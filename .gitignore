@@ -1,0 +1,45 @@
+# --- Entorno y Secretos ---
+.env
+.env.local
+.env.*.local
+*.env
+server/.env
+client/.env
+
+# --- Herramientas de Editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# --- Cliente (React/Vite + Yarn) ---
+client/node_modules/
+client/dist/
+client/dist-ssr/
+client/build/
+client/*.log
+client/.yarn/cache/
+client/.yarn/unplugged/
+client/.yarn/build-state.yml
+client/.yarn/install-state.gz
+client/.pnp.*
+
+# --- Servidor (Python/FastAPI) ---
+server/venv/
+server/env/
+server/ENV/
+server/__pycache__/
+server/*.py[cod]
+server/*$py.class
+server/.pytest_cache/
+server/.python-version
+
+# Logs y Bases de Datos Locales
+server/*.log
+server/*.db
+server/*.sqlite3
+
+# Carpetas de archivos temporales o recursos pesados
+server/scratch/
+server/media/

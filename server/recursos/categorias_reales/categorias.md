@@ -1,0 +1,63 @@
+## ESTAS SON CATEGORIAS REALES JUNT A SU JERARQUIA
+
+padre = 1 -> raiz
+
+En el listado el primer elemento representa al padre y a continuacion los hijos de esta.
+
+/// = Fin de esa lista especifica
+
+Ejemplo:
+
+Padre
+Hijo
+Hijo2
+...
+...
+HijoN
+///
+
+Padre2
+HijoP
+HijoP2
+...
+...
+HijoPN
+///
+
+
+1
+VESTIMENTA
+ACCESORIOS
+LECTURAS
+LIBRERIA
+///
+
+VESTIMENTA
+BLUSAS
+BLAZERS
+VESTIDOS
+FALDAS
+CAMISAS
+JUMPER
+TAPADOS
+PRISCILA
+SEFORA
+///
+
+
+VESTIDOS
+VESTIDO NOEMI
+VESTIDO SOFIA
+VESTIDO PERLA
+///
+
+ACCESORIOS
+CALENDARIOS
+CINTURONES
+BILLETERA
+///
+
+LECTURAS
+BIBLIAS
+LIBROS PARA COLOREAR
+///

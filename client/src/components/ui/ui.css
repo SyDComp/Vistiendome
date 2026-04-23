@@ -1,0 +1,141 @@
+/* ====== Design System Atómico ====== */
+
+/* --- Inputs --- */
+.ui-input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.ui-label {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #333333;
+}
+
+.ui-required-mark {
+    color: #e74c3c;
+    margin-left: 3px;
+}
+
+.ui-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 15px;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+    color: #212529;
+    box-sizing: border-box;
+}
+
+.ui-input:focus {
+    outline: none;
+    border-color: #8f0653; /* Color Vistiendome */
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(143, 6, 83, 0.15);
+}
+
+.ui-input::placeholder {
+    color: #adb5bd;
+}
+
+/* Validaciones y Errores Puros */
+.has-error .ui-input {
+    border-color: #e74c3c;
+    background-color: #fffafb;
+}
+
+.has-error .ui-input:focus {
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
+}
+
+.ui-error-text {
+    color: #e74c3c;
+    font-size: 13px;
+    margin-top: 6px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Buttons --- */
+.ui-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.ui-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Variantes visuales */
+.ui-btn-primary {
+    background-color: #8f0653; /* Rosado oscuro Vistiendome */
+    color: white;
+}
+
+.ui-btn-primary:hover:not(:disabled) {
+    background-color: #720542;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(143, 6, 83, 0.25);
+}
+
+.ui-btn-secondary {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.ui-btn-secondary:hover:not(:disabled) {
+    background-color: #dee2e6;
+}
+
+.ui-btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+/* Loader Interno */
+.ui-btn-loading {
+    cursor: wait !important;
+}
+
+.ui-btn-text-hidden {
+    opacity: 0;
+}
+
+.ui-loader {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+.ui-btn-secondary .ui-loader {
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #495057;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: vistiendome_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vistiendome2024}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_HOST_AUTH_METHOD: trust
+      LC_MESSAGES: C
+      LANG: en_US.utf8
+      LC_ALL: C
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  backend:
+    build: 
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: vistiendome_backend
+    restart: always
+    volumes:
+      - ./server:/app
+      - /app/venv
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-paola}:${POSTGRES_PASSWORD:-vistiendome2024}@db:5432/${POSTGRES_DB:-vistiendome_db}
+      SECRET_KEY: ${SECRET_KEY:-vistiendome_secret_key_2024}
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: vistiendome_frontend
+    restart: always
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:8000
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+  media_volume:
