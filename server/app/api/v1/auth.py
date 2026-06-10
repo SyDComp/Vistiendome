@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from sqlmodel import Session, select
 from pydantic import BaseModel
 import pyotp
@@ -107,10 +107,10 @@ class LoginMfaSchema(BaseModel):
     totp_code: str | None = None
 
 @router.post("/login")
-def basic_login(data: LoginMfaSchema, db: Session = Depends(get_session)):
+def basic_login(data: LoginMfaSchema, response: Response, db: Session = Depends(get_session)):
     """
     Login simplificado para el Administrador (MVP).
-    Retorna JWT directamente si las credenciales son válidas.
+    Retorna JWT directamente si las credenciales son válidas y lo establece en una cookie segura.
     """
     cuenta = db.exec(select(CuentaAcceso).where(CuentaAcceso.email_corporativo == data.email)).first()
     
@@ -131,4 +131,16 @@ def basic_login(data: LoginMfaSchema, db: Session = Depends(get_session)):
     db.commit()
 
     token = security.create_access_token(subject=cuenta.id)
+    
+    # Establecer Cookie HttpOnly para mayor seguridad
+    response.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,
+        max_age=1440 * 60, # 24 horas
+        expires=1440 * 60,
+        samesite="lax",
+        secure=False, # Cambiar a True en producción con HTTPS
+    )
+
     return {"access_token": token, "token_type": "bearer"}

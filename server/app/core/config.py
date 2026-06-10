@@ -3,7 +3,7 @@ from typing import Optional
 import os
 
 class Settings(BaseSettings):
-    APP_NAME: str = "Vistiéndome API"
+    APP_NAME: str = "Vistiendomé API"
     APP_ENV: str = "development" # development | production
     
     # Database

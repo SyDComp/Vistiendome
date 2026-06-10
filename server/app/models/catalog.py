@@ -27,6 +27,20 @@ class CategorySpecificationLink(SQLModel, table=True):
     category_id: Optional[int] = Field(default=None, foreign_key="category.id", primary_key=True)
     specification_id: Optional[int] = Field(default=None, foreign_key="specification.id", primary_key=True)
 
+class ProductMediaLink(SQLModel, table=True):
+    product_id: Optional[int] = Field(default=None, foreign_key="product.id", primary_key=True)
+    media_asset_id: Optional[int] = Field(default=None, foreign_key="mediaasset.id", primary_key=True)
+    is_main: bool = Field(default=False)
+    ui_config: Dict[str, Any] = Field(default={"zoom": 1, "x": 0, "y": 0}, sa_type=JSON)
+
+class SKUMediaLink(SQLModel, table=True):
+    sku_id: Optional[int] = Field(default=None, foreign_key="sku.id", primary_key=True)
+    media_asset_id: Optional[int] = Field(default=None, foreign_key="mediaasset.id", primary_key=True)
+
+class CollectionSKULink(SQLModel, table=True):
+    collection_id: Optional[int] = Field(default=None, foreign_key="collection.id", primary_key=True)
+    sku_id: Optional[int] = Field(default=None, foreign_key="sku.id", primary_key=True)
+
 # --- CORE MODELS ---
 
 class Characteristic(SQLModel, table=True):
@@ -35,6 +49,9 @@ class Characteristic(SQLModel, table=True):
     name: str = Field(unique=True) 
     description: Optional[str] = Field(default=None)
     is_filterable: bool = Field(default=True)
+    
+    is_system: bool = Field(default=False)
+    system_id: Optional[str] = Field(default=None)
     
     value_structure: List[Dict[str, Any]] = Field(default=[], sa_type=JSON)
     domain: List[Dict[str, Any]] = Field(default=[], sa_type=JSON)
@@ -64,6 +81,22 @@ class Specification(SQLModel, table=True):
         link_model=CategorySpecificationLink
     )
 
+class Collection(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str = Field(unique=True, index=True)
+    slug: str = Field(unique=True, index=True)
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+    
+    is_active: bool = Field(default=True)
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        sa_column=Column(DateTime(timezone=True), server_default=sa_func.now())
+    )
+    
+    # Relationships
+    skus: List["SKU"] = Relationship(back_populates="collections", link_model=CollectionSKULink)
+
 class Product(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str = Field(index=True)
@@ -79,7 +112,10 @@ class Product(SQLModel, table=True):
     specs: Dict[str, str] = Field(default={}, sa_type=JSON) 
     
     skus: List["SKU"] = Relationship(back_populates="product")
-    images: List["ProductImage"] = Relationship(back_populates="product")
+    media_assets: List["MediaAsset"] = Relationship(
+        back_populates="products",
+        link_model=ProductMediaLink
+    )
 
 class Category(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -134,10 +170,17 @@ class SKU(SQLModel, table=True):
     
     price: float
     stock: int = Field(default=0)
-    image_urls: List[str] = Field(default=[], sa_type=JSON)
     
     product: "Product" = Relationship(back_populates="skus")
     movements: List["StockMovement"] = Relationship(back_populates="sku")
+    media_assets: List["MediaAsset"] = Relationship(
+        back_populates="skus",
+        link_model=SKUMediaLink
+    )
+    collections: List["Collection"] = Relationship(
+        back_populates="skus",
+        link_model=CollectionSKULink
+    )
 
 class StockMovement(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -161,12 +204,24 @@ class ColorSwatch(SQLModel, table=True):
     hex_code: str = Field(default="#000000")
     slug: str = Field(unique=True, index=True)
 
-class ProductImage(SQLModel, table=True):
+class MediaAsset(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    product_id: int = Field(foreign_key="product.id")
+    filename: str = Field(unique=True, index=True)
+    original_name: str
     url: str
-    is_main: bool = Field(default=False)
-    ui_config: Dict[str, Any] = Field(default={"zoom": 1, "x": 0, "y": 0}, sa_type=JSON)
-    config_match: Dict[str, str] = Field(default={}, sa_type=JSON) # E.j. {"color": "Azul"}
+    mime_type: Optional[str] = None
+    file_size: Optional[int] = None
+    metadata_json: Dict[str, Any] = Field(default={}, sa_type=JSON)
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        sa_column=Column(DateTime(timezone=True), server_default=sa_func.now())
+    )
     
-    product: "Product" = Relationship(back_populates="images")
+    products: List["Product"] = Relationship(
+        back_populates="media_assets",
+        link_model=ProductMediaLink
+    )
+    skus: List["SKU"] = Relationship(
+        back_populates="media_assets",
+        link_model=SKUMediaLink
+    )

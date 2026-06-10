@@ -22,13 +22,19 @@ class ConnectionManager:
 
     async def broadcast(self, message: dict):
         """Envía un mensaje JSON a todos los clientes conectados."""
+        # Añadir timestamp para asegurar unicidad y forzar renderizado en React
+        import time
+        message["_ts"] = time.time()
+        
+        print(f"📡 Broadcasting: {message['type']} -> {message.get('resource', 'general')} a {len(self.active_connections)} clientes")
+        
         for connection in self.active_connections:
             try:
                 await connection.send_json(message)
             except Exception as e:
-                # Manejar desconexiones silenciosas
-                print(f"Error enviando broadcast: {e}")
-                self.active_connections.remove(connection)
+                print(f"❌ Error enviando broadcast: {e}")
+                # No eliminamos aquí para no mutar la lista mientras iteramos
+                # pero FastAPI suele limpiar conexiones muertas solo.
 
 # Instancia global para ser usada en los routers
 manager = ConnectionManager()
