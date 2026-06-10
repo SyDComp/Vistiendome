@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 
 const WebSocketContext = createContext(null);
@@ -11,9 +12,11 @@ export const WebSocketProvider = ({ children }) => {
     const reconnectTimeoutRef = useRef(null);
 
     const connect = () => {
-        // En desarrollo usamos el puerto 8000
-        const wsUrl = 'ws://localhost:8000/ws/heartbeat';
-        
+        // Determinar protocolo ws o wss dependiendo de si es https
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        // En producción usamos el host actual, en desarrollo localhost:8000
+        const wsHost = import.meta.env.PROD ? window.location.host : 'localhost:8000';
+        const wsUrl = `${wsProtocol}//${wsHost}/ws/heartbeat`;
         console.log('Intentando conectar WebSocket:', wsUrl);
         const ws = new WebSocket(wsUrl);
 
@@ -30,8 +33,13 @@ export const WebSocketProvider = ({ children }) => {
         };
 
         ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            setLastMessage(data);
+            try {
+                const data = JSON.parse(event.data);
+                setLastMessage(data);
+            } catch (err) {
+                // Si no es JSON (ej: un 'pong' o mensaje de texto), lo ignoramos o manejamos como texto
+                // console.debug('WebSocket mensaje recibido (no-JSON):', event.data);
+            }
         };
 
         ws.onclose = () => {

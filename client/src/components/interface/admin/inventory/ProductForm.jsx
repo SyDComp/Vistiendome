@@ -13,7 +13,7 @@ import { useNotification } from '../../../../context/NotificationContext';
 import { Search, Image as ImageIcon, Box, Layout, Layers, Settings, Save, ArrowLeft, Trash2, Edit3, Plus, X, Folder, Sparkles, Package, Check, AlertCircle } from 'lucide-react';
 import { formatChar, formatOpt } from '../../../../utils/formatters';
 
-const API_BASE = 'http://localhost:8000/api/v1/admin/catalog';
+const API_BASE = `${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/admin/catalog`;
 
 const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = false }) => {
     const { toast } = useNotification();
@@ -40,6 +40,7 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
     const [showVariantDetail, setShowVariantDetail] = useState(false);
     const [gallerySelectMode, setGallerySelectMode] = useState(false); // MEMORIA MODO SELECCIÓN
     const [allSpecifications, setAllSpecifications] = useState([]);
+    const [showCarouselGallery, setShowCarouselGallery] = useState(false);
 
     const { values, errors, handleChange, handleSubmit, isSubmitting, setValues } = useForm({
         name: initialData?.name || '',
@@ -123,28 +124,25 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
 
     useEffect(() => {
         const universe = [];
-        const seenUrls = new Set();
+        const seenIds = new Set();
 
         generatedVariants.forEach(variant => {
-            // Caso 1: Imágenes como objetos (Legacy/Detallado)
-            if (variant.images && Array.isArray(variant.images)) {
-                variant.images.forEach(img => {
-                    if (img && img.url && !seenUrls.has(img.url)) {
-                        seenUrls.add(img.url);
-                        universe.push(img);
+            // Caso: media_assets (Nuevo estándar relacional)
+            if (variant.media_assets && Array.isArray(variant.media_assets)) {
+                variant.media_assets.forEach(asset => {
+                    if (asset && asset.id && !seenIds.has(asset.id)) {
+                        seenIds.add(asset.id);
+                        universe.push(asset);
                     }
                 });
             }
-            // Caso 2: Imágenes como URLs (Simple/Nuevo)
-            if (variant.image_urls && Array.isArray(variant.image_urls)) {
+            // Fallback: image_urls (Legacy strings - los convertimos a un objeto básico si no hay assets)
+            else if (variant.image_urls && Array.isArray(variant.image_urls)) {
                 variant.image_urls.forEach(url => {
-                    if (url && !seenUrls.has(url)) {
-                        seenUrls.add(url);
-                        universe.push({ 
-                            url, 
-                            is_main: false,
-                            ui_config: { zoom: 1, x: 0, y: 0, rotate: 0, brightness: 100 }
-                        });
+                    // Nota: esto es sub-óptimo, lo ideal es que siempre lleguen assets
+                    if (url && !seenIds.has(url)) {
+                        seenIds.add(url);
+                        universe.push({ url, id: null });
                     }
                 });
             }
@@ -152,29 +150,28 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
 
         setAllImagesUniverse(universe);
         
-        // Sincronización: Si se borra una versión y con ella desaparece la imagen principal del producto,
-        // intentamos asignar una nueva del universo restante.
+        // Sincronización: Si se borra una versión, limpiamos del producto
         if (productImages.length > 0) {
-            const validImages = productImages.filter(pi => seenUrls.has(pi.url));
+            const validImages = productImages.filter(pi => seenIds.has(pi.media_asset_id || pi.url));
             if (validImages.length !== productImages.length) {
                 setProductImages(validImages);
-                if (selectedImage && !seenUrls.has(selectedImage.url)) {
+                if (selectedImage && !seenIds.has(selectedImage.media_asset_id || selectedImage.url)) {
                     setSelectedImage(validImages[0] || null);
                 }
             }
         }
     }, [generatedVariants]);
 
-    const handleToggleProductImage = (img) => {
-        if (!img || !img.url) return;
-        const alreadyIn = productImages.find(pi => pi.url === img.url);
+    const handleToggleProductImage = (asset) => {
+        if (!asset || !asset.id) return;
+        const alreadyIn = productImages.find(pi => pi.media_asset_id === asset.id);
         if (alreadyIn) {
-            removeImage(img.url);
+            removeImage(asset.id);
         } else {
             const newImg = { 
-                url: img.url, 
-                is_main: productImages.length === 0,
-                ui_config: img.ui_config || { zoom: 1, x: 0, y: 0, rotate: 0, brightness: 100 }
+                media_asset_id: asset.id,
+                url: asset.url, 
+                is_main: productImages.length === 0
             };
             const updated = [...productImages, newImg];
             setProductImages(updated);
@@ -182,24 +179,38 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
         }
     };
 
-    const removeImage = (url) => {
-        const filtered = productImages.filter(img => img.url !== url);
+    const removeImage = (id) => {
+        const filtered = productImages.filter(img => img.media_asset_id !== id);
         setProductImages(filtered);
-        if (selectedImage?.url === url) {
+        if (selectedImage?.media_asset_id === id) {
             setSelectedImage(filtered[0] || null);
         }
     };
 
-    const setMainImage = (url) => {
-        if (!url) return;
-        setProductImages(productImages.map(img => ({ ...img, is_main: img.url === url })));
+    const setMainImage = (id) => {
+        if (!id) return;
+        setProductImages(productImages.map(img => ({ ...img, is_main: img.media_asset_id === id })));
     };
 
-    const updateImageConfig = (newConfig) => {
-        if (!selectedImage) return;
-        const updated = productImages.map(img => img.url === selectedImage.url ? { ...img, ui_config: newConfig } : img);
-        setProductImages(updated);
-        setSelectedImage({ ...selectedImage, ui_config: newConfig });
+    const toggleCarouselImage = (url) => {
+        const currentCarousel = values.extras?.preview_carousel || [];
+        let updatedCarousel;
+        if (currentCarousel.includes(url)) {
+            updatedCarousel = currentCarousel.filter(u => u !== url);
+        } else {
+            updatedCarousel = [...currentCarousel, url];
+        }
+        setValues(prev => ({
+            ...prev,
+            extras: { ...prev.extras, preview_carousel: updatedCarousel }
+        }));
+    };
+
+    const updateCarouselSpeed = (speed) => {
+        setValues(prev => ({
+            ...prev,
+            extras: { ...prev.extras, carousel_speed: parseInt(speed) }
+        }));
     };
 
     const addCustomExtra = async () => {
@@ -237,24 +248,34 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
         } catch (err) { console.error(err); }
     };
 
-    const handleMassImageAssign = (selectedUrls) => {
+    const handleMassImageAssign = (selectedMedia) => {
         if (!selectedVariantIndices.length) return;
         
+        const assetsToAdd = Array.isArray(selectedMedia) ? selectedMedia : [selectedMedia];
         const updatedVariants = [...generatedVariants];
+        
         selectedVariantIndices.forEach(idx => {
             const variant = updatedVariants[idx];
             if (variant) {
-                // Combinar sin duplicados
-                const currentUrls = variant.image_urls || [];
-                const newUrls = [...new Set([...currentUrls, ...selectedUrls])];
-                updatedVariants[idx] = { ...variant, image_urls: newUrls };
+                const currentAssets = variant.media_assets || [];
+                const currentIds = new Set(currentAssets.map(a => a.id));
+                
+                // Filtrar solo las nuevas
+                const newUniqueAssets = assetsToAdd.filter(a => !currentIds.has(a.id));
+                const nextAssets = [...currentAssets, ...newUniqueAssets];
+                
+                updatedVariants[idx] = { 
+                    ...variant, 
+                    media_assets: nextAssets,
+                    media_ids: nextAssets.map(a => a.id)
+                };
             }
         });
 
         setGeneratedVariants(updatedVariants);
-        setSelectedVariantIndices([]); // REINICIAMOS SELECCIÓN PARA NUEVO LOTE
+        setSelectedVariantIndices([]);
         setShowMassGallery(false);
-        setShowVersionLibrary(true); // RETORNO AUTOMÁTICO A VERSIONES
+        setShowVersionLibrary(true);
         toast.success(`Fotos asignadas a ${selectedVariantIndices.length} versiones con éxito.`);
     };
 
@@ -262,9 +283,19 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
         const payload = {
             ...formValues,
             category_id: parseInt(formValues.category_id),
-            images: productImages,
-            skus: skusOverride || generatedVariants,
-            specs: {} // Deprecated/Legacy
+            images: productImages.map(img => ({
+                media_asset_id: img.media_asset_id || img.id,
+                is_main: img.is_main
+            })),
+            skus: (skusOverride || generatedVariants).map(s => ({
+                ...s,
+                media_ids: s.media_ids || (s.media_assets?.map(a => a.id)) || []
+            })),
+            extras: {
+                ...formValues.extras,
+                carousel_speed: formValues.extras?.carousel_speed || 3000,
+                preview_carousel: formValues.extras?.preview_carousel || []
+            }
         };
 
         const isNew = !productId;
@@ -311,54 +342,37 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
     };
 
     return (
-        <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: isMobile ? '1fr' : '1fr 380px', 
-            gap: '24px',
-            height: '100%',
-            overflowY: isMobile ? 'auto' : 'hidden'
-        }}>
+        <div className={`product-form-container ${isMobile ? 'mobile' : 'desktop'}`}>
             {/* PANEL IZQUIERDO: FORMULARIO */}
-            <div style={{ 
-                background: '#fff', 
-                borderRadius: '16px', 
-                border: '1px solid #e2e8f0', 
-                boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden'
-            }}>
-                <div style={{ padding: '24px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ padding: '10px', background: '#fdf2f8', borderRadius: '12px', color: '#8f0653' }}>
+            <div className="product-form-left-panel">
+                <div className="product-form-header">
+                    <div className="product-form-header-icon">
                         <Layout size={20} />
                     </div>
-                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#1e1b4b' }}>
+                    <h3 className="product-form-header-title">
                         {initialData ? 'Editar Producto' : 'Crear Nuevo Producto'}
                     </h3>
                 </div>
 
-                <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+                <div className="product-form-body">
                     {batchErrors && (
-                        <div style={{ 
-                            background: '#fff7ed', border: '1px solid #ffedd5', borderRadius: '16px', 
-                            padding: '20px', marginBottom: '32px', animation: 'fadeIn 0.3s ease' 
-                        }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#9a3412' }}>
+                        <div className="product-batch-errors">
+                            <div className="product-batch-errors-header">
+                                <div className="product-batch-errors-title">
                                     <AlertCircle size={18} />
-                                    <span style={{ fontWeight: '800', fontSize: '14px' }}>Errores de Persistencia ({batchErrors.length})</span>
+                                    <span>Errores de Persistencia ({batchErrors.length})</span>
                                 </div>
-                                <button onClick={() => setBatchErrors(null)} style={{ background: 'none', border: 'none', color: '#9a3412', cursor: 'pointer', fontSize: '11px', fontWeight: '800' }}>OCULTAR</button>
+                                <button type="button" onClick={() => setBatchErrors(null)} className="product-batch-errors-close">OCULTAR</button>
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div className="product-batch-errors-list">
                                 {batchErrors.map((err, idx) => (
-                                    <div key={idx} style={{ fontSize: '12px', color: '#c2410c', background: '#fff', padding: '10px 14px', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', border: '1px solid #fed7aa' }}>
+                                    <div key={idx} className="product-batch-error-item">
                                         <span style={{ fontWeight: '700' }}>{err.sku}</span>
                                         <span>{err.error}</span>
                                     </div>
                                 ))}
                             </div>
-                            <p style={{ marginTop: '12px', fontSize: '11px', color: '#9a3412', fontWeight: '600', fontStyle: 'italic' }}>
+                            <p className="product-batch-errors-note">
                                 Nota: Las versiones que no aparecen aquí se guardaron correctamente. Por favor corrige los códigos de arriba y vuelve a intentar.
                             </p>
                         </div>
@@ -366,17 +380,17 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                     
                     <form onSubmit={handleSubmit(onSave)}>
                         {/* Secciones del Formulario */}
-                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1.5fr', gap: '20px', marginBottom: '24px' }}>
+                        <div className={`product-form-row ${isMobile ? 'mobile' : 'desktop'}`}>
                             <Input label="Nombre del Producto" name="name" value={values.name} onChange={handleChange} error={errors.name} placeholder="Ej: Vestido Noemi Azul" />
                             <Input label="Identificador URL (Automático)" name="slug" value={values.slug} readOnly style={{ backgroundColor: '#f1f5f9', color: '#64748b', cursor: 'not-allowed' }} />
                         </div>
 
                         <div style={{ marginTop: '32px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                <label style={{ fontSize: '14px', fontWeight: '800', color: '#1e1b4b' }}>Ficha Técnica (Datos fijos)</label>
-                                <div style={{ padding: '2px 8px', background: '#f1f5f9', borderRadius: '4px', fontSize: '10px', color: '#64748b', fontWeight: '700' }}>DATOS INFORMATIVOS</div>
+                            <div className="product-form-section-title-wrapper">
+                                <label className="product-form-section-title">Ficha Técnica (Datos fijos)</label>
+                                <div className="product-form-section-badge">DATOS INFORMATIVOS</div>
                             </div>
-                            <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '16px' }}>
+                            <p className="product-form-section-desc">
                                 Detalles globales (ej: Cuidado de la tela, Origen - Aplica a todas las versiones).
                             </p>
                             
@@ -385,22 +399,18 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                                 value={values.description} 
                                 onChange={handleChange} 
                                 placeholder="Escribe aquí los detalles que enamorarán a tu cliente..."
-                                style={{ 
-                                    width: '100%', minHeight: '100px', padding: '14px', borderRadius: '12px', border: '1px solid #e2e8f0', 
-                                    fontSize: '14.5px', outline: 'none', backgroundColor: '#f8fafc', transition: 'all 0.2s', resize: 'vertical',
-                                    boxSizing: 'border-box'
-                                }} 
+                                className="product-form-textarea"
                             ></textarea>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr', gap: '20px', marginBottom: '32px', marginTop: '24px' }}>
+                        <div className="product-form-select-wrapper">
                             <div>
-                                <label style={{ fontSize: '13.5px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '8px' }}>Categoría Base</label>
+                                <label className="product-form-label">Categoría Base</label>
                                 <select 
                                     name="category_id" 
                                     value={values.category_id} 
                                     onChange={handleChange} 
-                                    style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontWeight: '600', outline: 'none', boxSizing: 'border-box' }}
+                                    className="product-form-select"
                                 >
                                     <option value="">-- Seleccionar Categoría --</option>
                                     {categories.map(c => (
@@ -414,60 +424,43 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
 
 
                         {/* SECCIÓN 3: CENTRO DE VERSIONES (HUB) - BLOQUEADO SI NO ESTÁ GUARDADO */}
-                        <div style={{ 
-                            position: 'relative',
-                            marginTop: '40px',
-                            background: '#fff', borderRadius: '32px', border: '1px solid #fce7f3', 
-                            padding: isMobile ? '24px' : '40px', boxShadow: '0 20px 50px -12px rgba(143, 6, 83, 0.05)' 
-                        }}>
+                        <div className={`product-hub-wrapper ${isMobile ? 'mobile' : 'desktop'}`}>
                             {!isSaved && (
-                                <div style={{
-                                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                    background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(4px)',
-                                    zIndex: 10, borderRadius: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    padding: '40px', textAlign: 'center'
-                                }}>
-                                    <div style={{ maxWidth: '400px', animation: 'fadeIn 0.5s ease' }}>
-                                        <div style={{ width: '64px', height: '64px', background: '#fdf2f8', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', color: '#8f0653' }}>
+                                <div className="product-hub-overlay">
+                                    <div className="product-hub-overlay-content">
+                                        <div className="product-hub-overlay-icon">
                                             <Package size={32} />
                                         </div>
-                                        <h4 style={{ margin: 0, fontSize: '18px', fontWeight: '900', color: '#1e1b4b' }}>Gestión de Versiones</h4>
-                                        <p style={{ margin: '12px 0 0', fontSize: '14px', color: '#64748b', lineHeight: '1.6' }}>
+                                        <h4 className="product-hub-overlay-title">Gestión de Versiones</h4>
+                                        <p className="product-hub-overlay-desc">
                                             Para empezar a crear tallas, colores e imágenes específicas, primero debes **confirmar el Producto Base**.
                                         </p>
                                     </div>
                                 </div>
                             )}
 
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', marginBottom: '32px', flexDirection: isMobile ? 'column' : 'row', gap: '16px' }}>
+                            <div className={`product-hub-header ${isMobile ? 'mobile' : 'desktop'}`}>
                                 <div>
-                                    <h4 style={{ margin: 0, fontSize: '18px', fontWeight: '900', color: '#1e1b4b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <h4 className="product-hub-title">
                                         <Package size={20} color="#8f0653" /> Centro de Versiones (Variantes)
                                     </h4>
-                                    <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>Crea los SKUs con sus características y fotos propias.</p>
+                                    <p className="product-hub-desc">Crea los SKUs con sus características y fotos propias.</p>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '20px' }}>
+                            <div className={`product-hub-buttons ${isMobile ? 'mobile' : 'desktop'}`}>
                                 {/* Botón "CREAR NUEVA VERSIÓN" */}
                                 <button
                                     type="button"
                                     onClick={() => setShowVariantPicker(true)}
-                                    style={{
-                                        padding: '32px', backgroundColor: '#fff', color: '#1e1b4b', border: '2px dashed #8f0653',
-                                        borderRadius: '24px', cursor: 'pointer', transition: 'all 0.2s',
-                                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
-                                        boxShadow: '0 4px 15px rgba(143,6,83,0.05)'
-                                    }}
-                                    onMouseOver={e => e.currentTarget.style.transform = 'translateY(-4px)'}
-                                    onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
+                                    className="product-hub-btn-add"
                                 >
-                                    <div style={{ width: '48px', height: '48px', background: '#8f0653', color: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <div className="product-hub-btn-add-icon">
                                         <Plus size={24} />
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
-                                        <span style={{ display: 'block', fontWeight: '900', fontSize: '16px' }}>Añadir Versión</span>
-                                        <span style={{ display: 'block', fontSize: '12px', color: '#94a3b8', fontWeight: '500', marginTop: '4px' }}>Mezcla opciones y sube fotos</span>
+                                        <span className="product-hub-btn-title">Añadir Versión</span>
+                                        <span className="product-hub-btn-desc">Mezcla opciones y sube fotos</span>
                                     </div>
                                 </button>
 
@@ -475,21 +468,14 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                                 <button
                                     type="button"
                                     onClick={() => setShowVersionLibrary(true)}
-                                    style={{
-                                        padding: '32px', backgroundColor: '#1e1b4b', color: '#fff', border: 'none',
-                                        borderRadius: '24px', cursor: 'pointer', transition: 'all 0.2s',
-                                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
-                                        boxShadow: '0 10px 25px rgba(30,27,75,0.2)'
-                                    }}
-                                    onMouseOver={e => e.currentTarget.style.transform = 'translateY(-4px)'}
-                                    onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
+                                    className="product-hub-btn-lib"
                                 >
-                                    <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,0.1)', color: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <div className="product-hub-btn-lib-icon">
                                         <Package size={24} />
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
-                                        <span style={{ display: 'block', fontWeight: '900', fontSize: '16px' }}>Ver Mi Galería de SKUs</span>
-                                        <span style={{ display: 'block', fontSize: '12px', color: 'rgba(255,255,255,0.6)', fontWeight: '500', marginTop: '4px' }}>
+                                        <span className="product-hub-btn-title">Ver Mi Galería de SKUs</span>
+                                        <span className="product-hub-btn-lib-desc">
                                             {generatedVariants.length} versiones activas
                                         </span>
                                     </div>
@@ -497,7 +483,7 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                             </div>
 
                             {generatedVariants.length > 0 && (
-                                <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+                                <div className="product-hub-clear-wrapper">
                                     <button 
                                         type="button"
                                         onClick={() => {
@@ -506,13 +492,7 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                                                 toast.info("Workspace local limpiado. Las versiones en servidor permanecen intactas.");
                                             }
                                         }}
-                                        style={{ 
-                                            background: 'none', border: 'none', color: '#64748b', fontSize: '11px', 
-                                            fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
-                                            padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s'
-                                        }}
-                                        onMouseOver={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                                        onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                                        className="product-hub-clear-btn"
                                     >
                                         <Trash2 size={14} /> LIMPIAR ESPACIO DE TRABAJO LOCAL
                                     </button>
@@ -579,6 +559,7 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                                         ...updated[selectedVariant.index], 
                                         price: newData.price, 
                                         stock: newData.stock,
+                                        barcode: newData.barcode,
                                         image_urls: newData.image_urls 
                                     };
                                     setGeneratedVariants(updated);
@@ -635,7 +616,7 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                             />
                         </div>
 
-                        <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'center' }}>
+                        <div className="product-submit-wrapper">
                             <Button 
                                 variant="primary" 
                                 type="submit" 
@@ -650,111 +631,129 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
             </div>
 
             {/* PANEL DERECHO: AGREGADOR DE FOTOS (UNIVERSO) */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                <div style={{ background: '#fff', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+            <div className="product-right-panel">
+                <div className="product-gallery-card">
                     {/* Función para importar TODO del universo a la galería principal */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <ImageIcon size={20} color="#8f0653" />
-                            <h4 style={{ margin: 0, fontSize: '16px', color: '#1e1b4b', fontWeight: '800' }}>Universo Agregado</h4>
+                    <div className="product-gallery-header">
+                        <div className="product-gallery-title-wrapper">
+                            <div className="product-gallery-icon">
+                                <ImageIcon size={20} />
+                            </div>
+                            <div>
+                                <h4 className="product-gallery-title">Galería Multimedia</h4>
+                                <p className="product-gallery-subtitle">Fotos activas en el catálogo.</p>
+                            </div>
                         </div>
-                        {allImagesUniverse.length > 0 && (
+                    </div>
+
+                    <div className="product-carousel-wrapper">
+                        <div className="product-carousel-header">
+                            <h5 className="product-carousel-title">
+                                <Sparkles size={16} color="#f59e0b" /> Carrusel de Catálogo
+                            </h5>
                             <button 
                                 type="button"
-                                onClick={() => {
-                                    const newBatch = [...productImages];
-                                    allImagesUniverse.forEach(uniImg => {
-                                        if (!newBatch.some(pi => pi.url === uniImg.url)) {
-                                            newBatch.push({ ...uniImg, is_main: newBatch.length === 0 });
-                                        }
-                                    });
-                                    setProductImages(newBatch);
-                                    if (!selectedImage && newBatch.length > 0) setSelectedImage(newBatch[0]);
-                                    toast.success("¡Todas las fotos importadas con éxito!");
-                                }}
-                                style={{ 
-                                    background: '#fdf2f8', color: '#8f0653', border: '1px solid #fbcfe8', 
-                                    padding: '6px 12px', borderRadius: '10px', fontSize: '11px', 
-                                    fontWeight: '900', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' 
-                                }}
+                                onClick={() => setShowCarouselGallery(true)}
+                                className="product-carousel-btn"
                             >
-                                <Sparkles size={14} /> IMPORTAR TODO
+                                GESTIONAR SELECCIÓN
                             </button>
-                        )}
-                    </div>
-                    <p style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '20px', fontWeight: '600', lineHeight: '1.4' }}>
-                        Selecciona qué fotos de tus versiones aparecerán en la galería global del producto.
-                    </p>
+                        </div>
+                        <p className="product-carousel-desc">
+                            Usa el explorador para elegir qué fotos rotarán automáticamente en el catálogo.
+                        </p>
+                        
+                        <div className="product-carousel-speed">
+                            <label className="product-carousel-speed-label">
+                                VELOCIDAD DE ROTACIÓN
+                            </label>
+                            <select 
+                                value={values.extras?.carousel_speed || 3000} 
+                                onChange={(e) => updateCarouselSpeed(e.target.value)}
+                                className="product-carousel-speed-select"
+                            >
+                                <option value="2000">Rápida (2 seg)</option>
+                                <option value="3000">Normal (3 seg)</option>
+                                <option value="5000">Lenta (5 seg)</option>
+                                <option value="10000">Muy Lenta (10 seg)</option>
+                            </select>
+                        </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '24px' }}>
-                        {allImagesUniverse.length > 0 ? (
-                            allImagesUniverse.map((img, idx) => {
-                                const isCurrentProductImg = productImages.some(pi => pi.url === img.url);
-                                const isMain = productImages.find(pi => pi.url === img.url)?.is_main;
+                        <div className="product-carousel-summary">
+                            <span className="product-carousel-summary-text">
+                                Resumen: {values.extras?.preview_carousel?.length || 0} fotos en el carrusel.
+                            </span>
+                        </div>
 
-                                return (
-                                    <div key={idx} style={{ position: 'relative', cursor: 'pointer' }} onClick={() => handleToggleProductImage(img)}>
-                                        <div style={{ 
-                                            aspectRatio: '1/1', borderRadius: '10px', overflow: 'hidden',
-                                            border: isCurrentProductImg ? '2.5px solid #8f0653' : '1px solid #f1f5f9',
-                                            opacity: isCurrentProductImg ? 1 : 0.6,
-                                            transition: 'all 0.2s'
-                                        }}>
-                                            <img src={`http://localhost:8000${img.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        </div>
-                                        {isCurrentProductImg && (
-                                            <div style={{ position: 'absolute', top: '-5px', right: '-5px', width: '18px', height: '18px', background: '#8f0653', color: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>
-                                                <Check size={12} strokeWidth={4} />
-                                            </div>
-                                        )}
-                                        {isMain && (
-                                            <div style={{ position: 'absolute', bottom: '-4px', left: '0', right: '0', textAlign: 'center' }}>
-                                                <span style={{ background: '#8f0653', color: '#fff', fontSize: '8px', fontWeight: '900', padding: '1px 4px', borderRadius: '3px', textTransform: 'uppercase' }}>PORTADA PR</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })
-                        ) : (
-                            <div style={{ gridColumn: 'span 4', padding: '24px', textAlign: 'center', border: '2px dashed #f1f5f9', borderRadius: '16px' }}>
-                                <ImageIcon size={24} color="#cbd5e1" style={{ marginBottom: '8px' }} />
-                                <span style={{ display: 'block', fontSize: '10px', color: '#94a3b8', fontWeight: '700' }}>Sin versiones creadas aún.</span>
-                            </div>
-                        )}
-                    </div>
+                        <MediaGallery 
+                            isOpen={showCarouselGallery}
+                            onClose={() => setShowCarouselGallery(false)}
+                            selectionMode={true}
+                            allowMultiple={true}
+                            itemsPool={allImagesUniverse}
+                            initialSelected={productImages.map(img => img.media_asset_id || img.id)}
+                            mainId={productImages.find(img => img.is_main)?.media_asset_id || productImages.find(img => img.is_main)?.id}
+                            contextInfo="Gestión de Galería"
+                            onSetMain={(img) => {
+                                const assetId = img.id;
+                                // 1. Actualizar is_main en productImages (Galería)
+                                setProductImages(prev => prev.map(pi => ({
+                                    ...pi,
+                                    is_main: (pi.media_asset_id || pi.id) === assetId
+                                })));
 
-                    <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '20px' }}>
-                        <h5 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: '800', color: '#475569' }}>Selección y Calibración</h5>
-                        {selectedImage ? (
-                            <>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                                    <span style={{ fontSize: '11px', fontWeight: '700', color: '#94a3b8' }}>Ajuste de encuadre general</span>
-                                    {!selectedImage.is_main && (
-                                        <button 
-                                            type="button"
-                                            onClick={() => setMainImage(selectedImage.url)} 
-                                            style={{ fontSize: '11px', color: '#8f0653', background: '#fdf2f8', border: 'none', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', fontWeight: '800' }}
-                                        >
-                                            Hacer Portada
-                                        </button>
-                                    )}
-                                </div>
-                                <SmartCanvas 
-                                    src={`http://localhost:8000${selectedImage.url}`} 
-                                    mode="edit" 
-                                    config={selectedImage.ui_config}
-                                    onChange={updateImageConfig}
-                                />
-                            </>
-                        ) : (
-                            <div style={{ padding: '30px 15px', textAlign: 'center', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #e2e8f0' }}>
-                                <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>
-                                    {allImagesUniverse.length > 0 
-                                        ? "Toca una foto del universo para incluirla en la galería del producto." 
-                                        : "Crea primero una versión con fotos para poblar este panel."}
-                                </p>
-                            </div>
-                        )}
+                                // 2. Sincronizar con el Carrusel: Mover la portada a la primera posición para que sea determinista
+                                setValues(prev => {
+                                    const currentCarousel = prev.extras?.preview_carousel || [];
+                                    const coverIndex = currentCarousel.findIndex(c => c.id === assetId);
+                                    
+                                    if (coverIndex !== -1) {
+                                        const newCarousel = [...currentCarousel];
+                                        const [coverObj] = newCarousel.splice(coverIndex, 1);
+                                        newCarousel.unshift(coverObj); // Portada siempre primero
+                                        return { ...prev, extras: { ...prev.extras, preview_carousel: newCarousel } };
+                                    }
+                                    return prev;
+                                });
+                                
+                                toast.success("Portada actualizada y sincronizada");
+                            }}
+                            onSelect={(selected) => {
+                                // Las imágenes seleccionadas en el modal pasan a ser la galería del producto
+                                const newProductImages = selected.map((img, idx) => {
+                                    const existing = productImages.find(pi => (pi.media_asset_id || pi.id) === img.id);
+                                    return {
+                                        media_asset_id: img.id,
+                                        url: img.url,
+                                        is_main: existing ? existing.is_main : (idx === 0 && !productImages.some(pi => pi.is_main))
+                                    };
+                                });
+                                setProductImages(newProductImages);
+                                
+                                // Carrusel determinista: Objetos completos con la portada al principio
+                                const mainImage = newProductImages.find(pi => pi.is_main);
+                                const otherImages = selected.filter(img => img.id !== mainImage?.media_asset_id);
+                                
+                                const finalCarousel = [];
+                                if (mainImage) {
+                                    const mainObj = selected.find(s => s.id === mainImage.media_asset_id);
+                                    if (mainObj) finalCarousel.push({ id: mainObj.id, url: mainObj.url, filename: mainObj.filename || '' });
+                                }
+                                
+                                otherImages.forEach(img => {
+                                    finalCarousel.push({ id: img.id, url: img.url, filename: img.filename || '' });
+                                });
+                                
+                                
+                                setValues(prev => ({
+                                    ...prev,
+                                    extras: { ...prev.extras, preview_carousel: finalCarousel }
+                                }));
+
+                                setShowCarouselGallery(false);
+                                toast.success("Galería y Carrusel sincronizados con éxito");
+                            }}
+                        />
                     </div>
                 </div>
             </div>

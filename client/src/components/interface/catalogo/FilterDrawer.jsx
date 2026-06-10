@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, ChevronDown, ChevronUp, RotateCcw, Check } from 'lucide-react';
 import Button from '../../ui/Button';
+import './FilterDrawer.css';
 
 const FilterDrawer = ({ 
     isOpen, 
@@ -58,68 +59,47 @@ const FilterDrawer = ({
         <>
             {/* Backdrop */}
             <div 
-                style={{
-                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
-                    backdropFilter: 'blur(4px)', zIndex: 1000,
-                    animation: 'fadeIn 0.3s ease-out'
-                }}
+                className="filter-drawer-backdrop"
                 onClick={onClose}
             />
 
             {/* Drawer */}
-            <div style={{
-                position: 'fixed', top: 0, right: 0, bottom: 0,
-                width: '100%', maxWidth: '400px', background: '#fff',
-                boxShadow: '-10px 0 30px rgba(0,0,0,0.1)', zIndex: 1001,
-                display: 'flex', flexDirection: 'column',
-                animation: 'slideInRight 0.3s ease-out'
-            }}>
+            <div className="filter-drawer-container">
                 {/* Header */}
-                <div style={{ 
-                    padding: '20px', borderBottom: '1px solid #f1f5f9',
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                }}>
-                    <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '900', color: '#1e1b4b' }}>
+                <div className="filter-drawer-header">
+                    <h2 className="filter-drawer-title">
                         Filtros
                     </h2>
                     <button 
                         onClick={onClose}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                        className="filter-drawer-close"
+                        type="button"
                     >
                         <X size={24} />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+                <div className="filter-drawer-content">
                     
                     {/* Sección Categorías */}
-                    <div style={{ marginBottom: '24px' }}>
+                    <div className="filter-section">
                         <button 
                             onClick={() => toggleSection('categories')}
-                            style={{ 
-                                width: '100%', display: 'flex', justifyContent: 'space-between', 
-                                padding: '12px 0', border: 'none', background: 'none', 
-                                cursor: 'pointer', borderBottom: '1px solid #f8fafc' 
-                            }}
+                            className="filter-section-toggle"
+                            type="button"
                         >
-                            <span style={{ fontWeight: '800', fontSize: '14px', color: '#1e1b4b', textTransform: 'uppercase' }}>Categoría</span>
+                            <span className="filter-section-title">Categoría</span>
                             {expandedSections.categories ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                         </button>
                         {expandedSections.categories && (
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '16px' }}>
+                            <div className="filter-options-grid">
                                 {metadata.categories?.map(cat => (
                                     <button
                                         key={cat.id}
+                                        type="button"
                                         onClick={() => handleCategorySelect(cat.slug)}
-                                        style={{
-                                            padding: '8px 16px', borderRadius: '12px', fontSize: '13px',
-                                            fontWeight: '700', border: '1px solid',
-                                            borderColor: localFilters.category === cat.slug ? '#8f0653' : '#e2e8f0',
-                                            background: localFilters.category === cat.slug ? '#8f0653' : '#fff',
-                                            color: localFilters.category === cat.slug ? '#fff' : '#64748b',
-                                            cursor: 'pointer', transition: 'all 0.2s'
-                                        }}
+                                        className={`filter-option-btn ${localFilters.category === cat.slug ? 'active-primary' : ''}`}
                                     >
                                         {cat.name}
                                     </button>
@@ -130,33 +110,23 @@ const FilterDrawer = ({
 
                     {/* Atributos Dinámicos (Color, Material, etc.) */}
                     {Object.entries(metadata.attributes || {}).map(([key, values]) => (
-                        <div key={key} style={{ marginBottom: '24px' }}>
+                        <div key={key} className="filter-section">
                             <button 
                                 onClick={() => toggleSection(key)}
-                                style={{ 
-                                    width: '100%', display: 'flex', justifyContent: 'space-between', 
-                                    padding: '12px 0', border: 'none', background: 'none', 
-                                    cursor: 'pointer', borderBottom: '1px solid #f8fafc' 
-                                }}
+                                className="filter-section-toggle"
+                                type="button"
                             >
-                                <span style={{ fontWeight: '800', fontSize: '14px', color: '#1e1b4b', textTransform: 'uppercase' }}>{key}</span>
+                                <span className="filter-section-title">{key}</span>
                                 {expandedSections[key] ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                             </button>
                             {expandedSections[key] && (
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '16px' }}>
+                                <div className="filter-options-grid">
                                     {values.map(val => (
                                         <button
                                             key={val}
+                                            type="button"
                                             onClick={() => handleSpecToggle(key, val)}
-                                            style={{
-                                                padding: '8px 16px', borderRadius: '12px', fontSize: '13px',
-                                                fontWeight: '700', border: '1px solid',
-                                                borderColor: isSpecSelected(key, val) ? '#8f0653' : '#e2e8f0',
-                                                background: isSpecSelected(key, val) ? '#fdf2f8' : '#fff',
-                                                color: isSpecSelected(key, val) ? '#8f0653' : '#64748b',
-                                                cursor: 'pointer', transition: 'all 0.2s',
-                                                display: 'flex', alignItems: 'center', gap: '6px'
-                                            }}
+                                            className={`filter-option-btn ${isSpecSelected(key, val) ? 'active' : ''}`}
                                         >
                                             {isSpecSelected(key, val) && <Check size={14} />}
                                             {val}
@@ -168,20 +138,17 @@ const FilterDrawer = ({
                     ))}
 
                     {/* Precio (Placeholder por ahora) */}
-                    <div style={{ marginBottom: '24px' }}>
+                    <div className="filter-section">
                         <button 
                             onClick={() => toggleSection('price')}
-                            style={{ 
-                                width: '100%', display: 'flex', justifyContent: 'space-between', 
-                                padding: '12px 0', border: 'none', background: 'none', 
-                                cursor: 'pointer', borderBottom: '1px solid #f8fafc' 
-                            }}
+                            className="filter-section-toggle"
+                            type="button"
                         >
-                            <span style={{ fontWeight: '800', fontSize: '14px', color: '#1e1b4b', textTransform: 'uppercase' }}>Rango de Precio</span>
+                            <span className="filter-section-title">Rango de Precio</span>
                             {expandedSections.price ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                         </button>
                         {expandedSections.price && (
-                            <div style={{ marginTop: '16px', color: '#64748b', fontSize: '13px', fontWeight: '600' }}>
+                            <div className="filter-price-range">
                                 De ${metadata.price_range?.min?.toLocaleString()} a ${metadata.price_range?.max?.toLocaleString()}
                             </div>
                         )}
@@ -189,10 +156,7 @@ const FilterDrawer = ({
                 </div>
 
                 {/* Footer Actions */}
-                <div style={{ 
-                    padding: '20px', borderTop: '1px solid #f1f5f9',
-                    display: 'flex', gap: '12px'
-                }}>
+                <div className="filter-drawer-footer">
                     <Button 
                         variant="outline" 
                         onClick={() => { onClear(); onClose(); }}
@@ -209,11 +173,6 @@ const FilterDrawer = ({
                     </Button>
                 </div>
             </div>
-
-            <style>{`
-                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-                @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
-            `}</style>
         </>
     );
 };

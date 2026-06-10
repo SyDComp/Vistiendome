@@ -10,13 +10,23 @@ const Home = ({ isModalView = false }) => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Gestión dinámica de estilos globales
+    // Determinar si debemos mostrar el Navbar (se oculta en colecciones porque tienen su propio header hero)
+    const hideNavbar = location.pathname.startsWith('/coleccion/');
+
+    // Gestión dinámica de estilos globales: Solo aplicar padding si el Navbar es visible
     useEffect(() => {
-        document.body.classList.add('has-fixed-navbar');
+        if (isModalView) return; // El modal no debe interferir con las clases globales de layout
+
+        if (!hideNavbar) {
+            document.body.classList.add('has-fixed-navbar');
+        } else {
+            document.body.classList.remove('has-fixed-navbar');
+        }
+        
         return () => {
             document.body.classList.remove('has-fixed-navbar');
         };
-    }, []);
+    }, [hideNavbar, isModalView]);
 
     // Si es vista de modal, renderizamos solo el componente de detalle
     if (isModalView) {
@@ -25,10 +35,12 @@ const Home = ({ isModalView = false }) => {
 
     return (
         <>
-            <Navbar
-                links={navLinks}
-                vistaActual={location.pathname === '/' ? 'inicio' : location.pathname.slice(1)}
-            />
+            {!hideNavbar && (
+                <Navbar
+                    links={navLinks}
+                    vistaActual={location.pathname === '/' ? 'inicio' : location.pathname.slice(1)}
+                />
+            )}
 
             <div className="home-layout">
                 <main className="content">

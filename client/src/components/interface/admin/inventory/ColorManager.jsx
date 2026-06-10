@@ -6,7 +6,7 @@ import Button from '../../../ui/Button';
 import { useNotification } from '../../../../context/NotificationContext';
 import { Palette, Plus, Save, Hash, Type, Trash2, Edit2, RotateCcw } from 'lucide-react';
 
-const API_BASE = 'http://127.0.0.1:8000/api/v1/admin/catalog/colors';
+const API_BASE = (import.meta.env.PROD ? '/api/v1/admin/catalog/colors' : 'http://127.0.0.1:8000/api/v1/admin/catalog/colors');
 
 const ColorManager = () => {
     const { toast, confirm } = useNotification();
@@ -76,7 +76,7 @@ const ColorManager = () => {
     const handleSync = async () => {
         setLoading(true);
         try {
-            const res = await fetch('http://127.0.0.1:8000/api/v1/admin/catalog/colors/sync', { method: 'POST' });
+            const res = await fetch((import.meta.env.PROD ? '/api/v1/admin/catalog/colors/sync' : 'http://127.0.0.1:8000/api/v1/admin/catalog/colors/sync'), { method: 'POST' });
             if (res.ok) {
                 const data = await res.json();
                 toast.success(`Sincronización exitosa: ${data.synced_count} colores actualizados en el catálogo.`);
@@ -108,53 +108,53 @@ const ColorManager = () => {
 
     if (view === 'edit') {
         return (
-            <div style={{ maxWidth: '600px', margin: '0 auto', animation: 'fadeIn 0.3s ease-out' }}>
+            <div className="color-manager-edit-container">
                 <SectionHeader 
                     title={editingColor ? "Editar Color Oficial" : "Nuevo Color de Marca"}
                     description="Define un tono exacto que será reutilizado en todo el catálogo."
                 />
 
-                <div style={{ background: '#fff', padding: '40px', borderRadius: '32px', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(0,0,0,0.03)' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div className="color-manager-edit-card">
+                    <div className="color-manager-edit-body">
                         <div>
-                            <label style={{ display: 'block', fontSize: '12px', fontWeight: '800', color: '#8f0653', textTransform: 'uppercase', marginBottom: '8px' }}>Nombre Identificador</label>
-                            <div style={{ position: 'relative' }}>
-                                <Type size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                            <label className="color-manager-label">Nombre Identificador</label>
+                            <div className="color-manager-input-wrap">
+                                <Type size={18} className="color-manager-input-icon" />
                                 <input 
                                     type="text" 
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                    placeholder="Ej: Rosa Vistiéndome, Azul Marino Premium..."
-                                    style={{ width: '100%', padding: '16px 16px 16px 48px', borderRadius: '16px', border: '2px solid #f1f5f9', outline: 'none', fontWeight: '700', fontSize: '15px' }}
+                                    placeholder="Ej: Rosa Vistiendomé, Azul Marino Premium..."
+                                    className="color-manager-input-text"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label style={{ display: 'block', fontSize: '12px', fontWeight: '800', color: '#8f0653', textTransform: 'uppercase', marginBottom: '8px' }}>Valor Cromático (Hex)</label>
-                            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                                <div style={{ width: '64px', height: '64px', borderRadius: '16px', border: '3px solid #fff', boxShadow: '0 0 0 1px #e2e8f0', background: formData.hex_code, position: 'relative', overflow: 'hidden' }}>
+                            <label className="color-manager-label">Valor Cromático (Hex)</label>
+                            <div className="color-manager-hex-row">
+                                <div className="color-manager-color-box" style={{ background: formData.hex_code }}>
                                     <input 
                                         type="color" 
                                         value={formData.hex_code}
                                         onChange={e => setFormData({ ...formData, hex_code: e.target.value })}
-                                        style={{ position: 'absolute', top: '-50%', left: '-50%', width: '200%', height: '200%', cursor: 'pointer', border: 'none' }}
+                                        className="color-manager-color-input"
                                     />
                                 </div>
-                                <div style={{ flex: 1, position: 'relative' }}>
-                                    <Hash size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                                <div className="color-manager-input-hex-wrap">
+                                    <Hash size={18} className="color-manager-input-icon" />
                                     <input 
                                         type="text" 
                                         value={formData.hex_code}
                                         onChange={e => setFormData({ ...formData, hex_code: e.target.value })}
                                         placeholder="#000000"
-                                        style={{ width: '100%', padding: '16px 16px 16px 48px', borderRadius: '16px', border: '2px solid #f1f5f9', outline: 'none', fontWeight: '800', color: '#1e1b4b', fontFamily: 'monospace' }}
+                                        className="color-manager-input-hex"
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                        <div className="color-manager-actions">
                             <Button variant="outline" onClick={() => setView('list')} style={{ flex: 1, height: '54px' }}>Cancelar</Button>
                             <Button variant="primary" onClick={handleSave} style={{ flex: 2, height: '54px' }}>
                                 <Save size={20} style={{ marginRight: '8px' }} /> {editingColor ? "Guardar Cambios" : "Registrar Color"}
@@ -167,19 +167,19 @@ const ColorManager = () => {
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+        <div className="color-manager-layout">
+            <div className="color-manager-header">
                 <SectionHeader 
                     title="Maestra de Colores Oficiales"
                     description="Gestiona la biblioteca de tonos permitidos para el catálogo. Estos colores son los únicos que podrán asignarse a los productos."
                     style={{ margin: 0, padding: 0 }}
                 />
-                <div style={{ display: 'flex', gap: '12px' }}>
+                <div className="color-manager-header-actions">
                     <Button 
                         variant="outline" 
                         onClick={handleSync} 
                         disabled={loading}
-                        style={{ height: '48px', padding: '0 20px', borderRadius: '14px', borderColor: '#e2e8f0' }}
+                        className="color-manager-sync-btn"
                     >
                         <RotateCcw size={18} style={{ marginRight: '8px' }} className={loading ? 'animate-spin' : ''} /> 
                         Sincronizar Catálogo
@@ -187,14 +187,14 @@ const ColorManager = () => {
                     <Button 
                         variant="primary" 
                         onClick={handleStartCreate}
-                        style={{ height: '48px', padding: '0 24px', borderRadius: '14px', boxShadow: '0 4px 12px rgba(143, 6, 83, 0.2)' }}
+                        className="color-manager-create-btn"
                     >
                         ＋ Registrar Color
                     </Button>
                 </div>
             </div>
 
-            <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '40px' }}>
+            <div className="color-manager-list-body">
                 <DataTable 
                     columns={[
                         { 
@@ -202,26 +202,23 @@ const ColorManager = () => {
                             label: 'Visual', 
                             width: '80px',
                             render: (_, row) => (
-                                <div style={{ 
-                                    width: '32px', height: '32px', borderRadius: '10px', background: row.hex_code, 
-                                    border: '2px solid #fff', boxShadow: '0 0 0 1px #e2e8f0' 
-                                }}></div>
+                                <div className="color-manager-dt-swatch" style={{ background: row.hex_code }}></div>
                             )
                         },
                         { 
                             key: 'name', 
                             label: 'Nombre del Color', 
-                            render: (v) => <span style={{ fontWeight: '800', color: '#1e1b4b', letterSpacing: '-0.3px' }}>{v.toUpperCase()}</span>
+                            render: (v) => <span className="color-manager-dt-name">{v.toUpperCase()}</span>
                         },
                         { 
                             key: 'hex_code', 
                             label: 'Código HEX', 
-                            render: (v) => <code style={{ background: '#f8fafc', padding: '4px 10px', borderRadius: '8px', color: '#64748b', fontWeight: '800', fontSize: '13px' }}>{v.toUpperCase()}</code>
+                            render: (v) => <code className="color-manager-dt-hex">{v.toUpperCase()}</code>
                         },
                         {
                             key: 'slug',
                             label: 'Identificador Interno',
-                            render: (v) => <span style={{ color: '#94a3b8', fontSize: '12px' }}>{v}</span>
+                            render: (v) => <span className="color-manager-dt-slug">{v}</span>
                         }
                     ]}
                     data={colors}
@@ -236,23 +233,19 @@ const ColorManager = () => {
                 />
 
                 {colors.length > 0 && (
-                    <div style={{ marginTop: '32px', padding: '32px', background: '#f8fafc', borderRadius: '24px', border: '1px solid #e2e8f0' }}>
-                        <h4 style={{ margin: '0 0 16px', fontSize: '13px', fontWeight: '900', color: '#8f0653', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Previsualización de Biblioteca</h4>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '12px' }}>
+                    <div className="color-manager-preview-card">
+                        <h4 className="color-manager-preview-title">Previsualización de Biblioteca</h4>
+                        <div className="color-manager-preview-grid">
                             {colors.map(c => (
-                                <div key={c.id} style={{ background: '#fff', padding: '12px', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', textAlign: 'center' }}>
-                                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: c.hex_code, border: '2px solid #fff', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}></div>
-                                    <span style={{ fontSize: '10px', fontWeight: '800', color: '#1e1b4b', textTransform: 'uppercase' }}>{c.name}</span>
+                                <div key={c.id} className="color-manager-preview-item">
+                                    <div className="color-manager-preview-circle" style={{ background: c.hex_code }}></div>
+                                    <span className="color-manager-preview-name">{c.name}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
                 )}
             </div>
-
-            <style>{`
-                @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-            `}</style>
         </div>
     );
 };

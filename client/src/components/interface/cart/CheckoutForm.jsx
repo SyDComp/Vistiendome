@@ -40,13 +40,13 @@ const CheckoutForm = ({ onClose }) => {
         <div className="checkout-modal-overlay fade-in" onClick={onClose}>
             <div className="checkout-modal-card slide-up" onClick={e => e.stopPropagation()}>
                 <div className="checkout-header">
-                    <h2>Datos de tu Pedido</h2>
+                    <h2>Datos de tu Cotización</h2>
                     <button className="btn-close-modal" onClick={onClose}><X size={20} /></button>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="checkout-form-body">
                     <p className="form-intro">
-                        Completa tus datos para enviarle el detalle de tu pedido a la vendedora por WhatsApp.
+                        Completa tus datos para enviarle el detalle de tu cotización a la vendedora por WhatsApp.
                     </p>
 
                     <div className="form-grid">
@@ -93,7 +93,7 @@ const CheckoutForm = ({ onClose }) => {
                         <button type="button" className="btn-cancel" onClick={onClose}>Volver</button>
                         <button type="submit" className="btn-submit-whatsapp" disabled={isSubmitting}>
                             <Send size={18} />
-                            Enviar pedido por WhatsApp
+                            Enviar cotización por WhatsApp
                         </button>
                     </div>
                 </form>

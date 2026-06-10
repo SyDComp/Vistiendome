@@ -5,6 +5,7 @@ import CharacteristicManager from './CharacteristicManager';
 import SpecificationManager from './SpecificationManager';
 import LogisticsManager from './LogisticsManager';
 import ColorManager from './ColorManager';
+import CollectionManager from './CollectionManager';
 import LibraryPicker from './LibraryPicker';
 import SectionHeader from '../../../ui/admin/SectionHeader';
 import FilterBar from '../../../ui/admin/FilterBar';
@@ -12,40 +13,55 @@ import DataTable from '../../../ui/admin/DataTable';
 import Pagination from '../../../ui/admin/Pagination';
 import RowActions from '../../../ui/admin/RowActions';
 import DetailDrawer from '../../../ui/admin/DetailDrawer';
+import QuickPeek from '../../../ui/admin/QuickPeek';
 import { useNotification } from '../../../../context/NotificationContext';
-import { Package } from 'lucide-react';
+import { Package, Eye, Barcode as BarcodeIcon } from 'lucide-react';
+import { getImageUrl } from '../../../../services/api';
+import ReactBarcode from 'react-barcode';
 
-const API_BASE = 'http://localhost:8000/api/v1/admin/catalog';
+const API_BASE = `${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/admin/catalog`;
 const PAGE_SIZE = 20;
 
 // Configuración global de stock (fácilmente parametrizable)
 const STOCK_THRESHOLD = 5;
 
+const SkuCell = ({ sku, barcodeValue }) => {
+    const [show, setShow] = useState(false);
+    return (
+        <div className="sku-cell-wrapper">
+            <div className="sku-cell-header">
+                <span className="sku-cell-text">{sku}</span>
+                <button 
+                    onClick={(e) => { e.stopPropagation(); setShow(!show); }}
+                    className={`sku-barcode-btn ${show ? 'active' : 'inactive'}`}
+                    title={show ? "Ocultar código de barras" : "Ver código de barras"}
+                >
+                    <BarcodeIcon size={14} />
+                </button>
+            </div>
+            {show && (
+                <div className="sku-barcode-container">
+                    <ReactBarcode value={barcodeValue || sku || '000000'} format="CODE128" width={1.2} height={30} fontSize={10} displayValue={true} margin={0} background="transparent" />
+                </div>
+            )}
+        </div>
+    );
+};
+
 // Badge de categoría
 const CategoryBadge = ({ name }) => (
-    <span style={{
-        padding: '3px 10px',
-        background: '#eff6ff',
-        color: '#3b82f6',
-        borderRadius: '20px',
-        fontSize: '12px',
-        fontWeight: '600',
-        whiteSpace: 'nowrap'
-    }}>
+    <span className="category-badge">
         {name}
     </span>
 );
 
 // Badge de tipo
 const TypeBadge = ({ type }) => {
-    const config = {
-        prenda: { bg: '#f0fdf4', color: '#16a34a', label: 'Prenda' },
-        accesorio: { bg: '#fdf4ff', color: '#9333ea', label: 'Accesorio' }
-    };
-    const c = config[type] || { bg: '#f1f5f9', color: '#64748b', label: type };
+    const typeClass = type === 'prenda' ? 'prenda' : type === 'accesorio' ? 'accesorio' : 'default';
+    const label = type === 'prenda' ? 'Prenda' : type === 'accesorio' ? 'Accesorio' : type;
     return (
-        <span style={{ padding: '3px 10px', background: c.bg, color: c.color, borderRadius: '20px', fontSize: '12px', fontWeight: '600' }}>
-            {c.label}
+        <span className={`type-badge ${typeClass}`}>
+            {label}
         </span>
     );
 };
@@ -54,24 +70,56 @@ const TypeBadge = ({ type }) => {
 const StockBadge = ({ count }) => {
     const isLow = count < 5;
     const isEmpty = count === 0;
+    const statusClass = isEmpty ? 'empty' : isLow ? 'low' : 'normal';
     return (
-        <span style={{
-            padding: '3px 10px',
-            background: isEmpty ? '#fef2f2' : isLow ? '#fffbeb' : '#f0fdf4',
-            color: isEmpty ? '#ef4444' : isLow ? '#d97706' : '#15803d',
-            borderRadius: '20px',
-            fontSize: '12px',
-            fontWeight: '700'
-        }}>
+        <span className={`stock-badge ${statusClass}`}>
             {count} und.
         </span>
     );
 };
 
 const PRODUCT_COLUMNS = [
-    { key: 'name', label: 'Producto', render: (v) => <span style={{ fontWeight: '700', color: '#1e1b4b' }}>{v}</span> },
+    { 
+        key: 'image', 
+        label: '', 
+        width: '70px', 
+        render: (v, row, { onPeek }) => (
+            <div 
+                onClick={(e) => { e.stopPropagation(); onPeek(row); }}
+                className="admin-product-thumb"
+            >
+                {v ? (
+                    <img src={getImageUrl(v)} alt="" />
+                ) : (
+                    <div className="admin-product-thumb-placeholder">
+                        <Package size={22} />
+                    </div>
+                )}
+            </div>
+        )
+    },
+    { key: 'name', label: 'Producto', render: (v) => <span className="admin-product-name">{v}</span> },
     { key: 'category', label: 'Categoría', render: (v) => <CategoryBadge name={v} /> },
-    { key: 'stock_total', label: 'Stock Total', width: '140px', render: (v) => <StockBadge count={v} /> },
+    { 
+        key: 'price', 
+        label: 'Precio', 
+        render: (_, row) => {
+            const min = row.price_min || 0;
+            const max = row.price_max || 0;
+            if (min === max) return <span className="admin-product-price">${min.toLocaleString()}</span>;
+            return <span className="admin-product-price">${min.toLocaleString()} - ${max.toLocaleString()}</span>;
+        }
+    },
+    { 
+        key: 'stock_total', 
+        label: 'Stock', 
+        width: '100px',
+        render: (v) => (
+            <span className={`admin-stock-val ${v > 0 ? 'positive' : 'negative'}`}>
+                {v} und.
+            </span>
+        ) 
+    },
 ];
 
 const VARIANT_COLUMNS = [
@@ -79,31 +127,45 @@ const VARIANT_COLUMNS = [
         key: 'image_url', 
         label: 'Imagen', 
         width: '80px', 
-        render: (v) => v ? (
-            <div style={{ width: '48px', height: '48px', borderRadius: '10px', overflow: 'hidden', border: '1px solid #f1f5f9' }}>
-                <img src={`http://localhost:8000${v}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-        ) : (
-            <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#cbd5e1' }}>
-                <Package size={20} />
+        render: (v, row, { onPeek }) => (
+            <div 
+                onClick={(e) => { e.stopPropagation(); onPeek(row, 'variant'); }}
+                className="admin-product-thumb"
+            >
+                {v ? (
+                    <img src={getImageUrl(v)} alt="" />
+                ) : (
+                    <div className="admin-product-thumb-placeholder">
+                        <Package size={22} />
+                    </div>
+                )}
             </div>
         )
     },
-    { key: 'sku', label: 'SKU', render: (v) => <span style={{ fontWeight: '800', color: '#1e1b4b', fontFamily: 'monospace' }}>{v}</span> },
-    { key: 'product_name', label: 'Producto Padre', render: (v) => <span style={{ fontWeight: '600', color: '#64748b' }}>{v}</span> },
+    { key: 'sku', label: 'SKU', render: (v, row) => <SkuCell sku={v} barcodeValue={row.barcode} /> },
+    { key: 'product_name', label: 'Producto Padre', render: (v) => <span className="admin-product-name parent">{v}</span> },
     { 
         key: 'config', 
         label: 'Combinación', 
         render: (v) => (
-            <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+            <div className="admin-variant-config-wrapper">
                 {Object.values(v || {}).map((val, i) => (
-                    <span key={i} style={{ padding: '2px 8px', background: '#fdf2f8', color: '#8f0653', borderRadius: '6px', fontSize: '10px', fontWeight: '800', textTransform: 'uppercase' }}>{val}</span>
+                    <span key={i} className="admin-variant-config">{val}</span>
                 ))}
             </div>
         )
     },
-    { key: 'price', label: 'Precio', width: '110px', render: (v) => <span style={{ fontWeight: '800', color: '#16a34a' }}>${v?.toLocaleString()}</span> },
-    { key: 'stock', label: 'Stock', width: '110px', render: (v) => <StockBadge count={v} /> },
+    { key: 'price', label: 'Precio', width: '110px', render: (v) => <span className="admin-product-price">${v?.toLocaleString()}</span> },
+    { 
+        key: 'stock', 
+        label: 'Stock', 
+        width: '100px',
+        render: (v) => (
+            <span className={`admin-stock-val ${v > 0 ? 'positive' : 'negative'}`}>
+                {v} und.
+            </span>
+        ) 
+    },
 ];
 
 const InventoryModule = ({ view = 'products' }) => {
@@ -121,7 +183,9 @@ const InventoryModule = ({ view = 'products' }) => {
     const [activeFilters, setActiveFilters] = useState({});
     const [categories, setCategories] = useState([]);
     const [showDetail, setShowDetail] = useState(false);
+    const [showQuickPeek, setShowQuickPeek] = useState(false);
     const [detailData, setDetailData] = useState(null);
+    const [quickPeekData, setQuickPeekData] = useState(null);
     const [showPicker, setShowPicker] = useState(false);
     const [pickerContext, setPickerContext] = useState(null);
     const [autoOpenVariants, setAutoOpenVariants] = useState(false);
@@ -152,11 +216,6 @@ const InventoryModule = ({ view = 'products' }) => {
             
             // Filtros específicos de variantes
             if (view === 'variants') {
-                if (activeFilters.stock_status) {
-                    params.append('stock_status', activeFilters.stock_status);
-                    params.append('stock_threshold', STOCK_THRESHOLD);
-                }
-                
                 // Filtros de atributos dinámicos
                 Object.keys(activeFilters).forEach(key => {
                     if (key.startsWith('attr_')) {
@@ -185,6 +244,16 @@ const InventoryModule = ({ view = 'products' }) => {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    // POLÍTICA DE MESA LIMPIA: Cerrar todo al cambiar de sección/vista
+    useEffect(() => {
+        setShowForm(false);
+        setEditingProduct(null);
+        setShowDetail(false);
+        setDetailData(null);
+        setShowPicker(false);
+        setPage(1); // Resetear paginación por cortesía
+    }, [view]);
 
     useEffect(() => {
         if (view === 'products' || view === 'variants') fetchProducts();
@@ -237,7 +306,6 @@ const InventoryModule = ({ view = 'products' }) => {
     const handleViewProduct = async (row) => {
         try {
             setLoading(true);
-            // Si es una variante, usamos el endpoint de SKUs
             const endpoint = view === 'variants' ? `skus/${row.id}` : `products/${row.id}`;
             const res = await fetch(`${API_BASE}/${endpoint}`);
             const fullData = await res.json();
@@ -251,21 +319,31 @@ const InventoryModule = ({ view = 'products' }) => {
         }
     };
 
+    const handleQuickPeek = async (row) => {
+        try {
+            setLoading(true);
+            const endpoint = view === 'variants' ? `skus/${row.id}` : `products/${row.id}`;
+            const res = await fetch(`${API_BASE}/${endpoint}`);
+            const fullData = await res.json();
+            setQuickPeekData(fullData);
+            setShowQuickPeek(true);
+        } catch (err) {
+            console.error("Error cargando quick peek:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     if (showForm) {
         return (
-            <div style={{ height: '100%', overflowY: 'auto', animation: 'fadeIn 0.3s ease', padding: isMobile ? '5px' : '0' }}>
+            <div className={`admin-inventory-form-container ${isMobile ? 'mobile' : 'desktop'}`}>
                 <button
                     onClick={() => { 
                         setShowForm(false); 
                         setEditingProduct(null); 
                         fetchProducts(); // Refrescar al volver para asegurar consistencia
                     }}
-                    style={{
-                        display: 'flex', alignItems: 'center', gap: '8px',
-                        background: 'none', border: 'none', color: '#8f0653',
-                        cursor: 'pointer', fontWeight: '700', marginBottom: '24px',
-                        fontSize: '14px', padding: '10px 0', width: isMobile ? '100%' : 'auto'
-                    }}
+                    className={`admin-back-btn ${isMobile ? 'mobile' : 'desktop'}`}
                 >
                     ← Volver al Listado
                 </button>
@@ -287,7 +365,7 @@ const InventoryModule = ({ view = 'products' }) => {
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', animation: 'fadeIn 0.3s ease', overflow: 'hidden' }}>
+        <div className="admin-inventory-module">
 
             {view === 'categories' ? (
                 <CategoryManager />
@@ -299,6 +377,8 @@ const InventoryModule = ({ view = 'products' }) => {
                 <LogisticsManager />
             ) : view === 'colors' ? (
                 <ColorManager />
+            ) : view === 'collections' ? (
+                <CollectionManager />
             ) : (
                 <>
                     {/* Cabecera de sección de Productos */}
@@ -333,15 +413,6 @@ const InventoryModule = ({ view = 'products' }) => {
                                     .map(c => ({ value: c.id, label: c.parent_name ? `${c.parent_name} › ${c.name}` : c.name }))
                             },
                             ...(view === 'variants' ? [
-                                {
-                                    key: 'stock_status',
-                                    label: 'Disponibilidad',
-                                    options: [
-                                        { value: 'disponible', label: '✅ Disponible' },
-                                        { value: 'bajo_stock', label: `⚠️ Bajo Stock (<${STOCK_THRESHOLD})` },
-                                        { value: 'agotado', label: '❌ Agotado' }
-                                    ]
-                                },
                                 // Añadir una opción de filtro por cada característica dinámica
                                 ...characteristics.map(char => ({
                                     key: `attr_${char.name}`,
@@ -361,8 +432,12 @@ const InventoryModule = ({ view = 'products' }) => {
                         data={products}
                         isLoading={loading}
                         emptyMessage={view === 'variants' ? "No se encontraron variantes." : "No se encontraron productos con los filtros aplicados."}
+                        context={{ onPeek: handleQuickPeek }}
                         rowActions={(row) => (
                             <RowActions
+                                customButtons={[
+                                    { icon: <Eye size={16} />, onClick: () => handleQuickPeek(row, view === 'variants' ? 'variant' : 'product'), title: 'Vistazo Rápido', variant: 'secondary' }
+                                ]}
                                 onView={() => handleViewProduct(row)}
                                 onEdit={() => view === 'variants' ? handleViewProduct(row) : handleEditProduct(row)}
                                 onDelete={() => view === 'variants' ? null : handleDelete(row)}
@@ -391,6 +466,13 @@ const InventoryModule = ({ view = 'products' }) => {
                     // Refrescar lista al guardar cambios en variante
                     fetchProducts();
                 } : null}
+            />
+
+            <QuickPeek 
+                isOpen={showQuickPeek}
+                onClose={() => setShowQuickPeek(false)}
+                data={quickPeekData}
+                type={view === 'variants' ? 'variant' : 'product'}
             />
 
             <LibraryPicker 

@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Maximize2, ChevronRight, ChevronLeft } from 'lucide-react';
 import ProductLightbox from './ProductLightbox';
+import './ProductPreviewCarousel.css';
 import { getImageUrl } from '../../../services/api';
 
 /**
@@ -21,6 +22,8 @@ const ProductPreviewCarousel = ({
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState(0);
     const thumbnailScrollRef = useRef(null);
+    const touchStartX = useRef(null);
+    const touchStartY = useRef(null);
 
     // Ayudante para normalizar nombres de archivo (Detección de portada)
     const getFileName = (path) => path?.split(/[?#]/)[0].split(/[\\/]/).pop()?.toLowerCase();
@@ -32,47 +35,51 @@ const ProductPreviewCarousel = ({
     const finalImages = useMemo(() => {
         if (!skus.length) return [];
 
-        const uniqueThumbnails = [];
+        // 1. Recolectar todas las imágenes únicas con su metadata
+        const allUniqueImages = [];
         const seenUrls = new Set();
 
-        const collectImage = (url, skuConfig) => {
+        const collectImage = (url, sku) => {
             if (!url) return;
             const normalizedUrl = url.split(/[?#]/)[0].toLowerCase();
             if (seenUrls.has(normalizedUrl)) return;
             
             seenUrls.add(normalizedUrl);
-            uniqueThumbnails.push({
+            allUniqueImages.push({
                 url,
                 is_main_cover: getFileName(url) === coverFileName,
-                skuConfig: skuConfig,
-                skuId: skuConfig?.sku || 'generic'
+                skuConfig: sku?.config || null,
+                skuId: sku?.sku || 'generic',
+                originalSku: sku // Guardamos referencia para el filtrado
             });
         };
 
-        // 1. Forzar SIEMPRE la portada global primero
+        // Primero recolectamos todo el universo de fotos
+        // (Damos prioridad a la variante de la portada para que todas sus fotos vayan juntas al inicio)
+        let sortedSkus = [...skus];
         if (coverImage) {
             const coverSku = skus.find(s => s.image_urls?.some(u => getFileName(u) === coverFileName));
-            collectImage(coverImage, coverSku?.config || null);
+            if (coverSku) {
+                // Movemos la variante de la portada al principio
+                sortedSkus = [coverSku, ...skus.filter(s => s !== coverSku)];
+            }
+            // Insertamos la portada primero
+            collectImage(coverImage, coverSku);
         }
-
-        // 2. Recolectar el resto del universo de SKUs
-        // Agrupados por naturaleza, el orden en el que se iteran forma "packs" estáticos
-        skus.forEach(s => {
-            s.image_urls?.forEach(url => collectImage(url, s.config));
+        
+        // Ahora recolectamos el resto en orden
+        sortedSkus.forEach(s => {
+            s.image_urls?.forEach(url => collectImage(url, s));
         });
 
-        // Calculamos la propiedad dinámica isFromActiveSku fuera del ordenamiento
-        // para afectar solo a los estilos CSS (opacidad), no la posición en el DOM.
-        return uniqueThumbnails.map(img => {
+        // 2. Mapeo final con propiedad isFromActiveSku para UI
+        return allUniqueImages.map(img => {
             let isActive = false;
             if (skuActual && skuActual.image_urls) {
                 const imgNorm = getFileName(img.url);
                 isActive = skuActual.image_urls.some(u => getFileName(u) === imgNorm);
             }
-            return {
-                ...img,
-                isFromActiveSku: isActive
-            };
+            return { ...img, isFromActiveSku: isActive };
         });
     }, [skus, coverImage, skuActual, coverFileName]);
 
@@ -146,7 +153,7 @@ const ProductPreviewCarousel = ({
     }, [displayUrl, selectedImageUrl]);
 
     // Lógica de Navegación Circular (Imágenes)
-    const navigateImage = (direction) => {
+    const navigateImage = useCallback((direction) => {
         const currentUrl = displayUrl || selectedImageUrl;
         const currentIndex = finalImages.findIndex(img => img.url === currentUrl);
         if (currentIndex === -1) return;
@@ -166,19 +173,38 @@ const ProductPreviewCarousel = ({
         }
         
         setSelectedImageUrl(nextImage.url);
+        // Ya no enviamos 0, enviamos el índice real porque el orden es estable
         if (onImageSelected) onImageSelected(newIndex);
-    };
+    }, [displayUrl, selectedImageUrl, finalImages, onJumpToVariant, onImageSelected]);
+
+    // Touch swipe handlers para la imagen principal
+    const handleTouchStart = useCallback((e) => {
+        touchStartX.current = e.touches[0].clientX;
+        touchStartY.current = e.touches[0].clientY;
+    }, []);
+
+    const handleTouchEnd = useCallback((e) => {
+        if (touchStartX.current === null) return;
+        const dx = e.changedTouches[0].clientX - touchStartX.current;
+        const dy = e.changedTouches[0].clientY - touchStartY.current;
+        // Swipe horizontal > 40px y más horizontal que vertical
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+            if (dx < 0) navigateImage('right');  // swipe izquierda → siguiente
+            else navigateImage('left');            // swipe derecha → anterior
+        }
+        touchStartX.current = null;
+        touchStartY.current = null;
+    }, [navigateImage]);
 
     const handleThumbnailClick = (imgObj) => {
-        const newIndex = finalImages.findIndex(i => i.url === imgObj.url);
-        
         if (!imgObj.isFromActiveSku && onJumpToVariant && imgObj.skuConfig) {
             onJumpToVariant(imgObj.skuConfig);
         }
         
         setSelectedImageUrl(imgObj.url);
-        if (onImageSelected && newIndex !== -1) {
-            onImageSelected(newIndex);
+        if (onImageSelected) {
+            const idx = finalImages.findIndex(i => i.url === imgObj.url);
+            onImageSelected(idx >= 0 ? idx : 0);
         }
     };
 
@@ -189,11 +215,37 @@ const ProductPreviewCarousel = ({
         setIsLightboxOpen(true);
     };
 
+    // Al cerrar el lightbox, sincronizar el carrusel con la imagen en que quedó el usuario
+    const handleLightboxClose = () => {
+        setIsLightboxOpen(false);
+        const closedAtImage = finalImages[lightboxIndex];
+        if (!closedAtImage) return;
+
+        // Si la imagen en que cerró es de una variante distinta, saltar a esa variante
+        if (!closedAtImage.isFromActiveSku && onJumpToVariant && closedAtImage.skuConfig) {
+            onJumpToVariant(closedAtImage.skuConfig);
+        }
+
+        // Actualizar la imagen seleccionada en el carrusel
+        setSelectedImageUrl(closedAtImage.url);
+        if (onImageSelected) {
+            onImageSelected(lightboxIndex);
+        }
+    };
+
     if (finalImages.length === 0 && !displayUrl) return null;
 
     return (
         <div className="product-carousel-system">
-            <div className="main-display-area" onClick={() => openLightbox(displayUrl)}>
+            <div
+                className="main-display-area"
+                onClick={() => openLightbox(displayUrl)}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+            >
+                {displayUrl && (
+                    <img src={getImageUrl(displayUrl)} alt="" className="main-blur-bg" aria-hidden="true" />
+                )}
                 <img 
                     src={getImageUrl(displayUrl)} 
                     alt="Vista del producto" 
@@ -202,7 +254,9 @@ const ProductPreviewCarousel = ({
                         display: 'block',
                         width: '100%',
                         height: '100%',
-                        objectFit: 'cover'
+                        objectFit: 'contain',
+                        position: 'relative',
+                        zIndex: 2
                     }}
                     onError={(e) => {
                         e.target.src = getImageUrl(coverImage);
@@ -226,7 +280,14 @@ const ProductPreviewCarousel = ({
                                 className={`carousel-thumb-item ${selectedImageUrl === img.url ? 'active' : ''} ${!img.isFromActiveSku ? 'secondary-pack' : ''}`}
                                 onClick={() => handleThumbnailClick(img)}
                             >
-                                <img src={getImageUrl(img.url)} alt={`Previsualización ${idx + 1}`} />
+                                <img 
+                                    src={getImageUrl(img.url)} 
+                                    alt={`Previsualización ${idx + 1}`} 
+                                    onError={(e) => {
+                                        e.target.onerror = null; // Prevenir loop infinito
+                                        e.target.src = getImageUrl(coverImage);
+                                    }}
+                                />
                                 {!img.isFromActiveSku && (
                                     <div className="pack-indicator" title="Ver esta variante">✨</div>
                                 )}
@@ -246,154 +307,12 @@ const ProductPreviewCarousel = ({
                 images={finalImages.map(i => getImageUrl(i.url))}
                 currentIndex={lightboxIndex}
                 isOpen={isLightboxOpen}
-                onClose={() => setIsLightboxOpen(false)}
+                onClose={handleLightboxClose}
                 onPrev={() => setLightboxIndex(p => (p - 1 + finalImages.length) % finalImages.length)}
                 onNext={() => setLightboxIndex(p => (p + 1) % finalImages.length)}
             />
 
-            <style>{`
-                .product-carousel-system {
-                    width: 100%;
-                    max-width: 100%;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 16px;
-                    overflow: hidden;
-                    box-sizing: border-box;
-                }
 
-                @media (max-width: 768px) {
-                    .product-carousel-system { gap: 8px; }
-                }
-
-                .main-display-area {
-                    position: relative;
-                    width: 100%;
-                    max-width: 600px;
-                    margin: 0 auto;
-                    aspect-ratio: 3/4;
-                    min-height: 300px; /* Garantiza visibilidad en cualquier reflow */
-                    border-radius: 20px;
-                    overflow: hidden;
-                    background: #f1f5f9; /* Color base más suave */
-                    cursor: zoom-in;
-                    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-                    border: 1px solid rgba(0,0,0,0.04);
-                }
-
-                @media (min-width: 1024px) {
-                    .main-display-area {
-                        max-width: 100%;
-                        border-radius: 24px;
-                    }
-                }
-
-                .main-large-image {
-                    background: #f1f5f9;
-                    transition: opacity 0.3s ease;
-                }
-
-                @media (max-width: 768px) {
-                    .main-display-area {
-                        min-height: 400px; /* Más espacio en móviles */
-                    }
-                }
-
-                .glass-magnifier {
-                    position: absolute;
-                    bottom: 24px;
-                    right: 24px;
-                    background: rgba(255, 255, 255, 0.7);
-                    backdrop-filter: blur(12px);
-                    color: #1e1b4b;
-                    padding: 12px;
-                    border-radius: 18px;
-                    opacity: 0;
-                    transform: translateY(10px);
-                    transition: all 0.3s ease;
-                    border: 1px solid rgba(255,255,255,0.5);
-                }
-
-                .main-display-area:hover .glass-magnifier { opacity: 1; transform: translateY(0); }
-
-                .carousel-controls-wrapper {
-                    position: relative;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    width: 100%;
-                    min-width: 0; /* CRÍTICO: Permite que el contenedor flex se encoja */
-                }
-
-                .thumbnails-scroll-container {
-                    flex: 1;
-                    min-width: 0; /* CRÍTICO: Previene que el scroll estire al padre */
-                    overflow-x: auto;
-                    overflow-y: hidden;
-                    white-space: nowrap;
-                    scroll-behavior: smooth;
-                    padding: 4px 0 10px;
-                    -webkit-overflow-scrolling: touch;
-                }
-
-                .thumbnails-scroll-container::-webkit-scrollbar { height: 4px; }
-                .thumbnails-scroll-container::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-
-                .thumbnails-track {
-                    display: inline-flex;
-                    gap: 12px;
-                    min-width: min-content;
-                }
-
-                .carousel-thumb-item {
-                    width: 70px;
-                    height: 70px;
-                    flex: 0 0 70px;
-                    border-radius: 12px;
-                    overflow: hidden;
-                    cursor: pointer;
-                    background: #f1f5f9;
-                    border: 2px solid transparent;
-                    transition: all 0.2s ease;
-                }
-
-                .carousel-thumb-item img { width: 100%; height: 100%; object-fit: cover; }
-                .carousel-thumb-item.active { border-color: #8f0653; transform: scale(1.05); }
-
-                .carousel-thumb-item.secondary-pack { opacity: 0.4; }
-                .carousel-thumb-item.secondary-pack:hover { opacity: 1; }
-
-                .scroll-btn {
-                    width: 36px;
-                    height: 36px;
-                    border-radius: 50%;
-                    border: 1px solid #f1f5f9;
-                    background: white;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: #475569;
-                    cursor: pointer;
-                    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-                    flex-shrink: 0;
-                }
-
-                .carousel-fade-edge {
-                    position: absolute;
-                    right: 40px;
-                    top: 0;
-                    bottom: 0;
-                    width: 40px;
-                    background: linear-gradient(to right, transparent, rgba(255,255,255,0.8));
-                    pointer-events: none;
-                }
-
-                @media (max-width: 768px) {
-                    .scroll-btn, .carousel-fade-edge { display: none; }
-                    .carousel-thumb-item { width: 64px; height: 64px; flex-basis: 64px; }
-                    .main-display-area { border-radius: 16px; }
-                }
-            `}</style>
         </div>
     );
 };

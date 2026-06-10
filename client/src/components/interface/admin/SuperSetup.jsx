@@ -26,7 +26,7 @@ const SuperSetup = () => {
     const boostrapSystem = async (payload) => {
         setStatusMessage(null);
         try {
-            const res = await fetch('http://localhost:8000/api/v1/auth/bootstrap/first-admin', {
+            const res = await fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/auth/bootstrap/first-admin`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -53,20 +53,15 @@ const SuperSetup = () => {
     };
 
     return (
-        <div style={{ maxWidth: '450px', margin: '50px auto', padding: '30px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', borderRadius: '12px' }}>
-            <h1 style={{ color: '#8f0653', margin: '0 0 10px 0' }}>God-Mode Setup</h1>
-            <p style={{ color: '#666', marginBottom: '20px', fontSize: '14px' }}>
+        <div className="auth-form-container setup">
+            <h1 className="auth-form-title setup">God-Mode Setup</h1>
+            <p className="auth-form-subtitle setup">
                 Este formulario es de un solo uso. Una vez se aprovisione la cuenta maestra, 
                 esta ruta quedará bloqueada perpetuamente para proteger la PBAC.
             </p>
 
             {statusMessage && (
-                <div style={{
-                    padding: '12px', borderRadius: '8px', marginBottom: '20px',
-                    backgroundColor: statusMessage.type === 'error' ? '#ffebee' : '#e8f5e9',
-                    color: statusMessage.type === 'error' ? '#c62828' : '#2e7d32',
-                    borderLeft: `4px solid ${statusMessage.type === 'error' ? '#c62828' : '#2e7d32'}`
-                }}>
+                <div className={`auth-status-message ${statusMessage.type === 'error' ? 'error' : 'success'}`}>
                     {statusMessage.text}
                 </div>
             )}
@@ -79,7 +74,7 @@ const SuperSetup = () => {
                 <Input label="Correo Institucional (Acceso)" name="email_corporativo" type="email" placeholder="admin@vistiendome.cl" value={values.email_corporativo} onChange={handleChange} error={errors.email_corporativo} />
                 <Input label="Clave Administrativa" name="password" type="password" value={values.password} onChange={handleChange} error={errors.password} />
                 
-                <Button type="submit" variant="danger" style={{ width: '100%', marginTop: '10px' }} isLoading={isSubmitting}>
+                <Button type="submit" variant="danger" className="auth-btn-wrapper" isLoading={isSubmitting}>
                     Sellar Sistema (Bootstrap)
                 </Button>
             </form>

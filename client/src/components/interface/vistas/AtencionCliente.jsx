@@ -1,181 +1,80 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
+import CMSRenderer from '../cms/CMSRenderer';
+import { useWebSocket } from '../../../context/WebSocketContext';
+import PremiumLoader from '../../ui/PremiumLoader';
+import { ChevronRight, X, ArrowLeft } from 'lucide-react';
+
+const HELP_API = (import.meta.env.PROD ? '/api/v1/homepage/help/sections' : 'http://127.0.0.1:8000/api/v1/homepage/help/sections');
 
 const AtencionCliente = ({ initialSection = 'tallas' }) => {
     const location = useLocation();
+    const [sections, setSections] = useState([]);
     const [activeSection, setActiveSection] = useState(initialSection);
+    const [loading, setLoading] = useState(true);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+    // Modal para móvil
+    const [modalSection, setModalSection] = useState(null); // { slug, title, icon }
+    const { lastMessage } = useWebSocket();
 
-    // Sincronizar sección con el estado de navegación (Footer -> Deep Linking)
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const fetchSections = useCallback(async () => {
+        try {
+            const res = await fetch(HELP_API);
+            const data = await res.json();
+            setSections(data);
+            if (data.length > 0 && !data.find(s => s.slug === activeSection)) {
+                setActiveSection(data[0].slug);
+            }
+        } catch (err) {
+            console.error("Error fetching help sections:", err);
+        } finally {
+            setLoading(false);
+        }
+    }, [activeSection]);
+
+    useEffect(() => {
+        fetchSections();
+    }, [fetchSections]);
+
+    useEffect(() => {
+        if (lastMessage?.type === 'invalidate_cache' && lastMessage.resource === 'help_sections') {
+            fetchSections();
+        }
+    }, [lastMessage, fetchSections]);
+
     useEffect(() => {
         if (location.state?.section) {
             setActiveSection(location.state.section);
-            // Hacer scroll al inicio de la sección para asegurar visibilidad
             window.scrollTo({ top: 0, behavior: 'auto' });
         }
     }, [location.state]);
 
-    const sections = [
-        { id: 'tallas', title: 'Guía de Tallas', icon: '📏' },
-        { id: 'faq', title: 'Preguntas Frecuentes', icon: '❓' },
-        { id: 'cambios', title: 'Cambios y Devoluciones', icon: '🔄' },
-        { id: 'envios', title: 'Envíos y Seguimiento', icon: '🚚' },
-        { id: 'cuidados', title: 'Cuidado de Prendas', icon: '✨' }
-    ];
-
-    const sizeGuideData = [
-        { talla: '12', busto: '94-98', cintura: '76-80', cadera: '102-106' },
-        { talla: '14', busto: '98-102', cintura: '80-84', cadera: '106-110' },
-        { talla: '16 (XL)', busto: '102-106', cintura: '84-88', cadera: '110-114' },
-        { talla: 'XXL (48)', busto: '108-112', cintura: '90-94', cadera: '116-120' },
-        { talla: '3XL', busto: '114-118', cintura: '96-100', cadera: '122-126' },
-        { talla: '4XL', busto: '120-124', cintura: '102-106', cadera: '128-132' },
-        { talla: '5XL', busto: '126-130', cintura: '108-112', cadera: '134-138' },
-        { talla: '6XL', busto: '132-136', cintura: '114-118', cadera: '140-144' },
-        { talla: '7XL', busto: '140-146', cintura: '122-128', cadera: '148-154' },
-    ];
-
-    const faqs = [
-        {
-            q: "¿Hacen envíos a todo Chile?",
-            a: "Sí, enviamos a todas las regiones a través de Starken y Chilexpress con cobro en destino o previo pago según prefieras."
-        },
-        {
-            q: "¿Tienen tienda física para probarse?",
-            a: "Contamos con nuestro taller showroom en San Carlos (Camino San Camilo Km 1,8). Te recomendamos agendar tu visita vía WhatsApp para darte una atención personalizada."
-        },
-        {
-            q: "¿Cómo pido uniformes para mi grupo de Coristas?",
-            a: "Puedes usar nuestro formulario de contacto sección 'Grupos' o hablarnos directamente por WhatsApp. Trabajamos con precios especiales por volumen desde las 12 unidades."
-        },
-        {
-            q: "¿Qué telas utilizan?",
-            a: "Seleccionamos textiles de alta gama como Punto Roma premium, Sofía, Lanillas y Encajes elásticos, priorizando la durabilidad y la caída elegante."
+    // Bloquear scroll del body cuando el modal está abierto
+    useEffect(() => {
+        if (modalSection) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
         }
-    ];
+        return () => { document.body.style.overflow = ''; };
+    }, [modalSection]);
 
-    const renderTallas = () => (
-        <div className="ayuda-content fade-in">
-            <h2>Guía de Tallas Inclusiva</h2>
-            <p className="ayuda-intro">
-                En Vistiéndome, sabemos que cada cuerpo es único. Nuestra tabla de medidas está diseñada para que elijas con total confianza desde la talla 12 hasta la 7XL.
-            </p>
-            <div className="table-responsive">
-                <table className="tallas-table">
-                    <thead>
-                        <tr>
-                            <th>Talla</th>
-                            <th>Busto (cm)</th>
-                            <th>Cintura (cm)</th>
-                            <th>Cadera (cm)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {sizeGuideData.map((item, index) => (
-                            <tr key={index}>
-                                <td className="talla-highlight">{item.talla}</td>
-                                <td>{item.busto}</td>
-                                <td>{item.cintura}</td>
-                                <td>{item.cadera}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-            <div className="ayuda-tip">
-                <strong>💡 Tip Pro:</strong> Si estás entre dos tallas, te recomendamos elegir la más grande para mayor comodidad, especialmente en telas sin elasticidad.
-            </div>
-        </div>
-    );
+    const openModal = (sec) => setModalSection(sec);
+    const closeModal = () => setModalSection(null);
 
-    const renderFAQ = () => (
-        <div className="ayuda-content fade-in">
-            <h2>Preguntas Frecuentes</h2>
-            <div className="faq-grid">
-                {faqs.map((faq, index) => (
-                    <div key={index} className="faq-item">
-                        <h4>{faq.q}</h4>
-                        <p>{faq.a}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-
-    const renderCambios = () => (
-        <div className="ayuda-content fade-in">
-            <h2>Cambios y Devoluciones</h2>
-            <div className="ayuda-text-block">
-                <h3>Políticas de Satisfacción</h3>
-                <p>Queremos que ames tu prenda Vistiéndome. Si por alguna razón necesitas un cambio:</p>
-                <ul>
-                    <li>Tienes <strong>15 días</strong> desde que recibes tu pedido para solicitar un cambio de talla o modelo.</li>
-                    <li>La prenda debe estar sin uso, con sus etiquetas y en perfecto estado.</li>
-                    <li>Los costos de envío por cambios de talla son responsabilidad de la cliente, a menos que exista una falla de fabricación.</li>
-                    <li><strong>Pedidos Especiales:</strong> Las prendas confeccionadas a medida o con modificaciones personalizadas no admiten cambios ni devoluciones.</li>
-                </ul>
-            </div>
-        </div>
-    );
-
-    const renderEnvios = () => (
-        <div className="ayuda-content fade-in">
-            <h2>Envíos y Seguimiento</h2>
-            <div className="ayuda-text-block">
-                <p>Procesamos tu pedido con la máxima dedicación desde San Carlos.</p>
-                <div className="envio-steps">
-                    <div className="step">
-                        <strong>1. Confección / Preparación</strong>
-                        <span>2-5 días hábiles (si no hay stock inmediato).</span>
-                    </div>
-                    <div className="step">
-                        <strong>2. Despacho</strong>
-                        <span>Te enviamos el número de seguimiento por WhatsApp.</span>
-                    </div>
-                    <div className="step">
-                        <strong>3. Entrega</strong>
-                        <span>Depende de la región, generalmente 24-48 horas tras el despacho.</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-
-    const renderCuidados = () => (
-        <div className="ayuda-content fade-in">
-            <h2>Cuidado de tus Prendas</h2>
-            <div className="ayuda-text-block">
-                <p>Nuestros diseños están hechos para acompañarte por mucho tiempo. Sigue estos consejos:</p>
-                <div className="cuidados-grid">
-                    <div className="cuidado-card">
-                        <strong>Lavado</strong>
-                        <p>Lavar a mano o en ciclo delicado con agua fría. Evita el uso de cloro.</p>
-                    </div>
-                    <div className="cuidado-card">
-                        <strong>Secado</strong>
-                        <p>No usar secadora. Secar a la sombra para mantener la intensidad de los colores.</p>
-                    </div>
-                    <div className="cuidado-card">
-                        <strong>Planchado</strong>
-                        <p>Usar plancha a temperatura media/baja por el revés de la prenda.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-
-    const renderContent = () => {
-        switch (activeSection) {
-            case 'tallas': return renderTallas();
-            case 'faq': return renderFAQ();
-            case 'cambios': return renderCambios();
-            case 'envios': return renderEnvios();
-            case 'cuidados': return renderCuidados();
-            default: return renderTallas();
-        }
-    };
+    if (loading) {
+        return <PremiumLoader text="Cargando centro de ayuda..." />;
+    }
 
     return (
         <div className="atencion-hub-view">
+            {/* Hero compacto */}
             <div className="ayuda-hero">
                 <div className="container">
                     <span className="subtitle">Atención al Cliente</span>
@@ -183,28 +82,229 @@ const AtencionCliente = ({ initialSection = 'tallas' }) => {
                 </div>
             </div>
 
-            <div className="container ayuda-layout">
-                {/* Sidebar Navigation */}
-                <aside className="ayuda-sidebar">
-                    <nav>
-                        {sections.map(sec => (
-                            <button 
-                                key={sec.id}
-                                className={`ayuda-nav-btn ${activeSection === sec.id ? 'active' : ''}`}
-                                onClick={() => setActiveSection(sec.id)}
-                            >
-                                <span className="icon">{sec.icon}</span>
-                                <span className="title">{sec.title}</span>
-                            </button>
-                        ))}
-                    </nav>
-                </aside>
+            {/* MÓVIL: Lista de tarjetas → abre modal */}
+            {isMobile ? (
+                <div className="container ayuda-cards-list">
+                    {sections.map(sec => (
+                        <button
+                            key={sec.id}
+                            className="ayuda-card-item"
+                            onClick={() => openModal(sec)}
+                        >
+                            <span className="ayuda-card-icon">{sec.icon}</span>
+                            <span className="ayuda-card-title">{sec.title}</span>
+                            <ChevronRight size={18} className="ayuda-card-arrow" />
+                        </button>
+                    ))}
+                </div>
+            ) : (
+                /* ESCRITORIO: Layout sidebar + contenido */
+                <div className="container ayuda-layout">
+                    <aside className="ayuda-sidebar">
+                        <nav>
+                            {sections.map(sec => (
+                                <button
+                                    key={sec.id}
+                                    className={`ayuda-nav-btn ${activeSection === sec.slug ? 'active' : ''}`}
+                                    onClick={() => setActiveSection(sec.slug)}
+                                >
+                                    <span className="icon">{sec.icon}</span>
+                                    <span className="title">{sec.title}</span>
+                                </button>
+                            ))}
+                        </nav>
+                    </aside>
 
-                {/* Main Content Area */}
-                <main className="ayuda-main">
-                    {renderContent()}
-                </main>
-            </div>
+                    <main className="ayuda-main fade-in">
+                        <div className="ayuda-content">
+                            <CMSRenderer page={activeSection} />
+                        </div>
+                    </main>
+                </div>
+            )}
+
+            {/* MODAL FULLSCREEN — solo en móvil */}
+            {modalSection && (
+                <div className="ayuda-modal-overlay" onClick={closeModal}>
+                    <div
+                        className="ayuda-modal-panel fade-in"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {/* Header del modal */}
+                        <div className="ayuda-modal-header">
+                            <button className="ayuda-modal-back" onClick={closeModal}>
+                                <ArrowLeft size={20} />
+                            </button>
+                            <div className="ayuda-modal-title-row">
+                                <span className="ayuda-modal-icon">{modalSection.icon}</span>
+                                <h2 className="ayuda-modal-title">{modalSection.title}</h2>
+                            </div>
+                            <button className="ayuda-modal-close" onClick={closeModal}>
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Contenido */}
+                        <div className="ayuda-modal-body">
+                            <div className="ayuda-modal-cms-wrap">
+                                <CMSRenderer page={modalSection.slug} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <style>{`
+                /* Hero compacto */
+                .ayuda-hero {
+                    padding: 2.5rem 0 2rem;
+                    text-align: center;
+                    background-color: #fbfbfb;
+                    margin-bottom: 1.5rem;
+                }
+                .ayuda-hero h1 {
+                    font-size: 1.8rem;
+                    margin-top: 4px;
+                }
+
+                /* Lista de tarjetas móvil */
+                .ayuda-cards-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    padding-bottom: 3rem;
+                }
+
+                .ayuda-card-item {
+                    width: 100%;
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                    background: white;
+                    border: 1px solid #e8e8e8;
+                    border-radius: 16px;
+                    padding: 18px 20px;
+                    cursor: pointer;
+                    text-align: left;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+                }
+
+                .ayuda-card-item:active {
+                    transform: scale(0.98);
+                    background: #fdf2f8;
+                    border-color: #d1a3d4;
+                }
+
+                .ayuda-card-icon {
+                    font-size: 1.5rem;
+                    flex-shrink: 0;
+                }
+
+                .ayuda-card-title {
+                    flex: 1;
+                    font-weight: 700;
+                    font-size: 1rem;
+                    color: #1e1b4b;
+                }
+
+                .ayuda-card-arrow {
+                    color: #94a3b8;
+                    flex-shrink: 0;
+                }
+
+                /* Modal fullscreen */
+                .ayuda-modal-overlay {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0, 0, 0, 0.4);
+                    z-index: 9000;
+                    display: flex;
+                    align-items: flex-end;
+                }
+
+                .ayuda-modal-panel {
+                    width: 100%;
+                    height: 92vh;
+                    background: white;
+                    border-radius: 24px 24px 0 0;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                }
+
+                .ayuda-modal-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 16px 20px;
+                    border-bottom: 1px solid #f1f5f9;
+                    flex-shrink: 0;
+                    background: white;
+                }
+
+                .ayuda-modal-back {
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    color: #475569;
+                    padding: 4px;
+                    display: flex;
+                    align-items: center;
+                    flex-shrink: 0;
+                }
+
+                .ayuda-modal-title-row {
+                    flex: 1;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    min-width: 0;
+                }
+
+                .ayuda-modal-icon {
+                    font-size: 1.2rem;
+                    flex-shrink: 0;
+                }
+
+                .ayuda-modal-title {
+                    font-size: 1rem;
+                    font-weight: 800;
+                    color: #1e1b4b;
+                    margin: 0;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .ayuda-modal-close {
+                    background: #f1f5f9;
+                    border: none;
+                    border-radius: 50%;
+                    width: 32px;
+                    height: 32px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    color: #475569;
+                    flex-shrink: 0;
+                }
+
+                .ayuda-modal-body {
+                    flex: 1;
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                    padding: 20px;
+                    -webkit-overflow-scrolling: touch;
+                }
+
+                /* Contenedor principal del modal */
+                .ayuda-modal-cms-wrap {
+                    width: 100%;
+                    overflow-x: hidden;
+                }
+            `}</style>
         </div>
     );
 };

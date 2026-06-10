@@ -1,6 +1,6 @@
 import React from 'react';
 import { useWebSocket } from '../../context/WebSocketContext';
-import '../../styles/Heartbeat.css';
+
 
 const Heartbeat = () => {
     const { isConnected } = useWebSocket();
