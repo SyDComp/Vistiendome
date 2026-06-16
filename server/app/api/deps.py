@@ -19,16 +19,23 @@ def get_current_user(
     request: Request,
     db: Session = Depends(get_session)
 ) -> CuentaAcceso:
-    """Extrae el portador del token desde la cabecera estándar de Authorización HTTP"""
+    """Extrae el portador del token desde la cabecera estándar de Authorización HTTP o desde Cookies"""
     auth = request.headers.get("Authorization")
-    if not auth or not auth.startswith("Bearer "):
+    token = None
+
+    if auth and auth.startswith("Bearer "):
+        token = auth.split(" ")[1]
+    else:
+        # Intentar extraer de las cookies si no hay header
+        token = request.cookies.get("access_token")
+
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Falta credencial Bearer"
+            detail="Falta credencial de acceso (Header o Cookie)"
         )
     
     try:
-        token = auth.split(" ")[1]
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id = payload.get("sub")
         if user_id is None:

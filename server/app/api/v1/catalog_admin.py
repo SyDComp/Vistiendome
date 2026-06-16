@@ -3,9 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Body, Response, Up
 from sqlmodel import Session, select, func, delete, or_, and_, cast, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import selectinload
 from ...database import get_session
 from ...models.catalog import (
-    Product, Category, SKU, ProductImage, 
+    Product, Category, SKU, MediaAsset, ProductMediaLink, SKUMediaLink,
     Characteristic, Specification, SpecificationCharacteristicLink, CategorySpecificationLink,
     StockMovement, MovementType, ColorSwatch
 )
@@ -27,6 +28,7 @@ from pydantic import BaseModel
 import re
 import unicodedata
 from ...core.config import settings
+from ...core.sockets import manager
 
 router = APIRouter()
 
@@ -38,10 +40,10 @@ class SKUCreate(BaseModel):
     price: float
     stock: int
     config: Dict[str, str]
-    image_urls: List[str] = []
+    media_ids: List[int] = []
 
 class ImageCreate(BaseModel):
-    url: str
+    media_asset_id: int
     is_main: bool = False
     ui_config: Dict[str, Any] = {"zoom": 1, "x": 0, "y": 0}
     config_match: Dict[str, str] = {}
@@ -141,7 +143,7 @@ def list_attributes(db: Session = Depends(get_session)):
     return db.exec(select(Characteristic)).all()
 
 @router.post("/attributes")
-def create_attribute(data: Dict[str, Any], db: Session = Depends(get_session)):
+async def create_attribute(data: Dict[str, Any], db: Session = Depends(get_session)):
     norm_name = normalize_char(data.get("name", ""))
     norm_domain = []
     for item in data.get("domain", []):
@@ -154,29 +156,82 @@ def create_attribute(data: Dict[str, Any], db: Session = Depends(get_session)):
         description=data.get("description"),
         is_filterable=data.get("is_filterable", True),
         value_structure=data.get("value_structure", []),
-        domain=norm_domain
+        domain=norm_domain,
+        is_system=data.get("is_system", False)
     )
     db.add(attr)
     db.commit()
     db.refresh(attr)
+
+    # Notificar cambio en tiempo real
+    await manager.broadcast({"type": "invalidate_cache", "resource": "attributes", "action": "create"})
+
     return attr
 
 @router.put("/attributes/{attr_id}")
-def update_attribute(attr_id: int, attr_data: Dict[str, Any], db: Session = Depends(get_session)):
+async def update_attribute(attr_id: int, attr_data: Dict[str, Any], db: Session = Depends(get_session)):
     db_attr = db.get(Characteristic, attr_id)
     if not db_attr:
         raise HTTPException(status_code=404, detail="Característica no encontrada")
     
-    # Normalizar nombre si viene
+    # 1. BLOQUEO: No se puede cambiar el nombre a una característica de sistema
+    if db_attr.is_system and "name" in attr_data:
+        norm_new_name = normalize_char(attr_data["name"])
+        if norm_new_name != db_attr.name:
+            raise HTTPException(status_code=403, detail="No se puede cambiar el nombre a una característica protegida por el sistema")
+    
+    # 2. BLOQUEO: No se puede eliminar una característica de sistema
+    # (Ya se maneja en el endpoint DELETE, pero aquí protegemos el flag is_system si se intentara falsear)
+    if db_attr.is_system and attr_data.get("is_system") is False:
+         raise HTTPException(status_code=403, detail="No se puede degradar una característica de sistema a usuario")
+
+    # Normalizar nombre si viene (y no es sistema o es el mismo)
     if "name" in attr_data:
         attr_data["name"] = normalize_char(attr_data["name"])
     
     # Normalizar dominio si viene
     if "domain" in attr_data:
+        new_domain = attr_data["domain"]
+        old_domain = db_attr.domain or []
+        
+        # A. VALIDAR INMUTABILIDAD DE vOS (Opciones del Sistema)
+        # Si la característica es de sistema, verificamos que no se hayan borrado o alterado las vOS existentes
+        if db_attr.is_system:
+            old_system_values = {opt["value"]: opt for opt in old_domain if opt.get("is_system")}
+            new_values_map = {opt["value"]: opt for opt in new_domain}
+            
+            for val, old_opt in old_system_values.items():
+                if val not in new_values_map:
+                    raise HTTPException(status_code=403, detail=f"La opción de sistema '{val}' es inmutable y no puede ser eliminada")
+                
+                # Opcional: Impedir cambio de hex_code en vOS si quisiéramos ser ultra-estrictos
+                # if old_opt.get("hex_code") != new_values_map[val].get("hex_code"):
+                #    raise HTTPException(status_code=403, detail=f"No se permite alterar el color base de la opción de sistema '{val}'")
+
+        # B. CHECK DE USO (Para vOS y vOU)
+        # Si se está intentando eliminar una opción (que no esté en el nuevo dominio), comprobamos si hay SKUs usándola
+        old_values = {opt["value"] for opt in old_domain}
+        new_values = {normalize_opt(opt.get("value", "")) for opt in new_domain}
+        removed_values = old_values - new_values
+        
+        if removed_values:
+            # Buscamos en SKUs si alguna configuración usa estos valores para ESTE atributo
+            # Nota: SKU.config es JSONB, buscamos la clave del atributo
+            for val in removed_values:
+                # Consulta para ver si existe algún SKU con este valor en la clave db_attr.name
+                statement = select(func.count(SKU.id)).where(SKU.config[db_attr.name].as_string() == val)
+                count = db.exec(statement).one()
+                if count > 0:
+                    raise HTTPException(
+                        status_code=400, 
+                        detail=f"No se puede eliminar '{val}': está vinculada a {count} variante(s). Desvincúlala primero."
+                    )
+
         norm_domain = []
-        for item in attr_data["domain"]:
+        for item in new_domain:
             new_item = {**item}
             if "value" in new_item: new_item["value"] = normalize_opt(new_item["value"])
+            # Asegurar que mantenemos el flag is_system si ya venía o si es nueva vOU
             norm_domain.append(new_item)
         attr_data["domain"] = norm_domain
 
@@ -187,16 +242,40 @@ def update_attribute(attr_id: int, attr_data: Dict[str, Any], db: Session = Depe
     db.add(db_attr)
     db.commit()
     db.refresh(db_attr)
+
+    # Notificar cambio en tiempo real
+    await manager.broadcast({
+        "type": "invalidate_cache",
+        "resource": "attributes",
+        "action": "update",
+        "id": attr_id
+    })
+    
     return db_attr
 
 @router.delete("/attributes/{attr_id}")
-def delete_attribute(attr_id: int, db: Session = Depends(get_session)):
+async def delete_attribute(attr_id: int, db: Session = Depends(get_session)):
     db_attr = db.get(Characteristic, attr_id)
     if not db_attr:
         raise HTTPException(status_code=404, detail="Característica no encontrada")
     
+    if db_attr.is_system:
+        raise HTTPException(status_code=403, detail="No se puede eliminar una característica maestra del sistema")
+    
+    # Check si tiene productos asociados antes de borrar
+    # (Opcional: aquí podríamos ser más estrictos si quisiéramos)
+    
     db.delete(db_attr)
     db.commit()
+
+    # Notificar cambio en tiempo real
+    await manager.broadcast({
+        "type": "invalidate_cache",
+        "resource": "attributes",
+        "action": "delete",
+        "id": attr_id
+    })
+
     return {"ok": True}
 
 @router.get("/attributes/{attr_id}")
@@ -209,12 +288,14 @@ def get_attribute(attr_id: int, db: Session = Depends(get_session)):
         "name": attr.name,
         "description": attr.description,
         "is_filterable": attr.is_filterable,
+        "is_system": attr.is_system,
+        "system_id": attr.system_id,
         "value_structure": attr.value_structure,
         "domain": attr.domain
     }
 
 @router.delete("/skus/{sku_id}")
-def delete_sku(sku_id: int, db: Session = Depends(get_session)):
+async def delete_sku(sku_id: int, db: Session = Depends(get_session)):
     sku = db.get(SKU, sku_id)
     if not sku:
         raise HTTPException(status_code=404, detail="Versión no encontrada")
@@ -225,6 +306,15 @@ def delete_sku(sku_id: int, db: Session = Depends(get_session)):
     # 2. Borrar SKU
     db.delete(sku)
     db.commit()
+
+    # Notificar cambio en tiempo real
+    await manager.broadcast({
+        "type": "invalidate_cache",
+        "resource": "products",
+        "action": "update_sku",
+        "sku": sku.sku
+    })
+
     return {"ok": True, "msg": "Versión eliminada permanentemente"}
 
 @router.get("/skus/{sku_id}")
@@ -247,7 +337,9 @@ def get_sku(sku_id: int, db: Session = Depends(get_session)):
         "price": sku.price,
         "config": sku.config,
         "stock": stock_total,
-        "image_urls": sku.image_urls
+        "image_urls": [m.url for m in sku.media_assets],
+        "media_ids": [m.id for m in sku.media_assets],
+        "media_assets": [{"id": m.id, "url": m.url} for m in sku.media_assets]
     }
 
 # --- ENDPOINTS DE ESPECIFICACIONES ---
@@ -511,7 +603,7 @@ def get_category(category_id: int, db: Session = Depends(get_session)):
     }
 
 @router.post("/categories")
-def create_category(category_data: CategoryUpdate, db: Session = Depends(get_session)):
+async def create_category(category_data: CategoryUpdate, db: Session = Depends(get_session)):
     new_cat = Category(
         name=category_data.name,
         slug="temp-slug-" + str(func.random()),
@@ -531,10 +623,19 @@ def create_category(category_data: CategoryUpdate, db: Session = Depends(get_ses
     
     db.commit()
     db.refresh(new_cat)
+
+    # Notificar cambio en tiempo real
+    await manager.broadcast({
+        "type": "invalidate_cache",
+        "resource": "categories",
+        "action": "create",
+        "slug": new_cat.slug
+    })
+
     return new_cat
 
 @router.put("/categories/{category_id}")
-def update_category(category_id: int, data: CategoryUpdate, db: Session = Depends(get_session)):
+async def update_category(category_id: int, data: CategoryUpdate, db: Session = Depends(get_session)):
     category = db.get(Category, category_id)
     if not category:
         raise HTTPException(status_code=404, detail="Categoría no encontrada")
@@ -576,6 +677,15 @@ def update_category(category_id: int, data: CategoryUpdate, db: Session = Depend
     db.add(category)
     db.commit()
     db.refresh(category)
+
+    # Notificar cambio en tiempo real
+    await manager.broadcast({
+        "type": "invalidate_cache",
+        "resource": "categories",
+        "action": "update",
+        "slug": category.slug
+    })
+
     return category
 
 @router.delete("/categories/{category_id}")
@@ -606,12 +716,13 @@ def delete_category(category_id: int, db: Session = Depends(get_session)):
 @router.get("/products")
 def list_products_admin(
     db: Session = Depends(get_session),
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
-    search: Optional[str] = Query(None),
-    category_id: Optional[int] = Query(None)
+    page: int = 1,
+    page_size: int = 999999,
+    search: Optional[str] = None,
+    category_id: Optional[int] = None
 ):
-    statement = select(Product).where(Product.is_deleted == False)
+    """Lista productos sin límites de paginación."""
+    statement = select(Product).where(Product.is_deleted == False).options(selectinload(Product.skus))
     
     if search:
         statement = statement.where(Product.name.ilike(f"%{search}%"))
@@ -623,25 +734,67 @@ def list_products_admin(
     total = db.exec(select(func.count()).select_from(statement.subquery())).one()
     
     offset = (page - 1) * page_size
+    # 1. Obtener productos de la página actual
     products = db.exec(statement.offset(offset).limit(page_size)).all()
+    product_ids = [p.id for p in products]
     
+    # 2. Carga masiva de stock y precios (Optimizado para evitar N+1 queries)
+    sku_to_product = {}
+    all_sku_ids = []
+    for p in products:
+        for s in p.skus:
+            sku_to_product[s.id] = p.id
+            all_sku_ids.append(s.id)
+            
+    stock_map = {}
+    price_ranges = {} # {product_id: [min, max]}
+    
+    # Pre-cargar precios desde los objetos SKU ya cargados por la relación
+    for p in products:
+        prices = [s.price for s in p.skus if s.price is not None]
+        if prices:
+            price_ranges[p.id] = [min(prices), max(prices)]
+        else:
+            price_ranges[p.id] = [0, 0]
+
+    if all_sku_ids:
+        stock_results = db.exec(
+            select(StockMovement.sku_id, func.sum(StockMovement.quantity))
+            .where(StockMovement.sku_id.in_(all_sku_ids))
+            .group_by(StockMovement.sku_id)
+        ).all()
+        for sid, qty in stock_results:
+            pid = sku_to_product[sid]
+            stock_map[pid] = stock_map.get(pid, 0) + (qty or 0)
+
+    # 3. Carga masiva de imágenes (Optimizado: 1 query para todas las imágenes principales/fallbacks)
+    image_map = {}
+    if product_ids:
+        # Obtenemos todos los links y URLs para estos productos
+        all_links = db.exec(
+            select(ProductMediaLink.product_id, ProductMediaLink.is_main, MediaAsset.url)
+            .join(MediaAsset, ProductMediaLink.media_asset_id == MediaAsset.id)
+            .where(ProductMediaLink.product_id.in_(product_ids))
+        ).all()
+        
+        # Procesamos para elegir la mejor imagen (is_main primero, luego cualquiera)
+        for pid, is_main, url in all_links:
+            if pid not in image_map or is_main:
+                image_map[pid] = url
+
+    # 4. Construir resultados
     results = []
     for p in products:
-        sku_ids = [s.id for s in p.skus]
-        stock_total = 0
-        if sku_ids:
-            stock_total = db.exec(
-                select(func.sum(StockMovement.quantity))
-                .where(StockMovement.sku_id.in_(sku_ids))
-            ).one() or 0
-            
         results.append({
             "id": p.id,
             "name": p.name,
             "slug": p.slug,
+            "image": image_map.get(p.id),
             "category": p.category.name if p.category else "Sin Categoría",
             "category_id": p.category_id,
-            "stock_total": stock_total
+            "price_min": price_ranges.get(p.id, [0,0])[0],
+            "price_max": price_ranges.get(p.id, [0,0])[1],
+            "stock_total": stock_map.get(p.id, 0)
         })
         
     return {
@@ -656,15 +809,17 @@ def list_products_admin(
 def list_skus_admin(
     request: Request,
     db: Session = Depends(get_session),
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
-    search: Optional[str] = Query(None),
-    category_id: Optional[int] = Query(None),
-    stock_status: Optional[str] = Query(None),
-    stock_threshold: int = Query(5)
+    page: int = 1,
+    page_size: int = 999999,
+    search: Optional[str] = None,
+    category_id: Optional[int] = None,
+    product_id: Optional[int] = None,
+    stock_status: Optional[str] = None,
+    stock_threshold: int = 5
 ):
+    """Lista SKUs sin límites de paginación."""
     # Join con Product para filtrar y obtener nombres
-    statement = select(SKU, Product.name, Product.category_id).join(Product, SKU.product_id == Product.id)
+    statement = select(SKU, Product.name, Product.category_id).join(Product, SKU.product_id == Product.id).options(selectinload(SKU.media_assets))
     statement = statement.where(Product.is_deleted == False)
     
     # 1. Búsqueda por texto (SKU o Nombre)
@@ -680,6 +835,10 @@ def list_skus_admin(
     if category_id:
         descendant_ids = get_descendant_ids(db, category_id)
         statement = statement.where(Product.category_id.in_(descendant_ids))
+
+    # 2b. Filtro por Producto (CRÍTICO PARA WORKSPACE)
+    if product_id:
+        statement = statement.where(SKU.product_id == product_id)
 
     # 3. Filtros Dinámicos por Atributos (attr_*)
     try:
@@ -717,9 +876,18 @@ def list_skus_admin(
     # Contar total
     total = db.exec(select(func.count()).select_from(statement.subquery())).one()
     
-    # Paginación
-    offset = (page - 1) * page_size
-    skus_data = db.exec(statement.offset(offset).limit(page_size)).all()
+    # Paginación INTELIGENTE: Si hay product_id (Workspace), traemos TODO sin límites.
+    if product_id:
+        # Aseguramos que no exista ningún límite residual en el statement
+        full_statement = statement.limit(None).offset(None)
+        skus_data = db.exec(full_statement).all()
+        print(f"\n--- DEBUG WORKSPACE ---")
+        print(f"Producto: {product_id}")
+        print(f"SKUs recuperados: {len(skus_data)}")
+        print(f"-----------------------\n")
+    else:
+        offset = (page - 1) * page_size
+        skus_data = db.exec(statement.offset(offset).limit(page_size)).all()
     
     results = []
     for sku_obj, product_name, p_cat_id in skus_data:
@@ -732,12 +900,15 @@ def list_skus_admin(
         results.append({
             "id": sku_obj.id,
             "sku": sku_obj.sku,
+            "barcode": sku_obj.barcode,
             "product_id": sku_obj.product_id,
             "product_name": product_name,
             "price": sku_obj.price,
             "config": sku_obj.config,
             "stock": stock_total,
-            "image_url": sku_obj.image_urls[0] if sku_obj.image_urls else None
+            "media_assets": [{"id": m.id, "url": m.url} for m in sku_obj.media_assets],
+            "media_ids": [m.id for m in sku_obj.media_assets],
+            "image_url": sku_obj.media_assets[0].url if sku_obj.media_assets else None
         })
         
     return {
@@ -762,8 +933,10 @@ def generate_variants(data: VariantGenRequest, db: Session = Depends(get_session
         norm_combo = {normalize_char(k): normalize_opt(v) for k, v in combo.items()}
         
         sku_code = inventory_core.generate_sku_id(category.name, data.product_name, norm_combo)
+        barcode_val = inventory_core.generate_barcode_eAN13(sku_code)
         results.append({
             "sku": sku_code,
+            "barcode": barcode_val,
             "config": norm_combo,
             "price": 0,
             "stock": 0
@@ -774,7 +947,7 @@ import traceback
 from datetime import datetime
 
 @router.post("/products")
-def create_product(data: ProductCreate, db: Session = Depends(get_session)):
+async def create_product(data: ProductCreate, db: Session = Depends(get_session)):
     try:
         # Enforce slug convention: pr-name_format
         final_slug = data.slug
@@ -796,8 +969,9 @@ def create_product(data: ProductCreate, db: Session = Depends(get_session)):
         for s_data in data.skus:
             barcode_val = s_data.barcode
             if not barcode_val:
-                barcode_val = s_data.sku
-                inventory_core.create_barcode_image(barcode_val, s_data.sku)
+                barcode_val = inventory_core.generate_barcode_eAN13(s_data.sku)
+                # Ya no creamos la imagen física aquí, el frontend lo renderiza
+
 
             # Normalizar config del SKU
             norm_config = {normalize_char(k): normalize_opt(v) for k, v in s_data.config.items()}
@@ -812,6 +986,10 @@ def create_product(data: ProductCreate, db: Session = Depends(get_session)):
             db.add(sku)
             db.flush() 
 
+            # Asignación relacional a SKUMediaLink
+            for media_id in s_data.media_ids:
+                db.add(SKUMediaLink(sku_id=sku.id, media_asset_id=media_id))
+
             # Crear movimiento inicial de stock (RECEIPT)
             if s_data.stock > 0:
                 movement = StockMovement(
@@ -822,16 +1000,29 @@ def create_product(data: ProductCreate, db: Session = Depends(get_session)):
                 )
                 db.add(movement)
 
+        # Garantizar que al menos una imagen sea principal si hay imágenes
+        if data.images and not any(i.is_main for i in data.images):
+            data.images[0].is_main = True
+
         for i_data in data.images:
-            img = ProductImage(
+            link = ProductMediaLink(
                 product_id=product.id,
-                url=i_data.url,
+                media_asset_id=i_data.media_asset_id,
                 is_main=i_data.is_main,
                 ui_config=i_data.ui_config
             )
-            db.add(img)
+            db.add(link)
 
         db.commit()
+
+        # Notificar cambio en tiempo real
+        await manager.broadcast({
+            "type": "invalidate_cache",
+            "resource": "products",
+            "action": "create",
+            "product_id": product.id
+        })
+
         return {"msg": "Producto creado con éxito", "id": product.id}
     except Exception as e:
         error_msg = traceback.format_exc()
@@ -847,6 +1038,19 @@ def get_product(product_id: int, db: Session = Depends(get_session)):
     if not product:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     
+    # Calcular agregados
+    prices = [s.price for s in product.skus if s.price is not None]
+    price_min = min(prices) if prices else 0
+    price_max = max(prices) if prices else 0
+
+    sku_ids = [s.id for s in product.skus]
+    stock_total = 0
+    if sku_ids:
+        stock_total = db.exec(
+            select(func.sum(StockMovement.quantity))
+            .where(StockMovement.sku_id.in_(sku_ids))
+        ).one() or 0
+
     return {
         "id": product.id,
         "name": product.name,
@@ -856,25 +1060,32 @@ def get_product(product_id: int, db: Session = Depends(get_session)):
         "category_name": product.category.name if product.category else "Sin categoría",
         "extras": product.extras,
         "specs": product.specs,
+        "price_min": price_min,
+        "price_max": price_max,
+        "stock_total": stock_total,
         "skus": [{
             "id": s.id,
             "sku": s.sku,
+            "barcode": s.barcode,
             "price": s.price,
             "stock": db.exec(
                 select(func.sum(StockMovement.quantity))
                 .where(StockMovement.sku_id == s.id)
             ).one() or 0,
             "config": s.config,
-            "image_urls": s.image_urls
+            "media_ids": [m.id for m in s.media_assets],
+            "media_assets": [{"id": m.id, "url": m.url} for m in s.media_assets]
         } for s in product.skus],
         "images": [{
-            "url": img.url,
-            "is_main": img.is_main
-        } for img in product.images]
+            "media_asset_id": link.media_asset_id,
+            "url": db.get(MediaAsset, link.media_asset_id).url if db.get(MediaAsset, link.media_asset_id) else "",
+            "is_main": link.is_main,
+            "ui_config": link.ui_config
+        } for link in db.exec(select(ProductMediaLink).where(ProductMediaLink.product_id == product.id)).all()]
     }
 
 @router.put("/products/{product_id}")
-def update_product(product_id: int, data: ProductCreate, db: Session = Depends(get_session)):
+async def update_product(product_id: int, data: ProductCreate, db: Session = Depends(get_session)):
     product = db.get(Product, product_id)
     if not product:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
@@ -919,22 +1130,27 @@ def update_product(product_id: int, data: ProductCreate, db: Session = Depends(g
                     # Actualizar existente
                     sku = existing_skus_by_code[s_data.sku]
                     sku.price = s_data.price
-                    sku.barcode = s_data.barcode or s_data.sku
+                    sku.barcode = s_data.barcode or (sku.barcode if sku.barcode else inventory_core.generate_barcode_eAN13(sku.sku))
                     sku.config = norm_config
-                    sku.image_urls = s_data.image_urls
                     db.add(sku)
+                    
+                    db.exec(delete(SKUMediaLink).where(SKUMediaLink.sku_id == sku.id))
+                    for media_id in s_data.media_ids:
+                        db.add(SKUMediaLink(sku_id=sku.id, media_asset_id=media_id))
                 else:
                     # Crear nuevo
                     sku = SKU(
                         product_id=product.id,
                         sku=s_data.sku,
-                        barcode=s_data.barcode or s_data.sku,
+                        barcode=s_data.barcode or inventory_core.generate_barcode_eAN13(s_data.sku),
                         price=s_data.price,
-                        config=norm_config,
-                        image_urls=s_data.image_urls
+                        config=norm_config
                     )
                     db.add(sku)
                     db.flush() # Disparar el check de unicidad preventivamente
+                    
+                    for media_id in s_data.media_ids:
+                        db.add(SKUMediaLink(sku_id=sku.id, media_asset_id=media_id))
                 
                 # Conciliación de stock (Optimizado usando el mapa local)
                 # Nota: sku.id ahora es seguro de usar gracias al flush()
@@ -987,20 +1203,30 @@ def update_product(product_id: int, data: ProductCreate, db: Session = Depends(g
             db.delete(sku_obj)
         
     # Update Images (Delete and recreate)
-    for img in product.images:
-        db.delete(img)
+    db.exec(delete(ProductMediaLink).where(ProductMediaLink.product_id == product.id))
+        
+    # Garantizar que al menos una imagen sea principal si hay imágenes
+    if data.images and not any(i.is_main for i in data.images):
+        data.images[0].is_main = True
         
     for i_data in data.images:
-        new_img = ProductImage(
+        new_link = ProductMediaLink(
             product_id=product.id,
-            url=i_data.url,
+            media_asset_id=i_data.media_asset_id,
             is_main=i_data.is_main,
-            ui_config=i_data.ui_config,
-            config_match=i_data.config_match
+            ui_config=i_data.ui_config
         )
-        db.add(new_img)
+        db.add(new_link)
     
     db.commit()
+
+    # Notificar cambio en tiempo real
+    await manager.broadcast({
+        "type": "invalidate_cache",
+        "resource": "products",
+        "action": "update",
+        "product_id": product_id
+    })
     
     response_data = {
         "msg": "Proceso completado" if not operation_errors else "Proceso completado con algunas omisiones",
@@ -1014,7 +1240,7 @@ def update_product(product_id: int, data: ProductCreate, db: Session = Depends(g
     return response_data
 
 @router.delete("/products/{product_id}")
-def delete_product(product_id: int, force: bool = False, db: Session = Depends(get_session)):
+async def delete_product(product_id: int, force: bool = False, db: Session = Depends(get_session)):
     product = db.get(Product, product_id)
     if not product:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
@@ -1026,19 +1252,27 @@ def delete_product(product_id: int, force: bool = False, db: Session = Depends(g
         # HARD DELETE: Limpieza profunda física
         from sqlmodel import delete
         
-        # 1. Borrar fotos
-        for img in product.images:
-            db.delete(img)
+        # 1. Borrar enlaces de fotos del producto (los MediaAssets se conservan en la galería)
+        db.exec(delete(ProductMediaLink).where(ProductMediaLink.product_id == product.id))
         
-        # 2. Borrar SKUs y sus movimientos
+        # 2. Borrar SKUs, sus movimientos y sus enlaces de medios
         for sku in product.skus:
-            # Borrar movimientos del SKU (Forma correcta en SQLModel)
             db.exec(delete(StockMovement).where(StockMovement.sku_id == sku.id))
+            db.exec(delete(SKUMediaLink).where(SKUMediaLink.sku_id == sku.id))
             db.delete(sku)
         
         # 3. Borrar producto base
         db.delete(product)
         db.commit()
+
+        # Notificar cambio en tiempo real
+        await manager.broadcast({
+            "type": "invalidate_cache",
+            "resource": "products",
+            "action": "delete",
+            "product_id": product_id
+        })
+
         return {"msg": "Producto y todos sus datos relacionados eliminados permanentemente (Hard Delete)"}
     else:
         # SOFT DELETE: Marcado lógico (Producción)
@@ -1046,6 +1280,110 @@ def delete_product(product_id: int, force: bool = False, db: Session = Depends(g
         db.add(product)
         db.commit()
         return {"msg": "Producto desactivado correctamente (Soft Delete)"}
+
+@router.post("/attributes/seed-system")
+def seed_system_attributes(db: Session = Depends(get_session)):
+    """
+    Inicializa o actualiza las características maestras del sistema (COLOR, TALLA)
+    con sus kits de opciones base (vOS) inmutables.
+    """
+    # 1. DEFINICIÓN DEL KIT DE COLORES (20 vOS)
+    system_colors = [
+        {"value": "Negro", "hex_code": "#1F1E1E", "order": 1, "is_system": True},
+        {"value": "Blanco", "hex_code": "#FFFFFF", "order": 2, "is_system": True},
+        {"value": "Beige", "hex_code": "#D1C9C1", "order": 3, "is_system": True},
+        {"value": "Azul Marino", "hex_code": "#231D54", "order": 4, "is_system": True},
+        {"value": "Sandia", "hex_code": "#D1511A", "order": 5, "is_system": True},
+        {"value": "Mostaza", "hex_code": "#D5B46C", "order": 6, "is_system": True},
+        {"value": "Uva", "hex_code": "#A809B3", "order": 7, "is_system": True},
+        {"value": "Lila", "hex_code": "#A997F2", "order": 8, "is_system": True},
+        {"value": "Verde Brasil", "hex_code": "#1DAF92", "order": 9, "is_system": True},
+        {"value": "Coral", "hex_code": "#EBA2AD", "order": 10, "is_system": True},
+        {"value": "Turquesa", "hex_code": "#73D1E8", "order": 11, "is_system": True},
+        {"value": "Azul Rey", "hex_code": "#3D5EE1", "order": 12, "is_system": True},
+        {"value": "Palo Rosa", "hex_code": "#E9BED1", "order": 13, "is_system": True},
+        {"value": "Rojo Italiano", "hex_code": "#B90909", "order": 14, "is_system": True},
+        {"value": "Verde Agua", "hex_code": "#73D7D9", "order": 15, "is_system": True},
+        {"value": "Gris", "hex_code": "#AABADA", "order": 16, "is_system": True},
+        {"value": "Burdeo", "hex_code": "#AA1354", "order": 17, "is_system": True},
+        {"value": "Chocolate", "hex_code": "#682222", "order": 18, "is_system": True},
+        {"value": "Menta", "hex_code": "#A2F1E8", "order": 19, "is_system": True},
+        {"value": "Morado", "hex_code": "#730891", "order": 20, "is_system": True},
+    ]
+
+    # 2. DEFINICIÓN DEL KIT DE TALLAS (13 vOS con orden específico)
+    # Orden: 12 (1) -> 14 (2) -> XS (3) -> S (4) ... -> 7XL (13)
+    system_sizes = [
+        {"value": "12", "order": 1, "is_system": True},
+        {"value": "14", "order": 2, "is_system": True},
+        {"value": "Xs", "order": 3, "is_system": True},
+        {"value": "S", "order": 4, "is_system": True},
+        {"value": "M", "order": 5, "is_system": True},
+        {"value": "L", "order": 6, "is_system": True},
+        {"value": "Xl", "order": 7, "is_system": True},
+        {"value": "2xl", "order": 8, "is_system": True},
+        {"value": "3xl", "order": 9, "is_system": True},
+        {"value": "4xl", "order": 10, "is_system": True},
+        {"value": "5xl", "order": 11, "is_system": True},
+        {"value": "6xl", "order": 12, "is_system": True},
+        {"value": "7xl", "order": 13, "is_system": True},
+    ]
+
+    results = []
+    
+    for attr_name, attr_domain, system_id in [
+        ("COLOR", system_colors, "sys_color"),
+        ("TALLA", system_sizes, "sys_size")
+    ]:
+        # Buscar característica existente
+        attr = db.exec(select(Characteristic).where(Characteristic.name == attr_name)).first()
+        
+        if not attr:
+            attr = Characteristic(
+                name=attr_name,
+                description=f"Característica maestra de {attr_name} (Sistema Vistiendomé)",
+                is_system=True,
+                system_id=system_id,
+                domain=attr_domain
+            )
+            db.add(attr)
+        else:
+            # Actualizar/Fusionar dominios
+            # Mantener las vOU (User Options) que el usuario ya haya creado, 
+            # pero eliminando duplicados si el sistema ahora provee una vOS con el mismo nombre.
+            current_domain = attr.domain or []
+            
+            # Nueva lógica Ultra-Deduplicada:
+            # 1. Crear un mapa de Valor Normalizado -> Objeto Opción para las vOS nuevas
+            vos_map = {normalize_opt(opt["value"]): opt for opt in attr_domain}
+            
+            # 2. Filtrar las opciones actuales
+            # Si una opción actual (sea vOS antigua o vOU) tiene el mismo nombre que una vOS nueva,
+            # LA DESCARTAMOS (será reemplazada por la vOS fresca del mapa).
+            # Solo conservamos vOU reales que NO colisionen por nombre.
+            preserved_vou = []
+            seen_values = set(vos_map.keys())
+            
+            for opt in current_domain:
+                val = normalize_opt(opt.get("value", ""))
+                if not val: continue
+                
+                # Solo conservamos si no es una vOS antigua (porque ya tenemos la fresca en vos_map)
+                # y si no colisiona con una vOS nueva por nombre
+                if val not in seen_values and not opt.get("is_system"):
+                    preserved_vou.append(opt)
+                    seen_values.add(val) # Evitar duplicados dentro de las propias vOU si existieran
+            
+            # 3. Resultado final: todas las vOS nuevas + las vOU preservadas
+            attr.domain = list(vos_map.values()) + preserved_vou
+            attr.is_system = True
+            attr.system_id = system_id
+            db.add(attr)
+            
+        results.append(attr_name)
+
+    db.commit()
+    return {"msg": "Kits base inyectados correctamente", "attributes": results}
 
 # --- ENDPOINTS DE COLORES (Color Swatch Registry) ---
 
@@ -1066,15 +1404,16 @@ def sync_colors_to_attribute(db: Session = Depends(get_session)):
     if not color_attr:
         # Si no existe, la creamos
         color_attr = Characteristic(
-            name="Color",
+            name="COLOR",
             description="Característica maestra del sistema para gestión cromática.",
             is_filterable=True,
-            value_structure="color",
+            is_system=True,
             domain=domain_list
         )
         db.add(color_attr)
     else:
-        # Si existe, actualizamos su dominio
+        # Si ya es de sistema, preferimos usar el nuevo endpoint de seed para una gestión más fina,
+        # pero aquí actualizamos el dominio si se solicita.
         color_attr.domain = domain_list
         db.add(color_attr)
     

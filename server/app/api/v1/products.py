@@ -1,8 +1,8 @@
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select, func
 from ...database import get_session
-from ...models.catalog import Product, Category, SKU, ProductImage, StockMovement, Characteristic, Specification
+from ...models.catalog import Product, Category, SKU, StockMovement, Characteristic, Specification
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -25,6 +25,7 @@ class ProductListSchema(BaseModel):
     price: float
     variants: List[VariantSummary] = []
     specs: Dict[str, str] = {}
+    extras: Dict[str, Any] = {}
 
 @router.get("/", response_model=List[ProductListSchema])
 def list_products(
@@ -69,7 +70,7 @@ def list_products(
         variant_summaries = []
         for s in p.skus:
             # Encontrar la primera imagen de este SKU o la principal del producto como fallback
-            v_img = s.image_urls[0] if s.image_urls else None
+            v_img = s.media_assets[0].url if s.media_assets else None
             variant_summaries.append(VariantSummary(
                 sku=s.sku,
                 config=s.config,
@@ -78,19 +79,40 @@ def list_products(
             ))
 
         # Encontrar imagen principal del producto
-        main_img = next((img.url for img in p.images if img.is_main), None)
-        if not main_img and p.images:
-            main_img = p.images[0].url
+        main_img = None
+        if p.media_assets:
+            main_img = p.media_assets[0].url
+        elif variant_summaries and variant_summaries[0].image:
+            main_img = variant_summaries[0].image
             
         # Encontrar el SKU que "posee" esta imagen principal para Deep Linking
         main_sku_code = None
         if main_img:
             # Buscamos el primer SKU que use esta imagen
             for s in p.skus:
-                if any(img_url == main_img for img_url in s.image_urls):
+                if any(m.url == main_img for m in s.media_assets):
                     main_sku_code = s.sku
                     break
             
+        # Construir mapa de MediaAsset ID -> SKU code para este producto
+        media_id_to_sku = {}
+        for s in p.skus:
+            for m in s.media_assets:
+                if m.id not in media_id_to_sku:
+                    media_id_to_sku[m.id] = s.sku
+
+        modified_extras = dict(p.extras) if p.extras else {}
+        if "preview_carousel" in modified_extras:
+            new_carousel = []
+            for item in modified_extras["preview_carousel"]:
+                media_id = item.get("id")
+                # Crear un nuevo dict para evitar mutar el original en memoria compartida
+                new_item = dict(item)
+                if media_id in media_id_to_sku:
+                    new_item["sku"] = media_id_to_sku[media_id]
+                new_carousel.append(new_item)
+            modified_extras["preview_carousel"] = new_carousel
+
         results.append(ProductListSchema(
             id=p.id,
             name=p.name,
@@ -102,7 +124,8 @@ def list_products(
             sku=main_sku_code,
             price=min_p,
             variants=variant_summaries,
-            specs=p.specs
+            specs=p.specs,
+            extras=modified_extras
         ))
     return results
 
@@ -156,8 +179,13 @@ def get_filters_metadata(db: Session = Depends(get_session)):
         # Buscar valores únicos en Product.specs o SKU.config
         # Por eficiencia, usaremos los 'domain' definidos si existen, 
         # o escanearemos valores si el usuario prefiere algo más dinámico.
-        # De momento, usamos el domain si tiene, si no, intentamos deducir.
-        values = [opt['value'] for opt in char.domain] if char.domain else []
+        values = []
+        if char.domain:
+            for opt in char.domain:
+                if isinstance(opt, dict) and 'value' in opt:
+                    values.append(opt['value'])
+                elif isinstance(opt, str):
+                    values.append(opt)
         
         # Opcionalmente: escanear productos para ver qué valores hay realmente
         # (Esto es más pesado pero más preciso)
@@ -218,13 +246,17 @@ def get_product_detail(
             "config": s.config, 
             "price": s.price, 
             "stock": stock,
-            "image_urls": s.image_urls
+            "image_urls": [m.url for m in s.media_assets]
         })
 
     # Encontrar imagen principal (portada)
-    main_img = next((img.url for img in product.images if img.is_main), None)
-    if not main_img and product.images:
-        main_img = product.images[0].url
+    main_img = product.media_assets[0].url if product.media_assets else None
+    if not main_img and product.skus:
+        # Fallback a la primera imagen de variante disponible si el producto no tiene globales
+        for s in product.skus:
+            if s.media_assets:
+                main_img = s.media_assets[0].url
+                break
 
     # Estructura optimizada para DetalleProducto.jsx
     return {
@@ -235,6 +267,6 @@ def get_product_detail(
         "specs": product.specs,
         "category": {"name": product.category.name, "slug": product.category.slug},
         "image": main_img,
-        "images": [{"url": i.url, "config_match": i.config_match, "is_main": i.is_main, "ui_config": i.ui_config} for i in product.images],
+        "images": [{"url": m.url, "config_match": {}, "is_main": (i==0), "ui_config": {}} for i, m in enumerate(product.media_assets)],
         "skus": skus_data
     }

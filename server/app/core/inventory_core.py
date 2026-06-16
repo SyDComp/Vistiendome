@@ -38,11 +38,35 @@ def generate_sku_id(category_name: str, product_name: str, options: dict) -> str
     if variant_suffix:
         sku += f"-{variant_suffix}"
     
-    return sku
+    # LIMPIEZA FINAL: Asegurar que no existan espacios en el código técnico
+    return sku.replace(" ", "_").strip("_")
 
-def generate_barcode_eAN13() -> str:
-    """Genera un número de 12 dígitos aleatorio para EAN13 (el 13 es checksum)"""
-    return "".join(random.choices(string.digits, k=12))
+def generate_barcode_eAN13(sku_text: str = "") -> str:
+    """Genera un EAN13 determinista basado en el SKU (hash de 32 bits)"""
+    if not sku_text:
+        return "".join(random.choices(string.digits, k=13))
+        
+    hash_val = 0
+    for char in sku_text:
+        hash_val = ((hash_val << 5) - hash_val) + ord(char)
+        hash_val = hash_val & 0xFFFFFFFF # Force 32-bit int
+        
+    # Python integers can be larger, but we simulate the JS 32-bit behavior
+    # Handle JS bitwise negative wrap-around
+    if hash_val > 0x7FFFFFFF:
+        hash_val -= 0x100000000
+        
+    hash_str = str(abs(hash_val)).zfill(12)
+    while len(hash_str) < 12:
+        hash_str += hash_str
+    hash_str = hash_str[:12]
+    
+    sum_val = 0
+    for i in range(12):
+        sum_val += int(hash_str[i]) * (1 if i % 2 == 0 else 3)
+        
+    checksum = (10 - (sum_val % 10)) % 10
+    return hash_str + str(checksum)
 
 def create_barcode_image(code: str, filename: str) -> str:
     """

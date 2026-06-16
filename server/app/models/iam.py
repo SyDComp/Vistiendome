@@ -1,6 +1,7 @@
 from datetime import datetime, date
 from decimal import Decimal
 from typing import Optional, List
+from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship
 
 try:
@@ -9,9 +10,10 @@ except ImportError:
     from pydantic import validator as field_validator
 
 import ulid
+from .geo import Comuna
 
 def generate_ulid() -> str:
-    return ulid.new().str
+    return str(ulid.ULID())
 
 # Funciones mock de cifrado (Vaulting Core Logic)
 def encrypt_data(plain_text: str) -> str:
@@ -26,6 +28,11 @@ def decrypt_data(cipher_text: str) -> str:
         return cipher_text
     return cipher_text.replace("vault:v1:", "")[::-1]
 
+class TipoPersona(str, Enum):
+    LEAD = "LEAD"
+    CLIENTE = "CLIENTE"
+    EMPLEADO = "EMPLEADO"
+
 class EstadoCuenta(SQLModel, table=True):
     __tablename__ = "estado_cuenta"
     id: str = Field(default_factory=generate_ulid, primary_key=True, max_length=26)
@@ -33,6 +40,20 @@ class EstadoCuenta(SQLModel, table=True):
     descripcion: Optional[str] = Field(default=None)
 
     cuentas: List["CuentaAcceso"] = Relationship(back_populates="estado")
+
+
+class Direccion(SQLModel, table=True):
+    __tablename__ = "direcciones"
+    id: str = Field(default_factory=generate_ulid, primary_key=True, max_length=26)
+    persona_id: str = Field(foreign_key="personas.id", index=True, max_length=26)
+    comuna_id: int = Field(foreign_key="comunas.id", index=True)
+    
+    calle_y_numero: str = Field(max_length=255)
+    referencia: Optional[str] = Field(default=None, max_length=255)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+    persona: "Persona" = Relationship(back_populates="direcciones")
+    comuna: Optional[Comuna] = Relationship(back_populates="direcciones")
 
 
 class Persona(SQLModel, table=True):
@@ -43,6 +64,7 @@ class Persona(SQLModel, table=True):
     apellidos: str = Field(max_length=100)
     email_personal: Optional[str] = Field(default=None, max_length=255)
     telefono: Optional[str] = Field(default=None, max_length=20)
+    tipo_persona: TipoPersona = Field(default=TipoPersona.LEAD)
     estado: str = Field(default="ACTIVO", max_length=50)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -51,6 +73,9 @@ class Persona(SQLModel, table=True):
     contratos: List["ContratosLegales"] = Relationship(back_populates="persona")
     datos_bancarios: Optional["DatosBancarios"] = Relationship(back_populates="persona", sa_relationship_kwargs={"uselist": False})
     perfil_cliente: Optional["PerfilCliente"] = Relationship(back_populates="persona", sa_relationship_kwargs={"uselist": False})
+    
+    cotizaciones: List["Cotizacion"] = Relationship(back_populates="persona")
+    direcciones: List["Direccion"] = Relationship(back_populates="persona")
 
     def anonimizar(self):
         """Ley 19.628: Anonimización irreversible PII (Identificadores de Información Personal)"""
