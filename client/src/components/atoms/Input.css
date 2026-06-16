@@ -1,0 +1,88 @@
+.input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    /* margin-bottom: 1.5rem; */
+}
+
+.input-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #121212;
+    margin-bottom: 0.2rem;
+}
+
+.input-required {
+    color: #dc3545;
+    margin-left: 4px;
+}
+
+.input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    /* Slightly sharper corners for gallery style */
+    transition: all 0.2s ease;
+}
+
+.input-container:hover {
+    border-color: #b0b0b0;
+}
+
+.input-container--focused {
+    border-color: #121212;
+    /* Minimal focus ring or just bold border */
+    box-shadow: 0 0 0 1px #121212;
+}
+
+.input-container--error {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 1px #dc3545;
+}
+
+.input-icon {
+    padding: 0 0.8rem;
+    color: #888;
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    pointer-events: none;
+    /* Prevent icon from blocking clicks */
+    z-index: 2;
+}
+
+.input-field {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 0.8rem;
+    font-size: 0.95rem;
+    color: #121212;
+    /* High contrast text */
+    font-family: inherit;
+    position: relative;
+    z-index: 1;
+    /* Ensure input is interactable */
+    width: 100%;
+}
+
+.input-field::placeholder {
+    color: #aaa;
+}
+
+.input-field:disabled {
+    background-color: #f5f5f5;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.input-error {
+    font-size: 0.8rem;
+    color: #dc3545;
+    margin-top: 0.3rem;
+    display: block;
+}

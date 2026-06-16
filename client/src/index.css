@@ -1,0 +1,126 @@
+:root {
+    /* Colors */
+    --color-primary: #3182ce;
+    --color-primary-dark: #2c5282;
+    --color-secondary: #718096;
+    --color-secondary-dark: #4a5568;
+    --color-accent: #d69e2e;
+
+    --color-text: #2d3748;
+    --color-text-light: #718096;
+    --color-background: #ffffff;
+    --color-surface: #f8fafc;
+    --color-surface-light: #edf2f7;
+
+    --color-success: #38a169;
+    --color-error: #e53e3e;
+    --color-warning: #dd6b20;
+    --color-info: #3182ce;
+
+    /* Typography */
+    --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+
+    /* Borders & Radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-full: 9999px;
+
+    /* Transitions */
+    --transition-base: 0.2s ease-in-out;
+    --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    font-family: var(--font-family);
+    background-color: var(--color-background);
+    color: var(--color-text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden; /* Prevent horizontal scroll from off-screen menus */
+}
+
+/* Modal Open State: Used as a marker for scroll-lock logic in JS */
+body.modal-open {
+    padding-right: var(--scrollbar-width, 0px);
+}
+
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color var(--transition-base);
+}
+
+a:hover {
+    color: var(--color-primary-dark);
+}
+
+button {
+    font-family: inherit;
+}
+
+ul,
+ol {
+    list-style: none;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* Global Image Shapes */
+.shape-square {
+    aspect-ratio: 1/1 !important;
+}
+
+.shape-wide {
+    aspect-ratio: 16/9 !important;
+}
+
+.shape-original {
+    /* Baseline for components with absolute children - using 1/1 as safe default for catalog */
+    aspect-ratio: 1/1;
+}
+
+/* Global Image Radius */
+.radius-rounded {
+    border-radius: 24px !important;
+}
+
+.radius-circle {
+    border-radius: 50% !important;
+}
+
+.radius-none {
+    border-radius: 0 !important;
+}

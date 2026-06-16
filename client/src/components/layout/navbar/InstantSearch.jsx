@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, Loader2 } from 'lucide-react';
-import { getProducts, getImageUrl } from '../../../services/api';
+import { getProducts, getImageUrl } from '../../../lib/api/endpoints';
 
 const InstantSearch = ({ isMobile = false, onResultClick }) => {
     const navigate = useNavigate();
@@ -107,7 +107,7 @@ const InstantSearch = ({ isMobile = false, onResultClick }) => {
         setIsOpen(false);
         if (onResultClick) onResultClick();
         // Navegación profunda con SKU si existe
-        navigate(`/producto/${result.slug}${result.sku ? `/${result.sku}` : ''}`);
+        navigate(`/catalogo/producto/${result.slug}${result.sku ? `/${result.sku}` : ''}`);
     };
 
     const handleSearchSubmit = (e) => {
@@ -115,7 +115,7 @@ const InstantSearch = ({ isMobile = false, onResultClick }) => {
         if (query.trim()) {
             setIsOpen(false);
             if (onResultClick) onResultClick();
-            navigate(`/catalogo?q=${encodeURIComponent(query)}`);
+            navigate(`/search?q=${encodeURIComponent(query)}`);
         }
     };
 

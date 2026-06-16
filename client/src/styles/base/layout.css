@@ -1,0 +1,38 @@
+/* ============================================================
+   LAYOUT UTILITIES
+   ============================================================ */
+
+/* Container */
+.container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+/* Compensación por Navbar Fixed */
+body.has-fixed-navbar {
+  padding-top: var(--navbar-height);
+}
+
+/* Scroll lock (usado por modales) */
+html.no-scroll {
+  overflow: hidden !important;
+  scrollbar-gutter: auto !important;
+}
+
+body.no-scroll {
+  overflow: hidden !important;
+  height: 100dvh !important;
+  width: 100dvw !important;
+  position: fixed !important;
+}
+
+/* Responsive utilities */
+html, body { min-height: 100vh; min-height: 100dvh; }
+.h-screen-dynamic { height: 100vh; height: 100dvh; }
+.w-screen-dynamic { width: 100vw; width: 100dvw; }
+.min-h-screen-dynamic { min-height: 100vh; min-height: 100dvh; }
+.overflow-y-auto { overflow-y: auto; height: 100%; }
+
+/* Rotaciones */
+.rotated-180 { transform: rotate(180deg); }

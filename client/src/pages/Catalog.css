@@ -1,0 +1,334 @@
+.catalog-page {
+    background-color: #fff;
+    min-height: 100vh;
+}
+
+/* Layout Grid */
+.catalog-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    /* Slightly wider sidebar */
+    gap: 3rem;
+    padding: 0 var(--spacing-container);
+    max-width: 1600px;
+    margin: 0 auto;
+    margin-top: 4rem;
+    padding-bottom: 4rem;
+}
+
+/* Filters Sidebar */
+.catalog-filters {
+    border-right: 1px solid #f0f0f0;
+    padding-right: 2rem;
+}
+
+.filters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.catalog-filters h3 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 700;
+    margin: 0;
+    color: #999;
+}
+
+.filters-toggle {
+    display: none;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: var(--color-text-primary);
+    transition: all 0.2s ease;
+    align-items: center;
+    justify-content: center;
+}
+
+.filters-toggle:hover {
+    background: #f0f0f0;
+}
+
+.catalog-filters ul {
+    list-style: none;
+}
+
+.catalog-filters li {
+    font-size: 0.9rem;
+    color: #888;
+    padding: 0.6rem 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid transparent;
+    display: block;
+    width: fit-content;
+}
+
+.catalog-filters li:hover {
+    color: var(--color-text-primary);
+    padding-left: 0.25rem;
+}
+
+.catalog-filters li.active {
+    color: var(--color-text-primary);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.catalog-filters li.active::after {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: var(--color-text-primary);
+    margin-top: 2px;
+}
+
+/* Product Grid */
+.products-grid,
+.mock-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 3rem 2rem;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.loading-state {
+    text-align: center;
+    padding: 4rem;
+    color: #999;
+}
+
+.empty-state {
+    width: 100%;
+}
+
+/* Product Grid Area */
+.product-grid-container {
+    width: 100%;
+}
+
+.catalog-search-container {
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    padding-right: 2.5rem;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    /* Matches sidebar aesthetic better than round pills */
+    font-size: 0.85rem;
+    background: #f9f9f9;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.search-input:focus {
+    outline: none;
+    background: #fff;
+    border-color: var(--color-text-primary);
+}
+
+.search-clear {
+    position: absolute;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 0.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-clear:hover {
+    color: var(--color-text-primary);
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+
+/* Tablet & Small Desktop (768px - 968px) */
+@media (max-width: 1024px) {
+    .catalog-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.5rem;
+        text-align: center;
+    }
+
+    .catalog-search-container {
+        max-width: 100%;
+    }
+
+    .catalog-layout {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    /* Show toggle button on mobile */
+    .filters-toggle {
+        display: flex;
+    }
+
+    .catalog-filters {
+        margin-bottom: 1rem;
+        border: 1px solid #f0f0f0;
+        padding: 1rem;
+        background: #fafafa;
+    }
+
+    .filters-header {
+        margin-bottom: 0;
+    }
+
+    /* Accordion behavior */
+    .catalog-filters ul {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        margin-top: 0;
+    }
+
+    .catalog-filters ul.expanded {
+        max-height: 500px;
+        margin-top: 1rem;
+    }
+
+    .catalog-filters li {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e8e8e8;
+        font-size: 0.9rem;
+    }
+
+    .catalog-filters li:last-child {
+        border-bottom: none;
+    }
+
+    .products-grid,
+    .mock-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 2.5rem 1.5rem;
+    }
+}
+
+/* Mobile (481px - 768px) */
+@media (max-width: 768px) {
+    .catalog-page {
+        padding-top: 60px;
+    }
+
+    .catalog-header {
+        padding: 2rem 1rem;
+    }
+
+    .catalog-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .catalog-header p {
+        font-size: 0.75rem;
+        letter-spacing: 1.5px;
+    }
+
+    .catalog-layout {
+        padding: 0 1rem;
+        padding-bottom: 2rem;
+    }
+
+    .catalog-filters h3 {
+        font-size: 0.8rem;
+    }
+
+    .products-grid,
+    .mock-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem 0.8rem;
+    }
+
+    .catalog-footer-nav {
+        padding: 2rem 1rem;
+        margin-top: 2rem;
+    }
+
+    .back-link {
+        font-size: 0.8rem;
+    }
+}
+
+/* Small Mobile (320px - 480px) */
+@media (max-width: 480px) {
+    .catalog-page {
+        padding-top: 56px;
+    }
+
+    .catalog-header {
+        padding: 2rem 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .catalog-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .catalog-header p {
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+    }
+
+    .catalog-layout {
+        gap: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .catalog-filters {
+        padding: 0.75rem;
+    }
+
+    .catalog-filters h3 {
+        font-size: 0.75rem;
+    }
+
+    .catalog-filters li {
+        font-size: 0.85rem;
+        padding: 0.6rem 0;
+    }
+
+    .products-grid,
+    .mock-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+
+    .loading-state {
+        padding: 2rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .catalog-footer-nav {
+        padding: 1.5rem 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .back-link {
+        font-size: 0.75rem;
+    }
+}

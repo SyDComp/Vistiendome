@@ -1,0 +1,28 @@
+@import url('./global/global_modules.css');
+@import url('./global/heartbeat.css');
+@import url('./global/notification_system.css');
+@import url('./home/home_modules.css');
+@import url('./catalogo/catalogo_modules.css');
+@import url('./detalles/detalles_modules.css');
+@import url('./vistas/vistas_modules.css');
+@import url('./auth/auth_modules.css');
+
+/* Admin modules (divididos por dominio) */
+@import url('./admin/admin-login.css');
+@import url('./admin/dashboard-layout.css');
+@import url('./admin/inventory-module-badges.css');
+@import url('./admin/category-manager.css');
+@import url('./admin/product-form.css');
+@import url('./admin/logistics-manager.css');
+@import url('./admin/batch-variant-editor.css');
+@import url('./admin/library-picker-component.css');
+@import url('./admin/variant-picker.css');
+@import url('./admin/barcode-printer.css');
+@import url('./admin/characteristic-manager.css');
+@import url('./admin/characteristic-form.css');
+@import url('./admin/collection-manager.css');
+@import url('./admin/color-manager.css');
+@import url('./admin/specification-manager.css');
+@import url('./admin/variant-matrix.css');
+@import url('./admin/workspace-module.css');
+@import url('./admin/cms_studio.css');

@@ -1,0 +1,285 @@
+.store-config {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.config-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    font-size: 1.1rem;
+    color: #777777;
+}
+
+/* Header */
+.config-header {
+    margin-bottom: 3rem;
+}
+
+.config-header h1 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    color: #121212;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+}
+
+.config-subtitle {
+    font-size: 0.95rem;
+    color: #777777;
+}
+
+/* Sections */
+.config-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.config-section {
+    background: white;
+    border: 1px solid #e2e2e2;
+    border-radius: 0;
+    transition: all 0.3s ease;
+}
+
+.config-section.expanded {
+    border-color: #121212;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.section-header {
+    padding: 1.5rem 2rem;
+    background: #f9f9f9;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.section-header:hover {
+    background: #f0f0f0;
+}
+
+.config-section.expanded .section-header {
+    background: #121212;
+    color: white;
+}
+
+.section-header h2 {
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: #121212;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.config-section.expanded .section-header h2 {
+    color: white;
+}
+
+.section-icon {
+    font-size: 1.5rem;
+}
+
+.accordion-toggle {
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: #555555;
+    transition: all 0.3s ease;
+    line-height: 1;
+}
+
+.config-section.expanded .accordion-toggle {
+    color: white;
+    transform: rotate(180deg);
+}
+
+.section-body {
+    padding: 2rem;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Form Fields */
+.config-field {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.config-field label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #121212;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+.config-field label .required {
+    color: #e53935;
+    margin-left: 0.3rem;
+}
+
+.config-field input,
+.config-field select,
+.config-field textarea {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid #e2e2e2;
+    border-radius: 0;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.config-field input:focus,
+.config-field select:focus,
+.config-field textarea:focus {
+    outline: none;
+    border-color: #121212;
+    box-shadow: 0 0 0 2px rgba(18, 18, 18, 0.1);
+}
+
+.config-field textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+}
+
+.config-field select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.2rem;
+    padding-right: 3rem;
+}
+
+/* Section Actions */
+.section-actions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e2e2;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.section-actions button {
+    min-width: 180px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .store-config {
+        padding: 1.5rem 1rem;
+    }
+
+    .config-header h1 {
+        margin-top: 2rem;
+        font-size: 2rem;
+    }
+
+    .section-header {
+        padding: 1.2rem;
+    }
+
+    .section-body {
+        padding: 0.2rem;
+    }
+
+    .section-header h2 {
+        font-size: 0.85rem;
+    }
+
+    .section-icon {
+        font-size: 1.2rem;
+    }
+
+    .section-actions {
+        flex-direction: column;
+    }
+
+    .section-actions button {
+        width: 100%;
+        min-height: 48px;
+    }
+
+    .config-field input,
+    .config-field select,
+    .config-field textarea {
+        font-size: 16px;
+        /* Prevents zoom on iOS */
+    }
+}
+
+/* Print styles - hide action buttons */
+@media print {
+
+    .section-actions,
+    .config-message {
+        display: none;
+    }
+
+    .config-section {
+        page-break-inside: avoid;
+    }
+}
+
+.shape-selector {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.contenidoCustom {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+@media (max-width: 1010px) {
+    .contenidoCustom {
+        display: flex;
+        align-items: self-start;
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+.add-section-wrapper {
+    text-align: center;
+}

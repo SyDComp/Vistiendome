@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
  * DataTable — Componente de tabla genérica y reutilizable.
  * Optimizado para ser responsivo con scroll horizontal controlado.
  */
-const DataTable = ({ columns = [], data = [], rowActions, isLoading, emptyMessage = 'No hay datos.' }) => {
+const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {}, emptyMessage = 'No hay datos.' }) => {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
 
     useEffect(() => {
@@ -108,7 +108,7 @@ const DataTable = ({ columns = [], data = [], rowActions, isLoading, emptyMessag
                                             textAlign: col.align || 'left',
                                             verticalAlign: 'middle'
                                         }}>
-                                            {col.render ? col.render(row[col.key], row) : row[col.key]}
+                                            {col.render ? col.render(row[col.key], row, context) : row[col.key]}
                                         </td>
                                     ))}
                                     {rowActions && (

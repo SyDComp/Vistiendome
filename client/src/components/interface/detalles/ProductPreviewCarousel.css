@@ -1,0 +1,161 @@
+.product-carousel-system {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .product-carousel-system { gap: 8px; }
+}
+
+.main-display-area {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    aspect-ratio: 3/4;
+    min-height: 300px; /* Garantiza visibilidad en cualquier reflow */
+    border-radius: 20px;
+    overflow: hidden;
+    background: #f1f5f9; /* Color base más suave */
+    cursor: zoom-in;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,0.04);
+}
+
+@media (max-width: 768px) {
+    .main-display-area {
+        aspect-ratio: 1/1; /* Más compacto en móviles para no necesitar scroll */
+        min-height: auto; 
+    }
+}
+
+@media (min-width: 1024px) {
+    .main-display-area {
+        max-width: 100%;
+        border-radius: 24px;
+    }
+}
+
+.main-large-image {
+    background: transparent;
+    transition: opacity 0.3s ease;
+}
+
+.main-blur-bg {
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 120%;
+    height: 120%;
+    object-fit: cover;
+    filter: blur(25px) brightness(0.8);
+    opacity: 0.6;
+    z-index: 1;
+}
+
+.glass-magnifier {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    color: #1e1b4b;
+    padding: 12px;
+    border-radius: 18px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.5);
+}
+
+.main-display-area:hover .glass-magnifier { opacity: 1; transform: translateY(0); }
+
+.carousel-controls-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-width: 0; /* CRÍTICO: Permite que el contenedor flex se encoja */
+}
+
+.thumbnails-scroll-container {
+    flex: 1;
+    min-width: 0; /* CRÍTICO: Previene que el scroll estire al padre */
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scroll-behavior: smooth;
+    padding: 4px 0 10px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #d1a3d4 transparent;
+    touch-action: pan-x; /* Optimización para swipe fluido en móviles */
+}
+
+.thumbnails-scroll-container::-webkit-scrollbar { height: 6px !important; }
+.thumbnails-scroll-container::-webkit-scrollbar-thumb { background: #d1a3d4 !important; border-radius: 10px !important; }
+.thumbnails-scroll-container::-webkit-scrollbar-thumb:hover { background: #c592c8 !important; }
+.thumbnails-scroll-container::-webkit-scrollbar-track { background: transparent !important; }
+
+.thumbnails-track {
+    display: inline-flex;
+    gap: 12px;
+    min-width: min-content;
+}
+
+.carousel-thumb-item {
+    width: 70px;
+    height: 70px;
+    flex: 0 0 70px;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #f1f5f9;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+}
+
+.carousel-thumb-item img { width: 100%; height: 100%; object-fit: contain; }
+.carousel-thumb-item.active { border-color: #8f0653; transform: scale(1.05); }
+
+/* Eliminada la opacidad para que los colores no se laven ni se vean grises */
+.carousel-thumb-item.secondary-pack { opacity: 1; }
+
+.scroll-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid #f1f5f9;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #475569;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    flex-shrink: 0;
+    touch-action: manipulation;
+}
+
+.carousel-fade-edge {
+    position: absolute;
+    right: 40px;
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.8));
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .scroll-btn, .carousel-fade-edge { display: none; }
+    .carousel-thumb-item { width: 64px; height: 64px; flex-basis: 64px; }
+    .main-display-area { border-radius: 16px; }
+}

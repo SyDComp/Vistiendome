@@ -8,27 +8,19 @@ import Button from '../../../ui/Button';
 import { useNotification } from '../../../../context/NotificationContext';
 import LibraryPicker from './LibraryPicker';
 import DetailDrawer from '../../../ui/admin/DetailDrawer';
-import { X, Layers, Plus } from 'lucide-react';
+import { X, Layers, Plus, Shield } from 'lucide-react';
 
-const API_BASE = 'http://localhost:8000/api/v1/admin/catalog';
+const API_BASE = `${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/admin/catalog`;
 const PAGE_SIZE = 20;
 
 // Badge de categoría padre
 const ParentCategoryBadge = ({ name }) => (
     name ? (
-        <span style={{
-            padding: '3px 10px',
-            background: '#f8fafc',
-            color: '#64748b',
-            borderRadius: '20px',
-            fontSize: '12px',
-            fontWeight: '600',
-            border: '1px solid #e2e8f0'
-        }}>
+        <span className="category-parent-badge">
             {name}
         </span>
     ) : (
-        <span style={{ color: '#cbd5e1', fontSize: '12px', fontStyle: 'italic' }}>— Raíz —</span>
+        <span className="category-root-text">— Raíz —</span>
     )
 );
 
@@ -46,7 +38,7 @@ const CategoryForm = ({ editingCategory, categories, onSubmit, onCancel }) => {
     const [detailData, setDetailData] = useState(null);
 
     useEffect(() => {
-        fetch('http://localhost:8000/api/v1/admin/catalog/specifications')
+        fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/admin/catalog/specifications`)
             .then(r => r.json())
             .then(data => setSpecifications(data || []))
             .catch(console.error);
@@ -74,37 +66,29 @@ const CategoryForm = ({ editingCategory, categories, onSubmit, onCancel }) => {
         }));
     };
 
-    const inputStyle = {
-        width: '100%', padding: '10px 14px', borderRadius: '10px',
-        border: '1px solid #e2e8f0', fontSize: '14px', color: '#1e293b',
-        outline: 'none', transition: 'border-color 0.2s', backgroundColor: '#fff', boxSizing: 'border-box'
-    };
-    const labelStyle = { display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' };
+    // Ya no necesitamos inputStyle ni labelStyle pues usaremos las clases
 
     return (
-        <div style={{
-            backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px',
-            padding: '24px', marginBottom: '20px', animation: 'fadeIn 0.2s ease'
-        }}>
-            <h3 style={{ margin: '0 0 20px', color: '#1e1b4b', fontSize: '16px', fontWeight: '700' }}>
+        <div className="category-form-wrapper">
+            <h3 className="category-form-title">
                 {editingCategory ? `Editando: ${editingCategory.name}` : 'Nueva Categoría'}
             </h3>
             <form onSubmit={(e) => { e.preventDefault(); onSubmit(formData); }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'start', marginBottom: '20px' }}>
+                <div className="category-form-grid">
                     <div>
-                        <label style={labelStyle}>Nombre</label>
+                        <label className="category-form-label">Nombre</label>
                         <input
                             type="text" name="name" value={formData.name}
-                            onChange={handleChange} required style={inputStyle}
+                            onChange={handleChange} required className="category-form-input"
                             placeholder="Ej: Vestidos de Noche"
                         />
                     </div>
                     <div>
-                        <label style={labelStyle}>Categoría Padre</label>
+                        <label className="category-form-label">Categoría Padre</label>
                         <select
                             name="parent_id" value={formData.parent_id}
                             onChange={handleChange}
-                            style={{ ...inputStyle, appearance: 'none', cursor: 'pointer' }}
+                            className="category-form-input"
                         >
                             <option value="">— Sin padre (Raíz) —</option>
                             {categories
@@ -115,7 +99,7 @@ const CategoryForm = ({ editingCategory, categories, onSubmit, onCancel }) => {
                     </div>
                 </div>
 
-                <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', background: '#fff', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <div className="category-form-checkbox-wrapper">
                     <input 
                         type="checkbox" 
                         id="is_filterable"
@@ -124,38 +108,36 @@ const CategoryForm = ({ editingCategory, categories, onSubmit, onCancel }) => {
                         onChange={(e) => setFormData(p => ({ ...p, is_filterable: e.target.checked }))}
                         style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                     />
-                    <label htmlFor="is_filterable" style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', cursor: 'pointer' }}>
+                    <label htmlFor="is_filterable" className="category-form-checkbox-label">
                         Mostrar como filtro en el catálogo público
                     </label>
                 </div>
 
                 <div style={{ marginBottom: '24px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <label style={labelStyle}>Especificaciones Sugeridas</label>
-                        <span style={{ fontSize: '11px', fontWeight: '700', color: '#8f0653' }}>{formData.suggested_specification_ids.length} ACTIVAS</span>
+                    <div className="category-spec-header">
+                        <label className="category-form-label" style={{ marginBottom: 0 }}>Especificaciones Sugeridas</label>
+                        <span className="category-spec-count">{formData.suggested_specification_ids.length} ACTIVAS</span>
                     </div>
                     
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                    <div className="category-spec-list">
                         {specifications.filter(s => formData.suggested_specification_ids.includes(s.id)).map(spec => (
-                            <div key={spec.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#f8fafc', color: '#64748b', padding: '6px 12px', borderRadius: '10px', fontSize: '12px', fontWeight: '700', border: '1px solid #e2e8f0' }}>
+                            <div key={spec.id} className="category-spec-tag">
                                 <Layers size={12} />
                                 {spec.name}
-                                <button onClick={() => removeSpec(spec.id)} style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex' }}>
+                                <button type="button" onClick={() => removeSpec(spec.id)} className="category-spec-remove-btn">
                                     <X size={14} />
                                 </button>
                             </div>
                         ))}
                         {formData.suggested_specification_ids.length === 0 && (
-                            <p style={{ fontSize: '13px', color: '#94a3b8', fontStyle: 'italic', margin: 0 }}>No se han asignado especificaciones automáticas.</p>
+                            <p className="category-spec-empty">No se han asignado especificaciones automáticas.</p>
                         )}
                     </div>
 
                     <button 
                         type="button" 
                         onClick={() => setShowLibrary(true)}
-                        style={{ width: '100%', padding: '14px', borderRadius: '14px', border: '2px dashed #e2e8f0', color: '#64748b', background: '#fff', fontWeight: '800', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}
-                        onMouseEnter={e => e.currentTarget.style.borderColor = '#8f0653'}
-                        onMouseLeave={e => e.currentTarget.style.borderColor = '#e2e8f0'}
+                        className="category-lib-btn"
                     >
                         <Plus size={16} /> Abrir Biblioteca de Especificaciones
                     </button>
@@ -174,7 +156,7 @@ const CategoryForm = ({ editingCategory, categories, onSubmit, onCancel }) => {
                     />
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                <div className="category-form-actions">
                     <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
                     <Button type="submit" variant="primary">
                         {editingCategory ? 'Guardar Cambios' : 'Crear Categoría'}
@@ -192,10 +174,19 @@ const CATEGORY_COLUMNS = [
         render: (v, row) => {
             const isSystem = row.is_joker || row.slug === 'sin_categoria';
             return (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontWeight: '700', color: isSystem ? '#94a3b8' : '#1e1b4b' }}>
+                <div className="cat-table-name-wrapper">
+                    {isSystem ? (
+                        <div 
+                            title="Esta categoría es del núcleo del sistema y está protegida."
+                            className="cat-table-shield"
+                        >
+                            <Shield size={14} />
+                        </div>
+                    ) : (
+                        <div className="cat-table-dot"></div>
+                    )}
+                    <span className={`cat-table-name ${isSystem ? 'system' : 'normal'}`}>
                         {v}
-                        {isSystem && <span style={{ marginLeft: '8px', fontSize: '10px', background: '#e2e8f0', color: '#64748b', padding: '2px 6px', borderRadius: '4px', fontWeight: '600' }}>SISTEMA</span>}
                     </span>
                 </div>
             );
@@ -210,31 +201,12 @@ const CATEGORY_COLUMNS = [
             const isSystem = row.is_joker || row.slug === 'sin_categoria';
             if (isSystem) return <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '700' }}>—</span>;
             
-            // Configuración por nivel
-            const config = {
-                1: { label: 'Niv. 1', bg: '#fdf2f8', border: '#fbcfe8', color: '#8f0653' },
-                2: { label: 'Niv. 2', bg: '#eff6ff', border: '#dbeafe', color: '#1e40af' },
-                3: { label: 'Niv. 3', bg: '#f0fdf4', border: '#dcfce7', color: '#166534' }
-            };
-            
-            const c = config[v] || { label: `Niv. ${v}`, bg: '#f8fafc', border: '#e2e8f0', color: '#64748b' };
+            const levelClass = v === 1 ? 'l1' : v === 2 ? 'l2' : v === 3 ? 'l3' : 'other';
+            const label = `Niv. ${v}`.toUpperCase();
             
             return (
-                <div style={{ 
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '4px 8px', 
-                    background: c.bg,
-                    color: c.color,
-                    borderRadius: '6px', 
-                    fontSize: '10px', 
-                    fontWeight: '800',
-                    border: `1px solid ${c.border}`,
-                    whiteSpace: 'nowrap',
-                    lineHeight: '1'
-                }}>
-                    {c.label.toUpperCase()}
+                <div className={`cat-table-level-badge ${levelClass}`}>
+                    {label}
                 </div>
             );
         }
@@ -251,14 +223,14 @@ const CATEGORY_COLUMNS = [
     { 
         key: 'slug', 
         label: 'Slug / URL', 
-        render: (v) => <code style={{ fontSize: '12px', color: '#64748b', backgroundColor: '#f1f5f9', padding: '2px 8px', borderRadius: '6px' }}>{v}</code> 
+        render: (v) => <code className="cat-table-slug">{v}</code> 
     },
     { 
         key: 'product_count', 
         label: 'Productos', 
         width: '120px', 
         align: 'center',
-        render: (v) => <span style={{ fontWeight: '700', color: v > 0 ? '#059669' : '#94a3b8', fontSize: '14px' }}>{v > 0 ? v : '—'}</span>
+        render: (v) => <span className={`cat-table-count ${v > 0 ? 'positive' : 'zero'}`}>{v > 0 ? v : '—'}</span>
     },
     {
         key: 'is_filterable',
@@ -266,15 +238,7 @@ const CATEGORY_COLUMNS = [
         width: '100px',
         align: 'center',
         render: (v) => (
-            <span style={{ 
-                padding: '4px 8px', 
-                borderRadius: '6px', 
-                fontSize: '10px', 
-                fontWeight: '800',
-                background: v ? '#f0fdf4' : '#fef2f2',
-                color: v ? '#166534' : '#991b1b',
-                border: `1px solid ${v ? '#dcfce7' : '#fee2e2'}`
-            }}>
+            <span className={`cat-table-filter-badge ${v ? 'active' : 'inactive'}`}>
                 {v ? 'SÍ' : 'NO'}
             </span>
         )
@@ -286,8 +250,8 @@ const CategoryManager = () => {
     const [categories, setCategories] = useState([]);
     const [allCategoriesForFilter, setAllCategoriesForFilter] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [showForm, setShowForm] = useState(false);
-    const [editingCategory, setEditingCategory] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     
     // Paginación y búsqueda
     const [page, setPage] = useState(1);
@@ -295,8 +259,6 @@ const CategoryManager = () => {
     const [totalItems, setTotalItems] = useState(0);
     const [search, setSearch] = useState('');
     const [activeFilters, setActiveFilters] = useState({});
-    const [showDetail, setShowDetail] = useState(false);
-    const [detailData, setDetailData] = useState(null);
 
     const fetchCategories = useCallback(async () => {
         setLoading(true);
@@ -319,7 +281,6 @@ const CategoryManager = () => {
 
     const fetchAllForFilter = useCallback(async () => {
         try {
-            // Aumentamos a 500 para asegurar que carguen todos
             const res = await fetch(`${API_BASE}/categories?page_size=500`);
             const data = await res.json();
             setAllCategoriesForFilter(data.items || []);
@@ -331,38 +292,49 @@ const CategoryManager = () => {
     useEffect(() => { fetchCategories(); }, [fetchCategories]);
     useEffect(() => { fetchAllForFilter(); }, [fetchAllForFilter]);
 
-    const handleSubmit = async (formData) => {
-        const url = editingCategory
-            ? `${API_BASE}/categories/${editingCategory.id}`
+    const handleUpdate = async (formData) => {
+        const isEditing = formData.id;
+        const url = isEditing
+            ? `${API_BASE}/categories/${formData.id}`
             : `${API_BASE}/categories`;
 
         const body = { ...formData };
-        if (body.parent_id === '') body.parent_id = null;
-        else body.parent_id = parseInt(body.parent_id);
-
-        const res = await fetch(url, {
-            method: editingCategory ? 'PUT' : 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-
-        if (res.ok) {
-            toast.success(editingCategory ? 'Categoría actualizada' : 'Categoría creada con éxito');
-            setShowForm(false);
-            setEditingCategory(null);
-            fetchCategories();
-            fetchAllForFilter();
+        
+        // Normalizar parent_id para el backend
+        if (!body.parent_id || body.parent_id === '') {
+            body.parent_id = null;
         } else {
-            const err = await res.json();
-            toast.error(err.detail || 'Error al guardar categoría');
+            body.parent_id = parseInt(body.parent_id);
+        }
+
+        try {
+            const res = await fetch(url, {
+                method: isEditing ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            if (res.ok) {
+                toast.success(isEditing ? 'Categoría actualizada' : 'Categoría creada con éxito');
+                setIsDrawerOpen(false);
+                fetchCategories();
+                fetchAllForFilter();
+            } else {
+                const err = await res.json();
+                toast.error(err.detail || 'Error al guardar categoría');
+            }
+        } catch (err) {
+            console.error("Error al guardar:", err);
+            toast.error("Ocurrió un error inesperado.");
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!await confirm("¿Eliminar esta categoría? Los productos se moverán a 'Sin Categoría'.")) return;
-        const res = await fetch(`${API_BASE}/categories/${id}`, { method: 'DELETE' });
+    const handleDelete = async (category) => {
+        if (!await confirm(`¿Eliminar la categoría "${category.name}"? Los productos se moverán a 'Sin Categoría'.`)) return;
+        const res = await fetch(`${API_BASE}/categories/${category.id}`, { method: 'DELETE' });
         if (res.ok) {
             toast.success('Categoría eliminada con éxito');
+            setIsDrawerOpen(false);
             fetchCategories();
             fetchAllForFilter();
         } else {
@@ -371,16 +343,33 @@ const CategoryManager = () => {
         }
     };
 
-    const handleViewCategory = async (category) => {
+    const handleOpenCategory = async (category = null, isEditing = true) => {
+        if (!category) {
+            setSelectedCategory({
+                name: '',
+                parent_id: null,
+                is_filterable: true,
+                suggested_specification_ids: [],
+                suggested_specifications: [],
+                is_editing: true // Creación siempre es edición
+            });
+            setIsDrawerOpen(true);
+            return;
+        }
+
         try {
             setLoading(true);
             const res = await fetch(`${API_BASE}/categories/${category.id}`);
             const fullData = await res.json();
-            setDetailData(fullData);
-            setShowDetail(true);
+            
+            // Marcar como sistema si corresponde para que DetailDrawer proteja los botones
+            const isSystem = fullData.is_joker || fullData.slug === 'sin_categoria';
+            setSelectedCategory({ ...fullData, is_system: isSystem, is_editing: isEditing });
+            
+            setIsDrawerOpen(true);
         } catch (err) {
             console.error("Error cargando detalle:", err);
-            toast.error("No se pudo cargar el detalle de la categoría.");
+            toast.error("No se pudo cargar la categoría.");
         } finally {
             setLoading(false);
         }
@@ -394,17 +383,8 @@ const CategoryManager = () => {
             <SectionHeader
                 title="Gestión de Categorías"
                 description={`${totalItems} categorías definidas`}
-                action={!showForm ? { label: '＋ Nueva Categoría', onClick: () => { setEditingCategory(null); setShowForm(true); } } : null}
+                action={{ label: '＋ Nueva Categoría', onClick: () => handleOpenCategory() }}
             />
-
-            {showForm && (
-                <CategoryForm
-                    editingCategory={editingCategory}
-                    categories={allCategoriesForFilter}
-                    onSubmit={handleSubmit}
-                    onCancel={() => { setShowForm(false); setEditingCategory(null); }}
-                />
-            )}
 
             <FilterBar
                 searchPlaceholder="Buscar categoría por nombre..."
@@ -427,16 +407,16 @@ const CategoryManager = () => {
                 data={categories}
                 isLoading={loading}
                 emptyMessage="No se encontraron categorías."
+                onRowClick={handleOpenCategory}
                 rowActions={(row) => {
-                    // Joker category: no edit, no delete
                     const isSystem = row.is_joker || row.slug === 'sin_categoria';
                     if (isSystem) return null;
 
                     return (
                         <RowActions
-                            onView={() => handleViewCategory(row)}
-                            onEdit={() => { setEditingCategory(row); setShowForm(true); }}
-                            onDelete={() => handleDelete(row.id)}
+                            onView={() => handleOpenCategory(row, false)}
+                            onEdit={() => handleOpenCategory(row, true)}
+                            onDelete={() => handleDelete(row)}
                         />
                     );
                 }}
@@ -451,11 +431,13 @@ const CategoryManager = () => {
             />
 
             <DetailDrawer 
-                isOpen={showDetail}
-                onClose={() => setShowDetail(false)}
-                data={detailData}
+                isOpen={isDrawerOpen}
+                onClose={() => setIsDrawerOpen(false)}
+                data={selectedCategory}
                 type="category"
-                title={detailData?.name}
+                title={selectedCategory?.id ? selectedCategory.name : 'Nueva Categoría'}
+                onUpdate={handleUpdate}
+                onDelete={handleDelete}
             />
         </div>
     );

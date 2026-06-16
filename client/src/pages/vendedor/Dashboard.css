@@ -1,0 +1,543 @@
+:root {
+    --vendor-bg: #f8fafc;
+    --vendor-primary: #1e293b;
+    --vendor-accent: #3b82f6;
+    --vendor-success: #10b981;
+    --vendor-warning: #f59e0b;
+    --vendor-surface: #ffffff;
+    --vendor-text: #334155;
+    --vendor-text-light: #64748b;
+    --vendor-border: #e2e8f0;
+}
+
+body {
+    background-color: var(--vendor-bg);
+}
+
+.vendedor-dashboard-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--vendor-bg);
+    color: var(--vendor-text);
+}
+
+/* Header */
+.vendedor-header {
+    background: var(--vendor-surface);
+    padding: 2rem 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--vendor-border);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.vendedor-header h1 {
+    font-size: 2rem;
+    font-weight: 300;
+    margin: 0 0 0.5rem 0;
+    color: var(--vendor-text);
+}
+
+.highlight-name {
+    font-weight: 700;
+    color: var(--vendor-primary);
+}
+
+.subtitle {
+    color: var(--vendor-text-light);
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* Main Layout */
+.vendedor-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 1.5rem 3rem 1.5rem;
+    box-sizing: border-box;
+}
+
+/* KPI Grid */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.kpi-card {
+    background: var(--vendor-surface);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border: 1px solid var(--vendor-border);
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+}
+
+.kpi-card.highlight {
+    background: var(--vendor-primary);
+    color: white;
+    border-color: var(--vendor-primary);
+}
+
+.kpi-card.highlight .kpi-content h3 {
+    color: #cbd5e1;
+}
+
+.kpi-card.highlight .kpi-value {
+    color: white;
+}
+
+.kpi-icon-wrapper {
+    width: 54px;
+    height: 54px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: rgba(255,255,255,0.1);
+    flex-shrink: 0;
+}
+
+.kpi-icon-wrapper.secondary { background: #eff6ff; color: var(--vendor-accent); }
+.kpi-icon-wrapper.accent { background: #f0fdf4; color: var(--vendor-success); }
+.kpi-icon-wrapper.warning { background: #fffbeb; color: var(--vendor-warning); }
+
+.kpi-content {
+    flex: 1;
+}
+
+.kpi-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+}
+
+.kpi-content h3 {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--vendor-text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.kpi-value {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--vendor-primary);
+}
+
+.kpi-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 20px;
+    text-transform: uppercase;
+}
+
+.kpi-badge.success { background: #d1fae5; color: #047857; }
+.kpi-badge.info { background: #dbeafe; color: #1d4ed8; }
+
+/* Dashboard Content Split */
+.dashboard-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 2.5rem;
+    align-items: start;
+}
+
+.section-head {
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.section-title h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--vendor-primary);
+    font-weight: 700;
+}
+
+.count-pill {
+    background: var(--vendor-accent);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.15rem 0.6rem;
+    border-radius: 12px;
+}
+
+.section-desc {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.9rem;
+    color: var(--vendor-text-light);
+}
+
+/* Empty States */
+.empty-state-modern {
+    background: var(--vendor-surface);
+    border: 2px dashed var(--vendor-border);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.empty-state-modern.light {
+    border-style: solid;
+}
+
+.empty-emoji {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.empty-state-modern h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--vendor-primary);
+    font-size: 1.1rem;
+}
+
+.empty-state-modern p {
+    color: var(--vendor-text-light);
+    margin: 0;
+    max-width: 300px;
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
+
+/* Task Cards (Available Sales) */
+.cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.task-card {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: var(--vendor-surface);
+    border-radius: 12px;
+    border: 1px solid var(--vendor-border);
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.task-card.available-card {
+    border-left: 4px solid var(--vendor-warning);
+}
+
+.task-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+    transform: translateY(-2px);
+}
+
+.task-card-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--vendor-bg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+}
+
+.ref-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ref-label {
+    font-size: 0.75rem;
+    color: var(--vendor-text-light);
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.ref-number {
+    font-family: 'Fira Code', monospace;
+    font-weight: 600;
+    color: var(--vendor-primary);
+    font-size: 0.9rem;
+}
+
+.amount-badge {
+    background: #ecfdf5;
+    color: #059669;
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.task-card-body {
+    padding: 1.25rem;
+}
+
+.customer-name {
+    margin: 0 0 1rem 0;
+    font-size: 1.15rem;
+    color: var(--vendor-primary);
+}
+
+.info-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.info-line:last-child {
+    margin-bottom: 0;
+}
+
+.info-line .icon {
+    width: 18px;
+    height: 18px;
+    color: var(--vendor-text-light);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.info-line span {
+    color: var(--vendor-text);
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.task-card-footer {
+    padding: 1rem 1.25rem;
+    background: #f1f5f9;
+    border-top: 1px solid var(--vendor-border);
+}
+
+/* Modern Select Styling */
+.select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.modern-select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--vendor-surface);
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    font-size: 0.95rem;
+    color: var(--vendor-primary);
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modern-select:hover {
+    border-color: #94a3b8;
+}
+
+.modern-select:focus {
+    outline: none;
+    border-color: var(--vendor-accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.select-arrow {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: var(--vendor-text-light);
+    pointer-events: none;
+}
+
+/* History List (My Sales) */
+.history-list {
+    background: var(--vendor-surface);
+    border-radius: 16px;
+    border: 1px solid var(--vendor-border);
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--vendor-bg);
+    transition: background-color 0.2s;
+}
+
+.history-item:hover {
+    background-color: transparent;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--vendor-primary);
+}
+
+.history-amount {
+    font-weight: 700;
+    color: var(--vendor-text);
+}
+
+.history-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-ref {
+    font-size: 0.8rem;
+    color: var(--vendor-text-light);
+    font-family: 'Fira Code', monospace;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Status variants */
+.status-badge.pending { background: #fef3c7; color: #d97706; }
+.status-badge.assigned { background: #e0e7ff; color: #4338ca; }
+.status-badge.in_transit { background: #e0e7ff; color: #4338ca; }
+.status-badge.delivered { background: #d1fae5; color: #059669; }
+.status-badge.completed { background: #d1fae5; color: #059669; }
+.status-badge.cancelled { background: #fee2e2; color: #dc2626; }
+
+/* Seller Buttons */
+.vendedor-btn-primary {
+    background: var(--vendor-accent);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.vendedor-btn-primary:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+}
+
+/* External Sale Tag */
+.external-tag {
+    background: #fef3c7;
+    color: #d97706;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    margin-right: 0.5rem;
+    border: 1px solid #fbbf24;
+    vertical-align: middle;
+}
+
+/* Manual Status Selector Sm */
+.manual-status-selector-sm {
+    padding: 0.2rem 0.4rem;
+    border-radius: 8px;
+    border: 1px solid var(--vendor-border);
+    font-size: 0.8rem;
+    background: white;
+    color: var(--vendor-text);
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+}
+
+.manual-status-selector-sm:focus {
+    border-color: var(--vendor-accent);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 968px) {
+    .dashboard-content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .vendedor-header {
+        padding: 1.5rem 1rem;
+    }
+    
+    .vendedor-main {
+        padding: 0 1rem 2rem 1rem;
+    }
+
+    .kpi-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .vendedor-header h1 {
+        font-size: 1.5rem;
+    }
+}

@@ -1,0 +1,234 @@
+
+.logistics-product-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+.logistics-product-name {
+    font-weight: 700;
+    color: #1e1b4b;
+}
+.logistics-product-sku {
+    font-size: 11px;
+    color: #64748b;
+    font-family: monospace;
+}
+
+.logistics-config-wrapper {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+.logistics-config-tag {
+    font-size: 10px;
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.logistics-stock-badge {
+    font-weight: 800;
+    font-size: 15px;
+    padding: 4px 12px;
+    border-radius: 8px;
+}
+.logistics-stock-badge.empty { color: #ef4444; background: #fef2f2; }
+.logistics-stock-badge.low { color: #f59e0b; background: #fffbe6; }
+.logistics-stock-badge.good { color: #10b981; background: #ecfdf5; }
+
+.logistics-action-btn {
+    border-radius: 8px;
+    padding: 6px;
+    cursor: pointer;
+}
+.logistics-action-btn.history {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+.logistics-action-btn.adjust {
+    background: #fdf2f8;
+    border: 1px solid #fbcfe8;
+}
+
+.logistics-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+.logistics-modal-content {
+    background: white;
+    border-radius: 24px;
+    width: 100%;
+    max-width: 500px;
+    padding: 32px;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+}
+.logistics-modal-title {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    font-weight: 800;
+    color: #1e1b4b;
+}
+.logistics-modal-subtitle {
+    margin: 0 0 24px 0;
+    font-size: 14px;
+    color: #64748b;
+}
+.logistics-modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.logistics-modal-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 8px;
+}
+.logistics-type-btns {
+    display: flex;
+    gap: 10px;
+}
+.logistics-type-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: 2px solid;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.logistics-type-btn.receipt { border-color: #e2e8f0; background: white; }
+.logistics-type-btn.receipt.active { border-color: #10b981; background: #ecfdf5; }
+.logistics-type-btn.adjustment { border-color: #e2e8f0; background: white; }
+.logistics-type-btn.adjustment.active { border-color: #f59e0b; background: #fffbeb; }
+.logistics-type-btn-text {
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.logistics-modal-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    outline: none;
+    box-sizing: border-box;
+}
+.logistics-modal-textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    outline: none;
+    height: 80px;
+    resize: none;
+    box-sizing: border-box;
+}
+
+.logistics-modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+}
+.logistics-modal-btn-cancel {
+    flex: 1;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+.logistics-modal-btn-confirm {
+    flex: 1;
+    padding: 14px;
+    border-radius: 14px;
+    border: none;
+    background: #8f0653;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.logistics-drawer-body {
+    padding: 20px;
+}
+.logistics-drawer-header {
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    border: 1px solid #e2e8f0;
+}
+.logistics-drawer-label {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+.logistics-drawer-value {
+    font-weight: 800;
+    color: #1e1b4b;
+}
+
+.logistics-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.logistics-history-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #f1f5f9;
+}
+.logistics-history-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.logistics-history-icon-wrapper.receipt { background: #ecfdf5; }
+.logistics-history-icon-wrapper.sale { background: #fef2f2; }
+.logistics-history-icon-wrapper.adjustment { background: #fffbeb; }
+
+.logistics-history-details { flex: 1; }
+.logistics-history-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2px;
+}
+.logistics-history-type {
+    font-size: 14px;
+    font-weight: 800;
+    color: #1e1b4b;
+}
+.logistics-history-qty {
+    font-size: 14px;
+    font-weight: 900;
+}
+.logistics-history-qty.positive { color: #10b981; }
+.logistics-history-qty.negative { color: #ef4444; }
+
+.logistics-history-date {
+    font-size: 12px;
+    color: #94a3b8;
+}
+.logistics-history-note {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 6px;
+    font-style: italic;
+}

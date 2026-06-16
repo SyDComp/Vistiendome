@@ -1,0 +1,145 @@
+.content-block {
+    padding: 5rem 2rem;
+    overflow: hidden;
+}
+
+.content-block-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 4rem;
+}
+
+.content-block-container.row {
+    flex-direction: row;
+}
+
+.content-block-container.row-reverse {
+    flex-direction: row-reverse;
+}
+
+.content-text-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.content-title {
+    font-size: 2.5rem;
+    font-weight: 300;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.content-description {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    opacity: 0.9;
+    max-width: 500px;
+}
+
+.content-image-wrapper {
+    flex: 1;
+    height: 400px;
+}
+
+.image-container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    /* Optional: Add shadow or border radius */
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.image-container:hover img {
+    transform: scale(1.02);
+}
+
+.content-link {
+    display: inline-block;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 2px;
+    text-decoration: none;
+    color: inherit;
+    font-weight: 500;
+    transition: opacity 0.2s;
+    cursor: pointer;
+}
+
+.content-link:hover {
+    opacity: 0.7;
+}
+
+@media (max-width: 968px) {
+    .content-block {
+        padding: 4rem 1.5rem;
+    }
+
+    .content-block-container,
+    .content-block-container.row,
+    .content-block-container.row-reverse {
+        flex-direction: column-reverse;
+        /* Always text on top/bottom depending on design preference, or stack image on top */
+        gap: 3rem;
+    }
+
+    /* Let's make image come first on mobile for visual appeal usually */
+    .content-block-container.row,
+    .content-block-container.row-reverse {
+        flex-direction: column-reverse;
+    }
+
+    /* However, often text first is better for SEO/Reading. 
+       Let's stick to standard flow: Image on top or bottom? 
+       If we want image on top: flex-direction: column. 
+       If we want text on top: flex-direction: column-reverse (since HTML structure has text first? No, structure is Text then Image).
+       
+       Wait, DOM structure is:
+       1. Text Wrapper
+       2. Image Wrapper
+       
+       So column puts Text on top. column-reverse puts Image on top.
+    */
+
+    .content-block-container.row,
+    .content-block-container.row-reverse {
+        flex-direction: column;
+        /* Text on top */
+    }
+
+    .content-title {
+        font-size: 2rem;
+    }
+
+    .content-image-wrapper {
+        width: 100%;
+        height: 300px;
+    }
+}
+
+/* Responsive controls for Builder Content */
+.builder-section .content-title,
+.builder-section .content-description {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+@media (max-width: 768px) {
+    .builder-section .content-title {
+        /* Force cap on font size for mobile, overriding inline styles */
+        font-size: clamp(1.5rem, 5vw, 2.2rem) !important;
+    }
+
+    .builder-section .content-description {
+        font-size: clamp(1rem, 4vw, 1.2rem) !important;
+    }
+}

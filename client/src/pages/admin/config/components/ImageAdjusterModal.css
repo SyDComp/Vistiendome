@@ -1,0 +1,266 @@
+.image-adjuster-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(8px);
+    z-index: 5000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    animation: fadeInModal 0.2s ease-out;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.image-adjuster-container {
+    background: #fff;
+    width: 100%;
+    max-width: 650px;
+    max-height: 95vh;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    animation: slideUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpModal {
+    from { transform: translateY(20px) scale(0.98); }
+    to { transform: translateY(0) scale(1); }
+}
+
+.image-adjuster-header {
+    padding: 1rem 1.25rem;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 60px;
+}
+
+.image-adjuster-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: #1e293b;
+    font-weight: 700;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.btn-save-header {
+    display: none; /* Hidden by default (Desktop) */
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.image-adjuster-header .close-btn {
+    background: none;
+    border: none;
+    font-size: 1.75rem;
+    color: #94a3b8;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.2s;
+    z-index: 10;
+}
+
+.mobile-cancel {
+    display: none;
+}
+
+.image-adjuster-header .close-btn:hover {
+    color: #475569;
+}
+
+.image-adjuster-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+    background: #fff;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure the shared editor fills the modal correctly */
+.image-adjuster-body .image-settings-editor {
+    margin-top: 0 !important;
+}
+
+.image-adjuster-footer {
+    padding: 1.25rem 1.5rem;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.btn-cancel {
+    padding: 0.6rem 1.2rem;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #475569;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    background: #f1f5f9;
+}
+
+.btn-save {
+    padding: 0.6rem 1.5rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-save:hover {
+    background: #2563eb;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 640px) {
+    .image-adjuster-overlay {
+        padding: 0;
+        height: 100%;
+        top: 0;
+        bottom: 0;
+        display: flex;
+        align-items: stretch; /* Stretch to fill */
+    }
+    
+    .image-adjuster-container {
+        height: 100%;
+        max-height: 100%;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 0;
+    }
+
+    .image-adjuster-header h3 {
+        font-size: 0.95rem;
+    }
+    
+    .btn-save-header {
+        display: block; /* Show on mobile */
+    }
+
+    .mobile-cancel {
+        display: block;
+        font-size: 2rem !important;
+        color: #64748b !important;
+    }
+
+    .desktop-close {
+        display: none;
+    }
+    
+    .image-adjuster-body {
+        padding: 1.25rem 1rem;
+    }
+
+    .image-adjuster-footer {
+        display: none; /* Hide footer on mobile */
+    }
+}
+
+/* Confirmation Overlay */
+.confirm-discard-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 6000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    animation: fadeInModal 0.2s ease-out;
+}
+
+.confirm-discard-modal {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 340px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.confirm-discard-modal h4 {
+    margin: 0 0 0.75rem 0;
+    color: #1e293b;
+}
+
+.confirm-discard-modal p {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 1.5rem;
+}
+
+.confirm-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.confirm-actions button {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.btn-discard {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.btn-discard:hover {
+    background: #fecaca;
+}
+
+.btn-stay {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.btn-stay:hover {
+    background: #e2e8f0;
+}
+
+.btn-save-confirm {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-save-confirm:hover {
+    background: #2563eb;
+}

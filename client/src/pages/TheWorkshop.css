@@ -1,0 +1,119 @@
+.workshop-page-container {
+    padding: 0 1rem 4rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.loading-spinner,
+.empty-workshop {
+    text-align: center;
+    padding: 3rem;
+    color: var(--color-gray-medium);
+}
+
+.workshop-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+.workshop-post-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+    overflow: hidden;
+}
+
+.post-date {
+    font-size: 0.9rem;
+    color: var(--color-gray-medium);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.post-title {
+    font-size: 1.75rem;
+    color: var(--color-primary-dark);
+    margin-bottom: 1rem;
+}
+
+.post-content {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--color-gray-dark);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* --- Inline media in public post content --- */
+
+.post-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+    margin: 1rem auto;
+}
+
+.post-content .ql-video-custom {
+    margin: 1rem auto;
+    text-align: center;
+}
+
+.post-content .ql-video-custom video {
+    max-width: 100%;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto;
+    background: #000;
+}
+
+/* Fallback: if a bare <video> ends up in content */
+.post-content video {
+    max-width: 100%;
+    border-radius: 8px;
+    display: block;
+    margin: 1rem auto;
+    background: #000;
+}
+
+/* Ensure any admin-only overlay artifacts are hidden */
+.post-content .media-delete-overlay,
+.post-content .media-floating-toolbar {
+    display: none !important;
+}
+
+.post-content .media-delete-overlay,
+.post-content .media-wrapper {
+    display: contents;
+    /* Render children normally, ignore wrapper */
+}
+
+.post-content button.media-delete-overlay {
+    display: none !important;
+}
+
+/* --- Mobile --- */
+@media (max-width: 600px) {
+    .workshop-page-container {
+        padding: 2rem 0.75rem;
+    }
+
+    .workshop-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .workshop-post-card {
+        padding: 1.25rem;
+    }
+
+    .post-title {
+        font-size: 1.4rem;
+    }
+
+    .post-content {
+        font-size: 1rem;
+    }
+}

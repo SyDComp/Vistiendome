@@ -1,0 +1,526 @@
+/* Admin Layout Base */
+.admin-layout {
+    display: flex;
+    height: 100vh;
+    background-color: #f4f5f7;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Mobile Menu Button - Hidden on desktop */
+.mobile-menu-btn {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 1100;
+    background: white;
+    border: 1px solid #e2e2e2;
+    width: 48px;
+    height: 48px;
+    border-radius: 0;
+    cursor: pointer;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.mobile-menu-btn:hover {
+    background: #f9f9f9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.mobile-menu-btn span {
+    width: 20px;
+    height: 2px;
+    background: #121212;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+/* Mobile close button in sidebar */
+.mobile-close-btn {
+    display: none;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #ffffff; /* Bright white */
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+}
+
+.mobile-close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Overlay for mobile sidebar */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+/* Sidebar */
+.admin-sidebar {
+    width: 260px;
+    background-color: #1a1c23;
+    color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
+    z-index: 1000;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.admin-layout.collapsed .admin-sidebar {
+    width: 80px;
+}
+
+.sidebar-header {
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-logo {
+    display: none !important; /* Customer requested to remove it globally */
+}
+
+.collapse-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+/* Nav */
+.sidebar-nav {
+    flex: 1;
+    padding: 1.5rem 0;
+    overflow-y: auto;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1.5rem;
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #f3f4f6;
+}
+
+.nav-item.active {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border-left-color: #6C63FF;
+}
+
+.nav-item .icon {
+    font-size: 1.2rem;
+    margin-right: 1rem;
+    min-width: 24px;
+    text-align: center;
+}
+
+.sidebar-badge {
+    background-color: #ef4444;
+    /* red-500 */
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 0.15rem 0.4rem;
+    border-radius: 10px;
+    margin-left: auto;
+    min-width: 1.25rem;
+    text-align: center;
+}
+
+.admin-layout.collapsed .sidebar-badge {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    padding: 0.15rem 0.3rem;
+}
+
+.admin-layout.collapsed .label {
+    display: none;
+}
+
+.admin-layout.collapsed .nav-item {
+    justify-content: center;
+    padding: 0.8rem 0;
+}
+
+.admin-layout.collapsed .nav-item .icon {
+    margin-right: 0;
+}
+
+/* Footer & User Info */
+.sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    background: #6C63FF;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #fff;
+}
+
+.admin-layout.collapsed .avatar {
+    margin-right: 0;
+    margin: 0 auto;
+}
+
+.admin-layout.collapsed .details {
+    display: none;
+}
+
+.details {
+    display: flex;
+    flex-direction: column;
+}
+
+.username {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.role {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.logout-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+    padding: 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Main Content */
+.admin-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.admin-header {
+    height: 64px;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+}
+
+.page-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.date {
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+.content-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+/* Utility for Tables */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-table th {
+    background: #f9fafb;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: #6b7280;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    color: #374151;
+    vertical-align: middle;
+}
+
+.admin-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Buttons in Admin */
+.btn-action {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    margin-right: 0.5rem;
+}
+
+.btn-edit {
+    background: #e0e7ff;
+    color: #4338ca;
+}
+
+.btn-delete {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.btn-create {
+    background: #111827;
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-create:hover {
+    background: #000;
+}
+
+/* ========== MOBILE RESPONSIVE ========== */
+@media (max-width: 768px) {
+
+    /* Show mobile menu button */
+    .mobile-menu-btn {
+        display: flex;
+    }
+
+    /* Sidebar header tweaks for mobile - MINIMALIST (No Logo) */
+    .sidebar-header {
+        height: 60px !important;
+        padding: 0 1rem !important;
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important; /* Button to the right */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        overflow: visible !important;
+    }
+
+    .sidebar-logo {
+        display: none !important; /* Customer requested to remove it */
+    }
+
+    /* Close button on mobile */
+    .mobile-close-btn {
+        display: flex !important;
+        position: static !important; /* Back to flex flow */
+        width: 44px !important;
+        height: 44px !important;
+        background: transparent !important;
+        border-radius: 4px !important;
+        z-index: 9999 !important;
+        color: #ffffff !important;
+        border: none !important;
+    }
+
+    .admin-sidebar {
+        overflow: visible !important; /* Ensure children can be seen */
+    }
+
+    /* Hide desktop collapse button on mobile */
+    .collapse-btn {
+        display: none !important;
+    }
+
+    /* Show overlay when menu is open */
+    .mobile-menu-open .sidebar-overlay {
+        display: block;
+    }
+
+    /* Sidebar as overlay on mobile */
+    .admin-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 260px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .mobile-menu-open .admin-sidebar {
+        transform: translateX(0);
+    }
+
+    /* Never collapse sidebar on mobile */
+    .admin-layout.collapsed .admin-sidebar {
+        width: 260px;
+    }
+
+    .admin-layout.collapsed .label {
+        display: inline !important;
+    }
+
+    .admin-layout.collapsed .nav-item {
+        justify-content: flex-start;
+        padding: 0.8rem 1.5rem;
+    }
+
+    .admin-layout.collapsed .nav-item .icon {
+        margin-right: 1rem;
+    }
+
+    .admin-layout.collapsed .details {
+        display: flex !important;
+    }
+
+    .admin-layout.collapsed .avatar {
+        margin-right: 0.8rem;
+    }
+
+    /* Main content takes full width */
+    .admin-content {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    /* Adjust header for mobile */
+    .admin-header {
+        display: flex;
+        justify-content: end;
+        padding: 0 1rem;
+    }
+
+    .page-title {
+        font-size: 1rem;
+    }
+
+    .date {
+        font-size: 0.8rem;
+    }
+
+    /* Content padding - Increased to avoid hamburger menu overlap */
+    .content-container {
+        padding: 4rem 1rem 1rem;
+    }
+
+    /* Better table responsiveness */
+    .admin-table {
+        font-size: 0.85rem;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    /* Buttons */
+    .btn-create {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .mobile-menu-btn {
+        top: 0.5rem;
+        left: 0.5rem;
+        width: 44px;
+        height: 44px;
+    }
+
+    .admin-header {
+        height: 56px;
+    }
+
+    .page-title {
+        font-size: 0.95rem;
+    }
+
+    .date {
+        font-size: 0.75rem;
+    }
+
+    .content-container {
+        padding: 3.5rem 0.75rem 0.75rem;
+    }
+
+    /* Smaller table text on very small screens */
+    .admin-table {
+        font-size: 0.8rem;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 0.6rem 0.4rem;
+    }
+}

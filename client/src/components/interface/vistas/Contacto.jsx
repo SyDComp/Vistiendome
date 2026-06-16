@@ -1,10 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSettings } from '../../../context/SettingsContext';
+import { Camera, Globe, MessageCircle, Mail, Phone, MapPin, Clock, User, Users, Calendar, FileText, X } from 'lucide-react';
+import Button from '../../ui/Button';
+import { get, post } from '../../../lib/api/client';
 
 const Contacto = () => {
+    const { settings } = useSettings();
+    const contact = settings.contact_info || {};
+    const social = settings.social_links || {};
+
     const [tipoContacto, setTipoContacto] = useState('seleccion'); // 'seleccion', 'individual', 'grupo'
     const [formData, setFormData] = useState({
+        rut: '',
         nombre: '',
+        email: '',
         whatsapp: '+569',
+        transporte: 'STARKEN',
+        tipo_despacho: 'DOMICILIO',
+        region: '',
+        comuna: '',
+        comuna_id: '',
+        direccion: '',
         mensaje: '',
         tipoGrupo: 'Coristas',
         cantidad: '',
@@ -12,13 +28,61 @@ const Contacto = () => {
     });
 
     const [status, setStatus] = useState(''); // 'sending', 'success', 'error'
+    const [regiones, setRegiones] = useState([]);
+    const [comunas, setComunas] = useState([]);
+
+    useEffect(() => {
+        get('/api/v1/geo/regiones')
+            .then(data => setRegiones(data))
+            .catch(err => console.error('Error fetching regiones:', err));
+    }, []);
+
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem('contactoDraft');
+            if (saved) {
+                setFormData(JSON.parse(saved));
+            }
+        } catch (e) {}
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('contactoDraft', JSON.stringify(formData));
+    }, [formData]);
+
+    const handleRegionChange = (e) => {
+        const selectedRegionNombre = e.target.value;
+        setFormData(prev => ({ ...prev, region: selectedRegionNombre }));
+        
+        const regionObj = regiones.find(r => r.nombre === selectedRegionNombre);
+        if (regionObj) {
+            get(`/api/v1/geo/regiones/${regionObj.id}/comunas`)
+                .then(data => {
+                    setComunas(data);
+                    setFormData(prev => ({ ...prev, comuna: '', comuna_id: '' }));
+                })
+                .catch(err => console.error('Error fetching comunas:', err));
+        } else {
+            setComunas([]);
+            setFormData(prev => ({ ...prev, comuna: '', comuna_id: '' }));
+        }
+    };
+
+    const handleComunaChange = (e) => {
+        const selectedComunaNombre = e.target.value;
+        const comunaObj = comunas.find(c => c.nombre === selectedComunaNombre);
+        setFormData(prev => ({ 
+            ...prev, 
+            comuna: selectedComunaNombre,
+            comuna_id: comunaObj ? comunaObj.id : ''
+        }));
+    };
 
     const handleWhatsAppChange = (e) => {
         let value = e.target.value;
         if (!value.startsWith('+569')) {
             value = '+569';
         }
-        // Solo permitir números después del +569
         const numbers = value.slice(4).replace(/\D/g, '').slice(0, 8);
         setFormData({ ...formData, whatsapp: '+569' + numbers });
     };
@@ -27,7 +91,7 @@ const Contacto = () => {
         return /^\+569\d{8}$/.test(number);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validateWhatsApp(formData.whatsapp)) {
             setStatus('error-whatsapp');
@@ -35,11 +99,65 @@ const Contacto = () => {
         }
 
         setStatus('sending');
-        // Simulación de envío
-        setTimeout(() => {
-            console.log('Datos enviados:', formData);
+        
+        try {
+            const partesNombre = formData.nombre.trim().split(' ');
+            const nombres = partesNombre[0] || '';
+            const apellidos = partesNombre.slice(1).join(' ') || '';
+
+            const origen = tipoContacto === 'individual' ? 'CONTACTO_INDIVIDUAL' : 'CONTACTO_GRUPAL';
+
+            const payload = {
+                rut: formData.rut,
+                nombres: nombres,
+                apellidos: apellidos,
+                email_personal: formData.email,
+                telefono: formData.whatsapp,
+                transporte: formData.transporte,
+                tipo_despacho: formData.tipo_despacho,
+                region: formData.region,
+                comuna: formData.comuna,
+                comuna_id: formData.comuna_id,
+                direccion: formData.direccion,
+                mensaje: formData.mensaje,
+                origen: origen
+            };
+
+            if (tipoContacto === 'grupo') {
+                payload.tipo_grupo = formData.tipoGrupo;
+                payload.cantidad_aprox = formData.cantidad ? parseInt(formData.cantidad, 10) : null;
+                payload.fecha_evento = formData.evento;
+            }
+
+            try {
+                await post('/api/v1/crm/', payload);
+            } catch (error) {
+                console.error("Error al registrar el contacto en el backend", error);
+            }
+
             setStatus('success');
-        }, 1500);
+            setFormData({
+                rut: '',
+                nombre: '',
+                email: '',
+                whatsapp: '+569',
+                transporte: 'STARKEN',
+                tipo_despacho: 'DOMICILIO',
+                region: '',
+                comuna: '',
+                comuna_id: '',
+                direccion: '',
+                mensaje: '',
+                tipoGrupo: 'Coristas',
+                cantidad: '',
+                evento: ''
+            });
+            localStorage.removeItem('contactoDraft');
+
+        } catch (error) {
+            console.error("Error de red al enviar contacto:", error);
+            setStatus('error-whatsapp'); // Reutilizamos este estado o creamos uno nuevo
+        }
     };
 
     const renderSelection = () => (
@@ -50,31 +168,46 @@ const Contacto = () => {
                     <div className="card-icon">🛍️</div>
                     <h3>Busco una prenda para mí</h3>
                     <p>Consultas sobre tallas, disponibilidad o visitas al local en San Carlos.</p>
-                    <button className="ui-btn ui-btn-secondary">Contactar Ventas</button>
+                    <Button variant="secondary">Contactar Ventas</Button>
                 </div>
                 <div className="selection-card" onClick={() => setTipoContacto('grupo')}>
                     <div className="card-icon">⛪</div>
                     <h3>Uniformes para mi Grupo</h3>
                     <p>Cotizaciones para Coristas o Dorcas, elección de telas y plazos de confección.</p>
-                    <button className="ui-btn ui-btn-secondary">Solicitar Presupuesto</button>
+                    <Button variant="secondary">Solicitar Presupuesto</Button>
                 </div>
             </div>
         </div>
     );
 
-    const renderForm = () => (
-        <div className="contact-form-wrapper fade-in">
-            <button className="back-btn" onClick={() => setTipoContacto('seleccion')}>
-                ← Volver a elegir
-            </button>
-            <div className="form-header">
-                <h2>{tipoContacto === 'individual' ? 'Consulta Personal' : 'Presupuesto Grupal'}</h2>
-                <p>Déjanos tus datos y Paola te contactará a la brevedad.</p>
-            </div>
+    const renderFormModal = () => {
+        if (tipoContacto === 'seleccion') return null;
+        
+        return (
+            <div className="contact-modal-overlay fade-in" onClick={() => setTipoContacto('seleccion')}>
+                <div className="contact-modal-card slide-up" onClick={e => e.stopPropagation()}>
+                    <div className="contact-modal-header">
+                        <h2>{tipoContacto === 'individual' ? 'Consulta Personal' : 'Presupuesto Grupal'}</h2>
+                        <button type="button" className="btn-close-modal" onClick={() => setTipoContacto('seleccion')}>
+                            <X size={20} />
+                        </button>
+                    </div>
 
-            <form className="contact-form" onSubmit={handleSubmit}>
+                    <form className="contact-form" onSubmit={handleSubmit}>
+                        <div className="contact-form-body">
+                            <p className="form-intro">Déjanos tus datos y Paola te contactará a la brevedad.</p>
                 <div className="form-group">
-                    <label>Nombre Completo</label>
+                    <label><User size={16} /> RUT *</label>
+                    <input 
+                        type="text" 
+                        placeholder="Ej: 12.345.678-9" 
+                        required 
+                        value={formData.rut}
+                        onChange={(e) => setFormData({...formData, rut: e.target.value})}
+                    />
+                </div>
+                <div className="form-group">
+                    <label><User size={16} /> Nombre Completo *</label>
                     <input 
                         type="text" 
                         placeholder="Ej: María González" 
@@ -84,7 +217,16 @@ const Contacto = () => {
                     />
                 </div>
                 <div className="form-group">
-                    <label>WhatsApp (Chile)</label>
+                    <label><Mail size={16} /> Email</label>
+                    <input 
+                        type="email" 
+                        placeholder="tu@email.com" 
+                        value={formData.email}
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    />
+                </div>
+                <div className="form-group">
+                    <label><Phone size={16} /> WhatsApp (Chile) *</label>
                     <input 
                         type="tel" 
                         placeholder="+569 1234 5678" 
@@ -96,11 +238,73 @@ const Contacto = () => {
                     {status === 'error-whatsapp' && <span className="error-msg">El número debe tener 8 dígitos después del +569</span>}
                 </div>
 
+                <div className="form-group">
+                    <label><MapPin size={16} /> Método de Envío *</label>
+                    <select 
+                        value={formData.transporte}
+                        onChange={(e) => setFormData({...formData, transporte: e.target.value})}
+                    >
+                        <option value="STARKEN">Starken</option>
+                        <option value="CHILEXPRESS">Chilexpress</option>
+                        <option value="CORREOS">Correos de Chile</option>
+                        <option value="RETIRO">Retiro en Tienda (San Carlos)</option>
+                    </select>
+                </div>
+
+                <div className="form-group">
+                    <label><MapPin size={16} /> Tipo de Entrega *</label>
+                    <select 
+                        value={formData.tipo_despacho}
+                        onChange={(e) => setFormData({...formData, tipo_despacho: e.target.value})}
+                    >
+                        <option value="DOMICILIO">Despacho a Domicilio</option>
+                        <option value="SUCURSAL">Retiro en Sucursal de Envío</option>
+                    </select>
+                </div>
+
+                <div className="form-row" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%'}}>
+                    <div className="form-group">
+                        <label><MapPin size={16} /> Región</label>
+                        <select 
+                            value={formData.region} 
+                            onChange={handleRegionChange}
+                        >
+                            <option value="">Selecciona una región</option>
+                            {regiones.map(r => (
+                                <option key={r.id} value={r.nombre}>{r.nombre}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label><MapPin size={16} /> Comuna</label>
+                        <select 
+                            value={formData.comuna} 
+                            onChange={handleComunaChange}
+                            disabled={!formData.region}
+                        >
+                            <option value="">Selecciona una comuna</option>
+                            {comunas.map(c => (
+                                <option key={c.id} value={c.nombre}>{c.nombre}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                <div className="form-group">
+                    <label><MapPin size={16} /> Dirección (Opcional)</label>
+                    <input 
+                        type="text" 
+                        placeholder="Calle, número..." 
+                        value={formData.direccion}
+                        onChange={(e) => setFormData({...formData, direccion: e.target.value})}
+                    />
+                </div>
+
                 {tipoContacto === 'grupo' && (
                     <>
-                        <div className="form-row">
+                        <div className="form-row" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%'}}>
                             <div className="form-group">
-                                <label>Tipo de Grupo</label>
+                                <label><Users size={16} /> Tipo de Grupo</label>
                                 <select 
                                     value={formData.tipoGrupo}
                                     onChange={(e) => setFormData({...formData, tipoGrupo: e.target.value})}
@@ -111,7 +315,7 @@ const Contacto = () => {
                                 </select>
                             </div>
                             <div className="form-group">
-                                <label>Cantidad Aprox.</label>
+                                <label><Users size={16} /> Cantidad Aprox.</label>
                                 <input 
                                     type="number" 
                                     placeholder="Ej: 20" 
@@ -122,7 +326,7 @@ const Contacto = () => {
                             </div>
                         </div>
                         <div className="form-group">
-                            <label>Fecha de Evento (Opcional)</label>
+                            <label><Calendar size={16} /> Fecha de Evento (Opcional)</label>
                             <input 
                                 type="text" 
                                 placeholder="Ej: Aniversario en Noviembre"
@@ -134,7 +338,7 @@ const Contacto = () => {
                 )}
 
                 <div className="form-group">
-                    <label>Mensaje</label>
+                    <label><FileText size={16} /> Mensaje</label>
                     <textarea 
                         rows="4" 
                         placeholder="Cuéntanos más para asesorarte mejor..."
@@ -143,21 +347,26 @@ const Contacto = () => {
                     ></textarea>
                 </div>
                 
-                <div className="form-submit-container">
-                    <button type="submit" className="ui-btn ui-btn-primary" disabled={status === 'sending'}>
-                        {status === 'sending' ? 'Enviando...' : 'Enviar Solicitud'}
-                    </button>
+                        </div>
+                        
+                        <div className="contact-form-footer">
+                            <Button type="submit" variant="primary" disabled={status === 'sending'} style={{width: '100%'}}>
+                                {status === 'sending' ? 'Enviando...' : 'Enviar Solicitud'}
+                            </Button>
+                            
+                            {status === 'success' && (
+                                <div className="success-banner">¡Mensaje enviado con éxito! Paola se contactará contigo pronto.</div>
+                            )}
+                        </div>
+                    </form>
                 </div>
-
-                {status === 'success' && (
-                    <div className="success-banner">¡Mensaje enviado con éxito! Paola se contactará contigo pronto.</div>
-                )}
-            </form>
-        </div>
-    );
+            </div>
+        );
+    };
 
     return (
         <section className="contacto-view">
+            {renderFormModal()}
             <div className="container">
                 <div className="contacto-header">
                     <span className="subtitle">Hablemos</span>
@@ -166,20 +375,198 @@ const Contacto = () => {
                 </div>
 
                 <div className="contacto-main-container">
-                    {tipoContacto === 'seleccion' ? renderSelection() : renderForm()}
+                    {renderSelection()}
                 </div>
 
                 <div className="contacto-footer-info">
                     <div className="info-block">
-                        <h4>📍 Taller y Showroom</h4>
-                        <p>Camino San Camilo Km 1,8, San Carlos, Chile.</p>
+                        <h4><MapPin size={18} /> Taller y Showroom</h4>
+                        <p>{contact.address || 'Camino San Camilo Km 1,8, San Carlos, Chile.'}</p>
                     </div>
+                    {contact.email && (
+                        <div className="info-block">
+                            <h4><Mail size={18} /> Correo Electrónico</h4>
+                            <p>{contact.email}</p>
+                        </div>
+                    )}
                     <div className="info-block">
-                        <h4>⏰ Horarios</h4>
+                        <h4><Clock size={18} /> Horarios</h4>
                         <p>Lun - Vie: 09:00 - 18:00 / Sáb: 09:00 - 14:00</p>
                     </div>
                 </div>
+
+                <div className="contacto-social-links" style={{ 
+                    marginTop: '60px', 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    gap: '30px',
+                    borderTop: '1px solid #f1f5f9',
+                    paddingTop: '40px'
+                }}>
+                    {social.instagram && (
+                        <a href={social.instagram} target="_blank" rel="noopener noreferrer" className="social-link-item">
+                            <Camera size={24} /> <span>Instagram</span>
+                        </a>
+                    )}
+                    {social.facebook && (
+                        <a href={social.facebook} target="_blank" rel="noopener noreferrer" className="social-link-item">
+                            <Globe size={24} /> <span>Facebook</span>
+                        </a>
+                    )}
+                    {social.whatsapp && (
+                        <a href={`https://wa.me/${social.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="social-link-item">
+                            <MessageCircle size={24} /> <span>WhatsApp</span>
+                        </a>
+                    )}
+                </div>
             </div>
+            <style>{`
+                .social-link-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    color: #64748b;
+                    text-decoration: none;
+                    font-weight: 700;
+                    transition: all 0.3s;
+                    padding: 12px 20px;
+                    border-radius: 12px;
+                    background: #f8fafc;
+                }
+                .social-link-item:hover {
+                    color: #8f0653;
+                    background: #fdf2f8;
+                    transform: translateY(-2px);
+                }
+                .info-block h4 {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                
+                /* Modal Estilos */
+                .contact-modal-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(15, 23, 42, 0.7);
+                    backdrop-filter: blur(4px);
+                    z-index: 9999;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    padding: 20px;
+                }
+                .contact-modal-card {
+                    width: 100%;
+                    max-width: 800px;
+                    background: white;
+                    border-radius: 24px;
+                    overflow: hidden;
+                    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                    max-height: 90vh;
+                    display: flex;
+                    flex-direction: column;
+                    box-sizing: border-box;
+                }
+
+                .contact-modal-header {
+                    padding: 24px;
+                    background: #f8fafc;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    border-bottom: 1px solid #e2e8f0;
+                    flex-shrink: 0;
+                    box-sizing: border-box;
+                    width: 100%;
+                }
+                .contact-modal-header h2 { margin: 0; font-size: 1.25rem; font-weight: 800; color: #1e1b4b; }
+                
+                .btn-close-modal { background: none; border: none; cursor: pointer; color: #94a3b8; }
+                .btn-close-modal:hover { color: #1e1b4b; }
+
+                .contact-form {
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+
+                .contact-form-body {
+                    padding: 24px;
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                    box-sizing: border-box;
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                }
+
+                .contact-form-footer {
+                    padding: 24px;
+                    background: white;
+                    border-top: 1px solid #e2e8f0;
+                    flex-shrink: 0;
+                    box-sizing: border-box;
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                }
+
+                .form-intro { font-size: 14px; color: #64748b; margin-bottom: 8px; line-height: 1.5; margin-top: 0; }
+
+                @media (max-width: 768px) {
+                    .contact-modal-card {
+                        max-height: 95vh;
+                    }
+                    .contact-modal-header, .contact-form-body, .contact-form-footer {
+                        padding: 16px;
+                    }
+                }
+                
+                /* Estilos homologados con CheckoutForm */
+                .contact-form .form-group label {
+                    font-size: 13px;
+                    font-weight: 700;
+                    color: #1e1b4b;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    text-transform: none;
+                    letter-spacing: normal;
+                    margin-bottom: 8px;
+                }
+                .contact-form input, 
+                .contact-form select, 
+                .contact-form textarea {
+                    height: 48px;
+                    padding: 0 16px;
+                    border-radius: 12px;
+                    border: 1px solid #e2e8f0;
+                    font-size: 14px;
+                    transition: border-color 0.2s, box-shadow 0.2s;
+                    box-sizing: border-box;
+                    width: 100%;
+                    background: white;
+                }
+                .contact-form textarea {
+                    height: auto;
+                    padding: 16px;
+                }
+                .contact-form input:focus, 
+                .contact-form select:focus, 
+                .contact-form textarea:focus {
+                    outline: none;
+                    border-color: #1e1b4b;
+                    box-shadow: 0 0 0 3px rgba(30, 27, 75, 0.05);
+                }
+            `}</style>
         </section>
     );
 };

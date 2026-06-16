@@ -1,0 +1,679 @@
+
+.barcode-printer-container {
+    display: flex;
+    gap: 24px;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+}
+
+.barcode-printer-container.mobile {
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+/* Panel Izquierdo: Selector */
+.barcode-printer-left-panel {
+    width: 380px;
+    min-width: 320px;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+.barcode-printer-container.mobile .barcode-printer-left-panel {
+    width: 100%;
+    flex: none;
+    max-height: 50vh;
+}
+
+.barcode-printer-left-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.barcode-printer-left-header-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.barcode-printer-left-header-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #1e1b4b, #8f0653);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.barcode-printer-left-header-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e1b4b;
+}
+
+.barcode-printer-left-header-desc {
+    margin: 0;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.barcode-printer-search-wrap {
+    position: relative;
+}
+
+.barcode-printer-search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.barcode-printer-search-input {
+    width: 100%;
+    padding: 9px 12px 9px 32px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    font-size: 13px;
+    outline: none;
+    background: #f8fafc;
+    color: #1e293b;
+    box-sizing: border-box;
+}
+
+.barcode-printer-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.barcode-printer-empty {
+    padding: 40px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.barcode-printer-product-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-bottom: 4px;
+}
+
+.barcode-printer-product-row.selected {
+    background: rgba(143,6,83,0.05);
+}
+
+.barcode-printer-product-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+}
+
+.barcode-printer-product-btn.all {
+    color: #8f0653;
+}
+.barcode-printer-product-btn.some {
+    color: #c084fc;
+}
+.barcode-printer-product-btn.none {
+    color: #cbd5e1;
+}
+
+.barcode-printer-product-name {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e1b4b;
+}
+
+.barcode-printer-product-count {
+    font-size: 11px;
+    color: #94a3b8;
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+
+.barcode-printer-variants {
+    padding-left: 32px;
+    padding-bottom: 4px;
+}
+
+.barcode-printer-variant-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 2px;
+    transition: background 0.15s;
+}
+
+.barcode-printer-variant-row.selected {
+    background: rgba(143,6,83,0.08);
+}
+
+.barcode-printer-variant-icon {
+    display: flex;
+}
+.barcode-printer-variant-icon.selected {
+    color: #8f0653;
+}
+.barcode-printer-variant-icon.unselected {
+    color: #cbd5e1;
+}
+
+.barcode-printer-variant-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.barcode-printer-variant-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: #1e1b4b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.barcode-printer-variant-bc {
+    font-size: 10px;
+    color: #94a3b8;
+    font-family: monospace;
+}
+
+.barcode-printer-left-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #f1f5f9;
+    background: #fafafa;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.barcode-printer-btn-distribute {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    background: #1e1b4b;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.barcode-printer-btn-clear {
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Panel Derecho: Configurador + Vista previa */
+.barcode-printer-right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow: hidden;
+}
+.barcode-printer-container.mobile .barcode-printer-right-panel {
+    overflow: visible;
+}
+
+.barcode-printer-config {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+    border: 1px solid #e2e8f0;
+}
+
+.barcode-printer-config-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.barcode-printer-config-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e1b4b;
+}
+
+.barcode-printer-config-info {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 4px 10px;
+    border: 1px solid #e2e8f0;
+}
+
+.barcode-printer-config-info-text {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.barcode-printer-config-info-highlight {
+    color: #8f0653;
+    font-weight: bold;
+}
+
+.barcode-printer-config-grid {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.barcode-printer-config-group {
+    flex: 1;
+    min-width: 160px;
+}
+.barcode-printer-config-group.large {
+    flex: 2;
+    min-width: 240px;
+}
+
+.barcode-printer-config-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.barcode-printer-config-options {
+    display: flex;
+    gap: 8px;
+}
+
+.barcode-printer-config-option {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 2px solid;
+    font-size: 12px;
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-align: center;
+}
+.barcode-printer-config-option.primary {
+    border-color: #8f0653;
+    background: rgba(143,6,83,0.06);
+    color: #8f0653;
+    font-weight: 700;
+}
+.barcode-printer-config-option.secondary {
+    border-color: #1e1b4b;
+    background: rgba(30,27,75,0.06);
+    color: #1e1b4b;
+    font-weight: 700;
+}
+.barcode-printer-config-option.inactive {
+    border-color: #e2e8f0;
+    background: #fff;
+    color: #64748b;
+    font-weight: 400;
+}
+
+.barcode-printer-config-option-icon {
+    font-size: 16px;
+    margin-bottom: 2px;
+    line-height: 1;
+}
+
+.barcode-printer-config-option-title {
+    font-weight: 700;
+}
+
+.barcode-printer-config-option-sub {
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+.barcode-printer-config-styles {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
+    margin-top: 4px;
+    width: 100%;
+}
+
+.barcode-printer-config-compat {
+    display: flex;
+    align-items: flex-end;
+}
+
+.barcode-printer-config-compat-box {
+    padding: 10px 14px;
+    background: #f0fdf4;
+    border-radius: 10px;
+    border: 1px solid #bbf7d0;
+    font-size: 11px;
+    color: #166534;
+}
+
+.barcode-printer-config-compat-title {
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.barcode-printer-config-compat-sub {
+    opacity: 0.8;
+}
+
+.barcode-printer-copies {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px 20px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+    border: 1px solid #e2e8f0;
+}
+
+.barcode-printer-copies-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.barcode-printer-copies-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.barcode-printer-copies-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e1b4b;
+}
+
+.barcode-printer-copies-info {
+    font-size: 11px;
+    color: #94a3b8;
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+
+.barcode-printer-copies-btn-fill {
+    font-size: 11px;
+    color: #8f0653;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.barcode-printer-copies-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 8px;
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.barcode-printer-copy-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    min-width: 200px;
+    flex: 1;
+}
+
+.barcode-printer-copy-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.barcode-printer-copy-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: #1e1b4b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.barcode-printer-copy-sku {
+    font-size: 10px;
+    color: #94a3b8;
+    font-family: monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.barcode-printer-copy-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.barcode-printer-copy-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+}
+
+.barcode-printer-copy-input {
+    width: 40px;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #8f0653;
+}
+
+.barcode-printer-preview {
+    flex: 1;
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px 20px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.barcode-printer-container.mobile .barcode-printer-preview {
+    min-height: 500px;
+}
+
+.barcode-printer-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.barcode-printer-preview-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.barcode-printer-preview-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e1b4b;
+}
+
+.barcode-printer-preview-info {
+    font-size: 11px;
+    color: #94a3b8;
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+.barcode-printer-btn-print {
+    padding: 8px 20px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+.barcode-printer-btn-print.active {
+    background: linear-gradient(135deg, #8f0653, #1e1b4b);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(143,6,83,0.35);
+}
+.barcode-printer-btn-print.inactive {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.barcode-printer-preview-area {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 12px 0;
+    background: #f1f5f9;
+    border-radius: 8px;
+    margin: 0 -4px;
+}
+
+.barcode-printer-preview-empty {
+    text-align: center;
+    color: #94a3b8;
+    padding-top: 60px;
+}
+
+.barcode-printer-preview-empty-title {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.barcode-printer-preview-empty-desc {
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.barcode-printer-pages {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 12px;
+}
+
+.barcode-printer-page {
+    background: #fff;
+    border: 1px solid #94a3b8;
+    border-radius: 3px;
+    box-shadow: 3px 4px 18px rgba(0,0,0,0.15);
+    display: grid;
+    gap: 0;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.barcode-printer-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 1px;
+}
+
+.barcode-printer-label-svg {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 2px 6px;
+}
+
+.barcode-printer-label-svg-inner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.barcode-printer-label-loading {
+    font-size: 10px;
+    color: #94a3b8;
+}
+
+.barcode-printer-label-text {
+    font-weight: 700;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 2px;
+    flex-shrink: 0;
+}

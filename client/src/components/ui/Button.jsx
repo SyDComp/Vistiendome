@@ -1,5 +1,5 @@
 import React from 'react';
-import './ui.css'; // Compartido por los componentes UI
+import './Button.css';
 
 /**
  * Atomo visual para Botones con soporte nativo de estados de carga.

@@ -1,0 +1,676 @@
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Modal Content */
+.modal-content {
+    background: #fff;
+    width: 90% !important;
+    max-width: 1200px !important;
+    /* Increased for better presence */
+    height: 80vh !important;
+    /* Fixed standard frame */
+    min-height: 600px !important;
+    display: flex;
+    position: relative;
+    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.4);
+    overflow: hidden !important;
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 8px;
+}
+
+.modal-content-column {
+    background: #fff;
+    width: 90% !important;
+    max-width: 1200px !important;
+    height: 80vh !important;
+    min-height: 600px !important;
+    display: flex;
+    position: relative;
+    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.4);
+    overflow: hidden !important;
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 8px;
+    flex-direction: column;
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #fff;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    /* Subir por encima de todo el sistema de navegación (Navbar ~1001) */
+    z-index: 3100;
+    color: #121212;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    transform: rotate(90deg) scale(1.1);
+    background: #f4f4f4;
+}
+
+/* Grid Layout */
+.modal-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 5.5fr) minmax(0, 4.5fr);
+    /* Replaced rigid percentages with flexible fraction units */
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    align-items: stretch;
+    /* Ensure columns span full height */
+}
+
+/* Image Section */
+.modal-image-container {
+    background: #f8f8f8;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    /* Give it some breathing room from the edges of the modal frame */
+}
+
+.product-modal-image-wrapper {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    background-color: #f8f8f8;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.product-modal-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain !important;
+    object-position: center;
+    display: block;
+    image-rendering: -webkit-optimize-contrast;
+    transition: transform 0.3s ease;
+}
+
+/* Info Section */
+.modal-info {
+    padding: 2.5rem 3rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    /* Lock parent scroll */
+    background: #fff;
+}
+
+.modal-fixed-header {
+    flex-shrink: 0;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.modal-category {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    color: #999;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.modal-title {
+    font-size: 2.2rem;
+    font-weight: 300;
+    line-height: 1.2;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.modal-price {
+    font-size: 1.6rem;
+    font-weight: 400;
+    color: #2a7705;
+    margin-top: 1rem;
+}
+
+/* Scrollable Body - Layout Container */
+.modal-body-product {
+    flex: 1;
+    display: flex !important; /* Ensure visibility on desktop */
+    flex-direction: column;
+    /* En desktop el scroll está en .modal-description; en mobile aquí */
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.modal-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.section-label {
+    flex-shrink: 0;
+    /* Keep label always visible */
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #888;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.modal-description {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #444;
+    white-space: pre-wrap;
+}
+
+.modal-description p {
+    margin: 0;
+    word-break: break-all;
+}
+
+/* Custom Scrollbar specifically for the description */
+.modal-description::-webkit-scrollbar {
+    width: 4px;
+}
+
+.modal-description::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-description::-webkit-scrollbar-thumb {
+    background: #e0e0e0;
+    border-radius: 10px;
+}
+
+.mobile-text {
+    display: none;
+}
+
+.modal-meta {
+    margin-top: auto;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 1.25rem;
+    padding-bottom: 0.5rem;
+    background: #fff;
+    z-index: 5;
+    flex-shrink: 0;
+}
+
+.meta-item {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+    font-size: 0.85rem;
+}
+
+.meta-item .label {
+    color: #999;
+    min-width: 100px;
+}
+
+.meta-item .value {
+    color: #333;
+    font-weight: 500;
+}
+
+.value.in-stock {
+    color: #1a7f37;
+    background: #f0fff4;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.value.out-stock {
+    color: #cf222e;
+    background: #fff1f0;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+/* Actions - Fixed on bottom */
+.modal-actions {
+    flex-shrink: 0;
+    padding-top: 1rem;
+    /* margin-top: 1.5rem; */
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.modal-actions button,
+.modal-actions a {
+    width: 100%;
+    padding: 1.1rem;
+    border-radius: 4px;
+    font-weight: 600;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+    border: none;
+}
+
+.btn-primary {
+    background: #121212;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-mercadolibre {
+    background: #ffe600;
+    color: #2e2f7a;
+}
+
+.btn-mercadolibre:hover {
+    background: #ffd700;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 230, 0, 0.2);
+}
+
+.full-width {
+    width: 100%;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .modal-overlay {
+        align-items: center;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .modal-content {
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        width: 100% !important;
+        border-radius: 0 !important;
+        margin: 0;
+        box-shadow: none;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column;
+        position: relative;
+    }
+
+    .modal-content-column {
+        background: #fff;
+        width: 90% !important;
+        max-width: 1200px !important;
+        /* Increased for better presence */
+        height: 80vh !important;
+        /* Fixed standard frame */
+        min-height: 600px !important;
+        display: flex;
+        position: relative;
+        box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.4);
+        overflow: hidden !important;
+        animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        border-radius: 8px;
+    }
+
+    .modal-grid {
+        display: flex !important;
+        flex-direction: column;
+        height: 100%; /* Force it to fill the modal-content height */
+        flex: 1;
+        overflow: hidden;
+    }
+
+    .modal-image-container {
+        min-height: 250px;
+        flex-shrink: 0;
+        max-height: 40vh;
+        width: 100%;
+        background: #f8f8f8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-close {
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 28px;
+        height: 28px;
+        font-size: 1rem;
+    }
+
+    .modal-info {
+        padding: 1rem 1.25rem;
+        flex: 1;
+        /* Permitir scroll interno si el contenido desborda */
+        overflow-y: auto;
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        /* Necesario para que sticky bottom del modal-actions funcione */
+        position: relative;
+    }
+
+    .modal-fixed-header {
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 500;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .modal-price {
+        font-size: 1.1rem;
+        margin-top: 0.25rem;
+    }
+
+    .modal-body-product {
+        padding: 0;
+        margin-bottom: 0.5rem;
+        flex: 1;
+        /* Scroll interno restaurado para descripción larga */
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+
+    .modal-section {
+        height: auto;
+        overflow: visible;
+        margin-bottom: 1rem;
+    }
+
+    .modal-description {
+        font-size: 0.9rem;
+        line-height: 1.6;
+        /* Sin scroll propio en mobile, el padre se encarga */
+        overflow: visible;
+    }
+
+    .modal-meta {
+        margin-top: 0.5rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #f0f0f0;
+        flex-shrink: 0;
+    }
+
+    .meta-item {
+        margin-bottom: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .modal-actions {
+        position: sticky;
+        bottom: 0;
+        padding: 1rem 0 0;
+        margin: 0;
+        width: 100%;
+        background: #fff;
+        border-top: 1px solid #f0f0f0;
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 0.5rem;
+        z-index: 10;
+        flex-shrink: 0;
+    }
+
+    .modal-actions button,
+    .modal-actions a {
+        flex: 1;
+        padding: 0.7rem 0.3rem !important;
+        /* Reduced padding for side-by-side */
+        font-size: 0.8rem !important;
+        white-space: nowrap;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 !important;
+        border-radius: 4px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .btn-mercadolibre {
+        background: #ffe600 !important;
+        color: #2e2f7a !important;
+        border: none !important;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-primary.full-width {
+        background: #121212;
+        color: #fff;
+        border: none;
+    }
+
+    .desktop-text {
+        display: none;
+    }
+
+    .mobile-text {
+        display: inline;
+    }
+}
+
+/* --- Mobile Details Drawer & Header Rows --- */
+.section-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: default;
+    margin-bottom: 1rem;
+}
+
+/* Default hidden for desktop */
+.details-trigger-mobile,
+.product-details-drawer {
+    display: none;
+}
+
+@media (max-width: 968px) {
+    .section-header-row {
+        cursor: pointer;
+        background: #fafafa;
+        padding: 0.8rem;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        margin-bottom: 1rem !important;
+        transition: all 0.2s;
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-header-row:active {
+        background: #f0f0f0;
+        transform: scale(0.98);
+    }
+
+    .section-label {
+        margin-bottom: 0 !important;
+    }
+
+    .details-trigger-mobile {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: transparent;
+        border: none;
+        color: #3182ce;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    /* Hide the normal description area in mobile to save space */
+    .modal-body-product {
+        display: none !important;
+    }
+
+    /* The Drawer itself - positioned inside modal-content */
+    .product-details-drawer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        z-index: 3500; /* Higher than modal-close (3100) to avoid overlap */
+        display: flex;
+        flex-direction: column;
+        transform: translateY(100%);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        visibility: hidden;
+    }
+
+    .product-details-drawer.open {
+        transform: translateY(0);
+        visibility: visible;
+    }
+
+    .drawer-header {
+        padding: 1.25rem;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .drawer-header h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #121212;
+    }
+
+    .close-drawer-btn {
+        background: #f5f5f5;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #666;
+    }
+
+    .drawer-body {
+        padding: 1.5rem;
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .drawer-description-text {
+        font-size: 0.95rem;
+        line-height: 1.8;
+        color: #444;
+        white-space: pre-wrap;
+        margin: 0;
+        word-break: break-all;
+    }
+
+    .drawer-footer-actions {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px dashed #eee;
+        padding-bottom: 2rem;
+    }
+
+    .btn-drawer-close {
+        width: 100%;
+        padding: 1rem;
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-weight: 600;
+        color: #444;
+        cursor: pointer;
+    }
+}

@@ -1,0 +1,54 @@
+.page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.policy-content-wrapper {
+    max-width: 800px;
+    margin: 4rem auto;
+    padding: 0 2rem;
+    flex: 1;
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.policy-content-wrapper h1 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: #333;
+    text-align: center;
+}
+
+.policy-body {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #4a5568;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.policy-body img,
+.policy-body iframe,
+.policy-body video {
+    max-width: 100%;
+    height: auto;
+}
+
+.policy-body p {
+    margin-bottom: 1.5rem;
+}
+
+.policy-body h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: #2d3748;
+}
+
+.loading-spinner {
+    text-align: center;
+    color: #aaa;
+    padding: 3rem;
+}

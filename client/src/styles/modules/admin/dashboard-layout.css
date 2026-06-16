@@ -1,0 +1,302 @@
+
+.admin-layout {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    background-color: #f8fafc;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+.admin-layout.mobile {
+    flex-direction: column;
+}
+
+.admin-header-mobile {
+    height: 60px;
+    background-color: #1e1b4b;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 110;
+}
+.admin-header-logo-box {
+    width: 32px;
+    height: 32px;
+    background: #8f0653;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+.admin-header-logo-text {
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+.admin-header-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+.admin-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 115;
+    animation: fadeInOverlay 0.3s ease;
+}
+
+.admin-sidebar {
+    background-color: #1e1b4b;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+}
+.admin-sidebar.desktop {
+    position: relative;
+    height: auto;
+    z-index: 100;
+}
+.admin-sidebar.desktop.expanded {
+    width: 280px;
+}
+.admin-sidebar.desktop.collapsed {
+    width: 80px;
+}
+.admin-sidebar.mobile {
+    position: fixed;
+    height: 100%;
+    z-index: 120;
+    width: 280px;
+}
+.admin-sidebar.mobile.open {
+    left: 0;
+}
+.admin-sidebar.mobile.closed {
+    left: -280px;
+}
+
+.admin-sidebar-collapse-btn {
+    position: absolute;
+    right: -12px;
+    top: 45px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #8f0653;
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 101;
+    transition: transform 0.3s;
+}
+
+.admin-sidebar-header {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    overflow: hidden;
+    white-space: nowrap;
+}
+.admin-sidebar-header.desktop {
+    padding: 30px 20px;
+}
+.admin-sidebar-header.mobile {
+    padding: 20px;
+}
+.admin-sidebar-header-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.admin-sidebar-logo-box {
+    min-width: 40px;
+    height: 40px;
+    background: #8f0653;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 20px;
+}
+.admin-sidebar-title-container {
+    animation: fadeIn 0.3s;
+}
+.admin-sidebar-title {
+    margin: 0;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    color: #fff;
+}
+.admin-sidebar-subtitle {
+    color: #8b8bbd;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.admin-sidebar-nav {
+    flex: 1;
+    padding: 20px 10px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.admin-sidebar-nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.admin-sidebar-nav-item {
+    margin-bottom: 8px;
+}
+.admin-sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 15px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+.admin-sidebar-link.active {
+    color: #fff;
+    background: #8f0653;
+}
+.admin-sidebar-link.inactive {
+    color: #8b8bbd;
+    background: transparent;
+}
+.admin-sidebar-link.disabled {
+    color: #433e7a;
+    background: transparent;
+    cursor: not-allowed;
+}
+.admin-sidebar-link:not(.disabled) {
+    cursor: pointer;
+}
+.admin-sidebar-link.collapsed {
+    justify-content: center;
+}
+.admin-sidebar-link.expanded {
+    justify-content: flex-start;
+}
+.admin-sidebar-link-label {
+    font-size: 14px;
+    flex: 1;
+}
+.admin-sidebar-link-label.bold {
+    font-weight: 600;
+}
+.admin-sidebar-link-label.normal {
+    font-weight: 400;
+}
+
+.admin-sidebar-sublist {
+    list-style: none;
+    padding: 5px 0 0 45px;
+    margin: 0;
+    animation: fadeIn 0.2s ease;
+}
+.admin-sidebar-subitem {
+    margin-bottom: 4px;
+}
+.admin-sidebar-sublink {
+    display: block;
+    padding: 8px 10px;
+    font-size: 13px;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+.admin-sidebar-sublink.active {
+    color: #fff;
+    background: rgba(255,255,255,0.08);
+    font-weight: 600;
+}
+.admin-sidebar-sublink.inactive {
+    color: #8b8bbd;
+    background: transparent;
+    font-weight: 400;
+}
+
+.admin-sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    background-color: rgba(0,0,0,0.1);
+}
+.admin-sidebar-logout {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    background: transparent;
+    color: #ef4444;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+.admin-sidebar-logout.collapsed {
+    justify-content: center;
+}
+.admin-sidebar-logout.expanded {
+    justify-content: flex-start;
+}
+
+.admin-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+.admin-main.desktop {
+    height: 100%;
+}
+.admin-main.mobile {
+    height: calc(100% - 60px);
+}
+
+.admin-content-wrapper {
+    flex: 1;
+    overflow: hidden;
+    background-color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+.admin-content-wrapper.desktop {
+    padding: 30px 40px;
+}
+.admin-content-wrapper.mobile {
+    padding: 15px;
+}
+
+.admin-content-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+}

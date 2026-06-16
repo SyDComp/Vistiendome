@@ -1,0 +1,128 @@
+/* ==========================================================================
+   FEATURE: CATALOG
+   Estilos namespaceados para el módulo de catálogo público.
+   ========================================================================== */
+
+/* --- Layout Principal --- */
+.catalog-view {
+    margin-top: 2rem;
+    padding-bottom: 5rem;
+}
+
+.catalog-header {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.catalog-subtitle {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    color: #8f0653;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.catalog-title {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #0f172a;
+    letter-spacing: -1.5px;
+    margin: 0;
+    line-height: 1;
+}
+
+.catalog-decorative-line {
+    width: 60px;
+    height: 3px;
+    background: #8f0653;
+    margin: 24px 0;
+    border-radius: 10px;
+}
+
+.catalog-description {
+    font-size: 1.1rem;
+    color: #64748b;
+    max-width: 500px;
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .catalog-title { font-size: 2.2rem; }
+    .catalog-header { padding: 3rem 10px; }
+}
+
+.catalog-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* --- Grid de Productos --- */
+.catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 2rem;
+}
+
+@media (min-width: 768px) {
+    .catalog-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 32px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .catalog-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 40px;
+    }
+}
+
+.catalog-grid-item {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* --- Estado Vacío --- */
+.catalog-empty-state {
+    text-align: center;
+    padding: 5rem 0;
+    background: #f8fafc;
+    border-radius: 30px;
+    border: 2px dashed #e2e8f0;
+}
+
+.catalog-empty-icon {
+    font-size: 3rem;
+    color: #cbd5e1;
+    margin-bottom: 1rem;
+}
+
+.catalog-empty-state p {
+    font-size: 1.2rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.catalog-btn-reset {
+    margin-top: 20px;
+    background: #0f172a;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.catalog-btn-reset:hover {
+    transform: scale(1.05);
+    background: #1e293b;
+}

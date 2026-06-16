@@ -80,7 +80,7 @@ const Navbar = ({ links = [], vistaActual }) => { // links are passed from Home
                 <nav className="navbar container">
                     {/* Logo Section */}
                     <div className="navbar-logo" onClick={() => { navigate('/'); setIsMenuOpen(false); }}>
-                        <span className="logo-text">Vistiendome</span>
+                        <span className="logo-text">Vistiendomé</span>
                         {/* <Heartbeat /> */}
                     </div>
 

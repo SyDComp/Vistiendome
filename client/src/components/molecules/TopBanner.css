@@ -1,0 +1,27 @@
+.top-banner-container {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    /* Fluye en el documento (no fixed) y empuja el navbar hacia abajo */
+    position: relative;
+    z-index: 1002;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.top-banner-message {
+    margin: 0;
+    line-height: 1.4;
+    max-width: 1200px;
+}
+
+/* Ensure mobile compatibility */
+@media (max-width: 768px) {
+    .top-banner-container {
+        font-size: 0.85rem;
+        padding: 0.6rem 1rem;
+    }
+}

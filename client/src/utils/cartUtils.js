@@ -23,7 +23,7 @@ export const generateWhatsAppMessage = (cart, userData, total) => {
         ? `\n*Contacto:* ${userData.email || ''} ${userData.telefono ? '| ' + userData.telefono : ''}`
         : '';
 
-    const message = `*NUEVO PEDIDO VISTIÉNDOME* 🌸\n` +
+    const message = `*NUEVO PEDIDO VISTIENDOMÉ* 🌸\n` +
         `---------------------------\n` +
         `*Cliente:* ${userData.nombre}` +
         `${contactPart}` +
@@ -36,6 +36,15 @@ export const generateWhatsAppMessage = (cart, userData, total) => {
     return encodeURIComponent(message);
 };
 
-export const getCartItemKey = (productId, sku) => {
-    return `${productId}-${sku || 'no-sku'}`;
+export const getCartItemKey = (productId, sku, selections = {}) => {
+    // Si no hay SKU, usamos una combinación de ID y atributos ordenados para garantizar unicidad
+    if (!sku) {
+        const sortedSpecs = Object.entries(selections || {})
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([k, v]) => `${k}:${v}`)
+            .join('|');
+        return `${productId}-spec-${sortedSpecs}`;
+    }
+    // Si hay SKU, es la identidad definitiva
+    return `${productId}-${sku}`;
 };

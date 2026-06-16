@@ -1,0 +1,104 @@
+.external-sale-form .form-group-row input,
+.external-sale-form .form-group-row select {
+    font-size: 0.95rem;
+    color: #1e293b;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.external-sale-form .input-field:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.external-sale-products-section {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.selected-products-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.product-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.product-item-row:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background-color: #f8fafc !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .modal-content-column.external-sale-modal-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        border-radius: 0 !important;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-header {
+        padding: 1rem !important;
+    }
+
+    .modal-body.external-sale-form {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.25rem !important;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .external-sale-form .form-group-row {
+        grid-template-columns: 1fr !important;
+        gap: 1.25rem !important;
+    }
+
+    .product-item-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+
+    .product-info-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .product-controls-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px dashed #e2e8f0;
+        padding-top: 0.75rem;
+    }
+
+    .external-sale-actions {
+        flex-direction: column-reverse;
+        padding: 1rem !important;
+        background: #fff;
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+        gap: 0.75rem !important;
+    }
+
+    .external-sale-actions button {
+        width: 100%;
+        padding: 0.9rem !important;
+        height: 50px;
+    }
+}

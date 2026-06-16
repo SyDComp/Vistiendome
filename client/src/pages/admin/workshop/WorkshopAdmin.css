@@ -1,0 +1,218 @@
+/* ===== Word-like Editor Experience ===== */
+
+.workshop-editor-container {
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.workshop-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.editor-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--color-gray-dark, #374151);
+}
+
+/* The "paper" wrapper */
+.editor-paper {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    overflow: visible;
+    border: 1px solid #e2e8f0;
+}
+
+/* Sticky toolbar */
+.editor-paper .ql-toolbar.ql-snow {
+    border: none;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 8px 12px;
+    border-radius: 12px 12px 0 0;
+}
+
+.editor-paper .ql-container.ql-snow {
+    border: none;
+    font-family: inherit;
+}
+
+.editor-paper .ql-editor {
+    min-height: 500px;
+    padding: 2rem 1.5rem;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #1e293b;
+}
+
+.editor-paper .ql-editor.ql-blank::before {
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* --- Media inside the editor --- */
+
+.editor-paper .ql-editor img {
+    max-width: 100%;
+    border-radius: 8px;
+    display: block;
+    margin: 1rem auto;
+    cursor: grab;
+    transition: outline 0.15s, opacity 0.2s;
+}
+
+.editor-paper .ql-editor img:active {
+    cursor: grabbing;
+}
+
+.editor-paper .ql-editor img:hover {
+    outline: 2px dashed #93c5fd;
+    outline-offset: 4px;
+}
+
+.editor-paper .ql-editor .ql-video-custom {
+    margin: 1rem auto;
+    text-align: center;
+    cursor: grab;
+    border-radius: 8px;
+    transition: outline 0.15s;
+    position: relative;
+}
+
+.editor-paper .ql-editor .ql-video-custom:active {
+    cursor: grabbing;
+}
+
+.editor-paper .ql-editor .ql-video-custom:hover {
+    outline: 2px dashed #93c5fd;
+    outline-offset: 4px;
+}
+
+.editor-paper .ql-editor .ql-video-custom video {
+    max-width: 100%;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto;
+    background: #000;
+    pointer-events: none;
+    /* Prevent native video controls from intercepting clicks */
+}
+
+/* Play icon overlay on video thumbnail in editor */
+.editor-paper .ql-editor .ql-video-custom::after {
+    content: '▶';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    color: rgba(255, 255, 255, 0.75);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+/* --- Floating Media Toolbar --- */
+
+.media-floating-toolbar {
+    z-index: 9999;
+    display: flex;
+    gap: 6px;
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(8px);
+    padding: 8px 12px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    animation: toolbar-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes toolbar-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.media-toolbar-btn {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+}
+
+.media-toolbar-btn:active {
+    transform: scale(0.95);
+}
+
+.media-toolbar-delete {
+    background: #ef4444;
+    color: white;
+}
+
+.media-toolbar-delete:hover {
+    background: #dc2626;
+}
+
+.media-toolbar-play {
+    background: #3b82f6;
+    color: white;
+}
+
+.media-toolbar-play:hover {
+    background: #2563eb;
+}
+
+/* --- Form Actions --- */
+.form-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+}
+
+/* --- Mobile --- */
+@media (max-width: 768px) {
+    .workshop-editor-container {
+        padding: 0 0.5rem;
+    }
+
+    .editor-paper .ql-editor {
+        min-height: 350px;
+        padding: 1.25rem 1rem;
+        font-size: 1rem;
+    }
+
+    .editor-paper .ql-toolbar.ql-snow {
+        padding: 6px 8px;
+    }
+
+    .editor-paper .ql-toolbar .ql-formats {
+        margin-right: 4px;
+    }
+
+    .media-floating-toolbar {
+        padding: 6px 8px;
+    }
+
+    .media-toolbar-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+}

@@ -1,0 +1,80 @@
+/* ====== Button Component Styles ====== */
+
+.ui-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 28px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    font-weight: 500;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.ui-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Variantes visuales */
+.ui-btn-primary {
+    background-color: #c8a2a2;
+    color: #ffffff;
+}
+
+.ui-btn-primary:hover:not(:disabled) {
+    background-color: #b38b8b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(200, 162, 162, 0.2);
+}
+
+.ui-btn-secondary {
+    background-color: transparent;
+    border-color: #e0e0e0;
+    color: #2c2c2c;
+}
+
+.ui-btn-secondary:hover:not(:disabled) {
+    background-color: #fcfbfa;
+    border-color: #c8a2a2;
+}
+
+.ui-btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+/* Loader Interno */
+.ui-btn-loading {
+    cursor: wait !important;
+}
+
+.ui-btn-text-hidden {
+    opacity: 0;
+}
+
+.ui-loader {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+.ui-btn-secondary .ui-loader {
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #495057;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

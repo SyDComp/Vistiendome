@@ -1,0 +1,138 @@
+/* ============================================================
+   THEME VARIABLES — Vistiendome Design System
+   ============================================================
+   Un único lugar de verdad para colores, tipografía, spacing,
+   breakpoints y radii. Nada debe hardcodearse fuera de aquí.
+   ============================================================ */
+
+:root {
+  /* ----------------------------------------------------------
+     COLORS — Brand
+     ---------------------------------------------------------- */
+  --color-brand: #8f0653;
+  --color-brand-light: #c8a2a2;
+  --color-brand-lighter: #fdf2f8;
+  --color-brand-soft: #fce7f3;
+
+  /* ----------------------------------------------------------
+     COLORS — Admin
+     ---------------------------------------------------------- */
+  --color-admin-dark: #1e1b4b;
+  --color-admin-text: #8b8bbd;
+
+  /* ----------------------------------------------------------
+     COLORS — Text
+     ---------------------------------------------------------- */
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #2c2c2c;
+  --color-text-body: #555;
+  --color-text-muted: #64748b;
+  --color-text-placeholder: #94a3b8;
+  --color-text-disabled: #cbd5e1;
+
+  /* ----------------------------------------------------------
+     COLORS — Surfaces
+     ---------------------------------------------------------- */
+  --color-surface: #ffffff;
+  --color-bg: #fcfbfa;
+  --color-bg-elevated: #f8fafc;
+  --color-bg-subtle: #f1f5f9;
+  --color-bg-warm: #fbfbfb;
+
+  /* ----------------------------------------------------------
+     COLORS — Borders
+     ---------------------------------------------------------- */
+  --color-border: #e2e8f0;
+  --color-border-light: #eaeaea;
+  --color-border-medium: #e0e0e0;
+  --color-border-subtle: #f1f5f9;
+
+  /* ----------------------------------------------------------
+     COLORS — Feedback
+     ---------------------------------------------------------- */
+  --color-success: #16a34a;
+  --color-success-bg: #f0fdf4;
+  --color-success-border: #dcfce7;
+
+  --color-error: #ef4444;
+  --color-error-bg: #fef2f2;
+  --color-error-border: #fee2e2;
+
+  --color-warning: #d97706;
+  --color-warning-bg: #fffbeb;
+  --color-warning-border: #fef3c7;
+
+  --color-info: #3b82f6;
+  --color-info-bg: #eff6ff;
+  --color-info-border: #dbeafe;
+
+  /* ----------------------------------------------------------
+     COLORS — Misc
+     ---------------------------------------------------------- */
+  --color-gold-accent: #92400e;
+  --color-gold-bg: #fffbeb;
+  --color-gold-border: #fde68a;
+
+  /* ----------------------------------------------------------
+     TYPOGRAPHY
+     ---------------------------------------------------------- */
+  --font-heading: 'Cormorant Garamond', serif;
+  --font-body: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: monospace;
+
+  /* ----------------------------------------------------------
+     SPACING
+     ---------------------------------------------------------- */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+  --space-4xl: 40px;
+
+  /* ----------------------------------------------------------
+     BORDER RADIUS
+     ---------------------------------------------------------- */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
+  --radius-3xl: 14px;
+  --radius-4xl: 16px;
+  --radius-5xl: 20px;
+  --radius-6xl: 24px;
+  --radius-7xl: 30px;
+  --radius-8xl: 32px;
+  --radius-pill: 100px;
+  --radius-full: 50%;
+
+  /* ----------------------------------------------------------
+     LAYOUT
+     ---------------------------------------------------------- */
+  --navbar-height: 70px;
+  --container-max: 1400px;
+  --container-padding: 20px;
+
+  /* ----------------------------------------------------------
+     Z-INDEX SCALE
+     ---------------------------------------------------------- */
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-drawer: 1200;
+  --z-modal: 1300;
+  --z-toast: 1400;
+  --z-overlay: 1500;
+
+  /* ----------------------------------------------------------
+     BREAKPOINTS (referencia para JS y media queries)
+     ---------------------------------------------------------- */
+  --bp-sm: 480px;
+  --bp-md: 640px;
+  --bp-lg: 768px;
+  --bp-xl: 1024px;
+  --bp-2xl: 1200px;
+  --bp-3xl: 1400px;
+}

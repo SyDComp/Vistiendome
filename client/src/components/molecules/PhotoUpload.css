@@ -1,0 +1,123 @@
+.photo-upload {
+    background: white;
+    padding: 2rem;
+    border-radius: 0;
+    border: 1px solid #e2e2e2;
+}
+
+.photo-upload h3 {
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: #121212;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+}
+
+/* Upload Area */
+.upload-area {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.file-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    border: 2px dashed #e2e2e2;
+    border-radius: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #f9f9f9;
+}
+
+.upload-label:hover {
+    border-color: #121212;
+    background: white;
+}
+
+.camera-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.6;
+}
+
+.upload-label p {
+    font-size: 1rem;
+    color: #121212;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.hint {
+    font-size: 0.85rem;
+    color: #777777;
+}
+
+/* Preview Area */
+.preview-area {
+    text-align: center;
+}
+
+.preview-image {
+    max-width: 100%;
+    max-height: 400px;
+    border: 1px solid #e2e2e2;
+    margin-bottom: 1.5rem;
+    object-fit: contain;
+}
+
+.preview-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.cancel-link {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 1rem;
+    background: none;
+    border: none;
+    color: #999999;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 0.9rem;
+    padding: 0.5rem;
+}
+
+.cancel-link:hover {
+    color: #121212;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .photo-upload {
+        padding: 1.5rem;
+    }
+
+    .upload-label {
+        padding: 2rem 1rem;
+    }
+
+    .preview-actions {
+        flex-direction: column;
+    }
+
+    .preview-actions button {
+        width: 100%;
+    }
+}

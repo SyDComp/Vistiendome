@@ -1,0 +1,46 @@
+
+.char-manager-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.char-manager-name-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.char-manager-shield {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8f0653;
+    flex-shrink: 0;
+}
+
+.char-manager-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    flex-shrink: 0;
+}
+
+.char-manager-name-text {
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.char-manager-name-text.system { color: #8f0653; }
+.char-manager-name-text.normal { color: #334155; }
+
+.char-manager-badge-system {
+    padding: 2px 6px;
+    font-size: 9px;
+}

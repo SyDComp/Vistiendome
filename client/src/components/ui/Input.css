@@ -1,0 +1,92 @@
+/* Premium Input Component Styles */
+.premium-input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+    position: relative;
+    width: 100%;
+}
+
+.premium-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    color: #92400e;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.premium-input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 2px solid #fde68a;
+    font-size: 14px;
+    font-weight: 800;
+    color: #1e1b4b;
+    outline: none;
+    background: #fff;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.premium-input:focus {
+    border-color: #fbbf24;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+}
+
+.premium-input::placeholder {
+    color: #cbd5e1;
+}
+
+/* Color Type Specifics */
+.premium-color-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+}
+
+.premium-color-square {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    border: 2px solid #fde68a;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.premium-color-native {
+    position: absolute;
+    inset: -5px;
+    width: 150%;
+    height: 150%;
+    cursor: pointer;
+    opacity: 0;
+}
+
+.premium-color-text {
+    flex: 1;
+    min-width: 0;
+    font-family: monospace;
+}
+
+/* Error text (migrated from ui.css) */
+.ui-error-text {
+    color: #d89b9b;
+    font-size: 12px;
+    margin-top: 6px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.ui-required-mark {
+    color: #e74c3c;
+    margin-left: 3px;
+}

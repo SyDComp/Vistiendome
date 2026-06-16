@@ -1,0 +1,77 @@
+.heartbeat-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.3s ease;
+}
+
+.heart-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    position: relative;
+    z-index: 2;
+}
+
+.heart-pulse {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    z-index: 1;
+    opacity: 0;
+}
+
+/* Online State */
+.heartbeat-indicator.online .heart-dot {
+    background: #10b981; /* Emerald 500 */
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.heartbeat-indicator.online .heart-pulse {
+    background: rgba(16, 185, 129, 0.4);
+    animation: pulse-out 2s infinite;
+}
+
+.heartbeat-indicator.online .heart-label {
+    color: #10b981;
+}
+
+/* Offline State */
+.heartbeat-indicator.offline {
+    background: rgba(239, 68, 68, 0.05);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.heartbeat-indicator.offline .heart-dot {
+    background: #ef4444; /* Red 500 */
+}
+
+.heartbeat-indicator.offline .heart-label {
+    color: #ef4444;
+}
+
+@keyframes pulse-out {
+    0% {
+        transform: scale(0.3);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Glassmorphism hover effect */
+.heartbeat-indicator:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}

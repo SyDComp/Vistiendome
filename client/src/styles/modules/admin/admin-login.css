@@ -1,0 +1,39 @@
+.admin-login-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border-radius: 12px;
+}
+
+.admin-login-title {
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.admin-login-brand {
+    color: #8f0653;
+}
+
+.admin-login-status {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.admin-login-status.error {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.admin-login-status.success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.admin-login-btn {
+    width: 100%;
+    margin-top: 15px;
+}

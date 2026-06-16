@@ -1,0 +1,197 @@
+.product-card {
+    background: transparent;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    position: relative; /* Anchor for badges */
+}
+
+.card-image-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Redundant image styles removed - Managed by SmartImage */
+
+/* Badges - Floating logic */
+.badges-container {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+    z-index: 15;
+}
+
+.badge-out-of-stock,
+.badge-low-stock,
+.badge-mercadolibre {
+    position: static !important; /* Managed by flex container */
+    background: #fff;
+    color: #121212;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    white-space: nowrap;
+}
+
+.badge-out-of-stock {
+    background: #121212;
+    color: #fff;
+}
+
+.badge-mercadolibre {
+    background: #FFE600 !important;
+    color: #333 !important;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Hover Overlay */
+.card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 1.5rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    height: 100%;
+}
+
+.product-card:hover .card-overlay {
+    opacity: 1;
+}
+
+.btn-quick-view {
+    background: #fff;
+    color: #121212;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    font-weight: 500;
+    transform: translateY(10px);
+    transition: transform 0.3s ease, background 0.2s;
+}
+
+.product-card:hover .btn-quick-view {
+    transform: translateY(0);
+}
+
+.btn-quick-view:hover {
+    background: #121212;
+    color: #fff;
+}
+
+/* Info Section - Rigid Standardization */
+.card-info {
+    display: flex;
+    flex-direction: column;
+    height: 140px !important;
+    /* Fixed standard area for info */
+    padding: 0 0.5rem;
+    justify-content: flex-start;
+    overflow: hidden;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.4rem;
+    gap: 0.5rem;
+}
+
+.product-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: #1a1a1a;
+    margin: 0;
+    /* Multiline Clamp */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+}
+
+.product-price {
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: #333;
+    white-space: nowrap;
+}
+
+.product-category {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #999;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .card-image-container {
+        margin-bottom: 0.8rem;
+    }
+
+    .product-title,
+    .product-price {
+        font-size: 0.85rem;
+    }
+
+    .product-category {
+        font-size: 0.75rem;
+    }
+
+    /* Hide quick view overlay on small screens to prioritize image visibility */
+    .card-overlay {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-image-container {
+        margin-bottom: 0.5rem;
+    }
+
+    .product-title {
+        font-size: 0.8rem;
+        max-width: 100%;
+        /* More space for title on 2-col layout */
+    }
+
+    .product-price {
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.1rem;
+    }
+}

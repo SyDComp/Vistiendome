@@ -1,0 +1,284 @@
+/* Main Layout Structure */
+.main-layout-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    /* Navbar fixed has 80px height + TopBanner (variable) */
+    /* By default, we use a global padding-top to avoid overlap */
+    padding-top: 110px; 
+}
+
+/* Wrapper FIXED que agrupa Banner + Navbar */
+.sticky-header-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1001; /* Must be below ProductModal (3000) */
+    width: 100%;
+    will-change: transform;
+    transform: translateY(0);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Home page specific: No padding if hero goes under navbar (handled in Hero component usually or via negative margin) */
+.main-layout-container:has(.hero-section) .main-content {
+    padding-top: 0;
+}
+
+/* Navbar */
+.main-nav {
+    /* Ahora es relative dentro del sticky-header-wrapper */
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5%;
+    z-index: 1;
+    transition: background 0.3s ease, padding 0.3s ease;
+
+    /* Default state (Home top): Transparent & Dark Text */
+    background: transparent;
+    color: #121212;
+}
+
+/* Ocultar cuando el usuario scrollea hacia abajo */
+.sticky-header-wrapper.nav-hidden {
+    transform: translateY(-100%);
+}
+
+/* Ocultar Navbar cuando hay un detalle de producto abierto (para máxima inmersión) */
+body.product-modal-open .sticky-header-wrapper {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Scrolled or Non-Home State: White & Dark Text */
+.main-nav.scrolled {
+    background: rgba(255, 255, 255, 0.98);
+    height: 80px;
+    color: #121212;
+    border-bottom: none;
+    box-shadow: none;
+}
+
+/* When mobile menu is active, remove the nav background so the inner overlay can expand fully */
+.main-nav.mobile-active {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover {
+    opacity: 0.8;
+}
+
+.nav-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+/* User Menu */
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-greeting {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.admin-link {
+    font-size: 0.8rem;
+    text-decoration: underline;
+}
+
+.logout-btn-public {
+    background: transparent;
+    border: 1px solid currentColor;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: inherit;
+    transition: all 0.2s;
+}
+
+.login-btn {
+    border: 1px solid currentColor;
+    padding: 0.5rem 1.2rem;
+    border-radius: 4px;
+}
+
+/* Cart Button in Nav */
+.nav-cart-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 0.5rem;
+    color: inherit;
+    transition: transform 0.2s;
+}
+
+.nav-cart-btn:hover {
+    transform: scale(1.1);
+}
+
+.cart-icon-emoji {
+    font-size: 1.25rem;
+}
+
+.cart-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #dc3545;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    min-width: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    border: 2px solid white;
+}
+
+/* Scrolled state adjustment for badge border */
+.main-nav:not(.scrolled) .cart-badge {
+    border-color: transparent;
+}
+
+
+/* Mobile Toggle */
+.mobile-menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 24px;
+    height: 18px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 1000;
+    position: relative;
+    padding: 0;
+}
+
+.mobile-menu-toggle span {
+    width: 100%;
+    height: 2px;
+    background-color: currentColor;
+    transition: all 0.3s ease;
+    transform-origin: left center;
+}
+
+/* Hamburger animation when active */
+.main-nav.mobile-active .mobile-menu-toggle span:nth-child(1) {
+    transform: rotate(45deg);
+}
+
+.main-nav.mobile-active .mobile-menu-toggle span:nth-child(2) {
+    opacity: 0;
+    width: 0;
+}
+
+.main-nav.mobile-active .mobile-menu-toggle span:nth-child(3) {
+    transform: rotate(-45deg);
+}
+
+/* Mobile Styles */
+@media (max-width: 1024px) {
+    .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        z-index: 1000;
+        padding-top: 10px;
+    }
+
+    .nav-logo {
+        padding-top: 10px;
+    }
+
+    .mobile-menu-toggle {
+        display: flex;
+    }
+
+    .nav-links {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        height: 100vh;
+        width: 80%;
+        max-width: 300px;
+        background: #ffffff;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: #121212;
+        /* Always dark on mobile menu */
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+        transition: right 0.38s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.38s;
+        z-index: 999;
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    .nav-links.mobile-active {
+        right: 0;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .mobile-menu-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 998;
+        /* Removido backdrop-filter: causa flicker en móvil al hacer scroll */
+    }
+}

@@ -1,0 +1,187 @@
+.rich-text-modal-overlay {
+    z-index: 10000;
+}
+
+.split-view-modal-content {
+    background: white;
+    width: 95%;
+    max-width: 1400px;
+    max-height: 90vh;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+.split-view-modal-content .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.split-view-modal-content .modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.split-view-modal-content .close-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    line-height: 1;
+}
+
+.split-view-modal-content .close-btn:hover {
+    color: #000;
+}
+
+/* Split View Layout */
+.split-view-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    flex: 1;
+    min-height: 500px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.split-view-pane {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+    overflow: hidden;
+}
+
+.pane-header {
+    background: #edf2f7;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #4a5568;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Hidden by default on desktop, shown on mobile via media query */
+.mobile-expand-btn {
+    display: none;
+}
+
+/* HTML Source Editor */
+.html-source-editor {
+    flex: 1;
+    width: 100%;
+    padding: 1rem;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #e2e8f0;
+    background-color: #1a202c;
+    border: none;
+    resize: none;
+    outline: none;
+    overflow-y: auto;
+}
+
+.html-source-editor:focus {
+    box-shadow: inset 0 0 0 2px #3182ce;
+}
+
+/* Preview Pane */
+.preview-pane {
+    background: #ffffff;
+}
+
+.preview-content {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    background: #fff;
+    /* Emulate the public page background */
+}
+
+/* Override PolicyPage.css wrappers that add too much margin */
+.preview-content.policy-content-wrapper {
+    margin: 0 !important;
+    max-width: none;
+}
+
+/* Editable Preview Specifics */
+.editable-preview {
+    outline: none;
+    /* Remove default browser outline */
+    min-height: 100%;
+}
+
+.editable-preview:focus-visible {
+    box-shadow: inset 0 0 0 2px rgba(49, 130, 206, 0.2);
+    border-radius: 4px;
+}
+
+.split-view-modal-content .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+/* --- Responsive Layout for Tablets & Mobile --- */
+@media (max-width: 1024px) {
+    .split-view-container {
+        grid-template-columns: 1fr;
+        /* Stack vertically */
+        grid-template-rows: minmax(300px, 1fr) minmax(300px, 1fr);
+        overflow-y: auto;
+        /* Allow scrolling the whole container if needed */
+    }
+
+    .split-view-pane {
+        min-height: 350px;
+    }
+
+    .split-view-modal-content {
+        padding: 1rem;
+        width: 100%;
+        max-height: 95vh;
+    }
+
+    .mobile-expand-btn {
+        display: block;
+        background: #fff;
+        border: 1px solid #cbd5e0;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        cursor: pointer;
+        color: #4a5568;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .mobile-expand-btn:active {
+        background: #edf2f7;
+    }
+
+    .split-view-pane.mobile-hidden {
+        display: none !important;
+    }
+
+    .split-view-pane.mobile-expanded {
+        grid-row: span 2;
+        min-height: 60vh;
+    }
+}

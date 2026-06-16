@@ -1,30 +1,34 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { X, ArrowLeft, Info, Layers, List, Package, Folder, Hash, Tag, ChevronRight, Image as ImageIcon, Plus, Star, Trash2, Upload, Sparkles, FolderOpen, Palette, LayoutList } from 'lucide-react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { Edit2, Save, Trash2, ArrowLeft, Image as ImageIcon, Sparkles, Folder, Tag, Layers, FileText, Check, LayoutDashboard, Database, ChevronRight, Share2, Upload, AlertCircle, Maximize2, X, Package, FolderOpen, RefreshCw, BarChart2, Info, Lock, ChevronLeft, Plus, Hash, List, Palette, LayoutList, Users, Mail, Printer } from 'lucide-react';
+import Barcode from 'react-barcode';
 import Button from '../Button';
 import MediaGallery from '../../interface/admin/media/MediaGallery';
 import LibraryPicker from '../../interface/admin/inventory/LibraryPicker';
+import Input from '../Input';
 
-const API_BASE = 'http://127.0.0.1:8000/api/v1/admin/catalog';
+const API_BASE = (import.meta.env.PROD ? '/api/v1/admin/catalog' : 'http://127.0.0.1:8000/api/v1/admin/catalog');
 
-/**
- * Skeleton Loader para secciones de DetailDrawer
- */
-const SectionSkeleton = () => (
-    <div style={{ marginBottom: '40px', opacity: 0.6 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-            <div className="skeleton" style={{ width: '20px', height: '20px', borderRadius: '4px' }}></div>
-            <div className="skeleton" style={{ width: '120px', height: '14px', borderRadius: '4px' }}></div>
-        </div>
-        <div style={{ background: '#f8fafc', padding: '24px', borderRadius: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            {[1, 2, 3, 4].map(i => (
-                <div key={i}>
-                    <div className="skeleton" style={{ width: '60px', height: '10px', marginBottom: '8px' }}></div>
-                    <div className="skeleton" style={{ width: '100px', height: '14px' }}></div>
-                </div>
-            ))}
-        </div>
-    </div>
-);
+// Función para generar un código EAN-13 determinista basado en un texto (SKU)
+const generateEAN13 = (text) => {
+    if (!text) return "";
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+        hash = ((hash << 5) - hash) + text.charCodeAt(i);
+        hash = hash & hash;
+    }
+    let hashStr = Math.abs(hash).toString().padStart(12, '0');
+    while (hashStr.length < 12) hashStr += hashStr;
+    hashStr = hashStr.substring(0, 12);
+    
+    let sum = 0;
+    for (let i = 0; i < 12; i++) {
+        sum += parseInt(hashStr[i]) * (i % 2 === 0 ? 1 : 3);
+    }
+    const checksum = (10 - (sum % 10)) % 10;
+    return hashStr + checksum;
+};
+
+import Skeleton, { SectionSkeleton } from '../Skeleton';
 
 /**
  * DetailDrawer: Vista de detalles potente con navegación histórica (Stack-based).
@@ -32,30 +36,73 @@ const SectionSkeleton = () => (
 const DetailDrawer = ({ 
     isOpen, 
     onClose, 
+    onSelect, 
+    onUpdate, 
+    onDelete,
+    onReorder,
     data: initialData, 
     type: initialType = 'generic',
     title: initialTitle = "Detalles del Registro",
     metadata: initialMetadata = null,
-    galleryPool = [], // Pool de imágenes del producto para elegir
-    onUpdate, // Callback para cuando se editan datos (ej: variantes)
-    onDelete // Nuevo: Callback opcional para eliminar el registro
+    initialShowLibrary = false
 }) => {
     const [isVisible, setIsVisible] = useState(false);
+    const [currData, setCurrData] = useState(null);
+    const [editData, setEditData] = useState({});
+    const [currType, setCurrType] = useState(null);
+    const [currTitle, setCurrTitle] = useState('');
+    const [currMetadata, setCurrMetadata] = useState(null);
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [showGlobalGallery, setShowGlobalGallery] = useState(false);
     const [showLibraryVarieties, setShowLibraryVarieties] = useState(false);
-    
-    // Estado local para edición
-    const [editData, setEditData] = useState({});
+    const [showLibraryOptions, setShowLibraryOptions] = useState(false);
+    const [isReorderMode, setIsReorderMode] = useState(false);
+    const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+    const [activeLayerIndex, setActiveLayerIndex] = useState(null);
+    const [pickingFor, setPickingFor] = useState(null); // { slideIndex: number, layerIndex: number, type: 'image' }
+    const [tableNewHeader, setTableNewHeader] = useState('');
+    const [allSpecs, setAllSpecs] = useState([]);
+    const [allCategories, setAllCategories] = useState([]);
+    const [allCollections, setAllCollections] = useState([]);
+
+
+
+    // Resetear estados al cerrar el drawer
+    useEffect(() => {
+        if (!isOpen) {
+            setShowLibraryVarieties(false);
+            setShowLibraryOptions(false);
+            setShowGlobalGallery(false);
+            setIsReorderMode(false);
+        }
+    }, [isOpen]);
+
+    // Cargar especificaciones y categorías si es categoría
+    useEffect(() => {
+        if (isOpen && (currType === 'category' || currType === 'cms_block')) {
+            if (allSpecs.length === 0) {
+                fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/admin/catalog/specifications`)
+                    .then(r => r.json())
+                    .then(data => setAllSpecs(data || []))
+                    .catch(console.error);
+            }
+            if (allCategories.length === 0) {
+                fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/admin/catalog/categories?page_size=500`)
+                    .then(r => r.json())
+                    .then(data => setAllCategories(data.items || []))
+                    .catch(console.error);
+            }
+            if (allCollections.length === 0) {
+                fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/admin/catalog/collections?page_size=500`)
+                    .then(r => r.json())
+                    .then(data => setAllCollections(Array.isArray(data) ? data : (data.items || [])))
+                    .catch(console.error);
+            }
+        }
+    }, [isOpen, currType, allSpecs.length, allCategories.length, allCollections.length]);
     
     // Estado local para permitir navegación profunda
-    const [currData, setCurrData] = useState(null);
-    const [currType, setCurrType] = useState('generic');
-    const [currTitle, setCurrTitle] = useState('');
-    const [currMetadata, setCurrMetadata] = useState(null);
-    
-    // Pila de historial: [{ data, type, title, meta }]
     const [history, setHistory] = useState([]);
 
     // Resetear/Inicializar cuando se abre con nuevos datos desde fuera
@@ -65,13 +112,15 @@ const DetailDrawer = ({
             setCurrData(initialData);
             setEditData({
                 ...initialData,
-                image_urls: initialData?.image_urls || [] // Aseguramos que exista la lista
+                media_assets: initialData?.media_assets || [],
+                media_ids: initialData?.media_ids || []
             });
             setCurrType(initialType);
             setCurrTitle(initialTitle);
             setCurrMetadata(initialMetadata);
             setHistory([]);
             setShowGlobalGallery(false);
+            setShowLibraryVarieties(initialShowLibrary);
             setTimeout(() => setIsVisible(true), 10);
         } else {
             document.body.style.overflow = 'auto';
@@ -80,10 +129,33 @@ const DetailDrawer = ({
     }, [isOpen, initialData, initialType, initialTitle, initialMetadata]);
 
     const navigateTo = async (id, targetType, targetTitle, meta = null) => {
+        if (isReorderMode) return;
         setLoading(true);
-        // Apilar el actual
-        setHistory(prev => [...prev, { data: currData, type: currType, title: currTitle, meta: currMetadata }]);
+        // Apilar el actual con su estado de UI
+        setHistory(prev => [...prev, { 
+            data: currData, 
+            type: currType, 
+            title: currTitle, 
+            meta: currMetadata,
+            showLibrary: showLibraryVarieties || showLibraryOptions
+        }]);
         
+        // Si ya tenemos los datos en meta (como en color_option), no necesitamos fetch
+        if (targetType === 'color_option' && meta) {
+            setCurrData(meta);
+            setEditData({
+                ...meta,
+                media_assets: meta.media_assets || [],
+                media_ids: meta.media_ids || []
+            });
+            setCurrType(targetType);
+            setCurrTitle(targetTitle);
+            setCurrMetadata(null);
+            setShowLibraryOptions(false);
+            setLoading(false);
+            return;
+        }
+
         try {
             // Normalizar endpoint (ej: characteristic -> attributes)
             const endpoint = targetType === 'characteristic' ? 'attributes' : 
@@ -96,9 +168,16 @@ const DetailDrawer = ({
             const data = await res.json();
             
             setCurrData(data);
+            setEditData({
+                ...data,
+                media_assets: data.media_assets || [],
+                media_ids: data.media_ids || []
+            });
             setCurrType(targetType);
             setCurrTitle(targetTitle || data.name);
             setCurrMetadata(meta);
+            setShowLibraryVarieties(false); // Ocultamos biblioteca para ver el nuevo detalle
+            setShowLibraryOptions(false);
         } catch (err) {
             console.error(err);
         } finally {
@@ -112,20 +191,38 @@ const DetailDrawer = ({
         const last = newHistory.pop();
         
         setCurrData(last.data);
+        setEditData({
+            ...last.data,
+            media_assets: last.data?.media_assets || [],
+            media_ids: last.data?.media_ids || []
+        });
         setCurrType(last.type);
         setCurrTitle(last.title);
         setCurrMetadata(last.meta);
+        
+        // Restaurar estado de biblioteca según el contexto previo
+        if (last.type === 'product' || last.type === 'collection') {
+            setShowLibraryVarieties(last.showLibrary || false);
+            setShowLibraryOptions(false);
+        } else if (last.type === 'characteristic') {
+            setShowLibraryOptions(last.showLibrary || false);
+            setShowLibraryVarieties(false);
+        } else {
+            setShowLibraryVarieties(false);
+            setShowLibraryOptions(false);
+        }
+        
         setHistory(newHistory);
+        setIsReorderMode(false);
     };
 
-    if (!isOpen) return null;
+    // Memoizar las secciones para evitar re-cálculos pesados en cada render
+    const sections = useMemo(() => {
+        const s = [];
+        if (loading || !currData) return s;
 
-    const sections = [];
-
-    // Lógica para estructurar secciones según el tipo actual (Deep rendering)
-    if (!loading && currData) {
         if (currType === 'product') {
-            sections.push({
+            s.push({
                 title: 'Información General',
                 icon: <Package size={18} />,
                 items: [
@@ -139,55 +236,207 @@ const DetailDrawer = ({
                 ]
             });
             if (currData.description) {
-                sections.push({ title: 'Descripción', icon: <Info size={18} />, content: currData.description });
+                s.push({ title: 'Descripción', icon: <Info size={18} />, content: currData.description });
             }
             if (currData.skus && currData.skus.length > 0) {
-                sections.push({
-                    title: 'Variantes y Stock',
+                const prices = currData.skus.map(sk => sk.price);
+                const minPrice = Math.min(...prices);
+                const maxPrice = Math.max(...prices);
+                const configKeys = new Set();
+                currData.skus.forEach(sk => {
+                    Object.keys(sk.config || {}).forEach(k => configKeys.add(k));
+                });
+
+                s.push({
+                    title: 'Variantes',
                     icon: <List size={18} />,
-                    type: 'table',
-                    headers: ['SKU', 'Configuración', 'Precio', 'Stock'],
-                    rows: currData.skus.map(s => [
-                        s.sku, 
-                        Object.entries(s.config || {}).map(([k, v]) => `${k}: ${v}`).join(', ') || 'Base',
-                        `$${s.price.toLocaleString()}`,
-                        `${s.stock} und.`
-                    ])
+                    type: 'summary-card',
+                    items: [
+                        { label: 'Total Registradas', value: `${currData.skus.length} variantes` },
+                        { label: 'Rango de Precios', value: minPrice === maxPrice ? `$${minPrice.toLocaleString()}` : `$${minPrice.toLocaleString()} - $${maxPrice.toLocaleString()}` },
+                        { label: 'Atributos Definidos', value: Array.from(configKeys).join(', ') || 'Base' }
+                    ],
+                    footer: (
+                        <p className="detail-drawer-summary-footer-text">
+                            Usa el Explorador Visual para gestionar fotos, precios y stock de cada combinación.
+                        </p>
+                    )
                 });
             }
-        } else if (currType === 'category') {
-            sections.push({
-                title: 'Configuración de Categoría',
+        } else if (currType === 'collection') {
+            s.push({
+                title: 'Información General',
                 icon: <Folder size={18} />,
                 items: [
                     { label: 'Nombre', value: currData.name },
-                    { label: 'Slug', value: currData.slug },
-                    { 
-                        label: 'Padre', 
-                        value: currData.parent_name || 'Ninguno (Raíz)',
-                        link: currData.parent_id ? { id: currData.parent_id, type: 'category' } : null
-                    },
-                    { label: 'Productos', value: `${currData.product_count || 0} productos asociados` }
+                        { label: 'Identificador (Slug)', value: currData.slug },
+                    { label: 'Estado', value: currData.is_active ? 'Activa' : 'Inactiva' }
                 ]
             });
-            if (currData.subcategories && currData.subcategories.length > 0) {
-                sections.push({
-                    title: 'Subcategorías Hijas',
+            if (currData.description) {
+                s.push({ title: 'Descripción', icon: <Info size={18} />, content: currData.description });
+            }
+            if (currData.skus && currData.skus.length > 0) {
+                s.push({
+                    title: `Variantes en la Colección (${currData.skus.length})`,
                     icon: <Layers size={18} />,
-                    type: 'interactive-list',
-                    linkedItems: currData.subcategories.map(s => ({ id: s.id, name: s.name, type: 'category' }))
+                    type: 'collection-items',
+                    items: currData.skus
                 });
             }
-            if (currData.suggested_specifications && currData.suggested_specifications.length > 0) {
-                sections.push({
+        } else if (currType === 'cliente') {
+            s.push({
+                title: 'Información de Cliente',
+                icon: <Users size={18} />,
+                items: [
+                    { label: 'Nombre Completo', value: `${currData.nombres || ''} ${currData.apellidos || ''}`.trim() || 'Sin Nombre' },
+                    { label: 'RUT', value: currData.rut || 'Sin RUT' },
+                    { label: 'Tipo', value: currData.tipo_persona === 'LEAD' ? 'Prospecto' : 'Cliente' }
+                ]
+            });
+            s.push({
+                title: 'Datos de Contacto',
+                icon: <Mail size={18} />,
+                items: [
+                    { label: 'Correo Electrónico', value: currData.email_personal || 'No registrado' },
+                    { label: 'Teléfono', value: currData.telefono || 'No registrado' },
+                    { label: 'Fecha de Registro', value: new Date(currData.created_at || Date.now()).toLocaleDateString() }
+                ]
+            });
+        } else if (currType === 'cotizacion') {
+            const calculatedTotal = currData.total || (currData.items ? currData.items.reduce((acc, item) => acc + ((item.cantidad || 0) * (item.precio_unitario_estimado || 0)), 0) : 0);
+            s.push({
+                title: 'Detalles de Cotización',
+                icon: <FileText size={18} />,
+                items: [
+                    { label: 'Número', value: `#${currData.id}` },
+                    { label: 'Estado', value: currData.estado || 'NUEVA' },
+                    { label: 'Monto Total Estimado', value: `$${calculatedTotal.toLocaleString()}` }
+                ]
+            });
+            if (currData.cliente) {
+                s.push({
+                    title: 'Cliente Asociado',
+                    icon: <Users size={18} />,
+                    items: [
+                        { label: 'Nombre', value: `${currData.cliente.nombres || ''} ${currData.cliente.apellidos || ''}`.trim() || 'Sin Nombre' },
+                        { label: 'Correo', value: currData.cliente.email_personal || 'No registrado' },
+                        { label: 'Teléfono', value: currData.cliente.telefono || 'No registrado' }
+                    ]
+                });
+            }
+        } else if (currType === 'category') {
+            if (!editData.is_editing) {
+                // MODO VISTA (Solo lectura)
+                s.push({
+                    title: 'Configuración de Categoría',
+                    icon: <Folder size={18} />,
+                    items: [
+                        { label: 'Nombre', value: currData.name },
+                        { label: 'Slug', value: currData.slug },
+                        { 
+                            label: 'Padre', 
+                            value: currData.parent_name || 'Ninguno (Raíz)',
+                            link: currData.parent_id ? { id: currData.parent_id, type: 'category' } : null
+                        },
+                        { label: 'Productos', value: `${currData.product_count || 0} productos asociados` }
+                    ]
+                });
+
+                if (currData.subcategories && currData.subcategories.length > 0) {
+                    s.push({
+                        title: 'Subcategorías Hijas',
+                        icon: <Layers size={18} />,
+                        type: 'interactive-list',
+                        linkedItems: currData.subcategories.map(sc => ({ id: sc.id, name: sc.name, type: 'category' }))
+                    });
+                }
+
+                if (currData.suggested_specifications && currData.suggested_specifications.length > 0) {
+                    s.push({
+                        title: 'Especificaciones Sugeridas',
+                        icon: <Layers size={18} />,
+                        type: 'interactive-list',
+                        linkedItems: currData.suggested_specifications.map(ss => ({ id: ss.id, name: ss.name, type: 'specification' }))
+                    });
+                }
+            } else {
+                // MODO EDICIÓN
+                s.push({
+                    title: 'Configuración Básica',
+                    icon: <LayoutDashboard size={18} />,
+                    editable: true,
+                    type: 'form',
+                    inputs: [
+                        { label: 'Nombre de Categoría', type: 'text', name: 'name', value: editData.name, onChange: (e) => setEditData({...editData, name: e.target.value}) },
+                        { label: 'Identificador (Slug)', type: 'text', name: 'slug', value: editData.slug, disabled: true },
+                        { 
+                            label: 'Categoría Padre', 
+                            type: 'select', 
+                            name: 'parent_id', 
+                            value: editData.parent_id || '', 
+                            options: [
+                                { value: '', label: '— Sin padre (Raíz) —' },
+                                ...allCategories
+                                    .filter(c => c.id !== editData.id && c.slug !== 'sin_categoria')
+                                    .map(c => ({ value: c.id, label: c.parent_name ? `${c.parent_name} › ${c.name}` : c.name }))
+                            ],
+                            onChange: (e) => setEditData({...editData, parent_id: e.target.value}) 
+                        },
+                        { label: 'Visible como Filtro', type: 'checkbox', name: 'is_filterable', value: editData.is_filterable, onChange: (e) => setEditData({...editData, is_filterable: e.target.checked}) }
+                    ]
+                });
+
+                if (currData.subcategories && currData.subcategories.length > 0) {
+                    s.push({
+                        title: 'Subcategorías Hijas',
+                        icon: <Layers size={18} />,
+                        type: 'interactive-list',
+                        linkedItems: currData.subcategories.map(sc => ({ id: sc.id, name: sc.name, type: 'category' }))
+                    });
+                }
+
+                s.push({
                     title: 'Especificaciones Sugeridas',
                     icon: <Layers size={18} />,
-                    type: 'interactive-list',
-                    linkedItems: currData.suggested_specifications.map(s => ({ id: s.id, name: s.name, type: 'specification' }))
+                    editable: true,
+                    type: 'custom',
+                    content: (
+                        <div className="detail-drawer-flex-col-16">
+                            <p className="detail-drawer-hint-text">
+                                Estas especificaciones se sugerirán automáticamente al crear productos en esta categoría.
+                            </p>
+                            <div className="detail-drawer-tags-container">
+                                {(editData.suggested_specifications || []).map(spec => (
+                                    <div key={spec.id} className="detail-drawer-tag-pill">
+                                        {spec.name}
+                                        <button 
+                                            type="button"
+                                            onClick={() => {
+                                                const nextSpecs = editData.suggested_specifications.filter(s => s.id !== spec.id);
+                                                setEditData({ ...editData, suggested_specifications: nextSpecs, suggested_specification_ids: nextSpecs.map(s => s.id) });
+                                            }}
+                                            className="detail-drawer-tag-remove-btn"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                            <Button 
+                                variant="outline" 
+                                type="button"
+                                onClick={() => setShowLibraryOptions(true)}
+                                className="detail-drawer-btn-dashed"
+                            >
+                                <Plus size={16} /> Gestionar Especificaciones
+                            </Button>
+                        </div>
+                    )
                 });
             }
         } else if (currType === 'specification') {
-            sections.push({
+            s.push({
                 title: 'Maestro de Especificación',
                 icon: <Layers size={18} />,
                 items: [
@@ -195,7 +444,7 @@ const DetailDrawer = ({
                 ]
             });
             if (currData.characteristics && currData.characteristics.length > 0) {
-                sections.push({
+                s.push({
                     title: 'Características Incluidas',
                     icon: <Hash size={18} />,
                     type: 'interactive-list',
@@ -207,17 +456,9 @@ const DetailDrawer = ({
                     }))
                 });
             }
-            if (currData.categories && currData.categories.length > 0) {
-                sections.push({
-                    title: 'Categorías Vinculadas',
-                    icon: <Folder size={18} />,
-                    type: 'interactive-list',
-                    linkedItems: currData.categories.map(c => ({ id: c.id, name: c.name, type: 'category' }))
-                });
-            }
         } else if (currType === 'characteristic') {
             const isColor = currData.name.toLowerCase() === 'color' || currData.name.toLowerCase() === 'colores';
-            sections.push({
+            s.push({
                 title: 'Detalle de Atributo',
                 icon: isColor ? <Palette size={18} /> : <Hash size={18} />,
                 items: [
@@ -228,8 +469,7 @@ const DetailDrawer = ({
             });
 
             const suggested = currMetadata?.suggestedValues || [];
-            const hasSuggestions = suggested.length > 0;
-            const finalOptions = hasSuggestions 
+            const finalOptions = suggested.length > 0 
                 ? currData.domain.filter(opt => {
                     const val = typeof opt === 'string' ? opt : (opt.value || opt.name);
                     return suggested.includes(val);
@@ -237,25 +477,129 @@ const DetailDrawer = ({
                 : currData.domain;
 
             if (finalOptions.length > 0) {
-                sections.push({
-                    title: hasSuggestions ? `Valores Sugeridos (${finalOptions.length})` : `Opciones en Biblioteca (${finalOptions.length})`,
-                    icon: hasSuggestions ? <Sparkles size={18} /> : <LayoutList size={18} />,
+                s.push({
+                    title: suggested.length > 0 ? `Valores Sugeridos (${finalOptions.length})` : `Opciones en Biblioteca (${finalOptions.length})`,
+                    icon: suggested.length > 0 ? <Sparkles size={18} /> : <LayoutList size={18} />,
                     type: 'library-grid',
                     isColor: isColor,
-                    options: finalOptions
+                    options: finalOptions,
+                    actions: !suggested.length && (
+                        <button 
+                            onClick={() => setIsReorderMode(!isReorderMode)}
+                            className={`detail-drawer-reorder-btn ${isReorderMode ? 'active' : ''}`}
+                        >
+                            {isReorderMode ? 'FINALIZAR ORDEN' : 'ORGANIZAR ORDEN'}
+                        </button>
+                    )
                 });
             }
+        } else if (currType === 'color_option') {
+            const parentChar = history.find(h => h.type === 'characteristic');
+            const isSize = parentChar?.title?.toLowerCase() === 'talla' || parentChar?.title?.toLowerCase() === 'tallas';
+            const isColor = parentChar?.title?.toLowerCase() === 'color' || parentChar?.title?.toLowerCase() === 'colores';
+
+            s.push({
+                title: isColor ? 'Detalle de Opción de Color' : 'Detalle de Opción de Catálogo',
+                icon: isColor ? <Palette size={18} /> : <Hash size={18} />,
+                items: [
+                    { label: 'Nombre Original', value: currData.value || currData.name },
+                    ...(isColor ? [{ 
+                        label: 'Código Hexadecimal', 
+                        value: (
+                            <div className="detail-drawer-flex-align-center-8">
+                                <div className="detail-drawer-color-dot-sm" style={{ background: currData.hex_code || '#000000' }} />
+                                {currData.hex_code || '#000000'}
+                            </div>
+                        ) 
+                    }] : [])
+                ]
+            });
+            
+            if (currData.is_system) {
+                s.push({
+                    title: 'Información Protegida',
+                    icon: <Lock size={18} />,
+                    content: (
+                        <div className="detail-drawer-protected-info-box">
+                            <p className="detail-drawer-m-0">Esta opción es parte de las <strong>vOS (Opciones del Sistema)</strong> básicas de Vistiendomé.</p>
+                            <p className="detail-drawer-mt-8">El nombre {isColor ? 'y el color base están protegidos' : 'está protegido'} para asegurar la consistencia del catálogo, pero puedes organizar su posición en la biblioteca general.</p>
+                        </div>
+                    )
+                });
+            } else {
+                s.push({
+                    title: 'Edición de Opción',
+                    icon: <Sparkles size={18} />,
+                    editable: true,
+                    type: 'form',
+                    inputs: [
+                        { 
+                            label: isColor ? 'Nombre del Color' : 'Valor de la Opción', 
+                            type: 'text', 
+                            name: 'value', 
+                            value: editData.value || editData.name,
+                            onChange: (e) => setEditData(prev => ({...prev, value: e.target.value})),
+                            disabled: currData.is_system,
+                            helpText: currData.is_system ? "Este nombre es parte del kit base de Vistiendomé y no se puede editar." : null
+                        },
+                        ...(isColor ? [{ 
+                            label: 'Código Hex (#)', 
+                            type: 'color', 
+                            name: 'hex_code', 
+                            value: editData.hex_code,
+                            onChange: (e) => setEditData(prev => ({...prev, hex_code: e.target.value}))
+                        }] : [])
+                    ]
+                });
+            }
+
+            s.push({
+                title: 'Previsualización',
+                icon: isColor ? <ImageIcon size={18} /> : <Tag size={18} />,
+                content: (
+                    <div className="detail-drawer-preview-box">
+                        {isColor ? (
+                            <div className="detail-drawer-color-preview-circle" style={{ background: editData.hex_code || '#000' }} />
+                        ) : (
+                            <div className="detail-drawer-tag-preview-box">
+                                <span className="detail-drawer-tag-preview-text">
+                                    {editData.value || editData.name}
+                                </span>
+                            </div>
+                        )}
+                        <div className="detail-drawer-text-center">
+                            <span className="detail-drawer-preview-title">
+                                {isColor ? (editData.value || editData.name) : 'Etiqueta Visual'}
+                            </span>
+                            {!isColor && (
+                                <p className="detail-drawer-preview-subtitle">Así se verá esta talla en las tarjetas de producto.</p>
+                            )}
+                        </div>
+                    </div>
+                )
+            });
         } else if (currType === 'variant') {
-            sections.push({
+            const variantBarcode = currData.barcode || generateEAN13(currData.sku);
+            s.push({
                 title: 'Configuración de Versión',
                 icon: <Tag size={18} />,
                 items: [
                     { label: 'Código (SKU)', value: currData.sku },
-                    { label: 'Combinación', value: Object.values(currData.config || {}).join(' / ') || 'Producto Base' }
+                    { label: 'Combinación', value: Object.values(currData.config || {}).join(' / ') || 'Producto Base' },
+                    { label: 'Identificador Interno (Código de barras)', value: variantBarcode }
                 ]
             });
             
-            sections.push({
+            s.push({
+                title: 'Código de Barras',
+                icon: <Tag size={18} />,
+                type: 'barcode-visual',
+                value: variantBarcode,
+                sku: currData.sku,
+                config_str: Object.values(currData.config || {}).join(' / ') || 'Producto Base'
+            });
+            
+            s.push({
                 title: 'Gestión Comercial',
                 icon: <Package size={18} />,
                 editable: true,
@@ -266,27 +610,488 @@ const DetailDrawer = ({
                         type: 'number', 
                         name: 'price', 
                         value: editData.price,
-                        onChange: (e) => setEditData({...editData, price: parseFloat(e.target.value)})
-                    },
-                    { 
-                        label: 'Stock Disponible (Unidades)', 
-                        type: 'number', 
-                        name: 'stock', 
-                        value: editData.stock,
-                        onChange: (e) => setEditData({...editData, stock: parseInt(e.target.value)})
+                        onChange: (e) => setEditData(prev => ({...prev, price: parseFloat(e.target.value)}))
                     }
                 ]
             });
 
-            // GESTIÓN DE IMÁGENES (Editable)
-            sections.push({
+            s.push({
                 title: 'Galería de la Versión',
                 icon: <ImageIcon size={18} />,
                 type: 'image-manager',
-                currentImages: editData.image_urls || []
+                currentAssets: editData.media_assets || []
             });
+        } else if (currType === 'homepage_section' || currType === 'cms_block') {
+            s.push({
+                title: 'Configuración Básica',
+                icon: <LayoutDashboard size={18} />,
+                editable: true,
+                type: 'form',
+                inputs: [
+                    { label: 'Título Administrativo', type: 'text', name: 'title', value: editData.title, onChange: (e) => setEditData({...editData, title: e.target.value}) },
+                    { label: 'Tipo de Bloque', type: 'text', name: 'type', value: editData.type, disabled: true }
+                ]
+            });
+
+            if (currData.type === 'hero') {
+                s.push({
+                    title: 'Contenido del Hero',
+                    icon: <Sparkles size={18} />,
+                    editable: true,
+                    type: 'form',
+                    inputs: [
+                        { label: 'Título Visual', type: 'text', name: 'v_title', value: editData.config?.title || '', onChange: (e) => setEditData({...editData, config: {...editData.config, title: e.target.value}}) },
+                        { label: 'Descripción', type: 'text', name: 'v_desc', value: editData.config?.description || '', onChange: (e) => setEditData({...editData, config: {...editData.config, description: e.target.value}}) },
+                        { label: 'Texto Botón', type: 'text', name: 'b_text', value: editData.config?.button_text || '', onChange: (e) => setEditData({...editData, config: {...editData.config, button_text: e.target.value}}) },
+                        { label: 'Link Botón', type: 'text', name: 'b_link', value: editData.config?.button_link || '', onChange: (e) => setEditData({...editData, config: {...editData.config, button_link: e.target.value}}) }
+                    ]
+                });
+                s.push({
+                    title: 'Imagen de Fondo',
+                    icon: <ImageIcon size={18} />,
+                    type: 'image-manager',
+                    currentAssets: editData.config?.media_assets || []
+                });
+            } else if (currData.type === 'carousel') {
+                s.push({
+                    title: 'Opciones de Carrusel',
+                    icon: <Layers size={18} />,
+                    editable: true,
+                    type: 'form',
+                    inputs: [
+                        { label: 'Auto-reproducción', type: 'checkbox', name: 'auto_play', value: editData.config?.auto_play || false, onChange: (e) => setEditData({...editData, config: {...editData.config, auto_play: e.target.checked}}) }
+                    ]
+                });
+            } else if (currData.type === 'text_post') {
+                s.push({
+                    title: 'Contenido Editorial',
+                    icon: <FileText size={18} />,
+                    editable: true,
+                    type: 'form',
+                    inputs: [
+                        { label: 'Alineación', type: 'select', name: 'align', value: editData.config?.align || 'left', options: ['left', 'center', 'right'], onChange: (e) => setEditData({...editData, config: {...editData.config, align: e.target.value}}) },
+                    ]
+                });
+            } else if (currData.type === 'data_table') {
+                const headers = editData.config?.headers || [];
+                const rows = editData.config?.rows || [];
+
+                s.push({
+                    title: 'Estructura y Contenido',
+                    icon: <List size={18} />,
+                    type: 'custom',
+                    content: (
+                        <div className="detail-drawer-flex-col-24">
+                            {/* GESTOR DE COLUMNAS */}
+                            <div className="detail-drawer-table-manager-box">
+                                <label className="detail-drawer-table-header-label">Columnas de la Tabla</label>
+                                <div className="detail-drawer-table-headers-container">
+                                    {headers.map((h, i) => (
+                                        <div key={i} className="detail-drawer-table-header-pill">
+                                            {h}
+                                            <button 
+                                                onClick={() => {
+                                                    const newHeaders = headers.filter((_, idx) => idx !== i);
+                                                    setEditData({...editData, config: {...editData.config, headers: newHeaders}});
+                                                }}
+                                                className="detail-drawer-table-header-remove-btn"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {headers.length === 0 && <span className="detail-drawer-table-headers-empty-text">Aún no hay columnas definidas...</span>}
+                                </div>
+                                <div className="detail-drawer-flex-row-8">
+                                    <input 
+                                        type="text" 
+                                        value={tableNewHeader}
+                                        onChange={(e) => setTableNewHeader(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && tableNewHeader.trim()) {
+                                                const nh = tableNewHeader.trim();
+                                                if (!headers.includes(nh)) {
+                                                    setEditData({...editData, config: {...editData.config, headers: [...headers, nh]}});
+                                                }
+                                                setTableNewHeader('');
+                                            }
+                                        }}
+                                        placeholder="Ej: Busto, Cintura, Pecho..."
+                                        className="detail-drawer-table-header-input"
+                                    />
+                                    <button 
+                                        onClick={() => {
+                                            if (tableNewHeader.trim()) {
+                                                const nh = tableNewHeader.trim();
+                                                if (!headers.includes(nh)) {
+                                                    setEditData({...editData, config: {...editData.config, headers: [...headers, nh]}});
+                                                }
+                                                setTableNewHeader('');
+                                            }
+                                        }}
+                                        className="detail-drawer-table-header-add-btn"
+                                    >
+                                        + AÑADIR
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* GESTOR DE FILAS */}
+                            {headers.length > 0 && (
+                                <div className="detail-drawer-table-rows-container">
+                                    <div className="detail-drawer-overflow-x-auto">
+                                        <table className="detail-drawer-table">
+                                            <thead>
+                                                <tr className="detail-drawer-table-thead-tr">
+                                                    {headers.map((h, i) => <th key={i} className="detail-drawer-table-th">{h}</th>)}
+                                                    <th className="detail-drawer-table-th-action"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {rows.map((row, i) => (
+                                                    <tr key={i} className="detail-drawer-table-tbody-tr">
+                                                        {headers.map((h, j) => (
+                                                            <td key={j} className="detail-drawer-table-td">
+                                                                <input 
+                                                                    type="text"
+                                                                    value={row[h] || ''}
+                                                                    onChange={(e) => {
+                                                                        const newRows = [...rows];
+                                                                        newRows[i] = { ...newRows[i], [h]: e.target.value };
+                                                                        setEditData({...editData, config: {...editData.config, rows: newRows}});
+                                                                    }}
+                                                                    placeholder="..."
+                                                                    className="detail-drawer-table-input"
+                                                                    onFocus={(e) => { e.target.style.background = '#f8fafc'; e.target.style.borderColor = '#e2e8f0'; }}
+                                                                    onBlur={(e) => { e.target.style.background = ''; e.target.style.borderColor = ''; }}
+                                                                />
+                                                            </td>
+                                                        ))}
+                                                        <td className="detail-drawer-table-td-action">
+                                                            <button 
+                                                                onClick={() => {
+                                                                    const newRows = rows.filter((_, idx) => idx !== i);
+                                                                    setEditData({...editData, config: {...editData.config, rows: newRows}});
+                                                                }}
+                                                                className="detail-drawer-table-row-remove-btn"
+                                                            >
+                                                                <X size={16} />
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <button 
+                                        onClick={() => {
+                                            const newRow = {};
+                                            headers.forEach(h => newRow[h] = '');
+                                            setEditData({...editData, config: {...editData.config, rows: [...rows, newRow]}});
+                                        }}
+                                        className="detail-drawer-table-add-row-btn"
+                                    >
+                                        + AÑADIR NUEVA FILA
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )
+                });
+            } else if (currData.type === 'banner') {
+                s.push({
+                    title: 'Configuración de Banner',
+                    icon: <ImageIcon size={18} />,
+                    editable: true,
+                    type: 'form',
+                    inputs: [
+                        { label: 'Link de Destino', type: 'text', name: 'link', value: editData.config?.link || '', onChange: (e) => setEditData({...editData, config: {...editData.config, link: e.target.value}}) }
+                    ]
+                });
+                s.push({
+                    title: 'Imagen del Banner',
+                    icon: <ImageIcon size={18} />,
+                    type: 'image-manager',
+                    currentAssets: editData.config?.media_assets || []
+                });
+            } else if (currData.type === 'recent_products') {
+                s.push({
+                    title: 'Configuración de Novedades',
+                    icon: <Sparkles size={18} />,
+                    editable: true,
+                    type: 'form',
+                    inputs: [
+                        { label: 'Subtítulo', type: 'text', name: 'subtitle', value: editData.config?.subtitle || '', onChange: (e) => setEditData({...editData, config: {...editData.config, subtitle: e.target.value}}) },
+                        { label: 'Límite de Productos', type: 'number', name: 'limit', value: editData.config?.limit || 4, onChange: (e) => setEditData({...editData, config: {...editData.config, limit: parseInt(e.target.value)}}) }
+                    ]
+                });
+            } else if (currData.type === 'product_carousel') {
+                s.push({
+                    title: 'Configuración del Carrusel',
+                    icon: <Package size={18} />,
+                    editable: true,
+                    type: 'form',
+                    inputs: [
+                        { label: 'Título del Bloque', type: 'text', name: 'title', value: editData.title, onChange: (e) => setEditData({...editData, title: e.target.value}) },
+                        { 
+                            label: 'Colección a Mostrar', 
+                            type: 'select', 
+                            name: 'collection_id', 
+                            value: editData.config?.collection_id || '', 
+                            options: [
+                                { value: '', label: '— Últimos Productos (Auto) —' },
+                                { value: 'smart_latest', label: '✨ Recién Llegados (Novedades)' },
+                                { value: 'smart_best_sellers', label: '🔥 Los Más Vendidos (Top Ventas)' },
+                                { value: 'smart_random', label: '🎲 Descubre Algo Nuevo (Aleatorio)' },
+                                { value: 'disabled_sep', label: '─── TUS COLECCIONES ───', disabled: true },
+                                ...allCollections.map(c => ({ value: c.slug, label: `📁 ${c.name}` }))
+                            ],
+                            onChange: (e) => setEditData({...editData, config: {...editData.config, collection_id: e.target.value}}) 
+                        }
+                    ]
+                });
+            } else if (currData.type === 'composition_carousel') {
+                const slides = editData.config?.slides || [];
+                const currentSlide = slides[activeSlideIndex] || { 
+                    bg_color: '#ffffff', 
+                    layers: [] 
+                };
+
+                s.push({
+                    title: 'Gestión de Diapositivas',
+                    icon: <Layers size={18} />,
+                    type: 'custom',
+                    content: (
+                        <div className="detail-drawer-flex-col-20">
+                            {/* Selector de Slides */}
+                            <div className="detail-drawer-slides-nav">
+                                {slides.map((_, i) => (
+                                    <button 
+                                        key={i}
+                                        onClick={() => { setActiveSlideIndex(i); setActiveLayerIndex(null); }}
+                                        className={`detail-drawer-slide-btn ${activeSlideIndex === i ? 'active' : ''}`}
+                                    >
+                                        SLIDE {i + 1}
+                                    </button>
+                                ))}
+                                <button 
+                                    onClick={() => {
+                                        const newSlides = [...slides, { bg_color: '#ffffff', layers: [] }];
+                                        setEditData({...editData, config: {...editData.config, slides: newSlides}});
+                                        setActiveSlideIndex(slides.length);
+                                    }}
+                                    className="detail-drawer-add-slide-btn"
+                                >
+                                    <Plus size={16} />
+                                </button>
+                            </div>
+
+                            {slides.length > 0 && (
+                                <div className="detail-drawer-flex-col-24">
+                                    {/* Configuración del Fondo (Lienzo) */}
+                                    <div className="detail-drawer-slide-bg-box">
+                                        <div className="detail-drawer-flex-between-mb-16">
+                                            <h4 className="detail-drawer-layer-title">Fondo del Lienzo (Nivel 0)</h4>
+                                            <input 
+                                                type="color" 
+                                                value={currentSlide.bg_color} 
+                                                onChange={(e) => {
+                                                    const newSlides = [...slides];
+                                                    newSlides[activeSlideIndex].bg_color = e.target.value;
+                                                    setEditData({...editData, config: {...editData.config, slides: newSlides}});
+                                                }}
+                                                className="detail-drawer-color-input"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Gestor de Capas (Niveles 1..N) */}
+                                    <div className="detail-drawer-slide-layers-box">
+                                        <div className="detail-drawer-flex-between-mb-16">
+                                            <h4 className="detail-drawer-layer-title">Capas de la Diapositiva</h4>
+                                            <div className="detail-drawer-flex-row-8">
+                                                <button 
+                                                    onClick={() => {
+                                                        const newLayers = [...(currentSlide.layers || []), { 
+                                                            id: Date.now(), type: 'text', content: 'Nuevo Texto', 
+                                                            x: 50, y: 50, scale: 1, rotation: 0, color: '#1e1b4b', size: 40, zIndex: (currentSlide.layers?.length || 0) + 1 
+                                                        }];
+                                                        const newSlides = [...slides];
+                                                        newSlides[activeSlideIndex].layers = newLayers;
+                                                        setEditData({...editData, config: {...editData.config, slides: newSlides}});
+                                                        setActiveLayerIndex(newLayers.length - 1);
+                                                    }}
+                                                    className="detail-drawer-add-layer-btn"
+                                                >
+                                                    <Tag size={12} /> + TEXTO
+                                                </button>
+                                                <button 
+                                                    onClick={() => {
+                                                        setPickingFor({ slideIndex: activeSlideIndex, layerIndex: currentSlide.layers?.length || 0, type: 'image' });
+                                                        setShowGlobalGallery(true);
+                                                    }}
+                                                    className="detail-drawer-add-layer-btn"
+                                                >
+                                                    <ImageIcon size={12} /> + IMAGEN
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="detail-drawer-flex-col-8">
+                                            {(currentSlide.layers || []).sort((a,b) => b.zIndex - a.zIndex).map((layer, idx) => {
+                                                const originalIdx = currentSlide.layers.indexOf(layer);
+                                                const isActive = activeLayerIndex === originalIdx;
+                                                return (
+                                                    <div 
+                                                        key={layer.id}
+                                                        onClick={() => setActiveLayerIndex(originalIdx)}
+                                                        className={`detail-drawer-layer-item ${isActive ? 'active' : ''}`}
+                                                    >
+                                                        <span className="detail-drawer-layer-zindex">L{layer.zIndex}</span>
+                                                        <div className="detail-drawer-layer-thumb">
+                                                            {layer.type === 'text' ? <Tag size={14} color="#64748b" /> : <img src={`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${layer.url}`} className="detail-drawer-w-full-h-full-cover" />}
+                                                        </div>
+                                                        <div className="detail-drawer-flex-1">
+                                                            <div className="detail-drawer-layer-name">{layer.type === 'text' ? layer.content : 'Capa de Imagen'}</div>
+                                                            <div className="detail-drawer-layer-info">X: {layer.x} | Y: {layer.y} | R: {layer.rotation}°</div>
+                                                        </div>
+                                                        {isActive && (
+                                                            <button 
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    const newLayers = currentSlide.layers.filter((_, i) => i !== originalIdx);
+                                                                    const newSlides = [...slides];
+                                                                    newSlides[activeSlideIndex].layers = newLayers;
+                                                                    setEditData({...editData, config: {...editData.config, slides: newSlides}});
+                                                                    setActiveLayerIndex(null);
+                                                                }}
+                                                                className="detail-drawer-layer-remove-btn"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* Editor de la Capa Activa (Photoshop Style) */}
+                                    {activeLayerIndex !== null && currentSlide.layers[activeLayerIndex] && (
+                                        <div className="detail-drawer-layer-editor-box">
+                                            <h5 className="detail-drawer-layer-editor-title">Transformación de Capa</h5>
+                                            
+                                            <div className="detail-drawer-grid-2-gap-16">
+                                                {currentSlide.layers[activeLayerIndex].type === 'text' && (
+                                                    <div className="detail-drawer-col-span-full">
+                                                        <label className="detail-drawer-editor-label">TEXTO</label>
+                                                        <input 
+                                                            type="text" 
+                                                            value={currentSlide.layers[activeLayerIndex].content}
+                                                            onChange={(e) => {
+                                                                const newSlides = [...slides];
+                                                                newSlides[activeSlideIndex].layers[activeLayerIndex].content = e.target.value;
+                                                                setEditData({...editData, config: {...editData.config, slides: newSlides}});
+                                                            }}
+                                                            className="detail-drawer-editor-input"
+                                                        />
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <label className="detail-drawer-editor-label">POSICIÓN X (%)</label>
+                                                    <input type="range" min="-50" max="150" value={currentSlide.layers[activeLayerIndex].x} onChange={(e) => {
+                                                        const newSlides = [...slides];
+                                                        newSlides[activeSlideIndex].layers[activeLayerIndex].x = parseInt(e.target.value);
+                                                        setEditData({...editData, config: {...editData.config, slides: newSlides}});
+                                                    }} style={{ width: '100%' }} />
+                                                </div>
+                                                <div>
+                                                    <label className="detail-drawer-editor-label">POSICIÓN Y (%)</label>
+                                                    <input type="range" min="-50" max="150" value={currentSlide.layers[activeLayerIndex].y} onChange={(e) => {
+                                                        const newSlides = [...slides];
+                                                        newSlides[activeSlideIndex].layers[activeLayerIndex].y = parseInt(e.target.value);
+                                                        setEditData({...editData, config: {...editData.config, slides: newSlides}});
+                                                    }} style={{ width: '100%' }} />
+                                                </div>
+                                                <div>
+                                                    <label className="detail-drawer-editor-label">ROTACIÓN (°)</label>
+                                                    <input type="range" min="-180" max="180" value={currentSlide.layers[activeLayerIndex].rotation} onChange={(e) => {
+                                                        const newSlides = [...slides];
+                                                        newSlides[activeSlideIndex].layers[activeLayerIndex].rotation = parseInt(e.target.value);
+                                                        setEditData({...editData, config: {...editData.config, slides: newSlides}});
+                                                    }} style={{ width: '100%' }} />
+                                                </div>
+                                                <div>
+                                                    <label className="detail-drawer-editor-label">ESCALA</label>
+                                                    <input type="range" min="0.1" max="3" step="0.1" value={currentSlide.layers[activeLayerIndex].scale} onChange={(e) => {
+                                                        const newSlides = [...slides];
+                                                        newSlides[activeSlideIndex].layers[activeLayerIndex].scale = parseFloat(e.target.value);
+                                                        setEditData({...editData, config: {...editData.config, slides: newSlides}});
+                                                    }} style={{ width: '100%' }} />
+                                                </div>
+                                                <div>
+                                                    <label style={{ display: 'block', fontSize: '10px', fontWeight: '800', color: '#94a3b8', marginBottom: '8px' }}>NIVEL (Z-INDEX)</label>
+                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                        <button 
+                                                            onClick={() => {
+                                                                const newSlides = [...slides];
+                                                                newSlides[activeSlideIndex].layers[activeLayerIndex].zIndex = Math.max(1, (newSlides[activeSlideIndex].layers[activeLayerIndex].zIndex || 1) - 1);
+                                                                setEditData({...editData, config: {...editData.config, slides: newSlides}});
+                                                            }}
+                                                            className="detail-drawer-zindex-btn"
+                                                        >BAJAR</button>
+                                                        <span className="detail-drawer-zindex-value">{currentSlide.layers[activeLayerIndex].zIndex}</span>
+                                                        <button 
+                                                            onClick={() => {
+                                                                const newSlides = [...slides];
+                                                                newSlides[activeSlideIndex].layers[activeLayerIndex].zIndex = (newSlides[activeSlideIndex].layers[activeLayerIndex].zIndex || 1) + 1;
+                                                                setEditData({...editData, config: {...editData.config, slides: newSlides}});
+                                                            }}
+                                                            className="detail-drawer-zindex-btn"
+                                                        >SUBIR</button>
+                                                    </div>
+                                                </div>
+                                                {currentSlide.layers[activeLayerIndex].type === 'text' && (
+                                                    <div>
+                                                        <label className="detail-drawer-editor-label">COLOR TEXTO</label>
+                                                        <input 
+                                                            type="color" 
+                                                            value={currentSlide.layers[activeLayerIndex].color}
+                                                            onChange={(e) => {
+                                                                const newSlides = [...slides];
+                                                                newSlides[activeSlideIndex].layers[activeLayerIndex].color = e.target.value;
+                                                                setEditData({...editData, config: {...editData.config, slides: newSlides}});
+                                                            }}
+                                                            className="detail-drawer-color-input-full"
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )
+                });
+            }
         }
-    }
+
+        return s;
+    }, [currData, currType, currTitle, currMetadata, editData.price, editData.value, editData.hex_code, editData.title, editData.config, editData.name, editData.slug, editData.parent_id, editData.is_filterable, editData.suggested_specifications, editData.is_editing, allCategories, allSpecs, loading, isReorderMode, activeSlideIndex, activeLayerIndex]);
+
+    // Cálculo memoizado de items para la biblioteca
+    const librarySkus = useMemo(() => {
+        const baseData = (currType === 'product' || currType === 'collection') ? currData : history.find(h => h.type === 'product' || h.type === 'collection')?.data;
+        return (baseData?.skus || []).map(sk => ({
+            ...sk,
+            name: sk.sku,
+            image: sk.image_urls?.[0] || sk.image || sk.image_url || null
+        }));
+    }, [currData, currType, history]);
+
+    // Si no está abierto ni en medio de la animación de cierre, desmontamos para no bloquear la UI
+    if (!isOpen && !isVisible) return null;
 
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
@@ -297,15 +1102,16 @@ const DetailDrawer = ({
         formData.append('file', file);
 
         try {
-            const res = await fetch('http://localhost:8000/api/v1/media/upload', {
+            const res = await fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/media/upload`, {
                 method: 'POST',
                 body: formData
             });
 
             if (res.ok) {
                 const data = await res.json();
-                const newUrls = [...(editData.image_urls || []), data.url];
-                setEditData({ ...editData, image_urls: newUrls });
+                const newAssets = [...(editData.media_assets || []), data];
+                const newIds = [...(editData.media_ids || []), data.id];
+                setEditData({ ...editData, media_assets: newAssets, media_ids: newIds });
             }
         } catch (err) {
             console.error("Error al subir imagen:", err);
@@ -314,20 +1120,8 @@ const DetailDrawer = ({
         }
     };
 
-    const addFromGallery = (url) => {
-        const current = editData.image_urls || [];
-        if (!current.includes(url)) {
-            setEditData({ ...editData, image_urls: [...current, url] });
-        }
-        setShowGlobalGallery(false);
-    };
-
     return (
-        <div style={{
-            position: 'fixed', inset: 0, zIndex: 4000, 
-            display: 'flex', justifyContent: 'flex-end',
-            transition: 'all 0.4s ease'
-        }}>
+        <div className="detail-drawer-overlay" style={{ display: (isOpen || isVisible) ? 'flex' : 'none' }}>
             <style>{`
                 .skeleton {
                     background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
@@ -344,109 +1138,190 @@ const DetailDrawer = ({
                 }
             `}</style>
 
-            {/* Overlay */}
             <div 
                 onClick={onClose}
+                className="detail-drawer-backdrop"
                 style={{
-                    position: 'absolute', inset: 0,
-                    backgroundColor: 'rgba(15, 23, 42, 0.4)',
-                    backdropFilter: 'blur(8px)',
-                    opacity: isVisible ? 1 : 0,
-                    transition: 'opacity 0.4s ease'
+                    opacity: (isVisible && !showLibraryVarieties && !showLibraryOptions) ? 1 : 0,
+                    display: isVisible ? 'block' : 'none',
+                    pointerEvents: (isVisible && !showLibraryVarieties && !showLibraryOptions) ? 'auto' : 'none'
                 }} 
             />
 
-            {/* Panel */}
-            <div style={{
-                width: '100%', maxWidth: '600px',
-                height: '100%', background: '#fff',
-                position: 'relative', zIndex: 4001,
-                boxShadow: '-10px 0 50px rgba(0,0,0,0.15)',
-                display: 'flex', flexDirection: 'column',
-                transform: isVisible ? 'translateX(0)' : 'translateX(100%)',
-                transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+            <div className="detail-drawer-main-panel" style={{
+                pointerEvents: (isVisible && !showLibraryVarieties && !showLibraryOptions) ? 'auto' : 'none',
+                transform: (isVisible && !showLibraryVarieties && !showLibraryOptions) ? 'translateX(0)' : 'translateX(100%)',
+                opacity: (isVisible && !showLibraryVarieties && !showLibraryOptions) ? 1 : 0
             }}>
-                {/* Header */}
-                <div style={{ padding: '32px 40px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div className="detail-drawer-header">
+                    <div className="detail-drawer-flex-row-16">
                         {history.length > 0 && (
                             <button 
                                 type="button"
                                 onClick={goBack}
-                                style={{ width: '36px', height: '36px', borderRadius: '50%', border: '1px solid #e2e8f0', background: '#fff', color: '#1e1b4b', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                                className="detail-drawer-back-btn"
                             >
                                 <ArrowLeft size={18} />
                             </button>
                         )}
                         <div>
-                            <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '900', color: '#1e1b4b', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <h2 className="detail-drawer-title-h2">
                                 {loading ? 'Cargando...' : currTitle}
                             </h2>
-                            <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '14px', fontWeight: '500' }}>
+                            <p className="detail-drawer-subtitle-p">
                                 {history.length > 0 ? `Regresar a ${history[history.length-1].title}` : 'Ficha técnica detallada'}
                             </p>
                         </div>
                     </div>
-                    <button 
-                        type="button"
-                        onClick={onClose}
-                        style={{ width: '40px', height: '40px', borderRadius: '50%', border: 'none', background: '#f8fafc', color: '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                    >
-                        <X size={20} />
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        {currType === 'cotizacion' && currData?.id && (
+                            <button 
+                                type="button"
+                                onClick={() => {
+                                    const iframe = document.getElementById(`print-frame-${currData.id}`);
+                                    if (iframe) iframe.contentWindow.print();
+                                }}
+                                style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#f1f5f9', color: '#0f172a', border: '1px solid #cbd5e1', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700', fontSize: '12px' }}
+                                title="Imprimir Etiqueta de Envío"
+                            >
+                                <Printer size={16} /> Imprimir
+                            </button>
+                        )}
+                        <button 
+                            type="button"
+                            onClick={onClose}
+                            className="detail-drawer-close-btn"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
                 </div>
 
-                {/* Content */}
-                <div style={{ flex: 1, overflowY: 'auto', padding: '40px' }}>
+                <div className="detail-drawer-body-container" style={{ padding: showGlobalGallery ? '0' : '40px' }}>
                     {loading ? (
                         <>
                             <SectionSkeleton />
                             <SectionSkeleton />
                             <SectionSkeleton />
                         </>
+                    ) : showGlobalGallery ? (
+                        <div className="detail-drawer-gallery-wrapper">
+                            <MediaGallery 
+                                isOpen={true}
+                                asModal={false}
+                                selectionMode 
+                                allowMultiple={true}
+                                initialSelected={editData.media_ids || []}
+                                onClose={() => setShowGlobalGallery(false)}
+                                onSelect={(data) => {
+                                    const selectedAssets = Array.isArray(data) ? data : [data];
+                                    
+                                    if (pickingFor) {
+                                        const slides = [...(editData.config?.slides || [])];
+                                        const targetSlide = slides[pickingFor.slideIndex];
+                                        if (targetSlide) {
+                                            const newLayer = {
+                                                id: Date.now(),
+                                                type: 'image',
+                                                url: selectedAssets[0]?.url,
+                                                x: 50, y: 50, scale: 1, rotation: 0,
+                                                zIndex: (targetSlide.layers?.length || 0) + 1
+                                            };
+                                            targetSlide.layers = [...(targetSlide.layers || []), newLayer];
+                                            setEditData({ ...editData, config: { ...editData.config, slides } });
+                                            setActiveLayerIndex(targetSlide.layers.length - 1);
+                                        }
+                                        setPickingFor(null);
+                                        setShowGlobalGallery(false);
+                                        return;
+                                    }
+
+                                    const currentAssets = editData.media_assets || [];
+                                    const existingIds = new Set(currentAssets.map(a => a.id));
+                                    const newUniqueAssets = selectedAssets.filter(a => !existingIds.has(a.id));
+                                    const nextAssets = [...currentAssets, ...newUniqueAssets];
+                                    if (currType === 'homepage_section' || currType === 'cms_block') {
+                                        setEditData({ 
+                                            ...editData, 
+                                            config: {
+                                                ...editData.config,
+                                                media_assets: nextAssets,
+                                                media_ids: nextAssets.map(a => a.id)
+                                            }
+                                        });
+                                    } else {
+                                        setEditData({ 
+                                            ...editData, 
+                                            media_assets: nextAssets,
+                                            media_ids: nextAssets.map(a => a.id)
+                                        });
+                                    }
+                                    setShowGlobalGallery(false);
+                                }} 
+                            />
+                        </div>
                     ) : (
                         sections.map((section, idx) => (
-                            <div key={idx} style={{ marginBottom: '40px', animation: `slideUp 0.4s ease forwards ${idx * 0.1}s`, opacity: 0 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#8f0653' }}>
-                                        {section.icon}
-                                        <h4 style={{ margin: 0, fontSize: '13px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{section.title}</h4>
+                            <div key={idx} className="detail-drawer-section-wrapper" style={{ animation: `slideUp 0.4s ease forwards ${idx * 0.1}s` }}>
+                                <div className="detail-drawer-section-header">
+                                    <div className="detail-drawer-flex-row-12">
+                                        <div className="detail-drawer-section-icon">
+                                            {section.icon}
+                                        </div>
+                                        <h3 className="detail-drawer-section-title">{section.title}</h3>
                                     </div>
-
-                                    {/* BOTÓN MÁGICO PARA BIBLIOTECA VISUAL (SOLO EN PRODUCTO) */}
-                                    {currType === 'product' && section.title === 'Variantes y Stock' && (
-                                        <button 
-                                            type="button"
-                                            onClick={() => setShowLibraryVarieties(true)}
-                                            style={{ 
-                                                display: 'flex', alignItems: 'center', gap: '6px',
-                                                padding: '6px 14px', borderRadius: '12px', border: '1px solid #fee2e2',
-                                                background: '#fff', color: '#8f0653', fontSize: '11px', fontWeight: '800',
-                                                cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(143,6,83,0.05)'
-                                            }}
-                                            onMouseEnter={e => { e.currentTarget.style.background = '#8f0653'; e.currentTarget.style.color = '#fff'; }}
-                                            onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#8f0653'; }}
-                                        >
-                                            <FolderOpen size={14} /> EXPLORADOR VISUAL
-                                        </button>
-                                    )}
+                                    <div className="detail-drawer-section-actions">
+                                        {((currType === 'product' && section.title === 'Variantes') || 
+                                           (currType === 'collection' && section.type === 'collection-items') ||
+                                           (currType === 'characteristic' && section.isColor && section.type === 'library-grid')) && (
+                                            <button 
+                                                type="button"
+                                                onClick={() => {
+                                                    if (currType === 'product' || currType === 'collection') setShowLibraryVarieties(true);
+                                                    else setShowLibraryOptions(true);
+                                                }}
+                                                className="detail-drawer-explorer-btn"
+                                            >
+                                                <FolderOpen size={14} /> EXPLORADOR VISUAL
+                                            </button>
+                                        )}
+                                        {section.actions && section.actions}
+                                    </div>
                                 </div>
 
-                                {section.items && (
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', background: '#f8fafc', padding: '24px', borderRadius: '20px' }}>
+                                {section.type === 'summary-card' && section.items && (
+                                    <div className="detail-drawer-summary-card">
+                                        <div className="detail-drawer-summary-grid">
+                                            {section.items.map((item, i) => (
+                                                <div key={i}>
+                                                    <span className="detail-drawer-summary-label">{item.label}</span>
+                                                    <span className="detail-drawer-summary-value">{item.value}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        {section.footer && (
+                                            <div className="detail-drawer-summary-footer">
+                                                {section.footer}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {section.items && section.type !== 'summary-card' && section.type !== 'collection-items' && (
+                                    <div className="detail-drawer-items-grid-2">
                                         {section.items.map((item, i) => (
                                             <div key={i}>
-                                                <span style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>{item.label}</span>
+                                                <span className="detail-drawer-item-label">{item.label}</span>
                                                 {item.link ? (
                                                     <button 
                                                         type="button"
                                                         onClick={() => navigateTo(item.link.id, item.link.type, item.value)}
-                                                        style={{ background: 'none', border: 'none', padding: 0, fontSize: '14px', fontWeight: '700', color: '#8f0653', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                                        className="detail-drawer-item-link-btn"
                                                     >
                                                         {item.value} <ChevronRight size={14} />
                                                     </button>
                                                 ) : (
-                                                    <span style={{ fontSize: '14px', fontWeight: '700', color: '#1e1b4b' }}>{item.value}</span>
+                                                    <span className="detail-drawer-item-value">{item.value}</span>
                                                 )}
                                             </div>
                                         ))}
@@ -454,15 +1329,13 @@ const DetailDrawer = ({
                                 )}
 
                                 {section.type === 'interactive-list' && section.linkedItems && (
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                                    <div className="detail-drawer-linked-items-wrap">
                                         {section.linkedItems.map((item, i) => (
                                             <button 
                                                 key={i} 
                                                 type="button"
                                                 onClick={() => navigateTo(item.id, item.type, item.name, item.meta)}
-                                                style={{ background: '#fff', border: '1px solid #e2e8f0', color: '#1e1b4b', padding: '8px 16px', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}
-                                                onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#8f0653'; e.currentTarget.style.color = '#8f0653'; }}
-                                                onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#1e1b4b'; }}
+                                                className="detail-drawer-linked-item-btn"
                                             >
                                                 {item.name} <ChevronRight size={12} opacity={0.5} />
                                             </button>
@@ -470,164 +1343,298 @@ const DetailDrawer = ({
                                     </div>
                                 )}
 
-                                {section.content && (
-                                    <p style={{ fontSize: '15px', color: '#475569', lineHeight: '1.6', margin: 0, background: '#fff', border: '1px solid #f1f5f9', padding: '20px', borderRadius: '20px' }}>
+                                {section.type === 'barcode-visual' && section.value && (
+                                    <div className="detail-drawer-barcode-box">
+                                        <div className="detail-drawer-barcode-scroll">
+                                            <Barcode value={section.value} format="CODE128" background="transparent" lineColor="#1e1b4b" height={80} margin={0} displayValue={false} />
+                                        </div>
+                                        <div className="detail-drawer-barcode-texts">
+                                            <span className="detail-drawer-barcode-value">
+                                                {section.value}
+                                            </span>
+                                            {section.sku && (
+                                                <span className="detail-drawer-barcode-sku">
+                                                    {section.sku}
+                                                </span>
+                                            )}
+                                            {section.config_str && (
+                                                <span className="detail-drawer-barcode-config">
+                                                    {section.config_str}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {section.content && section.type !== 'custom' && (
+                                    <div className="detail-drawer-content-box">
                                        {section.content}
-                                    </p>
+                                    </div>
                                 )}
 
                                 {section.type === 'list' && section.pills && (
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                    <div className="detail-drawer-pill-list">
                                         {section.pills.map((pill, i) => (
-                                            <span key={i} style={{ background: '#f1f5f9', color: '#475569', padding: '6px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: '700' }}>{pill}</span>
+                                            <span key={i} className="detail-drawer-pill-item">{pill}</span>
                                         ))}
                                     </div>
                                 )}
 
                                 {section.type === 'library-grid' && section.options && (
-                                    <div style={{ 
-                                        display: 'grid', 
-                                        gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
-                                        gap: '12px' 
-                                    }}>
+                                    <div className="detail-drawer-library-grid">
                                         {section.options.map((opt, i) => {
                                             const val = typeof opt === 'string' ? opt : (opt.value || opt.name || '---');
                                             const hex = typeof opt === 'string' ? null : opt.hex_code;
                                             
                                             return (
-                                                <div key={i} style={{ 
-                                                    background: '#fff', 
-                                                    border: '1px solid #e2e8f0', 
-                                                    padding: '16px', 
-                                                    borderRadius: '20px',
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    alignItems: 'center',
-                                                    gap: '12px',
-                                                    textAlign: 'center',
-                                                    boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
-                                                    transition: 'all 0.2s'
+                                                <div key={`${val}-${i}`} className="detail-drawer-library-grid-item" style={{ 
+                                                    border: isReorderMode ? '2px dashed #8f0653' : '1px solid #e2e8f0'
                                                 }}>
-                                                    {section.isColor ? (
-                                                        <>
-                                                            <div style={{ 
-                                                                width: '44px', height: '44px', borderRadius: '50%', 
-                                                                background: hex || '#cbd5e1', 
-                                                                border: '3px solid #fff', boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                                                                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#64748b'
-                                                            }}>
-                                                                {!hex && <Palette size={14} opacity={0.5} />}
-                                                            </div>
-                                                            <div>
-                                                                <span style={{ display: 'block', fontSize: '11px', fontWeight: '900', color: '#1e1b4b', textTransform: 'uppercase' }}>{val}</span>
-                                                                {hex && <code style={{ fontSize: '10px', color: '#94a3b8', letterSpacing: '0.05em' }}>{hex.toUpperCase()}</code>}
-                                                            </div>
-                                                        </>
-                                                    ) : (
-                                                        <div style={{ width: '100%' }}>
-                                                            <span style={{ 
-                                                                display: 'block', 
-                                                                fontSize: '18px', 
-                                                                fontWeight: '900', 
-                                                                color: '#8f0653',
-                                                                lineHeight: '1.2'
-                                                            }}>
-                                                                {val}
-                                                            </span>
-                                                            {typeof opt === 'object' && Object.entries(opt).map(([k, v]) => (
-                                                                k !== 'value' && k !== 'hex_code' && k !== 'name' && v && (
-                                                                    <span key={k} style={{ display: 'block', fontSize: '10px', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', marginTop: '4px' }}>
-                                                                        {v}
-                                                                    </span>
-                                                                )
-                                                            ))}
+                                                    {isReorderMode && (
+                                                        <div className="detail-drawer-reorder-actions">
+                                                            {i > 0 && (
+                                                                <button 
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        const newDomain = [...currData.domain];
+                                                                        [newDomain[i], newDomain[i-1]] = [newDomain[i-1], newDomain[i]];
+                                                                        onReorder(newDomain);
+                                                                    }}
+                                                                    className="detail-drawer-reorder-btn"
+                                                                >
+                                                                    <ChevronLeft size={16} />
+                                                                </button>
+                                                            )}
+                                                            {i < section.options.length - 1 && (
+                                                                <button 
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        const newDomain = [...currData.domain];
+                                                                        [newDomain[i], newDomain[i+1]] = [newDomain[i+1], newDomain[i]];
+                                                                        onReorder(newDomain);
+                                                                    }}
+                                                                    className="detail-drawer-reorder-btn"
+                                                                >
+                                                                    <ChevronRight size={16} />
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     )}
+                                                    
+                                                    <div 
+                                                        onClick={() => !isReorderMode && navigateTo(null, 'color_option', val, opt)}
+                                                        style={{ cursor: isReorderMode ? 'default' : 'pointer', width: '100%' }}
+                                                    >
+                                                        {section.isColor ? (
+                                                            <>
+                                                                <div style={{ 
+                                                                    width: '44px', height: '44px', borderRadius: '50%', 
+                                                                    background: hex || '#000000', 
+                                                                    border: '3px solid #fff', boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#64748b',
+                                                                    margin: '0 auto'
+                                                                }}>
+                                                                </div>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', marginTop: '8px' }}>
+                                                                    <span style={{ display: 'block', fontSize: '11px', fontWeight: '900', color: '#1e1b4b', textTransform: 'uppercase' }}>{val}</span>
+                                                                    {opt.is_system && (
+                                                                        <div style={{ background: '#fdf2f8', color: '#8f0653', fontSize: '8px', fontWeight: '900', padding: '2px 5px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                                                                            <Lock size={8} /> vOS
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                {hex && <code style={{ fontSize: '10px', color: '#94a3b8', letterSpacing: '0.05em' }}>{hex.toUpperCase()}</code>}
+                                                            </>
+                                                        ) : (
+                                                            <div style={{ width: '100%' }}>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
+                                                                    <span style={{ 
+                                                                        display: 'block', 
+                                                                        fontSize: '18px', 
+                                                                        fontWeight: '900', 
+                                                                        color: '#8f0653',
+                                                                        lineHeight: '1.2'
+                                                                    }}>
+                                                                        {val}
+                                                                    </span>
+                                                                    {opt.is_system && (
+                                                                        <div className="detail-drawer-system-tag">
+                                                                            <Lock size={8} /> vOS
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                {typeof opt === 'object' && Object.entries(opt).map(([k, v]) => (
+                                                                        <span key={k} className="detail-drawer-opt-attr">
+                                                                            {v}
+                                                                        </span>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             );
                                         })}
                                     </div>
                                 )}
 
+                                {section.type === 'collection-items' && section.items && (
+                                    <div className="detail-drawer-collection-grid">
+                                        {section.items.map((sku, i) => (
+                                            <div 
+                                                key={sku.id || i}
+                                                onClick={() => navigateTo(sku.id, 'variant', sku.sku, sku)}
+                                                className="detail-drawer-collection-item"
+                                            >
+                                                <div className="detail-drawer-collection-thumb-wrapper">
+                                                    {(sku.image || sku.image_url) ? <img src={`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${sku.image || sku.image_url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Package size={18} color="#cbd5e1" style={{ margin: '13px' }} />}
+                                                </div>
+                                                <div className="detail-drawer-flex-1-min-w-0">
+                                                    <div className="detail-drawer-collection-sku">{sku.sku}</div>
+                                                    <div className="detail-drawer-collection-name">{sku.product_name || 'Variante'}</div>
+                                                </div>
+                                                <ChevronRight size={14} color="#cbd5e1" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
                                 {section.type === 'form' && (
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', background: '#fffbeb', border: '1px solid #fef3c7', padding: '24px', borderRadius: '20px' }}>
+                                    <div className="detail-drawer-form-grid">
                                         {section.inputs.map((input, i) => (
-                                            <div key={i}>
-                                                <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: '#92400e', textTransform: 'uppercase', marginBottom: '8px' }}>{input.label}</label>
-                                                <input 
-                                                    type={input.type} 
-                                                    name={input.name}
-                                                    value={input.value}
-                                                    onChange={input.onChange}
-                                                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '2px solid #fde68a', fontSize: '14px', fontWeight: '800', color: '#1e1b4b', outline: 'none', background: '#fff' }}
-                                                />
+                                            <div key={i} style={{ gridColumn: (input.type === 'textarea') ? '1 / -1' : 'auto' }}>
+                                                {input.type === 'textarea' ? (
+                                                    <div className="detail-drawer-flex-col-8">
+                                                        <label className="detail-drawer-input-label">{input.label}</label>
+                                                        <textarea 
+                                                            value={input.value}
+                                                            onChange={input.onChange}
+                                                            className="detail-drawer-textarea"
+                                                        />
+                                                    </div>
+                                                ) : input.type === 'select' ? (
+                                                    <div className="detail-drawer-flex-col-8">
+                                                        <label className="detail-drawer-input-label">{input.label}</label>
+                                                        <select 
+                                                            value={input.value}
+                                                            onChange={input.onChange}
+                                                            className="detail-drawer-select"
+                                                        >
+                                                            {input.options.map((opt, idx) => {
+                                                                const isObj = typeof opt === 'object' && opt !== null;
+                                                                const val = isObj ? opt.value : opt;
+                                                                const label = isObj ? opt.label : opt;
+                                                                return <option key={idx} value={val}>{label}</option>;
+                                                            })}
+                                                        </select>
+                                                    </div>
+                                                ) : input.type === 'checkbox' ? (
+                                                    <label className="detail-drawer-checkbox-label">
+                                                        <input 
+                                                            type="checkbox" 
+                                                            checked={input.value}
+                                                            onChange={input.onChange}
+                                                            className="detail-drawer-checkbox-input"
+                                                        />
+                                                        <span className="detail-drawer-checkbox-text">{input.label}</span>
+                                                    </label>
+                                                ) : input.type === 'color' ? (
+                                                    <div className="detail-drawer-flex-col-8">
+                                                        <label className="detail-drawer-input-label">{input.label}</label>
+                                                        <input 
+                                                            type="color" 
+                                                            value={input.value}
+                                                            onChange={input.onChange}
+                                                            className="detail-drawer-color-box"
+                                                        />
+                                                    </div>
+                                                ) : input.type === 'range' ? (
+                                                    <div className="detail-drawer-flex-col-8">
+                                                        <div className="detail-drawer-flex-between">
+                                                            <label className="detail-drawer-input-label">{input.label}</label>
+                                                            <span className="detail-drawer-range-val">{input.value}{input.unit || ''}</span>
+                                                        </div>
+                                                        <input 
+                                                            type="range" 
+                                                            min={input.min || 0}
+                                                            max={input.max || 100}
+                                                            step={input.step || 1}
+                                                            value={input.value}
+                                                            onChange={input.onChange}
+                                                            className="detail-drawer-range-input"
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <Input
+                                                        label={input.label}
+                                                        name={input.name}
+                                                        type={input.type}
+                                                        value={input.value}
+                                                        onChange={input.onChange}
+                                                        disabled={input.disabled}
+                                                    />
+                                                )}
                                             </div>
                                         ))}
                                     </div>
                                 )}
 
                                 {section.type === 'image-manager' && (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', background: '#f8fafc', padding: '24px', borderRadius: '24px', border: '1px solid #e2e8f0' }}>
-                                            {section.currentImages.map((url, i) => {
+                                    <div className="detail-drawer-flex-col-20">
+                                        <div className="detail-drawer-img-grid">
+                                            {(section.currentAssets || []).map((asset, i) => {
                                                 const isMain = i === 0;
                                                 return (
-                                                    <div key={i} style={{ 
-                                                        position: 'relative', 
-                                                        aspectRatio: '1/1', 
-                                                        borderRadius: '14px', 
-                                                        overflow: 'hidden', 
+                                                    <div key={asset.id || i} className="detail-drawer-img-wrapper" style={{ 
                                                         border: isMain ? '2.5px solid #8f0653' : '1px solid #e2e8f0',
                                                         boxShadow: isMain ? '0 4px 12px rgba(143,6,83,0.15)' : 'none'
                                                     }}>
-                                                        <img src={`http://localhost:8000${url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                        <img src={`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${asset.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                         
                                                         {/* Botón Eliminar */}
                                                         <button 
                                                             type="button"
-                                                            onClick={() => setEditData({ ...editData, image_urls: section.currentImages.filter(u => u !== url) })}
-                                                            style={{ position: 'absolute', top: '5px', right: '5px', width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.9)', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}
+                                                            onClick={() => {
+                                                                const nextAssets = section.currentAssets.filter(a => a.id !== asset.id);
+                                                                if (currType === 'homepage_section') {
+                                                                    setEditData({ 
+                                                                        ...editData, 
+                                                                        config: {
+                                                                            ...editData.config,
+                                                                            media_assets: nextAssets,
+                                                                            media_ids: nextAssets.map(a => a.id)
+                                                                        }
+                                                                    });
+                                                                } else {
+                                                                    setEditData({ 
+                                                                        ...editData, 
+                                                                        media_assets: nextAssets,
+                                                                        media_ids: nextAssets.map(a => a.id)
+                                                                    });
+                                                                }
+                                                            }}
+                                                            className="detail-drawer-img-remove-btn"
                                                         >
                                                             <Trash2 size={10} />
                                                         </button>
-
-                                                        {/* Botón Marcar Principal (Solo si no es la principal ya) */}
-                                                        {!isMain ? (
-                                                            <button 
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    const others = section.currentImages.filter(u => u !== url);
-                                                                    setEditData({ ...editData, image_urls: [url, ...others] });
-                                                                }}
-                                                                style={{ position: 'absolute', bottom: '5px', right: '5px', width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.9)', color: '#64748b', border: '1px solid #e2e8f0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}
-                                                                title="Hacer Principal"
-                                                            >
-                                                                <Star size={10} />
-                                                            </button>
-                                                        ) : (
-                                                            <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', background: '#8f0653', color: '#fff', padding: '2px 0', textAlign: 'center', fontSize: '8px', fontWeight: '900', textTransform: 'uppercase' }}>
-                                                                Principal
-                                                            </div>
-                                                        )}
                                                     </div>
                                                 );
                                             })}
 
                                             {/* Botón para abrir Mediateca Global */}
-                                            <button 
+                                                <button 
                                                 type="button"
                                                 onClick={() => setShowGlobalGallery(true)}
-                                                style={{ aspectRatio: '1/1', borderRadius: '14px', border: '2px dashed #8f0653', background: '#fff', color: '#8f0653', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px', transition: 'all 0.2s' }}
+                                                className="detail-drawer-add-img-btn"
                                             >
                                                 <FolderOpen size={20} />
-                                                <span style={{ fontSize: '9px', fontWeight: '900' }}>GALERÍA</span>
+                                                <span className="detail-drawer-add-img-text">GALERÍA</span>
                                             </button>
 
                                             {/* Botón para Carga Directa */}
-                                            <label style={{ aspectRatio: '1/1', borderRadius: '14px', border: '2px dashed #cbd5e1', background: '#fff', color: '#94a3b8', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                            <label className="detail-drawer-upload-img-btn">
                                                 <input type="file" onChange={handleFileUpload} accept="image/*" style={{ display: 'none' }} />
                                                 {uploading ? <Sparkles size={20} className="animate-spin" /> : <Upload size={20} />}
-                                                <span style={{ fontSize: '9px', fontWeight: '900' }}>SUBIR</span>
+                                                <span className="detail-drawer-add-img-text">SUBIR</span>
                                             </label>
                                         </div>
 
@@ -635,17 +1642,17 @@ const DetailDrawer = ({
                                 )}
 
                                 {section.type === 'table' && (
-                                    <div style={{ overflowX: 'auto', background: '#fff', border: '1px solid #f1f5f9', borderRadius: '20px' }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                                    <div className="detail-drawer-table-wrapper">
+                                        <table className="detail-drawer-data-table">
                                             <thead>
-                                                <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                                    {section.headers.map((h, i) => <th key={i} style={{ padding: '12px 16px', textAlign: 'left', color: '#94a3b8', fontWeight: '800', textTransform: 'uppercase', fontSize: '10px' }}>{h}</th>)}
+                                                <tr className="detail-drawer-data-tr-head">
+                                                    {section.headers.map((h, i) => <th key={i} className="detail-drawer-data-th">{h}</th>)}
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {section.rows.map((row, i) => (
-                                                    <tr key={i} style={{ borderBottom: i === section.rows.length - 1 ? 'none' : '1px solid #f8fafc' }}>
-                                                        {row.map((cell, j) => <td key={j} style={{ padding: '12px 16px', color: '#1e1b4b', fontWeight: '600' }}>{cell}</td>)}
+                                                    <tr key={i} className="detail-drawer-data-tr">
+                                                        {row.map((cell, j) => <td key={j} className="detail-drawer-data-td">{cell}</td>)}
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -655,121 +1662,171 @@ const DetailDrawer = ({
                             </div>
                         ))
                     )}
+                    
+                    {currType === 'cotizacion' && currData?.id && (
+                        <div style={{ marginTop: '40px', borderTop: '2px dashed #cbd5e1', paddingTop: '40px' }}>
+                            <h3 style={{ fontSize: '14px', fontWeight: '800', color: '#64748b', marginBottom: '20px', letterSpacing: '1px', textTransform: 'uppercase' }}>Vista Previa de Etiqueta</h3>
+                            <iframe
+                                id={`print-frame-${currData.id}`}
+                                src={`/admin/print/cotizacion/${currData.id}`}
+                                style={{ width: '100%', height: '800px', border: '1px solid #e2e8f0', borderRadius: '12px', background: '#fff', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                                title="Vista Previa de Etiqueta"
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* Footer */}
-                <div style={{ padding: '24px 40px', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end', gap: '16px', alignItems: 'center' }}>
-                    {currType === 'variant' && onDelete && (
+                <div className="detail-drawer-footer">
+                    {['variant', 'color_option', 'homepage_section', 'cms_block', 'category'].includes(currType) && onDelete && !currData.is_system && (currType !== 'category' || editData.is_editing) && (
                         <Button 
                             variant="outline" 
                             type="button"
-                            onClick={() => {
-                                if (window.confirm("¿Estás seguro de que deseas eliminar esta versión permanentemente?")) {
-                                    onDelete(currData);
-                                    onClose();
+                            onClick={async () => {
+                                const success = await onDelete(currData);
+                                if (success !== false) {
+                                    if (history.length > 0) {
+                                        goBack();
+                                    } else {
+                                        onClose();
+                                    }
                                 }
                             }}
-                            style={{ height: '48px', padding: '0 24px', borderRadius: '16px', color: '#ef4444', borderColor: '#fee2e2' }}
+                            className="detail-drawer-btn-danger"
                         >
-                            Eliminar Versión
+                            Eliminar
                         </Button>
                     )}
                     <div style={{ flex: 1 }} />
-                    <Button variant="outline" type="button" onClick={onClose} style={{ height: '48px', padding: '0 24px', borderRadius: '16px' }}>Cerrar</Button>
-                    {currType === 'variant' && onUpdate && (
+                    <Button variant="outline" type="button" onClick={onClose} className="detail-drawer-btn-outline">Cerrar</Button>
+                    {['variant', 'color_option', 'homepage_section', 'cms_block', 'category'].includes(currType) && onUpdate && !currData.is_system && (currType !== 'category' || editData.is_editing) && (
                         <Button 
                             onClick={() => {
-                                onUpdate(editData);
-                                onClose();
+                                onUpdate(editData, currData);
                             }} 
                             type="button"
                             variant="primary" 
-                            style={{ height: '48px', padding: '0 32px', borderRadius: '16px', boxShadow: '0 10px 15px -3px rgba(143, 6, 83, 0.2)' }}
+                            className="detail-drawer-btn-primary"
                         >
                             Guardar Cambios
                         </Button>
                     )}
                 </div>
             </div>
-
-            {/* MODAL DE MEDIATECA GLOBAL - FUERA DEL CONTENEDOR TRANSFORMARLE */}
+            {/* MODAL DE MEDIATECA GLOBAL (FULLSCREEN OVERLAY) */}
             {showGlobalGallery && (
-                <div style={{ 
-                    position: 'fixed', inset: 0, 
-                    background: 'rgba(15, 23, 42, 0.7)', 
-                    backdropFilter: 'blur(12px) saturate(180%)', 
-                    zIndex: 9999, 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    padding: '24px',
-                    animation: 'fadeIn_drawer 0.3s ease-out'
-                }}>
-                    <div style={{ 
-                        width: '95%', maxWidth: '1200px', 
-                        height: '90vh', 
-                        background: 'rgba(255, 255, 255, 0.98)',
-                        borderRadius: '32px', 
-                        padding: '40px', 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        boxShadow: '0 40px 100px -20px rgba(0,0,0,0.5)',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        animation: 'modalOpen_drawer 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-                            <div>
-                                <h3 style={{ margin: 0, fontSize: '24px', fontWeight: '900', color: '#1e1b4b', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <FolderOpen size={28} color="#8f0653" /> Mediateca Global
-                                </h3>
-                                <p style={{ margin: '6px 0 0 0', fontSize: '14px', color: '#64748b', fontWeight: '500' }}>Elige la foto perfecta para esta versión. Puedes seleccionar de cualquier carpeta.</p>
-                            </div>
-                            <button 
-                                type="button" 
-                                onClick={() => setShowGlobalGallery(false)}
-                                style={{ width: '48px', height: '48px', borderRadius: '50%', border: 'none', background: '#f1f5f9', color: '#1e1b4b', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-                                onMouseOver={(e) => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#ef4444'; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#1e1b4b'; }}
-                            >
-                                <X size={24} />
-                            </button>
-                        </div>
-                        <div style={{ flex: 1, minHeight: 0, marginTop: '8px' }}>
-                            <MediaGallery 
-                                selectionMode 
-                                allowMultiple={true}
-                                initialSelected={editData.image_urls || []}
-                                onSelect={(data) => {
-                                    const urls = Array.isArray(data) ? data : [data];
-                                    const current = editData.image_urls || [];
-                                    // Mecla sin duplicados
-                                    const next = [...new Set([...current, ...urls])];
-                                    setEditData({ ...editData, image_urls: next });
-                                    setShowGlobalGallery(false);
-                                }} 
-                            />
-                        </div>
+                <div className="detail-drawer-global-gallery-overlay">
+                    <div className="detail-drawer-global-gallery-modal">
+                        <MediaGallery 
+                            isOpen 
+                            onClose={() => setShowGlobalGallery(false)} 
+                            onSelect={(assets) => {
+                                const selected = Array.isArray(assets) ? assets : [assets];
+                                const currentAssets = editData.media_assets || [];
+                                const currentIds = editData.media_ids || [];
+                                
+                                // Evitar duplicados
+                                const newAssets = [...currentAssets];
+                                const newIds = [...currentIds];
+                                
+                                selected.forEach(asset => {
+                                    if (!newIds.includes(asset.id)) {
+                                        newAssets.push(asset);
+                                        newIds.push(asset.id);
+                                    }
+                                });
+
+                                if (currType === 'homepage_section' || currType === 'cms_block') {
+                                    setEditData({ 
+                                        ...editData, 
+                                        config: {
+                                            ...editData.config,
+                                            media_assets: newAssets,
+                                            media_ids: newIds
+                                        }
+                                    });
+                                } else {
+                                    setEditData({ 
+                                        ...editData, 
+                                        media_assets: newAssets,
+                                        media_ids: newIds
+                                    });
+                                }
+                                setShowGlobalGallery(false);
+                            }} 
+                        />
                     </div>
                 </div>
             )}
 
-            {/* MODAL DE EXPLORADOR VISUAL DE VARIANTES */}
-            {showLibraryVarieties && currType === 'product' && (
+            {/* MODAL DE EXPLORADOR VISUAL DE COLORES */}
+            {showLibraryOptions && currType === 'characteristic' && (
+                <LibraryPicker 
+                    isOpen={showLibraryOptions}
+                    onClose={() => setShowLibraryOptions(false)}
+                    items={currData.domain || []}
+                    type="options"
+                    title={`Explorador de: ${currData.name}`}
+                    description="Visualización interactiva de la biblioteca de opciones. Haz clic en una para editar."
+                    onItemClick={(item) => {
+                        // Navegar a la edición del color individual
+                        navigateTo(item.id || item.value, 'color_option', item.value || item.name, item);
+                        setShowLibraryOptions(false); // Cerramos el explorador al navegar
+                    }}
+                />
+            )}
+
+            {/* MODAL DE EXPLORADOR DE ESPECIFICACIONES PARA CATEGORÍAS */}
+            {showLibraryOptions && currType === 'category' && (
+                <LibraryPicker 
+                    isOpen={showLibraryOptions}
+                    onClose={() => setShowLibraryOptions(false)}
+                    items={allSpecs}
+                    type="specifications"
+                    initialSelectedIds={editData.suggested_specification_ids}
+                    onSelect={(selected) => {
+                        setEditData({ ...editData, suggested_specifications: selected, suggested_specification_ids: selected.map(s => s.id) });
+                        setShowLibraryOptions(false);
+                    }}
+                    title="Biblioteca de Especificaciones"
+                    description="Elige los grupos de características que se sugerirán al crear productos en esta categoría."
+                />
+            )}
+
+            {/* MODAL DE EXPLORADOR VISUAL DE VARIANTES (Persistente para mantener scroll) */}
+            {(showLibraryVarieties || history.some(h => h.showLibrary)) && (
                 <LibraryPicker 
                     isOpen={showLibraryVarieties}
                     onClose={() => setShowLibraryVarieties(false)}
-                    items={(currData.skus || []).map(s => ({
-                        ...s,
-                        name: s.sku,
-                        image: s.image_urls?.[0] || null
-                    }))}
+                    items={librarySkus}
                     type="variants"
-                    title={`Explorar Línea: ${currData.name}`}
-                    description="Visualización inmersiva de combinaciones disponibles, precios y stock en tiempo real."
+                    title={`Explorar: ${currType === 'collection' ? currData.name : (currType === 'product' ? currData.name : (history.find(h => h.type === 'product' || h.type === 'collection')?.data.name || ''))}`}
+                    description="Visualización inmersiva de combinaciones disponibles y precios."
                     onItemClick={(v) => {
-                        setShowLibraryVarieties(false);
-                        navigateTo(v.id, 'variant', v.sku);
+                        if (pickingFor) {
+                            const slides = [...(editData.config?.slides || [])];
+                            const targetSlide = slides[pickingFor.slideIndex];
+                            if (targetSlide) {
+                                const newLayer = {
+                                    id: Date.now(),
+                                    type: 'image',
+                                    url: v.image || v.image_url,
+                                    x: 50, y: 50, scale: 1, rotation: 0,
+                                    zIndex: (targetSlide.layers?.length || 0) + 1,
+                                    link: `/catalogo/producto/${v.product_id}/${v.sku}`
+                                };
+                                targetSlide.layers = [...(targetSlide.layers || []), newLayer];
+                                setEditData({ ...editData, config: { ...editData.config, slides } });
+                                setActiveLayerIndex(targetSlide.layers.length - 1);
+                            }
+                            setPickingFor(null);
+                            setShowLibraryVarieties(false);
+                        } else {
+                            navigateTo(v.id, 'variant', v.sku);
+                        }
                     }}
+
+
                 />
             )}
 
