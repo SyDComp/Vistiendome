@@ -1,8 +1,9 @@
 import React from 'react';
-import './ui.css';
+import '../../styles/components/Input.css';
 
 /**
- * Atomo visual para Inputs. Unifica el renderizado de etiquetas y errores de validación.
+ * Atomo visual para Inputs Premium.
+ * Soporta renderizado especial interactivo para type="color".
  */
 const Input = ({
     label,
@@ -18,23 +19,46 @@ const Input = ({
 }) => {
     
     return (
-        <div className={`ui-input-group ${error ? 'has-error' : ''} ${className}`}>
+        <div className={`premium-input-group ${className}`}>
             {label && (
-                <label className="ui-label" htmlFor={name}>
+                <label className="premium-label" htmlFor={name}>
                     {label} {required && <span className="ui-required-mark">*</span>}
                 </label>
             )}
             
-            <input
-                id={name}
-                name={name}
-                type={type}
-                value={value}
-                onChange={onChange}
-                placeholder={placeholder}
-                className="ui-input"
-                {...props}
-            />
+            {type === 'color' ? (
+                <div className="premium-color-wrapper">
+                    <div className="premium-color-square" style={{ background: value || '#000' }}>
+                        <input 
+                            type="color" 
+                            name={name}
+                            value={value || '#000000'} 
+                            onChange={onChange}
+                            className="premium-color-native"
+                        />
+                    </div>
+                    <input 
+                        type="text" 
+                        name={`${name}_text`}
+                        value={value || ''}
+                        onChange={onChange}
+                        placeholder="#000000"
+                        className="premium-input premium-color-text"
+                        {...props}
+                    />
+                </div>
+            ) : (
+                <input
+                    id={name}
+                    name={name}
+                    type={type}
+                    value={value || ''}
+                    onChange={onChange}
+                    placeholder={placeholder}
+                    className="premium-input"
+                    {...props}
+                />
+            )}
             
             {error && (
                 <span className="ui-error-text">{error}</span>

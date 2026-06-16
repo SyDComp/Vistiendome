@@ -1,0 +1,10 @@
+@import url('./global/global_modules.css');
+@import url('./global/heartbeat.css');
+@import url('./global/notification_system.css');
+@import url('./home/home_modules.css');
+@import url('./catalogo/catalogo_modules.css');
+@import url('./detalles/detalles_modules.css');
+@import url('./vistas/vistas_modules.css');
+@import url('./admin/admin_modules.css');
+@import url('./admin/cms_studio.css');
+@import './auth/auth_modules.css';

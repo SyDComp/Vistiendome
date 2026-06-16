@@ -1,11 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Filtros from '../catalogo/Filtros';
 import ElementoColeccion from '../colecciones/ElementoColeccion';
+import Navbar from '../../layout/navbar/Navbar';
+import PremiumLoader from '../../ui/PremiumLoader';
 import { getProducts, getCategoriesTree, getImageUrl, getFiltersMetadata } from '../../../services/api';
+import { useWebSocket } from '../../../context/WebSocketContext';
 
 const Catalogo = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const [productos, setProductos] = useState([]);
     const [totalCategorias, setTotalCategorias] = useState([]); 
     const [filtersMetadata, setFiltersMetadata] = useState({});
@@ -17,38 +21,37 @@ const Catalogo = () => {
     const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null); 
     const [orden, setOrden] = useState('relevancia');
     const [loading, setLoading] = useState(true);
+    const { lastMessage } = useWebSocket();
+
+    const cargarDatos = async () => {
+        setLoading(true);
+        try {
+            const [prods, tree, meta] = await Promise.all([
+                getProducts(),
+                getCategoriesTree(),
+                getFiltersMetadata()
+            ]);
+            setProductos(prods);
+            setTotalCategorias(tree);
+            setFiltersMetadata(meta);
+        } catch (error) {
+            console.error("Error al cargar el catálogo:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const cargarDatos = async () => {
-            setLoading(true);
-            try {
-                const [prods, tree, meta] = await Promise.all([
-                    getProducts(),
-                    getCategoriesTree(),
-                    getFiltersMetadata()
-                ]);
-                setProductos(prods);
-                setTotalCategorias(tree);
-                setFiltersMetadata(meta);
-            } catch (error) {
-                console.error("Error al cargar el catálogo:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
         cargarDatos();
     }, []);
 
-    // Actualizar productos cuando cambian los filtros (Opcional: recarga desde el servidor)
-    /*
+    // Escuchar WebSockets para actualizaciones en tiempo real
     useEffect(() => {
-        const refetch = async () => {
-             const prods = await getProducts(appliedFilters);
-             setProductos(prods);
-        };
-        refetch();
-    }, [appliedFilters]);
-    */
+        if (lastMessage && (lastMessage.resource === 'products' || lastMessage.resource === 'categories')) {
+            console.log("WebSocket: Actualización detectada, recargando catálogo...", lastMessage);
+            cargarDatos();
+        }
+    }, [lastMessage]);
 
     // Lógica de filtrado y ordenamiento MULTI-FACETADA
     const productosFiltrados = useMemo(() => {
@@ -92,16 +95,23 @@ const Catalogo = () => {
         return resultado;
     }, [productos, categoriaSeleccionada, appliedFilters, orden]);
 
+    const handleClearAll = () => {
+        setAppliedFilters({
+            category: null,
+            specs: {},
+            priceRange: null
+        });
+        setCategoriaSeleccionada(null);
+    };
+
+    const isModalOpen = location.pathname.includes('/producto/');
+
     if (loading) {
-        return (
-            <div className="catalogo-loading container">
-                <div className="loader">Cargando colección artesanal...</div>
-            </div>
-        );
+        return <PremiumLoader text="Cargando catálogo artesanal..." />;
     }
 
     return (
-        <div className="catalogo-view-premium container">
+        <div className="catalogo-view-premium container fade-in">
             <header className="catalogo-header-premium">
                 <span className="sc-subtitle">Colecciones de Autor</span>
                 <h1 className="sc-title-elegant">Nuestro Catálogo</h1>
@@ -123,19 +133,30 @@ const Catalogo = () => {
                     {productosFiltrados.length > 0 ? (
                         <div className="elementosColeccion-premium">
                             {productosFiltrados.map(producto => (
-                                <Link 
-                                    key={producto.id} 
-                                    to={producto.sku ? `/producto/${producto.slug}/${producto.sku}` : `/producto/${producto.slug}`}
-                                    state={{ backgroundLocation: location }}
-                                    className="product-card-link-premium"
-                                >
+                                <div key={producto.id} className="product-card-link-premium">
                                     <ElementoColeccion 
                                         tipo="vertical"
                                         nombre={producto.name}
                                         precio={producto.price ? `$ ${producto.price.toLocaleString('es-CL')}` : 'Consultar'}
                                         imagen={producto.image ? getImageUrl(producto.image) : (producto.images?.[0]?.url ? getImageUrl(producto.images[0].url) : null)}
+                                        imagenes={producto.extras?.preview_carousel 
+                                            ? producto.extras.preview_carousel.map(img => typeof img === 'string' ? getImageUrl(img) : getImageUrl(img.url)) 
+                                            : []}
+                                        intervalo={producto.extras?.carousel_speed}
+                                        isPaused={isModalOpen}
+                                        onClick={(indexActual) => {
+                                            let targetSku = producto.sku;
+                                            if (producto.extras?.preview_carousel) {
+                                                const currentImgObj = producto.extras.preview_carousel[indexActual];
+                                                if (currentImgObj && currentImgObj.sku) {
+                                                    targetSku = currentImgObj.sku;
+                                                }
+                                            }
+                                            const targetUrl = targetSku ? `/catalogo/producto/${producto.slug}/${targetSku}` : `/catalogo/producto/${producto.slug}`;
+                                            navigate(targetUrl, { state: { backgroundLocation: location } });
+                                        }}
                                     />
-                                </Link>
+                                </div>
                             ))}
                         </div>
                     ) : (

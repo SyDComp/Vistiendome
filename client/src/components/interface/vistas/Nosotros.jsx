@@ -27,7 +27,7 @@ const Nosotros = () => {
                     <span className="subtitle">Nuestra Historia</span>
                     <h1>Diseñando identidad con modestia</h1>
                     <p className="hero-text">
-                        En el corazón de San Carlos, en el sector de San Camilo, nace Vistiéndome. 
+                        En el corazón de San Carlos, en el sector de San Camilo, nace Vistiendomé. 
                         Más que una marca de ropa, somos un taller de confección propio dedicado 
                         a vestir a la mujer cristiana con honor y elegancia.
                     </p>
@@ -45,7 +45,7 @@ const Nosotros = () => {
                         <h2>El arte de la confección propia</h2>
                         <p>
                             Nuestra misión es sencilla pero profunda: <strong>Vestir a la mujer con diseños que respeten su fe 
-                            y realcen su elegancia natural.</strong> A diferencia de la moda fragmentada actual, en Vistiéndome 
+                            y realcen su elegancia natural.</strong> A diferencia de la moda fragmentada actual, en Vistiendomé 
                             controlamos cada etapa del proceso.
                         </p>
                         <p>
@@ -100,7 +100,7 @@ const Nosotros = () => {
             {/* Cierre */}
             <section className="nosotros-cierre">
                 <div className="container">
-                    <h3>Vistiéndome Chile</h3>
+                    <h3>Vistiendomé Chile</h3>
                     <p>Sencillez, Elegancia y Modestia en cada prenda.</p>
                 </div>
             </section>

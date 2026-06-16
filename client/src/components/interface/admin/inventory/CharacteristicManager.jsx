@@ -4,11 +4,12 @@ import DataTable from '../../../ui/admin/DataTable';
 import RowActions from '../../../ui/admin/RowActions';
 import CharacteristicForm from './CharacteristicForm';
 import DetailDrawer from '../../../ui/admin/DetailDrawer';
+import Badge from '../../../ui/Badge';
 import FilterBar from '../../../ui/admin/FilterBar';
 import { useNotification } from '../../../../context/NotificationContext';
 import { Hash, Tag, Palette } from 'lucide-react';
 
-const API_BASE = 'http://127.0.0.1:8000/api/v1/admin/catalog';
+const API_BASE = (import.meta.env.PROD ? '/api/v1/admin/catalog' : 'http://127.0.0.1:8000/api/v1/admin/catalog');
 
 const CharacteristicManager = () => {
     const { toast, confirm } = useNotification();
@@ -49,8 +50,25 @@ const CharacteristicManager = () => {
 
     useEffect(() => { fetchCharacteristics(); }, [fetchCharacteristics]);
 
+    const normalizeChar = (text) => text.trim().toUpperCase();
+    const normalizeOpt = (text) => {
+        if (!text) return "";
+        return text.trim().toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    };
+
     const handleSave = async (formData) => {
         if (!formData.name) return toast.error('El nombre de la característica es obligatorio');
+        
+        // Aplicar Regla de Negocio: CARACTERÍSTICA y Opción
+        const normalizedData = {
+            ...formData,
+            name: normalizeChar(formData.name),
+            domain: (formData.domain || []).map(item => ({
+                ...item,
+                value: item.value ? normalizeOpt(item.value) : item.value
+            }))
+        };
+
         try {
             const isEdit = !!editingChar;
             const url = isEdit ? `${API_BASE}/attributes/${editingChar.id}` : `${API_BASE}/attributes`;
@@ -59,7 +77,7 @@ const CharacteristicManager = () => {
             const res = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(normalizedData)
             });
 
             if (res.ok) {
@@ -90,18 +108,119 @@ const CharacteristicManager = () => {
         }
     };
 
+    const handleReorderOptions = async (charId, newDomain) => {
+        try {
+            const res = await fetch(`${API_BASE}/attributes/${charId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ domain: newDomain })
+            });
+
+            if (res.ok) {
+                toast.success('Orden actualizado');
+                const updated = await res.json();
+                setDetailData(updated);
+                fetchCharacteristics();
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error('Error al guardar el nuevo orden');
+        }
+    };
+
+    const handleUpdateDetail = async (updatedItem, originalItem) => {
+        if (!detailData) return;
+
+        // Normalizar el valor antes de guardar (Regla de Negocio)
+        const finalValue = updatedItem.value ? normalizeOpt(updatedItem.value) : updatedItem.value;
+        const normalizedItem = { ...updatedItem, value: finalValue };
+
+        // Si estamos actualizando una opción (ej: color) dentro de una característica
+        if (detailData.domain) {
+            const newDomain = detailData.domain.map(opt => {
+                // Si tenemos ID, usamos ID
+                if (opt.id && originalItem?.id && opt.id === originalItem.id) {
+                    return { ...opt, ...normalizedItem };
+                }
+                
+                // Si no hay ID, comparamos con el valor ORIGINAL (el que tenía antes de editar)
+                const origVal = originalItem?.value || originalItem?.name;
+                const optVal = opt.value || opt.name;
+                
+                if (origVal && optVal === origVal) {
+                    return { ...opt, ...normalizedItem };
+                }
+                return opt;
+            });
+
+            const updatedChar = { ...detailData, domain: newDomain };
+            
+            try {
+                const res = await fetch(`${API_BASE}/attributes/${detailData.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedChar)
+                });
+
+                if (res.ok) {
+                    toast.success('Opción actualizada correctamente');
+                    setDetailData(updatedChar);
+                    fetchCharacteristics();
+                } else {
+                    const err = await res.json();
+                    toast.error(err.detail || 'Error al actualizar');
+                }
+            } catch (err) {
+                console.error(err);
+                toast.error('Error de red al actualizar');
+            }
+        }
+    };
+
+    const handleDeleteDetail = async (itemToDelete) => {
+        if (!detailData || !detailData.domain) return false;
+
+        const newDomain = detailData.domain.filter(opt => {
+            const idMatch = (opt.id && opt.id === itemToDelete.id);
+            const valueMatch = (opt.value === itemToDelete.value || opt.name === itemToDelete.name);
+            return !(idMatch || valueMatch);
+        });
+
+        const updatedChar = { ...detailData, domain: newDomain };
+
+        try {
+            const res = await fetch(`${API_BASE}/attributes/${detailData.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedChar)
+            });
+
+            if (res.ok) {
+                toast.success('Opción eliminada correctamente');
+                setDetailData(updatedChar);
+                fetchCharacteristics();
+                return true;
+            } else {
+                toast.error('Error al eliminar la opción');
+                return false;
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error('Error de red al eliminar');
+            return false;
+        }
+    };
+
     const handleViewChar = async (char) => {
         try {
-            setLoading(true);
+            setDetailData(null);
+            setShowDetail(true);
             const res = await fetch(`${API_BASE}/attributes/${char.id}`);
             const fullData = await res.json();
             setDetailData(fullData);
-            setShowDetail(true);
         } catch (err) {
             console.error("Error cargando detalle:", err);
             toast.error("No se pudo cargar el detalle de la característica.");
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -115,10 +234,8 @@ const CharacteristicManager = () => {
         
         return matchesSearch && matchesCategory;
     }).sort((a, b) => {
-        const aIsColor = a.name.toLowerCase() === 'color' || a.name.toLowerCase() === 'colores';
-        const bIsColor = b.name.toLowerCase() === 'color' || b.name.toLowerCase() === 'colores';
-        if (aIsColor && !bIsColor) return -1;
-        if (!aIsColor && bIsColor) return 1;
+        if (a.is_system && !b.is_system) return -1;
+        if (!a.is_system && b.is_system) return 1;
         return a.name.localeCompare(b.name);
     });
 
@@ -133,7 +250,7 @@ const CharacteristicManager = () => {
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+        <div className="char-manager-layout">
             <SectionHeader 
                 title="Gestión de Características"
                 description="Define las opciones base (Talla, Color, Tela) que usarás en tus productos o especificaciones."
@@ -162,34 +279,27 @@ const CharacteristicManager = () => {
                     { 
                         key: 'name', 
                         label: 'Nombre de Característica', 
-                        render: (v) => {
-                            const isColor = v.toLowerCase() === 'color' || v.toLowerCase() === 'colores';
+                        render: (v, char) => {
+                            const isSystem = char.is_system;
                             return (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    {isColor ? (
-                                        <div style={{ padding: '4px 8px', borderRadius: '8px', background: 'linear-gradient(135deg, #8f0653 0%, #db2777 100%)', color: '#fff', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px', boxShadow: '0 4px 10px rgba(143,6,83,0.3)' }}>
-                                            <Palette size={12} /> SISTEMA
+                                <div className="char-manager-name-wrap">
+                                    {isSystem ? (
+                                        <div 
+                                            title="Esta característica es del núcleo del sistema y está protegida."
+                                            className="char-manager-shield"
+                                        >
+                                            <Palette size={14} />
                                         </div>
                                     ) : (
-                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#8f0653' }}></div>
+                                        <div className="char-manager-dot"></div>
                                     )}
-                                    <span style={{ fontWeight: '900', color: isColor ? '#8f0653' : '#1e1b4b', letterSpacing: '-0.5px' }}>{v.toUpperCase()}</span>
+                                    <span className={`char-manager-name-text ${isSystem ? 'system' : 'normal'}`}>{v.toUpperCase()}</span>
+                                    {isSystem && (
+                                        <Badge variant="error" size="sm" className="char-manager-badge-system">SISTEMA</Badge>
+                                    )}
                                 </div>
                             );
                         }
-                    },
-                    { 
-                        key: 'value_structure', 
-                        label: 'Configuración de Valores', 
-                        render: (v) => (
-                            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                                {v.map((c, i) => (
-                                    <span key={i} style={{ fontSize: '10px', background: '#f1f5f9', color: '#64748b', padding: '3px 10px', borderRadius: '20px', fontWeight: '700', border: '1px solid #e2e8f0' }}>
-                                        {c.label}
-                                    </span>
-                                ))}
-                            </div>
-                        )
                     },
                     { 
                         key: 'domain', 
@@ -197,9 +307,9 @@ const CharacteristicManager = () => {
                         width: '200px', 
                         align: 'center', 
                         render: (v) => (
-                            <span style={{ fontWeight: '800', color: '#059669', background: '#f0fdf4', padding: '4px 12px', borderRadius: '20px', fontSize: '12px' }}>
+                            <Badge variant="success" size="md">
                                 {v?.length || 0} registradas
-                            </span>
+                            </Badge>
                         ) 
                     },
                     { 
@@ -208,17 +318,9 @@ const CharacteristicManager = () => {
                         width: '100px', 
                         align: 'center', 
                         render: (v) => (
-                            <span style={{ 
-                                padding: '4px 8px', 
-                                borderRadius: '20px', 
-                                fontSize: '10px', 
-                                fontWeight: '800',
-                                background: v ? '#f0fdf4' : '#fef2f2',
-                                color: v ? '#166534' : '#991b1b',
-                                border: `1px solid ${v ? '#dcfce7' : '#fee2e2'}`
-                            }}>
+                            <Badge variant={v ? 'success' : 'error'} size="sm">
                                 {v ? 'SÍ' : 'NO'}
-                            </span>
+                            </Badge>
                         ) 
                     }
                 ]}
@@ -229,7 +331,7 @@ const CharacteristicManager = () => {
                     <RowActions 
                         onView={() => handleViewChar(row)}
                         onEdit={() => { setEditingChar(row); setView('edit'); }}
-                        onDelete={() => handleDelete(row.id)}
+                        onDelete={row.is_system ? null : () => handleDelete(row.id)}
                     />
                 )}
             />
@@ -240,6 +342,9 @@ const CharacteristicManager = () => {
                 data={detailData}
                 type="characteristic"
                 title={detailData?.name}
+                onUpdate={handleUpdateDetail}
+                onDelete={handleDeleteDetail}
+                onReorder={(newDomain) => handleReorderOptions(detailData.id, newDomain)}
             />
         </div>
     );

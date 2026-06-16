@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
     Plus, Trash2, Settings2, Save, ArrowLeft, 
-    Palette, Hash, Type, LayoutList, Layers, GripVertical, ChevronRight, Settings
+    Palette, Hash, Type, LayoutList, Layers, GripVertical, ChevronRight, Settings, Lock
 } from 'lucide-react';
 import Button from '../../../ui/Button';
 import Input from '../../../ui/Input';
 import { useNotification } from '../../../../context/NotificationContext';
+import Badge from '../../../ui/Badge';
 import { formatChar, normalizeDomain } from '../../../../utils/formatters';
 
 const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false }) => {
@@ -14,6 +15,8 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
     const [localData, setLocalData] = useState({
         name: initialData?.name || '',
         description: initialData?.description || '',
+        is_system: initialData?.is_system || false,
+        system_id: initialData?.system_id || null,
         value_structure: initialData?.value_structure?.length 
             ? initialData.value_structure 
             : [{ label: 'Valor', key: 'value', type: 'text' }],
@@ -24,28 +27,42 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
     const [libraryColors, setLibraryColors] = useState([]);
     const [showLibraryModal, setShowLibraryModal] = useState(false);
 
-    const isColorType = localData.name.toLowerCase() === 'color' || localData.name.toLowerCase() === 'colores';
+    const isColorType = localData.system_id === 'COLOR' || localData.name.toUpperCase() === 'COLOR';
 
     useEffect(() => {
         if (isColorType) {
-            fetch('http://127.0.0.1:8000/api/v1/admin/catalog/colors')
+            fetch((import.meta.env.PROD ? '/api/v1/admin/catalog/colors' : 'http://127.0.0.1:8000/api/v1/admin/catalog/colors'))
                 .then(r => r.json())
                 .then(setLibraryColors)
                 .catch(console.error);
             
             setLocalData(p => ({
                 ...p,
+                is_system: true,
+                system_id: 'COLOR',
                 value_structure: [
                     { label: 'Nombre del Color', key: 'value', type: 'text' },
                     { label: 'Código Hex', key: 'hex_code', type: 'color' }
                 ]
             }));
+        } else if (!localData.is_system) {
+            // Si es libre, forzamos estructura simple
+            setLocalData(p => ({
+                ...p,
+                value_structure: [{ label: 'Valor', key: 'value', type: 'text' }]
+            }));
         }
-    }, [isColorType]);
+    }, [isColorType, localData.is_system]);
 
     const addOption = () => {
         const newRow = {};
-        localData.value_structure.forEach(col => newRow[col.key] = '');
+        localData.value_structure.forEach(col => {
+            if (isColorType && col.key === 'hex_code') {
+                newRow[col.key] = '#000000';
+            } else {
+                newRow[col.key] = '';
+            }
+        });
         setLocalData(prev => ({ ...prev, domain: [...prev.domain, newRow] }));
     };
 
@@ -61,35 +78,19 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
         setLocalData(prev => ({ ...prev, domain: newDomain }));
     };
 
-    const addExtraField = async () => {
-        const label = await prompt("¿Qué otro dato quieres guardar de cada opción? (ej: Código, Hexadecimal, etc)");
-        if (!label) return;
-        const key = `extra_${Date.now()}`;
-        const type = label.toLowerCase().includes('color') ? 'color' : 'text';
-        
-        setLocalData(prev => ({ 
-            ...prev, 
-            value_structure: [...prev.value_structure, { label, key, type }] 
-        }));
-    };
-
     return (
-        <div style={{ 
-            maxWidth: '800px', margin: '0 auto', width: '100%',
-            display: 'flex', flexDirection: 'column', height: '90vh', 
-            animation: 'fadeIn 0.3s ease-out' 
-        }}>
+        <div className="char-form-container">
             {/* CABECERA */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <button onClick={onCancel} style={{ background: '#fff', border: '1px solid #e2e8f0', padding: '10px', borderRadius: '12px', cursor: 'pointer', color: '#64748b' }}>
+            <div className="char-form-header">
+                <div className="char-form-header-left">
+                    <button onClick={onCancel} className="char-form-back-btn">
                         <ArrowLeft size={20} />
                     </button>
-                    <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '900', color: '#1e1b4b' }}>
+                    <h2 className="char-form-title">
                         {initialData ? 'Configurar Característica' : 'Nueva Característica'}
                     </h2>
                 </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
+                <div className="char-form-header-right">
                     <Button variant="outline" onClick={onCancel}>Cancelar</Button>
                     <Button variant="primary" onClick={() => {
                         // Aplicar normalización estricta antes de guardar
@@ -105,111 +106,134 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                 </div>
             </div>
 
-            <div style={{ 
-                background: '#fff', borderRadius: '24px', border: '1px solid #e2e8f0', 
-                boxShadow: '0 10px 25px -5px rgba(0,0,0,0.04)', overflow: 'hidden',
-                display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0
-            }}>
+            <div className="char-form-body-wrapper">
                 {/* SECCIÓN 1: NOMBRE PRINCIPAL */}
-                <div style={{ padding: '32px', borderBottom: '1px solid #f1f5f9', background: '#fcfcfc' }}>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '800', color: '#8f0653', textTransform: 'uppercase', marginBottom: '12px' }}>
+                <div className="char-form-section-1">
+                    <label className="char-form-label">
                         Identificador (Biblioteca)
                     </label>
-                    <input 
-                        value={localData.name}
-                        onChange={e => setLocalData(p => ({ ...p, name: e.target.value }))}
-                        placeholder="Ej: Tallas, Colores..."
-                        autoFocus
-                        style={{ width: '100%', fontSize: '22px', fontWeight: '700', border: 'none', outline: 'none', background: 'transparent', color: '#1e1b4b' }}
-                    />
+                    <div className="char-form-input-wrap">
+                        <input 
+                            value={localData.name}
+                            onChange={e => setLocalData(p => ({ ...p, name: e.target.value.toUpperCase() }))}
+                            placeholder="Ej: Tallas, Colores..."
+                            autoFocus={!localData.is_system}
+                            disabled={localData.is_system}
+                            className={`char-form-input-main ${localData.is_system ? 'system' : 'normal'}`}
+                        />
+                        {localData.is_system && (
+                            <div className="char-form-protected-badge">
+                                <Lock size={12} /> NOMBRE PROTEGIDO
+                            </div>
+                        )}
+                    </div>
                     <input 
                         value={localData.description}
                         onChange={e => setLocalData(p => ({ ...p, description: e.target.value }))}
                         placeholder="Descripción breve (opcional)..."
-                        style={{ width: '100%', fontSize: '14px', fontWeight: '500', border: 'none', outline: 'none', background: 'transparent', color: '#64748b' }}
+                        className="char-form-desc-input"
                     />
-                    <div style={{ marginTop: '20px', display: 'flex', alignItems: 'center', gap: '8px', background: '#fff', padding: '10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', width: 'fit-content' }}>
+                    <div className="char-form-filter-wrap">
                         <input type="checkbox" id="char_is_filterable" checked={localData.is_filterable} onChange={e => setLocalData(p => ({ ...p, is_filterable: e.target.checked }))} />
-                        <label htmlFor="char_is_filterable" style={{ fontSize: '12px', fontWeight: '800', color: '#1e1b4b', textTransform: 'uppercase' }}>Mostrar en filtros</label>
+                        <label htmlFor="char_is_filterable" className="char-form-filter-label">Mostrar en filtros</label>
                     </div>
                 </div>
 
                 {/* SECCIÓN 2: LISTA DE VALORES (SCROLLABLE) */}
-                <div style={{ padding: '32px 32px 10px 32px', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                        <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>
+                <div className="char-form-section-2">
+                    <div className="char-form-section-2-header">
+                        <h4 className="char-form-section-2-title">
                             Opciones Disponibles ({localData.domain.length})
                         </h4>
-                        {!isColorType && (
-                            <button onClick={addExtraField} style={{ background: 'none', border: 'none', color: '#8f0653', fontSize: '12px', fontWeight: '800', cursor: 'pointer' }}>+ Detalles extra</button>
-                        )}
                     </div>
 
-                    <div style={{ 
-                        flex: 1, overflowY: 'auto', paddingRight: '12px', marginRight: '-12px',
-                        display: 'flex', flexDirection: 'column', gap: '12px',
-                        scrollbarWidth: 'thin', scrollbarColor: '#8f0653 #f1f5f9'
-                    }} className="custom-scrollbar">
+                    <div className="char-form-options-list">
                         {localData.domain.map((row, rIdx) => (
-                            <div key={rIdx} style={{ 
-                                display: 'flex', alignItems: 'center', gap: '12px', background: '#f8fafc', 
-                                padding: '16px', borderRadius: '16px', border: '1px solid #e2e8f0'
-                            }}>
-                                <div style={{ color: '#cbd5e1' }}><GripVertical size={16} /></div>
+                            <div key={rIdx} className={`char-form-row ${row.is_system ? 'system' : 'normal'}`}>
+                                <div className="char-form-row-icon">
+                                    {row.is_system ? <Lock size={16} /> : <GripVertical size={16} />}
+                                </div>
                                 
                                 {isColorType ? (
-                                    <div style={{ flex: 1, display: 'flex', gap: '16px', alignItems: 'center' }}>
-                                        <div style={{ 
-                                            width: '40px', height: '40px', borderRadius: '50%', background: row.hex_code || '#000', 
-                                            border: '3px solid #fff', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', position: 'relative', overflow: 'hidden'
-                                        }}>
-                                            <input type="color" value={row.hex_code || '#000000'} onChange={e => {
-                                                updateValue(rIdx, 'hex_code', e.target.value);
-                                                setTimeout(() => {
-                                                    const el = document.getElementById(`hex-input-${rIdx}`);
-                                                    if (el) { el.focus(); const len = el.value.length; el.setSelectionRange(len, len); }
-                                                }, 50);
-                                            }} style={{ position: 'absolute', inset: -5, width: '150%', height: '150%', cursor: 'pointer', border: 'none', background: 'none' }} />
+                                    <div className="char-form-row-content">
+                                        <div className={`char-form-color-circle ${row.is_system ? 'system' : 'normal'}`} style={{ background: row.hex_code || '#000' }}>
+                                            {!row.is_system && (
+                                                <input type="color" value={row.hex_code || '#000000'} onChange={e => {
+                                                    updateValue(rIdx, 'hex_code', e.target.value);
+                                                    setTimeout(() => {
+                                                        const el = document.getElementById(`hex-input-${rIdx}`);
+                                                        if (el) { el.focus(); const len = el.value.length; el.setSelectionRange(len, len); }
+                                                    }, 50);
+                                                }} className="char-form-color-input-hidden" />
+                                            )}
                                         </div>
-                                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                            <input value={row.value || ''} onChange={e => updateValue(rIdx, 'value', e.target.value)} placeholder="Nombre del color" onKeyDown={e => e.key === 'Enter' && addOption()} autoFocus={rIdx === localData.domain.length - 1} style={{ background: 'none', border: 'none', fontWeight: '900', color: '#1e1b4b', fontSize: '16px', textTransform: 'uppercase', outline: 'none', width: '100%', padding: 0 }} />
-                                            <input id={`hex-input-${rIdx}`} value={row.hex_code || ''} onChange={e => updateValue(rIdx, 'hex_code', e.target.value)} placeholder="#000000" onKeyDown={e => e.key === 'Enter' && addOption()} style={{ background: 'none', border: 'none', fontSize: '12px', color: '#64748b', fontWeight: '700', fontFamily: 'monospace', outline: 'none', width: '100%', padding: 0 }} />
+                                        <div className="char-form-inputs-col">
+                                            <input 
+                                                value={row.value || ''} 
+                                                onChange={e => updateValue(rIdx, 'value', e.target.value)} 
+                                                onBlur={e => updateValue(rIdx, 'value', formatOpt(e.target.value))}
+                                                placeholder="Nombre del color" 
+                                                onKeyDown={e => e.key === 'Enter' && addOption()} 
+                                                autoFocus={!row.is_system && rIdx === localData.domain.length - 1} 
+                                                disabled={row.is_system}
+                                                className={`char-form-input-val ${row.is_system ? 'system' : 'normal'}`}
+                                            />
+                                            <input 
+                                                id={`hex-input-${rIdx}`} 
+                                                value={row.hex_code || ''} 
+                                                onChange={e => updateValue(rIdx, 'hex_code', e.target.value)} 
+                                                placeholder="#000000" 
+                                                onKeyDown={e => e.key === 'Enter' && addOption()} 
+                                                disabled={row.is_system}
+                                                className={`char-form-input-hex ${row.is_system ? 'system' : 'normal'}`}
+                                            />
                                         </div>
-                                        {libraryColors.some(lc => lc.name === row.value) && <span style={{ fontSize: '10px', background: '#fdf2f8', color: '#db2777', padding: '4px 8px', borderRadius: '8px', fontWeight: '800' }}>VINCULADO</span>}
+                                        {row.is_system && <Badge variant="error" size="sm" className="char-form-badge-sys">SISTEMA</Badge>}
+                                        {libraryColors.some(lc => lc.name === row.value) && !row.is_system && <span className="char-form-badge-linked">VINCULADO</span>}
                                     </div>
                                 ) : (
-                                    <div style={{ flex: 1, display: 'flex', gap: '16px', alignItems: 'center' }}>
+                                    <div className="char-form-row-content">
                                         {localData.value_structure.map(col => (
                                             <div key={col.key} style={{ flex: col.key === 'value' ? 2 : 1 }}>
-                                                <input value={row[col.key] || ''} onChange={e => updateValue(rIdx, col.key, e.target.value)} placeholder={col.label} onKeyDown={e => e.key === 'Enter' && addOption()} style={{ background: 'none', border: 'none', fontWeight: '700', outline: 'none', width: '100%' }} />
+                                                <input 
+                                                    value={row[col.key] || ''} 
+                                                    onChange={e => updateValue(rIdx, col.key, e.target.value)} 
+                                                    onBlur={e => col.key === 'value' && updateValue(rIdx, col.key, formatOpt(e.target.value))}
+                                                    placeholder={col.label} 
+                                                    onKeyDown={e => e.key === 'Enter' && addOption()} 
+                                                    disabled={row.is_system}
+                                                    className={`char-form-input-generic ${row.is_system ? 'system' : 'normal'}`}
+                                                />
                                             </div>
                                         ))}
+                                        {row.is_system && <Badge variant="error" size="sm" className="char-form-badge-sys">SISTEMA</Badge>}
                                     </div>
                                 )}
-                                <button onClick={() => removeOption(rIdx)} style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer' }}><Trash2 size={18} /></button>
+                                {!row.is_system && (
+                                    <button onClick={() => removeOption(rIdx)} className="char-form-del-btn">
+                                        <Trash2 size={18} />
+                                    </button>
+                                )}
                             </div>
                         ))}
                     </div>
                 </div>
 
                 {/* SECCIÓN 3: ACCIONES PRINCIPALES (PERSISTENTES) */}
-                <div style={{ 
-                    padding: '24px 32px', background: '#fff', borderTop: '1px solid #f1f5f9',
-                    display: 'flex', gap: '16px', boxShadow: '0 -10px 20px rgba(0,0,0,0.02)'
-                }}>
-                    <button onClick={addOption} style={{ flex: 1, padding: '18px', borderRadius: '18px', border: '2px dashed #8f0653', color: '#8f0653', background: '#fff', fontSize: '15px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                <div className="char-form-section-3">
+                    <button onClick={addOption} className="char-form-btn-add">
                         <Plus size={20} /> Añadir nueva opción
                     </button>
                     {isColorType && (
-                        <button onClick={() => setShowLibraryModal(true)} style={{ flex: 2, padding: '18px', borderRadius: '18px', border: 'none', color: '#fff', background: 'linear-gradient(135deg, #8f0653 0%, #db2777 100%)', fontSize: '15px', fontWeight: '900', cursor: 'pointer', textTransform: 'uppercase', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 4px 14px rgba(143,6,83,0.3)' }}>
+                        <button onClick={() => setShowLibraryModal(true)} className="char-form-btn-import">
                             <Palette size={20} /> Importar de Biblioteca
                         </button>
                     )}
                 </div>
 
                 {/* SECCIÓN 4: TIP */}
-                <div style={{ padding: '20px', background: '#f8fafc', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'center' }}>
-                    <div style={{ color: '#64748b', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div className="char-form-section-4">
+                    <div className="char-form-tip">
                         <Settings size={14} /> Tip: Puedes presionar **Enter** para añadir opciones consecutivas rápidamente.
                     </div>
                 </div>
@@ -217,33 +241,28 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
 
             {/* Modal Biblioteca */}
             {showLibraryModal && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.5)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-                    <div style={{ background: '#fff', width: '100%', maxWidth: '600px', borderRadius: '24px', padding: '32px' }}>
-                        <h3 style={{ margin: '0 0 24px', fontSize: '20px', fontWeight: '900', color: '#1e1b4b' }}>Biblioteca de Colores</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '12px', maxHeight: '400px', overflowY: 'auto' }}>
+                <div className="char-form-modal-overlay">
+                    <div className="char-form-modal-box">
+                        <h3 className="char-form-modal-title">Biblioteca de Colores</h3>
+                        <div className="char-form-modal-grid">
                             {libraryColors.map(color => {
                                 const isSelected = localData.domain.some(d => d.value === color.name);
                                 return (
-                                    <button key={color.id} onClick={() => isSelected ? setLocalData(p => ({ ...p, domain: p.domain.filter(d => d.value !== color.name) })) : setLocalData(p => ({ ...p, domain: [...p.domain, { value: color.name, hex_code: color.hex_code }] }))} style={{ background: '#fff', border: `2px solid ${isSelected ? '#8f0653' : '#e2e8f0'}`, borderRadius: '16px', padding: '16px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: color.hex_code, border: '2px solid #fff', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}></div>
-                                        <span style={{ fontSize: '10px', fontWeight: '900', textTransform: 'uppercase' }}>{color.name}</span>
+                                    <button key={color.id} onClick={() => isSelected ? setLocalData(p => ({ ...p, domain: p.domain.filter(d => d.value !== color.name) })) : setLocalData(p => ({ ...p, domain: [...p.domain, { value: color.name, hex_code: color.hex_code }] }))} className={`char-form-modal-color-btn ${isSelected ? 'selected' : 'unselected'}`}>
+                                        <div className="char-form-modal-color-circle" style={{ background: color.hex_code }}></div>
+                                        <span className="char-form-modal-color-name">{color.name}</span>
                                     </button>
                                 );
                             })}
                         </div>
-                        <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
+                        <div className="char-form-modal-actions">
                             <Button variant="primary" onClick={() => setShowLibraryModal(false)}>Confirmar</Button>
                         </div>
                     </div>
                 </div>
             )}
 
-            <style>{`
-                @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-                .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-                .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
-                .custom-scrollbar::-webkit-scrollbar-thumb { background: #8f0653; border-radius: 10px; }
-            `}</style>
+
         </div>
     );
 };

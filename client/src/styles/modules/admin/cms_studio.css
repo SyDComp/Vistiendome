@@ -1,0 +1,668 @@
+/* 
+ * =========================================================================
+ * VISTIENDOME PLATFORM - CMS & STUDIO VISUAL COMPOSITION ENGINE CSS
+ * =========================================================================
+ */
+
+/* =========================================
+ * 1. COMPOSITION EDITOR (Main UI)
+ * ========================================= */
+
+.cms-studio-container {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    background: rgba(15, 12, 41, 0.98);
+    backdrop-filter: blur(15px);
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    animation: fadeIn 0.3s ease;
+}
+
+.cms-studio-header {
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    background: rgba(0,0,0,0.2);
+}
+
+.cms-studio-header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.cms-studio-header-icon {
+    background: linear-gradient(135deg, #8f0653, #50032e);
+    padding: 12px;
+    border-radius: 14px;
+    box-shadow: 0 8px 16px rgba(143,6,83,0.3);
+}
+
+.cms-studio-header-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    background: linear-gradient(to right, #fff, rgba(255,255,255,0.7));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.cms-studio-header-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.cms-studio-header-tag {
+    font-size: 9px;
+    color: #8f0653;
+    background: rgba(143,6,83,0.1);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 900;
+}
+
+.cms-studio-header-subtitle {
+    margin: 0;
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.cms-studio-header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.cms-studio-btn-outline {
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    font-weight: 800;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.cms-studio-btn-outline.preview-mode {
+    background: #fff;
+    color: #000;
+}
+
+.cms-studio-btn-primary {
+    padding: 10px 24px;
+    border-radius: 12px;
+    background: #8f0653;
+    color: #fff;
+    border: none;
+    font-weight: 900;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 10px 25px rgba(143,6,83,0.4);
+    transition: transform 0.2s;
+}
+
+.cms-studio-btn-primary:hover {
+    transform: scale(1.02);
+}
+
+.cms-studio-btn-close {
+    background: rgba(255,255,255,0.05);
+    border: none;
+    color: #fff;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cms-studio-btn-close:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.cms-studio-divider {
+    width: 1px;
+    height: 32px;
+    background: rgba(255,255,255,0.1);
+    margin: 0 8px;
+}
+
+/* =========================================
+ * 2. MAIN EDITOR AREA
+ * ========================================= */
+
+.cms-studio-editor-area {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.cms-studio-sidebar-left {
+    width: 300px;
+    background: rgba(0,0,0,0.4);
+    border-right: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.cms-studio-sidebar-right {
+    width: 320px;
+    background: rgba(0,0,0,0.3);
+    border-left: 1px solid rgba(255,255,255,0.05);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.cms-studio-layer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.cms-studio-layer-title {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.cms-studio-layer-count {
+    font-size: 10px;
+    background: rgba(255,255,255,0.05);
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-weight: 800;
+}
+
+.cms-studio-layer-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cms-studio-layer-empty {
+    text-align: center;
+    padding: 60px 20px;
+    border: 1px dashed rgba(255,255,255,0.1);
+    border-radius: 24px;
+    color: rgba(255,255,255,0.2);
+}
+
+.cms-studio-layer-item {
+    padding: 10px 14px;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    background: rgba(255,255,255,0.03);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+    transform: translateX(0);
+}
+
+.cms-studio-layer-item.active {
+    border-color: #8f0653;
+    background: rgba(143,6,83,0.15);
+    transform: translateX(4px);
+}
+
+.cms-studio-layer-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    flex-shrink: 0;
+}
+
+.cms-studio-layer-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.cms-studio-layer-name {
+    font-size: 11px;
+    font-weight: 900;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cms-studio-layer-zindex {
+    font-size: 9px;
+    color: rgba(255,255,255,0.3);
+    font-weight: 700;
+}
+
+.cms-studio-layer-trash {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.3);
+    cursor: pointer;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+}
+
+.cms-studio-layer-trash:hover {
+    color: #ff4d4d;
+}
+
+.cms-studio-toolbar {
+    padding: 24px;
+    background: rgba(0,0,0,0.2);
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.cms-studio-toolbar-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.cms-studio-tool-btn {
+    padding: 14px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.03);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.05);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.cms-studio-tool-btn.span-2 {
+    grid-column: span 2;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+}
+
+.cms-studio-tool-btn:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.1);
+}
+
+.cms-studio-tool-label {
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+}
+
+/* =========================================
+ * 3. CANVAS AREA
+ * ========================================= */
+
+.cms-studio-canvas-container {
+    flex: 1;
+    background: #080808;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px;
+    position: relative;
+    overflow: hidden;
+}
+
+.cms-studio-perspective-lines {
+    position: absolute;
+    inset: 0;
+    opacity: 0.03;
+    pointer-events: none;
+    background: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 100px 100px;
+}
+
+.cms-studio-slide-tabs {
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    padding: 6px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    z-index: 10;
+}
+
+.cms-studio-tab-btn {
+    padding: 8px 20px;
+    border-radius: 100px;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.cms-studio-tab-btn.active {
+    background: #8f0653;
+    color: #fff;
+}
+
+.cms-studio-tab-add {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.cms-studio-tab-add:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.cms-studio-canvas {
+    width: 100%;
+    max-width: 1200px;
+    aspect-ratio: 21/9;
+    position: relative;
+    overflow: hidden;
+    border-radius: 2px;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cms-studio-canvas.edit-mode {
+    box-shadow: 0 60px 120px -20px rgba(0,0,0,0.8);
+    border: 1px solid rgba(143,6,83,0.4);
+}
+
+.cms-studio-canvas.preview-mode {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    border: none;
+}
+
+.cms-studio-canvas-layer {
+    position: absolute;
+    user-select: none;
+}
+
+.cms-studio-canvas-layer.edit-mode {
+    cursor: grab;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cms-studio-canvas-layer.edit-mode.dragging {
+    cursor: grabbing;
+    transition: none;
+}
+
+.cms-studio-canvas-layer.active {
+    border: 2px solid #8f0653;
+    padding: 8px;
+    box-shadow: 0 0 40px rgba(143,6,83,0.3);
+}
+
+.cms-studio-layer-tooltip {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #8f0653;
+    color: #fff;
+    font-size: 9px;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 900;
+    white-space: nowrap;
+    box-shadow: 0 8px 16px rgba(143,6,83,0.4);
+}
+
+.cms-studio-text-content {
+    white-space: nowrap;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+    text-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.cms-studio-image-content {
+    display: block;
+    max-width: 600px;
+    height: auto;
+    pointer-events: none;
+}
+
+.cms-studio-image-content.active {
+    border-radius: 8px;
+}
+
+.cms-studio-status-bar {
+    margin-top: 40px;
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: flex;
+    gap: 32px;
+}
+
+/* =========================================
+ * 4. RIGHT PROPERTIES PANEL
+ * ========================================= */
+
+.cms-studio-prop-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    animation: slideInRight 0.3s ease;
+}
+
+.cms-studio-prop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cms-studio-prop-title {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+}
+
+.cms-studio-prop-id {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
+
+.cms-studio-prop-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cms-studio-prop-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.cms-studio-prop-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.4);
+}
+
+.cms-studio-input {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 12px;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 14px;
+}
+
+.cms-studio-range-val {
+    font-size: 10px;
+    text-align: right;
+}
+
+.cms-studio-zindex-ctrl {
+    display: flex;
+    gap: 8px;
+}
+
+.cms-studio-zindex-btn {
+    flex: 1;
+    padding: 10px;
+    background: rgba(255,255,255,0.05);
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.cms-studio-zindex-display {
+    width: 40px;
+    background: #8f0653;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+}
+
+.cms-studio-color-picker {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.cms-studio-color-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+}
+
+.cms-studio-color-input {
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.cms-studio-bg-input {
+    width: 100%;
+    height: 40px;
+    background: none;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.cms-studio-info-box {
+    padding: 20px;
+    border-radius: 16px;
+    background: rgba(143,6,83,0.05);
+    border: 1px solid rgba(143,6,83,0.2);
+}
+
+.cms-studio-info-text {
+    font-size: 11px;
+    margin: 0;
+    color: #fdf2f8;
+    line-height: 1.5;
+}
+
+.cms-studio-btn-danger {
+    margin-top: auto;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #ff4d4d;
+    color: #ff4d4d;
+    background: transparent;
+    font-weight: 800;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+/* Globals specific to this UI */
+input[type=range].cms-studio-range {
+    -webkit-appearance: none;
+    background: rgba(255,255,255,0.1);
+    height: 4px;
+    border-radius: 2px;
+    width: 100%;
+}
+input[type=range].cms-studio-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    background: #8f0653;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(143,6,83,0.5);
+}
+
+@keyframes slideInRight { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.dt-studio-layout { flex: 1; display: flex; overflow: hidden; }
+.dt-studio-sidebar { width: 320px; background: rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.1); padding: 32px; overflow-y: auto; }
+.dt-studio-workspace { flex: 1; padding: 60px; overflow: auto; display: flex; flex-direction: column; align-items: center; }
+
+@media (max-width: 950px) {
+    .dt-studio-layout { flex-direction: column; overflow: hidden; }
+    .dt-studio-sidebar { width: 100%; flex: 1; border-right: none; border-bottom: none; padding: 20px; box-sizing: border-box; }
+    .dt-studio-workspace { width: 100%; flex: 1; padding: 20px; box-sizing: border-box; }
+}

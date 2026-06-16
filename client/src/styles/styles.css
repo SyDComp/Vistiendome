@@ -1,0 +1,7 @@
+@import url('./modules/modules.css');
+
+/* Responsive Utilities */
+html, body { min-height: 100vh; min-height: 100dvh; }
+.h-screen-dynamic { height: 100vh; height: 100dvh; }
+.w-screen-dynamic { width: 100vw; width: 100dvw; }
+.min-h-screen-dynamic { min-height: 100vh; min-height: 100dvh; }

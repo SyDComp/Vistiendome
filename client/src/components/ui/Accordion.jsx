@@ -87,7 +87,8 @@ const Accordion = ({
             borderRadius: '16px', 
             border: '1px solid #e2e8f0', 
             overflow: 'hidden', 
-            boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+            boxShadow: isOpen ? '0 12px 24px rgba(0,0,0,0.06)' : '0 4px 12px rgba(0,0,0,0.03)',
+            transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
             ...style 
         }}>
             {/* Cabecera */}

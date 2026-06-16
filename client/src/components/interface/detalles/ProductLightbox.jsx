@@ -1,8 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import './ProductLightbox.css';
 
 const ProductLightbox = ({ images = [], currentIndex = 0, isOpen, onClose, onPrev, onNext }) => {
+    // Touch swipe state
+    const touchStartX = useRef(null);
+    const touchStartY = useRef(null);
+
     // Bloquear scroll del body al estar abierto
     useEffect(() => {
         if (isOpen) {
@@ -13,6 +18,36 @@ const ProductLightbox = ({ images = [], currentIndex = 0, isOpen, onClose, onPre
         return () => { document.body.style.overflow = 'auto'; };
     }, [isOpen]);
 
+    // Teclado (flechas + Escape)
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKey = (e) => {
+            if (e.key === 'ArrowLeft') onPrev();
+            else if (e.key === 'ArrowRight') onNext();
+            else if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handleKey);
+        return () => window.removeEventListener('keydown', handleKey);
+    }, [isOpen, onPrev, onNext, onClose]);
+
+    const handleTouchStart = useCallback((e) => {
+        touchStartX.current = e.touches[0].clientX;
+        touchStartY.current = e.touches[0].clientY;
+    }, []);
+
+    const handleTouchEnd = useCallback((e) => {
+        if (touchStartX.current === null) return;
+        const dx = e.changedTouches[0].clientX - touchStartX.current;
+        const dy = e.changedTouches[0].clientY - touchStartY.current;
+        // Solo considerar swipe si fue más horizontal que vertical
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+            if (dx < 0) onNext();   // swipe izquierda → siguiente
+            else onPrev();           // swipe derecha → anterior
+        }
+        touchStartX.current = null;
+        touchStartY.current = null;
+    }, [onNext, onPrev]);
+
     if (!isOpen) return null;
 
     const handleBackdropClick = (e) => {
@@ -22,7 +57,12 @@ const ProductLightbox = ({ images = [], currentIndex = 0, isOpen, onClose, onPre
     };
 
     const lightboxContent = (
-        <div className="lightbox-backdrop fade-in" onClick={handleBackdropClick}>
+        <div
+            className="lightbox-backdrop fade-in"
+            onClick={handleBackdropClick}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+        >
             <button className="lightbox-close" onClick={onClose}>
                 <X size={32} />
             </button>
@@ -39,6 +79,7 @@ const ProductLightbox = ({ images = [], currentIndex = 0, isOpen, onClose, onPre
                         src={images[currentIndex]} 
                         alt={`Vista ampliada ${currentIndex + 1}`} 
                         className="lightbox-image"
+                        draggable={false}
                     />
                 </div>
 
@@ -53,89 +94,14 @@ const ProductLightbox = ({ images = [], currentIndex = 0, isOpen, onClose, onPre
                 {currentIndex + 1} / {images.length}
             </div>
 
-            <style>{`
-                .lightbox-backdrop {
-                    position: fixed;
-                    inset: 0;
-                    background: rgba(0, 0, 0, 0.95);
-                    z-index: 99999;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    backdrop-filter: blur(10px);
-                }
-                .lightbox-content {
-                    position: relative;
-                    width: 100%;
-                    max-width: 90vh;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    padding: 20px;
-                }
-                .lightbox-image-wrapper {
-                    width: 100%;
-                    height: 80vh;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                .lightbox-image {
-                    max-width: 100%;
-                    max-height: 100%;
-                    object-fit: contain;
-                    border-radius: 8px;
-                    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-                }
-                .lightbox-close {
-                    position: absolute;
-                    top: 30px;
-                    right: 30px;
-                    background: none;
-                    border: none;
-                    color: white;
-                    cursor: pointer;
-                    z-index: 100000;
-                    transition: transform 0.2s;
-                    opacity: 0.8;
-                }
-                .lightbox-close:hover { transform: scale(1.1); opacity: 1; }
-                
-                .lightbox-nav {
-                    background: rgba(255, 255, 255, 0.1);
-                    border: none;
-                    color: white;
-                    width: 60px;
-                    height: 60px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                    margin: 0 20px;
-                    backdrop-filter: blur(5px);
-                }
-                .lightbox-nav:hover { background: rgba(255, 255, 255, 0.2); }
-                
-                .lightbox-counter {
-                    position: absolute;
-                    bottom: 30px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    color: white;
-                    font-size: 14px;
-                    font-weight: 700;
-                    letter-spacing: 1px;
-                    opacity: 0.7;
-                }
+            {/* Indicador visual de swipe en móvil */}
+            {images.length > 1 && (
+                <div className="lightbox-swipe-hint">
+                    ← desliza →
+                </div>
+            )}
 
-                @media (max-width: 768px) {
-                    .lightbox-nav { display: none; }
-                    .lightbox-content { padding: 10px; }
-                    .lightbox-close { top: 20px; right: 20px; }
-                }
-            `}</style>
+
         </div>
     );
 

@@ -1,0 +1,107 @@
+.lightbox-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    touch-action: pan-y;
+}
+.lightbox-content {
+    position: relative;
+    width: 100%;
+    max-width: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.lightbox-image-wrapper {
+    width: 100%;
+    height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+}
+.lightbox-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    pointer-events: none;
+}
+.lightbox-close {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    z-index: 100000;
+    transition: transform 0.2s;
+    opacity: 0.8;
+}
+.lightbox-close:hover { transform: scale(1.1); opacity: 1; }
+
+.lightbox-nav {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 0 20px;
+    backdrop-filter: blur(5px);
+    flex-shrink: 0;
+}
+.lightbox-nav:hover { background: rgba(255, 255, 255, 0.2); }
+
+.lightbox-counter {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    opacity: 0.7;
+}
+
+.lightbox-swipe-hint {
+    display: none;
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.4);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    animation: fadeHint 3s ease-out forwards;
+}
+
+@keyframes fadeHint {
+    0% { opacity: 1; }
+    60% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@media (max-width: 768px) {
+    /* Ocultamos los botones de flecha en móvil — el swipe es el gesto nativo */
+    .lightbox-nav { display: none; }
+    .lightbox-swipe-hint { display: block; }
+    .lightbox-content { padding: 10px; }
+    .lightbox-close { top: 20px; right: 20px; }
+}

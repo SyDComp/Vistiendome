@@ -107,7 +107,7 @@ const InstantSearch = ({ isMobile = false, onResultClick }) => {
         setIsOpen(false);
         if (onResultClick) onResultClick();
         // Navegación profunda con SKU si existe
-        navigate(`/producto/${result.slug}${result.sku ? `/${result.sku}` : ''}`);
+        navigate(`/catalogo/producto/${result.slug}${result.sku ? `/${result.sku}` : ''}`);
     };
 
     const handleSearchSubmit = (e) => {
@@ -115,7 +115,7 @@ const InstantSearch = ({ isMobile = false, onResultClick }) => {
         if (query.trim()) {
             setIsOpen(false);
             if (onResultClick) onResultClick();
-            navigate(`/catalogo?q=${encodeURIComponent(query)}`);
+            navigate(`/search?q=${encodeURIComponent(query)}`);
         }
     };
 

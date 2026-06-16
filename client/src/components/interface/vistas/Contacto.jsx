@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
+import { useSettings } from '../../../context/SettingsContext';
+import { Camera, Globe, MessageCircle, Music, Mail, Phone, MapPin, Clock } from 'lucide-react';
 
 const Contacto = () => {
+    const { settings } = useSettings();
+    const contact = settings.contact_info || {};
+    const social = settings.social_links || {};
+
     const [tipoContacto, setTipoContacto] = useState('seleccion'); // 'seleccion', 'individual', 'grupo'
     const [formData, setFormData] = useState({
         nombre: '',
@@ -18,7 +24,6 @@ const Contacto = () => {
         if (!value.startsWith('+569')) {
             value = '+569';
         }
-        // Solo permitir números después del +569
         const numbers = value.slice(4).replace(/\D/g, '').slice(0, 8);
         setFormData({ ...formData, whatsapp: '+569' + numbers });
     };
@@ -35,7 +40,6 @@ const Contacto = () => {
         }
 
         setStatus('sending');
-        // Simulación de envío
         setTimeout(() => {
             console.log('Datos enviados:', formData);
             setStatus('success');
@@ -171,15 +175,70 @@ const Contacto = () => {
 
                 <div className="contacto-footer-info">
                     <div className="info-block">
-                        <h4>📍 Taller y Showroom</h4>
-                        <p>Camino San Camilo Km 1,8, San Carlos, Chile.</p>
+                        <h4><MapPin size={18} /> Taller y Showroom</h4>
+                        <p>{contact.address || 'Camino San Camilo Km 1,8, San Carlos, Chile.'}</p>
                     </div>
+                    {contact.email && (
+                        <div className="info-block">
+                            <h4><Mail size={18} /> Correo Electrónico</h4>
+                            <p>{contact.email}</p>
+                        </div>
+                    )}
                     <div className="info-block">
-                        <h4>⏰ Horarios</h4>
+                        <h4><Clock size={18} /> Horarios</h4>
                         <p>Lun - Vie: 09:00 - 18:00 / Sáb: 09:00 - 14:00</p>
                     </div>
                 </div>
+
+                <div className="contacto-social-links" style={{ 
+                    marginTop: '60px', 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    gap: '30px',
+                    borderTop: '1px solid #f1f5f9',
+                    paddingTop: '40px'
+                }}>
+                    {social.instagram && (
+                        <a href={social.instagram} target="_blank" rel="noopener noreferrer" className="social-link-item">
+                            <Camera size={24} /> <span>Instagram</span>
+                        </a>
+                    )}
+                    {social.facebook && (
+                        <a href={social.facebook} target="_blank" rel="noopener noreferrer" className="social-link-item">
+                            <Globe size={24} /> <span>Facebook</span>
+                        </a>
+                    )}
+                    {social.whatsapp && (
+                        <a href={`https://wa.me/${social.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="social-link-item">
+                            <MessageCircle size={24} /> <span>WhatsApp</span>
+                        </a>
+                    )}
+                </div>
             </div>
+            <style>{`
+                .social-link-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    color: #64748b;
+                    text-decoration: none;
+                    font-weight: 700;
+                    transition: all 0.3s;
+                    padding: 12px 20px;
+                    border-radius: 12px;
+                    background: #f8fafc;
+                }
+                .social-link-item:hover {
+                    color: #8f0653;
+                    background: #fdf2f8;
+                    transform: translateY(-2px);
+                }
+                .info-block h4 {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+            `}</style>
         </section>
     );
 };

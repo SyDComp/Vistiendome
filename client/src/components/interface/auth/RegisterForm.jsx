@@ -56,7 +56,7 @@ const RegisterForm = () => {
         setStatusMessage(null);
         
         try {
-            const response = await fetch('http://localhost:8000/api/v1/auth/register', {
+            const response = await fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formValues)
@@ -85,19 +85,12 @@ const RegisterForm = () => {
     };
 
     return (
-        <div style={{ maxWidth: '400px', margin: '0 auto', padding: '20px' }}>
-            <h2>Únete a Vistiéndome 👋</h2>
-            <p style={{ color: '#666', marginBottom: '30px' }}>Crea tu cuenta de cliente para guardar tus vestidos favoritos e historial real.</p>
+        <div className="auth-form-container public">
+            <h2 className="auth-form-title">Únete a Vistiendomé 👋</h2>
+            <p className="auth-form-subtitle">Crea tu cuenta de cliente para guardar tus vestidos favoritos e historial real.</p>
 
             {statusMessage && (
-                <div style={{ 
-                    padding: '12px', 
-                    borderRadius: '8px', 
-                    marginBottom: '20px',
-                    backgroundColor: statusMessage.type === 'error' ? '#ffebee' : '#e8f5e9',
-                    color: statusMessage.type === 'error' ? '#c62828' : '#2e7d32',
-                    fontWeight: 500
-                }}>
+                <div className={`auth-status-message ${statusMessage.type === 'error' ? 'error' : 'success'}`}>
                     {statusMessage.text}
                 </div>
             )}
@@ -157,8 +150,7 @@ const RegisterForm = () => {
 
                 <Button 
                     type="submit" 
-                    className="w-100" 
-                    style={{ width: '100%', marginTop: '10px' }}
+                    className="w-100 auth-btn-wrapper" 
                     isLoading={isSubmitting}
                 >
                     Crear mi cuenta
