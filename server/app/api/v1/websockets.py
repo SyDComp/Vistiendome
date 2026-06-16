@@ -1,5 +1,5 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from app.core.sockets import manager
+from ...core.sockets import manager
 import asyncio
 import time
 
@@ -12,7 +12,7 @@ async def websocket_endpoint(websocket: WebSocket):
         # Enviar confirmación inicial
         await websocket.send_json({
             "type": "connection_established",
-            "message": "Vistiéndome Heartbeat Active",
+            "message": "Vistiendomé Heartbeat Active",
             "timestamp": time.time()
         })
         

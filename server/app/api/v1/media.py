@@ -6,8 +6,9 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from ...database import get_session
 from sqlmodel import Session
 
-from sqlmodel import select
-from ...models.catalog import Product, SKU, ProductImage
+from sqlmodel import select, delete
+from ...models.catalog import Product, SKU, MediaAsset, ProductMediaLink, SKUMediaLink
+from ...models.cms import HomepageSection
 
 router = APIRouter()
 
@@ -15,7 +16,7 @@ router = APIRouter()
 UPLOAD_DIR = "media"
 
 @router.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_session)):
     """
     Sube un archivo imagen al servidor local.
     Genera un nombre único para evitar colisiones.
@@ -29,61 +30,132 @@ async def upload_file(file: UploadFile = File(...)):
     unique_filename = f"{uuid.uuid4()}.{extension}"
     file_path = os.path.join(UPLOAD_DIR, unique_filename)
 
-    # 3. Guardar en disco
     try:
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
+            
+        # Inserción Relacional en la Base de Datos
+        asset = MediaAsset(
+            filename=unique_filename,
+            original_name=file.filename,
+            url=f"/media/{unique_filename}",
+            mime_type=file.content_type,
+            file_size=os.path.getsize(file_path)
+        )
+        db.add(asset)
+        db.commit()
+        db.refresh(asset)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error guardando el archivo: {str(e)}")
 
-    # 4. Retornar URL relativa
     return {
-        "url": f"/media/{unique_filename}",
-        "filename": unique_filename,
-        "original_name": file.filename
+        "id": asset.id,
+        "url": asset.url,
+        "filename": asset.filename,
+        "original_name": asset.original_name
     }
 
 @router.get("/")
-def list_media():
-    """Lista todos los archivos subidos (fines de galería básica)"""
-    if not os.path.exists(UPLOAD_DIR):
-        os.makedirs(UPLOAD_DIR)
-        
-    files = []
-    for f in os.listdir(UPLOAD_DIR):
-        if os.path.isfile(os.path.join(UPLOAD_DIR, f)):
-            files.append({
-                "url": f"/media/{f}",
-                "filename": f
+def list_media(db: Session = Depends(get_session)):
+    """Lista todos los archivos de medios (Directo desde la BD)"""
+    assets = db.exec(select(MediaAsset)).all()
+    return [{
+        "id": a.id, 
+        "url": a.url, 
+        "filename": a.filename,
+        "original_name": a.original_name
+    } for a in assets]
+
+@router.post("/check-references")
+def check_media_references(ids: List[int], db: Session = Depends(get_session)):
+    """
+    Verifica si una lista de IDs de MediaAsset está en uso en productos, SKUs (variantes) o el CMS.
+    """
+    results = []
+    has_references = False
+
+    for asset_id in ids:
+        asset = db.get(MediaAsset, asset_id)
+        if not asset:
+            continue
+
+        associations = []
+
+        # 1. Comprobar asociaciones con Productos
+        links = db.exec(
+            select(ProductMediaLink, Product)
+            .join(Product, Product.id == ProductMediaLink.product_id)
+            .where(ProductMediaLink.media_asset_id == asset_id)
+        ).all()
+        for link, product in links:
+            associations.append({
+                "type": "product",
+                "name": f"Producto: {product.name}",
+                "id": product.id
             })
-    return sorted(files, key=lambda x: x['filename'])
+
+        # 2. Comprobar asociaciones con SKUs (Variantes)
+        sku_links = db.exec(
+            select(SKUMediaLink, SKU, Product)
+            .join(SKU, SKU.id == SKUMediaLink.sku_id)
+            .join(Product, Product.id == SKU.product_id)
+            .where(SKUMediaLink.media_asset_id == asset_id)
+        ).all()
+        for link, sku, product in sku_links:
+            associations.append({
+                "type": "sku",
+                "name": f"Variante: {product.name} ({sku.sku})",
+                "id": sku.id
+            })
+
+        # 3. Comprobar asociaciones con Secciones del CMS (Homepage)
+        sections = db.exec(select(HomepageSection)).all()
+        for sec in sections:
+            config_str = str(sec.config).lower()
+            if asset.filename.lower() in config_str or asset.url.lower() in config_str:
+                associations.append({
+                    "type": "homepage",
+                    "name": f"CMS Homepage - Sección: {sec.title} ({sec.type})",
+                    "id": sec.id
+                })
+
+        if len(associations) > 0:
+            has_references = True
+            results.append({
+                "media_id": asset_id,
+                "filename": asset.filename,
+                "original_name": asset.original_name,
+                "associations": associations
+            })
+
+    return {
+        "has_references": has_references,
+        "references": results
+    }
 
 @router.delete("/batch")
-async def delete_media_batch(urls: List[str], db: Session = Depends(get_session)):
+async def delete_media_batch(ids: List[int], db: Session = Depends(get_session)):
     """
-    Elimina archivos físicos y limpia referencias en la base de datos.
+    Elimina archivos físicos y limpia referencias en la base de datos a través de IDs.
     """
     deleted_count = 0
     errors = []
 
-    for url in urls:
-        filename = url.replace("/media/", "")
-        file_path = os.path.join(UPLOAD_DIR, filename)
+    for asset_id in ids:
+        asset = db.get(MediaAsset, asset_id)
+        if not asset:
+            errors.append(f"MediaAsset no encontrado: ID {asset_id}")
+            continue
+
+        file_path = os.path.join(UPLOAD_DIR, asset.filename)
 
         try:
-            # 1. Limpiar Referencias en DB (Integridad Referencial)
-            # SKU.image_urls
-            skus = db.exec(select(SKU).where(SKU.image_urls.contains(url))).all()
-            for sku in skus:
-                new_urls = [u for u in sku.image_urls if u != url]
-                sku.image_urls = new_urls
-                db.add(sku)
+            # 1. Limpiar Referencias en DB (Integridad Referencial Estricta)
+            db.exec(delete(SKUMediaLink).where(SKUMediaLink.media_asset_id == asset_id))
+            db.exec(delete(ProductMediaLink).where(ProductMediaLink.media_asset_id == asset_id))
 
-            # ProductImage (Borrar registro completo)
-            product_images = db.exec(select(ProductImage).where(ProductImage.url == url)).all()
-            for pi in product_images:
-                db.delete(pi)
-
+            # Borrar la entidad MediaAsset
+            db.delete(asset)
             db.commit()
 
             # 2. Eliminar archivo físico
@@ -91,11 +163,11 @@ async def delete_media_batch(urls: List[str], db: Session = Depends(get_session)
                 os.remove(file_path)
                 deleted_count += 1
             else:
-                errors.append(f"Archivo no encontrado: {filename}")
+                errors.append(f"Archivo no encontrado en disco: {asset.filename}")
 
         except Exception as e:
             db.rollback()
-            errors.append(f"Error procesando {filename}: {str(e)}")
+            errors.append(f"Error procesando el asset {asset_id}: {str(e)}")
 
     return {
         "success": deleted_count,
@@ -103,50 +175,43 @@ async def delete_media_batch(urls: List[str], db: Session = Depends(get_session)
     }
 
 @router.post("/rename")
-async def rename_media_batch(mapping: Dict[str, str], db: Session = Depends(get_session)):
+async def rename_media_batch(mapping: Dict[int, str], db: Session = Depends(get_session)):
     """
-    Renombra archivos físicos y actualiza referencias en la base de datos.
-    Mapping: { "old_url": "new_url" }
+    Renombra archivos físicos y actualiza el MediaAsset.
+    Mapping: { asset_id: "new_filename" }
     """
     renamed_count = 0
     errors = []
 
-    for old_url, new_url in mapping.items():
-        old_filename = old_url.replace("/media/", "")
-        new_filename = new_url.replace("/media/", "")
-        
-        old_path = os.path.join(UPLOAD_DIR, old_filename)
+    for asset_id_str, new_filename in mapping.items():
+        asset_id = int(asset_id_str)
+        asset = db.get(MediaAsset, asset_id)
+        if not asset:
+            errors.append(f"No existe el asset: {asset_id}")
+            continue
+
+        old_path = os.path.join(UPLOAD_DIR, asset.filename)
         new_path = os.path.join(UPLOAD_DIR, new_filename)
 
         if not os.path.exists(old_path):
-            errors.append(f"No existe el origen: {old_filename}")
+            errors.append(f"No existe el archivo en disco: {asset.filename}")
             continue
 
         try:
             # 1. Renombrar archivo físico
             os.rename(old_path, new_path)
 
-            # 2. Actualizar Referencias en DB
-            # SKU.image_urls
-            # Nota: SQLModel/SQLAlchemy JSON types requieren re-asignación para detectar cambios
-            skus = db.exec(select(SKU).where(SKU.image_urls.contains(old_url))).all()
-            for sku in skus:
-                updated_urls = [u.replace(old_url, new_url) for u in sku.image_urls]
-                sku.image_urls = updated_urls
-                db.add(sku)
-
-            # ProductImage
-            product_images = db.exec(select(ProductImage).where(ProductImage.url == old_url)).all()
-            for pi in product_images:
-                pi.url = new_url
-                db.add(pi)
-
+            # 2. Actualizar MediaAsset (La magia relacional: no hay que tocar SKUs ni Productos)
+            asset.filename = new_filename
+            asset.url = f"/media/{new_filename}"
+            db.add(asset)
             db.commit()
+            
             renamed_count += 1
 
         except Exception as e:
             db.rollback()
-            errors.append(f"Error renombrando {old_filename}: {str(e)}")
+            errors.append(f"Error renombrando {asset.filename}: {str(e)}")
 
     return {
         "success": renamed_count,

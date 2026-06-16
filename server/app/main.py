@@ -4,11 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 
 from .database import init_db
-from .api.v1 import auth, products, admin, websockets, media, catalog_admin
+from .api.v1 import auth, products, admin, websockets, media, catalog_admin, catalog_collections, collections, cms, settings as site_settings
 
 app = FastAPI(
-    title="Vistiéndome API",
-    description="Motor de e-commerce profesional para Vistiéndome Chile",
+    title="Vistiendomé API",
+    description="Motor de e-commerce profesional para Vistiendomé Chile",
     version="1.0.0"
 )
 
@@ -16,7 +16,7 @@ app = FastAPI(
 # Configuramos CORS antes que cualquier ruta para asegurar que OPTIONS funcione
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Temporalmente abierto para diagnóstico total
+    allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(","), 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -25,8 +25,12 @@ app.add_middleware(
 # --- RUTAS ---
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Autenticación"])
 app.include_router(products.router, prefix="/api/v1/products", tags=["Catálogo Público"])
+app.include_router(collections.router, prefix="/api/v1/collections", tags=["Colecciones Públicas"])
+app.include_router(cms.router, prefix="/api/v1/homepage", tags=["CMS de Portada"])
 app.include_router(catalog_admin.router, prefix="/api/v1/admin/catalog", tags=["Gestión de Catálogo"])
+app.include_router(catalog_collections.router, prefix="/api/v1/admin/catalog", tags=["Colecciones"])
 app.include_router(admin.router, prefix="/api/v1/admin", tags=["Administración"])
+app.include_router(site_settings.router, prefix="/api/v1/settings", tags=["Configuraciones"])
 app.include_router(media.router, prefix="/api/v1/media", tags=["Medios"])
 app.include_router(websockets.router, prefix="/ws", tags=["websockets"])
 
@@ -45,7 +49,7 @@ def on_startup():
 
 @app.get("/")
 def read_root():
-    return {"message": "Vistiéndome API se encuentra operativa 🚀"}
+    return {"message": "Vistiendomé API se encuentra operativa 🚀"}
 
 @app.get("/health")
 def health_check():

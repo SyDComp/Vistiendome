@@ -95,7 +95,7 @@ def ingest():
                 product = Product(
                     name=clean_name(folder_name),
                     slug=cat_slug,
-                    description=f"Colección {clean_name(folder_name)} por Vistiéndome Chile.",
+                    description=f"Colección {clean_name(folder_name)} por Vistiendomé Chile.",
                     category_id=category.id,
                     type=ProductType.PRENDA,
                     specs=specs
