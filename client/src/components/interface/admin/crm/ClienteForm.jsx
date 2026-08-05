@@ -5,7 +5,7 @@ import { Users } from 'lucide-react';
 import AdminFormLayout, { AdminFormSubmit } from '../../../ui/admin/AdminFormLayout';
 import PersonaFields from './PersonaFields';
 
-const API_BASE = `${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/crm`;
+const API_BASE = `/api/v1/crm`;
 
 const ClienteForm = ({ initialData, onSuccess, onCancel }) => {
     const { toast } = useNotification();
@@ -17,7 +17,11 @@ const ClienteForm = ({ initialData, onSuccess, onCancel }) => {
         apellidos: '',
         email_personal: '',
         telefono: '',
-        tipo_persona: 'CLIENTE'
+        tipo_persona: 'CLIENTE',
+        transporte_preferido: '',
+        direccion: '',
+        region_id: '',
+        comuna_id: ''
     });
 
     const handleChange = (e) => {
@@ -37,10 +41,16 @@ const ClienteForm = ({ initialData, onSuccess, onCancel }) => {
             const url = initialData ? `${API_BASE}/clientes/${initialData.id}` : `${API_BASE}/clientes`;
             const method = initialData ? 'PUT' : 'POST';
 
+            const payload = { ...formData };
+            if (!payload.comuna_id) delete payload.comuna_id;
+            if (!payload.region_id) delete payload.region_id;
+            if (!payload.transporte_preferido) delete payload.transporte_preferido;
+            if (!payload.direccion) delete payload.direccion;
+
             const res = await fetch(url, {
                 method: method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(payload)
             });
 
             if (!res.ok) {

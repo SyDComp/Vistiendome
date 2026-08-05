@@ -56,6 +56,7 @@ const CatalogView = () => {
                     filtersMetadata={filtersMetadata}
                     activeFilters={appliedFilters}
                     setFilters={setAppliedFilters}
+                    hideSpecs={true}
                 />
 
                 <main className="catalog-main">
@@ -65,6 +66,7 @@ const CatalogView = () => {
                         onProductClick={handleProductClick}
                         isModalOpen={isModalOpen}
                         onClearAll={clearAll}
+                        activeFilters={appliedFilters}
                     />
                 </main>
             </div>

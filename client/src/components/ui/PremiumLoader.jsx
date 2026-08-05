@@ -1,17 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 const PremiumLoader = ({ text = "Cargando..." }) => {
-    // Bloquear scroll del body mientras se muestra la carga
-    useEffect(() => {
-        const prevOverflow = document.body.style.overflow;
-        const prevHtmlOverflow = document.documentElement.style.overflow;
-        document.body.style.overflow = 'hidden';
-        document.documentElement.style.overflow = 'hidden';
-        return () => {
-            document.body.style.overflow = prevOverflow;
-            document.documentElement.style.overflow = prevHtmlOverflow;
-        };
-    }, []);
+    useScrollLock(true);
 
     return (
         <div className="premium-loader-overlay">

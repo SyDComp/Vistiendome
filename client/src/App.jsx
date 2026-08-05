@@ -12,6 +12,7 @@ import SuspenseFallback from './components/ui/SuspenseFallback'
 // Rutas críticas (cargadas estáticamente)
 import Inicio from './components/interface/vistas/Inicio'
 import CatalogView from './features/catalog/components/CatalogView'
+import ExplorerView from './features/catalog/components/ExplorerView'
 import ColeccionesIndex from './components/interface/vistas/ColeccionesIndex'
 import ProductDetailView from './features/productDetail/components/ProductDetailView'
 
@@ -54,6 +55,7 @@ function App() {
                 <Route path="/" element={<Home />}>
                    <Route index element={<Inicio />} />
                    <Route path="catalogo" element={<CatalogView />} />
+                   <Route path="explorador" element={<ExplorerView />} />
                    <Route path="colecciones" element={<ColeccionesIndex />} />
                    <Route path="nosotros" element={<Nosotros />} />
                    <Route path="contacto" element={<Contacto />} />
@@ -61,6 +63,7 @@ function App() {
                    <Route path="search" element={<Search />} />
                    <Route path="producto/:slug/:sku?/:imgIndex?" element={<ProductDetailView />} />
                    <Route path="catalogo/producto/:slug/:sku?/:imgIndex?" element={<ProductDetailView />} />
+                   <Route path="explorador/producto/:slug/:sku?/:imgIndex?" element={<ProductDetailView />} />
                    <Route path="coleccion/:slug" element={<DetalleColeccion />} />
                    <Route path="coleccion/:collectionSlug/producto/:slug/:sku?/:imgIndex?" element={<ProductDetailView />} />
                 </Route>
@@ -82,6 +85,20 @@ function App() {
                     </div>
                   } />
                   <Route path="/catalogo/producto/:slug/:sku?/:imgIndex?" element={
+                    <div className="modal-routing-overlay fade-in">
+                       <div className="modal-routing-content">
+                          <Home isModalView={true} />
+                       </div>
+                    </div>
+                  } />
+                  <Route path="/explorador/producto/:slug/:sku?/:imgIndex?" element={
+                    <div className="modal-routing-overlay fade-in">
+                       <div className="modal-routing-content">
+                          <Home isModalView={true} />
+                       </div>
+                    </div>
+                  } />
+                  <Route path="/coleccion/:collectionSlug/producto/:slug/:sku?/:imgIndex?" element={
                     <div className="modal-routing-overlay fade-in">
                        <div className="modal-routing-content">
                           <Home isModalView={true} />

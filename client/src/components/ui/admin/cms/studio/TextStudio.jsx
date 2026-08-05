@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
-import { X, Save, Type, Sparkles, Layout, ArrowLeft } from 'lucide-react';
+import { Save, Type, ArrowLeft } from 'lucide-react';
 import Button from '../../../Button';
 
 const TextStudio = ({ isOpen, onClose, data, onSave }) => {
@@ -50,62 +50,48 @@ const TextStudio = ({ isOpen, onClose, data, onSave }) => {
             fontFamily: 'Outfit, sans-serif'
         }}>
             {/* HEADER */}
-            <div style={{ padding: '20px 40px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.7 }}>
-                        <ArrowLeft size={20} /> <span style={{ fontSize: '13px', fontWeight: '800', textTransform: 'uppercase' }}>Volver</span>
+            <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1, minWidth: 0 }}>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.7, padding: 0, flexShrink: 0 }}>
+                        <ArrowLeft size={20} /> <span className="hide-on-mobile" style={{ fontSize: '13px', fontWeight: '800', textTransform: 'uppercase' }}>Volver</span>
                     </button>
-                    <div style={{ height: '30px', width: '1px', background: 'rgba(255,255,255,0.1)' }} />
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'linear-gradient(135deg, #8f0653, #530432)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div className="hide-on-mobile" style={{ height: '30px', width: '1px', background: 'rgba(255,255,255,0.1)', flexShrink: 0 }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'linear-gradient(135deg, #8f0653, #530432)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             <Type size={20} color="#fff" />
                         </div>
-                        <div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
                             <input 
                                 value={title}
                                 onChange={e => setTitle(e.target.value)}
-                                style={{ background: 'none', border: 'none', color: '#fff', fontSize: '18px', fontWeight: '900', outline: 'none', width: '300px' }}
+                                style={{ background: 'none', border: 'none', color: '#fff', fontSize: '18px', fontWeight: '900', outline: 'none', width: '100%', textOverflow: 'ellipsis' }}
                             />
-                            <p style={{ margin: 0, fontSize: '11px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px' }}>Editorial Studio Pro</p>
+                            <p style={{ margin: 0, fontSize: '11px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Editorial Studio Pro</p>
                         </div>
                     </div>
                 </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                    <button 
-                        onClick={onClose} 
-                        style={{ 
-                            background: 'rgba(255,255,255,0.05)', 
-                            border: '1px solid rgba(255,255,255,0.1)', 
-                            color: 'rgba(255,255,255,0.6)', 
-                            padding: '0 24px', 
-                            borderRadius: '14px', 
-                            fontSize: '13px', 
-                            fontWeight: '800', 
-                            textTransform: 'uppercase', 
-                            letterSpacing: '1px', 
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
-                        }}
-                    >
-                        Cancelar
-                    </button>
-                    <Button onClick={handleSave} variant="primary" style={{ background: '#8f0653' }}>
-                        <Save size={18} /> Guardar Cambios
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
+                    <Button onClick={handleSave} variant="primary" style={{ background: '#8f0653', height: '40px', padding: '0 16px', borderRadius: '12px' }}>
+                        <Save size={18} /> <span className="hide-on-mobile">Guardar</span>
                     </Button>
                 </div>
             </div>
 
             {/* CANVAS / EDITOR */}
-            <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-                <div style={{ flex: 1, padding: '40px', overflow: 'auto', display: 'flex', justifyContent: 'center' }}>
+            <div className="dt-studio-layout">
+                <div className="dt-studio-workspace" style={{ padding: '20px', overflow: 'hidden' }}>
                     <div style={{ 
                         width: '100%', 
                         maxWidth: '900px', 
                         background: '#fff', 
-                        borderRadius: '32px', 
-                        padding: '60px', 
+                        borderRadius: '24px', 
+                        padding: '20px', 
+                        boxSizing: 'border-box',
                         boxShadow: '0 40px 100px rgba(0,0,0,0.5)',
-                        minHeight: '80vh'
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        minHeight: 0
                     }}>
                         <ReactQuill 
                             theme="snow" 
@@ -113,40 +99,31 @@ const TextStudio = ({ isOpen, onClose, data, onSave }) => {
                             onChange={setContent} 
                             modules={modules}
                             placeholder="Escribe algo increíble aquí..."
-                            style={{ height: 'auto' }}
+                            style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}
                         />
                     </div>
                 </div>
-
-                {/* SIDEBAR TIPS */}
-                <div style={{ width: '320px', background: 'rgba(255,255,255,0.02)', borderLeft: '1px solid rgba(255,255,255,0.05)', padding: '40px' }}>
-                    <section style={{ marginBottom: '40px' }}>
-                        <h4 style={{ color: '#fff', fontSize: '12px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '24px', opacity: 0.6 }}>Consejos de Edición</h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '20px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <Sparkles size={16} color="#8f0653" style={{ marginBottom: '12px' }} />
-                                <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255,255,255,0.7)', lineHeight: '1.6' }}>
-                                    Utiliza los <strong>Encabezados (H1, H2)</strong> para organizar tu contenido y mejorar el SEO.
-                                </p>
-                            </div>
-                            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '20px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <Layout size={16} color="#8f0653" style={{ marginBottom: '12px' }} />
-                                <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255,255,255,0.7)', lineHeight: '1.6' }}>
-                                    Selecciona una parte del texto para aplicar <strong>colores específicos</strong> y resaltar información clave.
-                                </p>
-                            </div>
-                        </div>
-                    </section>
-                </div>
             </div>
+
 
             <style>{`
                 @keyframes studioFadeIn { from { opacity:0; transform: scale(1.05); } to { opacity:1; transform: scale(1); } }
-                .quill { border: none !important; font-family: 'Outfit', sans-serif !important; }
-                .ql-toolbar { border: none !important; border-bottom: 1px solid #f1f5f9 !important; padding: 20px 0 !important; margin-bottom: 30px !important; }
-                .ql-container { border: none !important; font-size: 18px !important; color: #1e1b4b !important; }
-                .ql-editor { padding: 0 !important; min-height: 400px !important; }
+                .quill { border: none !important; font-family: 'Outfit', sans-serif !important; flex: 1; display: flex; flexDirection: column; min-height: 0; }
+                .ql-toolbar { border: none !important; border-bottom: 1px solid #f1f5f9 !important; padding: 10px 0 !important; margin-bottom: 20px !important; display: flex !important; flex-wrap: wrap !important; gap: 8px !important; flex-shrink: 0; }
+                .ql-formats { margin-right: 0 !important; display: flex !important; flex-wrap: wrap !important; gap: 4px !important; }
+                .ql-container { border: none !important; font-size: 18px !important; color: #1e1b4b !important; flex: 1; display: flex; flex-direction: column; min-height: 0; }
+                .ql-editor { padding: 0 !important; padding-right: 10px !important; flex: 1; overflow-y: auto !important; }
                 .ql-editor.ql-blank::before { color: #cbd5e1 !important; font-style: normal !important; left: 0 !important; }
+                
+                /* Estilizar scrollbar interno del editor */
+                .ql-editor::-webkit-scrollbar { width: 6px; }
+                .ql-editor::-webkit-scrollbar-track { background: transparent; }
+                .ql-editor::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+
+                /* Utilidades Mobile */
+                @media (max-width: 600px) {
+                    .hide-on-mobile { display: none !important; }
+                }
             `}</style>
         </div>
     );

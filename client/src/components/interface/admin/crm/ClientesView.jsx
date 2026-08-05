@@ -6,18 +6,19 @@ import ClienteForm from './ClienteForm';
 import RowActions from '../../../ui/admin/RowActions';
 import DetailDrawer from '../../../ui/admin/DetailDrawer';
 import { useNotification } from '../../../../context/NotificationContext';
-import { Users, Mail, Phone, Calendar, ArrowLeft } from 'lucide-react';
+import { Users, Mail, Phone, Calendar, ArrowLeft, FileText, Plus } from 'lucide-react';
+import AdminCotizacionModal from './AdminCotizacionModal';
 
 const TypeBadge = ({ type }) => {
     const isLead = type === 'LEAD';
     return (
         <span style={{
             display: 'inline-flex', alignItems: 'center', padding: '4px 10px',
-            borderRadius: '6px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase',
-            backgroundColor: isLead ? '#eff6ff' : '#f0fdf4',
-            color: isLead ? '#3b82f6' : '#16a34a'
+            borderRadius: '12px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase',
+            backgroundColor: isLead ? '#eff6ff' : '#ecfdf5',
+            color: isLead ? '#3b82f6' : '#10b981'
         }}>
-            {isLead ? 'Prospecto' : 'Cliente'}
+            {isLead ? 'Lead (Prospecto)' : 'Cliente'}
         </span>
     );
 };
@@ -32,11 +33,13 @@ const ClientesView = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [activeFilters, setActiveFilters] = useState({});
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [targetCliente, setTargetCliente] = useState(null);
 
     const fetchClientes = async () => {
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:8000/api/v1/crm/clientes');
+            const response = await fetch('/api/v1/crm/clientes');
             if (response.ok) {
                 const data = await response.json();
                 setClientes(data);
@@ -58,7 +61,7 @@ const ClientesView = () => {
             variant: 'danger',
             onConfirm: async () => {
                 try {
-                    const res = await fetch(`http://localhost:8000/api/v1/crm/clientes/${cliente.id}`, {
+                    const res = await fetch(`/api/v1/crm/clientes/${cliente.id}`, {
                         method: 'DELETE'
                     });
                     if (res.ok) {
@@ -133,11 +136,32 @@ const ClientesView = () => {
         { 
             key: 'created_at', 
             label: 'Registro',
-            render: (value) => (
-                <span style={{ color: '#64748b', fontSize: '13px', fontWeight: '500' }}>
-                    {new Date(value).toLocaleDateString()}
-                </span>
-            )
+            render: (value) => {
+                if (!value) return <span style={{ color: '#94a3b8', fontSize: '13px' }}>--</span>;
+                const date = new Date(value);
+                return isNaN(date.getTime()) ? (
+                    <span style={{ color: '#94a3b8', fontSize: '13px' }}>--</span>
+                ) : (
+                    <span style={{ color: '#64748b', fontSize: '13px', fontWeight: '500' }}>
+                        {date.toLocaleDateString('es-CL')}
+                    </span>
+                );
+            }
+        },
+        {
+            key: 'ubicacion',
+            label: 'Ubicación',
+            render: (_, row) => {
+                if (row.comuna_nombre && row.region_nombre) {
+                    return (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <span style={{ fontSize: '13px', color: '#334155', fontWeight: '500' }}>{row.comuna_nombre}</span>
+                            <span style={{ fontSize: '11px', color: '#64748b' }}>{row.region_nombre}</span>
+                        </div>
+                    );
+                }
+                return <span style={{ color: '#94a3b8', fontSize: '13px' }}>No registrada</span>;
+            }
         }
     ];
 
@@ -172,6 +196,7 @@ const ClientesView = () => {
                 subtitle={`${clientes.length} prospectos y clientes registrados`}
                 icon={Users}
                 action={[
+                    { label: '＋ Cotización Manual', onClick: () => { setTargetCliente(null); setShowCreateModal(true); }, variant: 'secondary' },
                     { label: '＋ Nuevo Cliente', onClick: () => setShowForm(true), variant: 'primary' }
                 ]}
             />
@@ -199,11 +224,28 @@ const ClientesView = () => {
                 loading={loading}
                 emptyMessage="No se encontraron clientes"
                 rowActions={(row) => (
-                    <RowActions
-                        onView={() => { setDetailData(row); setShowDetail(true); }}
-                        onEdit={() => { setEditingCliente(row); setShowForm(true); }}
-                        onDelete={() => handleDelete(row)}
-                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button
+                            type="button"
+                            onClick={() => { setTargetCliente(row); setShowCreateModal(true); }}
+                            title="Armar Cotización para este Cliente"
+                            style={{
+                                background: '#fdf2f8', border: '1px solid #fbcfe8', borderRadius: '8px',
+                                padding: '6px 10px', color: '#8f0653', fontWeight: '800', fontSize: '11px',
+                                display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer',
+                                transition: 'all 0.15s ease'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.background = '#fce7f3'}
+                            onMouseOut={(e) => e.currentTarget.style.background = '#fdf2f8'}
+                        >
+                            <FileText size={13} /> Cotizar
+                        </button>
+                        <RowActions
+                            onView={() => { setDetailData(row); setShowDetail(true); }}
+                            onEdit={() => { setEditingCliente(row); setShowForm(true); }}
+                            onDelete={() => handleDelete(row)}
+                        />
+                    </div>
                 )}
             />
 
@@ -213,6 +255,17 @@ const ClientesView = () => {
                 data={detailData}
                 type="cliente"
                 title={detailData ? `${detailData.nombres} ${detailData.apellidos || ''}` : ''}
+            />
+
+            <AdminCotizacionModal
+                isOpen={showCreateModal}
+                onClose={() => { setShowCreateModal(false); setTargetCliente(null); }}
+                initialCliente={targetCliente}
+                onCreated={() => {
+                    setShowCreateModal(false);
+                    setTargetCliente(null);
+                    fetchClientes();
+                }}
             />
         </div>
     );

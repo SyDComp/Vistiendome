@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, ShoppingBag, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import { useCart } from '../../../context/CartContext';
 import { formatCurrency } from '../../../utils/cartUtils';
+import { useScrollLock } from '../../../hooks/useScrollLock';
 import CheckoutForm from './CheckoutForm';
 import './CartDrawer.css';
 
@@ -9,10 +10,17 @@ const CartDrawer = () => {
     const { cart, isCartOpen, setIsCartOpen, removeItem, updateQuantity, total, itemsCount } = useCart();
     const [showCheckout, setShowCheckout] = useState(false);
 
+    useScrollLock(isCartOpen);
+
+    const handleClose = () => {
+        setIsCartOpen(false);
+        setShowCheckout(false);
+    };
+
     if (!isCartOpen) return null;
 
     return (
-        <div className="cart-overlay fade-in" onClick={() => setIsCartOpen(false)}>
+        <div className="cart-overlay fade-in" onClick={handleClose}>
             <div className="cart-drawer slide-in-right" onClick={e => e.stopPropagation()}>
                 {/* Header */}
                 <div className="cart-header">
@@ -21,7 +29,7 @@ const CartDrawer = () => {
                         <h2>Tu Cotización</h2>
                         <span className="cart-count-pill">{itemsCount}</span>
                     </div>
-                    <button className="btn-close-cart" onClick={() => setIsCartOpen(false)}>
+                    <button className="btn-close-cart" onClick={handleClose}>
                         <X size={24} />
                     </button>
                 </div>
@@ -35,7 +43,7 @@ const CartDrawer = () => {
                             </div>
                             <h3>Tu lista de cotización está vacía</h3>
                             <p>¡Explora nuestro catálogo y encuentra algo que te encante!</p>
-                            <button className="btn-return-shopping" onClick={() => setIsCartOpen(false)}>
+                            <button className="btn-return-shopping" onClick={handleClose}>
                                 Volver a la tienda
                             </button>
                         </div>

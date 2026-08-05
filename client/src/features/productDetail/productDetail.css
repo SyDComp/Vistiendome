@@ -179,6 +179,29 @@
 
 .price-tag-premium .currency { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 400; color: #475569; }
 .price-tag-premium .val { font-family: 'Outfit', sans-serif; font-size: 2.2rem; font-weight: 300; letter-spacing: 0px; color: #1e293b; }
+.price-tag-premium .val--sale { color: #b91c1c; }
+.price-tag-premium .price-original {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: #94a3b8;
+    text-decoration: line-through;
+    margin-right: 8px;
+}
+.price-tag-premium .price-sale-badge {
+    display: inline-block;
+    background-color: #b91c1c;
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
 
 .product-description-refined {
     font-size: 1.05rem;
@@ -319,8 +342,18 @@
     font-size: 15px;
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 8px;
+}
+
+.btn-primary-premium:disabled,
+.btn-secondary-premium:disabled,
+.btn-mobile-buy:disabled,
+.btn-mobile-whatsapp-full:disabled {
+    opacity: 0.5;
+    cursor: not-allowed !important;
+    transform: none !important;
+    box-shadow: none !important;
+    pointer-events: none;
 }
 
 .mobile-selection-summary-container {

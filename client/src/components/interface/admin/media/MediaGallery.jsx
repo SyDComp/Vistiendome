@@ -22,6 +22,7 @@ const MediaGallery = ({
     onSelect, 
     initialSelected = [], 
     allowMultiple = true,
+    confirmButtonText = null,
     contextInfo = null,
     asModal = true,      // Permite renderizar sin portal ni overlay
     itemsPool = null,    // Pool de imágenes personalizado (opcional)
@@ -32,7 +33,7 @@ const MediaGallery = ({
     const [uploading, setUploading] = useState(false);
     const [status, setStatus] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [isSelectMode, setIsSelectMode] = useState(selectionMode); 
+    const [isSelectMode, setIsSelectMode] = useState(selectionMode || Boolean(onSelect)); 
     const [previewIndex, setPreviewIndex] = useState(null);
     const [selectedIds, setSelectedIds] = useState(new Set());
     const [stableOrder, setStableOrder] = useState([]);
@@ -61,8 +62,8 @@ const MediaGallery = ({
     }, [initialSelected, isOpen]);
 
     useEffect(() => {
-        setIsSelectMode(selectionMode);
-    }, [selectionMode]);
+        setIsSelectMode(selectionMode || Boolean(onSelect));
+    }, [selectionMode, onSelect]);
 
     // Ordenamiento estable al abrir la galería o al recibir nuevos datos base
     useEffect(() => {
@@ -83,7 +84,7 @@ const MediaGallery = ({
 
     const fetchImages = async () => {
         try {
-            const res = await fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/media/`);
+            const res = await fetch(`/api/v1/media/`);
             const data = await res.json();
             setImages(data);
         } catch (err) {
@@ -109,7 +110,7 @@ const MediaGallery = ({
         const formData = new FormData();
         formData.append('file', file);
         try {
-            const res = await fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/media/upload`, { 
+            const res = await fetch(`/api/v1/media/upload`, { 
                 method: 'POST', 
                 body: formData 
             });
@@ -125,9 +126,28 @@ const MediaGallery = ({
         }
     };
 
+    const handleUpdateAlias = async (id, alias) => {
+        try {
+            const res = await fetch(`/api/v1/media/alias`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, alias }),
+            });
+            if (res.ok) {
+                setStatus({ type: 'success', text: 'Nombre actualizado' });
+                setTimeout(() => setStatus(null), 2500);
+                fetchImages();
+            } else {
+                setStatus({ type: 'error', text: 'No se pudo actualizar el nombre' });
+            }
+        } catch (err) {
+            setStatus({ type: 'error', text: 'Error de conexión' });
+        }
+    };
+
     const filteredImages = useMemo(() => {
         return stableOrder.filter(img => {
-            const name = img.filename || img.url || '';
+            const name = `${img.alias || ''} ${img.original_name || ''} ${img.filename || ''}`;
             return name.toLowerCase().includes(searchTerm.toLowerCase());
         });
     }, [stableOrder, searchTerm]);
@@ -147,8 +167,14 @@ const MediaGallery = ({
 
     const toggleImageSelection = (id) => {
         const next = new Set(selectedIds);
-        if (next.has(id)) next.delete(id);
-        else next.add(id);
+        if (next.has(id)) {
+            next.delete(id);
+        } else {
+            if (!allowMultiple) {
+                next.clear();
+            }
+            next.add(id);
+        }
         setSelectedIds(next);
     };
 
@@ -163,7 +189,7 @@ const MediaGallery = ({
     const executeBatchDelete = async (ids) => {
         try {
             setStatus({ type: 'info', text: 'Eliminando archivos de medios...' });
-            const res = await fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/media/batch`, {
+            const res = await fetch(`/api/v1/media/batch`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(ids)
@@ -191,7 +217,7 @@ const MediaGallery = ({
 
         try {
             setStatus({ type: 'info', text: 'Analizando integridad y referencias...' });
-            const res = await fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/media/check-references`, {
+            const res = await fetch(`/api/v1/media/check-references`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(ids)
@@ -274,70 +300,83 @@ const MediaGallery = ({
                 </div>
 
                 {/* 3. Footer de Acciones Múltiples */}
-                {isSelectMode && (
-                    <div className="media-gallery-footer">
-                        <div className="media-gallery-footer-info">
-                             <div className={`media-gallery-footer-icon-wrapper ${selectedIds.size > 0 ? '' : 'is-inactive'}`}>
-                                <Layers size={24} />
-                             </div>
-                             <div>
-                                <span className="media-gallery-footer-title">{selectedIds.size} seleccionadas</span>
-                                <span className="media-gallery-footer-subtitle">Listas para asignar</span>
-                             </div>
-                        </div>
-                        <div className="media-gallery-footer-buttons">
-                            {selectedIds.size > 0 && (
-                                <Button 
-                                    variant="outline" 
-                                    onClick={(e) => { 
-                                        e.stopPropagation(); 
-                                        handleDeleteClick(); 
-                                    }} 
-                                    className="media-gallery-footer-btn-danger"
-                                >
-                                    <Trash2 size={16} className="media-gallery-icon-mr" />
-                                    Eliminar
-                                </Button>
-                            )}
-                            
-                            {selectedIds.size < filteredImages.length ? (
-                                <Button 
-                                    variant="outline" 
-                                    onClick={(e) => { 
-                                        e.stopPropagation(); 
-                                        setSelectedIds(new Set(filteredImages.map(img => img.id))); 
-                                    }} 
-                                    className="media-gallery-footer-btn-secondary"
-                                >
-                                    Seleccionar Todo
-                                </Button>
-                            ) : (
-                                <Button 
-                                    variant="outline" 
-                                    onClick={(e) => { 
-                                        e.stopPropagation(); 
-                                        setSelectedIds(new Set()); 
-                                    }} 
-                                    className="media-gallery-footer-btn-secondary"
-                                >
-                                    Deseleccionar Todo
-                                </Button>
-                            )}
+                {isSelectMode && (() => {
+                    const isVariantContext = contextInfo?.toLowerCase().includes('versione') || contextInfo?.toLowerCase().includes('variante');
+                    const defaultButtonText = isVariantContext
+                        ? 'Asignar a Variante'
+                        : (allowMultiple ? 'Seleccionar Imágenes' : 'Seleccionar Imagen');
+                    const btnText = confirmButtonText || defaultButtonText;
+                    const subtitleText = isVariantContext
+                        ? 'Listas para asignar a variante'
+                        : (allowMultiple ? 'Listas para usar' : 'Lista para seleccionar');
 
-                            <Button 
-                                variant="primary" 
-                                disabled={selectedIds.size === 0}
-                                onClick={(e) => { 
-                                    e.stopPropagation(); 
-                                    handleConfirmSelection(); 
-                                }} 
-                                className={`media-gallery-footer-btn-primary ${selectedIds.size > 0 ? 'is-active' : 'is-disabled'}`}
-                            >
-                                Asignar a Variante
-                            </Button>
+                    return (
+                        <div className="media-gallery-footer">
+                            <div className="media-gallery-footer-info">
+                                 <div className={`media-gallery-footer-icon-wrapper ${selectedIds.size > 0 ? '' : 'is-inactive'}`}>
+                                    <Layers size={24} />
+                                 </div>
+                                 <div>
+                                    <span className="media-gallery-footer-title">{selectedIds.size} seleccionada{selectedIds.size !== 1 ? 's' : ''}</span>
+                                    <span className="media-gallery-footer-subtitle">{subtitleText}</span>
+                                 </div>
+                            </div>
+                            <div className="media-gallery-footer-buttons">
+                                {selectedIds.size > 0 && (
+                                    <Button 
+                                        variant="outline" 
+                                        onClick={(e) => { 
+                                            e.stopPropagation(); 
+                                            handleDeleteClick(); 
+                                        }} 
+                                        className="media-gallery-footer-btn-danger"
+                                    >
+                                        <Trash2 size={16} className="media-gallery-icon-mr" />
+                                        Eliminar
+                                    </Button>
+                                )}
+                                
+                                {allowMultiple && (
+                                    selectedIds.size < filteredImages.length ? (
+                                        <Button 
+                                            variant="outline" 
+                                            onClick={(e) => { 
+                                                e.stopPropagation(); 
+                                                setSelectedIds(new Set(filteredImages.map(img => img.id))); 
+                                            }} 
+                                            className="media-gallery-footer-btn-secondary"
+                                        >
+                                            Seleccionar Todo
+                                        </Button>
+                                    ) : (
+                                        <Button 
+                                            variant="outline" 
+                                            onClick={(e) => { 
+                                                e.stopPropagation(); 
+                                                setSelectedIds(new Set()); 
+                                            }} 
+                                            className="media-gallery-footer-btn-secondary"
+                                        >
+                                            Deseleccionar Todo
+                                        </Button>
+                                    )
+                                )}
+
+                                <Button 
+                                    variant="primary" 
+                                    disabled={selectedIds.size === 0}
+                                    onClick={(e) => { 
+                                        e.stopPropagation(); 
+                                        handleConfirmSelection(); 
+                                    }} 
+                                    className={`media-gallery-footer-btn-primary ${selectedIds.size > 0 ? 'is-active' : 'is-disabled'}`}
+                                >
+                                    {btnText}
+                                </Button>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    );
+                })()}
             </div>
 
             {/* 4. Lightbox Visor (Especializado) */}
@@ -349,6 +388,7 @@ const MediaGallery = ({
                     onClose={closePreview}
                     onPrev={prevPreview}
                     onNext={nextPreview}
+                    onUpdateAlias={handleUpdateAlias}
                 />
             )}
 

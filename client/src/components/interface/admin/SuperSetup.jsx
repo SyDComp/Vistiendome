@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from '../../../hooks/useForm';
+import { formatRUT } from '../../../utils/formatters';
 import Input from '../../ui/Input';
 import Button from '../../ui/Button';
 
@@ -26,7 +27,7 @@ const SuperSetup = () => {
     const boostrapSystem = async (payload) => {
         setStatusMessage(null);
         try {
-            const res = await fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/auth/bootstrap/first-admin`, {
+            const res = await fetch(`/api/v1/auth/bootstrap/first-admin`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -67,7 +68,15 @@ const SuperSetup = () => {
             )}
 
             <form onSubmit={handleSubmit(boostrapSystem)}>
-                <Input label="RUT Responsable" name="rut" placeholder="Ej: 11222333-4" value={values.rut} onChange={handleChange} error={errors.rut} />
+                <Input 
+                    label="RUT Responsable" 
+                    name="rut" 
+                    placeholder="Ej: 11222333-4" 
+                    value={values.rut} 
+                    onChange={handleChange} 
+                    onBlur={(e) => setValues({ ...values, rut: formatRUT(e.target.value) })}
+                    error={errors.rut} 
+                />
                 <Input label="Nombres" name="nombres" value={values.nombres} onChange={handleChange} error={errors.nombres} />
                 <Input label="Apellidos" name="apellidos" value={values.apellidos} onChange={handleChange} error={errors.apellidos} />
                 <Input label="Correo Personal" name="email_personal" type="email" value={values.email_personal} onChange={handleChange} error={errors.email_personal} />

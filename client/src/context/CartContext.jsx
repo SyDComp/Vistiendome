@@ -19,6 +19,10 @@ export const CartProvider = ({ children }) => {
     }, [cart]);
 
     const addItem = (item) => {
+        if (!item || !item.price || item.price <= 0) {
+            toast.error("Por favor espera a que se cargue el precio del producto antes de agregarlo.", "Precio no disponible");
+            return;
+        }
         setCart(prev => {
             const itemKey = getCartItemKey(item.productId, item.sku, item.selections);
             const existing = prev.find(i => getCartItemKey(i.productId, i.sku, i.selections) === itemKey);

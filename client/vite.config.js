@@ -8,4 +8,30 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+  test: {
+    environment: 'jsdom',
+    globals: true,
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true
+      },
+      '/ws': {
+        target: 'ws://127.0.0.1:8000',
+        ws: true
+      },
+      '/static': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true
+      },
+      '/media': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true
+      }
+    }
+  }
 })
+
+

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AlertCircle, X, Check, HelpCircle } from 'lucide-react';
 import Button from './Button';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 /**
  * ConfirmModal: Un modal premium para confirmaciones críticas.
@@ -17,12 +18,12 @@ const ConfirmModal = ({
 }) => {
     const [isVisible, setIsVisible] = useState(false);
 
+    useScrollLock(isOpen);
+
     useEffect(() => {
         if (isOpen) {
-            document.body.style.overflow = 'hidden';
             setTimeout(() => setIsVisible(true), 10);
         } else {
-            document.body.style.overflow = 'auto';
             setIsVisible(false);
         }
     }, [isOpen]);

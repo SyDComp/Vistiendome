@@ -8,12 +8,17 @@ import { Search, ChevronDown, X } from 'lucide-react';
 const FilterBar = ({
     searchPlaceholder = 'Buscar...',
     onSearchChange,
+    activeFilters = {},
     filters = [],
     onFilterChange,
-    activeFilters = {}
+    initialSearchValue = ''
 }) => {
-    const [searchValue, setSearchValue] = useState('');
+    const [searchValue, setSearchValue] = useState(initialSearchValue);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+
+    useEffect(() => {
+        setSearchValue(initialSearchValue);
+    }, [initialSearchValue]);
 
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 640);

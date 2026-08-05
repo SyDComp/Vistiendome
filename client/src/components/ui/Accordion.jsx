@@ -1,11 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown } from 'lucide-react';
+import './Accordion.css';
 
 /**
  * Reusable Accordion Component
  * Arquitectura Pure DOM: Manipula el DOM directamente vía Refs para esquivar
  * los problemas de asincronía del Virtual DOM de React, logrando animación fluida
  * y eliminando el lag y los "bloques invisibles".
+ *
+ * Todas las clases CSS expuestas:
+ *   - className      → root container
+ *   - .accordion-header  → cabecera clickeable
+ *   - .accordion-wrapper → envoltorio de animación (height controlada por JS)
+ *   - .accordion-content → contenido interno (scroll, padding, etc. vía CSS)
  */
 const Accordion = ({ 
     title, 
@@ -15,6 +22,8 @@ const Accordion = ({
     extraHeader,
     onToggle,
     style = {},
+    className,
+    contentClassName,
     showArrow = true,
     disabled = false
 }) => {
@@ -46,115 +55,69 @@ const Accordion = ({
         const content = contentRef.current;
         if (!wrapper || !content) return;
 
-        // Limpiar animaciones pendientes
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
         }
 
         if (nextState) {
-            // --- ABRIENDO ---
             const targetHeight = content.scrollHeight;
-            
             wrapper.style.height = `${targetHeight}px`;
             wrapper.style.opacity = '1';
 
-            // Volver a auto al final para mantener responsividad a cambios de tamaño interno
             timeoutRef.current = setTimeout(() => {
                 if (wrapperRef.current && wrapperRef.current.style.opacity === '1') {
                     wrapperRef.current.style.height = 'auto';
                 }
             }, 300);
-
         } else {
-            // --- CERRANDO ---
-            // 1. Fijar altura en px absolutos primero (para que la transición empiece de inmediato)
             const currentHeight = content.scrollHeight;
             wrapper.style.height = `${currentHeight}px`;
-
-            // 2. FORZAR REFLOW MAGICO: esto obliga al motor del navegador a asimilar 
-            // la altura en píxeles antes del siguiente comando, aniquilando el "salto/lag".
-            void wrapper.offsetHeight; 
-
-            // 3. Aplastar a 0 instantáneamente. Transición fluida gatillada.
+            void wrapper.offsetHeight;
             wrapper.style.height = '0px';
             wrapper.style.opacity = '0';
         }
     };
 
     return (
-        <div style={{ 
-            background: '#fff', 
-            borderRadius: '16px', 
-            border: '1px solid #e2e8f0', 
-            overflow: 'hidden', 
-            boxShadow: isOpen ? '0 12px 24px rgba(0,0,0,0.06)' : '0 4px 12px rgba(0,0,0,0.03)',
-            transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-            ...style 
-        }}>
+        <div className={`accordion ${className || ''}`} style={style}>
             {/* Cabecera */}
             <div 
+                className={`accordion-header ${isOpen ? 'is-open' : ''}`}
                 onClick={handleToggle}
-                style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center', 
-                    padding: '12px 20px', 
-                    cursor: disabled ? 'default' : 'pointer',
-                    userSelect: 'none',
-                    background: isOpen ? '#f8fafc' : '#fff',
-                    transition: 'background 300ms cubic-bezier(0.4, 0, 0.2, 1)'
-                }}
+                style={{ cursor: disabled ? 'default' : 'pointer' }}
             >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div className="accordion-header-left">
                     {icon && (
-                        <div style={{ 
-                            width: '28px', height: '28px', 
-                            background: '#fff', 
-                            borderRadius: '8px', 
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                            color: '#8f0653', 
-                            border: '1px solid #e2e8f0' 
-                        }}>
+                        <div className="accordion-icon-box">
                             {React.cloneElement(icon, { size: 14 })}
                         </div>
                     )}
-                    <span style={{ fontSize: '13px', fontWeight: '800', color: '#1e1b4b' }}>{title}</span>
+                    <span className="accordion-title">{title}</span>
                 </div>
                 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div className="accordion-header-right">
                     {extraHeader}
                     {showArrow && (
-                        <div style={{ 
-                            color: '#94a3b8', 
-                            display: 'flex', 
-                            transition: 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1)', 
-                            transform: isOpen ? 'rotate(-180deg)' : 'rotate(0deg)' 
-                        }}>
+                        <div 
+                            className="accordion-arrow"
+                            style={{ transform: isOpen ? 'rotate(-180deg)' : 'rotate(0deg)' }}
+                        >
                             <ChevronDown size={20} />
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Envoltorio de Animación Directa */}
+            {/* Envoltorio de Animación (height controlada por JS para la transición) */}
             <div 
                 ref={wrapperRef}
+                className="accordion-wrapper"
                 style={{ 
-                    overflow: 'hidden',
                     height: initialOpen ? 'auto' : '0px',
                     opacity: initialOpen ? 1 : 0,
-                    transition: 'height 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
             >
-                <div 
-                    ref={contentRef}
-                    style={{ 
-                        borderTop: '1px solid #f1f5f9', 
-                        padding: '20px',
-                        display: 'flex',
-                        flexDirection: 'column'
-                    }}
-                >
+                <div ref={contentRef} className={`accordion-content ${contentClassName || ''}`}>
                     {children}
                 </div>
             </div>

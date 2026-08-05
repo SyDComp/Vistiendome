@@ -1,7 +1,8 @@
 import ProductCard from '../../../components/shared/ProductCard/ProductCard';
 import { getImageUrl } from '../../../lib/api/endpoints/images.api';
+import { track } from '../../../lib/analytics';
 
-const ProductGrid = ({ products, loading, onProductClick, isModalOpen, onClearAll }) => {
+const ProductGrid = ({ products, loading, onProductClick, isModalOpen, onClearAll, activeFilters }) => {
     if (loading) {
         return (
             <div className="catalog-grid">
@@ -31,31 +32,71 @@ const ProductGrid = ({ products, loading, onProductClick, isModalOpen, onClearAl
     return (
         <div className="catalog-grid">
             {products.map(producto => {
-                const images = producto.extras?.preview_carousel
+                // Buscar variante coincidente si hay filtros aplicados
+                let bestVariant = null;
+                if (activeFilters?.specs && Object.keys(activeFilters.specs).length > 0 && producto.variants) {
+                    bestVariant = producto.variants.find(v => {
+                        return Object.entries(activeFilters.specs).every(([key, values]) => {
+                            if (!values || values.length === 0) return true;
+                            const lowerValues = values.map(val => String(val).toLowerCase().trim());
+                            const lowerKey = String(key).toLowerCase().trim();
+                            return v.config && Object.entries(v.config).some(([ck, cv]) => 
+                                ck.toLowerCase().trim() === lowerKey && lowerValues.includes(String(cv).toLowerCase().trim())
+                            );
+                        });
+                    });
+                }
+
+                let images = producto.extras?.preview_carousel
                     ? producto.extras.preview_carousel.map(img =>
                         typeof img === 'string' ? getImageUrl(img) : getImageUrl(img.url)
                     )
                     : [];
 
-                const mainImage = producto.image
+                let mainImage = producto.image
                     ? getImageUrl(producto.image)
                     : (producto.images?.[0]?.url ? getImageUrl(producto.images[0].url) : null);
 
-                const price = producto.price
-                    ? `$ ${producto.price.toLocaleString('es-CL')}`
+                // Si encontramos una mejor variante y tiene imagen propia, la ponemos primera
+                if (bestVariant && bestVariant.image) {
+                    const variantImageUrl = getImageUrl(bestVariant.image);
+                    mainImage = variantImageUrl;
+                    images = [variantImageUrl, ...images.filter(img => img !== variantImageUrl)];
+                }
+
+                const displayPrice = bestVariant ? bestVariant.price : producto.price;
+                const hasPrice = displayPrice != null && displayPrice > 0;
+                const priceValue = hasPrice
+                    ? `$ ${displayPrice.toLocaleString('es-CL')}`
                     : 'Consultar';
+                const pricePrefix = hasPrice && !bestVariant ? 'Desde' : null;
+
+                // Oferta temporal: precio original tachado + badge
+                const onSale = bestVariant ? bestVariant.on_sale : producto.on_sale;
+                const originalRaw = bestVariant ? bestVariant.original_price : producto.original_price;
+                const originalPrice = (onSale && originalRaw != null && originalRaw > displayPrice)
+                    ? `$ ${originalRaw.toLocaleString('es-CL')}`
+                    : null;
 
                 return (
                     <div key={producto.id} className="catalog-grid-item">
                         <ProductCard
                             type="vertical"
                             name={producto.name}
-                            price={price}
+                            price={priceValue}
+                            originalPrice={originalPrice}
+                            onSale={onSale && hasPrice}
+                            pricePrefix={pricePrefix}
                             image={mainImage}
                             images={images}
                             interval={producto.extras?.carousel_speed}
                             isPaused={isModalOpen}
-                            onClick={(indexActual) => onProductClick(producto, indexActual)}
+                            onClick={(indexActual) => {
+                                // Pasar un objeto temporal que fuerce la SKU si es necesario
+                                const tempProducto = bestVariant ? { ...producto, sku: bestVariant.sku } : producto;
+                                track('click', { product_id: producto.baseProductId ?? producto.id });
+                                onProductClick(tempProducto, indexActual);
+                            }}
                         />
                     </div>
                 );

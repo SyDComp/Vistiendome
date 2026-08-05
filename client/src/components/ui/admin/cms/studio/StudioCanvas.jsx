@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 
 /**
  * StudioCanvas
@@ -17,11 +17,15 @@ const StudioCanvas = ({
     borderRadius = '3px',
     scenes, activeSceneIdx,     // solo modo multi
     onSelectLayer, onDeselectLayer, onStartDrag,
-    onSelectScene, onAddScene   // solo modo multi
+    onSelectScene, onAddScene, onRemoveScene,   // solo modo multi
+    desktopRatio, mobileRatio
 }) => {
     const isMobile = viewport === 'mobile';
-    const ratio = isMobile ? '9/16' : '21/9';
-    const maxW = isMobile ? '375px' : '1100px';
+    const ratio = isMobile ? (mobileRatio || '9/16') : (desktopRatio || '21/9');
+    // Para evitar que el lienzo se vuelva más alto que la pantalla (y se coma la UI de arriba/abajo)
+    // calculamos el ancho máximo dinámicamente usando la altura disponible y el aspect ratio.
+    const baseMaxW = isMobile ? '375px' : '1100px';
+    const dynamicMaxW = `min(${baseMaxW}, calc((100vh - 240px) * (${ratio})))`;
 
     const getRadius = () => {
         const t = isMobile ? (scene.mobile_border_type || scene.border_type || 'soft') : (scene.border_type || 'soft');
@@ -41,12 +45,23 @@ const StudioCanvas = ({
 
             {/* Tabs de escenas (multi) */}
             {mode === 'multi' && (
-                <div style={{ position: 'absolute', top: '24px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '6px', padding: '4px', background: 'rgba(255,255,255,0.03)', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.05)', zIndex: 10 }}>
+                <div style={{ position: 'absolute', top: '16px', left: '50%', transform: 'translateX(-50%)', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', width: 'max-content', maxWidth: '90vw', gap: '6px', padding: '4px', background: 'rgba(255,255,255,0.03)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', zIndex: 10 }}>
                     {scenes.map((_, i) => (
-                        <button key={i} onClick={e => { e.stopPropagation(); onSelectScene(i); }}
-                            style={{ padding: '6px 16px', borderRadius: '100px', border: 'none', background: activeSceneIdx === i ? '#8f0653' : 'transparent', color: activeSceneIdx === i ? '#fff' : 'rgba(255,255,255,0.4)', fontSize: '10px', fontWeight: '900', cursor: 'pointer', transition: 'all 0.25s' }}>
-                            ESCENA {i + 1}
-                        </button>
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', background: activeSceneIdx === i ? '#8f0653' : 'transparent', borderRadius: '100px', transition: 'all 0.25s' }}>
+                            <button onClick={e => { e.stopPropagation(); onSelectScene(i); }}
+                                style={{ padding: '6px 16px', borderRadius: '100px', border: 'none', background: 'transparent', color: activeSceneIdx === i ? '#fff' : 'rgba(255,255,255,0.4)', fontSize: '10px', fontWeight: '900', cursor: 'pointer', paddingRight: (activeSceneIdx === i && scenes.length > 1) ? '6px' : '16px' }}>
+                                ESCENA {i + 1}
+                            </button>
+                            {scenes.length > 1 && activeSceneIdx === i && (
+                                <button onClick={e => { e.stopPropagation(); onRemoveScene(i); }}
+                                    style={{ background: 'transparent', border: 'none', color: '#ffb3b3', cursor: 'pointer', display: 'flex', padding: '4px', marginRight: '6px', borderRadius: '50%' }}
+                                    title="Eliminar Escena"
+                                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.2)'}
+                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                    <X size={12} strokeWidth={3} />
+                                </button>
+                            )}
+                        </div>
                     ))}
                     <button onClick={e => { e.stopPropagation(); onAddScene(); }}
                         style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -61,7 +76,7 @@ const StudioCanvas = ({
             <div
                 ref={canvasRef}
                 style={{
-                    width: '100%', maxWidth: maxW,
+                    width: '100%', maxWidth: dynamicMaxW,
                     aspectRatio: ratio,
                     background: (isMobile ? (scene.mobile_bg_color || scene.bg_color) : scene.bg_color) || '#1e1b4b',
                     position: 'relative', overflow: 'hidden',
@@ -109,8 +124,10 @@ const StudioCanvas = ({
                             {layer.type === 'text' ? (
                                 <div style={{ 
                                     color: layer.color || '#fff', 
+                                    fontFamily: layer.fontFamily ? `"${layer.fontFamily}", sans-serif` : 'Outfit, sans-serif',
                                     fontSize: `calc(100cqw * ${(isMobile ? (layer.mf ?? layer.fontSize ?? 48) : (layer.fontSize || 48)) / 1000} * ${isMobile ? (layer.ms ?? layer.scale ?? 1) : (layer.scale || 1)})`,
-                                    fontWeight: '900', 
+                                    fontWeight: layer.fontWeight || '900', 
+                                    fontStyle: layer.fontStyle || 'normal',
                                     whiteSpace: 'nowrap', 
                                     letterSpacing: '-0.03em', 
                                     lineHeight: '1', 
@@ -120,7 +137,7 @@ const StudioCanvas = ({
                                 </div>
                             ) : (
                                 <img
-                                    src={layer.url ? `${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${layer.url}` : ''}
+                                    src={layer.url ? `${layer.url}` : ''}
                                     style={{ display: 'block', width: '100%', height: 'auto', pointerEvents: 'none', borderRadius: isSel ? '3px' : '0' }}
                                     alt="" draggable={false}
                                 />
@@ -131,8 +148,8 @@ const StudioCanvas = ({
             </div>
 
             {/* Status bar */}
-            <div style={{ marginTop: '18px', display: 'flex', gap: '20px', color: 'rgba(255,255,255,0.25)', fontSize: '9px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                <span>{isMobile ? '9:16 Móvil' : '21:9 UltraWide'}</span>
+            <div style={{ marginTop: '18px', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '12px', color: 'rgba(255,255,255,0.25)', fontSize: '9px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center' }}>
+                <span>{isMobile ? `Móvil (${ratio})` : `Escritorio (${ratio})`}</span>
                 <span>{layers.length} capas</span>
                 <span style={{ color: '#8f0653' }}>● {viewMode === 'edit' ? 'Arrastra los elementos' : 'Vista Previa'}</span>
             </div>

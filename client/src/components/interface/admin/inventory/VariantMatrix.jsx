@@ -111,7 +111,7 @@ const VariantMatrix = ({ variants, onUpdate, onDelete, productImages = [], baseP
                             <div className="vmatrix-photos-wrapper">
                                 {(v.media_assets || []).map((asset, iIndex) => (
                                     <div key={asset.id || iIndex} className="vmatrix-photo-thumb">
-                                        <img src={`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${asset.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <img src={`${asset.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
                                 ))}
                                 
@@ -138,7 +138,7 @@ const VariantMatrix = ({ variants, onUpdate, onDelete, productImages = [], baseP
                                                     onClick={() => handleToggleImageToVariant(idx, { id: assetId, url: img.url })}
                                                     className={`vmatrix-picker-thumb ${isSelected ? 'selected' : ''}`}
                                                 >
-                                                    <img src={`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${img.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    <img src={`${img.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                 </div>
                                             );
                                         })}

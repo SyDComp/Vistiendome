@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { X, ChevronDown, ChevronUp, RotateCcw, Check } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 import './FilterDrawer.css';
@@ -7,15 +7,22 @@ const FilterDrawer = ({
     isOpen,
     onClose,
     metadata,
+    categoriesTree = [],
     activeFilters,
     onApply,
     onClear,
+    hideSpecs = false,
 }) => {
     const [localFilters, setLocalFilters] = useState(activeFilters);
     const [expandedSections, setExpandedSections] = useState({
         categories: true,
         price: true,
     });
+    const [expandedCategories, setExpandedCategories] = useState({});
+
+    const toggleCategoryAccordion = (id) => {
+        setExpandedCategories(prev => ({ ...prev, [id]: !prev[id] }));
+    };
 
     useEffect(() => {
         if (isOpen) {
@@ -53,7 +60,134 @@ const FilterDrawer = ({
         }));
     };
 
+    const handlePriceChange = (type, value) => {
+        setLocalFilters(prev => ({
+            ...prev,
+            priceRange: {
+                ...(prev.priceRange || {}),
+                [type]: value === '' ? null : Number(value)
+            }
+        }));
+    };
+
     const isSpecSelected = (key, value) => localFilters.specs?.[key]?.includes(value);
+
+    const sortCategories = (cats) => {
+        return [...cats].sort((a, b) => {
+            const aHasChildren = a.children && a.children.length > 0;
+            const bHasChildren = b.children && b.children.length > 0;
+            
+            if (aHasChildren && !bHasChildren) return -1;
+            if (!aHasChildren && bHasChildren) return 1;
+            
+            return a.name.localeCompare(b.name);
+        });
+    };
+
+    const renderCategoryNode = (cat, depth = 0) => {
+        const categoryKey = cat.slug || cat.id || cat.name;
+        const isSelected = localFilters.category === cat.slug;
+        const hasChildren = cat.children && cat.children.length > 0;
+
+        return (
+            <div key={categoryKey} style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: `8px 0 8px ${depth * 16}px`,
+                    borderBottom: depth === 0 ? '1px solid #f8fafc' : 'none',
+                    marginTop: depth === 0 ? '8px' : '0'
+                }}>
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            if (hasChildren) {
+                                toggleCategoryAccordion(categoryKey);
+                            } else {
+                                handleCategorySelect(cat.slug);
+                            }
+                        }}
+                        style={{
+                            flex: 1,
+                            background: 'none',
+                            border: 'none',
+                            color: isSelected && !hasChildren ? '#8f0653' : '#1e1b4b',
+                            fontWeight: isSelected && !hasChildren ? '800' : (depth === 0 ? '700' : '500'),
+                            fontSize: depth === 0 ? '14px' : '13px',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            transition: 'color 0.2s',
+                            padding: '4px 0'
+                        }}
+                    >
+                        {cat.name}
+                    </button>
+                    {hasChildren && (
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleCategoryAccordion(categoryKey);
+                            }}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: '4px 8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: isSelected ? '#8f0653' : '#1e1b4b',
+                                transition: 'color 0.2s'
+                            }}
+                        >
+                            {expandedCategories[categoryKey] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        </button>
+                    )}
+                </div>
+                {hasChildren && expandedCategories[categoryKey] && (
+                    <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: `8px 0 8px ${(depth + 1) * 16}px`
+                        }}>
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleCategorySelect(cat.slug);
+                                }}
+                                style={{
+                                    flex: 1,
+                                    background: 'none',
+                                    border: 'none',
+                                    color: isSelected ? '#8f0653' : '#64748b',
+                                    fontWeight: isSelected ? '800' : '500',
+                                    fontSize: '13px',
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                    transition: 'color 0.2s',
+                                    padding: '4px 0',
+                                    fontStyle: 'italic'
+                                }}
+                            >
+                                Ver todo {cat.name}
+                            </button>
+                        </div>
+                        {sortCategories(cat.children).map(child => renderCategoryNode(child, depth + 1))}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    // Fallback if categoriesTree is not ready
+    const catsToRender = categoriesTree && categoriesTree.length > 0 
+        ? categoriesTree 
+        : (metadata.categories || []);
 
     return (
         <>
@@ -75,32 +209,29 @@ const FilterDrawer = ({
                 </div>
 
                 <div className="filter-drawer-content">
-                    <div className="filter-section">
-                        <button
-                            onClick={() => toggleSection('categories')}
-                            className="filter-section-toggle"
-                            type="button"
-                        >
-                            <span className="filter-section-title">Categoría</span>
-                            {expandedSections.categories ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                        </button>
-                        {expandedSections.categories && (
-                            <div className="filter-options-grid">
-                                {metadata.categories?.map(cat => (
-                                    <button
-                                        key={cat.id}
-                                        type="button"
-                                        onClick={() => handleCategorySelect(cat.slug)}
-                                        className={`filter-option-btn ${localFilters.category === cat.slug ? 'active-primary' : ''}`}
-                                    >
-                                        {cat.name}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                    {hideSpecs ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0', marginBottom: '24px' }}>
+                            {sortCategories(catsToRender).map(cat => renderCategoryNode(cat, 0))}
+                        </div>
+                    ) : (
+                        <div className="filter-section">
+                            <button
+                                onClick={() => toggleSection('categories')}
+                                className="filter-section-toggle"
+                                type="button"
+                            >
+                                <span className="filter-section-title">Categoría</span>
+                                {expandedSections['categories'] ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                            </button>
+                            {expandedSections['categories'] && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0', marginTop: '16px', marginBottom: '24px' }}>
+                                    {sortCategories(catsToRender).map(cat => renderCategoryNode(cat, 0))}
+                                </div>
+                            )}
+                        </div>
+                    )}
 
-                    {Object.entries(metadata.attributes || {}).map(([key, values]) => (
+                    {!hideSpecs && Object.entries(metadata.attributes || {}).map(([key, values]) => (
                         <div key={key} className="filter-section">
                             <button
                                 onClick={() => toggleSection(key)}
@@ -138,8 +269,22 @@ const FilterDrawer = ({
                             {expandedSections.price ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                         </button>
                         {expandedSections.price && (
-                            <div className="filter-price-range">
-                                De ${metadata.price_range?.min?.toLocaleString()} a ${metadata.price_range?.max?.toLocaleString()}
+                            <div className="filter-price-range" style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '16px' }}>
+                                <input 
+                                    type="number" 
+                                    placeholder={`Mín ($${metadata.price_range?.min?.toLocaleString()})`} 
+                                    value={localFilters.priceRange?.min ?? ''}
+                                    onChange={(e) => handlePriceChange('min', e.target.value)}
+                                    style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none' }}
+                                />
+                                <span>-</span>
+                                <input 
+                                    type="number" 
+                                    placeholder={`Máx ($${metadata.price_range?.max?.toLocaleString()})`} 
+                                    value={localFilters.priceRange?.max ?? ''}
+                                    onChange={(e) => handlePriceChange('max', e.target.value)}
+                                    style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none' }}
+                                />
                             </div>
                         )}
                     </div>

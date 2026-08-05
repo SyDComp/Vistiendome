@@ -39,11 +39,16 @@ def get_current_user(
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id = payload.get("sub")
         if user_id is None:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Payload de token corrupto")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, 
+                detail="Payload de token corrupto",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
     except (JWTError, ValidationError):
          raise HTTPException(
-             status_code=status.HTTP_403_FORBIDDEN, 
-             detail="Firma expirada o token manipulado"
+             status_code=status.HTTP_401_UNAUTHORIZED, 
+             detail="Firma expirada o token manipulado",
+             headers={"WWW-Authenticate": "Bearer"},
          )
          
     cuenta = db.get(CuentaAcceso, user_id)

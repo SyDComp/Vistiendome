@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { 
     Plus, Trash2, Settings2, Save, ArrowLeft, 
-    Palette, Hash, Type, LayoutList, Layers, GripVertical, ChevronRight, Settings, Lock
+    Hash, Type, LayoutList, Layers, GripVertical, ChevronRight, Settings, Lock, Image
 } from 'lucide-react';
 import Button from '../../../ui/Button';
 import Input from '../../../ui/Input';
 import { useNotification } from '../../../../context/NotificationContext';
 import Badge from '../../../ui/Badge';
 import { formatChar, normalizeDomain } from '../../../../utils/formatters';
+import MediaGallery from '../media/MediaGallery';
 
 const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false }) => {
     const { prompt } = useNotification();
@@ -24,25 +25,30 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
         domain: initialData?.domain || []
     });
     
-    const [libraryColors, setLibraryColors] = useState([]);
-    const [showLibraryModal, setShowLibraryModal] = useState(false);
+    const [pickingImageIndex, setPickingImageIndex] = useState(null);
 
-    const isColorType = localData.system_id === 'COLOR' || localData.name.toUpperCase() === 'COLOR';
+    const isColorType = localData.system_id === 'COLOR' || localData.system_id === 'sys_color' || localData.name.toUpperCase() === 'COLOR';
+    const isPatternType = localData.system_id === 'sys_pattern' || localData.system_id === 'ESTAMPADO' || ['ESTAMPADO', 'PATRÓN', 'PATRON', 'DISEÑO', 'DISENO', 'TELA'].includes(localData.name.toUpperCase());
 
     useEffect(() => {
         if (isColorType) {
-            fetch((import.meta.env.PROD ? '/api/v1/admin/catalog/colors' : 'http://127.0.0.1:8000/api/v1/admin/catalog/colors'))
-                .then(r => r.json())
-                .then(setLibraryColors)
-                .catch(console.error);
-            
             setLocalData(p => ({
                 ...p,
                 is_system: true,
-                system_id: 'COLOR',
+                system_id: 'sys_color',
                 value_structure: [
                     { label: 'Nombre del Color', key: 'value', type: 'text' },
                     { label: 'Código Hex', key: 'hex_code', type: 'color' }
+                ]
+            }));
+        } else if (isPatternType) {
+            setLocalData(p => ({
+                ...p,
+                is_system: true,
+                system_id: 'sys_pattern',
+                value_structure: [
+                    { label: 'Nombre del Estampado / Diseño', key: 'value', type: 'text' },
+                    { label: 'URL de Imagen', key: 'image_url', type: 'image' }
                 ]
             }));
         } else if (!localData.is_system) {
@@ -52,13 +58,15 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                 value_structure: [{ label: 'Valor', key: 'value', type: 'text' }]
             }));
         }
-    }, [isColorType, localData.is_system]);
+    }, [isColorType, isPatternType, localData.is_system]);
 
     const addOption = () => {
         const newRow = {};
         localData.value_structure.forEach(col => {
             if (isColorType && col.key === 'hex_code') {
                 newRow[col.key] = '#000000';
+            } else if (isPatternType && col.key === 'image_url') {
+                newRow[col.key] = '';
             } else {
                 newRow[col.key] = '';
             }
@@ -189,7 +197,52 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                                             />
                                         </div>
                                         {row.is_system && <Badge variant="error" size="sm" className="char-form-badge-sys">SISTEMA</Badge>}
-                                        {libraryColors.some(lc => lc.name === row.value) && !row.is_system && <span className="char-form-badge-linked">VINCULADO</span>}
+                                    </div>
+                                ) : isPatternType ? (
+                                    <div className="char-form-row-content" style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                                        <div style={{ width: '38px', height: '38px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                            {row.image_url ? (
+                                                <img src={row.image_url} alt="patrón" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            ) : (
+                                                <Image size={18} color="#94a3b8" />
+                                            )}
+                                        </div>
+                                        <div className="char-form-inputs-col" style={{ flex: 1, display: 'flex', gap: '10px' }}>
+                                            <input 
+                                                value={row.value || ''} 
+                                                onChange={e => updateValue(rIdx, 'value', e.target.value)} 
+                                                onBlur={e => updateValue(rIdx, 'value', formatOpt(e.target.value))}
+                                                placeholder="Nombre del estampado (ej: Floral Primavera)" 
+                                                onKeyDown={e => e.key === 'Enter' && addOption()} 
+                                                autoFocus={!row.is_system && rIdx === localData.domain.length - 1} 
+                                                disabled={row.is_system}
+                                                className={`char-form-input-val ${row.is_system ? 'system' : 'normal'}`}
+                                                style={{ flex: 2 }}
+                                            />
+                                            <button 
+                                                type="button"
+                                                disabled={row.is_system}
+                                                onClick={() => setPickingImageIndex(rIdx)}
+                                                style={{
+                                                    padding: '0 14px',
+                                                    height: '38px',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid #cbd5e1',
+                                                    background: '#fff',
+                                                    color: '#334155',
+                                                    fontSize: '13px',
+                                                    fontWeight: 500,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                    cursor: row.is_system ? 'not-allowed' : 'pointer'
+                                                }}
+                                            >
+                                                <Image size={16} />
+                                                {row.image_url ? 'Cambiar Imagen' : 'Seleccionar Imagen'}
+                                            </button>
+                                        </div>
+                                        {row.is_system && <Badge variant="error" size="sm" className="char-form-badge-sys">SISTEMA</Badge>}
                                     </div>
                                 ) : (
                                     <div className="char-form-row-content">
@@ -224,11 +277,6 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                     <button onClick={addOption} className="char-form-btn-add">
                         <Plus size={20} /> Añadir nueva opción
                     </button>
-                    {isColorType && (
-                        <button onClick={() => setShowLibraryModal(true)} className="char-form-btn-import">
-                            <Palette size={20} /> Importar de Biblioteca
-                        </button>
-                    )}
                 </div>
 
                 {/* SECCIÓN 4: TIP */}
@@ -239,29 +287,20 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                 </div>
             </div>
 
-            {/* Modal Biblioteca */}
-            {showLibraryModal && (
-                <div className="char-form-modal-overlay">
-                    <div className="char-form-modal-box">
-                        <h3 className="char-form-modal-title">Biblioteca de Colores</h3>
-                        <div className="char-form-modal-grid">
-                            {libraryColors.map(color => {
-                                const isSelected = localData.domain.some(d => d.value === color.name);
-                                return (
-                                    <button key={color.id} onClick={() => isSelected ? setLocalData(p => ({ ...p, domain: p.domain.filter(d => d.value !== color.name) })) : setLocalData(p => ({ ...p, domain: [...p.domain, { value: color.name, hex_code: color.hex_code }] }))} className={`char-form-modal-color-btn ${isSelected ? 'selected' : 'unselected'}`}>
-                                        <div className="char-form-modal-color-circle" style={{ background: color.hex_code }}></div>
-                                        <span className="char-form-modal-color-name">{color.name}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                        <div className="char-form-modal-actions">
-                            <Button variant="primary" onClick={() => setShowLibraryModal(false)}>Confirmar</Button>
-                        </div>
-                    </div>
-                </div>
+            {/* Modal para Selección de Imagen desde la Biblioteca de Medios */}
+            {pickingImageIndex !== null && (
+                <MediaGallery 
+                    isOpen={true} 
+                    onClose={() => setPickingImageIndex(null)} 
+                    onSelect={(assets) => {
+                        const a = Array.isArray(assets) ? assets[0] : assets;
+                        if (a && a.url) {
+                            updateValue(pickingImageIndex, 'image_url', a.url);
+                        }
+                        setPickingImageIndex(null);
+                    }} 
+                />
             )}
-
 
         </div>
     );

@@ -67,11 +67,49 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden; /* Prevent horizontal scroll from off-screen menus */
+    width: 100%;
+    max-width: 100dvw;
+    margin: 0;
+    padding: 0;
+}
+
+#root {
+    width: 100%;
+    max-width: 100dvw;
+    overflow-x: hidden;
+    min-height: 100dvh;
 }
 
 /* Modal Open State: Used as a marker for scroll-lock logic in JS */
 body.modal-open {
     padding-right: var(--scrollbar-width, 0px);
+}
+
+/* --- GLOBAL SCROLL LOCK SYSTEM --- */
+html.no-scroll,
+body.no-scroll {
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: none !important;
+}
+
+/* Modales y Drawers: Evitar que el scroll interno o rebote en bordes se propague al body en iOS / Android / Desktop */
+.modal-routing-overlay,
+.cart-overlay,
+.detalle-producto-container.is-modal-view,
+.welcome-modal-overlay,
+.confirm-modal-overlay,
+.library-picker-overlay,
+.batch-editor-overlay,
+.detail-drawer-overlay,
+.variant-picker-overlay,
+.lightbox-overlay,
+.char-form-modal-overlay,
+.logistics-modal-overlay,
+.barcode-printer-modal-overlay,
+.premium-loader-overlay {
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch;
 }
 
 a {

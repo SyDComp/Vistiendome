@@ -8,4 +8,4 @@ class SiteSetting(SQLModel, table=True):
     """
     id: Optional[int] = Field(default=None, primary_key=True)
     key: str = Field(unique=True, index=True) # Ej: 'social_links', 'contact_info'
-    value: Dict[str, Any] = Field(default={}, sa_type=JSON)
+    value: Any = Field(default={}, sa_type=JSON)

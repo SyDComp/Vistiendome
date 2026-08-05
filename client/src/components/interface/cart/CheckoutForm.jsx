@@ -2,18 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { X, Send, User, Mail, Phone, MapPin } from 'lucide-react';
 import { useForm } from '../../../hooks/useForm';
 import { useCart } from '../../../context/CartContext';
-import { generateWhatsAppMessage } from '../../../utils/cartUtils';
+import { buildWhatsAppMessage } from '../../../utils/cartUtils';
+import { track } from '../../../lib/analytics';
 import { get, post } from '../../../lib/api/client';
+import { formatRUT } from '../../../utils/formatters';
+import { useSettings } from '../../../context/SettingsContext';
 
 const CheckoutForm = ({ onClose }) => {
     const { cart, total, clearCart } = useCart();
+    const { settings } = useSettings();
+    const rawShippingMethods = settings?.shipping_methods !== undefined 
+        ? settings.shipping_methods 
+        : ['STARKEN', 'CORREOS DE CHILE', 'RETIRO EN LOCAL', 'OTRO'];
+    const shippingMethodsList = rawShippingMethods.filter(m => !m.toUpperCase().includes('CHILEXPRESS'));
+    const shippingMethods = shippingMethodsList.length > 0 ? shippingMethodsList : ['STARKEN', 'CORREOS DE CHILE', 'RETIRO EN LOCAL', 'OTRO'];
     
     const baseInitialValues = {
         rut: '',
         nombre: '',
         email: '',
         telefono: '',
-        transporte: 'STARKEN',
+        transporte: shippingMethods[0],
         region: '',
         comuna: '',
         comuna_id: '',
@@ -42,34 +51,62 @@ const CheckoutForm = ({ onClose }) => {
         const errors = {};
         if (!values.nombre.trim()) errors.nombre = 'El nombre es obligatorio';
         if (!values.rut.trim()) errors.rut = 'El RUT es obligatorio';
+        if (!values.telefono.trim()) errors.telefono = 'El teléfono es obligatorio';
         return errors;
     };
-
     const { values, errors, handleChange, handleSubmit, isSubmitting, setValues } = useForm(getInitialValues(), validate);
 
     useEffect(() => {
         localStorage.setItem('checkoutDraft', JSON.stringify(values));
     }, [values]);
 
-    // Cuando cambia la región, cargar sus comunas
-    const handleRegionChange = (e) => {
-        const selectedRegionNombre = e.target.value;
-        handleChange(e);
-        
-        // Buscar la region seleccionada para obtener su ID
-        const regionObj = regiones.find(r => r.nombre === selectedRegionNombre);
+    useEffect(() => {
+        if (shippingMethods.length > 0 && !shippingMethods.includes(values.transporte)) {
+            setValues(prev => ({...prev, transporte: shippingMethods[0]}));
+        }
+    }, [shippingMethods, values.transporte]);
+
+    useEffect(() => {
+        if (!values.region || regiones.length === 0) {
+            if (!values.region) setComunas([]);
+            return;
+        }
+        const regionObj = regiones.find(r => 
+            r.nombre.trim().toLowerCase() === String(values.region).trim().toLowerCase() ||
+            String(r.id) === String(values.region)
+        );
         if (regionObj) {
             get(`/api/v1/geo/regiones/${regionObj.id}/comunas`)
                 .then(data => {
-                    setComunas(data);
-                    // Resetear comuna al cambiar region
-                    setValues(prev => ({ ...prev, comuna: '', comuna_id: '' }));
+                    const loadedComunas = Array.isArray(data) ? data : [];
+                    setComunas(loadedComunas);
+                    setValues(prev => {
+                        const match = loadedComunas.find(c => 
+                            c.nombre.trim().toLowerCase() === String(prev.comuna || '').trim().toLowerCase() ||
+                            String(c.id) === String(prev.comuna_id || '')
+                        );
+                        if (match && (prev.comuna !== match.nombre || prev.comuna_id !== match.id)) {
+                            return { ...prev, comuna: match.nombre, comuna_id: match.id };
+                        }
+                        return prev;
+                    });
                 })
                 .catch(err => console.error('Error fetching comunas:', err));
         } else {
             setComunas([]);
-            setValues(prev => ({ ...prev, comuna: '', comuna_id: '' }));
         }
+    }, [values.region, regiones, setValues]);
+
+    // Cuando cambia la región por acción del usuario, actualizar región y resetear comuna
+    const handleRegionChange = (e) => {
+        const selectedRegionNombre = e.target.value;
+        handleChange(e);
+        setValues(prev => ({ 
+            ...prev, 
+            region: selectedRegionNombre,
+            comuna: '', 
+            comuna_id: '' 
+        }));
     };
 
     // Cuando cambia la comuna, guardar también su ID
@@ -84,49 +121,77 @@ const CheckoutForm = ({ onClose }) => {
     };
 
     const onSubmit = async (formData) => {
+        const whatsappMsg = buildWhatsAppMessage({
+            tipo: 'pedido',
+            cliente: { nombre: formData.nombre, rut: formData.rut, email: formData.email, telefono: formData.telefono },
+            despacho: {
+                transporte: formData.tipo_despacho === 'SUCURSAL' ? `${formData.transporte} (retiro en sucursal)` : formData.transporte,
+                direccion: formData.tipo_despacho === 'SUCURSAL' ? null : formData.direccion,
+                comuna: formData.comuna,
+                region: formData.region,
+            },
+            productos: cart.map(item => ({
+                name: item.name,
+                variantLabel: item.variantLabel,
+                selections: item.selections,
+                quantity: item.quantity,
+                price: item.price,
+                url: item.productUrl,
+            })),
+            total,
+        });
+        const contactNumber = settings?.social_links?.whatsapp?.replace(/\D/g, '') || '56931251973';
+        const whatsappUrl = `https://wa.me/${contactNumber}?text=${encodeURIComponent(whatsappMsg)}`;
+
+        // Detección robusta para iPad (incluso iPadOS 13+ con escritorio MacIntel), iOS y Móviles
+        const isIOSOrIPad = /iPad|iPhone|iPod/i.test(navigator.userAgent) || 
+                            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+                            /Android/i.test(navigator.userAgent);
+
+        // Abrir WhatsApp SÍNCRONAMENTE antes de cualquier operación asíncrona (evita bloqueo de pop-up por Safari en iPad)
+        let popup = null;
+        if (!isIOSOrIPad) {
+            popup = window.open(whatsappUrl, '_blank');
+        }
+        if (isIOSOrIPad || !popup || popup.closed || typeof popup.closed === 'undefined') {
+            window.location.href = whatsappUrl;
+        }
+
+        // Analítica síncrona
         try {
-            // Separar nombres y apellidos (básico)
+            cart.forEach(item => track('checkout_whatsapp', { sku: item.sku, product_id: item.productId }));
+        } catch { /* no bloquea el envío */ }
+
+        // Registrar la cotización en el CRM en segundo plano sin demorar ni bloquear el salto a WhatsApp
+        try {
             const partesNombre = formData.nombre.trim().split(' ');
             const nombres = partesNombre[0] || '';
             const apellidos = partesNombre.slice(1).join(' ') || '';
-
-            // Formatear items del carrito
             const items = cart.map(item => ({
                 sku_id: item.sku ? item.sku.id : null,
                 cantidad: item.quantity,
                 precio_unitario_estimado: item.price
             }));
 
-            // Llamada al backend
-            try {
-                await post('/api/v1/crm/', {
-                    rut: formData.rut,
-                    nombres: nombres,
-                    apellidos: apellidos,
-                    email_personal: formData.email,
-                    telefono: formData.telefono,
-                    origen: 'CATALOGO',
-                    transporte: formData.transporte,
-                    region: formData.region,
-                    comuna: formData.comuna,
-                    comuna_id: formData.comuna_id,
-                    direccion: formData.direccion,
-                    tipo_despacho: formData.tipo_despacho,
-                    items: items
-                });
-            } catch (error) {
-                console.error("Error al registrar cotización en CRM", error);
-            }
+            post('/api/v1/crm/', {
+                rut: formData.rut,
+                nombres: nombres,
+                apellidos: apellidos,
+                email_personal: formData.email,
+                telefono: formData.telefono,
+                origen: 'CATALOGO',
+                transporte: formData.transporte,
+                region: formData.region,
+                comuna: formData.comuna,
+                comuna_id: formData.comuna_id,
+                direccion: formData.direccion,
+                tipo_despacho: formData.tipo_despacho,
+                items: items
+            }).catch(error => console.error("Error al registrar cotización en CRM", error));
         } catch (error) {
-            console.error("Error de red al registrar cotización", error);
+            console.error("Error de red al preparar cotización", error);
         }
 
-        const whatsappMsg = generateWhatsAppMessage(cart, formData, total);
-        const whatsappUrl = `https://wa.me/56931251973?text=${whatsappMsg}`; // Número de Paola
-        
-        // Abrir WhatsApp en nueva pestaña
-        window.open(whatsappUrl, '_blank');
-        
         // Limpiamos datos tras "enviar"
         localStorage.removeItem('checkoutDraft');
         clearCart();
@@ -155,6 +220,7 @@ const CheckoutForm = ({ onClose }) => {
                                 name="rut" 
                                 value={values.rut} 
                                 onChange={handleChange} 
+                                onBlur={(e) => setValues({ ...values, rut: formatRUT(e.target.value) })}
                                 placeholder="12.345.678-9"
                                 className={errors.rut ? 'input-error' : ''}
                             />
@@ -181,50 +247,75 @@ const CheckoutForm = ({ onClose }) => {
                             <input type="email" name="email" value={values.email} onChange={handleChange} placeholder="tu@email.com" />
                         </div>
                         <div className="input-group">
-                            <label><Phone size={16} /> Teléfono</label>
-                            <input type="tel" name="telefono" value={values.telefono} onChange={handleChange} placeholder="+56 9..." />
+                            <label><Phone size={16} /> Teléfono *</label>
+                            <input 
+                                type="tel" 
+                                name="telefono" 
+                                value={values.telefono} 
+                                onChange={handleChange} 
+                                placeholder="+56 9..." 
+                                className={errors.telefono ? 'input-error' : ''}
+                            />
+                            {errors.telefono && <span className="error-text">{errors.telefono}</span>}
                         </div>
 
                         {/* Despacho - Opcional */}
                         <div className="input-group full">
                             <label><MapPin size={16} /> Método de Envío *</label>
                             <select name="transporte" value={values.transporte} onChange={handleChange} className="styled-select">
-                                <option value="STARKEN">Starken</option>
-                                <option value="CORREOS DE CHILE">Correos de Chile</option>
-                                <option value="CHILEXPRESS">Chilexpress</option>
-                                <option value="RETIRO EN LOCAL">Retiro en Local</option>
-                                <option value="OTRO">Otro</option>
-                            </select>
-                        </div>
-                        <div className="input-group full">
-                            <label><MapPin size={16} /> Tipo de Entrega *</label>
-                            <select name="tipo_despacho" value={values.tipo_despacho} onChange={handleChange} className="styled-select">
-                                <option value="DOMICILIO">Despacho a Domicilio</option>
-                                <option value="SUCURSAL">Retiro en Sucursal</option>
-                            </select>
-                        </div>
-                        <div className="input-group">
-                            <label><MapPin size={16} /> Región</label>
-                            <select name="region" value={values.region} onChange={handleRegionChange} className="styled-select">
-                                <option value="">Selecciona una región</option>
-                                {regiones.map(r => (
-                                    <option key={r.id} value={r.nombre}>{r.nombre}</option>
+                                {shippingMethods.map((method, idx) => (
+                                    <option key={idx} value={method}>{method}</option>
                                 ))}
                             </select>
                         </div>
-                        <div className="input-group">
-                            <label><MapPin size={16} /> Comuna</label>
-                            <select name="comuna" value={values.comuna} onChange={handleComunaChange} className="styled-select" disabled={!values.region || comunas.length === 0}>
-                                <option value="">Selecciona una comuna</option>
-                                {comunas.map(c => (
-                                    <option key={c.id} value={c.nombre}>{c.nombre}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="input-group full">
-                            <label><MapPin size={16} /> {values.tipo_despacho === 'SUCURSAL' ? 'Dirección de la Sucursal' : 'Dirección de Despacho'}</label>
-                            <input type="text" name="direccion" value={values.direccion} onChange={handleChange} placeholder={values.tipo_despacho === 'SUCURSAL' ? 'Ej: Sucursal Starken Centro...' : 'Calle, número...'} />
-                        </div>
+
+                        {values.transporte?.toUpperCase().includes('RETIRO') ? (
+                            <div className="input-group full">
+                                <p style={{ margin: 0, fontSize: '13px', color: '#0369a1', background: '#e0f2fe', padding: '12px 14px', borderRadius: '12px', border: '1px solid #bae6fd' }}>
+                                    📍 <strong>Retiro presencial en Tienda / Taller en San Carlos, Región de Ñuble.</strong> Te contactaremos por WhatsApp con la dirección exacta y horarios disponibles para la entrega.
+                                </p>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="input-group full">
+                                    <label><MapPin size={16} /> Tipo de Entrega *</label>
+                                    <select name="tipo_despacho" value={values.tipo_despacho} onChange={handleChange} className="styled-select">
+                                        <option value="DOMICILIO">Despacho a Domicilio</option>
+                                        <option value="SUCURSAL">Retiro en Sucursal (Agencia)</option>
+                                    </select>
+                                </div>
+                                <div className="input-group">
+                                    <label><MapPin size={16} /> Región</label>
+                                    <select name="region" value={values.region} onChange={handleRegionChange} className="styled-select">
+                                        <option value="">Selecciona una región</option>
+                                        {regiones.map(r => (
+                                            <option key={r.id} value={r.nombre}>{r.nombre}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="input-group">
+                                    <label><MapPin size={16} /> Comuna</label>
+                                    <select name="comuna" value={values.comuna || ''} onChange={handleComunaChange} className="styled-select" disabled={!values.region}>
+                                        <option value="">Selecciona una comuna</option>
+                                        {comunas.map(c => (
+                                            <option key={c.id} value={c.nombre}>{c.nombre}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {values.tipo_despacho === 'SUCURSAL' ? (
+                                    <div className="input-group full">
+                                        <p style={{ margin: 0, fontSize: '13px', color: '#64748b', background: '#f8fafc', padding: '12px 14px', borderRadius: '12px' }}>
+                                            Retiras en una sucursal de <strong>{values.transporte}</strong>. Coordinarás la sucursal exacta por WhatsApp según tu comuna.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="input-group full">
+                                        <label><MapPin size={16} /> Dirección de Despacho</label>
+                                        <input type="text" name="direccion" value={values.direccion} onChange={handleChange} placeholder="Calle, número..." />
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </div>
 
                     <div className="checkout-footer-actions">

@@ -8,6 +8,8 @@ from datetime import datetime
 import re
 import unicodedata
 from ...core.sockets import manager
+from ...api.deps import RequirePermiso
+from ...models.iam import CuentaAcceso
 
 router = APIRouter()
 
@@ -61,7 +63,7 @@ def get_collection(id: int, db: Session = Depends(get_session)):
     return result
 
 @router.post("/collections")
-async def create_collection(data: CollectionCreate, db: Session = Depends(get_session)):
+async def create_collection(data: CollectionCreate, db: Session = Depends(get_session), current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
     slug = slugify(data.name)
     
     # Verificar si el slug ya existe
@@ -98,7 +100,7 @@ async def create_collection(data: CollectionCreate, db: Session = Depends(get_se
     return collection
 
 @router.put("/collections/{id}")
-async def update_collection(id: int, data: CollectionCreate, db: Session = Depends(get_session)):
+async def update_collection(id: int, data: CollectionCreate, db: Session = Depends(get_session), current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
     collection = db.get(Collection, id)
     if not collection:
         raise HTTPException(status_code=404, detail="Collection not found")
@@ -130,7 +132,7 @@ async def update_collection(id: int, data: CollectionCreate, db: Session = Depen
     return collection
 
 @router.delete("/collections/{id}")
-async def delete_collection(id: int, db: Session = Depends(get_session)):
+async def delete_collection(id: int, db: Session = Depends(get_session), current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
     collection = db.get(Collection, id)
     if not collection:
         raise HTTPException(status_code=404, detail="Collection not found")

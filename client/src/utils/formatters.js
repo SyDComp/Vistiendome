@@ -32,3 +32,13 @@ export const normalizeDomain = (domain) => {
         value: item.value ? formatOpt(item.value) : item.value
     }));
 };
+
+export const formatRUT = (rut) => {
+    if (!rut) return '';
+    const clean = rut.replace(/[^0-9kK]/g, '').toUpperCase();
+    if (clean.length < 2) return clean;
+    const dv = clean.slice(-1);
+    let numbers = clean.slice(0, -1);
+    numbers = numbers.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `${numbers}-${dv}`;
+};

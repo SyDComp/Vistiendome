@@ -1,6 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import { X, Search, Check, Folder, ChevronRight, Hash, Layers, List, Package, Tag, Box, Palette, Sparkles, Lock } from 'lucide-react';
+import { X, Search, Check, Folder, ChevronRight, Hash, Layers, List, Package, Tag, Box, Palette, Sparkles, Lock, SlidersHorizontal } from 'lucide-react';
 import Button from '../../../ui/Button';
+
+const CATEGORY_FACET = '__category';
+const PRODUCT_FACET = '__product';
+
+// Orden canónico de tallas para ordenar esa faceta de menor a mayor
+const SIZE_ORDER = ['12', '14', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL', '6XL', '7XL'];
+const sortFacetValues = (field, values) => {
+    if (/talla|size/i.test(field)) {
+        return [...values].sort((a, b) => {
+            const ia = SIZE_ORDER.indexOf(a.toUpperCase());
+            const ib = SIZE_ORDER.indexOf(b.toUpperCase());
+            return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib) || a.localeCompare(b);
+        });
+    }
+    return [...values].sort((a, b) => a.localeCompare(b));
+};
+
+// Descubre facetas escaneando los ítems según el contexto (data-driven)
+const computeFacets = (items, type) => {
+    if (type === 'variants') {
+        const order = [];
+        const byKey = {};
+        const products = new Set();
+        items.forEach((it) => {
+            if (it && it.product_name) products.add(String(it.product_name));
+            const cfg = (it && it.config) || {};
+            Object.entries(cfg).forEach(([k, v]) => {
+                if (v === null || v === undefined || v === '') return;
+                if (!byKey[k]) { byKey[k] = new Set(); order.push(k); }
+                byKey[k].add(String(v));
+            });
+        });
+        const facets = [];
+        // Faceta jerárquica clave: el producto base al que pertenece la variante
+        if (products.size) {
+            facets.push({ field: PRODUCT_FACET, label: 'Producto', values: [...products].sort((a, b) => a.localeCompare(b)) });
+        }
+        order.forEach((k) => facets.push({
+            field: k,
+            label: k.charAt(0).toUpperCase() + k.slice(1).toLowerCase(),
+            values: sortFacetValues(k, [...byKey[k]]),
+        }));
+        return facets;
+    }
+    if (type === 'products') {
+        const set = new Set();
+        items.forEach((it) => { if (it && it.category) set.add(String(it.category)); });
+        return set.size ? [{ field: CATEGORY_FACET, label: 'Categoría', values: [...set].sort((a, b) => a.localeCompare(b)) }] : [];
+    }
+    return [];
+};
 
 /**
  * LibraryPicker: Componente inmersivo universal para la "Mecánica de Biblioteca".
@@ -26,28 +77,69 @@ const LibraryPicker = ({
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedIds, setSelectedIds] = useState([]);
     const [internalSelectMode, setInternalSelectMode] = useState(false);
+    const [activeFacets, setActiveFacets] = useState({}); // { field: [valores] }
+    const [showFacets, setShowFacets] = useState(false);
+
+    const facetDefs = React.useMemo(() => computeFacets(items, type), [items, type]);
+    const activeFacetCount = React.useMemo(
+        () => Object.values(activeFacets).reduce((n, arr) => n + (arr?.length || 0), 0),
+        [activeFacets]
+    );
+
+    const toggleFacet = (field, value) => {
+        setActiveFacets((prev) => {
+            const cur = prev[field] || [];
+            const next = cur.includes(value) ? cur.filter((v) => v !== value) : [...cur, value];
+            const out = { ...prev, [field]: next };
+            if (next.length === 0) delete out[field];
+            return out;
+        });
+    };
 
     const isExplorer = !!onItemClick && !internalSelectMode; // Si estamos en internalSelectMode, NO somos explorer
+
+    const initialIdsKey = React.useMemo(
+        () => JSON.stringify((initialSelectedIds || []).map(id => String(id))),
+        [initialSelectedIds]
+    );
 
     // Sincronizar selección inicial cada vez que se abre
     useEffect(() => {
         if (isOpen) {
-            // Normalizamos a Strings para evitar fallos de comparación (Number vs String)
-            setSelectedIds((initialSelectedIds || []).map(id => String(id)));
+            const parsedIds = JSON.parse(initialIdsKey);
+            setSelectedIds(prev => {
+                if (prev.length === parsedIds.length && prev.every((v, i) => v === parsedIds[i])) {
+                    return prev;
+                }
+                return parsedIds;
+            });
+            setActiveFacets(prev => Object.keys(prev).length === 0 ? prev : {});
         }
-    }, [isOpen, initialSelectedIds]);
+    }, [isOpen, initialIdsKey]);
 
     // No retornamos null para que el componente mantenga su estado interno (como el scroll)
     // cuando se oculta temporalmente durante la navegación.
     
-    const filtered = React.useMemo(() => {
-        return items.filter(a => {
-            const name = typeof a === 'string' ? a : (a.name || a.value || '');
-            const parentName = typeof a === 'object' ? (a.parent_name || '') : '';
-            return name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                   parentName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFacets = (item) => {
+        if (!item || typeof item !== 'object') return Object.keys(activeFacets).length === 0;
+        return Object.entries(activeFacets).every(([field, sel]) => {
+            if (!sel || sel.length === 0) return true;
+            const val = field === CATEGORY_FACET ? item.category
+                : field === PRODUCT_FACET ? item.product_name
+                : item.config?.[field];
+            return sel.includes(String(val));
         });
-    }, [items, searchTerm]);
+    };
+
+    const filtered = React.useMemo(() => {
+        const q = searchTerm.toLowerCase();
+        return items.filter(a => {
+            const name = typeof a === 'string' ? a : (a.sku || a.name || a.value || '');
+            const parentName = typeof a === 'object' ? (a.parent_name || '') : '';
+            const textOk = name.toLowerCase().includes(q) || parentName.toLowerCase().includes(q);
+            return textOk && matchesFacets(a);
+        });
+    }, [items, searchTerm, activeFacets]);
 
     const getItemId = (item) => {
         if (!item) return '';
@@ -119,12 +211,12 @@ const LibraryPicker = ({
             );
         }
         if (type === 'variants') {
-            const variantImage = item.image || item.image_url || item.image_urls?.[0] || item.fullData?.images?.find(img => img.is_main)?.url;
+            const variantImage = item.image || item.image_url || item.image_urls?.[0] || item.media_assets?.[0]?.url || item.fullData?.images?.find(img => img.is_main)?.url;
             return (
                 <div className="library-picker-preview-variant">
                     {variantImage && (
                         <div className="library-picker-preview-variant-img-wrap">
-                            <img src={`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${variantImage}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img src={`${variantImage}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
                     )}
                     <div className="library-picker-preview-variant-info">
@@ -137,10 +229,6 @@ const LibraryPicker = ({
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <Tag size={12} color="#16a34a" />
                                 <span className="library-picker-preview-variant-price">${item.price?.toLocaleString()}</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <Box size={12} color="#94a3b8" />
-                                <span className="library-picker-preview-variant-barcode">{item.barcode || (item.fullData && item.fullData.barcode) ? 'Cod. Barras asignado' : 'Producto de Autor'}</span>
                             </div>
                         </div>
                     </div>
@@ -219,6 +307,67 @@ const LibraryPicker = ({
                         />
                     </div>
 
+                    {facetDefs.length > 0 && (
+                        <div style={{ marginTop: '12px' }}>
+                            <button
+                                type="button"
+                                onClick={() => setShowFacets(s => !s)}
+                                style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                    padding: '8px 14px', borderRadius: '12px', cursor: 'pointer',
+                                    border: '1px solid ' + (activeFacetCount > 0 ? '#8f0653' : '#e2e8f0'),
+                                    background: activeFacetCount > 0 ? '#fdf2f8' : '#fff',
+                                    color: activeFacetCount > 0 ? '#8f0653' : '#475569',
+                                    fontSize: '13px', fontWeight: '700',
+                                }}
+                            >
+                                <SlidersHorizontal size={15} />
+                                Filtros{activeFacetCount > 0 ? ` (${activeFacetCount})` : ''}
+                                <ChevronRight size={14} style={{ transform: showFacets ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+                            </button>
+                            {activeFacetCount > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveFacets({})}
+                                    style={{ marginLeft: '10px', border: 'none', background: 'none', color: '#ef4444', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                                >
+                                    Limpiar filtros
+                                </button>
+                            )}
+
+                            {showFacets && (
+                                <div style={{ marginTop: '12px', padding: '16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', maxHeight: '220px', overflowY: 'auto' }}>
+                                    {facetDefs.map(fd => (
+                                        <div key={fd.field} style={{ marginBottom: '14px' }}>
+                                            <div style={{ fontSize: '11px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>{fd.label}</div>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                                {fd.values.map(v => {
+                                                    const on = (activeFacets[fd.field] || []).includes(v);
+                                                    return (
+                                                        <button
+                                                            key={v}
+                                                            type="button"
+                                                            onClick={() => toggleFacet(fd.field, v)}
+                                                            style={{
+                                                                padding: '5px 12px', borderRadius: '999px', cursor: 'pointer',
+                                                                fontSize: '12px', fontWeight: '600',
+                                                                border: '1px solid ' + (on ? '#8f0653' : '#e2e8f0'),
+                                                                background: on ? '#8f0653' : '#fff',
+                                                                color: on ? '#fff' : '#475569',
+                                                            }}
+                                                        >
+                                                            {v}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     {!isExplorer && allowMultiple && (
                         <div className="library-picker-toolbar">
                             <div className="library-picker-toolbar-left">
@@ -282,9 +431,11 @@ const LibraryPicker = ({
                                             className={`library-picker-card ${isExplorer ? 'selectable' : ''} ${(!isExplorer && isSelected) ? 'selected' : ''}`}
                                         >
                                         <div className="library-picker-card-header">
-                                            <div className="library-picker-card-icon">
-                                                {getIcon(type)}
-                                            </div>
+                                            {type !== 'variants' && type !== 'products' && (
+                                                <div className="library-picker-card-icon">
+                                                    {getIcon(type)}
+                                                </div>
+                                            )}
                                             <div className="library-picker-card-actions">
                                                 {item.is_system && (
                                                     <div className="library-picker-system-badge" title="Protegido por el sistema">
@@ -303,10 +454,7 @@ const LibraryPicker = ({
                                         </h3>
                                         {getPreview(item)}
                                         
-                                        {/* Overlay de Selección Visual */}
-                                        {!isExplorer && (
-                                            <div className="library-picker-overlay-border" style={{ borderColor: isSelected ? 'var(--brand-primary)' : 'transparent' }} />
-                                        )}
+
                                     </div>
                                 );
                             })}

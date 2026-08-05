@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, CheckCircle2 } from 'lucide-react';
 import VariantSelector from './VariantSelector';
+import { useScrollLock } from '../../../hooks/useScrollLock';
 import './VariantSelectionDrawer.css';
 
 /**
@@ -20,19 +21,11 @@ const VariantSelectionDrawer = ({
     const drawerRef = useRef(null);
     const [isMounted, setIsMounted] = useState(false);
 
+    useScrollLock(isOpen);
+
     useEffect(() => {
         setIsMounted(true);
     }, []);
-
-    // Bloquear scroll del body cuando el drawer está abierto
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-        return () => { document.body.style.overflow = 'unset'; };
-    }, [isOpen]);
 
     if (!isOpen || !isMounted) return null;
 

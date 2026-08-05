@@ -17,17 +17,41 @@ export const getDescendantSlugs = (node) => {
 };
 
 /**
+ * Encuentra un nodo de categoría por su slug dentro del árbol de categorías.
+ */
+export const findCategoryNode = (categoriesTree, slug) => {
+    if (!categoriesTree || !slug) return null;
+    for (const node of categoriesTree) {
+        if (node.slug === slug) return node;
+        if (node.children) {
+            const found = findCategoryNode(node.children, slug);
+            if (found) return found;
+        }
+    }
+    return null;
+};
+
+/**
  * Filtra productos por categoría.
  * @param {Array} products - Lista de productos.
  * @param {Object|null} categoryNode - Nodo de categoría seleccionada (incluye hijos).
  * @param {string|null} exactSlug - Slug exacto para filtro del drawer.
+ * @param {Array} categoriesTree - Árbol completo de categorías.
  */
-export const filterByCategory = (products, categoryNode, exactSlug) => {
+export const filterByCategory = (products, categoryNode, exactSlug, categoriesTree = []) => {
     if (!products?.length) return [];
-    if (categoryNode) {
-        const allowedSlugs = getDescendantSlugs(categoryNode);
+    
+    let resolvedNode = categoryNode;
+    if (!resolvedNode && exactSlug) {
+        resolvedNode = findCategoryNode(categoriesTree, exactSlug);
+    }
+
+    if (resolvedNode) {
+        const allowedSlugs = getDescendantSlugs(resolvedNode);
         return products.filter(p => allowedSlugs.includes(p.category_slug));
     }
+    
+    // Fallback original por si no se encuentra el nodo
     if (exactSlug) {
         return products.filter(p => p.category_slug === exactSlug);
     }
@@ -46,8 +70,37 @@ export const filterBySpecs = (products, specs) => {
     return products.filter(p => {
         return Object.entries(specs).every(([key, values]) => {
             if (!values || values.length === 0) return true;
-            return values.includes(p.specs?.[key]);
+            
+            const lowerValues = values.map(v => String(v).toLowerCase().trim());
+            const lowerKey = String(key).toLowerCase().trim();
+
+            const inSpecs = p.specs && Object.entries(p.specs).some(([sk, sv]) => 
+                sk.toLowerCase().trim() === lowerKey && lowerValues.includes(String(sv).toLowerCase().trim())
+            );
+            
+            const inVariants = p.variants && p.variants.some(v => 
+                v.config && Object.entries(v.config).some(([ck, cv]) => 
+                    ck.toLowerCase().trim() === lowerKey && lowerValues.includes(String(cv).toLowerCase().trim())
+                )
+            );
+            
+            return inSpecs || inVariants;
         });
+    });
+};
+
+/**
+ * Filtra productos por rango de precio.
+ */
+export const filterByPriceRange = (products, priceRange) => {
+    if (!products?.length) return [];
+    if (!priceRange) return products;
+    
+    return products.filter(p => {
+        const price = p.price || 0;
+        if (priceRange.min !== undefined && priceRange.min !== null && price < priceRange.min) return false;
+        if (priceRange.max !== undefined && priceRange.max !== null && price > priceRange.max) return false;
+        return true;
     });
 };
 

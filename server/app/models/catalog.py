@@ -109,8 +109,16 @@ class Product(SQLModel, table=True):
     is_deleted: bool = Field(default=False, index=True)
     
     extras: Dict[str, Any] = Field(default={}, sa_type=JSON)
-    specs: Dict[str, str] = Field(default={}, sa_type=JSON) 
-    
+    specs: Dict[str, str] = Field(default={}, sa_type=JSON)
+
+    # --- Oferta temporal a nivel producto (aplica a TODAS sus variantes) ---
+    # sale_type: 'percent' (sale_value = % 0-100) o 'fixed' (sale_value = precio rebajado).
+    # Un SKU puede sobrescribir esto con su propia oferta.
+    sale_type: Optional[str] = Field(default=None)
+    sale_value: Optional[float] = Field(default=None)
+    sale_start: Optional[datetime] = Field(default=None)
+    sale_end: Optional[datetime] = Field(default=None)
+
     skus: List["SKU"] = Relationship(back_populates="product")
     media_assets: List["MediaAsset"] = Relationship(
         back_populates="products",
@@ -170,7 +178,15 @@ class SKU(SQLModel, table=True):
     
     price: float
     stock: int = Field(default=0)
-    
+
+    # --- Override de oferta a nivel variante ---
+    # sale_type: 'percent' o 'fixed'. Si está activo (dentro de su ventana),
+    # prevalece sobre la oferta del producto.
+    sale_type: Optional[str] = Field(default=None)
+    sale_value: Optional[float] = Field(default=None)
+    sale_start: Optional[datetime] = Field(default=None)
+    sale_end: Optional[datetime] = Field(default=None)
+
     product: "Product" = Relationship(back_populates="skus")
     movements: List["StockMovement"] = Relationship(back_populates="sku")
     media_assets: List["MediaAsset"] = Relationship(
@@ -210,6 +226,7 @@ class MediaAsset(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     filename: str = Field(unique=True, index=True)
     original_name: str
+    alias: Optional[str] = Field(default=None)  # nombre amigable editable
     url: str
     mime_type: Optional[str] = None
     file_size: Optional[int] = None

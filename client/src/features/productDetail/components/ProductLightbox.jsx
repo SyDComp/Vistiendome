@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useScrollLock } from '../../../hooks/useScrollLock';
 import './ProductLightbox.css';
 
 const ProductLightbox = ({ images = [], currentIndex = 0, isOpen, onClose, onPrev, onNext }) => {
@@ -8,15 +9,7 @@ const ProductLightbox = ({ images = [], currentIndex = 0, isOpen, onClose, onPre
     const touchStartX = useRef(null);
     const touchStartY = useRef(null);
 
-    // Bloquear scroll del body al estar abierto
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'auto';
-        }
-        return () => { document.body.style.overflow = 'auto'; };
-    }, [isOpen]);
+    useScrollLock(isOpen);
 
     // Teclado (flechas + Escape)
     useEffect(() => {

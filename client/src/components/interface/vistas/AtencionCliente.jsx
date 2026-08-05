@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import CMSRenderer from '../cms/CMSRenderer';
 import { useWebSocket } from '../../../context/WebSocketContext';
 import PremiumLoader from '../../ui/PremiumLoader';
+import { useScrollLock } from '../../../hooks/useScrollLock';
 import { ChevronRight, X, ArrowLeft } from 'lucide-react';
 
 const HELP_API = (import.meta.env.PROD ? '/api/v1/homepage/help/sections' : 'http://127.0.0.1:8000/api/v1/homepage/help/sections');
@@ -16,6 +17,8 @@ const AtencionCliente = ({ initialSection = 'tallas' }) => {
     // Modal para móvil
     const [modalSection, setModalSection] = useState(null); // { slug, title, icon }
     const { lastMessage } = useWebSocket();
+
+    useScrollLock(!!modalSection);
 
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 1024);
@@ -54,16 +57,6 @@ const AtencionCliente = ({ initialSection = 'tallas' }) => {
             window.scrollTo({ top: 0, behavior: 'auto' });
         }
     }, [location.state]);
-
-    // Bloquear scroll del body cuando el modal está abierto
-    useEffect(() => {
-        if (modalSection) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
-        }
-        return () => { document.body.style.overflow = ''; };
-    }, [modalSection]);
 
     const openModal = (sec) => setModalSection(sec);
     const closeModal = () => setModalSection(null);

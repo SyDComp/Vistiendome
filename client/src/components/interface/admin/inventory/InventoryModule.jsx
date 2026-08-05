@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ProductForm from './ProductForm';
 import CategoryManager from './CategoryManager';
 import CharacteristicManager from './CharacteristicManager';
+import FilterManager from './FilterManager';
 import SpecificationManager from './SpecificationManager';
 import LogisticsManager from './LogisticsManager';
 import ColorManager from './ColorManager';
@@ -15,11 +16,12 @@ import RowActions from '../../../ui/admin/RowActions';
 import DetailDrawer from '../../../ui/admin/DetailDrawer';
 import QuickPeek from '../../../ui/admin/QuickPeek';
 import { useNotification } from '../../../../context/NotificationContext';
+import { useLocation } from 'react-router-dom';
 import { Package, Eye, Barcode as BarcodeIcon } from 'lucide-react';
 import { getImageUrl } from '../../../../lib/api/endpoints';
 import ReactBarcode from 'react-barcode';
 
-const API_BASE = `${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/admin/catalog`;
+const API_BASE = `/api/v1/admin/catalog`;
 const PAGE_SIZE = 20;
 
 // Configuración global de stock (fácilmente parametrizable)
@@ -176,10 +178,12 @@ const InventoryModule = ({ view = 'products' }) => {
     // Estado de productos con paginación
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [detailLoading, setDetailLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
-    const [search, setSearch] = useState('');
+    const location = useLocation();
+    const [search, setSearch] = useState(location.state?.initialSearch || '');
     const [activeFilters, setActiveFilters] = useState({});
     const [categories, setCategories] = useState([]);
     const [showDetail, setShowDetail] = useState(false);
@@ -187,7 +191,7 @@ const InventoryModule = ({ view = 'products' }) => {
     const [detailData, setDetailData] = useState(null);
     const [quickPeekData, setQuickPeekData] = useState(null);
     const [showPicker, setShowPicker] = useState(false);
-    const [pickerContext, setPickerContext] = useState(null);
+    const [baseProducts, setBaseProducts] = useState([]); // Productos base reales para el picker "Nueva Variante"
     const [autoOpenVariants, setAutoOpenVariants] = useState(false);
     const [characteristics, setCharacteristics] = useState([]);
 
@@ -253,11 +257,33 @@ const InventoryModule = ({ view = 'products' }) => {
         setDetailData(null);
         setShowPicker(false);
         setPage(1); // Resetear paginación por cortesía
+        setSearch('');
+        setActiveFilters({});
     }, [view]);
 
     useEffect(() => {
         if (view === 'products' || view === 'variants') fetchProducts();
     }, [view, fetchProducts]);
+
+    // Abrir el picker de "Nueva Variante" cargando SIEMPRE productos base reales,
+    // sin importar si estamos en la vista de productos o de variantes.
+    const openVariantBasePicker = async () => {
+        try {
+            const params = new URLSearchParams({ page: 1, page_size: 200 });
+            const res = await fetch(`${API_BASE}/products?${params}`);
+            const data = await res.json();
+            const baseItems = data.items || [];
+            if (baseItems.length === 0) {
+                toast.info("Primero debes crear al menos un producto base.");
+                return;
+            }
+            setBaseProducts(baseItems);
+            setShowPicker(true);
+        } catch (err) {
+            console.error('Error cargando productos base:', err);
+            toast.error('No se pudieron cargar los productos base.');
+        }
+    };
 
     // Resetear página al cambiar filtros
     const handleSearchChange = (val) => { setSearch(val); setPage(1); };
@@ -283,54 +309,57 @@ const InventoryModule = ({ view = 'products' }) => {
             } else {
                 toast.error('No se pudo eliminar el producto');
             }
-        } catch (err) {
+        } catch {
             toast.error('Error de red al intentar eliminar');
         }
     };
 
     const handleEditProduct = async (product) => {
         try {
-            setLoading(true);
+            setDetailLoading(true);
+            setEditingProduct(null);
+            setShowForm(true);
             const res = await fetch(`${API_BASE}/products/${product.id}`);
             const fullData = await res.json();
             setEditingProduct(fullData);
-            setShowForm(true);
         } catch (err) {
             console.error("Error cargando detalle:", err);
             toast.error("No se pudo cargar el producto para edición.");
         } finally {
-            setLoading(false);
+            setDetailLoading(false);
         }
     };
 
     const handleViewProduct = async (row) => {
         try {
-            setLoading(true);
+            setDetailLoading(true);
+            setDetailData(null);
+            setShowDetail(true);
             const endpoint = view === 'variants' ? `skus/${row.id}` : `products/${row.id}`;
             const res = await fetch(`${API_BASE}/${endpoint}`);
             const fullData = await res.json();
             setDetailData(fullData);
-            setShowDetail(true);
         } catch (err) {
             console.error("Error cargando detalle:", err);
             toast.error("No se pudo cargar el detalle del registro.");
         } finally {
-            setLoading(false);
+            setDetailLoading(false);
         }
     };
 
     const handleQuickPeek = async (row) => {
         try {
-            setLoading(true);
+            setDetailLoading(true);
+            setQuickPeekData(null);
+            setShowQuickPeek(true);
             const endpoint = view === 'variants' ? `skus/${row.id}` : `products/${row.id}`;
             const res = await fetch(`${API_BASE}/${endpoint}`);
             const fullData = await res.json();
             setQuickPeekData(fullData);
-            setShowQuickPeek(true);
         } catch (err) {
             console.error("Error cargando quick peek:", err);
         } finally {
-            setLoading(false);
+            setDetailLoading(false);
         }
     };
 
@@ -348,17 +377,24 @@ const InventoryModule = ({ view = 'products' }) => {
                     ← Volver al Listado
                 </button>
                 <div style={{ paddingBottom: '40px' }}>
-                    <ProductForm
-                        initialData={editingProduct}
-                        autoOpenVariants={autoOpenVariants}
-                        onRefresh={fetchProducts} // Callback para refresco en segundo plano
-                        onSuccess={() => { 
-                            setShowForm(false); 
-                            setEditingProduct(null); 
-                            setAutoOpenVariants(false);
-                            fetchProducts(); 
-                        }}
-                    />
+                    {detailLoading ? (
+                        <div style={{ padding: '100px 20px', textAlign: 'center', color: '#64748b' }}>
+                            <div style={{ width: '40px', height: '40px', border: '3px solid #e2e8f0', borderTopColor: '#8f0653', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 16px' }} />
+                            Cargando datos del producto...
+                        </div>
+                    ) : (
+                        <ProductForm
+                            initialData={editingProduct}
+                            autoOpenVariants={autoOpenVariants}
+                            onRefresh={fetchProducts} // Callback para refresco en segundo plano
+                            onSuccess={() => { 
+                                setShowForm(false); 
+                                setEditingProduct(null); 
+                                setAutoOpenVariants(false);
+                                fetchProducts(); 
+                            }}
+                        />
+                    )}
                 </div>
             </div>
         );
@@ -369,6 +405,8 @@ const InventoryModule = ({ view = 'products' }) => {
 
             {view === 'categories' ? (
                 <CategoryManager />
+            ) : view === 'filters' ? (
+                <FilterManager />
             ) : view === 'characteristics' || view === 'attributes' ? (
                 <CharacteristicManager />
             ) : view === 'specifications' ? (
@@ -381,26 +419,23 @@ const InventoryModule = ({ view = 'products' }) => {
                 <CollectionManager />
             ) : (
                 <>
-                    {/* Cabecera de sección de Productos */}
+                    {/* Cabecera de sección de Productos / Variantes */}
                     <SectionHeader
-                        title="Catálogo de Productos"
-                        description={`${totalItems} producto${totalItems !== 1 ? 's' : ''} en total`}
-                        action={[
+                        title={view === 'variants' ? "Catálogo de Variantes" : "Catálogo de Productos"}
+                        description={view === 'variants' ? `${totalItems} variante${totalItems !== 1 ? 's' : ''} en total` : `${totalItems} producto${totalItems !== 1 ? 's' : ''} en total`}
+                        action={view === 'variants' ? [
+                            { label: '📦 Nueva Variante', onClick: openVariantBasePicker, variant: 'primary' }
+                        ] : [
                             { label: '＋ Nuevo Producto', onClick: () => setShowForm(true), variant: 'primary' },
-                            { label: '📦 Nueva Variante', onClick: () => {
-                                if (products.length === 0) {
-                                    toast.info("Primero debes crear al menos un producto base.");
-                                } else {
-                                    setPickerContext('variant_base');
-                                    setShowPicker(true);
-                                }
-                            }, variant: 'outline' }
+                            { label: '📦 Nueva Variante', onClick: openVariantBasePicker, variant: 'outline' }
                         ]}
                     />
 
                     {/* Filtros */}
                     <FilterBar
+                        key={view}
                         searchPlaceholder={view === 'variants' ? "Buscar por SKU o producto..." : "Buscar producto por nombre..."}
+                        initialSearchValue={search}
                         onSearchChange={handleSearchChange}
                         activeFilters={activeFilters}
                         onFilterChange={handleFilterChange}
@@ -462,9 +497,32 @@ const InventoryModule = ({ view = 'products' }) => {
                 data={detailData}
                 type={view === 'variants' ? 'variant' : 'product'}
                 title={view === 'variants' ? detailData?.sku : detailData?.name}
-                onUpdate={view === 'variants' ? (updated) => {
-                    // Refrescar lista al guardar cambios en variante
-                    fetchProducts();
+                onUpdate={view === 'variants' ? async (updated, current) => {
+                    // Persistir precio y oferta de la variante individual
+                    const skuId = current?.id || updated?.id;
+                    if (!skuId) { toast.error('No se pudo identificar la variante'); return; }
+                    try {
+                        const res = await fetch(`${API_BASE}/skus/${skuId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                price: updated.price,
+                                sale_type: updated.sale_type || null,
+                                sale_value: updated.sale_type ? (updated.sale_value ?? null) : null,
+                                sale_start: updated.sale_type ? (updated.sale_start || null) : null,
+                                sale_end: updated.sale_type ? (updated.sale_end || null) : null,
+                            })
+                        });
+                        if (res.ok) {
+                            toast.success('Versión actualizada');
+                            fetchProducts();
+                        } else {
+                            const err = await res.json().catch(() => ({}));
+                            toast.error(err.detail || 'No se pudo guardar la versión');
+                        }
+                    } catch {
+                        toast.error('Error de red al guardar la versión');
+                    }
                 } : null}
             />
 
@@ -475,10 +533,10 @@ const InventoryModule = ({ view = 'products' }) => {
                 type={view === 'variants' ? 'variant' : 'product'}
             />
 
-            <LibraryPicker 
+            <LibraryPicker
                 isOpen={showPicker}
                 onClose={() => setShowPicker(false)}
-                items={products}
+                items={baseProducts}
                 onSelect={(selected) => {
                     const product = selected[0];
                     if (product) {

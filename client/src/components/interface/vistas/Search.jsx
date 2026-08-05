@@ -4,6 +4,7 @@ import { getProducts, getImageUrl } from '../../../lib/api/endpoints';
 import ProductCard from '../../shared/ProductCard/ProductCard';
 import { Search as SearchIcon, ArrowLeft, Share2 } from 'lucide-react';
 import PremiumLoader from '../../ui/PremiumLoader';
+import { track } from '../../../lib/analytics';
 
 const Search = () => {
     const [searchParams] = useSearchParams();
@@ -29,6 +30,14 @@ const Search = () => {
         fetchAll();
     }, []);
 
+    // Analítica: registrar búsqueda (con debounce para no contar cada tecla)
+    useEffect(() => {
+        const q = query.trim();
+        if (!q) return;
+        const t = setTimeout(() => track('search', { query: q }), 800);
+        return () => clearTimeout(t);
+    }, [query]);
+
     const results = useMemo(() => {
         if (!query.trim()) return [];
         const normalizedQuery = query.toLowerCase().trim();
@@ -50,11 +59,18 @@ const Search = () => {
             // Match por variantes
             if (product.variants) {
                 product.variants.forEach(variant => {
-                    const configMatch = Object.values(variant.config).some(val => 
+                    const configMatch = Object.values(variant.config || {}).some(val => 
                         val.toString().toLowerCase().includes(normalizedQuery)
                     );
                     if (configMatch) {
-                        const variantLabel = Object.values(variant.config).join(' - ');
+                        const variantLabel = Object.values(variant.config || {}).join(' - ');
+                        // Extraemos un grupo que excluye la talla (XS/S/M/L/XL/medidas) para que colores/estilos distintos
+                        // como "Azul Marino" y "Azul Rey" del mismo producto se incluyan individualmente.
+                        const variantGroup = Object.entries(variant.config || {})
+                            .filter(([k]) => !/talla|size|medida/i.test(k))
+                            .map(([, v]) => v)
+                            .join(' - ') || variant.sku;
+
                         matches.push({
                             ...product,
                             id: `${product.id}-${variant.sku}`,
@@ -62,6 +78,7 @@ const Search = () => {
                             image: variant.image || product.image,
                             price: variant.price,
                             sku: variant.sku,
+                            variant_group: variantGroup,
                             relevance: 5
                         });
                     }
@@ -69,11 +86,11 @@ const Search = () => {
             }
         });
 
-        // Eliminar duplicados (si el producto base y la variante coinciden, preferir variante si es búsqueda específica)
+        // Eliminar duplicados (Agrupar por color/variante o producto base según corresponda)
         const unique = [];
         const seen = new Set();
         matches.sort((a, b) => b.relevance - a.relevance).forEach(m => {
-            const key = m.sku || m.id;
+            const key = m.variant_group ? `${m.slug}::${m.variant_group}` : m.slug;
             if (!seen.has(key)) {
                 unique.push(m);
                 seen.add(key);

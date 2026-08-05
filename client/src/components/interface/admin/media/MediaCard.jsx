@@ -26,7 +26,7 @@ const MediaCard = ({
         >
             <div className="media-gallery-card-img-wrapper">
                 <img 
-                    src={`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${img.url}`} 
+                    src={`${img.url}`} 
                     className="media-gallery-card-img"
                     alt={img.filename || img.url || 'Imagen'}
                 />
@@ -56,8 +56,8 @@ const MediaCard = ({
                 )}
             </div>
             <div className="media-gallery-card-footer">
-                <span className="media-gallery-card-filename">
-                    {img.filename || img.url || 'Sin nombre'}
+                <span className="media-gallery-card-filename" title={img.alias || img.original_name || img.filename}>
+                    {img.alias || img.original_name || img.filename || 'Sin nombre'}
                 </span>
             </div>
         </div>

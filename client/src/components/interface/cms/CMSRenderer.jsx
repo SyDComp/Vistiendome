@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import { useWebSocket } from '../../../context/WebSocketContext';
 import FeaturedCollections from '../colecciones/FeaturedCollections';
-import { getProducts, getImageUrl } from '../../../lib/api/endpoints';
+import { getProducts, getImageUrl } from '../../../services/api';
 import { ArrowRight, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 
 const API_BASE = (import.meta.env.PROD ? '/api/v1/homepage/' : 'http://127.0.0.1:8000/api/v1/homepage/');
@@ -68,7 +69,7 @@ const LayerRenderer = ({ layers = [], navigate, isMobile }) => {
                             </div>
                         ) : (
                             <img 
-                                src={layer.url ? (layer.url.startsWith('http') ? layer.url : `${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${layer.url}`) : ''} 
+                                src={layer.url ? (layer.url.startsWith('http') ? layer.url : `${layer.url}`) : ''} 
                                 style={{ display: 'block', width: '100%', height: 'auto', pointerEvents: 'none' }} 
                                 alt="" 
                             />
@@ -108,12 +109,16 @@ export const UniversalBlock = ({ config, aspectRatio = '21/9', borderRadius = '4
         layers = config?.layers || [];
     }
 
+    const desktopRatio = config?.desktop_ratio || aspectRatio;
+    const currentRatio = isMobile ? (config?.mobile_ratio || '9/16') : desktopRatio;
+    const desktopMaxW = desktopRatio === '1/1' ? '700px' : '1200px';
+
     return (
         <div style={{ marginBottom: previewMode ? '20px' : '40px', width: '100%', display: 'flex', justifyContent: 'center' }}>
             <div style={{ 
                 width: '100%', 
-                maxWidth: previewMode ? '100%' : (isMobile ? '375px' : '1200px'),
-                aspectRatio: isMobile ? '9/16' : aspectRatio, 
+                maxWidth: previewMode ? '100%' : (isMobile ? '375px' : desktopMaxW),
+                aspectRatio: currentRatio, 
                 borderRadius: currentRadius, 
                 overflow: 'hidden', 
                 position: 'relative', 
@@ -138,9 +143,10 @@ export const SceneCarouselBlock = ({ config, previewMode = false, forceMobile = 
 
     useEffect(() => {
         if (scenes.length <= 1) return;
-        const t = setInterval(() => setActiveIdx(i => (i + 1) % scenes.length), 8000);
+        const intervalMs = (config?.carousel_interval || 5) * 1000;
+        const t = setInterval(() => setActiveIdx(i => (i + 1) % scenes.length), intervalMs);
         return () => clearInterval(t);
-    }, [scenes.length]);
+    }, [scenes.length, config?.carousel_interval]);
 
     const go = (dir) => setActiveIdx(i => (i + dir + scenes.length) % scenes.length);
 
@@ -154,13 +160,17 @@ export const SceneCarouselBlock = ({ config, previewMode = false, forceMobile = 
     
     if (previewMode && borderT !== 'none') containerRadius = '24px';
 
+    const desktopRatio = config?.desktop_ratio || '21/9';
+    const currentRatio = isMobile ? (config?.mobile_ratio || '9/16') : desktopRatio;
+    const desktopMaxW = desktopRatio === '1/1' ? '700px' : '1200px';
+
     return (
         <div style={{ marginBottom: previewMode ? '30px' : '60px', width: '100%', display: 'flex', justifyContent: 'center' }}>
             <div
                 style={{ 
                     width: '100%', 
-                    maxWidth: previewMode ? '100%' : (isMobile ? '375px' : '1200px'),
-                    aspectRatio: isMobile ? '9/16' : '21/9', 
+                    maxWidth: previewMode ? '100%' : (isMobile ? '375px' : desktopMaxW),
+                    aspectRatio: currentRatio, 
                     position: 'relative', 
                     overflow: 'hidden', 
                     background: 'transparent', 
@@ -230,7 +240,7 @@ export const TextBlock = ({ config, title, previewMode = false, forceMobile = nu
                 {title && <h2 style={{ fontSize: previewMode ? '20px' : (isMobile ? '22px' : '28px'), fontWeight: '900', color: '#1e1b4b', marginBottom: '24px' }}>{title}</h2>}
                 <div 
                     className="rich-text-content"
-                    dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(sanitizedContent) }}
                     style={{ 
                         fontSize: previewMode ? '14px' : (isMobile ? '15px' : '17px'), 
                         lineHeight: isMobile ? '1.6' : '1.8', 
@@ -404,7 +414,7 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
                     data = await getProducts();
                 } else if (collectionId === 'smart_best_sellers') {
                     // Simulamos top ventas con un limit, en el futuro puede ser un endpoint real
-                    const res = await fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/products/?page_size=20&sort=sales`);
+                    const res = await fetch(`/api/v1/products/?page_size=20&sort=sales`);
                     const resData = await res.json();
                     data = Array.isArray(resData) ? resData : (resData.items || []);
                 } else if (collectionId === 'smart_random') {
@@ -413,7 +423,7 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
                     data = [...all].sort(() => Math.random() - 0.5);
                 } else {
                     // Colección específica del usuario (por slug)
-                    const res = await fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/collections/${collectionId}`);
+                    const res = await fetch(`/api/v1/collections/${collectionId}`);
                     const resData = await res.json();
                     data = resData.skus || [];
                 }

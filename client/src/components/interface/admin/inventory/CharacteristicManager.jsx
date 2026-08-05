@@ -271,7 +271,12 @@ const CharacteristicManager = () => {
                     {
                         key: 'category_id',
                         label: 'Todas las Categorías',
-                        options: allCategories.map(cat => ({ value: cat.id, label: cat.name }))
+                        options: allCategories.map(cat => {
+                            const isSubcategory = cat.level > 1;
+                            const indent = '\u00A0\u00A0\u00A0\u00A0'.repeat(Math.max(0, (cat.level || 1) - 1));
+                            const prefix = isSubcategory ? '— ' : '';
+                            return { value: cat.id, label: indent + prefix + cat.name };
+                        })
                     }
                 ]}
             />

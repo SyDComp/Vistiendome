@@ -1,7 +1,7 @@
 import React from 'react';
 
 const label = { fontSize: '9px', fontWeight: '900', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.08em', display: 'block', marginBottom: '6px' };
-const inputStyle = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', padding: '10px 12px', borderRadius: '10px', color: '#fff', fontSize: '13px', width: '100%' };
+const inputStyle = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', padding: '10px 12px', borderRadius: '10px', color: '#fff', fontSize: '13px', width: '100%', boxSizing: 'border-box' };
 const zBtn = { flex: 1, padding: '8px', background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', borderRadius: '8px', cursor: 'pointer', fontWeight: '800', fontSize: '10px' };
 const swatch = (active, c) => ({ width: '26px', height: '26px', borderRadius: '50%', background: c, border: active ? '3px solid #fff' : '2px solid rgba(255,255,255,0.1)', cursor: 'pointer' });
 
@@ -25,12 +25,12 @@ const COLORS = ['#ffffff', '#000000', '#8f0653', '#1e1b4b', '#ffd700', '#ff4d4d'
  * StudioProperties
  * Panel derecho: propiedades de capa activa o propiedades del lienzo.
  */
-const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpoint, viewport, onUpdateLayer, onUpdateScene, onUpdateBreakpoint, onRemoveLayer, onToggleCustomMobile, onResetMobile }) => {
+const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpoint, viewport, mode, carouselInterval, onUpdateCarouselInterval, desktopRatio, setDesktopRatio, mobileRatio, setMobileRatio, onApplyBgToAllScenes, onDuplicateDesignToAllScenes, onMoveLayerZ, onUpdateLayer, onUpdateScene, onUpdateBreakpoint, onRemoveLayer, onToggleCustomMobile, onResetMobile, isDeviceMobile }) => {
     const isMobile = viewport === 'mobile';
 
     if (activeLayer) {
         return (
-            <div style={{ width: '290px', background: 'rgba(0,0,0,0.3)', borderLeft: '1px solid rgba(255,255,255,0.05)', padding: '22px', overflowY: 'auto', flexShrink: 0 }}>
+            <div style={{ width: isDeviceMobile ? '100%' : '290px', background: 'rgba(0,0,0,0.3)', borderLeft: '1px solid rgba(255,255,255,0.05)', padding: isDeviceMobile ? '16px' : '22px', overflowY: 'auto', flexShrink: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
                     <span style={{ ...label, marginBottom: 0 }}>PROPIEDADES DE CAPA</span>
                     <span style={{ fontSize: '9px', background: 'rgba(143,6,83,0.2)', color: '#c56fa8', padding: '2px 8px', borderRadius: '6px', fontWeight: '900' }}>
@@ -40,12 +40,12 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
 
-                    <Prop label="VISIBILIDAD">
+                    <Prop label="¿DÓNDE MOSTRAR ESTE ELEMENTO?">
                         <div style={{ display: 'flex', gap: '8px' }}>
                             {[
                                 { id: 'both', lbl: 'AMBOS' },
-                                { id: 'desktop', lbl: 'PC' },
-                                { id: 'mobile', lbl: 'MOVIL' }
+                                { id: 'desktop', lbl: 'SOLO PC' },
+                                { id: 'mobile', lbl: 'SOLO MÓVIL' }
                             ].map(t => (
                                 <button
                                     key={t.id}
@@ -84,6 +84,57 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                             <Prop label="CONTENIDO">
                                 <input type="text" style={inputStyle} value={activeLayer.content || ''} onChange={e => onUpdateLayer({ content: e.target.value })} />
                             </Prop>
+                            <Prop label="FUENTE">
+                                <select 
+                                    style={{ ...inputStyle, marginBottom: '6px' }}
+                                    value={activeLayer.fontFamily || 'Outfit'}
+                                    onChange={e => onUpdateLayer({ fontFamily: e.target.value })}
+                                >
+                                    <option value="Outfit" style={{ background: '#1e1b4b', color: '#fff' }}>Outfit</option>
+                                    <option value="Inter" style={{ background: '#1e1b4b', color: '#fff' }}>Inter</option>
+                                    <option value="Playfair Display" style={{ background: '#1e1b4b', color: '#fff' }}>Playfair Display</option>
+                                    <option value="Montserrat" style={{ background: '#1e1b4b', color: '#fff' }}>Montserrat</option>
+                                    <option value="Cinzel" style={{ background: '#1e1b4b', color: '#fff' }}>Cinzel</option>
+                                    <option value="Arial" style={{ background: '#1e1b4b', color: '#fff' }}>Arial</option>
+                                    <option value="Times New Roman" style={{ background: '#1e1b4b', color: '#fff' }}>Times New Roman</option>
+                                    <option value="Courier New" style={{ background: '#1e1b4b', color: '#fff' }}>Courier New</option>
+                                </select>
+                            </Prop>
+                            <Prop label="ESTILO (NEGRITA / CURSIVA)">
+                                <div style={{ display: 'flex', gap: '8px', marginBottom: '6px' }}>
+                                    {[
+                                        { id: 'normal', lbl: 'N', weight: '400' },
+                                        { id: 'bold', lbl: 'B', weight: '700' },
+                                        { id: 'black', lbl: 'BLACK', weight: '900' }
+                                    ].map(w => (
+                                        <button 
+                                            key={w.id}
+                                            onClick={() => onUpdateLayer({ fontWeight: w.weight })}
+                                            style={{
+                                                flex: 1, padding: '8px', borderRadius: '8px', border: '1px solid',
+                                                borderColor: (activeLayer.fontWeight || '900') === w.weight ? '#8f0653' : 'rgba(255,255,255,0.1)',
+                                                background: (activeLayer.fontWeight || '900') === w.weight ? 'rgba(143,6,83,0.2)' : 'rgba(255,255,255,0.05)',
+                                                color: (activeLayer.fontWeight || '900') === w.weight ? '#fff' : 'rgba(255,255,255,0.4)',
+                                                fontWeight: w.weight, fontSize: '11px', cursor: 'pointer'
+                                            }}
+                                        >
+                                            {w.lbl}
+                                        </button>
+                                    ))}
+                                    <button 
+                                        onClick={() => onUpdateLayer({ fontStyle: activeLayer.fontStyle === 'italic' ? 'normal' : 'italic' })}
+                                        style={{
+                                            flex: 1, padding: '8px', borderRadius: '8px', border: '1px solid',
+                                            borderColor: activeLayer.fontStyle === 'italic' ? '#8f0653' : 'rgba(255,255,255,0.1)',
+                                            background: activeLayer.fontStyle === 'italic' ? 'rgba(143,6,83,0.2)' : 'rgba(255,255,255,0.05)',
+                                            color: activeLayer.fontStyle === 'italic' ? '#fff' : 'rgba(255,255,255,0.4)',
+                                            fontStyle: 'italic', fontWeight: 'bold', fontSize: '11px', cursor: 'pointer'
+                                        }}
+                                    >
+                                        I
+                                    </button>
+                                </div>
+                            </Prop>
                             <Prop label="TAMAÑO DE FUENTE">
                                 <Slider min={10} max={200} value={isMobile ? (activeLayer.mf ?? activeLayer.fontSize ?? 48) : (activeLayer.fontSize || 48)} unit="px" onChange={v => onUpdateLayer(isMobile ? { mf: v } : { fontSize: v })} />
                             </Prop>
@@ -108,9 +159,9 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
 
                     <Prop label="ORDEN Z">
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <button style={zBtn} onClick={() => onUpdateLayer({ zIndex: Math.max(1, activeLayer.zIndex - 1) })}>↓ BAJAR</button>
+                            <button style={zBtn} onClick={() => onMoveLayerZ(activeLayerIdx, 'down')}>↓ BAJAR</button>
                             <span style={{ flex: 1, textAlign: 'center', fontWeight: '900', fontSize: '15px' }}>{activeLayer.zIndex}</span>
-                            <button style={zBtn} onClick={() => onUpdateLayer({ zIndex: activeLayer.zIndex + 1 })}>↑ SUBIR</button>
+                            <button style={zBtn} onClick={() => onMoveLayerZ(activeLayerIdx, 'up')}>↑ SUBIR</button>
                         </div>
                     </Prop>
 
@@ -124,7 +175,8 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
 
     // Propiedades del lienzo (ninguna capa seleccionada)
     return (
-        <div style={{ width: '290px', background: 'rgba(0,0,0,0.3)', borderLeft: '1px solid rgba(255,255,255,0.05)', padding: '22px', overflowY: 'auto', flexShrink: 0 }}>
+        <div style={{ width: isDeviceMobile ? '100%' : '320px', background: 'rgba(0,0,0,0.4)', borderLeft: '1px solid rgba(255,255,255,0.05)', padding: isDeviceMobile ? '16px' : '22px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            {/* Header Sticky */}
             <span style={{ ...label, marginBottom: '20px', display: 'block' }}>PROPIEDADES DEL LIENZO</span>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
 
@@ -179,6 +231,69 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                         </button>
                     )}
                 </Prop>
+
+                <Prop label={isMobile ? "PROPORCIÓN (MÓVIL)" : "PROPORCIÓN (ESCRITORIO)"}>
+                    <div style={{ display: 'flex', gap: '8px', padding: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px' }}>
+                        {[
+                            { id: isMobile ? '9/16' : '21/9', lbl: isMobile ? 'VERTICAL' : 'ULTRAWIDE' },
+                            { id: '16/9', lbl: 'CLÁSICO' },
+                            { id: '1/1', lbl: 'CUADRADO' }
+                        ].map(t => {
+                            const active = (isMobile ? mobileRatio : desktopRatio) === t.id;
+                            return (
+                                <button
+                                    key={t.id}
+                                    onClick={() => isMobile ? setMobileRatio(t.id) : setDesktopRatio(t.id)}
+                                    style={{
+                                        flex: 1,
+                                        padding: '8px 4px',
+                                        borderRadius: '8px',
+                                        border: '1px solid',
+                                        borderColor: active ? '#8f0653' : 'transparent',
+                                        background: active ? 'rgba(143,6,83,0.2)' : 'transparent',
+                                        color: active ? '#fff' : 'rgba(255,255,255,0.4)',
+                                        fontSize: '9px',
+                                        fontWeight: '900',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    {t.lbl}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </Prop>
+
+                {mode === 'multi' && (
+                    <>
+                        <Prop label="TIEMPO DE CARRUSEL">
+                            <Slider min={1} max={15} step={0.5} value={carouselInterval} unit="s" onChange={v => onUpdateCarouselInterval(v)} />
+                        </Prop>
+
+                        <div style={{ padding: '14px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <span style={{ ...label, marginBottom: '10px', color: '#fff' }}>DISEÑO GLOBAL</span>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <button 
+                                    onClick={onApplyBgToAllScenes}
+                                    style={{ padding: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '10px', fontWeight: '800', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'normal', wordWrap: 'break-word' }}
+                                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                >
+                                    {isDeviceMobile ? 'Aplicar fondo a todo' : 'Aplicar color actual a todas las escenas'}
+                                </button>
+                                <button 
+                                    onClick={onDuplicateDesignToAllScenes}
+                                    style={{ padding: '8px', background: '#8f0653', border: 'none', color: '#fff', fontSize: '10px', fontWeight: '800', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'normal', wordWrap: 'break-word' }}
+                                    onMouseEnter={e => e.currentTarget.style.background = '#a60862'}
+                                    onMouseLeave={e => e.currentTarget.style.background = '#8f0653'}
+                                >
+                                    {isDeviceMobile ? 'Duplicar diseño a todo' : 'Duplicar diseño a todas las escenas'}
+                                </button>
+                            </div>
+                        </div>
+                    </>
+                )}
 
                 <div style={{ padding: '14px', borderRadius: '12px', background: 'rgba(143,6,83,0.05)', border: '1px solid rgba(143,6,83,0.15)', fontSize: '10px', color: 'rgba(255,255,255,0.4)', lineHeight: '1.6' }}>
                     Selecciona una capa en el lienzo o en el panel izquierdo para editar sus propiedades.

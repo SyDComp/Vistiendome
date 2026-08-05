@@ -14,8 +14,7 @@ export const WebSocketProvider = ({ children }) => {
     const connect = () => {
         // Determinar protocolo ws o wss dependiendo de si es https
         const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        // En producción usamos el host actual, en desarrollo localhost:8000
-        const wsHost = import.meta.env.PROD ? window.location.host : 'localhost:8000';
+        const wsHost = window.location.host;
         const wsUrl = `${wsProtocol}//${wsHost}/ws/heartbeat`;
         console.log('Intentando conectar WebSocket:', wsUrl);
         const ws = new WebSocket(wsUrl);

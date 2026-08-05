@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Save, Palette, Type, Layout, Grid3X3, ArrowLeft, ArrowRight, ArrowUp, ArrowDown } from 'lucide-react';
+import { X, Plus, Trash2, Save, Palette, Type, Layout, Grid3X3, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Settings, Monitor } from 'lucide-react';
 import Button from '../../../Button';
 
 const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
     const [activeCell, setActiveCell] = useState(null); // { rowIndex, header }
+    const [isDeviceMobile, setIsDeviceMobile] = useState(window.innerWidth < 950);
+    const [activeMobileTab, setActiveMobileTab] = useState('canvas'); // 'tools' | 'canvas'
     const [config, setConfig] = useState({
         headers: ['Columna 1'],
         rows: [{ 'Columna 1': '' }],
@@ -27,6 +29,11 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
             });
         }
     }, [data]);
+    useEffect(() => {
+        const handleResize = () => setIsDeviceMobile(window.innerWidth < 950);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     if (!isOpen) return null;
 
@@ -94,10 +101,10 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
     };
 
     return (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 6000, background: 'rgba(10,8,28,0.98)', backdropFilter: 'blur(20px)', display: 'flex', flexDirection: 'column', animation: 'studioFadeIn 0.3s ease' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 6000, background: 'rgba(10,8,28,0.98)', backdropFilter: 'blur(20px)', display: 'flex', flexDirection: 'column', animation: 'studioFadeIn 0.3s ease', overflow: 'hidden' }}>
             
             {/* HEADER */}
-            <div style={{ padding: '20px 40px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#8f0653', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <Grid3X3 size={24} color="#fff" />
@@ -135,10 +142,11 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                 </div>
             </div>
 
-            <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+            <div className="dt-studio-layout">
                 
                 {/* TOOLBAR LATERAL */}
-                <div style={{ width: '320px', background: 'rgba(255,255,255,0.03)', borderRight: '1px solid rgba(255,255,255,0.1)', padding: '32px', overflowY: 'auto' }}>
+                {(!isDeviceMobile || activeMobileTab === 'tools') && (
+                    <div className="dt-studio-sidebar">
                     
                     <section style={{ marginBottom: '40px' }}>
                         <h4 style={{ color: '#fff', fontSize: '12px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '24px', opacity: 0.6 }}>Acciones Rápidas</h4>
@@ -218,10 +226,12 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                         </div>
                     </section>
                 </div>
+                )}
 
                 {/* AREA DE TRABAJO */}
-                <div style={{ flex: 1, padding: '60px', overflow: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <div style={{ width: '100%', maxWidth: '1000px', background: config.styles.cellBg, borderRadius: config.styles.borderRadius, boxShadow: '0 40px 100px rgba(0,0,0,0.5)', border: `1px solid ${config.styles.borderColor}`, overflow: 'hidden' }}>
+                {(!isDeviceMobile || activeMobileTab === 'canvas') && (
+                <div className="dt-studio-workspace">
+                    <div style={{ width: '100%', maxWidth: '1000px', background: config.styles.cellBg, borderRadius: config.styles.borderRadius, boxShadow: '0 40px 100px rgba(0,0,0,0.5)', border: `1px solid ${config.styles.borderColor}`, overflowX: 'auto', boxSizing: 'border-box' }}>
                         <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, tableLayout: 'fixed' }}>
                             <thead>
                                  <tr style={{ background: config.styles.headerBg }}>
@@ -302,11 +312,37 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                         </table>
                     </div>
                     
-                    <p style={{ marginTop: '32px', color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>
+                    <p style={{ marginTop: '32px', color: 'rgba(255,255,255,0.4)', fontSize: '13px', width: '100%', maxWidth: '400px', lineHeight: '1.5' }}>
                         💡 **Tip:** Haz clic en los nombres de columna para renombrarlas. Usa los botones flotantes para insertar o eliminar elementos.
                     </p>
                 </div>
+                )}
             </div>
+
+            {/* Barra de Navegación Inferior Móvil */}
+            {isDeviceMobile && (
+                <div style={{ display: 'flex', background: '#0a081c', borderTop: '1px solid rgba(255,255,255,0.05)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+                    {[
+                        { id: 'tools', icon: <Settings size={20} />, label: 'Herramientas' },
+                        { id: 'canvas', icon: <Monitor size={20} />, label: 'Tabla' }
+                    ].map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveMobileTab(tab.id)}
+                            style={{
+                                flex: 1, padding: '16px 0', background: 'none', border: 'none',
+                                color: activeMobileTab === tab.id ? '#8f0653' : 'rgba(255,255,255,0.4)',
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
+                                fontSize: '10px', fontWeight: '800', textTransform: 'uppercase',
+                                cursor: 'pointer', transition: 'all 0.2s'
+                            }}
+                        >
+                            {tab.icon}
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
+            )}
 
             <style>{`
                 @keyframes studioFadeIn { from { opacity:0; transform: scale(1.05); } to { opacity:1; transform: scale(1); } }

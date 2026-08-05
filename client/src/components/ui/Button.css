@@ -25,7 +25,7 @@
 
 /* Variantes visuales */
 .ui-btn-primary {
-    background-color: #c8a2a2;
+    background-color: #8f0653;
     color: #ffffff;
 }
 
@@ -43,7 +43,7 @@
 
 .ui-btn-secondary:hover:not(:disabled) {
     background-color: #fcfbfa;
-    border-color: #c8a2a2;
+    border-color: #8f0653;
 }
 
 .ui-btn-danger {

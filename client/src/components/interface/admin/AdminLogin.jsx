@@ -7,7 +7,7 @@ import Button from '../../ui/Button';
 
 const validateAdminAuth = (values) => {
     const errors = {};
-    if (!values.email) errors.email = "Requerido";
+    if (!values.identificador) errors.identificador = "Requerido";
     if (!values.password) errors.password = "Requerido";
     return errors;
 };
@@ -17,15 +17,15 @@ const AdminLogin = () => {
     const [authStatus, setAuthStatus] = useState(null);
 
     const { values, errors, isSubmitting, handleChange, handleSubmit } = useForm({
-        email: '', password: ''
+        identificador: '', password: ''
     }, validateAdminAuth);
 
     const performLogin = async (payload) => {
         setAuthStatus(null);
-        console.log("Iniciando Acceso Administrador para:", payload.email);
+        console.log("Iniciando Acceso Administrador para:", payload.identificador);
 
         try {
-            const API_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || `${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}`);
+            const API_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || ``);
             const res = await fetch(`${API_URL}/api/v1/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -67,8 +67,8 @@ const AdminLogin = () => {
 
             <form onSubmit={handleSubmit(performLogin)}>
                 <Input 
-                    label="Correo Corporativo" name="email" type="email"
-                    value={values.email} onChange={handleChange} error={errors.email}
+                    label="Email o Apodo" name="identificador" type="text"
+                    value={values.identificador} onChange={handleChange} error={errors.identificador}
                 />
                 
                 <Input 

@@ -14,7 +14,7 @@ import { Save, ArrowLeft, Layers, Plus, Trash2, Search, Settings2, Folder, X, Ch
 import { getImageUrl } from '../../../../lib/api/endpoints';
 import QuickPeek from '../../../ui/admin/QuickPeek';
 
-const API_BASE = `${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/admin/catalog`;
+const API_BASE = `/api/v1/admin/catalog`;
 
 const CollectionManager = () => {
     const { toast, confirm } = useNotification();
@@ -165,177 +165,179 @@ const CollectionManager = () => {
         const selectedSkus = allSkus.filter(s => formData.sku_ids.includes(s.id));
 
         return (
-            <div className="coll-manager-form-container">
-                <div className="coll-manager-form-header">
-                    <div className="coll-manager-form-header-left">
-                        <button onClick={() => setShowForm(false)} className="coll-manager-back-btn">
-                            <ArrowLeft size={20} />
-                        </button>
-                        <h2 className="coll-manager-form-title">
-                            {editingCollection ? 'Editar Colección' : 'Nueva Colección'}
-                        </h2>
+            <div className="admin-inventory-form-container desktop" style={{ padding: '20px 20px 80px 20px' }}>
+                <div className="coll-manager-form-container">
+                    <div className="coll-manager-form-header">
+                        <div className="coll-manager-form-header-left">
+                            <button onClick={() => setShowForm(false)} className="coll-manager-back-btn">
+                                <ArrowLeft size={20} />
+                            </button>
+                            <h2 className="coll-manager-form-title">
+                                {editingCollection ? 'Editar Colección' : 'Nueva Colección'}
+                            </h2>
+                        </div>
+                        <div className="coll-manager-form-header-right">
+                            <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
+                            <Button variant="primary" onClick={handleSave} style={{ padding: '0 24px' }}>
+                                <Save size={18} style={{ marginRight: '8px' }} /> Guardar Colección
+                            </Button>
+                        </div>
                     </div>
-                    <div className="coll-manager-form-header-right">
-                        <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
-                        <Button variant="primary" onClick={handleSave} style={{ padding: '0 24px' }}>
-                            <Save size={18} style={{ marginRight: '8px' }} /> Guardar Colección
-                        </Button>
-                    </div>
-                </div>
 
-                <div className="coll-manager-form-body">
-                    <div className="coll-manager-main-card">
-                        <div className="coll-manager-card-layout">
-                            {/* Portada de Colección */}
-                            <div className="coll-manager-cover-col">
-                                <label className="coll-manager-label-upper">Portada de Colección</label>
-                                <div 
-                                    onClick={() => setShowCoverGallery(true)}
-                                    className="coll-manager-cover-box"
-                                >
-                                    {formData.image_url ? (
-                                        <img src={`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${formData.image_url}`} className="coll-manager-cover-img" />
-                                    ) : (
-                                        <div className="coll-manager-cover-placeholder">
-                                            <ImageIcon size={48} color="#cbd5e1" />
-                                            <p className="coll-manager-cover-placeholder-text">ELEGIR DE GALERÍA</p>
+                    <div className="coll-manager-form-body">
+                        <div className="coll-manager-main-card">
+                            <div className="coll-manager-card-layout">
+                                {/* Portada de Colección */}
+                                <div className="coll-manager-cover-col">
+                                    <label className="coll-manager-label-upper">Portada de Colección</label>
+                                    <div 
+                                        onClick={() => setShowCoverGallery(true)}
+                                        className="coll-manager-cover-box"
+                                    >
+                                        {formData.image_url ? (
+                                            <img src={`${formData.image_url}`} className="coll-manager-cover-img" />
+                                        ) : (
+                                            <div className="coll-manager-cover-placeholder">
+                                                <ImageIcon size={48} color="#cbd5e1" />
+                                                <p className="coll-manager-cover-placeholder-text">ELEGIR DE GALERÍA</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    {selectedSkus.length > 0 && (
+                                        <div className="coll-manager-rec-wrapper">
+                                            <label className="coll-manager-rec-label">Recomendadas</label>
+                                            <div className="coll-manager-rec-grid">
+                                                {(() => {
+                                                    // Filtrar para mostrar imágenes ÚNICAS (basado en la URL)
+                                                    const uniqueImages = [];
+                                                    const seenUrls = new Set();
+                                                    
+                                                    for (const sku of selectedSkus) {
+                                                        const url = sku.image || sku.image_url;
+                                                        if (url && !seenUrls.has(url)) {
+                                                            uniqueImages.push(sku);
+                                                            seenUrls.add(url);
+                                                        }
+                                                        if (uniqueImages.length >= 6) break; // Mostramos hasta 6 opciones variadas
+                                                    }
+                                                    
+                                                    return uniqueImages.map((sku, i) => (
+                                                        <button 
+                                                            key={i}
+                                                            onClick={() => setFormData(p => ({ ...p, image_url: sku.image || sku.image_url }))}
+                                                            className="coll-manager-rec-btn"
+                                                            style={{ border: formData.image_url === (sku.image || sku.image_url) ? '2px solid #8f0653' : '1px solid #e2e8f0', opacity: formData.image_url === (sku.image || sku.image_url) ? 1 : 0.7 }}
+                                                        >
+                                                            <img src={`${sku.image || sku.image_url}`} className="coll-manager-cover-img" />
+                                                        </button>
+                                                    ));
+                                                })()}
+                                            </div>
                                         </div>
                                     )}
                                 </div>
-                                
-                                {selectedSkus.length > 0 && (
-                                    <div className="coll-manager-rec-wrapper">
-                                        <label className="coll-manager-rec-label">Recomendadas</label>
-                                        <div className="coll-manager-rec-grid">
-                                            {(() => {
-                                                // Filtrar para mostrar imágenes ÚNICAS (basado en la URL)
-                                                const uniqueImages = [];
-                                                const seenUrls = new Set();
-                                                
-                                                for (const sku of selectedSkus) {
-                                                    const url = sku.image || sku.image_url;
-                                                    if (url && !seenUrls.has(url)) {
-                                                        uniqueImages.push(sku);
-                                                        seenUrls.add(url);
-                                                    }
-                                                    if (uniqueImages.length >= 6) break; // Mostramos hasta 6 opciones variadas
-                                                }
-                                                
-                                                return uniqueImages.map((sku, i) => (
-                                                    <button 
-                                                        key={i}
-                                                        onClick={() => setFormData(p => ({ ...p, image_url: sku.image || sku.image_url }))}
-                                                        className="coll-manager-rec-btn"
-                                                        style={{ border: formData.image_url === (sku.image || sku.image_url) ? '2px solid #8f0653' : '1px solid #e2e8f0', opacity: formData.image_url === (sku.image || sku.image_url) ? 1 : 0.7 }}
-                                                    >
-                                                        <img src={`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${sku.image || sku.image_url}`} className="coll-manager-cover-img" />
-                                                    </button>
-                                                ));
-                                            })()}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
 
-                            <div className="coll-manager-inputs-col">
-                                <div className="coll-manager-input-header">
-                                    <label className="coll-manager-label-upper" style={{ marginBottom: 0 }}>Nombre de la Colección</label>
-                                    <div className="coll-manager-toggle-wrap" onClick={() => setFormData(p => ({ ...p, is_active: !p.is_active }))}>
-                                        <span className="coll-manager-toggle-text" style={{ color: formData.is_active ? '#16a34a' : '#ef4444' }}>{formData.is_active ? 'COLECCIÓN ACTIVA' : 'COLECCIÓN INACTIVA'}</span>
-                                        <div className="coll-manager-toggle-track" style={{ background: formData.is_active ? '#16a34a' : '#cbd5e1' }}>
-                                            <div className="coll-manager-toggle-thumb" style={{ left: formData.is_active ? '18px' : '2px' }} />
+                                <div className="coll-manager-inputs-col">
+                                    <div className="coll-manager-input-header">
+                                        <label className="coll-manager-label-upper" style={{ marginBottom: 0 }}>Nombre de la Colección</label>
+                                        <div className="coll-manager-toggle-wrap" onClick={() => setFormData(p => ({ ...p, is_active: !p.is_active }))}>
+                                            <span className="coll-manager-toggle-text" style={{ color: formData.is_active ? '#16a34a' : '#ef4444' }}>{formData.is_active ? 'COLECCIÓN ACTIVA' : 'COLECCIÓN INACTIVA'}</span>
+                                            <div className="coll-manager-toggle-track" style={{ background: formData.is_active ? '#16a34a' : '#cbd5e1' }}>
+                                                <div className="coll-manager-toggle-thumb" style={{ left: formData.is_active ? '18px' : '2px' }} />
+                                            </div>
                                         </div>
                                     </div>
+                                    <input 
+                                        value={formData.name}
+                                        onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
+                                        placeholder="Ej: Temporada Invierno 2024..."
+                                        className="coll-manager-input-name"
+                                    />
+
+                                    <label className="coll-manager-label-upper-gray">Descripción</label>
+                                    <textarea 
+                                        value={formData.description}
+                                        onChange={e => setFormData(p => ({ ...p, description: e.target.value }))}
+                                        placeholder="Cuéntanos de qué trata esta colección..."
+                                        className="coll-manager-textarea-desc"
+                                    />
                                 </div>
-                                <input 
-                                    value={formData.name}
-                                    onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
-                                    placeholder="Ej: Temporada Invierno 2024..."
-                                    className="coll-manager-input-name"
-                                />
+                            </div>
+                        </div>
 
-                                <label className="coll-manager-label-upper-gray">Descripción</label>
-                                <textarea 
-                                    value={formData.description}
-                                    onChange={e => setFormData(p => ({ ...p, description: e.target.value }))}
-                                    placeholder="Cuéntanos de qué trata esta colección..."
-                                    className="coll-manager-textarea-desc"
-                                />
+                        <div className="coll-manager-skus-card">
+                            <div className="coll-manager-skus-header">
+                                <h4 className="coll-manager-skus-title">Variantes en la Colección</h4>
+                                <span className="coll-manager-skus-count">{formData.sku_ids.length} SELECCIONADAS</span>
+                            </div>
+
+                            <div className="coll-manager-skus-body">
+                                <div className="coll-manager-skus-grid">
+                                    {selectedSkus.map(sku => (
+                                        <div key={sku.id} className="coll-manager-sku-item">
+                                            <div className="coll-manager-sku-img-box">
+                                                {sku.image_url ? (
+                                                    <img src={`${sku.image_url}`} className="coll-manager-cover-img" />
+                                                ) : <Package size={24} color="#cbd5e1" style={{ margin: '12px' }} />}
+                                            </div>
+                                            <div className="coll-manager-sku-info">
+                                                <div className="coll-manager-sku-code">{sku.sku}</div>
+                                                <div className="coll-manager-sku-name">{sku.product_name}</div>
+                                            </div>
+                                            <button onClick={() => removeSku(sku.id)} className="coll-manager-sku-del-btn">
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {formData.sku_ids.length === 0 && (
+                                        <div className="coll-manager-skus-empty">
+                                            No hay variantes seleccionadas aún.
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="coll-manager-skus-footer">
+                                <button 
+                                    type="button" 
+                                    onClick={() => setShowSkuLibrary(true)}
+                                    className="coll-manager-skus-add-btn"
+                                >
+                                    <Plus size={18} /> Gestionar Variantes desde la Biblioteca
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    <div className="coll-manager-skus-card">
-                        <div className="coll-manager-skus-header">
-                            <h4 className="coll-manager-skus-title">Variantes en la Colección</h4>
-                            <span className="coll-manager-skus-count">{formData.sku_ids.length} SELECCIONADAS</span>
-                        </div>
+                    <LibraryPicker 
+                        isOpen={showSkuLibrary}
+                        onClose={() => setShowSkuLibrary(false)}
+                        items={allSkus}
+                        initialSelectedIds={formData.sku_ids}
+                        onSelect={addSkusFromLibrary}
+                        title="Seleccionar Variantes"
+                        description="Elige los SKUs que formarán parte de esta colección específica."
+                        type="variants"
+                        labelSingular="variante"
+                        labelPlural="variantes"
+                        allowMultiple={true}
+                    />
 
-                        <div className="coll-manager-skus-body">
-                            <div className="coll-manager-skus-grid">
-                                {selectedSkus.map(sku => (
-                                    <div key={sku.id} className="coll-manager-sku-item">
-                                        <div className="coll-manager-sku-img-box">
-                                            {sku.image_url ? (
-                                                <img src={`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${sku.image_url}`} className="coll-manager-cover-img" />
-                                            ) : <Package size={24} color="#cbd5e1" style={{ margin: '12px' }} />}
-                                        </div>
-                                        <div className="coll-manager-sku-info">
-                                            <div className="coll-manager-sku-code">{sku.sku}</div>
-                                            <div className="coll-manager-sku-name">{sku.product_name}</div>
-                                        </div>
-                                        <button onClick={() => removeSku(sku.id)} className="coll-manager-sku-del-btn">
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
-                                ))}
-                                {formData.sku_ids.length === 0 && (
-                                    <div className="coll-manager-skus-empty">
-                                        No hay variantes seleccionadas aún.
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="coll-manager-skus-footer">
-                            <button 
-                                type="button" 
-                                onClick={() => setShowSkuLibrary(true)}
-                                className="coll-manager-skus-add-btn"
-                            >
-                                <Plus size={18} /> Gestionar Variantes desde la Biblioteca
-                            </button>
-                        </div>
-                    </div>
+                    <MediaGallery 
+                        isOpen={showCoverGallery}
+                        onClose={() => setShowCoverGallery(false)}
+                        selectionMode={true}
+                        allowMultiple={false}
+                        onSelect={(data) => {
+                            const asset = Array.isArray(data) ? data[0] : data;
+                            if (asset) {
+                                setFormData(p => ({ ...p, image_url: asset.url }));
+                                setShowCoverGallery(false);
+                            }
+                        }}
+                    />
                 </div>
-
-                <LibraryPicker 
-                    isOpen={showSkuLibrary}
-                    onClose={() => setShowSkuLibrary(false)}
-                    items={allSkus}
-                    initialSelectedIds={formData.sku_ids}
-                    onSelect={addSkusFromLibrary}
-                    title="Seleccionar Variantes"
-                    description="Elige los SKUs que formarán parte de esta colección específica."
-                    type="variants"
-                    labelSingular="variante"
-                    labelPlural="variantes"
-                    allowMultiple={true}
-                />
-
-                <MediaGallery 
-                    isOpen={showCoverGallery}
-                    onClose={() => setShowCoverGallery(false)}
-                    selectionMode={true}
-                    allowMultiple={false}
-                    onSelect={(data) => {
-                        const asset = Array.isArray(data) ? data[0] : data;
-                        if (asset) {
-                            setFormData(p => ({ ...p, image_url: asset.url }));
-                            setShowCoverGallery(false);
-                        }
-                    }}
-                />
             </div>
         );
     }

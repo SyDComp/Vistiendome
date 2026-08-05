@@ -27,9 +27,9 @@ const thumb = { width: '26px', height: '26px', borderRadius: '6px', background: 
 const StudioLayerPanel = ({
     layers, activeLayerIdx, bgColor, viewport,
     onSelectLayer, onRemoveLayer, onBgColorChange,
-    onAddText, onAddFromGallery, onAddFromCatalog
+    onAddText, onAddFromGallery, onAddFromCatalog, isDeviceMobile
 }) => (
-    <div style={{ width: '270px', background: 'rgba(0,0,0,0.4)', borderRight: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+    <div style={{ width: isDeviceMobile ? '100%' : '300px', background: 'rgba(0,0,0,0.4)', borderRight: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
 
         {/* Lista */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '18px' }}>
@@ -66,7 +66,7 @@ const StudioLayerPanel = ({
                             <div style={thumb}>
                                 {layer.type === 'text'
                                     ? <Type size={12} color="#000" />
-                                    : <img src={`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${layer.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />}
+                                    : <img src={`${layer.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ fontSize: '11px', fontWeight: '900', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

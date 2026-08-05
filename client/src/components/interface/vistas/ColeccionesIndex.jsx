@@ -64,35 +64,6 @@ const ColeccionesIndex = () => {
             </header>
 
             <main className="container">
-                {/* Smart Collections Grid */}
-                <section className="collections-section">
-                    <div className="collections-section-header">
-                        <h2 className="collections-section-title">Colecciones Destacadas</h2>
-                        <div className="collections-section-line" />
-                    </div>
-                    <div className="collections-grid">
-                        {SMART_COLLECTIONS.map(sc => (
-                            <div 
-                                key={sc.slug} 
-                                className="collection-card smart-card"
-                                onClick={() => navigate(`/coleccion/${sc.slug}`)}
-                                style={{ background: sc.background }}
-                            >
-                                <div className="card-icon-wrapper">
-                                    {sc.icon}
-                                </div>
-                                <div className="card-content">
-                                    <h3 className="card-title">{sc.name}</h3>
-                                    <p className="card-desc">{sc.description}</p>
-                                    <div className="card-action">
-                                        Explorar colección <ArrowRight size={16} />
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-
                 {/* User Collections Grid */}
                 {collections.length > 0 && (
                     <section className="collections-section">
@@ -129,6 +100,35 @@ const ColeccionesIndex = () => {
                         </div>
                     </section>
                 )}
+
+                {/* Smart Collections Grid */}
+                <section className="collections-section">
+                    <div className="collections-section-header">
+                        <h2 className="collections-section-title">Colecciones Destacadas</h2>
+                        <div className="collections-section-line" />
+                    </div>
+                    <div className="collections-grid">
+                        {SMART_COLLECTIONS.map(sc => (
+                            <div 
+                                key={sc.slug} 
+                                className="collection-card smart-card"
+                                onClick={() => navigate(`/coleccion/${sc.slug}`)}
+                                style={{ background: sc.background }}
+                            >
+                                <div className="card-icon-wrapper">
+                                    {sc.icon}
+                                </div>
+                                <div className="card-content">
+                                    <h3 className="card-title">{sc.name}</h3>
+                                    <p className="card-desc">{sc.description}</p>
+                                    <div className="card-action">
+                                        Explorar colección <ArrowRight size={16} />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
             </main>
 
 

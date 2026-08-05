@@ -12,8 +12,8 @@ const PrintLabel = () => {
         const fetchData = async () => {
             try {
                 const [cotiRes, cliRes] = await Promise.all([
-                    fetch(`http://localhost:8000/api/v1/crm/`),
-                    fetch(`http://localhost:8000/api/v1/crm/clientes`)
+                    fetch(`/api/v1/crm/`),
+                    fetch(`/api/v1/crm/clientes`)
                 ]);
                 
                 if (cotiRes.ok && cliRes.ok) {
@@ -401,6 +401,66 @@ const PrintLabel = () => {
                     font-size: 20px;
                     font-weight: 900;
                     letter-spacing: -0.5px;
+                }
+
+                * {
+                    box-sizing: border-box;
+                }
+
+                @media (max-width: 600px) {
+                    .modern-print-wrapper {
+                        padding: 10px !important;
+                    }
+                    .shipping-label-card {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        border-width: 1.5px !important;
+                    }
+                    .brand-clean-header {
+                        padding: 20px 12px 14px 12px !important;
+                    }
+                    .brand-title {
+                        font-size: 24px !important;
+                        letter-spacing: 1px !important;
+                        word-break: break-word !important;
+                    }
+                    .brand-subtitle {
+                        font-size: 11px !important;
+                        letter-spacing: 1.5px !important;
+                    }
+                    .label-body {
+                        padding: 16px !important;
+                        gap: 22px !important;
+                    }
+                    .recipient-name {
+                        font-size: 20px !important;
+                        word-break: break-word !important;
+                    }
+                    .contact-grid {
+                        grid-template-columns: 1fr !important;
+                        gap: 8px !important;
+                    }
+                    .contact-item {
+                        font-size: 13px !important;
+                        word-break: break-all !important;
+                    }
+                    .main-address {
+                        font-size: 17px !important;
+                        word-break: break-word !important;
+                    }
+                    .city-region-box {
+                        flex-direction: column !important;
+                    }
+                    .box-divider {
+                        width: 100% !important;
+                        height: 1.5px !important;
+                    }
+                    .box-section {
+                        padding: 10px !important;
+                    }
+                    .big-value {
+                        font-size: 16px !important;
+                    }
                 }
             `}</style>
         </div>

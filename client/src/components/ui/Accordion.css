@@ -1,0 +1,105 @@
+/* ============================================
+   ACCORDION — Base Styles
+   Controla TODO el layout visual del componente.
+   Para personalizar un accordion específico,
+   usar la clase del className padre, e.g.:
+     .batch-editor-master-accordion .accordion-content { ... }
+   ============================================ */
+
+.accordion {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordion:has(.accordion-header.is-open) {
+    box-shadow: 0 12px 24px rgba(0,0,0,0.06);
+}
+
+/* --- Cabecera --- */
+.accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    user-select: none;
+    background: #fff;
+    transition: background 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordion-header.is-open {
+    background: #f8fafc;
+}
+
+.accordion-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.accordion-icon-box {
+    width: 28px;
+    height: 28px;
+    background: #fff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8f0653;
+    border: 1px solid #e2e8f0;
+}
+
+.accordion-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #1e1b4b;
+}
+
+.accordion-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.accordion-arrow {
+    color: #94a3b8;
+    display: flex;
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Envoltorio de animación (height/opacity controlados por JS) --- */
+.accordion-wrapper {
+    overflow: hidden;
+    transition: height 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Contenido interno --- */
+.accordion-content {
+    border-top: 1px solid #f1f5f9;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Scrollbar genérico para cualquier accordion con scroll --- */
+.accordion-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.accordion-content::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 8px;
+}
+
+.accordion-content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 8px;
+}
+
+.accordion-content::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}

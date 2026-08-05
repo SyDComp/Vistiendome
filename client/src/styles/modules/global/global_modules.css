@@ -39,7 +39,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #c8a2a2;
+  background: #8f0653;
 }
 
 /* Firefox */
@@ -215,7 +215,7 @@ body.no-scroll {
 
 .search-input-field:focus-within {
   background: #fff;
-  border-color: #c8a2a2;
+  border-color: #8f0653;
   box-shadow: 0 0 0 1px rgba(200, 162, 162, 0.15);
 }
 
@@ -235,7 +235,7 @@ body.no-scroll {
 
 .spinner-search {
   animation: rotate 1s linear infinite;
-  color: #c8a2a2;
+  color: #8f0653;
 }
 
 @keyframes rotate {
@@ -310,7 +310,7 @@ body.no-scroll {
 
 .result-price {
   font-size: 0.85rem;
-  color: #c8a2a2;
+  color: #8f0653;
   font-weight: 600;
 }
 
@@ -489,7 +489,7 @@ body.no-scroll {
 }
 
 .nav-link-mobile.active, .nav-link-mobile:hover {
-  color: #c8a2a2;
+  color: #8f0653;
 }
 
 /* --- COLECCIONES E INICIO --- */
@@ -810,7 +810,7 @@ body.no-scroll {
 }
 
 .carrusel-cta:hover {
-  background: #c8a2a2;
+  background: #8f0653;
   color: #fff;
   transform: translateY(-1px);
 }
@@ -1613,7 +1613,7 @@ body.no-scroll {
   top: 70px;
   /* Debajo del Navbar */
   z-index: 10;
-  background: white;
+  background: transparent;
   padding: 10px 0;
   margin: 0 -20px;
   padding: 10px 20px;
@@ -1701,7 +1701,7 @@ body.no-scroll {
 
 /* Main Content Ayuda */
 .ayuda-main {
-  background: white;
+  background: transparent;
   min-height: 500px;
   min-width: 0;
   overflow: hidden;

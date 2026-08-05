@@ -10,7 +10,7 @@ import LibraryPicker from './LibraryPicker';
 import DetailDrawer from '../../../ui/admin/DetailDrawer';
 import { X, Layers, Plus, Shield } from 'lucide-react';
 
-const API_BASE = `${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/admin/catalog`;
+const API_BASE = `/api/v1/admin/catalog`;
 const PAGE_SIZE = 20;
 
 // Badge de categoría padre
@@ -38,7 +38,7 @@ const CategoryForm = ({ editingCategory, categories, onSubmit, onCancel }) => {
     const [detailData, setDetailData] = useState(null);
 
     useEffect(() => {
-        fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/admin/catalog/specifications`)
+        fetch(`/api/v1/admin/catalog/specifications`)
             .then(r => r.json())
             .then(data => setSpecifications(data || []))
             .catch(console.error);
@@ -93,7 +93,20 @@ const CategoryForm = ({ editingCategory, categories, onSubmit, onCancel }) => {
                             <option value="">— Sin padre (Raíz) —</option>
                             {categories
                                 .filter(c => c.id !== editingCategory?.id && c.slug !== 'sin_categoria')
-                                .map(c => <option key={c.id} value={c.id}>{c.parent_name ? `${c.parent_name} › ${c.name}` : c.name}</option>)
+                                .map(c => {
+                                    const isSubcategory = c.level > 1;
+                                    const indent = '\u00A0\u00A0\u00A0\u00A0'.repeat(Math.max(0, (c.level || 1) - 1));
+                                    const prefix = isSubcategory ? '— ' : '';
+                                    return (
+                                        <option 
+                                            key={c.id} 
+                                            value={c.id} 
+                                            style={!isSubcategory ? { fontWeight: '600', color: '#1e293b' } : {}}
+                                        >
+                                            {indent}{prefix}{c.name}
+                                        </option>
+                                    );
+                                })
                             }
                         </select>
                     </div>

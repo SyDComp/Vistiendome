@@ -62,15 +62,16 @@ const SectionHeader = ({ title, description, action }) => {
             )}
 
             {Array.isArray(action) && (
-                <div style={{ display: 'flex', gap: '12px', width: isMobile ? '100%' : 'auto' }}>
+                <div style={{ display: 'flex', gap: isMobile ? '8px' : '12px', width: isMobile ? '100%' : 'auto', flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
                     {action.map((btn, idx) => (
                         <button
                             key={idx}
                             onClick={btn.onClick}
                             style={{
-                                flex: isMobile ? 1 : 'none',
+                                flex: isMobile ? '1 1 100%' : 'none',
+                                width: isMobile ? '100%' : 'auto',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                padding: '10px 20px', 
+                                padding: isMobile ? '10px 14px' : '10px 20px', 
                                 backgroundColor: btn.variant === 'outline' ? '#fff' : '#8f0653',
                                 color: btn.variant === 'outline' ? '#8f0653' : '#fff',
                                 border: btn.variant === 'outline' ? '1px solid #8f0653' : 'none',

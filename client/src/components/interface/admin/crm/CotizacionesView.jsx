@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SectionHeader from '../../../ui/admin/SectionHeader';
 import DataTable from '../../../ui/admin/DataTable';
 import FilterBar from '../../../ui/admin/FilterBar';
 import RowActions from '../../../ui/admin/RowActions';
 import DetailDrawer from '../../../ui/admin/DetailDrawer';
 import { useNotification } from '../../../../context/NotificationContext';
-import { FileText, Calendar, MessageCircle, MapPin, Info } from 'lucide-react';
+import { useSettings } from '../../../../context/SettingsContext';
+import { getShippingColor } from '../../../../utils/shippingColors';
+import { FileText, Calendar, MessageCircle, MapPin, Info, Printer, Plus } from 'lucide-react';
+import AdminCotizacionModal from './AdminCotizacionModal';
 
 const StateSelector = ({ cotizacion, onUpdate }) => {
     const { toast } = useNotification();
@@ -24,7 +28,7 @@ const StateSelector = ({ cotizacion, onUpdate }) => {
         const newState = e.target.value;
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:8000/api/v1/crm/cotizaciones/${cotizacion.id}/estado`, {
+            const response = await fetch(`/api/v1/crm/cotizaciones/${cotizacion.id}/estado`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ estado: newState })
@@ -65,6 +69,9 @@ const StateSelector = ({ cotizacion, onUpdate }) => {
 };
 
 const CotizacionesView = () => {
+    const { settings } = useSettings();
+    const shippingColors = settings?.shipping_colors || {};
+    const navigate = useNavigate();
     const { toast, confirm } = useNotification();
     const [cotizaciones, setCotizaciones] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -73,12 +80,13 @@ const CotizacionesView = () => {
     const [showDetail, setShowDetail] = useState(false);
     const [detailData, setDetailData] = useState(null);
     const [showLegend, setShowLegend] = useState(false);
+    const [showCreateModal, setShowCreateModal] = useState(false);
 
     useEffect(() => {
         const fetchCotizaciones = async () => {
             setLoading(true);
             try {
-                const response = await fetch('http://localhost:8000/api/v1/crm/');
+                const response = await fetch('/api/v1/crm/');
                 if (response.ok) {
                     const data = await response.json();
                     setCotizaciones(data);
@@ -142,42 +150,97 @@ const CotizacionesView = () => {
         {
             key: 'detalles',
             label: 'Detalles Solicitud',
-            render: (_, row) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontSize: '13px' }}>
-                    <MapPin size={14} /> 
-                    <span>{row.comuna}, {row.region}</span>
-                </div>
-            )
+            render: (_, row) => {
+                const transColor = getShippingColor(row.transporte || 'STARKEN', shippingColors);
+                return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontSize: '13px' }}>
+                            <MapPin size={14} /> 
+                            <span>{row.comuna}, {row.region}</span>
+                        </div>
+                        {row.transporte && (
+                            <span style={{ fontSize: '10px', fontWeight: '800', color: transColor, background: `${transColor}15`, border: `1px solid ${transColor}40`, padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                                🚚 {row.transporte}
+                            </span>
+                        )}
+                    </div>
+                );
+            }
         }
     ];
 
     return (
         <div className="admin-module fade-in">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
                 <SectionHeader 
                     title="Cotizaciones Recibidas" 
                     subtitle={`${cotizaciones.length} solicitudes de cotización`}
                     icon={FileText}
                 />
-                <button 
-                    onClick={() => setShowLegend(!showLegend)}
-                    style={{ 
-                        background: showLegend ? '#f1f5f9' : 'transparent', 
-                        border: '1px solid #e2e8f0', 
-                        borderRadius: '8px', 
-                        padding: '8px 12px', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '8px', 
-                        color: '#475569', 
-                        cursor: 'pointer', 
-                        fontSize: '12px', 
-                        fontWeight: '600',
-                        marginTop: '10px'
-                    }}
-                >
-                    <Info size={14} /> {showLegend ? 'Ocultar Glosario' : '¿Qué significan los estados?'}
-                </button>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', width: '100%', justifyContent: 'flex-start' }}>
+                    <button
+                        onClick={() => setShowCreateModal(true)}
+                        style={{
+                            background: 'linear-gradient(135deg, #8f0653 0%, #d946ef 100%)',
+                            border: 'none',
+                            borderRadius: '10px',
+                            padding: '10px 18px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            color: '#ffffff',
+                            cursor: 'pointer',
+                            fontSize: '13px',
+                            fontWeight: '800',
+                            boxShadow: '0 4px 12px rgba(143, 6, 83, 0.25)',
+                            flex: '1 1 200px'
+                        }}
+                    >
+                        <Plus size={18} strokeWidth={3} /> + Nueva Cotización Manual
+                    </button>
+                    <button
+                        onClick={() => navigate('/admin/dashboard/crm/shipping-labels')}
+                        style={{
+                            background: '#fdf2f8',
+                            border: '1px solid #fbcfe8',
+                            borderRadius: '10px',
+                            padding: '10px 16px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            color: '#8f0653',
+                            cursor: 'pointer',
+                            fontSize: '13px',
+                            fontWeight: '800',
+                            boxShadow: '0 2px 6px rgba(143, 6, 83, 0.1)',
+                            flex: '1 1 240px'
+                        }}
+                    >
+                        <Printer size={16} /> 📦 Etiquetas de Envío (Ahorro Papel y Tinta)
+                    </button>
+                    <button 
+                        onClick={() => setShowLegend(!showLegend)}
+                        style={{ 
+                            background: showLegend ? '#f1f5f9' : 'transparent', 
+                            border: '1px solid #e2e8f0', 
+                            borderRadius: '10px', 
+                            padding: '10px 14px', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            gap: '8px', 
+                            color: '#475569', 
+                            cursor: 'pointer', 
+                            fontSize: '13px', 
+                            fontWeight: '600',
+                            flex: '1 1 200px'
+                        }}
+                    >
+                        <Info size={15} /> {showLegend ? 'Ocultar Glosario' : '¿Qué significan los estados?'}
+                    </button>
+                </div>
             </div>
 
             {showLegend && (
@@ -252,6 +315,14 @@ const CotizacionesView = () => {
                 data={detailData}
                 type="cotizacion"
                 title={detailData ? `Cotización #${detailData.id}` : ''}
+            />
+
+            <AdminCotizacionModal
+                isOpen={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+                onCreated={(newCoti) => {
+                    setCotizaciones(prev => [newCoti, ...prev]);
+                }}
             />
         </div>
     );

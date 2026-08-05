@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 
 from .database import init_db
-from .api.v1 import auth, products, admin, websockets, media, catalog_admin, catalog_collections, collections, cms, settings as site_settings, crm, geo
+from .api.v1 import auth, products, admin, websockets, media, catalog_admin, catalog_collections, collections, cms, settings as site_settings, crm, geo, analytics
 
 app = FastAPI(
     title="Vistiendomé API",
@@ -34,6 +34,7 @@ app.include_router(site_settings.router, prefix="/api/v1/settings", tags=["Confi
 app.include_router(media.router, prefix="/api/v1/media", tags=["Medios"])
 app.include_router(crm.router, prefix="/api/v1/crm", tags=["CRM y Cotizaciones"])
 app.include_router(geo.router, prefix="/api/v1/geo", tags=["Geografía"])
+app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Inteligencia de Negocio"])
 app.include_router(websockets.router, prefix="/ws", tags=["websockets"])
 
 # Servir archivos estáticos

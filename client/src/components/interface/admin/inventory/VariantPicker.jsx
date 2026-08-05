@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, ChevronRight, Check, Search, Layers, Box, Tag, ArrowLeft, Info, Hash, List, Sparkles, BookOpen, Image as ImageIcon, Upload, Trash2, Star, Palette } from 'lucide-react';
 import Button from '../../../ui/Button';
 import Accordion from '../../../ui/Accordion';
 import LibraryPicker from './LibraryPicker';
 import MediaGallery from '../media/MediaGallery';
-import { formatChar, formatOpt } from '../../../../utils/formatters';
 
 const generateEAN13 = (text) => {
     if (!text) return "";
@@ -25,6 +24,22 @@ const generateEAN13 = (text) => {
     return hashStr + checksum;
 };
 
+// Calcula qué filas (índices) coinciden con los filtros rápidos activos.
+// Semántica: AND entre atributos con filtro, OR entre los valores de un mismo atributo.
+const computeSelectionFromFilters = (filters, preview) => {
+    const activeCriteria = Object.entries(filters).filter(([, s]) => s && s.size > 0);
+    if (activeCriteria.length === 0) return new Set();
+
+    const indices = new Set();
+    preview.forEach((row, idx) => {
+        const matchesAll = activeCriteria.every(
+            ([attrName, activeValues]) => activeValues.has(row.config[attrName])
+        );
+        if (matchesAll) indices.add(idx);
+    });
+    return indices;
+};
+
 /**
  * VariantPicker — Asistente procedural para crear una nueva versión específica.
  */
@@ -35,12 +50,9 @@ const VariantPicker = ({
     suggestedSpecs = [], 
     allSpecs = [],
     allAttributes = [],
-    categoryId,
-    productId,
     baseSlug = ''
 }) => {
     const [selectedAttrs, setSelectedAttrs] = useState([]); // [{id, name, values: []}]
-    const [variantImages, setVariantImages] = useState([]); // Array para batch upload/selection
     const [generatedPreview, setGeneratedPreview] = useState([]); // Matriz generada antes de confirmar
     const [selection, setSelection] = useState(new Set()); // Índices seleccionados en la pre-visualización
 
@@ -63,6 +75,9 @@ const VariantPicker = ({
         barcode: ''
     });
 
+    // Rastrea el valor previo de isOpen para detectar la transición cerrado -> abierto.
+    const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+
     const semanticClean = (text) => {
         if (!text) return "";
         return text.toString()
@@ -75,49 +90,22 @@ const VariantPicker = ({
             .replace(/_+/g, '_');
     };
 
-    useEffect(() => {
+    // Reset del asistente cada vez que pasa de cerrado a abierto.
+    // Se ajusta el estado DURANTE el render (patrón oficial de React para
+    // "resetear estado cuando cambia una prop"), en vez de un setState síncrono
+    // dentro de un useEffect que provocaría renders en cascada.
+    if (isOpen !== prevIsOpen) {
+        setPrevIsOpen(isOpen);
         if (isOpen) {
             setStep(1);
             setSelectedAttrs([]);
-            setVariantImages([]);
             setGeneratedPreview([]);
             setSelection(new Set());
             setActiveFilters({});
+            setSearchTerm('');
             setCommercialData({ price: 0, stock: 0, sku: '', barcode: '' });
         }
-    }, [isOpen]);
-
-    // EFECTO: Sincronizar selección con filtros activos
-    useEffect(() => {
-        if (step !== 3) return;
-
-        // Lógica: AND entre atributos con filtros, OR entre valores del mismo atributo
-        const filteredIndices = new Set();
-        const activeCriteria = Object.entries(activeFilters).filter(([_, s]) => s && s.size > 0);
-        
-        if (activeCriteria.length > 0) {
-            generatedPreview.forEach((row, idx) => {
-                let matchesAllAttrs = true;
-
-                for (const [attrName, activeValues] of activeCriteria) {
-                    const rowValue = row.config[attrName];
-                    if (!activeValues.has(rowValue)) {
-                        matchesAllAttrs = false;
-                        break;
-                    }
-                }
-
-                if (matchesAllAttrs) {
-                    filteredIndices.add(idx);
-                }
-            });
-            setSelection(filteredIndices);
-        } else {
-            // Si se limpian todos los filtros, limpiamos la selección automáticamente
-            // para mantener la consistencia visual total.
-            setSelection(new Set());
-        }
-    }, [activeFilters, generatedPreview, step]);
+    }
 
     if (!isOpen) return null;
 
@@ -170,65 +158,6 @@ const VariantPicker = ({
             next[attrIdx].values = [...currentValues, val];
         }
         setSelectedAttrs(next);
-    };
-
-    // --- LÓGICA DE IMÁGENES (PASO 4) ---
-    const handleTransparentUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        setUploading(true);
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const res = await fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/media/upload`, {
-                method: 'POST',
-                body: formData
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                // data.url es la ruta relativa devuelta por el servidor
-                const newImg = { 
-                    url: data.url, 
-                    is_main: variantImages.length === 0,
-                    ui_config: { zoom: 1, x: 0, y: 0, rotate: 0, brightness: 100 }
-                };
-                setVariantImages([...variantImages, newImg]);
-            }
-        } catch (err) {
-            console.error("Error en subida transparente:", err);
-        } finally {
-            setUploading(false);
-        }
-    };
-
-    const addFromLibrary = (url) => {
-        if (variantImages.some(img => img.url === url)) return;
-        const newImg = { 
-            url, 
-            is_main: variantImages.length === 0,
-            ui_config: { zoom: 1, x: 0, y: 0, rotate: 0, brightness: 100 }
-        };
-        setVariantImages([...variantImages, newImg]);
-        setShowGlobalGallery(false);
-    };
-
-    const removeImage = (url) => {
-        const filtered = variantImages.filter(img => img.url !== url);
-        // Si borramos la principal, asignamos la siguiente si existe
-        if (variantImages.find(img => img.url === url)?.is_main && filtered.length > 0) {
-            filtered[0].is_main = true;
-        }
-        setVariantImages(filtered);
-    };
-
-    const setMainVariantImage = (url) => {
-        setVariantImages(variantImages.map(img => ({ 
-            ...img, 
-            is_main: img.url === url 
-        })));
     };
 
     // --- RENDERIZADO DE PASOS ---
@@ -450,17 +379,10 @@ const VariantPicker = ({
             delete nextFilters[attrName];
         }
 
+        // Derivamos la selección directamente en el handler (en vez de vía useEffect),
+        // manteniendo sincronizadas la selección visual y los filtros activos.
         setActiveFilters(nextFilters);
-    };
-
-    const selectByValue = (attrName, value) => {
-        // Obsoleto pero mantenido por compatibilidad si se llama, 
-        // aunque ahora preferimos toggleQuickFilter
-        const next = new Set();
-        generatedPreview.forEach((v, idx) => {
-            if (v.config[attrName] === value) next.add(idx);
-        });
-        setSelection(next);
+        setSelection(computeSelectionFromFilters(nextFilters, generatedPreview));
     };
 
     const applyBulk = (field, value) => {
@@ -469,6 +391,51 @@ const VariantPicker = ({
             next[idx][field] = value;
         });
         setGeneratedPreview(next);
+    };
+
+    // Genera el producto cartesiano de los valores seleccionados por atributo
+    // y construye la matriz de variantes que se editará en el Workspace (Paso 3).
+    const generateCombinations = () => {
+        const attrs = selectedAttrs.filter(a => (a.values || []).length > 0);
+        if (attrs.length === 0) {
+            setGeneratedPreview([]);
+            setSelection(new Set());
+            setActiveFilters({});
+            return;
+        }
+
+        // Cada combinación es un objeto config { [attr.name]: value }
+        let combos = [{}];
+        attrs.forEach(attr => {
+            const next = [];
+            combos.forEach(combo => {
+                attr.values.forEach(val => {
+                    next.push({ ...combo, [attr.name]: val });
+                });
+            });
+            combos = next;
+        });
+
+        const rows = combos.map(config => {
+            const sku = [baseSlug, ...Object.values(config)]
+                .map(semanticClean)
+                .filter(Boolean)
+                .join('-')
+                .toUpperCase();
+            return {
+                config,
+                sku,
+                barcode: generateEAN13(sku),
+                price: commercialData.price || 0,
+                stock: 0,
+                media_ids: [],
+                media_assets: [],
+            };
+        });
+
+        setGeneratedPreview(rows);
+        setSelection(new Set());
+        setActiveFilters({});
     };
 
     const renderStep3 = () => {
@@ -599,7 +566,7 @@ const VariantPicker = ({
                                         <div className="variant-picker-photos-wrap">
                                             {row.media_assets?.map((asset, iIdx) => (
                                                 <div key={asset.id || iIdx} className="variant-picker-photo-thumb">
-                                                    <img src={`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${asset.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    <img src={`${asset.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                 </div>
                                             ))}
                                             {(!row.media_assets || row.media_assets?.length === 0) && <div className="variant-picker-photo-empty" />}

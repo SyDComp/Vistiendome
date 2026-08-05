@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '../../../context/SettingsContext';
 import { Camera, Globe, MessageCircle, Mail, Phone, MapPin, Clock, User, Users, Calendar, FileText, X } from 'lucide-react';
+import { formatRUT } from '../../../utils/formatters';
+import { buildWhatsAppMessage } from '../../../utils/cartUtils';
 import Button from '../../ui/Button';
 import { get, post } from '../../../lib/api/client';
 
@@ -9,13 +11,19 @@ const Contacto = () => {
     const contact = settings.contact_info || {};
     const social = settings.social_links || {};
 
+    const rawShippingMethods = settings?.shipping_methods !== undefined 
+        ? settings.shipping_methods 
+        : ['STARKEN', 'CORREOS DE CHILE', 'RETIRO EN LOCAL', 'OTRO'];
+    const shippingMethods = rawShippingMethods.filter(m => !m.toUpperCase().includes('CHILEXPRESS'));
+    const finalShippingMethods = shippingMethods.length > 0 ? shippingMethods : ['STARKEN', 'CORREOS DE CHILE', 'RETIRO EN LOCAL', 'OTRO'];
+
     const [tipoContacto, setTipoContacto] = useState('seleccion'); // 'seleccion', 'individual', 'grupo'
     const [formData, setFormData] = useState({
         rut: '',
         nombre: '',
         email: '',
         whatsapp: '+569',
-        transporte: 'STARKEN',
+        transporte: finalShippingMethods[0] || 'STARKEN',
         tipo_despacho: 'DOMICILIO',
         region: '',
         comuna: '',
@@ -37,6 +45,14 @@ const Contacto = () => {
             .catch(err => console.error('Error fetching regiones:', err));
     }, []);
 
+    // Los settings (y por ende finalShippingMethods) cargan async: si el método
+    // por defecto quedó desfasado con la lista real, lo resincronizamos.
+    useEffect(() => {
+        if (finalShippingMethods.length > 0 && !finalShippingMethods.includes(formData.transporte)) {
+            setFormData(prev => ({ ...prev, transporte: finalShippingMethods[0] }));
+        }
+    }, [finalShippingMethods, formData.transporte]);
+
     useEffect(() => {
         try {
             const saved = localStorage.getItem('contactoDraft');
@@ -50,22 +66,45 @@ const Contacto = () => {
         localStorage.setItem('contactoDraft', JSON.stringify(formData));
     }, [formData]);
 
-    const handleRegionChange = (e) => {
-        const selectedRegionNombre = e.target.value;
-        setFormData(prev => ({ ...prev, region: selectedRegionNombre }));
-        
-        const regionObj = regiones.find(r => r.nombre === selectedRegionNombre);
+    useEffect(() => {
+        if (!formData.region || regiones.length === 0) {
+            if (!formData.region) setComunas([]);
+            return;
+        }
+        const regionObj = regiones.find(r => 
+            r.nombre.trim().toLowerCase() === String(formData.region).trim().toLowerCase() ||
+            String(r.id) === String(formData.region)
+        );
         if (regionObj) {
             get(`/api/v1/geo/regiones/${regionObj.id}/comunas`)
                 .then(data => {
-                    setComunas(data);
-                    setFormData(prev => ({ ...prev, comuna: '', comuna_id: '' }));
+                    const loadedComunas = Array.isArray(data) ? data : [];
+                    setComunas(loadedComunas);
+                    setFormData(prev => {
+                        const match = loadedComunas.find(c => 
+                            c.nombre.trim().toLowerCase() === String(prev.comuna || '').trim().toLowerCase() ||
+                            String(c.id) === String(prev.comuna_id || '')
+                        );
+                        if (match && (prev.comuna !== match.nombre || prev.comuna_id !== match.id)) {
+                            return { ...prev, comuna: match.nombre, comuna_id: match.id };
+                        }
+                        return prev;
+                    });
                 })
                 .catch(err => console.error('Error fetching comunas:', err));
         } else {
             setComunas([]);
-            setFormData(prev => ({ ...prev, comuna: '', comuna_id: '' }));
         }
+    }, [formData.region, regiones]);
+
+    const handleRegionChange = (e) => {
+        const selectedRegionNombre = e.target.value;
+        setFormData(prev => ({ 
+            ...prev, 
+            region: selectedRegionNombre,
+            comuna: '', 
+            comuna_id: '' 
+        }));
     };
 
     const handleComunaChange = (e) => {
@@ -98,6 +137,39 @@ const Contacto = () => {
             return;
         }
 
+        // Abrir WhatsApp de Paola con el resumen (sincrónico, dentro del gesto del usuario,
+        // para evitar bloqueo de pop-ups). Además se guarda en el CRM más abajo.
+        const numeroPaola = (social.whatsapp || '').replace(/\D/g, '');
+        if (numeroPaola) {
+            const esGrupo = tipoContacto === 'grupo';
+            const esRetiro = formData.transporte?.toUpperCase().includes('RETIRO');
+            const mensajeWA = buildWhatsAppMessage({
+                tipo: esGrupo ? 'grupo' : 'consulta',
+                cliente: { nombre: formData.nombre, rut: formData.rut, email: formData.email, telefono: formData.whatsapp },
+                despacho: esRetiro ? {
+                    transporte: formData.transporte
+                } : {
+                    transporte: formData.tipo_despacho === 'SUCURSAL' ? `${formData.transporte} (retiro en sucursal)` : formData.transporte,
+                    direccion: formData.tipo_despacho === 'SUCURSAL' ? null : formData.direccion,
+                    comuna: formData.comuna,
+                    region: formData.region,
+                },
+                grupo: esGrupo ? { tipo: formData.tipoGrupo, cantidad: formData.cantidad, evento: formData.evento } : undefined,
+                mensaje: formData.mensaje,
+            });
+            const whatsappUrl = `https://wa.me/${numeroPaola}?text=${encodeURIComponent(mensajeWA)}`;
+            const isIOSOrIPad = /iPad|iPhone|iPod/i.test(navigator.userAgent) || 
+                                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+                                /Android/i.test(navigator.userAgent);
+            let popup = null;
+            if (!isIOSOrIPad) {
+                popup = window.open(whatsappUrl, '_blank');
+            }
+            if (isIOSOrIPad || !popup || popup.closed || typeof popup.closed === 'undefined') {
+                window.location.href = whatsappUrl;
+            }
+        }
+
         setStatus('sending');
         
         try {
@@ -106,6 +178,7 @@ const Contacto = () => {
             const apellidos = partesNombre.slice(1).join(' ') || '';
 
             const origen = tipoContacto === 'individual' ? 'CONTACTO_INDIVIDUAL' : 'CONTACTO_GRUPAL';
+            const esRetiro = formData.transporte?.toUpperCase().includes('RETIRO');
 
             const payload = {
                 rut: formData.rut,
@@ -114,11 +187,11 @@ const Contacto = () => {
                 email_personal: formData.email,
                 telefono: formData.whatsapp,
                 transporte: formData.transporte,
-                tipo_despacho: formData.tipo_despacho,
-                region: formData.region,
-                comuna: formData.comuna,
-                comuna_id: formData.comuna_id,
-                direccion: formData.direccion,
+                tipo_despacho: esRetiro ? 'TIENDA' : formData.tipo_despacho,
+                region: esRetiro ? null : formData.region,
+                comuna: esRetiro ? null : formData.comuna,
+                comuna_id: esRetiro ? null : formData.comuna_id,
+                direccion: esRetiro ? null : formData.direccion,
                 mensaje: formData.mensaje,
                 origen: origen
             };
@@ -141,7 +214,7 @@ const Contacto = () => {
                 nombre: '',
                 email: '',
                 whatsapp: '+569',
-                transporte: 'STARKEN',
+                transporte: finalShippingMethods[0] || 'STARKEN',
                 tipo_despacho: 'DOMICILIO',
                 region: '',
                 comuna: '',
@@ -204,6 +277,7 @@ const Contacto = () => {
                         required 
                         value={formData.rut}
                         onChange={(e) => setFormData({...formData, rut: e.target.value})}
+                        onBlur={(e) => setFormData({...formData, rut: formatRUT(e.target.value)})}
                     />
                 </div>
                 <div className="form-group">
@@ -244,61 +318,78 @@ const Contacto = () => {
                         value={formData.transporte}
                         onChange={(e) => setFormData({...formData, transporte: e.target.value})}
                     >
-                        <option value="STARKEN">Starken</option>
-                        <option value="CHILEXPRESS">Chilexpress</option>
-                        <option value="CORREOS">Correos de Chile</option>
-                        <option value="RETIRO">Retiro en Tienda (San Carlos)</option>
+                        {finalShippingMethods.map((method, idx) => (
+                            <option key={idx} value={method}>{method}</option>
+                        ))}
                     </select>
                 </div>
 
-                <div className="form-group">
-                    <label><MapPin size={16} /> Tipo de Entrega *</label>
-                    <select 
-                        value={formData.tipo_despacho}
-                        onChange={(e) => setFormData({...formData, tipo_despacho: e.target.value})}
-                    >
-                        <option value="DOMICILIO">Despacho a Domicilio</option>
-                        <option value="SUCURSAL">Retiro en Sucursal de Envío</option>
-                    </select>
-                </div>
-
-                <div className="form-row" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%'}}>
+                {formData.transporte?.toUpperCase().includes('RETIRO') ? (
                     <div className="form-group">
-                        <label><MapPin size={16} /> Región</label>
-                        <select 
-                            value={formData.region} 
-                            onChange={handleRegionChange}
-                        >
-                            <option value="">Selecciona una región</option>
-                            {regiones.map(r => (
-                                <option key={r.id} value={r.nombre}>{r.nombre}</option>
-                            ))}
-                        </select>
+                        <p style={{ margin: 0, fontSize: '13px', color: '#0369a1', background: '#e0f2fe', padding: '12px 14px', borderRadius: '12px', border: '1px solid #bae6fd' }}>
+                            📍 <strong>Retiro presencial en Tienda / Taller en San Carlos, Región de Ñuble.</strong> Te contactaremos por WhatsApp con la dirección exacta y horarios disponibles para la entrega.
+                        </p>
                     </div>
-                    <div className="form-group">
-                        <label><MapPin size={16} /> Comuna</label>
-                        <select 
-                            value={formData.comuna} 
-                            onChange={handleComunaChange}
-                            disabled={!formData.region}
-                        >
-                            <option value="">Selecciona una comuna</option>
-                            {comunas.map(c => (
-                                <option key={c.id} value={c.nombre}>{c.nombre}</option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
+                ) : (
+                    <>
+                        <div className="form-group">
+                            <label><MapPin size={16} /> Tipo de Entrega *</label>
+                            <select 
+                                value={formData.tipo_despacho}
+                                onChange={(e) => setFormData({...formData, tipo_despacho: e.target.value})}
+                            >
+                                <option value="DOMICILIO">Despacho a Domicilio</option>
+                                <option value="SUCURSAL">Retiro en Sucursal de Envío</option>
+                            </select>
+                        </div>
 
-                <div className="form-group">
-                    <label><MapPin size={16} /> Dirección (Opcional)</label>
-                    <input 
-                        type="text" 
-                        placeholder="Calle, número..." 
-                        value={formData.direccion}
-                        onChange={(e) => setFormData({...formData, direccion: e.target.value})}
-                    />
-                </div>
+                        <div className="form-row" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%'}}>
+                            <div className="form-group">
+                                <label><MapPin size={16} /> Región</label>
+                                <select 
+                                    value={formData.region} 
+                                    onChange={handleRegionChange}
+                                >
+                                    <option value="">Selecciona una región</option>
+                                    {regiones.map(r => (
+                                        <option key={r.id} value={r.nombre}>{r.nombre}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label><MapPin size={16} /> Comuna</label>
+                                <select 
+                                    value={formData.comuna || ''} 
+                                    onChange={handleComunaChange}
+                                    disabled={!formData.region}
+                                >
+                                    <option value="">Selecciona una comuna</option>
+                                    {comunas.map(c => (
+                                        <option key={c.id} value={c.nombre}>{c.nombre}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        {formData.tipo_despacho === 'SUCURSAL' ? (
+                            <div className="form-group">
+                                <p style={{ margin: 0, fontSize: '13px', color: '#64748b', background: '#f8fafc', padding: '12px 14px', borderRadius: '12px' }}>
+                                    Retiras en una sucursal de <strong>{formData.transporte}</strong>. Coordinarás la sucursal exacta por WhatsApp según tu comuna.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="form-group">
+                                <label><MapPin size={16} /> Dirección (Opcional)</label>
+                                <input
+                                    type="text"
+                                    placeholder="Calle, número..."
+                                    value={formData.direccion}
+                                    onChange={(e) => setFormData({...formData, direccion: e.target.value})}
+                                />
+                            </div>
+                        )}
+                    </>
+                )}
 
                 {tipoContacto === 'grupo' && (
                     <>
@@ -355,7 +446,7 @@ const Contacto = () => {
                             </Button>
                             
                             {status === 'success' && (
-                                <div className="success-banner">¡Mensaje enviado con éxito! Paola se contactará contigo pronto.</div>
+                                <div className="success-banner">¡Listo! Te abrimos WhatsApp para enviar tu solicitud a Paola. Si no se abrió, revisa que tu navegador permita ventanas emergentes.</div>
                             )}
                         </div>
                     </form>
@@ -389,6 +480,12 @@ const Contacto = () => {
                             <p>{contact.email}</p>
                         </div>
                     )}
+                    {contact.phone_display && (
+                        <div className="info-block">
+                            <h4><Phone size={18} /> Teléfono Directo</h4>
+                            <p>{contact.phone_display}</p>
+                        </div>
+                    )}
                     <div className="info-block">
                         <h4><Clock size={18} /> Horarios</h4>
                         <p>Lun - Vie: 09:00 - 18:00 / Sáb: 09:00 - 14:00</p>
@@ -401,16 +498,17 @@ const Contacto = () => {
                     justifyContent: 'center', 
                     gap: '30px',
                     borderTop: '1px solid #f1f5f9',
-                    paddingTop: '40px'
+                    paddingTop: '40px',
+                    flexWrap: 'wrap'
                 }}>
-                    {social.instagram && (
-                        <a href={social.instagram} target="_blank" rel="noopener noreferrer" className="social-link-item">
-                            <Camera size={24} /> <span>Instagram</span>
-                        </a>
-                    )}
                     {social.facebook && (
                         <a href={social.facebook} target="_blank" rel="noopener noreferrer" className="social-link-item">
                             <Globe size={24} /> <span>Facebook</span>
+                        </a>
+                    )}
+                    {social.instagram && (
+                        <a href={social.instagram} target="_blank" rel="noopener noreferrer" className="social-link-item">
+                            <Camera size={24} /> <span>Instagram</span>
                         </a>
                     )}
                     {social.whatsapp && (

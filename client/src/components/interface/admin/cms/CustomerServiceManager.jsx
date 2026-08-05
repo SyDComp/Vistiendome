@@ -101,8 +101,8 @@ const CustomerServiceManager = () => {
                 >
                     <ArrowLeft size={16} /> Volver a Secciones
                 </button>
-                <div style={{ flex: 1 }}>
-                    <CMSPageManager 
+                <div style={{ flex: 1, minHeight: 0 }}>
+                    <CMSPageManager
                         page={selectedSlug} 
                         title={`Contenido: ${selectedTitle}`}
                         subtitle={`Gestiona los bloques que aparecen en la sección de ${selectedTitle}.`}

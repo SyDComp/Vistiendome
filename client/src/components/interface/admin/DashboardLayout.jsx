@@ -11,7 +11,9 @@ import {
     X,
     LayoutDashboard,
     Zap,
-    Hammer
+    Hammer,
+    User,
+    BarChart3
 } from 'lucide-react';
 import InventoryModule from './inventory/InventoryModule';
 import WorkspaceModule from './inventory/WorkspaceModule';
@@ -22,6 +24,9 @@ import CustomerServiceManager from './cms/CustomerServiceManager';
 import SettingsManager from './cms/SettingsManager';
 import ClientesView from './crm/ClientesView';
 import CotizacionesView from './crm/CotizacionesView';
+import ShippingLabelPrinter from './crm/ShippingLabelPrinter';
+import AnalyticsModule from './analytics/AnalyticsModule';
+import AdminProfile from './profile/AdminProfile';
 
 const DashboardLayout = () => {
     const navigate = useNavigate();
@@ -87,6 +92,7 @@ const DashboardLayout = () => {
                 { label: 'Categorias', path: '/admin/dashboard/inventory/categories' },
                 { label: 'Caracteristicas', path: '/admin/dashboard/inventory/characteristics' },
                 { label: 'Especificaciones', path: '/admin/dashboard/inventory/specifications' },
+                { label: 'Filtros', path: '/admin/dashboard/inventory/filters' },
                 { label: '🏷️ Códigos de Barras', path: '/admin/dashboard/inventory/barcodes' }
             ]
         },
@@ -100,7 +106,7 @@ const DashboardLayout = () => {
                 { label: 'Gestor de Portada', path: '/admin/dashboard/cms/homepage' },
                 { label: 'Atención al Cliente', path: '/admin/dashboard/cms/help' },
                 { label: 'Redes y Contacto', path: '/admin/dashboard/cms/settings' },
-                { label: 'Blog (Pronto)', path: '/admin/dashboard/cms/blog', disabled: true },
+
             ]
         },
         { 
@@ -111,9 +117,11 @@ const DashboardLayout = () => {
             children: [
                 { label: 'Clientes', path: '/admin/dashboard/crm/clientes' },
                 { label: 'Cotizaciones', path: '/admin/dashboard/crm/cotizaciones' },
+                { label: '🏷️ Etiquetas de Envío', path: '/admin/dashboard/crm/shipping-labels' }
             ]
         },
-        { id: 'hr', label: 'Personal', path: '/admin/dashboard/hr', icon: Users, disabled: true },
+        { id: 'analytics', label: 'Estadísticas', path: '/admin/dashboard/analytics', icon: BarChart3 },
+        { id: 'profile', label: 'Mi Perfil', path: '/admin/dashboard/profile', icon: User },
     ];
 
     return (
@@ -246,6 +254,7 @@ const DashboardLayout = () => {
                             <Route path="/inventory/categories" element={<InventoryModule view="categories" />} />
                             <Route path="/inventory/characteristics" element={<InventoryModule view="characteristics" />} />
                             <Route path="/inventory/attributes" element={<InventoryModule view="characteristics" />} />
+                            <Route path="/inventory/filters" element={<InventoryModule view="filters" />} />
                             <Route path="/inventory/specifications" element={<InventoryModule view="specifications" />} />
                             <Route path="/inventory/barcodes" element={<BarcodePrinter />} />
                             <Route path="/workspace" element={<WorkspaceModule />} />
@@ -253,8 +262,11 @@ const DashboardLayout = () => {
                             <Route path="/cms/homepage" element={<HomepageManager />} />
                             <Route path="/cms/help" element={<CustomerServiceManager />} />
                             <Route path="/cms/settings" element={<SettingsManager />} />
+                            <Route path="/analytics" element={<AnalyticsModule />} />
                             <Route path="/crm/clientes" element={<ClientesView />} />
                             <Route path="/crm/cotizaciones" element={<CotizacionesView />} />
+                            <Route path="/crm/shipping-labels" element={<ShippingLabelPrinter />} />
+                            <Route path="/profile" element={<AdminProfile />} />
                             <Route path="*" element={<Navigate to="/admin/dashboard/inventory/products" />} />
                         </Routes>
                     </div>

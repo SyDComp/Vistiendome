@@ -1,4 +1,5 @@
 from typing import List, Optional, Dict, Any
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, Body, Response, UploadFile, File, Request
 from sqlmodel import Session, select, func, delete, or_, and_, cast, String
 from sqlalchemy.dialects.postgresql import JSONB
@@ -18,10 +19,13 @@ def normalize_char(text: str) -> str:
     return text.strip().upper()
 
 def normalize_opt(text: str) -> str:
-    """Normaliza opciones a Mayúscula Cada Palabra"""
+    """Normaliza opciones a Mayúscula Cada Palabra preservando siglas comunes en mayúscula"""
     if not text: return ""
-    # string.capwords asegura que cada palabra empiece con mayúscula y el resto minúscula
-    return string.capwords(text.strip().lower())
+    cleaned = text.strip()
+    upper_cleaned = cleaned.upper()
+    if upper_cleaned in {"XS", "S", "M", "L", "XL", "XXL", "XXXL", "CM", "MM", "KG", "ML", "UN", "PAR"}:
+        return upper_cleaned
+    return string.capwords(cleaned.lower())
 
 from ...core import inventory_core
 from pydantic import BaseModel
@@ -29,8 +33,9 @@ import re
 import unicodedata
 from ...core.config import settings
 from ...core.sockets import manager
+from ...api.deps import RequirePermiso
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))])
 
 # --- SCHEMAS DE ENTRADA ---
 
@@ -41,6 +46,11 @@ class SKUCreate(BaseModel):
     stock: int
     config: Dict[str, str]
     media_ids: List[int] = []
+    # Oferta a nivel variante (sobrescribe la del producto). type: 'percent'|'fixed'
+    sale_type: Optional[str] = None
+    sale_value: Optional[float] = None
+    sale_start: Optional[datetime] = None
+    sale_end: Optional[datetime] = None
 
 class ImageCreate(BaseModel):
     media_asset_id: int
@@ -57,6 +67,11 @@ class ProductCreate(BaseModel):
     specs: Dict[str, str] = {}
     skus: List[SKUCreate] = []
     images: List[ImageCreate] = []
+    # Oferta a nivel producto (aplica a todas las variantes). type: 'percent'|'fixed'
+    sale_type: Optional[str] = None
+    sale_value: Optional[float] = None
+    sale_start: Optional[datetime] = None
+    sale_end: Optional[datetime] = None
 
 class VariantGenRequest(BaseModel):
     product_name: str
@@ -140,7 +155,11 @@ def update_category_metadata_recursive(db: Session, category: Category):
 
 @router.get("/attributes")
 def list_attributes(db: Session = Depends(get_session)):
-    return db.exec(select(Characteristic)).all()
+    attrs = db.exec(select(Characteristic)).all()
+    if not any(a.name == "ESTAMPADO" for a in attrs) or not any(a.name == "COLOR" for a in attrs) or not any(a.name == "TALLA" for a in attrs):
+        seed_system_attributes(db)
+        attrs = db.exec(select(Characteristic)).all()
+    return attrs
 
 @router.post("/attributes")
 async def create_attribute(data: Dict[str, Any], db: Session = Depends(get_session)):
@@ -335,11 +354,61 @@ def get_sku(sku_id: int, db: Session = Depends(get_session)):
         "product_id": sku.product_id,
         "product_name": sku.product.name if sku.product else "Producto Desconocido",
         "price": sku.price,
+        "sale_type": sku.sale_type,
+        "sale_value": sku.sale_value,
+        "sale_start": sku.sale_start.isoformat() if sku.sale_start else None,
+        "sale_end": sku.sale_end.isoformat() if sku.sale_end else None,
         "config": sku.config,
         "stock": stock_total,
         "image_urls": [m.url for m in sku.media_assets],
         "media_ids": [m.id for m in sku.media_assets],
         "media_assets": [{"id": m.id, "url": m.url} for m in sku.media_assets]
+    }
+
+
+class SKUUpdate(BaseModel):
+    price: Optional[float] = None
+    sale_type: Optional[str] = None      # 'percent' | 'fixed' | None (sin oferta)
+    sale_value: Optional[float] = None
+    sale_start: Optional[datetime] = None
+    sale_end: Optional[datetime] = None
+
+
+@router.put("/skus/{sku_id}")
+async def update_sku(sku_id: int, data: SKUUpdate, db: Session = Depends(get_session)):
+    """Actualiza precio y oferta de una variante individual."""
+    sku = db.get(SKU, sku_id)
+    if not sku:
+        raise HTTPException(status_code=404, detail="Versión no encontrada")
+
+    if data.price is not None:
+        sku.price = data.price
+    # La oferta se reemplaza por completo con lo que envíe el cliente
+    # (sale_type None => se limpia la oferta de la variante).
+    sku.sale_type = data.sale_type
+    sku.sale_value = data.sale_value
+    sku.sale_start = data.sale_start
+    sku.sale_end = data.sale_end
+
+    db.add(sku)
+    db.commit()
+    db.refresh(sku)
+
+    await manager.broadcast({
+        "type": "invalidate_cache",
+        "resource": "products",
+        "action": "update_sku",
+        "sku": sku.sku
+    })
+
+    return {
+        "id": sku.id,
+        "sku": sku.sku,
+        "price": sku.price,
+        "sale_type": sku.sale_type,
+        "sale_value": sku.sale_value,
+        "sale_start": sku.sale_start.isoformat() if sku.sale_start else None,
+        "sale_end": sku.sale_end.isoformat() if sku.sale_end else None,
     }
 
 # --- ENDPOINTS DE ESPECIFICACIONES ---
@@ -840,14 +909,23 @@ def list_skus_admin(
     if product_id:
         statement = statement.where(SKU.product_id == product_id)
 
-    # 3. Filtros Dinámicos por Atributos (attr_*)
+    # 3. Filtros Dinámicos por Atributos (attr_*) (Insensible a mayúsculas/minúsculas en clave y valor)
     try:
         for key, value in request.query_params.items():
             if key.startswith("attr_") and value:
                 attr_name = key.replace("attr_", "")
-                # Usando cast explícito a JSONB para asegurar disponibilidad de operadores de Postgres
-                # El operador ->> en Postgres devuelve Texto, por lo que comparamos directamente con el string
-                statement = statement.where(cast(SKU.config, JSONB)[attr_name].astext == value)
+                key_variants = {
+                    attr_name,
+                    attr_name.upper(),
+                    attr_name.lower(),
+                    string.capwords(attr_name.lower())
+                }
+                val_lower = value.strip().lower()
+                conditions = [
+                    func.lower(cast(SKU.config, JSONB)[k].astext) == val_lower
+                    for k in key_variants
+                ]
+                statement = statement.where(or_(*conditions))
     except Exception as e:
         print(f"Error en filtros dinámicos: {e}")
         # No bloqueamos la ejecución, pero logueamos
@@ -960,7 +1038,11 @@ async def create_product(data: ProductCreate, db: Session = Depends(get_session)
             description=data.description,
             category_id=data.category_id,
             extras=data.extras,
-            specs=data.specs
+            specs=data.specs,
+            sale_type=data.sale_type,
+            sale_value=data.sale_value,
+            sale_start=data.sale_start,
+            sale_end=data.sale_end
         )
         db.add(product)
         db.commit()
@@ -981,10 +1063,14 @@ async def create_product(data: ProductCreate, db: Session = Depends(get_session)
                 sku=s_data.sku,
                 barcode=barcode_val,
                 price=s_data.price,
-                config=norm_config
+                config=norm_config,
+                sale_type=s_data.sale_type,
+                sale_value=s_data.sale_value,
+                sale_start=s_data.sale_start,
+                sale_end=s_data.sale_end
             )
             db.add(sku)
-            db.flush() 
+            db.flush()
 
             # Asignación relacional a SKUMediaLink
             for media_id in s_data.media_ids:
@@ -1060,6 +1146,10 @@ def get_product(product_id: int, db: Session = Depends(get_session)):
         "category_name": product.category.name if product.category else "Sin categoría",
         "extras": product.extras,
         "specs": product.specs,
+        "sale_type": product.sale_type,
+        "sale_value": product.sale_value,
+        "sale_start": product.sale_start.isoformat() if product.sale_start else None,
+        "sale_end": product.sale_end.isoformat() if product.sale_end else None,
         "price_min": price_min,
         "price_max": price_max,
         "stock_total": stock_total,
@@ -1068,6 +1158,10 @@ def get_product(product_id: int, db: Session = Depends(get_session)):
             "sku": s.sku,
             "barcode": s.barcode,
             "price": s.price,
+            "sale_type": s.sale_type,
+            "sale_value": s.sale_value,
+            "sale_start": s.sale_start.isoformat() if s.sale_start else None,
+            "sale_end": s.sale_end.isoformat() if s.sale_end else None,
             "stock": db.exec(
                 select(func.sum(StockMovement.quantity))
                 .where(StockMovement.sku_id == s.id)
@@ -1097,7 +1191,11 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
     product.category_id = data.category_id
     product.extras = data.extras
     product.specs = data.specs
-    
+    product.sale_type = data.sale_type
+    product.sale_value = data.sale_value
+    product.sale_start = data.sale_start
+    product.sale_end = data.sale_end
+
     db.add(product)
     
     # --- ESTRATEGIA DE OPTIMIZACIÓN MASIVA (STOCK) ---
@@ -1132,6 +1230,10 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
                     sku.price = s_data.price
                     sku.barcode = s_data.barcode or (sku.barcode if sku.barcode else inventory_core.generate_barcode_eAN13(sku.sku))
                     sku.config = norm_config
+                    sku.sale_type = s_data.sale_type
+                    sku.sale_value = s_data.sale_value
+                    sku.sale_start = s_data.sale_start
+                    sku.sale_end = s_data.sale_end
                     db.add(sku)
                     
                     db.exec(delete(SKUMediaLink).where(SKUMediaLink.sku_id == sku.id))
@@ -1144,7 +1246,11 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
                         sku=s_data.sku,
                         barcode=s_data.barcode or inventory_core.generate_barcode_eAN13(s_data.sku),
                         price=s_data.price,
-                        config=norm_config
+                        config=norm_config,
+                        sale_type=s_data.sale_type,
+                        sale_value=s_data.sale_value,
+                        sale_start=s_data.sale_start,
+                        sale_end=s_data.sale_end
                     )
                     db.add(sku)
                     db.flush() # Disparar el check de unicidad preventivamente
@@ -1316,25 +1422,46 @@ def seed_system_attributes(db: Session = Depends(get_session)):
     system_sizes = [
         {"value": "12", "order": 1, "is_system": True},
         {"value": "14", "order": 2, "is_system": True},
-        {"value": "Xs", "order": 3, "is_system": True},
+        {"value": "XS", "order": 3, "is_system": True},
         {"value": "S", "order": 4, "is_system": True},
         {"value": "M", "order": 5, "is_system": True},
         {"value": "L", "order": 6, "is_system": True},
-        {"value": "Xl", "order": 7, "is_system": True},
-        {"value": "2xl", "order": 8, "is_system": True},
-        {"value": "3xl", "order": 9, "is_system": True},
-        {"value": "4xl", "order": 10, "is_system": True},
-        {"value": "5xl", "order": 11, "is_system": True},
-        {"value": "6xl", "order": 12, "is_system": True},
-        {"value": "7xl", "order": 13, "is_system": True},
+        {"value": "XL", "order": 7, "is_system": True},
+        {"value": "2XL", "order": 8, "is_system": True},
+        {"value": "3XL", "order": 9, "is_system": True},
+        {"value": "4XL", "order": 10, "is_system": True},
+        {"value": "5XL", "order": 11, "is_system": True},
+        {"value": "6XL", "order": 12, "is_system": True},
+        {"value": "7XL", "order": 13, "is_system": True},
+    ]
+
+    # 3. DEFINICIÓN DEL KIT DE ESTAMPADOS/DISEÑOS (Patrones con imagen)
+    system_patterns = [
+        {"value": "Floral Primavera", "image_url": "", "order": 1, "is_system": False},
+        {"value": "Rayas Marineras", "image_url": "", "order": 2, "is_system": False},
+        {"value": "Animal Print", "image_url": "", "order": 3, "is_system": False},
     ]
 
     results = []
     
     for attr_name, attr_domain, system_id in [
         ("COLOR", system_colors, "sys_color"),
-        ("TALLA", system_sizes, "sys_size")
+        ("TALLA", system_sizes, "sys_size"),
+        ("ESTAMPADO", system_patterns, "sys_pattern")
     ]:
+        if system_id == "sys_color":
+            v_struct = [
+                {"label": "Nombre del Color", "key": "value", "type": "text"},
+                {"label": "Código Hex", "key": "hex_code", "type": "color"}
+            ]
+        elif system_id == "sys_pattern":
+            v_struct = [
+                {"label": "Nombre del Estampado / Diseño", "key": "value", "type": "text"},
+                {"label": "URL de Imagen", "key": "image_url", "type": "image"}
+            ]
+        else:
+            v_struct = [{"label": "Valor", "key": "value", "type": "text"}]
+
         # Buscar característica existente
         attr = db.exec(select(Characteristic).where(Characteristic.name == attr_name)).first()
         
@@ -1344,10 +1471,12 @@ def seed_system_attributes(db: Session = Depends(get_session)):
                 description=f"Característica maestra de {attr_name} (Sistema Vistiendomé)",
                 is_system=True,
                 system_id=system_id,
+                value_structure=v_struct,
                 domain=attr_domain
             )
             db.add(attr)
         else:
+            attr.value_structure = v_struct
             # Actualizar/Fusionar dominios
             # Mantener las vOU (User Options) que el usuario ya haya creado, 
             # pero eliminando duplicados si el sistema ahora provee una vOS con el mismo nombre.

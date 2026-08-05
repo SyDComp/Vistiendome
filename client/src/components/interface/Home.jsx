@@ -5,6 +5,8 @@ import Footer from '../layout/footer/Footer';
 import { navLinks } from '../../constants/pruebas';
 import ProductDetailView from '../../features/productDetail/components/ProductDetailView';
 import CartDrawer from './cart/CartDrawer';
+import WelcomeModal from './WelcomeModal';
+import TopBanner from './TopBanner';
 
 const Home = ({ isModalView = false }) => {
     const location = useLocation();
@@ -35,6 +37,7 @@ const Home = ({ isModalView = false }) => {
 
     return (
         <>
+            <TopBanner />
             {!hideNavbar && (
                 <Navbar
                     links={navLinks}
@@ -70,6 +73,7 @@ const Home = ({ isModalView = false }) => {
             </div>
 
             <CartDrawer />
+            <WelcomeModal />
         </>
     );
 };

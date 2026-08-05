@@ -1,17 +1,22 @@
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select, func
+from datetime import datetime
 from ...database import get_session
 from ...models.catalog import Product, Category, SKU, StockMovement, Characteristic, Specification
+from ...core.pricing import compute_effective_price, get_chile_time
 from pydantic import BaseModel
 
 router = APIRouter()
 
 class VariantSummary(BaseModel):
+    id: Optional[int] = None
     sku: str
     config: Dict[str, str]
     image: Optional[str] = None
-    price: float
+    price: float                       # precio efectivo (con oferta si aplica)
+    original_price: float              # precio base sin oferta
+    on_sale: bool = False
 
 class ProductListSchema(BaseModel):
     id: int
@@ -22,7 +27,9 @@ class ProductListSchema(BaseModel):
     category_slug: str
     image: Optional[str] = None
     sku: Optional[str] = None
-    price: float
+    price: float                       # menor precio efectivo entre variantes
+    original_price: float              # menor precio base entre variantes
+    on_sale: bool = False              # True si alguna variante tiene oferta vigente
     variants: List[VariantSummary] = []
     specs: Dict[str, str] = {}
     extras: Dict[str, Any] = {}
@@ -40,13 +47,18 @@ def list_products(
         query = query.join(Category).where(Category.slug == category)
     
     products = db.exec(query).all()
-    
+    now = get_chile_time()
+
     results = []
     for p in products:
-        # Encontrar precio mínimo entre sus SKUs
-        prices = [sku.price for sku in p.skus]
+        # Precio efectivo (con oferta) y precio base por cada SKU
+        eff = {sku.sku: compute_effective_price(sku, p, now) for sku in p.skus}
+        prices = [e[0] for e in eff.values()]          # efectivos
+        base_prices = [sku.price for sku in p.skus]    # sin oferta
         min_p = min(prices) if prices else 0
-        
+        min_base = min(base_prices) if base_prices else 0
+        product_on_sale = any(e[1] for e in eff.values())
+
         # Filtro de precio (aplicado en Python por simplicidad dado que el precio está en SKUs)
         if min_price is not None and min_p < min_price: continue
         if max_price is not None and min_p > max_price: continue
@@ -71,11 +83,15 @@ def list_products(
         for s in p.skus:
             # Encontrar la primera imagen de este SKU o la principal del producto como fallback
             v_img = s.media_assets[0].url if s.media_assets else None
+            eff_price, on_sale, _ = eff[s.sku]
             variant_summaries.append(VariantSummary(
+                id=s.id,
                 sku=s.sku,
                 config=s.config,
                 image=v_img,
-                price=s.price
+                price=eff_price,
+                original_price=s.price,
+                on_sale=on_sale
             ))
 
         # Encontrar imagen principal del producto
@@ -123,6 +139,8 @@ def list_products(
             image=main_img,
             sku=main_sku_code,
             price=min_p,
+            original_price=min_base,
+            on_sale=product_on_sale,
             variants=variant_summaries,
             specs=p.specs,
             extras=modified_extras
@@ -180,17 +198,24 @@ def get_filters_metadata(db: Session = Depends(get_session)):
         # Por eficiencia, usaremos los 'domain' definidos si existen, 
         # o escanearemos valores si el usuario prefiere algo más dinámico.
         values = []
+        ordered_from_domain = False
         if char.domain:
-            for opt in char.domain:
+            ordered_from_domain = True
+            # Respetar el orden configurado (campo 'order') del dominio
+            domain_opts = sorted(
+                char.domain,
+                key=lambda o: (o.get('order', 9999) if isinstance(o, dict) else 9999)
+            )
+            for opt in domain_opts:
                 if isinstance(opt, dict) and 'value' in opt:
                     values.append(opt['value'])
                 elif isinstance(opt, str):
                     values.append(opt)
-        
+
         # Opcionalmente: escanear productos para ver qué valores hay realmente
         # (Esto es más pesado pero más preciso)
         if not values:
-            # Ejemplo simplificado de escaneo
+            ordered_from_domain = False
             all_products = db.exec(select(Product)).all()
             found_values = set()
             for p in all_products:
@@ -202,7 +227,21 @@ def get_filters_metadata(db: Session = Depends(get_session)):
             values = list(found_values)
 
         if values:
-            attributes_data[char.name] = sorted(values)
+            if ordered_from_domain:
+                # Ya viene ordenado por el dominio (incluye tallas en su secuencia real)
+                attributes_data[char.name] = values
+            else:
+                # Orden especial para tallas; alfabético para el resto
+                is_size = 'TALLA' in char.name.upper() or 'SIZE' in char.name.upper()
+                if is_size:
+                    size_order = ['12', '14', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL', '6XL', '7XL']
+                    values = sorted(values, key=lambda v: (
+                        size_order.index(v.strip().upper()) if v.strip().upper() in size_order else len(size_order),
+                        v.upper()
+                    ))
+                else:
+                    values = sorted(values)
+                attributes_data[char.name] = values
 
     # 3. Rango de Precios
     prices = db.exec(select(SKU.price)).all()
@@ -234,17 +273,22 @@ def get_product_detail(
     if not product:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     
+    now = get_chile_time()
     skus_data = []
     for s in product.skus:
         stock = db.exec(
             select(func.sum(StockMovement.quantity))
             .where(StockMovement.sku_id == s.id)
         ).one() or 0
+        eff_price, on_sale, sale_ends = compute_effective_price(s, product, now)
         skus_data.append({
-            "id": s.id, 
-            "sku": s.sku, 
-            "config": s.config, 
-            "price": s.price, 
+            "id": s.id,
+            "sku": s.sku,
+            "config": s.config,
+            "price": eff_price,
+            "original_price": s.price,
+            "on_sale": on_sale,
+            "sale_ends": sale_ends.isoformat() if sale_ends else None,
             "stock": stock,
             "image_urls": [m.url for m in s.media_assets]
         })

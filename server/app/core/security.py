@@ -5,7 +5,9 @@ from datetime import datetime, timedelta
 from typing import Any, Union
 from jose import jwt
 
-SECRET_KEY = os.getenv("SECRET_KEY", "vistiendome_secret_key_2024")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY environment variable is not set")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440")) # 24h
 

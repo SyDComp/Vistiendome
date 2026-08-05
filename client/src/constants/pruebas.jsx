@@ -143,6 +143,7 @@ export const productosCatalogo = [
 
 export const navLinks = [
     { nombre: 'Catálogo', destino: 'catalogo' },
+    { nombre: 'Explorador', destino: 'explorador' },
     { nombre: 'Colecciones', destino: 'colecciones' },
     { nombre: 'Nosotros', destino: 'nosotros' },
     { nombre: 'Contacto', destino: 'contacto' }

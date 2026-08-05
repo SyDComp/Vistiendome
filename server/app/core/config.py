@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     DATABASE_URL: Optional[str] = None
     
     # Security
-    SECRET_KEY: str = "vistiendome_secret_key_2024"
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
 

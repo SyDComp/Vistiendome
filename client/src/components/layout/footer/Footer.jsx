@@ -17,9 +17,10 @@ const Footer = ({ onNavigate }) => {
     const social = settings.social_links || {};
     const contact = settings.contact_info || {};
 
+    // Orden por prioridad: Facebook primero (es el canal más importante para Vistiendomé)
     const socialItems = [
-        { id: 'instagram', url: social.instagram, icon: <Camera size={18} />, name: 'Instagram' },
         { id: 'facebook', url: social.facebook, icon: <Globe size={18} />, name: 'Facebook' },
+        { id: 'instagram', url: social.instagram, icon: <Camera size={18} />, name: 'Instagram' },
         { id: 'tiktok', url: social.tiktok, icon: <Music size={18} />, name: 'TikTok' },
         { id: 'whatsapp', url: social.whatsapp ? `https://wa.me/${social.whatsapp.replace(/\D/g, '')}` : '', icon: <MessageCircle size={18} />, name: 'WhatsApp' },
     ].filter(item => item.url);
@@ -105,6 +106,15 @@ const Footer = ({ onNavigate }) => {
                                 <div>
                                     <span className="info-label">Correo Directo</span>
                                     <p>{contact.email}</p>
+                                </div>
+                            </div>
+                        )}
+                        {contact.phone_display && (
+                            <div className="contact-info-item">
+                                <Phone size={16} className="contact-icon" />
+                                <div>
+                                    <span className="info-label">Teléfono Directo</span>
+                                    <p>{contact.phone_display}</p>
                                 </div>
                             </div>
                         )}

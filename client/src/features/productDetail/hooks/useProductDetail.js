@@ -6,6 +6,9 @@ import useScrollLock from '../../../hooks/useScrollLock.js';
 
 const VALOR_NA = 'No aplica';
 
+const memoryCache = new Map();
+const FRESHNESS_TTL = 60 * 1000; // 1 minuto de frescura absoluta (no repite API call)
+
 export const useProductDetail = (initialProduct) => {
     const { slug, sku: variantSkuCode, collectionSlug, imgIndex } = useParams();
     const location = useLocation();
@@ -25,18 +28,32 @@ export const useProductDetail = (initialProduct) => {
 
     const lastUrlSku = useRef(variantSkuCode);
 
-    // Fetching
+    // Fetching con Stale-While-Revalidate
     useEffect(() => {
         const cargarDetalle = async () => {
             const targetSlug = slug || initialProduct?.slug;
             if (!targetSlug) return;
-            setLoading(true);
+            
+            const cached = memoryCache.get(targetSlug);
+            const isFresh = cached && (Date.now() - cached.timestamp < FRESHNESS_TTL);
+
+            // 1. Carga instantánea desde caché si existe
+            if (cached) {
+                setProducto(cached.data);
+                setLoading(false);
+                if (isFresh) return; // Si es súper reciente, ni siquiera disparamos el fetch de fondo
+            } else {
+                setLoading(true);
+            }
+
+            // 2. Fetch silencioso en segundo plano para actualizar precios/stock
             try {
                 const fullData = await getProductBySlug(targetSlug);
+                memoryCache.set(targetSlug, { data: fullData, timestamp: Date.now() });
                 setProducto(fullData);
             } catch (err) {
                 console.error('Error cargando detalle:', err);
-                if (!initialProduct) setError('No se pudo cargar la información del producto.');
+                if (!initialProduct && !cached) setError('No se pudo cargar la información del producto.');
             } finally {
                 setLoading(false);
             }

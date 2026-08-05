@@ -1,0 +1,111 @@
+.top-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    z-index: 1350; /* sobre el navbar (1300) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 44px 0 16px;
+    box-sizing: border-box;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+.top-banner__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    text-align: center;
+}
+
+/* --- Marquee (texto en movimiento) --- */
+.top-banner__marquee {
+    flex: 1;
+    overflow: hidden;
+    width: 100%;
+}
+.top-banner__track {
+    display: inline-flex;
+    white-space: nowrap;
+    will-change: transform;
+    animation-name: tbMarquee;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+.top-banner__chunk {
+    padding-right: 3rem; /* separación entre repeticiones */
+    white-space: nowrap;
+}
+/* Chunk medidor: no ocupa espacio ni se ve, solo sirve para medir su ancho */
+.top-banner__chunk--measure {
+    position: absolute;
+    visibility: hidden;
+    pointer-events: none;
+    left: -9999px;
+    top: 0;
+}
+/* El track tiene 2 copias; mover -50% = exactamente 1 copia => bucle perfecto */
+@keyframes tbMarquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+
+/* Modo "un solo mensaje": entra por la derecha, cruza y sale por la izquierda, con espacio antes de repetir */
+.top-banner__track--single {
+    display: inline-block;
+    padding-left: 100%; /* arranca fuera del borde derecho */
+    animation-name: tbMarqueeSingle;
+}
+.top-banner__track--single .top-banner__chunk {
+    padding-right: 0;
+}
+@keyframes tbMarqueeSingle {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-100%); }
+}
+/* Pausa al pasar el mouse (detalle UX) */
+.top-banner__marquee:hover .top-banner__track {
+    animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+    .top-banner__track { animation: none; }
+}
+
+.top-banner__close {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 50%;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+}
+.top-banner__close:hover {
+    opacity: 1;
+}
+
+/* Empuja el navbar fijo y el contenido cuando la barra está visible */
+body.has-top-banner .navbar-header {
+    top: 40px;
+}
+/* Base: en páginas sin navbar fijo (ej: colecciones) la barra empuja 40px */
+body.has-top-banner {
+    padding-top: 40px;
+}
+/* Con navbar fijo presente: 70px navbar + 40px barra */
+body.has-top-banner.has-fixed-navbar {
+    padding-top: 110px;
+}

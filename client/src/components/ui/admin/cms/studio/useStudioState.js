@@ -23,11 +23,20 @@ export function useStudioState({ data, mode }) {
     const [viewport,       setViewport]       = useState('desktop'); // 'desktop' | 'mobile'
     const [dragging,       setDragging]       = useState(null);
     const [viewMode,       setViewMode]       = useState('edit');    // 'edit' | 'preview'
+    const [carouselInterval, setCarouselInterval] = useState(5);
+    const [desktopRatio,   setDesktopRatio]   = useState('21/9');
+    const [mobileRatio,    setMobileRatio]    = useState('9/16');
     const canvasRef = useRef(null);
 
     // ── Inicialización (migra formatos viejos) ──────────────────────────────
     useEffect(() => {
         const cfg = data?.config || {};
+
+        if (cfg.carousel_interval !== undefined) {
+            setCarouselInterval(cfg.carousel_interval);
+        }
+        if (cfg.desktop_ratio) setDesktopRatio(cfg.desktop_ratio);
+        if (cfg.mobile_ratio) setMobileRatio(cfg.mobile_ratio);
 
         // Ya tiene el nuevo formato
         if (cfg.scenes) {
@@ -140,6 +149,31 @@ export function useStudioState({ data, mode }) {
         setActiveLayerIdx(null);
     };
 
+    const moveLayerZ = (idx, dir) => {
+        const layer = layers[idx];
+        if (!layer) return;
+        
+        let sorted = [...allLayers].sort((a, b) => a.zIndex - b.zIndex).map(l => ({...l}));
+        const currentIndex = sorted.findIndex(l => l.id === layer.id);
+        
+        if (dir === 'up' && currentIndex < sorted.length - 1) {
+            const temp = sorted[currentIndex].zIndex;
+            sorted[currentIndex].zIndex = sorted[currentIndex + 1].zIndex;
+            sorted[currentIndex + 1].zIndex = temp;
+        } else if (dir === 'down' && currentIndex > 0) {
+            const temp = sorted[currentIndex].zIndex;
+            sorted[currentIndex].zIndex = sorted[currentIndex - 1].zIndex;
+            sorted[currentIndex - 1].zIndex = temp;
+        } else {
+            return; // No se puede mover más
+        }
+        
+        // Re-normalizar z-indices de 1 a N de forma segura
+        sorted.sort((a, b) => a.zIndex - b.zIndex).forEach((l, i) => l.zIndex = i + 1);
+        
+        updateScene({ layers: sorted });
+    };
+
     // ── Viewport móvil ──────────────────────────────────────────────────────
     const switchViewport = (vp) => {
         setViewport(vp);
@@ -175,6 +209,22 @@ export function useStudioState({ data, mode }) {
         setActiveLayerIdx(null);
     };
 
+    const applyBgToAllScenes = () => {
+        const { bg_color, mobile_bg_color, border_type, mobile_border_type } = scene;
+        setScenes(prev => prev.map((s, i) => i === activeSceneIdx ? s : { ...s, bg_color, mobile_bg_color, border_type, mobile_border_type }));
+    };
+
+    const duplicateDesignToAllScenes = () => {
+        const { bg_color, mobile_bg_color, border_type, mobile_border_type } = scene;
+        const baseLayers = scene.layers || [];
+        
+        setScenes(prev => prev.map((s, i) => {
+            if (i === activeSceneIdx) return s;
+            const clonedLayers = baseLayers.map((l, j) => ({ ...l, id: Date.now() + Math.random() + j }));
+            return { ...s, bg_color, mobile_bg_color, border_type, mobile_border_type, layers: clonedLayers };
+        }));
+    };
+
     // ── Drag (se conecta con el canvas vía canvasRef) ──────────────────────
     const startDrag = (e, idx) => {
         if (viewMode === 'preview') return;
@@ -208,6 +258,9 @@ export function useStudioState({ data, mode }) {
     // ── Serializar para onSave ──────────────────────────────────────────────
     const buildConfig = () => ({
         breakpoint,
+        carousel_interval: carouselInterval,
+        desktop_ratio: desktopRatio,
+        mobile_ratio: mobileRatio,
         scenes
     });
 
@@ -218,8 +271,10 @@ export function useStudioState({ data, mode }) {
         // Acciones
         setActiveSceneIdx, setActiveLayerIdx, setViewMode,
         switchViewport,
-        updateScene, updateLayer, addLayer, removeLayer,
-        addScene, removeScene,
+        updateScene, updateLayer, addLayer, removeLayer, moveLayerZ,
+        addScene, removeScene, applyBgToAllScenes, duplicateDesignToAllScenes,
+        carouselInterval, setCarouselInterval,
+        desktopRatio, setDesktopRatio, mobileRatio, setMobileRatio,
         startDrag,
         buildConfig
     };

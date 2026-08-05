@@ -3,6 +3,7 @@ import Heartbeat from '../../interface/Heartbeat';
 import { useEffect, useRef, useState } from 'react';
 import CartButton from '../../interface/cart/CartButton';
 import InstantSearch from './InstantSearch';
+import { useScrollLock } from '../../../hooks/useScrollLock';
 
 const Navbar = ({ links = [], vistaActual }) => { // links are passed from Home
     const navigate = useNavigate();
@@ -13,20 +14,7 @@ const Navbar = ({ links = [], vistaActual }) => { // links are passed from Home
     const lastScrollY = useRef(0);
     const ticking = useRef(false);
 
-    // Bloqueo de scroll al abrir el menú móvil
-    useEffect(() => {
-        if (isMenuOpen) {
-            document.body.classList.add('no-scroll');
-            document.documentElement.classList.add('no-scroll');
-        } else {
-            document.body.classList.remove('no-scroll');
-            document.documentElement.classList.remove('no-scroll');
-        }
-        return () => {
-            document.body.classList.remove('no-scroll');
-            document.documentElement.classList.remove('no-scroll');
-        };
-    }, [isMenuOpen]);
+    useScrollLock(isMenuOpen);
 
     // Lógica para esconder/mostrar Navbar según scroll (Fail-Safe)
     useEffect(() => {

@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
-from sqlmodel import Session, select
+from sqlmodel import Session, select, or_
 from pydantic import BaseModel
 import pyotp
 
 from ...database import get_session
 from ...models.iam import CuentaAcceso, Persona, EstadoCuenta, Permiso, UsuarioPermisosDirectos
 from ...core import security
+from ..deps import get_current_user
 
 router = APIRouter()
 
@@ -102,7 +103,7 @@ def register_client(data: RegisterClientSchema, db: Session = Depends(get_sessio
 
 class LoginMfaSchema(BaseModel):
 
-    email: str
+    identificador: str
     password: str
     totp_code: str | None = None
 
@@ -112,7 +113,12 @@ def basic_login(data: LoginMfaSchema, response: Response, db: Session = Depends(
     Login simplificado para el Administrador (MVP).
     Retorna JWT directamente si las credenciales son válidas y lo establece en una cookie segura.
     """
-    cuenta = db.exec(select(CuentaAcceso).where(CuentaAcceso.email_corporativo == data.email)).first()
+    cuenta = db.exec(select(CuentaAcceso).where(
+        or_(
+            CuentaAcceso.email_corporativo == data.identificador,
+            CuentaAcceso.apodo == data.identificador
+        )
+    )).first()
     
     if not cuenta or not security.verify_password(data.password, cuenta.password_hash):
         if cuenta:
@@ -144,3 +150,43 @@ def basic_login(data: LoginMfaSchema, response: Response, db: Session = Depends(
     )
 
     return {"access_token": token, "token_type": "bearer"}
+
+class ProfileUpdateSchema(BaseModel):
+    nombres: str
+    apellidos: str
+    email_corporativo: str
+    apodo: str | None = None
+
+@router.get("/me")
+def get_current_user_profile(current_admin: CuentaAcceso = Depends(get_current_user)):
+    """Obtiene el perfil del administrador actualmente logueado."""
+    return {
+        "id": current_admin.id,
+        "nombres": current_admin.persona.nombres,
+        "apellidos": current_admin.persona.apellidos,
+        "email_corporativo": current_admin.email_corporativo,
+        "apodo": current_admin.apodo,
+        "estado": current_admin.estado.nombre
+    }
+
+@router.put("/me")
+def update_current_user(data: ProfileUpdateSchema, db: Session = Depends(get_session), current_admin: CuentaAcceso = Depends(get_current_user)):
+    """Permite al administrador actualizar su propio apodo o email_corporativo."""
+    
+    # Validar unicidad de email
+    if data.email_corporativo != current_admin.email_corporativo:
+        if db.exec(select(CuentaAcceso).where(CuentaAcceso.email_corporativo == data.email_corporativo)).first():
+            raise HTTPException(status_code=400, detail="Este correo ya está en uso.")
+            
+    # Validar unicidad de apodo
+    if data.apodo and data.apodo != current_admin.apodo:
+        if db.exec(select(CuentaAcceso).where(CuentaAcceso.apodo == data.apodo)).first():
+            raise HTTPException(status_code=400, detail="Este apodo ya está en uso.")
+            
+    current_admin.persona.nombres = data.nombres
+    current_admin.persona.apellidos = data.apellidos
+    current_admin.email_corporativo = data.email_corporativo
+    current_admin.apodo = data.apodo
+    db.commit()
+    
+    return {"msg": "Perfil actualizado correctamente."}

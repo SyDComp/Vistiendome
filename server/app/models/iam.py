@@ -15,18 +15,6 @@ from .geo import Comuna
 def generate_ulid() -> str:
     return str(ulid.ULID())
 
-# Funciones mock de cifrado (Vaulting Core Logic)
-def encrypt_data(plain_text: str) -> str:
-    """Implementación de Vaulting (Simulada). En producción utilizar bibliotecas de criptografía (ej: Fernet)."""
-    if not plain_text or plain_text.startswith("vault:v1:"): 
-        return plain_text
-    return f"vault:v1:{plain_text[::-1]}" 
-
-def decrypt_data(cipher_text: str) -> str:
-    """Desencriptación Vaulting (Simulada)."""
-    if not cipher_text or not cipher_text.startswith("vault:v1:"): 
-        return cipher_text
-    return cipher_text.replace("vault:v1:", "")[::-1]
 
 class TipoPersona(str, Enum):
     LEAD = "LEAD"
@@ -66,12 +54,10 @@ class Persona(SQLModel, table=True):
     telefono: Optional[str] = Field(default=None, max_length=20)
     tipo_persona: TipoPersona = Field(default=TipoPersona.LEAD)
     estado: str = Field(default="ACTIVO", max_length=50)
+    transporte_preferido: Optional[str] = Field(default=None, max_length=50)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     cuenta_acceso: Optional["CuentaAcceso"] = Relationship(back_populates="persona", sa_relationship_kwargs={"uselist": False})
-    remuneraciones: List["HistorialRemuneraciones"] = Relationship(back_populates="persona")
-    contratos: List["ContratosLegales"] = Relationship(back_populates="persona")
-    datos_bancarios: Optional["DatosBancarios"] = Relationship(back_populates="persona", sa_relationship_kwargs={"uselist": False})
     perfil_cliente: Optional["PerfilCliente"] = Relationship(back_populates="persona", sa_relationship_kwargs={"uselist": False})
     
     cotizaciones: List["Cotizacion"] = Relationship(back_populates="persona")
@@ -102,6 +88,7 @@ class CuentaAcceso(SQLModel, table=True):
     id: str = Field(default_factory=generate_ulid, primary_key=True, max_length=26)
     persona_id: str = Field(foreign_key="personas.id", unique=True, max_length=26)
     email_corporativo: str = Field(unique=True, index=True, max_length=255)
+    apodo: Optional[str] = Field(default=None, unique=True, index=True, max_length=50)
     password_hash: str = Field(max_length=255)
     estado_id: str = Field(foreign_key="estado_cuenta.id", max_length=26)
     intentos_fallidos: int = Field(default=0)
@@ -146,54 +133,6 @@ class UsuarioPermisosDirectos(SQLModel, table=True):
     cuenta: CuentaAcceso = Relationship(back_populates="permisos_directos")
     permiso: Permiso = Relationship(back_populates="cuentas_asignadas")
 
-
-class HistorialRemuneraciones(SQLModel, table=True):
-    __tablename__ = "historial_remuneraciones"
-    id: str = Field(default_factory=generate_ulid, primary_key=True, max_length=26)
-    persona_id: str = Field(foreign_key="personas.id", max_length=26)
-    sueldo_base: Decimal = Field(max_digits=12, decimal_places=2)
-    fecha_inicio: date
-    fecha_fin: Optional[date] = Field(default=None)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-
-    persona: Persona = Relationship(back_populates="remuneraciones")
-
-
-class ContratosLegales(SQLModel, table=True):
-    __tablename__ = "contratos_legales"
-    id: str = Field(default_factory=generate_ulid, primary_key=True, max_length=26)
-    persona_id: str = Field(foreign_key="personas.id", max_length=26)
-    cargo: str = Field(max_length=150)
-    hash_respaldo_pdf: str = Field(max_length=255)
-    fecha_inicio: date
-    fecha_fin: Optional[date] = Field(default=None)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-
-    persona: Persona = Relationship(back_populates="contratos")
-
-
-class DatosBancarios(SQLModel, table=True):
-    __tablename__ = "datos_bancarios"
-    id: str = Field(default_factory=generate_ulid, primary_key=True, max_length=26)
-    persona_id: str = Field(foreign_key="personas.id", unique=True, max_length=26)
-    banco: str = Field(max_length=100)
-    tipo_cuenta: str = Field(max_length=50)
-    numero_cuenta_vault: str = Field(max_length=255)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-
-    persona: Persona = Relationship(back_populates="datos_bancarios")
-
-    # Refinamiento 3: Cifrado explícito de datos bancarios (Vaulting)
-    @field_validator("numero_cuenta_vault", mode="before")
-    def encrypt_numero_cuenta(cls, v):
-        if v and not v.startswith("vault:v1:"):
-            return encrypt_data(str(v))
-        return v
-        
-    @property
-    def numero_cuenta_plano(self) -> str:
-        """Helper para recuperar el valor desencriptado."""
-        return decrypt_data(self.numero_cuenta_vault)
 
 
 class AuditoriaAccesoSensible(SQLModel, table=True):

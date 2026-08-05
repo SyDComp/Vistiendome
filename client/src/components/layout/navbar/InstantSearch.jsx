@@ -52,13 +52,18 @@ const InstantSearch = ({ isMobile = false, onResultClick }) => {
                         if (product.variants) {
                             product.variants.forEach(variant => {
                                 // Buscamos en los valores de la configuración (Rojo, M, etc.)
-                                const configMatch = Object.values(variant.config).some(val => 
+                                const configMatch = Object.values(variant.config || {}).some(val => 
                                     val.toString().toLowerCase().includes(normalizedQuery)
                                 );
 
                                 if (configMatch) {
                                     // Añadimos la variante como un resultado independiente
-                                    const variantLabel = Object.values(variant.config).join(' - ');
+                                    const variantLabel = Object.values(variant.config || {}).join(' - ');
+                                    const variantGroup = Object.entries(variant.config || {})
+                                        .filter(([k]) => !/talla|size|medida/i.test(k))
+                                        .map(([, v]) => v)
+                                        .join(' - ') || variant.sku;
+
                                     searchResults.push({
                                         id: `${product.id}-${variant.sku}`,
                                         name: product.name,
@@ -67,6 +72,7 @@ const InstantSearch = ({ isMobile = false, onResultClick }) => {
                                         sku: variant.sku,
                                         image: variant.image || product.image,
                                         price: variant.price,
+                                        variant_group: variantGroup,
                                         type: 'variant'
                                     });
                                 }
@@ -74,15 +80,15 @@ const InstantSearch = ({ isMobile = false, onResultClick }) => {
                         }
                     });
 
-                    // Limpiar duplicados y limitar resultados (Priorizar variantes específicas)
+                    // Limpiar duplicados de tallas idénticas pero permitir distintos colores/estilos del mismo producto
                     const uniqueResults = [];
-                    const seenIds = new Set();
+                    const seenSlugs = new Set();
                     
                     searchResults.forEach(res => {
-                        const uniqueKey = res.sku || res.id;
-                        if (!seenIds.has(uniqueKey)) {
+                        const uniqueKey = res.variant_group ? `${res.slug}::${res.variant_group}` : res.slug;
+                        if (!seenSlugs.has(uniqueKey)) {
                             uniqueResults.push(res);
-                            seenIds.add(uniqueKey);
+                            seenSlugs.add(uniqueKey);
                         }
                     });
 

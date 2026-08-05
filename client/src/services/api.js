@@ -1,6 +1,5 @@
-// En producción, usamos rutas relativas (cadena vacía) para que Nginx las intercepte.
-// En desarrollo, usamos localhost:8000 o lo que diga VITE_API_URL.
-const API_BASE_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || `${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}`);
+// En producción usamos rutas relativas, y en desarrollo el proxy de Vite se encarga de redirigir a FastAPI.
+const API_BASE_URL = '';
 
 // Simple in-memory cache para optimizar la carga (5 minutos)
 const apiCache = new Map();

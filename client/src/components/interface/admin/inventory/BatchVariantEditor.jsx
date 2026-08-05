@@ -8,7 +8,7 @@ import Accordion from '../../../ui/Accordion';
 import MediaGallery from '../media/MediaGallery';
 import { useNotification } from '../../../../context/NotificationContext';
 
-const API_BASE = `${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/admin/catalog`;
+const API_BASE = `/api/v1/admin/catalog`;
 
 /**
  * BatchVariantEditor — Mesa de trabajo masiva para variantes.
@@ -30,7 +30,7 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
         if (!url) return '';
         if (url.startsWith('http')) return url;
         const cleanUrl = url.startsWith('/') ? url : `/${url}`;
-        return `${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${cleanUrl}`;
+        return `${cleanUrl}`;
     };
 
     // Inicialización blindada: Solo cargamos si el estado local está vacío
@@ -48,32 +48,43 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
         setVariants(normalized);
     }, [initialVariants]); // Mantenemos la dependencia pero el guard arriba evita el reset indeseado
 
-    // 1. CÁLCULO DINÁMICO DE ATRIBUTOS (La unión de todo lo posible)
+    // 1. CÁLCULO DINÁMICO DE ATRIBUTOS (Todas las características del catálogo y del producto)
     const attributesInUse = useMemo(() => {
         const finalAttrs = new Map();
         
-        // Identificar nombres de atributos permitidos (Normalizados a minúsculas para el cruce)
-        const allowedNamesLower = new Set(categoryAttributes.map(n => n.toLowerCase()));
-        variants.forEach(v => {
-            if (v.config) Object.keys(v.config).forEach(k => allowedNamesLower.add(k.toLowerCase()));
-        });
-
-        // A. Añadimos primero TODOS los atributos de la BIBLIOTECA GLOBAL que coincidan con los permitidos
+        // A. Añadimos primero TODOS los atributos de la BIBLIOTECA GLOBAL (allAttributes)
+        // para que TODAS las características creadas en "Gestión de Características" (ej. Estampado, Color, etc.) estén siempre disponibles
         if (allAttributes && allAttributes.length > 0) {
             allAttributes.forEach(attr => {
-                if (allowedNamesLower.has(attr.name.toLowerCase())) {
-                    const options = (attr.domain || []).map(d => typeof d === 'string' ? d : (d.value || d.name || '---'));
-                    finalAttrs.set(attr.name, new Set(options));
+                if (!attr.name) return;
+                const options = (attr.domain || []).map(d => typeof d === 'string' ? d : (d.value || d.name || '---'));
+                finalAttrs.set(attr.name, new Set(options));
+            });
+        }
+
+        // B. Añadimos cualquier atributo definido en la categoría por si aún no está en la biblioteca
+        if (categoryAttributes && categoryAttributes.length > 0) {
+            categoryAttributes.forEach(catAttr => {
+                const name = typeof catAttr === 'string' ? catAttr : catAttr.name;
+                if (!name) return;
+                let targetName = name;
+                for (const existingName of finalAttrs.keys()) {
+                    if (existingName.toLowerCase() === name.toLowerCase()) {
+                        targetName = existingName;
+                        break;
+                    }
+                }
+                if (!finalAttrs.has(targetName)) {
+                    finalAttrs.set(targetName, new Set());
                 }
             });
         }
 
-        // B. Fusionamos con cualquier valor que venga directamente en los SKUs 
-        // (por si hay valores manuales o nuevos que no están en el dominio oficial todavía)
+        // C. Fusionamos con cualquier valor que venga directamente en los SKUs (config de cada variante)
         variants.forEach(v => {
             if (v.config) {
                 Object.entries(v.config).forEach(([name, val]) => {
-                    // Normalize case to match category attributes if possible
+                    if (!name) return;
                     let targetName = name;
                     for (const existingName of finalAttrs.keys()) {
                         if (existingName.toLowerCase() === name.toLowerCase()) {
@@ -81,21 +92,23 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
                             break;
                         }
                     }
-
                     if (!finalAttrs.has(targetName)) {
-                        // Si no estaba en la biblioteca pero está en el SKU, lo añadimos (ad-hoc)
                         finalAttrs.set(targetName, new Set());
                     }
-                    finalAttrs.get(targetName).add(val);
+                    if (val !== undefined && val !== null && val !== '') {
+                        finalAttrs.get(targetName).add(val);
+                    }
                 });
             }
         });
 
-        // Convertir el Map a array ordenado para el UI
-        return Array.from(finalAttrs.entries()).map(([name, valuesSet]) => ({
-            name,
-            values: Array.from(valuesSet).sort()
-        }));
+        // Convertir el Map a array ordenado alfabéticamente para el UI
+        return Array.from(finalAttrs.entries())
+            .map(([name, valuesSet]) => ({
+                name,
+                values: Array.from(valuesSet).sort()
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name));
     }, [variants, allAttributes, categoryAttributes]);
 
     // 2. LÓGICA DE FILTRADO Y SELECCIÓN INTELIGENTE
@@ -233,8 +246,8 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
                 </div>
                 <div className="batch-editor-header-actions">
                     <Button variant="outline" onClick={onClose} disabled={saving}>Cancelar</Button>
-                    <Button variant="primary" onClick={handleSave} disabled={saving} style={{ background: '#8f0653', minWidth: '160px' }}>
-                        {saving ? <Loader2 className="animate-spin" size={18} /> : <><Save size={18} style={{ marginRight: '8px' }} /> Guardar Cambios</>}
+                    <Button variant="primary" onClick={handleSave} disabled={saving} className="batch-editor-save-btn">
+                        {saving ? <Loader2 className="batch-editor-spin" size={18} /> : <><Save size={18} className="batch-editor-save-icon" /> Guardar Cambios</>}
                     </Button>
                 </div>
             </div>
@@ -248,6 +261,7 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
                     icon={<Sparkles size={18} />}
                     initialOpen={true}
                     className="batch-editor-master-accordion"
+                    contentClassName="batch-editor-filters-area"
                     extraHeader={
                         <div className="batch-editor-accordion-actions">
                             <button onClick={(e) => { e.stopPropagation(); setSelection(new Set(variants.map(v => v.id))); }} className="batch-editor-accordion-btn">Todo</button>
@@ -255,29 +269,35 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
                         </div>
                     }
                 >
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div className="batch-editor-quick-scroll-box">
                         {attributesInUse.map(attr => (
                             <Accordion 
                                 key={attr.name}
                                 title={attr.name}
-                                initialOpen={true}
+                                initialOpen={attr.values && attr.values.length > 0}
                                 showArrow={true}
-                                style={{ border: '1px solid #f1f5f9', boxShadow: 'none', borderRadius: '14px' }}
+                                className="batch-editor-inner-accordion"
                             >
                                 <div className="batch-editor-filters-grid">
-                                    {attr.values.map(val => {
-                                        const isActive = activeFilters[attr.name]?.has(val);
-                                        
-                                        return (
-                                            <button 
-                                                key={val}
-                                                onClick={() => toggleQuickFilter(attr.name, val)}
-                                                className={`batch-editor-filter-btn ${isActive ? 'active' : 'inactive'}`}
-                                            >
-                                                {val}
-                                            </button>
-                                        );
-                                    })}
+                                    {attr.values && attr.values.length > 0 ? (
+                                        attr.values.map(val => {
+                                            const isActive = activeFilters[attr.name]?.has(val);
+                                            
+                                            return (
+                                                <button 
+                                                    key={val}
+                                                    onClick={() => toggleQuickFilter(attr.name, val)}
+                                                    className={`batch-editor-filter-btn ${isActive ? 'active' : 'inactive'}`}
+                                                >
+                                                    {val}
+                                                </button>
+                                            );
+                                        })
+                                    ) : (
+                                        <div className="batch-editor-no-options-msg">
+                                            Sin opciones asignadas para esta característica en este producto.
+                                        </div>
+                                    )}
                                 </div>
                             </Accordion>
                         ))}
@@ -359,7 +379,7 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
 
                     <div className="batch-editor-table-scroll">
                         <table className="batch-editor-table">
-                            <thead className="batch-editor-th-container" style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 10, borderBottom: '2px solid #e2e8f0' }}>
+                            <thead className="batch-editor-th-container">
                                 <tr>
                                     <th className="batch-editor-th checkbox">
                                         <input 
@@ -415,7 +435,7 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
                                                 <div className="batch-editor-photos-wrapper">
                                                     {v.media_assets?.map((asset, i) => (
                                                         <div key={asset.id || i} className="batch-editor-photo-thumb">
-                                                            <img src={getImageUrl(asset.url)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                            <img src={getImageUrl(asset.url)} className="batch-editor-photo-img" />
                                                         </div>
                                                     ))}
                                                     {(!v.media_assets || v.media_assets.length === 0) && (
@@ -457,7 +477,7 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
                                 <X size={20} />
                             </button>
                         </div>
-                        <div style={{ flex: 1, overflowY: 'auto' }}>
+                        <div className="batch-editor-gallery-body">
                             <MediaGallery 
                                 key={showGlobalGallery ? (editingVariantId || 'bulk') : 'none'}
                                 selectionMode 
@@ -485,31 +505,7 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
                 </div>
             )}
 
-            <style>{`
-                @keyframes slideUp {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .animate-spin {
-                    animation: spin 1s linear infinite;
-                }
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-                .no-scrollbar::-webkit-scrollbar {
-                    display: none;
-                }
-                .no-scrollbar {
-                    -ms-overflow-style: none;
-                    scrollbar-width: none;
-                }
-                .photo-thumb:hover {
-                    transform: scale(1.1);
-                    z-index: 5;
-                    border-color: #8f0653;
-                }
-            `}</style>
+
         </div>
     );
 };

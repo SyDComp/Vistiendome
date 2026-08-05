@@ -14,7 +14,7 @@ import { Search, Image as ImageIcon, Box, Layout, Layers, Settings, Save, ArrowL
 import { formatChar, formatOpt } from '../../../../utils/formatters';
 import AdminFormLayout, { AdminFormRow, AdminFormSection, AdminFormSubmit } from '../../../ui/admin/AdminFormLayout';
 
-const API_BASE = `${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/admin/catalog`;
+const API_BASE = `/api/v1/admin/catalog`;
 
 const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = false }) => {
     const { toast } = useNotification();
@@ -48,7 +48,12 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
         slug: initialData?.slug || '',
         description: initialData?.description || '',
         category_id: initialData?.category_id || '',
-        extras: initialData?.extras || {}
+        extras: initialData?.extras || {},
+        // Oferta temporal a nivel producto (aplica a todas las variantes)
+        sale_type: initialData?.sale_type || '',
+        sale_value: initialData?.sale_value ?? '',
+        sale_start: initialData?.sale_start ? initialData.sale_start.slice(0, 16) : '',
+        sale_end: initialData?.sale_end ? initialData.sale_end.slice(0, 16) : ''
     }, (v) => {
         const err = {};
         if(!v.name) err.name = "El nombre es obligatorio";
@@ -296,7 +301,14 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                 ...formValues.extras,
                 carousel_speed: formValues.extras?.carousel_speed || 3000,
                 preview_carousel: formValues.extras?.preview_carousel || []
-            }
+            },
+            // Normalizar oferta: si no hay tipo seleccionado, se limpia toda la oferta
+            sale_type: formValues.sale_type || null,
+            sale_value: (formValues.sale_type && formValues.sale_value !== '' && formValues.sale_value != null)
+                ? parseFloat(formValues.sale_value)
+                : null,
+            sale_start: formValues.sale_type ? (formValues.sale_start || null) : null,
+            sale_end: formValues.sale_type ? (formValues.sale_end || null) : null
         };
 
         const isNew = !productId;
@@ -530,14 +542,88 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                                     className="product-form-select"
                                 >
                                     <option value="">-- Seleccionar Categoría --</option>
-                                    {categories.map(c => (
-                                        <option key={c.id} value={c.id}>
-                                            {c.name}
-                                        </option>
-                                    ))}
+                                    {categories.map(c => {
+                                        const isSubcategory = c.level > 1;
+                                        const indent = '\u00A0\u00A0\u00A0\u00A0'.repeat(Math.max(0, (c.level || 1) - 1));
+                                        const prefix = isSubcategory ? '— ' : '';
+                                        return (
+                                            <option 
+                                                key={c.id} 
+                                                value={c.id} 
+                                                style={!isSubcategory ? { fontWeight: '600', color: '#1e293b' } : {}}
+                                            >
+                                                {indent}{prefix}{c.name}
+                                            </option>
+                                        );
+                                    })}
                                 </select>
                             </div>
                         </div>
+
+                        <AdminFormSection
+                            title="Oferta temporal"
+                            badge="MARKETING"
+                            description="Aplica a TODAS las versiones de este producto durante el periodo indicado. Elige 'Sin oferta' para desactivarla. (Puedes sobrescribir una versión puntual en su detalle.)"
+                        >
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
+                                <div>
+                                    <label className="product-form-label">Tipo de oferta</label>
+                                    <select
+                                        name="sale_type"
+                                        value={values.sale_type}
+                                        onChange={handleChange}
+                                        className="product-form-select"
+                                    >
+                                        <option value="">Sin oferta</option>
+                                        <option value="percent">Descuento (%)</option>
+                                        <option value="amount">Monto de descuento ($)</option>
+                                        <option value="fixed">Precio final fijo ($)</option>
+                                    </select>
+                                </div>
+                                {values.sale_type && (
+                                    <>
+                                        <div>
+                                            <label className="product-form-label">
+                                                {values.sale_type === 'percent' ? 'Descuento (%)'
+                                                    : values.sale_type === 'amount' ? 'Monto a descontar ($)'
+                                                    : 'Precio final ($)'}
+                                            </label>
+                                            <input
+                                                type="number"
+                                                name="sale_value"
+                                                min="0"
+                                                max={values.sale_type === 'percent' ? '99' : undefined}
+                                                step={values.sale_type === 'percent' ? '1' : '100'}
+                                                value={values.sale_value}
+                                                onChange={handleChange}
+                                                placeholder={values.sale_type === 'percent' ? 'Ej: 20' : values.sale_type === 'amount' ? 'Ej: 5000' : 'Ej: 9990'}
+                                                className="product-form-select"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="product-form-label">Desde (opcional)</label>
+                                            <input
+                                                type="datetime-local"
+                                                name="sale_start"
+                                                value={values.sale_start}
+                                                onChange={handleChange}
+                                                className="product-form-select"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="product-form-label">Hasta (opcional)</label>
+                                            <input
+                                                type="datetime-local"
+                                                name="sale_end"
+                                                value={values.sale_end}
+                                                onChange={handleChange}
+                                                className="product-form-select"
+                                            />
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </AdminFormSection>
 
 
                         {/* SECCIÓN 3: CENTRO DE VERSIONES (HUB) - BLOQUEADO SI NO ESTÁ GUARDADO */}
@@ -598,23 +684,6 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                                     </div>
                                 </button>
                             </div>
-
-                            {generatedVariants.length > 0 && (
-                                <div className="product-hub-clear-wrapper">
-                                    <button 
-                                        type="button"
-                                        onClick={() => {
-                                            if (window.confirm("¿Estás seguro de que deseas limpiar todo el área de trabajo local? Esto no borrará versiones que ya estén guardadas permanentemente en la base de datos hasta que presiones Guardar Cambios.")) {
-                                                setGeneratedVariants([]);
-                                                toast.info("Workspace local limpiado. Las versiones en servidor permanecen intactas.");
-                                            }
-                                        }}
-                                        className="product-hub-clear-btn"
-                                    >
-                                        <Trash2 size={14} /> LIMPIAR ESPACIO DE TRABAJO LOCAL
-                                    </button>
-                                </div>
-                            )}
 
                             <LibraryPicker 
                                 isOpen={showVersionLibrary}

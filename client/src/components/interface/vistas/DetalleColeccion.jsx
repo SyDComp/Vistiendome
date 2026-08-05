@@ -30,14 +30,14 @@ const DetalleColeccion = () => {
                 } else if (slug === 'smart_best_sellers') {
                     title = 'Los Más Vendidos (Top Ventas)';
                     desc = 'Nuestras piezas más populares y amadas por nuestras clientas.';
-                    const res = await fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/products/?page_size=50&sort=sales`);
+                    const res = await fetch(`/api/v1/products/?page_size=50&sort=sales`);
                     const resData = await res.json();
                     data = Array.isArray(resData) ? resData : (resData.items || []);
                 } else if (slug === 'smart_random') {
                     title = 'Descubre Algo Nuevo (Aleatorio)';
                     desc = 'Déjate sorprender por una selección curada aleatoria.';
                     const all = await getProducts();
-                    data = [...all].sort(() => Math.random() - 0.5).slice(0, 50);
+                    data = [...all].sort(() => Math.random() - 0.5);
                 }
                 
                 const fakeSkus = [];
@@ -218,24 +218,19 @@ const DetalleColeccion = () => {
                     <span>{collection.skus?.length || 0} variantes en {groupedProducts.length} modelos</span>
                 </div>
 
-                {groupedProducts.map(group => (
-                    <section key={group.slug} className="product-group-section">
-                        <div className="group-title-wrapper">
-                            <h3 className="group-title">{group.name}</h3>
-                            <div className="group-title-line" />
-                        </div>
-                        
+                {slug.startsWith('smart_') ? (
+                    <section className="product-group-section">
                         <div className="products-grid">
-                            {group.variants.map(variant => (
+                            {collection.skus?.map(variant => (
                                 <div 
                                     key={variant.sku} 
                                     className="product-card"
-                                    onClick={() => navigate(`/coleccion/${slug}/producto/${group.slug}/${variant.sku}`, {
+                                    onClick={() => navigate(`/coleccion/${slug}/producto/${variant.product_slug}/${variant.sku}`, {
                                         state: {
                                             backgroundLocation: location,
                                             initialProduct: {
-                                                slug: group.slug,
-                                                name: group.name,
+                                                slug: variant.product_slug,
+                                                name: variant.product_name,
                                                 image: variant.image,
                                                 price: variant.price
                                             }
@@ -247,6 +242,7 @@ const DetalleColeccion = () => {
                                             <PremiumImage 
                                                 src={getImageUrl(variant.image)} 
                                                 alt={variant.sku} 
+                                                objectFit="contain"
                                             />
                                         ) : (
                                             <div className="no-image" />
@@ -258,9 +254,8 @@ const DetalleColeccion = () => {
                                         )}
                                     </div>
                                     <div className="product-info">
-                                        <span className="product-brand">Vistiendomé</span>
                                         <h3 className="product-name">
-                                            {variant.config?.color ? `Color ${variant.config.color}` : group.name}
+                                            {variant.product_name} {variant.config?.color ? `- Color ${variant.config.color}` : ''}
                                         </h3>
                                         <div className="product-footer">
                                             <span className="product-price">${variant.price?.toLocaleString('es-CL')}</span>
@@ -273,7 +268,64 @@ const DetalleColeccion = () => {
                             ))}
                         </div>
                     </section>
-                ))}
+                ) : (
+                    groupedProducts.map(group => (
+                        <section key={group.slug} className="product-group-section">
+                            <div className="group-title-wrapper">
+                                <h3 className="group-title">{group.name}</h3>
+                                <div className="group-title-line" />
+                            </div>
+                            
+                            <div className="products-grid">
+                                {group.variants.map(variant => (
+                                    <div 
+                                        key={variant.sku} 
+                                        className="product-card"
+                                        onClick={() => navigate(`/coleccion/${slug}/producto/${group.slug}/${variant.sku}`, {
+                                            state: {
+                                                backgroundLocation: location,
+                                                initialProduct: {
+                                                    slug: group.slug,
+                                                    name: group.name,
+                                                    image: variant.image,
+                                                    price: variant.price
+                                                }
+                                            }
+                                        })}
+                                    >
+                                        <div className="product-image-box">
+                                            {variant.image ? (
+                                                <PremiumImage 
+                                                    src={getImageUrl(variant.image)} 
+                                                    alt={variant.sku} 
+                                                    objectFit="contain"
+                                                />
+                                            ) : (
+                                                <div className="no-image" />
+                                            )}
+                                            {variant.compare_at_price && variant.compare_at_price > variant.price && (
+                                                <div className="sku-tag discount-tag">
+                                                    -{Math.round((1 - variant.price / variant.compare_at_price) * 100)}%
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="product-info">
+                                            <h3 className="product-name">
+                                                {variant.config?.color ? `Color ${variant.config.color}` : group.name}
+                                            </h3>
+                                            <div className="product-footer">
+                                                <span className="product-price">${variant.price?.toLocaleString('es-CL')}</span>
+                                                <div className="view-detail-icon">
+                                                    <ArrowLeft size={16} className="rotated-180" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    ))
+                )}
             </main>
 
 

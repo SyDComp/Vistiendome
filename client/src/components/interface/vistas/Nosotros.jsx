@@ -1,6 +1,14 @@
 import React from 'react';
+import { useSettings } from '../../../context/SettingsContext';
+import { getImageUrl } from '../../../lib/api/endpoints';
+
+// Imagen por defecto si el admin aún no configuró una desde la galería
+const TALLER_IMG_FALLBACK = 'https://vistiendomechile.cl/data/files/whatsappimage2025-12-31at9.11.46am.jpg';
 
 const Nosotros = () => {
+    const { settings } = useSettings();
+    const tallerImg = getImageUrl(settings?.nosotros?.image_url || TALLER_IMG_FALLBACK);
+
     const pilares = [
         {
             titulo: "Elegancia Natural",
@@ -38,7 +46,7 @@ const Nosotros = () => {
             <section className="nosotros-historia">
                 <div className="container grid-2">
                     <div className="historia-img">
-                        <img src="https://vistiendomechile.cl/data/files/whatsappimage2025-12-31at9.11.46am.jpg" alt="Taller de confección" />
+                        <img src={tallerImg} alt="Taller de confección" />
                         <div className="img-badge">Taller Propio - San Carlos</div>
                     </div>
                     <div className="historia-content">

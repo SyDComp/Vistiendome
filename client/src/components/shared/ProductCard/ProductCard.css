@@ -42,7 +42,6 @@
     position: absolute;
     top: 0;
     left: 0;
-    image-rendering: -webkit-optimize-contrast;
 }
 
 .product-card__image--current {
@@ -83,13 +82,59 @@
     line-height: 1.4;
 }
 
+.product-card__price-container {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.product-card__price-prefix {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 400;
+}
+
 .product-card__price {
     color: #8f0653;
-    display: block;
-    margin-top: 8px;
+    display: inline-block;
     font-family: 'Outfit', sans-serif;
     font-weight: 600;
     font-size: 1rem;
+}
+
+/* Precio original tachado cuando hay oferta */
+.product-card__price-original {
+    color: #94a3b8;
+    text-decoration: line-through;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 400;
+    font-size: 0.85rem;
+}
+
+/* Precio rebajado resaltado */
+.product-card__price--sale {
+    color: #b91c1c;
+}
+
+/* Badge "Oferta" sobre la imagen */
+.product-card__sale-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 3;
+    background-color: #b91c1c;
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 3px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 
 /* --- Variante Post --- */

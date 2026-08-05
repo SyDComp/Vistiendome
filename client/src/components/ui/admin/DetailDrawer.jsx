@@ -5,6 +5,9 @@ import Button from '../Button';
 import MediaGallery from '../../interface/admin/media/MediaGallery';
 import LibraryPicker from '../../interface/admin/inventory/LibraryPicker';
 import Input from '../Input';
+import { useScrollLock } from '../../../hooks/useScrollLock';
+import { useSettings } from '../../../context/SettingsContext';
+import { getShippingColor } from '../../../utils/shippingColors';
 
 const API_BASE = (import.meta.env.PROD ? '/api/v1/admin/catalog' : 'http://127.0.0.1:8000/api/v1/admin/catalog');
 
@@ -46,6 +49,8 @@ const DetailDrawer = ({
     metadata: initialMetadata = null,
     initialShowLibrary = false
 }) => {
+    const { settings } = useSettings();
+    const shippingColors = settings?.shipping_colors || {};
     const [isVisible, setIsVisible] = useState(false);
     const [currData, setCurrData] = useState(null);
     const [editData, setEditData] = useState({});
@@ -82,19 +87,19 @@ const DetailDrawer = ({
     useEffect(() => {
         if (isOpen && (currType === 'category' || currType === 'cms_block')) {
             if (allSpecs.length === 0) {
-                fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/admin/catalog/specifications`)
+                fetch(`/api/v1/admin/catalog/specifications`)
                     .then(r => r.json())
                     .then(data => setAllSpecs(data || []))
                     .catch(console.error);
             }
             if (allCategories.length === 0) {
-                fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/admin/catalog/categories?page_size=500`)
+                fetch(`/api/v1/admin/catalog/categories?page_size=500`)
                     .then(r => r.json())
                     .then(data => setAllCategories(data.items || []))
                     .catch(console.error);
             }
             if (allCollections.length === 0) {
-                fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/admin/catalog/collections?page_size=500`)
+                fetch(`/api/v1/admin/catalog/collections?page_size=500`)
                     .then(r => r.json())
                     .then(data => setAllCollections(Array.isArray(data) ? data : (data.items || [])))
                     .catch(console.error);
@@ -105,10 +110,11 @@ const DetailDrawer = ({
     // Estado local para permitir navegación profunda
     const [history, setHistory] = useState([]);
 
+    useScrollLock(isOpen);
+
     // Resetear/Inicializar cuando se abre con nuevos datos desde fuera
     useEffect(() => {
         if (isOpen) {
-            document.body.style.overflow = 'hidden';
             setCurrData(initialData);
             setEditData({
                 ...initialData,
@@ -123,7 +129,6 @@ const DetailDrawer = ({
             setShowLibraryVarieties(initialShowLibrary);
             setTimeout(() => setIsVisible(true), 10);
         } else {
-            document.body.style.overflow = 'auto';
             setIsVisible(false);
         }
     }, [isOpen, initialData, initialType, initialTitle, initialMetadata]);
@@ -311,6 +316,8 @@ const DetailDrawer = ({
                 items: [
                     { label: 'Número', value: `#${currData.id}` },
                     { label: 'Estado', value: currData.estado || 'NUEVA' },
+                    { label: 'Transporte / Envío', value: currData.transporte || 'STARKEN', isTransport: true },
+                    { label: 'Tipo Despacho', value: currData.tipo_despacho === 'SUCURSAL' ? 'A Sucursal / Retiro' : 'A Domicilio' },
                     { label: 'Monto Total Estimado', value: `$${calculatedTotal.toLocaleString()}` }
                 ]
             });
@@ -322,6 +329,31 @@ const DetailDrawer = ({
                         { label: 'Nombre', value: `${currData.cliente.nombres || ''} ${currData.cliente.apellidos || ''}`.trim() || 'Sin Nombre' },
                         { label: 'Correo', value: currData.cliente.email_personal || 'No registrado' },
                         { label: 'Teléfono', value: currData.cliente.telefono || 'No registrado' }
+                    ]
+                });
+            }
+            if (currData.items && currData.items.length > 0) {
+                s.push({
+                    title: 'Productos Cotizados',
+                    icon: <Package size={18} />,
+                    items: currData.items.map(it => {
+                        const nameStr = it.sku_name || it.nombre_custom || 'Producto del Catálogo / Especial';
+                        const codeStr = it.sku_code && it.sku_code !== 'SKU-CUSTOM' ? ` [SKU: ${it.sku_code}]` : '';
+                        const total = (it.cantidad || 1) * (it.precio_unitario_estimado || 0);
+                        const unitDesc = (it.cantidad || 1) > 1 ? ` ($${(it.precio_unitario_estimado || 0).toLocaleString('es-CL')} c/u)` : '';
+                        return {
+                            label: `${it.cantidad || 1}x ${nameStr}${codeStr}`,
+                            value: `$${total.toLocaleString('es-CL')}${unitDesc}`
+                        };
+                    })
+                });
+            }
+            if (currData.mensaje) {
+                s.push({
+                    title: 'Nota / Observaciones',
+                    icon: <FileText size={18} />,
+                    items: [
+                        { label: 'Detalle', value: currData.mensaje }
                     ]
                 });
             }
@@ -458,12 +490,13 @@ const DetailDrawer = ({
             }
         } else if (currType === 'characteristic') {
             const isColor = currData.name.toLowerCase() === 'color' || currData.name.toLowerCase() === 'colores';
+            const isPattern = currData.system_id === 'sys_pattern' || ['estampado', 'patrón', 'patron', 'diseño', 'diseno'].includes(currData.name.toLowerCase());
             s.push({
                 title: 'Detalle de Atributo',
-                icon: isColor ? <Palette size={18} /> : <Hash size={18} />,
+                icon: isColor ? <Palette size={18} /> : isPattern ? <ImageIcon size={18} /> : <Hash size={18} />,
                 items: [
                     { label: 'Nombre', value: currData.name.toUpperCase() },
-                    { label: 'Tipo de Dato', value: isColor ? 'BIBLIOTECA DE COLORES' : 'TEXTO / VALOR' },
+                    { label: 'Tipo de Dato', value: isColor ? 'BIBLIOTECA DE COLORES' : isPattern ? 'PATRONES / DISEÑOS' : 'TEXTO / VALOR' },
                     { label: 'Filtrable', value: currData.is_filterable ? 'SÍ' : 'NO' }
                 ]
             });
@@ -482,6 +515,7 @@ const DetailDrawer = ({
                     icon: suggested.length > 0 ? <Sparkles size={18} /> : <LayoutList size={18} />,
                     type: 'library-grid',
                     isColor: isColor,
+                    isPattern: isPattern,
                     options: finalOptions,
                     actions: !suggested.length && (
                         <button 
@@ -605,13 +639,49 @@ const DetailDrawer = ({
                 editable: true,
                 type: 'form',
                 inputs: [
-                    { 
-                        label: 'Precio de Venta ($)', 
-                        type: 'number', 
-                        name: 'price', 
+                    {
+                        label: 'Precio de Venta ($)',
+                        type: 'number',
+                        name: 'price',
                         value: editData.price,
                         onChange: (e) => setEditData(prev => ({...prev, price: parseFloat(e.target.value)}))
-                    }
+                    },
+                    {
+                        label: 'Oferta de esta versión',
+                        type: 'select',
+                        name: 'sale_type',
+                        value: editData.sale_type || '',
+                        options: [
+                            { value: '', label: 'Sin oferta (usa la del producto)' },
+                            { value: 'percent', label: 'Descuento (%)' },
+                            { value: 'amount', label: 'Monto de descuento ($)' },
+                            { value: 'fixed', label: 'Precio final fijo ($)' }
+                        ],
+                        onChange: (e) => setEditData(prev => ({ ...prev, sale_type: e.target.value || null }))
+                    },
+                    ...(editData.sale_type ? [
+                        {
+                            label: editData.sale_type === 'percent' ? 'Descuento (%)' : editData.sale_type === 'amount' ? 'Monto a descontar ($)' : 'Precio final ($)',
+                            type: 'number',
+                            name: 'sale_value',
+                            value: editData.sale_value ?? '',
+                            onChange: (e) => setEditData(prev => ({ ...prev, sale_value: e.target.value === '' ? null : parseFloat(e.target.value) }))
+                        },
+                        {
+                            label: 'Desde (opcional)',
+                            type: 'datetime-local',
+                            name: 'sale_start',
+                            value: (editData.sale_start || '').slice(0, 16),
+                            onChange: (e) => setEditData(prev => ({ ...prev, sale_start: e.target.value || null }))
+                        },
+                        {
+                            label: 'Hasta (opcional)',
+                            type: 'datetime-local',
+                            name: 'sale_end',
+                            value: (editData.sale_end || '').slice(0, 16),
+                            onChange: (e) => setEditData(prev => ({ ...prev, sale_end: e.target.value || null }))
+                        }
+                    ] : [])
                 ]
             });
 
@@ -949,7 +1019,7 @@ const DetailDrawer = ({
                                                     >
                                                         <span className="detail-drawer-layer-zindex">L{layer.zIndex}</span>
                                                         <div className="detail-drawer-layer-thumb">
-                                                            {layer.type === 'text' ? <Tag size={14} color="#64748b" /> : <img src={`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${layer.url}`} className="detail-drawer-w-full-h-full-cover" />}
+                                                            {layer.type === 'text' ? <Tag size={14} color="#64748b" /> : <img src={`${layer.url}`} className="detail-drawer-w-full-h-full-cover" />}
                                                         </div>
                                                         <div className="detail-drawer-flex-1">
                                                             <div className="detail-drawer-layer-name">{layer.type === 'text' ? layer.content : 'Capa de Imagen'}</div>
@@ -1078,15 +1148,20 @@ const DetailDrawer = ({
         }
 
         return s;
-    }, [currData, currType, currTitle, currMetadata, editData.price, editData.value, editData.hex_code, editData.title, editData.config, editData.name, editData.slug, editData.parent_id, editData.is_filterable, editData.suggested_specifications, editData.is_editing, allCategories, allSpecs, loading, isReorderMode, activeSlideIndex, activeLayerIndex]);
+    }, [currData, currType, currTitle, currMetadata, editData.price, editData.sale_type, editData.sale_value, editData.sale_start, editData.sale_end, editData.value, editData.hex_code, editData.title, editData.config, editData.name, editData.slug, editData.parent_id, editData.is_filterable, editData.suggested_specifications, editData.is_editing, allCategories, allSpecs, loading, isReorderMode, activeSlideIndex, activeLayerIndex]);
 
     // Cálculo memoizado de items para la biblioteca
     const librarySkus = useMemo(() => {
         const baseData = (currType === 'product' || currType === 'collection') ? currData : history.find(h => h.type === 'product' || h.type === 'collection')?.data;
+        // Fallback a la imagen principal del producto si la variante no tiene foto propia
+        const productImg = baseData?.image
+            || baseData?.images?.find(i => i.is_main)?.url
+            || baseData?.images?.[0]?.url
+            || null;
         return (baseData?.skus || []).map(sk => ({
             ...sk,
             name: sk.sku,
-            image: sk.image_urls?.[0] || sk.image || sk.image_url || null
+            image: sk.image_urls?.[0] || sk.media_assets?.[0]?.url || sk.image || sk.image_url || productImg
         }));
     }, [currData, currType, history]);
 
@@ -1102,7 +1177,7 @@ const DetailDrawer = ({
         formData.append('file', file);
 
         try {
-            const res = await fetch(`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/media/upload`, {
+            const res = await fetch(`/api/v1/media/upload`, {
                 method: 'POST',
                 body: formData
             });
@@ -1154,50 +1229,40 @@ const DetailDrawer = ({
                 opacity: (isVisible && !showLibraryVarieties && !showLibraryOptions) ? 1 : 0
             }}>
                 <div className="detail-drawer-header">
-                    <div className="detail-drawer-flex-row-16">
+                    <div className="detail-drawer-flex-row-16" style={{ flex: '1 1 auto', minWidth: 0, marginRight: '10px' }}>
                         {history.length > 0 && (
                             <button 
                                 type="button"
                                 onClick={goBack}
                                 className="detail-drawer-back-btn"
+                                style={{ flexShrink: 0 }}
                             >
                                 <ArrowLeft size={18} />
                             </button>
                         )}
-                        <div>
-                            <h2 className="detail-drawer-title-h2">
+                        <div style={{ flex: '1 1 auto', minWidth: 0 }}>
+                            <h2 className="detail-drawer-title-h2" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                                 {loading ? 'Cargando...' : currTitle}
                             </h2>
-                            <p className="detail-drawer-subtitle-p">
+                            <p className="detail-drawer-subtitle-p" style={{ wordBreak: 'break-word' }}>
                                 {history.length > 0 ? `Regresar a ${history[history.length-1].title}` : 'Ficha técnica detallada'}
                             </p>
                         </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        {currType === 'cotizacion' && currData?.id && (
-                            <button 
-                                type="button"
-                                onClick={() => {
-                                    const iframe = document.getElementById(`print-frame-${currData.id}`);
-                                    if (iframe) iframe.contentWindow.print();
-                                }}
-                                style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#f1f5f9', color: '#0f172a', border: '1px solid #cbd5e1', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700', fontSize: '12px' }}
-                                title="Imprimir Etiqueta de Envío"
-                            >
-                                <Printer size={16} /> Imprimir
-                            </button>
-                        )}
+                    <div className="detail-drawer-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                         <button 
                             type="button"
                             onClick={onClose}
                             className="detail-drawer-close-btn"
+                            style={{ flexShrink: 0 }}
+                            title="Cerrar panel"
                         >
                             <X size={20} />
                         </button>
                     </div>
                 </div>
 
-                <div className="detail-drawer-body-container" style={{ padding: showGlobalGallery ? '0' : '40px' }}>
+                <div className="detail-drawer-body-container" style={{ padding: showGlobalGallery ? '0' : undefined }}>
                     {loading ? (
                         <>
                             <SectionSkeleton />
@@ -1309,22 +1374,43 @@ const DetailDrawer = ({
 
                                 {section.items && section.type !== 'summary-card' && section.type !== 'collection-items' && (
                                     <div className="detail-drawer-items-grid-2">
-                                        {section.items.map((item, i) => (
-                                            <div key={i}>
-                                                <span className="detail-drawer-item-label">{item.label}</span>
-                                                {item.link ? (
-                                                    <button 
-                                                        type="button"
-                                                        onClick={() => navigateTo(item.link.id, item.link.type, item.value)}
-                                                        className="detail-drawer-item-link-btn"
-                                                    >
-                                                        {item.value} <ChevronRight size={14} />
-                                                    </button>
-                                                ) : (
-                                                    <span className="detail-drawer-item-value">{item.value}</span>
-                                                )}
-                                            </div>
-                                        ))}
+                                        {section.items.map((item, i) => {
+                                            if (item.isTransport) {
+                                                const transColor = getShippingColor(item.value || 'STARKEN', shippingColors);
+                                                return (
+                                                    <div key={i}>
+                                                        <span className="detail-drawer-item-label">{item.label}</span>
+                                                        <div style={{ marginTop: '4px' }}>
+                                                            <span style={{
+                                                                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                                                background: `${transColor}15`, color: transColor,
+                                                                border: `1.5px solid ${transColor}40`, padding: '4px 10px',
+                                                                borderRadius: '6px', fontWeight: '800', fontSize: '13px',
+                                                                textTransform: 'uppercase'
+                                                            }}>
+                                                                🚚 {item.value || 'STARKEN'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            return (
+                                                <div key={i}>
+                                                    <span className="detail-drawer-item-label">{item.label}</span>
+                                                    {item.link ? (
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => navigateTo(item.link.id, item.link.type, item.value)}
+                                                            className="detail-drawer-item-link-btn"
+                                                        >
+                                                            {item.value} <ChevronRight size={14} />
+                                                        </button>
+                                                    ) : (
+                                                        <span className="detail-drawer-item-value">{item.value}</span>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 )}
 
@@ -1400,20 +1486,20 @@ const DetailDrawer = ({
                                                                         [newDomain[i], newDomain[i-1]] = [newDomain[i-1], newDomain[i]];
                                                                         onReorder(newDomain);
                                                                     }}
-                                                                    className="detail-drawer-reorder-btn"
+                                                                    className="detail-drawer-reorder-nav-btn"
                                                                 >
                                                                     <ChevronLeft size={16} />
                                                                 </button>
                                                             )}
                                                             {i < section.options.length - 1 && (
-                                                                <button 
+                                                                <button
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         const newDomain = [...currData.domain];
                                                                         [newDomain[i], newDomain[i+1]] = [newDomain[i+1], newDomain[i]];
                                                                         onReorder(newDomain);
                                                                     }}
-                                                                    className="detail-drawer-reorder-btn"
+                                                                    className="detail-drawer-reorder-nav-btn"
                                                                 >
                                                                     <ChevronRight size={16} />
                                                                 </button>
@@ -1444,6 +1530,31 @@ const DetailDrawer = ({
                                                                     )}
                                                                 </div>
                                                                 {hex && <code style={{ fontSize: '10px', color: '#94a3b8', letterSpacing: '0.05em' }}>{hex.toUpperCase()}</code>}
+                                                            </>
+                                                        ) : section.isPattern || (typeof opt === 'object' && opt !== null && opt.image_url !== undefined) ? (
+                                                            <>
+                                                                <div style={{ 
+                                                                    width: '48px', height: '48px', borderRadius: '8px', 
+                                                                    overflow: 'hidden',
+                                                                    background: '#f8fafc', 
+                                                                    border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                    margin: '0 auto'
+                                                                }}>
+                                                                    {opt.image_url ? (
+                                                                        <img src={opt.image_url} alt={val} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                                    ) : (
+                                                                        <ImageIcon size={20} color="#94a3b8" />
+                                                                    )}
+                                                                </div>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', marginTop: '8px' }}>
+                                                                    <span style={{ display: 'block', fontSize: '11px', fontWeight: '900', color: '#1e1b4b', textTransform: 'uppercase' }}>{val}</span>
+                                                                    {opt.is_system && (
+                                                                        <div style={{ background: '#fdf2f8', color: '#8f0653', fontSize: '8px', fontWeight: '900', padding: '2px 5px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                                                                            <Lock size={8} /> vOS
+                                                                        </div>
+                                                                    )}
+                                                                </div>
                                                             </>
                                                         ) : (
                                                             <div style={{ width: '100%' }}>
@@ -1486,7 +1597,7 @@ const DetailDrawer = ({
                                                 className="detail-drawer-collection-item"
                                             >
                                                 <div className="detail-drawer-collection-thumb-wrapper">
-                                                    {(sku.image || sku.image_url) ? <img src={`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${sku.image || sku.image_url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Package size={18} color="#cbd5e1" style={{ margin: '13px' }} />}
+                                                    {(sku.image || sku.image_url) ? <img src={`${sku.image || sku.image_url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Package size={18} color="#cbd5e1" style={{ margin: '13px' }} />}
                                                 </div>
                                                 <div className="detail-drawer-flex-1-min-w-0">
                                                     <div className="detail-drawer-collection-sku">{sku.sku}</div>
@@ -1588,7 +1699,7 @@ const DetailDrawer = ({
                                                         border: isMain ? '2.5px solid #8f0653' : '1px solid #e2e8f0',
                                                         boxShadow: isMain ? '0 4px 12px rgba(143,6,83,0.15)' : 'none'
                                                     }}>
-                                                        <img src={`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${asset.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                        <img src={`${asset.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                         
                                                         {/* Botón Eliminar */}
                                                         <button 
@@ -1664,54 +1775,99 @@ const DetailDrawer = ({
                     )}
                     
                     {currType === 'cotizacion' && currData?.id && (
-                        <div style={{ marginTop: '40px', borderTop: '2px dashed #cbd5e1', paddingTop: '40px' }}>
-                            <h3 style={{ fontSize: '14px', fontWeight: '800', color: '#64748b', marginBottom: '20px', letterSpacing: '1px', textTransform: 'uppercase' }}>Vista Previa de Etiqueta</h3>
-                            <iframe
-                                id={`print-frame-${currData.id}`}
-                                src={`/admin/print/cotizacion/${currData.id}`}
-                                style={{ width: '100%', height: '800px', border: '1px solid #e2e8f0', borderRadius: '12px', background: '#fff', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                                title="Vista Previa de Etiqueta"
-                            />
+                        <div style={{ marginTop: '28px', borderTop: '2px dashed #cbd5e1', paddingTop: '28px', width: '100%', boxSizing: 'border-box' }}>
+                            <div style={{
+                                background: 'linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)',
+                                border: '1.5px solid #fbcfe8',
+                                borderRadius: '16px',
+                                padding: '24px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '16px',
+                                boxShadow: '0 10px 25px -5px rgba(143, 6, 83, 0.1)'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+                                    <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#8f0653', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 10px rgba(143, 6, 83, 0.3)' }}>
+                                        <Printer size={22} />
+                                    </div>
+                                    <div>
+                                        <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '900', color: '#8f0653', letterSpacing: '-0.3px' }}>
+                                            Sistema de Etiquetas y Ahorro de Tinta
+                                        </h4>
+                                        <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b', fontWeight: '600', lineHeight: 1.4 }}>
+                                            Accede al módulo avanzado para generar y descargar esta etiqueta en formatos múltiples, configurar ahorro de tinta e incluir códigos de barra.
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        onClose();
+                                        window.location.href = `/admin/dashboard/crm/shipping-labels?id=${currData.id}`;
+                                    }}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '8px',
+                                        background: '#8f0653',
+                                        color: '#fff',
+                                        border: 'none',
+                                        padding: '16px 20px',
+                                        borderRadius: '12px',
+                                        cursor: 'pointer',
+                                        fontWeight: '800',
+                                        fontSize: '14px',
+                                        width: '100%',
+                                        boxShadow: '0 4px 14px rgba(143, 6, 83, 0.3)',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    Ir al Sistema de Etiquetas (Ahorro y Formato) 🚀
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>
 
-                {/* Footer */}
-                <div className="detail-drawer-footer">
-                    {['variant', 'color_option', 'homepage_section', 'cms_block', 'category'].includes(currType) && onDelete && !currData.is_system && (currType !== 'category' || editData.is_editing) && (
-                        <Button 
-                            variant="outline" 
-                            type="button"
-                            onClick={async () => {
-                                const success = await onDelete(currData);
-                                if (success !== false) {
-                                    if (history.length > 0) {
-                                        goBack();
-                                    } else {
-                                        onClose();
+                {/* Footer (Se oculta en cotización porque el botón superior [X] o la tarjeta de acción son suficientes y dejan el diseño limpio) */}
+                {currType !== 'cotizacion' && (
+                    <div className="detail-drawer-footer">
+                        {['variant', 'color_option', 'homepage_section', 'cms_block', 'category'].includes(currType) && onDelete && currData && !currData.is_system && (currType !== 'category' || editData.is_editing) && (
+                            <Button 
+                                variant="outline" 
+                                type="button"
+                                onClick={async () => {
+                                    const success = await onDelete(currData);
+                                    if (success !== false) {
+                                        if (history.length > 0) {
+                                            goBack();
+                                        } else {
+                                            onClose();
+                                        }
                                     }
-                                }
-                            }}
-                            className="detail-drawer-btn-danger"
-                        >
-                            Eliminar
-                        </Button>
-                    )}
-                    <div style={{ flex: 1 }} />
-                    <Button variant="outline" type="button" onClick={onClose} className="detail-drawer-btn-outline">Cerrar</Button>
-                    {['variant', 'color_option', 'homepage_section', 'cms_block', 'category'].includes(currType) && onUpdate && !currData.is_system && (currType !== 'category' || editData.is_editing) && (
-                        <Button 
-                            onClick={() => {
-                                onUpdate(editData, currData);
-                            }} 
-                            type="button"
-                            variant="primary" 
-                            className="detail-drawer-btn-primary"
-                        >
-                            Guardar Cambios
-                        </Button>
-                    )}
-                </div>
+                                }}
+                                className="detail-drawer-btn-danger"
+                            >
+                                Eliminar
+                            </Button>
+                        )}
+                        <div style={{ flex: 1 }} />
+                        <Button variant="outline" type="button" onClick={onClose} className="detail-drawer-btn-outline">Cerrar</Button>
+                        {['variant', 'color_option', 'homepage_section', 'cms_block', 'category'].includes(currType) && onUpdate && currData && !currData.is_system && (currType !== 'category' || editData.is_editing) && (
+                            <Button 
+                                onClick={() => {
+                                    onUpdate(editData, currData);
+                                }} 
+                                type="button"
+                                variant="primary" 
+                                className="detail-drawer-btn-primary"
+                            >
+                                Guardar Cambios
+                            </Button>
+                        )}
+                    </div>
+                )}
             </div>
             {/* MODAL DE MEDIATECA GLOBAL (FULLSCREEN OVERLAY) */}
             {showGlobalGallery && (

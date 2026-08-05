@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, Share2, ShieldCheck, Truck, MessageCircle, ShoppingBag, Barcode as BarcodeIcon } from 'lucide-react';
 import ReactBarcode from 'react-barcode';
@@ -7,10 +7,13 @@ import VariantSelector from './VariantSelector';
 import VariantSelectionDrawer from './VariantSelectionDrawer';
 import { useCart } from '../../../context/CartContext.jsx';
 import { useNotification } from '../../../context/NotificationContext.jsx';
+import { useSettings } from '../../../context/SettingsContext.jsx';
 import { getImageUrl } from '../../../lib/api/endpoints/index.js';
 import useProductDetail from '../hooks/useProductDetail';
 import { generateEAN13, formatSku } from '../utils/skuUtils';
 import { handleShare } from '../utils/shareUtils';
+import { buildWhatsAppMessage } from '../../../utils/cartUtils';
+import { track } from '../../../lib/analytics';
 import '../productDetail.css';
 
 const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
@@ -18,6 +21,7 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
     const location = useLocation();
     const { addItem } = useCart();
     const { toast } = useNotification();
+    const { settings } = useSettings();
 
     const {
         producto,
@@ -42,6 +46,13 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
         slug,
     } = useProductDetail(location.state?.initialProduct || initialProduct);
 
+    // Analítica: registrar vista de producto
+    useEffect(() => {
+        if (producto?.id) {
+            track('view', { product_id: producto.id });
+        }
+    }, [producto?.id]);
+
     const onShare = async () => {
         const result = await handleShare(producto?.name);
         if (result.copied) setShowShareToast(true);
@@ -53,9 +64,9 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
     };
 
     const onWhatsApp = () => {
-        if (!producto) return;
+        if (loading || !producto || !skuActual || !precioFinal || precioFinal <= 0) return;
         const priorityOrder = ['talla', 'color'];
-        const selectionsText = Object.entries(selections)
+        const variantLabel = Object.entries(selections)
             .sort(([keyA], [keyB]) => {
                 const indexA = priorityOrder.indexOf(keyA.toLowerCase());
                 const indexB = priorityOrder.indexOf(keyB.toLowerCase());
@@ -64,17 +75,20 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                 if (indexB !== -1) return 1;
                 return keyA.localeCompare(keyB);
             })
-            .map(([key, val]) => `*${key.charAt(0).toUpperCase() + key.slice(1)}:* ${val}`)
-            .join('\n');
-        const specsText = producto?.specs && Object.keys(producto.specs).length > 0
-            ? '\n\n_Detalles técnicos:_\n' + Object.entries(producto.specs).map(([k, v]) => `• ${k}: ${v}`).join('\n')
-            : '';
-        const message = `¡Hola Paola! ✨ \n\nMe interesa este producto: *${producto?.name}*\n\n${selectionsText}${specsText}\n\n¿Podrías darme más información?`;
-        const url = `https://wa.me/569XXXXXXXX?text=${encodeURIComponent(message)}`;
+            .map(([key, val]) => `${key.charAt(0).toUpperCase() + key.slice(1)} ${val}`)
+            .join(' / ');
+        const message = buildWhatsAppMessage({
+            tipo: 'pedido',
+            productos: [{ name: producto.name, variantLabel, selections, url: window.location.href }],
+        });
+        const contactNumber = settings?.social_links?.whatsapp?.replace(/\D/g, '') || '569XXXXXXXX';
+        const url = `https://wa.me/${contactNumber}?text=${encodeURIComponent(message)}`;
+        track('checkout_whatsapp', { product_id: producto?.id, sku: skuActual?.sku });
         window.open(url, '_blank');
     };
 
     const addToCart = () => {
+        if (loading || !producto || !skuActual || !precioFinal || precioFinal <= 0) return;
         const rawImage = skuActual?.image_urls?.[0] || producto?.image;
         const currentImage = getImageUrl(rawImage);
         addItem({
@@ -87,6 +101,7 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
             selections: selections,
             productUrl: window.location.href,
         });
+        track('add_to_cart', { product_id: producto?.id, sku: skuActual?.sku });
     };
 
     const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
@@ -175,12 +190,20 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                                 <div className="price-tag-premium">
                                     {loading && !producto ? (
                                         <div className="skeleton-box" style={{ height: '36px', width: '120px', borderRadius: '8px' }}></div>
-                                    ) : (
-                                        <>
-                                            <span className="currency">$</span>
-                                            <span className="val">{precioFinal.toLocaleString('es-CL')}</span>
-                                        </>
-                                    )}
+                                    ) : (() => {
+                                        const refSku = skuActual || producto?.skus?.[0];
+                                        const onSale = refSku?.on_sale && refSku?.original_price > precioFinal;
+                                        return (
+                                            <>
+                                                {onSale && <span className="price-sale-badge">Oferta</span>}
+                                                {onSale && (
+                                                    <span className="price-original">${refSku.original_price.toLocaleString('es-CL')}</span>
+                                                )}
+                                                <span className="currency">$</span>
+                                                <span className={`val${onSale ? ' val--sale' : ''}`}>{precioFinal.toLocaleString('es-CL')}</span>
+                                            </>
+                                        );
+                                    })()}
                                 </div>
                             </header>
 
@@ -273,6 +296,7 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                             <div className="cta-grid-desktop">
                                 <button
                                     className="btn-primary-premium"
+                                    disabled={loading || !producto || !skuActual || !precioFinal || precioFinal <= 0}
                                     onClick={() => {
                                         const selectedCount = Object.keys(selections).length;
                                         if (selectedCount < configAtributos.length) {
@@ -283,11 +307,15 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                                     }}
                                 >
                                     <ShoppingBag size={20} />
-                                    Añadir a Cotización
+                                    {loading ? 'Cargando producto...' : 'Añadir a Cotización'}
                                 </button>
-                                <button className="btn-secondary-premium" onClick={onWhatsApp}>
+                                <button
+                                    className="btn-secondary-premium"
+                                    disabled={loading || !producto || !skuActual || !precioFinal || precioFinal <= 0}
+                                    onClick={onWhatsApp}
+                                >
                                     <MessageCircle size={20} />
-                                    Consultar
+                                    Pedir por WhatsApp
                                 </button>
                             </div>
 
@@ -309,6 +337,7 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                     <div className="buttons-group-mobile">
                         <button
                             className="btn-mobile-buy"
+                            disabled={loading || !producto || !skuActual || !precioFinal || precioFinal <= 0}
                             onClick={() => {
                                 const selectedCount = Object.keys(selections).length;
                                 if (selectedCount < configAtributos.length) {
@@ -319,11 +348,15 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                             }}
                         >
                             <ShoppingBag size={20} />
-                            Al Carrito
+                            {loading ? 'Cargando...' : 'Al Carrito'}
                         </button>
-                        <button className="btn-mobile-whatsapp-full" onClick={onWhatsApp}>
+                        <button
+                            className="btn-mobile-whatsapp-full"
+                            disabled={loading || !producto || !skuActual || !precioFinal || precioFinal <= 0}
+                            onClick={onWhatsApp}
+                        >
                             <MessageCircle size={20} />
-                            Consultar
+                            Pedir por WhatsApp
                         </button>
                     </div>
                 </div>

@@ -23,12 +23,6 @@ class TipoDespacho(str, Enum):
     DOMICILIO = "DOMICILIO"
     SUCURSAL = "SUCURSAL"
 
-class TipoTransporte(str, Enum):
-    STARKEN = "STARKEN"
-    CORREOS_DE_CHILE = "CORREOS DE CHILE"
-    CHILEXPRESS = "CHILEXPRESS"
-    RETIRO_LOCAL = "RETIRO EN LOCAL"
-    OTRO = "OTRO"
 
 class Cotizacion(SQLModel, table=True):
     __tablename__ = "cotizaciones"
@@ -46,7 +40,7 @@ class Cotizacion(SQLModel, table=True):
     fecha_evento: Optional[str] = Field(default=None)
     
     # Etiqueta de Envío
-    transporte: Optional[TipoTransporte] = Field(default=None)
+    transporte: Optional[str] = Field(default=None, max_length=100)
     tipo_despacho: Optional[TipoDespacho] = Field(default=None)
     region: Optional[str] = Field(default=None, max_length=100)
     comuna: Optional[str] = Field(default=None, max_length=100)
@@ -68,6 +62,7 @@ class CotizacionItem(SQLModel, table=True):
     sku_id: Optional[int] = Field(default=None, foreign_key="sku.id", index=True)
     cantidad: int = Field(default=1)
     precio_unitario_estimado: float = Field(default=0.0)
+    nombre_custom: Optional[str] = Field(default=None, max_length=255)
     
     # Relationships
     cotizacion: Cotizacion = Relationship(back_populates="items")

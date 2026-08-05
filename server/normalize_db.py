@@ -10,7 +10,11 @@ def normalize_char(text: str) -> str:
 
 def normalize_opt(text: str) -> str:
     if not text: return ""
-    return string.capwords(text.strip().lower())
+    cleaned = text.strip()
+    upper_cleaned = cleaned.upper()
+    if upper_cleaned in {"XS", "S", "M", "L", "XL", "XXL", "XXXL", "CM", "MM", "KG", "ML", "UN", "PAR"}:
+        return upper_cleaned
+    return string.capwords(cleaned.lower())
 
 def run_normalization():
     print("Iniciando normalizacion profunda de la base de datos...")

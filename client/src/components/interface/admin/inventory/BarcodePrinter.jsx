@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import DOMPurify from 'dompurify';
 import {
     Printer, Search, ChevronDown, ChevronRight, CheckSquare, Square,
     Layers, Settings2, RefreshCw, Maximize2, X, Info, BarChart2,
@@ -347,9 +348,17 @@ const BarcodePrinter = () => {
     // Slots para vista previa
     const previewSlots = buildSlots();
 
+    const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+    useEffect(() => {
+        const handleResize = () => setWindowWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+    const isMobile = windowWidth <= 768;
+
     // ─── Render ────────────────────────────────────────────────────────────────
     return (
-        <div className={`barcode-printer-container ${window.innerWidth <= 768 ? 'mobile' : ''}`}>
+        <div className={`barcode-printer-container ${isMobile ? 'mobile' : ''}`}>
 
             {/* ── Panel izquierdo: Selector ── */}
             <div className="barcode-printer-left-panel">
@@ -630,7 +639,7 @@ const BarcodePrinter = () => {
                             </div>
                         ) : (() => {
                             const colorMap = buildColorMap(selectedList);
-                            const SHEET_W = 500;
+                            const SHEET_W = isMobile ? Math.max(250, Math.min(500, windowWidth - 48)) : 500;
                             const SHEET_H = Math.round(SHEET_W * (grid.paperH / grid.paperW));
                             const PAD = 14;
                             const cellW = Math.floor((SHEET_W - PAD * 2) / grid.cols);
@@ -665,7 +674,7 @@ const BarcodePrinter = () => {
                                                         <div className="barcode-printer-label-svg">
                                                             {svgMap[slot.barcode] ? (
                                                                 <div className="barcode-printer-label-svg-inner"
-                                                                     dangerouslySetInnerHTML={{ __html: svgMap[slot.barcode] }} />
+                                                                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(svgMap[slot.barcode], { ADD_TAGS: ['svg', 'g', 'rect', 'text', 'path'] }) }} />
                                                             ) : (
                                                                 <span className="barcode-printer-label-loading">Generando...</span>
                                                             )}
@@ -766,7 +775,7 @@ const BarcodePrinter = () => {
                                         </div>
                                     ) : (() => {
                                         const colorMap = buildColorMap(selectedList);
-                                        const SHEET_W = Math.min(800, window.innerWidth - 80);
+                                        const SHEET_W = isMobile ? Math.max(250, windowWidth - 32) : Math.min(800, windowWidth - 80);
                                         const SHEET_H = Math.round(SHEET_W * (grid.paperH / grid.paperW));
                                         const PAD = 14;
                                         const cellW = Math.floor((SHEET_W - PAD * 2) / grid.cols);
@@ -800,7 +809,7 @@ const BarcodePrinter = () => {
                                                                     <div className="barcode-printer-label-svg">
                                                                         {svgMap[slot.barcode] ? (
                                                                             <div className="barcode-printer-label-svg-inner"
-                                                                                 dangerouslySetInnerHTML={{ __html: svgMap[slot.barcode] }} />
+                                                                                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(svgMap[slot.barcode], { ADD_TAGS: ['svg', 'g', 'rect', 'text', 'path'] }) }} />
                                                                         ) : (
                                                                             <span className="barcode-printer-label-loading">Generando...</span>
                                                                         )}
@@ -825,7 +834,7 @@ const BarcodePrinter = () => {
                             )}
                         </div>
                         {expandedSection === 'copies' && (
-                            <div style={{ padding: '16px 24px', borderTop: '1px solid #e2e8f0', background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ padding: '16px 24px', borderTop: '1px solid #e2e8f0', background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                                 <button onClick={redistribute} className="barcode-printer-copies-btn-fill" style={{ fontSize: '14px', padding: '10px 20px', height: '44px' }}>
                                     <RefreshCw size={16} /> Rellenar páginas completas
                                 </button>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, Search, Hammer, Package, ArrowRight, LayoutDashboard, Zap } from 'lucide-react';
 import BatchVariantEditor from './BatchVariantEditor';
 
-const API_BASE = `${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}/api/v1/admin/catalog`;
+const API_BASE = `/api/v1/admin/catalog`;
 
 const WorkspaceModule = () => {
     const [products, setProducts] = useState([]);
@@ -77,7 +77,7 @@ const WorkspaceModule = () => {
 
     if (showBatchEditor) {
         return (
-            <div className="workspace-layout" style={{ padding: '20px' }}>
+            <div className="workspace-layout batch-editor-active-layout">
                 <BatchVariantEditor 
                     product={selectedProduct}
                     initialVariants={productVariants}
@@ -108,7 +108,7 @@ const WorkspaceModule = () => {
 
                 {/* Buscador de Alto Impacto */}
                 <div className="workspace-search-wrapper">
-                    <div style={{ paddingLeft: '20px', color: '#94a3b8' }}>
+                    <div className="workspace-search-icon">
                         <Search size={24} />
                     </div>
                     <input 

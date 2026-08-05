@@ -240,101 +240,101 @@ const SpecificationManager = () => {
         const selectedCats = allCategories.filter(c => formData.category_ids.includes(c.id));
 
         return (
-            <div className="spec-form-container">
-                <div className="spec-form-header">
-                    <div className="spec-form-header-left">
-                        <button onClick={() => setShowForm(false)} className="spec-form-btn-back">
-                            <ArrowLeft size={20} />
-                        </button>
-                        <h2 className="spec-form-title">
-                            {editingSpec ? 'Editar Especificación' : 'Crear Grupo Maestro'}
-                        </h2>
+            <div className="admin-inventory-form-container desktop" style={{ padding: '20px 20px 80px 20px' }}>
+                <div className="spec-form-container">
+                    <div className="spec-form-header">
+                        <div className="spec-form-header-left">
+                            <button onClick={() => setShowForm(false)} className="spec-form-btn-back">
+                                <ArrowLeft size={20} />
+                            </button>
+                            <h2 className="spec-form-title">
+                                {editingSpec ? 'Editar Especificación' : 'Crear Grupo Maestro'}
+                            </h2>
+                        </div>
+                        <div className="spec-form-header-right">
+                            <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
+                            <Button variant="primary" onClick={handleSave} style={{ padding: '0 24px' }}>
+                                <Save size={18} style={{ marginRight: '8px' }} /> Guardar Grupo
+                            </Button>
+                        </div>
                     </div>
-                    <div className="spec-form-header-right">
-                        <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
-                        <Button variant="primary" onClick={handleSave} style={{ padding: '0 24px' }}>
-                            <Save size={18} style={{ marginRight: '8px' }} /> Guardar Grupo
-                        </Button>
-                    </div>
-                </div>
 
-                <div className="spec-form-body-wrapper">
                     <div className="spec-form-body-wrapper">
                         <div className="spec-form-card">
-                            <label className="spec-form-label-primary">Nombre de la Especificación</label>
-                            <input 
-                                value={formData.name}
-                                onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
-                                className="spec-form-input"
-                            />
+                                <label className="spec-form-label-primary">Nombre de la Especificación</label>
+                                <input 
+                                    value={formData.name}
+                                    onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
+                                    className="spec-form-input"
+                                />
 
-                            <label className="spec-form-label-secondary">Descripción (Opcional)</label>
-                            <textarea 
-                                value={formData.description}
-                                onChange={e => setFormData(p => ({ ...p, description: e.target.value }))}
-                                className="spec-form-textarea"
-                            />
-                        </div>
-
-                        {/* Características Section */}
-                        <div className="spec-char-wrapper">
-                            {/* Sticky Header */}
-                            <div className="spec-char-header">
-                                <div className="spec-char-header-inner">
-                                    <h4 className="spec-char-header-title">Características del Grupo</h4>
-                                    <span className="spec-char-header-badge">{formData.characteristics.length} Elementos</span>
-                                </div>
+                                <label className="spec-form-label-secondary">Descripción (Opcional)</label>
+                                <textarea 
+                                    value={formData.description}
+                                    onChange={e => setFormData(p => ({ ...p, description: e.target.value }))}
+                                    className="spec-form-textarea"
+                                />
                             </div>
 
-                            {/* Scrollable Area */}
-                            <div className="spec-char-scroll">
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                    {selectedChars.map(c => {
-                                        const config = formData.characteristics.find(fc => fc.id === c.id);
-                                        const hasDomain = c.domain && c.domain.length > 0;
-                                        const isColor = c.name.toLowerCase().includes('color');
-                                        const isOpen = openCharAccordions.includes(c.id);
+                            {/* Características Section */}
+                            <div className="spec-char-wrapper">
+                                {/* Sticky Header */}
+                                <div className="spec-char-header">
+                                    <div className="spec-char-header-inner">
+                                        <h4 className="spec-char-header-title">Características del Grupo</h4>
+                                        <span className="spec-char-header-badge">{formData.characteristics.length} Elementos</span>
+                                    </div>
+                                </div>
 
-                                        return (
-                                            <Accordion
-                                                key={c.id}
-                                                title={c.name}
-                                                icon={<Hash size={16} />}
-                                                initialOpen={isOpen}
-                                                onToggle={(open) => {
-                                                    setOpenCharAccordions(prev => 
-                                                        open ? [...prev, c.id] : prev.filter(id => id !== c.id)
-                                                    );
-                                                }}
-                                                extraHeader={
-                                                    <button 
-                                                        onClick={(e) => { e.stopPropagation(); removeChar(c.id); }}
-                                                        style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', display: 'flex' }}
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                }
-                                            >
-                                                <div className="spec-char-accordion-header">
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        <Sparkles size={14} color="#8f0653" />
-                                                        <span style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Selecciona Opciones Disponibles</span>
+                                {/* Scrollable Area */}
+                                <div className="spec-char-scroll">
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                        {selectedChars.map(c => {
+                                            const config = formData.characteristics.find(fc => fc.id === c.id);
+                                            const hasDomain = c.domain && c.domain.length > 0;
+                                            const isColor = c.name.toLowerCase().includes('color');
+                                            const isOpen = openCharAccordions.includes(c.id);
+
+                                            return (
+                                                <Accordion
+                                                    key={c.id}
+                                                    title={c.name}
+                                                    icon={<Hash size={16} />}
+                                                    initialOpen={isOpen}
+                                                    onToggle={(open) => {
+                                                        setOpenCharAccordions(prev => 
+                                                            open ? [...prev, c.id] : prev.filter(id => id !== c.id)
+                                                        );
+                                                    }}
+                                                    extraHeader={
+                                                        <button 
+                                                            onClick={(e) => { e.stopPropagation(); removeChar(c.id); }}
+                                                            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', display: 'flex' }}
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    }
+                                                >
+                                                    <div className="spec-char-accordion-header">
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                            <Sparkles size={14} color="#8f0653" />
+                                                            <span style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Selecciona Opciones Disponibles</span>
+                                                        </div>
+                                                        
+                                                        <button
+                                                            onClick={(e) => { 
+                                                                e.stopPropagation(); 
+                                                                setActiveCharForPicker(c);
+                                                                setShowOptionsPicker(true);
+                                                            }}
+                                                            className="spec-char-btn-picker"
+                                                            onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#8f0653'; e.currentTarget.style.color = '#8f0653'; }}
+                                                            onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#64748b'; }}
+                                                        >
+                                                            <Layers size={12} />
+                                                            Ver biblioteca de opciones
+                                                        </button>
                                                     </div>
-                                                    
-                                                    <button
-                                                        onClick={(e) => { 
-                                                            e.stopPropagation(); 
-                                                            setActiveCharForPicker(c);
-                                                            setShowOptionsPicker(true);
-                                                        }}
-                                                        className="spec-char-btn-picker"
-                                                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#8f0653'; e.currentTarget.style.color = '#8f0653'; }}
-                                                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#64748b'; }}
-                                                    >
-                                                        <Layers size={12} />
-                                                        Ver biblioteca de opciones
-                                                    </button>
-                                                </div>
                                                 
                                                 {hasDomain ? (
                                                     <div className="spec-char-grid">
@@ -494,7 +494,12 @@ const SpecificationManager = () => {
                     {
                         key: 'category_id',
                         label: 'Todas las Categorías',
-                        options: allCategories.map(cat => ({ value: cat.id, label: cat.name }))
+                        options: allCategories.map(cat => {
+                            const isSubcategory = cat.level > 1;
+                            const indent = '\u00A0\u00A0\u00A0\u00A0'.repeat(Math.max(0, (cat.level || 1) - 1));
+                            const prefix = isSubcategory ? '— ' : '';
+                            return { value: cat.id, label: indent + prefix + cat.name };
+                        })
                     }
                 ]}
             />

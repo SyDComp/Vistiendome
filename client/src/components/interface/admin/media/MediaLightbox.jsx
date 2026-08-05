@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Sparkles, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 
 /**
  * MediaLightbox Component (Presentational)
@@ -11,16 +11,41 @@ const MediaLightbox = ({
     onSetMain,
     onClose,
     onPrev,
-    onNext
+    onNext,
+    onUpdateAlias
 }) => {
+    const [aliasDraft, setAliasDraft] = useState('');
+
+    useEffect(() => {
+        setAliasDraft(img?.alias || img?.original_name || '');
+    }, [img?.id]);
+
     if (!img) return null;
 
     return (
         <div className="media-gallery-lightbox-overlay">
             <div className="media-gallery-lightbox-header">
-                <div>
-                    <span className="media-gallery-lightbox-title-label">Visualización</span>
-                    <h4 className="media-gallery-lightbox-title">{img.filename || 'Detalle de imagen'}</h4>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                    <span className="media-gallery-lightbox-title-label">Nombre amigable</span>
+                    {onUpdateAlias ? (
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '4px' }}>
+                            <input
+                                value={aliasDraft}
+                                onChange={(e) => setAliasDraft(e.target.value)}
+                                placeholder="Ej: Vestido Noemi Azul"
+                                style={{ flex: 1, maxWidth: '360px', height: '38px', padding: '0 12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.1)', color: '#fff', fontSize: '14px' }}
+                            />
+                            <button
+                                onClick={(e) => { e.stopPropagation(); onUpdateAlias(img.id, aliasDraft); }}
+                                title="Guardar nombre"
+                                style={{ height: '38px', padding: '0 14px', borderRadius: '10px', border: 'none', background: '#8f0653', color: '#fff', fontWeight: '700', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                            >
+                                <Check size={16} /> Guardar
+                            </button>
+                        </div>
+                    ) : (
+                        <h4 className="media-gallery-lightbox-title">{img.alias || img.original_name || 'Detalle de imagen'}</h4>
+                    )}
                 </div>
                 <div className="media-gallery-lightbox-actions">
                     {onSetMain && img.id !== mainId && (
@@ -50,7 +75,7 @@ const MediaLightbox = ({
                 </button>
                 <img 
                     className="media-gallery-lightbox-img" 
-                    src={`${(window.location.origin.includes('localhost') ? 'http://localhost:8000' : '')}${img.url}`} 
+                    src={`${img.url}`} 
                     alt={img.filename || ''} 
                 />
                 <button className="media-gallery-lightbox-arrow-right" onClick={onNext}>
