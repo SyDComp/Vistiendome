@@ -70,3 +70,13 @@ img {
   scrollbar-width: thin;
   scrollbar-color: var(--color-border-medium) transparent;
 }
+
+/* Selección de texto acorde a la marca (en vez del azul por defecto del navegador) */
+::selection {
+  background: var(--color-brand);
+  color: #ffffff;
+}
+::-moz-selection {
+  background: var(--color-brand);
+  color: #ffffff;
+}

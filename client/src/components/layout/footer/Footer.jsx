@@ -13,11 +13,13 @@ import {
 } from 'lucide-react';
 import { navLinks, soporteLinks } from '../../../constants/pruebas';
 import { useSettings } from '../../../context/SettingsContext';
+import { buildMapLinks } from '../../../utils/mapLinks';
 
 const Footer = ({ onNavigate }) => {
     const { settings } = useSettings();
     const social = settings.social_links || {};
     const contact = settings.contact_info || {};
+    const { googleMapsUrl, wazeUrl } = buildMapLinks();
 
     // Orden por prioridad: Facebook primero (es el canal más importante para Vistiendomé)
     const socialItems = [
@@ -25,8 +27,8 @@ const Footer = ({ onNavigate }) => {
         { id: 'instagram', url: social.instagram, icon: <Camera size={18} />, name: 'Instagram' },
         { id: 'tiktok', url: social.tiktok, icon: <Music size={18} />, name: 'TikTok' },
         { id: 'whatsapp', url: social.whatsapp ? `https://wa.me/${social.whatsapp.replace(/\D/g, '')}` : '', icon: <MessageCircle size={18} />, name: 'WhatsApp' },
-        { id: 'maps', url: contact.maps_url, icon: <Map size={18} />, name: 'Google Maps' },
-        { id: 'waze', url: contact.waze_url, icon: <Navigation size={18} />, name: 'Waze' },
+        { id: 'maps', url: googleMapsUrl, icon: <Map size={18} />, name: 'Google Maps' },
+        { id: 'waze', url: wazeUrl, icon: <Navigation size={18} />, name: 'Waze' },
     ].filter(item => item.url);
 
     return (

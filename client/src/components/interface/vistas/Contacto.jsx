@@ -3,6 +3,7 @@ import { useSettings } from '../../../context/SettingsContext';
 import { Camera, Globe, MessageCircle, Mail, Phone, MapPin, Clock, User, Users, Calendar, FileText, X, Map, Navigation } from 'lucide-react';
 import { formatRUT } from '../../../utils/formatters';
 import { buildWhatsAppMessage } from '../../../utils/cartUtils';
+import { buildMapLinks } from '../../../utils/mapLinks';
 import Button from '../../ui/Button';
 import { get, post } from '../../../lib/api/client';
 
@@ -10,6 +11,7 @@ const Contacto = () => {
     const { settings } = useSettings();
     const contact = settings.contact_info || {};
     const social = settings.social_links || {};
+    const { googleMapsUrl, wazeUrl } = buildMapLinks();
 
     const rawShippingMethods = settings?.shipping_methods !== undefined 
         ? settings.shipping_methods 
@@ -516,13 +518,13 @@ const Contacto = () => {
                             <MessageCircle size={24} /> <span>WhatsApp</span>
                         </a>
                     )}
-                    {contact.maps_url && (
-                        <a href={contact.maps_url} target="_blank" rel="noopener noreferrer" className="social-link-item">
+                    {googleMapsUrl && (
+                        <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="social-link-item">
                             <Map size={24} /> <span>Google Maps</span>
                         </a>
                     )}
-                    {contact.waze_url && (
-                        <a href={contact.waze_url} target="_blank" rel="noopener noreferrer" className="social-link-item">
+                    {wazeUrl && (
+                        <a href={wazeUrl} target="_blank" rel="noopener noreferrer" className="social-link-item">
                             <Navigation size={24} /> <span>Waze</span>
                         </a>
                     )}

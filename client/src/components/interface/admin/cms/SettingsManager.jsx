@@ -29,9 +29,7 @@ const SettingsManager = () => {
         tiktok: '',
         email: '',
         phone_display: '',
-        address: '',
-        maps_url: '',
-        waze_url: ''
+        address: ''
     });
     const [shippingMethods, setShippingMethods] = useState([]);
     const [shippingColors, setShippingColors] = useState({});
@@ -124,9 +122,7 @@ const SettingsManager = () => {
             const contact = {
                 email: settings.email,
                 phone_display: settings.phone_display,
-                address: settings.address,
-                maps_url: settings.maps_url,
-                waze_url: settings.waze_url
+                address: settings.address
             };
 
             await Promise.all([
@@ -316,34 +312,9 @@ const SettingsManager = () => {
                                 style={{ ...inputStyle, height: '100px', resize: 'none', paddingTop: '12px' }}
                             />
                         </div>
-                        <div className="input-group">
-                            <label style={labelStyle}><Globe size={14} /> Link de Google Maps</label>
-                            <input
-                                type="text"
-                                name="maps_url"
-                                value={settings.maps_url}
-                                onChange={handleChange}
-                                placeholder="https://maps.app.goo.gl/..."
-                                style={inputStyle}
-                            />
-                            <p style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', lineHeight: 1.5 }}>
-                                Botón "Compartir" en Google Maps. Vacío = no se muestra el ícono.
-                            </p>
-                        </div>
-                        <div className="input-group">
-                            <label style={labelStyle}><Globe size={14} /> Link de Waze</label>
-                            <input
-                                type="text"
-                                name="waze_url"
-                                value={settings.waze_url}
-                                onChange={handleChange}
-                                placeholder="https://waze.com/ul/..."
-                                style={inputStyle}
-                            />
-                            <p style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', lineHeight: 1.5 }}>
-                                Botón "Compartir" en Waze. Vacío = no se muestra el ícono.
-                            </p>
-                        </div>
+                        <p style={{ fontSize: '12px', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                            Los íconos de Google Maps y Waze del sitio se calculan solos a partir de esta dirección — no hay que cargar un link aparte.
+                        </p>
                     </div>
                     
                     <div style={{ marginTop: '24px', padding: '15px', background: '#f8fafc', borderRadius: '16px', display: 'flex', gap: '12px' }}>
