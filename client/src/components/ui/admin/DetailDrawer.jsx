@@ -11,27 +11,8 @@ import { getShippingColor } from '../../../utils/shippingColors';
 
 const API_BASE = '/api/v1/admin/catalog';
 
-// Función para generar un código EAN-13 determinista basado en un texto (SKU)
-const generateEAN13 = (text) => {
-    if (!text) return "";
-    let hash = 0;
-    for (let i = 0; i < text.length; i++) {
-        hash = ((hash << 5) - hash) + text.charCodeAt(i);
-        hash = hash & hash;
-    }
-    let hashStr = Math.abs(hash).toString().padStart(12, '0');
-    while (hashStr.length < 12) hashStr += hashStr;
-    hashStr = hashStr.substring(0, 12);
-    
-    let sum = 0;
-    for (let i = 0; i < 12; i++) {
-        sum += parseInt(hashStr[i]) * (i % 2 === 0 ? 1 : 3);
-    }
-    const checksum = (10 - (sum % 10)) % 10;
-    return hashStr + checksum;
-};
-
 import Skeleton, { SectionSkeleton } from '../Skeleton';
+import { generateEAN13 } from '../../../features/productDetail/utils/skuUtils';
 
 /**
  * DetailDrawer: Vista de detalles potente con navegación histórica (Stack-based).

@@ -3,7 +3,7 @@
 Documento vivo. Se actualiza después de cada reunión.
 Referencia de alcance original: [propuesta_vistiendome.md](propuesta_vistiendome.md) (junio 2026 — **desactualizada**, ver nota al final).
 
-**Progreso:** Fase 1 completa (2026-08-10) — commits `1ca9c37` (fix de puerto dinámico, fuera de este plan), `6040641` (gitignore), `3ea313c` (este documento) y `e04b314` (los 5 items de Fase 1). Fase 2 y 3 sin empezar.
+**Progreso:** Fase 1 completa (2026-08-10) — commits `1ca9c37` (fix de puerto dinámico, fuera de este plan), `6040641` (gitignore), `3ea313c` (este documento) y `e04b314` (los 5 items de Fase 1), más ajustes de pulido sobre WhatsApp/Maps/Waze. Fase 2 en curso: 2.0 (refactor de impresión) se descartó tras leer el código a fondo — ver sección 2.0 — y se corrigió una duplicación real de `generateEAN13`.
 
 **Clasificación comercial** (a completar por Allan antes de enviar a la clienta):
 
@@ -12,8 +12,6 @@ Referencia de alcance original: [propuesta_vistiendome.md](propuesta_vistiendome
 | `[I]` Incluido | Ya estaba en lo comprometido | Se hace, no se menciona |
 | `[A]` Ajuste sin costo | Nuevo pero mínimo | Se regala, **pero se le dice que se regaló** — trabajo gratis que nadie sabe que fue gratis no vale nada |
 | `[N]` Desarrollo nuevo | Alcance nuevo real | Lleva plazo y valor. **No se empieza sin aprobación** |
-
-> El refactor 2.0 **no va como línea aparte**: nadie compra un refactor. Se absorbe dentro del precio de la etiqueta de producto (2.1).
 
 **Decisión de Allan (2026-08-10):** todos los `[N]` de la Fase 3 se hacen **gratis**, con una condición explícita — **con esto se cierra el alcance de esta ronda.** Falta comunicárselo a Paola por escrito con esos mismos términos (gratis + cierre de alcance), no solo de palabra, para que la decisión quede protegida de cara al futuro.
 
@@ -47,28 +45,26 @@ Referencia de alcance original: [propuesta_vistiendome.md](propuesta_vistiendome
 
 | # | Pedido de la clienta | Traducción técnica | Estado hoy | Clas. |
 |---|---|---|---|---|
-| 2.1 | **Etiqueta de producto profesional** — código de barras + Vistiendome + talla + nombre + descripción + precio | Etiqueta nueva, al nivel de la de envíos | `BarcodePrinter.jsx` (868 líneas) imprime nombre + talla/color + código. No imprime precio ni marca. **Ver deuda técnica ↓** | `[ ]` |
+| 2.1 | **Etiqueta de producto profesional** — código de barras + Vistiendome + talla + nombre + descripción + precio | Extensión contenida dentro de `BarcodePrinter.jsx` | `BarcodePrinter.jsx` (868 líneas) imprime nombre + talla/color + código. No imprime precio ni marca. **Ya no depende de 2.0** (ver corrección abajo) — se implementa directo | `[ ]` |
 | 2.2 | Videos de YouTube en colecciones | Campo `video_url` en colección + embed | No existe nada. Patrón simple, igual al de imágenes | `[ ]` |
 | 2.3 | **Buscador sobre todas las características del sistema** | Tokenizar la búsqueda y matchear cada token contra nombre, categoría y **los valores de cualquier `Characteristic` definida** | `InstantSearch.jsx:51` es `.includes()` simple: el orden de las palabras importa y no tolera errores de tipeo. **El modelo ya lo permite:** `Characteristic` (`catalog.py:47`) es genérico (`name`, `value_structure`, `domain`, `is_filterable`) y `SKU.config` es un dict libre. Data-driven: al definir una característica nueva (Tela, Escote), el buscador la incorpora sin tocar código | `[ ]` |
 | 2.4 | Comprobante de compra sin precios | Nuevo layout de impresión sobre el núcleo de 2.0 | **Corrección tras revisar a fondo:** `ShippingLabelPrinter.jsx` y `PrintLabel.jsx` son etiquetas de **envío** (destinatario, dirección, transporte) — ninguno lista los productos comprados. El comprobante **no existe**, es trabajo nuevo real. Es la misma pieza técnica que 3.2 (lista de ítems de una cotización), solo cambia el layout: uno sin precios para la clienta, otro con detalle de confección para el taller | `[ ]` |
 
-### 2.0 Refactor del núcleo de impresión — **APROBADO, va primero**
+### 2.0 Refactor del núcleo de impresión — **DESCARTADO tras leer los tres archivos a fondo**
 
-Prerequisito de 2.1. Hay **tres** impresores vivos que reimplementan lo mismo (formatos de hoja, constructor del HTML de impresión, render de código de barras):
+La premisa original ("los tres reimplementan lo mismo") era incorrecta. Verificado línea por línea:
 
-| Archivo | Líneas | Ruta | Propósito |
+| Archivo | Líneas | Ruta | Cómo imprime |
 |---|---|---|---|
-| `BarcodePrinter.jsx` | 868 | `/admin/dashboard/inventory/barcodes` | Códigos de barras de variantes |
-| `ShippingLabelPrinter.jsx` | 1042 | `/admin/dashboard/crm/shipping-labels` | Etiquetas de envío en lote |
-| `PrintLabel.jsx` | 470 | `/admin/print/cotizacion/:id` | Impresión de **una** cotización |
+| `BarcodePrinter.jsx` | 868 | `/admin/dashboard/inventory/barcodes` | Genera un HTML completo como string (`buildPrintHTML`) desde datos. Modelo propio: Papel × Tamaño de etiqueta → grilla calculada matemáticamente |
+| `ShippingLabelPrinter.jsx` | 1042 | `/admin/dashboard/crm/shipping-labels` | Clona el HTML **ya renderizado** por React (`printContainerRef.current.innerHTML`) hacia la ventana nueva. Modelo propio: 6 presets de formato fijos, sin grilla calculada |
+| `PrintLabel.jsx` | 470 | `/admin/print/cotizacion/:id` | Ni siquiera usa ventana emergente — es una ruta React normal que se imprime con `Ctrl+P` (`@media print`) |
 
-> Corrección: `PrintLabel.jsx` **no es código muerto** (verificado en `App.jsx:74`). Los tres cumplen propósitos distintos y ninguno se elimina.
+Tres estrategias de impresión genuinamente distintas y tres modelos de datos distintos. Forzarlos a compartir un "núcleo" habría sido una abstracción inventada, no una real — exactamente lo que el estándar de arquitectura del proyecto pide evitar. **No se construye.**
 
-Plan:
-1. Extraer un subpaquete `impresion/` con responsabilidades separadas: formatos de hoja, constructor del HTML de impresión, render de código de barras. Fachada en `index.js`.
-2. Dejar cada impresor (códigos, envío, cotización, producto) como un **layout** sobre esa base.
+**Lo que sí era duplicación real (corregido):** `generateEAN13` (genera código de barras determinista desde el SKU) estaba copiada en 3 archivos (`BarcodePrinter.jsx`, `DetailDrawer.jsx`, `VariantPicker.jsx`) cuando ya existía una versión compartida en `features/productDetail/utils/skuUtils.js` que `ProductDetailView.jsx` sí usaba. Los tres ahora importan la versión compartida.
 
-Se hace una vez y los cuatro quedan mantenibles. Sin esto, agregar la etiqueta de producto empeora el problema.
+**Consecuencia:** 2.1 no tiene prerequisito — se implementa directo dentro de `BarcodePrinter.jsx`.
 
 ---
 
