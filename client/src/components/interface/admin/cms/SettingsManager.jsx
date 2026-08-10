@@ -30,7 +30,8 @@ const SettingsManager = () => {
         email: '',
         phone_display: '',
         address: '',
-        map_url: ''
+        maps_url: '',
+        waze_url: ''
     });
     const [shippingMethods, setShippingMethods] = useState([]);
     const [shippingColors, setShippingColors] = useState({});
@@ -124,7 +125,8 @@ const SettingsManager = () => {
                 email: settings.email,
                 phone_display: settings.phone_display,
                 address: settings.address,
-                map_url: settings.map_url
+                maps_url: settings.maps_url,
+                waze_url: settings.waze_url
             };
 
             await Promise.all([
@@ -315,17 +317,31 @@ const SettingsManager = () => {
                             />
                         </div>
                         <div className="input-group">
-                            <label style={labelStyle}><Globe size={14} /> Link de Google Maps o Waze</label>
+                            <label style={labelStyle}><Globe size={14} /> Link de Google Maps</label>
                             <input
                                 type="text"
-                                name="map_url"
-                                value={settings.map_url}
+                                name="maps_url"
+                                value={settings.maps_url}
                                 onChange={handleChange}
                                 placeholder="https://maps.app.goo.gl/..."
                                 style={inputStyle}
                             />
                             <p style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', lineHeight: 1.5 }}>
-                                Pega el link para compartir de Google Maps o Waze (botón "Compartir" en la app). Si lo dejas vacío, no se muestra el botón de "Cómo llegar".
+                                Botón "Compartir" en Google Maps. Vacío = no se muestra el ícono.
+                            </p>
+                        </div>
+                        <div className="input-group">
+                            <label style={labelStyle}><Globe size={14} /> Link de Waze</label>
+                            <input
+                                type="text"
+                                name="waze_url"
+                                value={settings.waze_url}
+                                onChange={handleChange}
+                                placeholder="https://waze.com/ul/..."
+                                style={inputStyle}
+                            />
+                            <p style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', lineHeight: 1.5 }}>
+                                Botón "Compartir" en Waze. Vacío = no se muestra el ícono.
                             </p>
                         </div>
                     </div>

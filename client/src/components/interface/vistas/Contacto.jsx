@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '../../../context/SettingsContext';
-import { Camera, Globe, MessageCircle, Mail, Phone, MapPin, Clock, User, Users, Calendar, FileText, X } from 'lucide-react';
+import { Camera, Globe, MessageCircle, Mail, Phone, MapPin, Clock, User, Users, Calendar, FileText, X, Map, Navigation } from 'lucide-react';
 import { formatRUT } from '../../../utils/formatters';
 import { buildWhatsAppMessage } from '../../../utils/cartUtils';
 import Button from '../../ui/Button';
@@ -473,16 +473,6 @@ const Contacto = () => {
                     <div className="info-block">
                         <h4><MapPin size={18} /> Taller y Showroom</h4>
                         <p>{contact.address || 'Camino San Camilo Km 1,8, San Carlos, Chile.'}</p>
-                        {contact.map_url && (
-                            <a
-                                href={contact.map_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ fontSize: '13px', color: 'var(--color-brand)', fontWeight: 600, textDecoration: 'underline', display: 'inline-block', marginTop: '4px' }}
-                            >
-                                Cómo llegar →
-                            </a>
-                        )}
                     </div>
                     {contact.email && (
                         <div className="info-block">
@@ -524,6 +514,16 @@ const Contacto = () => {
                     {social.whatsapp && (
                         <a href={`https://wa.me/${social.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="social-link-item">
                             <MessageCircle size={24} /> <span>WhatsApp</span>
+                        </a>
+                    )}
+                    {contact.maps_url && (
+                        <a href={contact.maps_url} target="_blank" rel="noopener noreferrer" className="social-link-item">
+                            <Map size={24} /> <span>Google Maps</span>
+                        </a>
+                    )}
+                    {contact.waze_url && (
+                        <a href={contact.waze_url} target="_blank" rel="noopener noreferrer" className="social-link-item">
+                            <Navigation size={24} /> <span>Waze</span>
                         </a>
                     )}
                 </div>

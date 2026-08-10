@@ -1,13 +1,15 @@
 import React from 'react';
 import { 
-    Camera, 
-    Globe, 
-    MessageCircle, 
-    Mail, 
+    Camera,
+    Globe,
+    MessageCircle,
+    Mail,
     Music,
     MapPin,
     Clock,
-    Phone
+    Phone,
+    Map,
+    Navigation
 } from 'lucide-react';
 import { navLinks, soporteLinks } from '../../../constants/pruebas';
 import { useSettings } from '../../../context/SettingsContext';
@@ -23,6 +25,8 @@ const Footer = ({ onNavigate }) => {
         { id: 'instagram', url: social.instagram, icon: <Camera size={18} />, name: 'Instagram' },
         { id: 'tiktok', url: social.tiktok, icon: <Music size={18} />, name: 'TikTok' },
         { id: 'whatsapp', url: social.whatsapp ? `https://wa.me/${social.whatsapp.replace(/\D/g, '')}` : '', icon: <MessageCircle size={18} />, name: 'WhatsApp' },
+        { id: 'maps', url: contact.maps_url, icon: <Map size={18} />, name: 'Google Maps' },
+        { id: 'waze', url: contact.waze_url, icon: <Navigation size={18} />, name: 'Waze' },
     ].filter(item => item.url);
 
     return (
@@ -91,16 +95,6 @@ const Footer = ({ onNavigate }) => {
                             <div>
                                 <span className="info-label">Taller y Showroom</span>
                                 <p>{contact.address || 'Camino San Camilo Km 1,8, San Carlos.'}</p>
-                                {contact.map_url && (
-                                    <a
-                                        href={contact.map_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        style={{ fontSize: '13px', color: 'var(--color-brand)', fontWeight: 600, textDecoration: 'underline', display: 'inline-block', marginTop: '4px' }}
-                                    >
-                                        Cómo llegar →
-                                    </a>
-                                )}
                             </div>
                         </div>
                         <div className="contact-info-item">
