@@ -94,66 +94,54 @@ const formatVariantAttributes = (p) => {
     return lines;
 };
 
+// Cada bloque es un grupo de líneas relacionadas (ej: Cliente+RUT+Contacto).
+// Los bloques se separan entre sí por una única línea en blanco — nada de
+// separadores ASCII, que en WhatsApp se ven como ruido, no como orden.
 export const buildWhatsAppMessage = ({ tipo = 'pedido', cliente, despacho, grupo, productos, total, mensaje } = {}) => {
-    const L = [];
     const subtitulo = tipo === 'grupo' && grupo?.tipo
         ? `${TITULOS.grupo} · ${grupo.tipo}`
         : (TITULOS[tipo] || 'Nuevo mensaje');
 
-    L.push(`¡Hola Paola! 🌸 *${subtitulo}*`);
-    L.push('──────────────');
+    const bloques = [];
 
-    if (cliente?.nombre) L.push(`*Cliente:* ${cliente.nombre}`);
-    if (cliente?.rut) L.push(`*RUT:* ${cliente.rut}`);
+    bloques.push([`¡Hola Paola! *${subtitulo}*`]);
+
+    const clienteLines = [];
+    if (cliente?.nombre) clienteLines.push(`*Cliente:* ${cliente.nombre}`);
+    if (cliente?.rut) clienteLines.push(`*RUT:* ${cliente.rut}`);
     const contacto = [cliente?.email, cliente?.telefono].filter(Boolean).join(' | ');
-    if (contacto) L.push(`*Contacto:* ${contacto}`);
-
-    if (grupo?.cantidad) L.push(`*Cantidad aprox.:* ${grupo.cantidad}`);
-    if (grupo?.evento) L.push(`*Evento:* ${grupo.evento}`);
+    if (contacto) clienteLines.push(`*Contacto:* ${contacto}`);
+    if (grupo?.cantidad) clienteLines.push(`*Cantidad aprox.:* ${grupo.cantidad}`);
+    if (grupo?.evento) clienteLines.push(`*Evento:* ${grupo.evento}`);
+    if (clienteLines.length) bloques.push(clienteLines);
 
     if (despacho) {
         const dest = [despacho.direccion, despacho.comuna, despacho.region].filter(Boolean).join(', ');
         const linea = [despacho.transporte, dest].filter(Boolean).join(' - ');
-        if (linea) L.push(`*Despacho:* ${linea}`);
+        if (linea) bloques.push([`*Despacho:* ${linea}`]);
     }
 
     if (productos && productos.length) {
-        L.push('');
-        if (productos.length === 1) {
-            L.push('*Detalle del producto:*');
-        } else {
-            L.push(`*Productos (${productos.length}):*`);
-        }
-        
+        const prodLines = [productos.length === 1 ? '*Detalle del producto:*' : `*Productos (${productos.length}):*`];
         productos.forEach((p, index) => {
-            if (index > 0 || productos.length > 1) {
-                L.push('');
-            }
+            if (productos.length > 1) prodLines.push('');
             const prefix = productos.length > 1 ? `*${index + 1}. Producto:* ` : '*Producto:* ';
-            L.push(`${prefix}${p.name}`);
-            if (p.quantity) L.push(`*Cantidad:* ${p.quantity}`);
-            if (p.price != null) L.push(`*Precio:* ${formatCurrency(p.price)}${p.quantity ? ' c/u' : ''}`);
-            
-            const variantLines = formatVariantAttributes(p);
-            variantLines.forEach(line => L.push(line));
-            
-            if (p.url) L.push(`*Enlace:* ${p.url}`);
+            prodLines.push(`${prefix}${p.name}`);
+            if (p.quantity) prodLines.push(`*Cantidad:* ${p.quantity}`);
+            if (p.price != null) prodLines.push(`*Precio:* ${formatCurrency(p.price)}${p.quantity ? ' c/u' : ''}`);
+            formatVariantAttributes(p).forEach(line => prodLines.push(line));
+            if (p.url) prodLines.push(`*Enlace:* ${p.url}`);
         });
+        bloques.push(prodLines);
     }
 
-    if (total != null) {
-        L.push('');
-        L.push(`*Total estimado:* ${formatCurrency(total)}`);
-    }
+    if (total != null) bloques.push([`*Total estimado:* ${formatCurrency(total)}`]);
 
-    if (mensaje) {
-        L.push('');
-        L.push(`*Mensaje:* ${mensaje}`);
-    }
+    if (mensaje) bloques.push([`*Mensaje:* ${mensaje}`]);
 
-    L.push('──────────────');
-    L.push('_Enviado desde el catálogo digital_ ✨');
-    return L.join('\n');
+    bloques.push(['_Enviado desde el catálogo digital_']);
+
+    return bloques.map(b => b.join('\n')).join('\n\n');
 };
 
 export const getCartItemKey = (productId, sku, selections = {}) => {
