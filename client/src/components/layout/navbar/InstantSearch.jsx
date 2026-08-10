@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, Loader2 } from 'lucide-react';
 import { getProducts, getImageUrl } from '../../../lib/api/endpoints';
+import { searchProducts } from '../../../features/catalog/utils/productSearch';
 
 const InstantSearch = ({ isMobile = false, onResultClick }) => {
     const navigate = useNavigate();
@@ -29,69 +30,7 @@ const InstantSearch = ({ isMobile = false, onResultClick }) => {
                 setIsLoading(true);
                 try {
                     const productsList = await getProducts();
-                    const searchResults = [];
-                    const normalizedQuery = query.toLowerCase().trim();
-
-                    productsList.forEach(product => {
-                        // 1. ¿Coincide el nombre del producto o categoría?
-                        const nameMatch = product.name.toLowerCase().includes(normalizedQuery);
-                        const catMatch = product.category?.toLowerCase().includes(normalizedQuery);
-
-                        if (nameMatch || catMatch) {
-                            // Si coincide el nombre/cat, añadimos el producto base (o su variante principal)
-                            searchResults.push({
-                                ...product,
-                                display_name: product.name,
-                                type: 'product'
-                            });
-                        }
-
-                        // 2. ¿Coincide alguna variante específica (Deep Search)?
-                        // Solo buscamos en variantes si el nombre del producto NO fue un match perfecto
-                        // o si queremos ofrecer opciones específicas (ej: cliente busca "Vestido Rojo")
-                        if (product.variants) {
-                            product.variants.forEach(variant => {
-                                // Buscamos en los valores de la configuración (Rojo, M, etc.)
-                                const configMatch = Object.values(variant.config || {}).some(val => 
-                                    val.toString().toLowerCase().includes(normalizedQuery)
-                                );
-
-                                if (configMatch) {
-                                    // Añadimos la variante como un resultado independiente
-                                    const variantLabel = Object.values(variant.config || {}).join(' - ');
-                                    const variantGroup = Object.entries(variant.config || {})
-                                        .filter(([k]) => !/talla|size|medida/i.test(k))
-                                        .map(([, v]) => v)
-                                        .join(' - ') || variant.sku;
-
-                                    searchResults.push({
-                                        id: `${product.id}-${variant.sku}`,
-                                        name: product.name,
-                                        display_name: `${product.name} - ${variantLabel}`,
-                                        slug: product.slug,
-                                        sku: variant.sku,
-                                        image: variant.image || product.image,
-                                        price: variant.price,
-                                        variant_group: variantGroup,
-                                        type: 'variant'
-                                    });
-                                }
-                            });
-                        }
-                    });
-
-                    // Limpiar duplicados de tallas idénticas pero permitir distintos colores/estilos del mismo producto
-                    const uniqueResults = [];
-                    const seenSlugs = new Set();
-                    
-                    searchResults.forEach(res => {
-                        const uniqueKey = res.variant_group ? `${res.slug}::${res.variant_group}` : res.slug;
-                        if (!seenSlugs.has(uniqueKey)) {
-                            uniqueResults.push(res);
-                            seenSlugs.add(uniqueKey);
-                        }
-                    });
-
+                    const uniqueResults = searchProducts(productsList, query);
                     setResults(uniqueResults.slice(0, 8));
                     setIsOpen(true);
                 } catch (error) {
