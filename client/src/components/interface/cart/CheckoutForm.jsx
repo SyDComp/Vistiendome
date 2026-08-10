@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Send, User, Mail, Phone, MapPin } from 'lucide-react';
 import { useForm } from '../../../hooks/useForm';
 import { useCart } from '../../../context/CartContext';
-import { buildWhatsAppMessage } from '../../../utils/cartUtils';
+import { buildWhatsAppMessage, openWhatsApp } from '../../../utils/cartUtils';
 import { track } from '../../../lib/analytics';
 import { get, post } from '../../../lib/api/client';
 import { formatRUT } from '../../../utils/formatters';
@@ -145,21 +145,8 @@ const CheckoutForm = ({ onClose }) => {
             total,
         });
         const contactNumber = settings?.social_links?.whatsapp?.replace(/\D/g, '') || '56931251973';
-        const whatsappUrl = `https://wa.me/${contactNumber}?text=${encodeURIComponent(whatsappMsg)}`;
-
-        // Detección robusta para iPad (incluso iPadOS 13+ con escritorio MacIntel), iOS y Móviles
-        const isIOSOrIPad = /iPad|iPhone|iPod/i.test(navigator.userAgent) || 
-                            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
-                            /Android/i.test(navigator.userAgent);
-
-        // Abrir WhatsApp SÍNCRONAMENTE antes de cualquier operación asíncrona (evita bloqueo de pop-up por Safari en iPad)
-        let popup = null;
-        if (!isIOSOrIPad) {
-            popup = window.open(whatsappUrl, '_blank');
-        }
-        if (isIOSOrIPad || !popup || popup.closed || typeof popup.closed === 'undefined') {
-            window.location.href = whatsappUrl;
-        }
+        // Se abre SÍNCRONAMENTE antes de cualquier operación asíncrona (evita bloqueo de pop-up por Safari en iPad)
+        openWhatsApp(contactNumber, whatsappMsg);
 
         // Analítica síncrona
         try {

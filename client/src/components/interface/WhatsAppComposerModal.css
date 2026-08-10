@@ -1,0 +1,93 @@
+.wa-composer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 2100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.wa-composer-card {
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
+    animation: waComposerSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes waComposerSlideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.wa-composer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+.wa-composer-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--color-admin-dark, #1e1b4b);
+}
+.wa-composer-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    display: flex;
+}
+
+.wa-composer-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-admin-dark, #1e1b4b);
+    margin-bottom: 8px;
+}
+
+.wa-composer-textarea {
+    width: 100%;
+    min-height: 110px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border, #e2e8f0);
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    box-sizing: border-box;
+}
+.wa-composer-textarea:focus-visible {
+    outline: none;
+    border-color: var(--color-success, #16a34a);
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+}
+
+.wa-composer-send {
+    width: 100%;
+    height: 52px;
+    margin-top: 16px;
+    background: var(--color-success, #16a34a);
+    color: #ffffff;
+    border: none;
+    border-radius: 14px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+}
+.wa-composer-send:hover:not(:disabled) { filter: brightness(1.05); }
+.wa-composer-send:disabled {
+    background: var(--color-text-disabled, #cbd5e1);
+    cursor: not-allowed;
+}

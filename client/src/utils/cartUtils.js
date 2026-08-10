@@ -14,6 +14,27 @@ const TITULOS = {
     pedido: 'Nuevo pedido',
     consulta: 'Consulta personal',
     grupo: 'Presupuesto grupal',
+    flotante: 'Consulta desde el sitio web',
+};
+
+/**
+ * Abre WhatsApp con un mensaje precargado, de forma robusta en iOS/iPadOS/Android
+ * (evita que Safari bloquee el popup por ocurrir tras código asíncrono).
+ * Único punto del sitio que hace esta navegación — no duplicar esta detección.
+ */
+export const openWhatsApp = (phone, message) => {
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    const isIOSOrIPad = /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+        /Android/i.test(navigator.userAgent);
+
+    let popup = null;
+    if (!isIOSOrIPad) {
+        popup = window.open(url, '_blank');
+    }
+    if (isIOSOrIPad || !popup || popup.closed || typeof popup.closed === 'undefined') {
+        window.location.href = url;
+    }
 };
 
 /**

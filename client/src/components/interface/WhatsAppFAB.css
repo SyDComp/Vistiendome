@@ -4,14 +4,17 @@
     bottom: 20px;
     width: 56px;
     height: 56px;
+    border: none;
     border-radius: 50%;
     background: var(--color-success);
     color: #ffffff;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
     z-index: 1400; /* bajo navbar/modales de producto y carrito, sobre el contenido normal */
+    cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
