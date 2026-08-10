@@ -29,8 +29,8 @@ client/.pnp.*
 server/venv/
 server/env/
 server/ENV/
-server/__pycache__/
-server/*.py[cod]
+server/**/__pycache__/
+server/**/*.py[cod]
 server/*$py.class
 server/.pytest_cache/
 server/.python-version
