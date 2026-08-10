@@ -7,7 +7,7 @@ import { useNotification } from '../../../../context/NotificationContext';
 import { Boxes, History, ArrowLeftRight, AlertTriangle, Plus, Minus, Info } from 'lucide-react';
 import FilterBar from '../../../ui/admin/FilterBar';
 
-const API_BASE = (import.meta.env.PROD ? '/api/v1/admin/catalog' : 'http://127.0.0.1:8000/api/v1/admin/catalog');
+const API_BASE = '/api/v1/admin/catalog';
 
 const LogisticsManager = () => {
     const { toast, confirm } = useNotification();

@@ -175,7 +175,7 @@ const BarcodePrinter = () => {
     // Carga de SKUs y agrupación por producto
     useEffect(() => {
         const token = localStorage.getItem('admin_token');
-        fetch((import.meta.env.PROD ? '/api/v1/admin/catalog/skus?page_size=9999' : 'http://127.0.0.1:8000/api/v1/admin/catalog/skus?page_size=9999'), {
+        fetch('/api/v1/admin/catalog/skus?page_size=9999', {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(r => r.json())

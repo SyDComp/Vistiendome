@@ -25,8 +25,7 @@ const AdminLogin = () => {
         console.log("Iniciando Acceso Administrador para:", payload.identificador);
 
         try {
-            const API_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || ``);
-            const res = await fetch(`${API_URL}/api/v1/auth/login`, {
+            const res = await fetch('/api/v1/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',

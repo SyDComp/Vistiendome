@@ -11,7 +11,7 @@ import Accordion from '../../../ui/Accordion';
 import FilterBar from '../../../ui/admin/FilterBar';
 import { Save, ArrowLeft, Layers, Plus, Trash2, Search, Settings2, Folder, X, ChevronRight, Hash, Sparkles, Check } from 'lucide-react';
 
-const API_BASE = (import.meta.env.PROD ? '/api/v1/admin/catalog' : 'http://127.0.0.1:8000/api/v1/admin/catalog');
+const API_BASE = '/api/v1/admin/catalog';
 
 const SpecificationManager = () => {
     const { toast, confirm } = useNotification();

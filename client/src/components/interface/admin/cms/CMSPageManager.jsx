@@ -28,7 +28,7 @@ import ConfirmModal from '../../../ui/ConfirmModal';
 import CMSRenderer from '../../cms/CMSRenderer';
 import { Smartphone, Monitor } from 'lucide-react';
 
-const API_BASE = `${(window.location.origin.includes('localhost') ? 'http://127.0.0.1:8000' : '')}/api/v1/homepage/admin`;
+const API_BASE = '/api/v1/homepage/admin';
 
 const CMSPageManager = ({ 
     page = 'homepage', 

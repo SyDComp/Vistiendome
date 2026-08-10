@@ -9,7 +9,7 @@ import { useScrollLock } from '../../../hooks/useScrollLock';
 import { useSettings } from '../../../context/SettingsContext';
 import { getShippingColor } from '../../../utils/shippingColors';
 
-const API_BASE = (import.meta.env.PROD ? '/api/v1/admin/catalog' : 'http://127.0.0.1:8000/api/v1/admin/catalog');
+const API_BASE = '/api/v1/admin/catalog';
 
 // Función para generar un código EAN-13 determinista basado en un texto (SKU)
 const generateEAN13 = (text) => {

@@ -6,7 +6,7 @@ import PremiumLoader from '../../ui/PremiumLoader';
 import { useScrollLock } from '../../../hooks/useScrollLock';
 import { ChevronRight, X, ArrowLeft } from 'lucide-react';
 
-const HELP_API = (import.meta.env.PROD ? '/api/v1/homepage/help/sections' : 'http://127.0.0.1:8000/api/v1/homepage/help/sections');
+const HELP_API = '/api/v1/homepage/help/sections';
 
 const AtencionCliente = ({ initialSection = 'tallas' }) => {
     const location = useLocation();

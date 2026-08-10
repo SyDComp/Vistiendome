@@ -15,7 +15,7 @@ import {
 import Button from '../../../ui/Button';
 import CMSPageManager from './CMSPageManager';
 
-const API_BASE = `${(window.location.origin.includes('localhost') ? 'http://127.0.0.1:8000' : '')}/api/v1/homepage/admin/help/sections`;
+const API_BASE = '/api/v1/homepage/admin/help/sections';
 
 const CustomerServiceManager = () => {
     const [sections, setSections] = useState([]);

@@ -6,7 +6,8 @@ import FeaturedCollections from '../colecciones/FeaturedCollections';
 import { getProducts, getImageUrl } from '../../../services/api';
 import { ArrowRight, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 
-const API_BASE = (import.meta.env.PROD ? '/api/v1/homepage/' : 'http://127.0.0.1:8000/api/v1/homepage/');
+// Ruta relativa: en dev pasa por el proxy de Vite (vite.config.js), en prod por nginx.
+const API_BASE = '/api/v1/homepage/';
 
 // ── Hook de viewport ─────────────────────────────────────────────────────────
 function useIsMobile(breakpoint = 1050, forcedValue = null) {

@@ -6,7 +6,7 @@ import Button from '../../../ui/Button';
 import { useNotification } from '../../../../context/NotificationContext';
 import { Palette, Plus, Save, Hash, Type, Trash2, Edit2, RotateCcw } from 'lucide-react';
 
-const API_BASE = (import.meta.env.PROD ? '/api/v1/admin/catalog/colors' : 'http://127.0.0.1:8000/api/v1/admin/catalog/colors');
+const API_BASE = '/api/v1/admin/catalog/colors';
 
 const ColorManager = () => {
     const { toast, confirm } = useNotification();
@@ -76,7 +76,7 @@ const ColorManager = () => {
     const handleSync = async () => {
         setLoading(true);
         try {
-            const res = await fetch((import.meta.env.PROD ? '/api/v1/admin/catalog/colors/sync' : 'http://127.0.0.1:8000/api/v1/admin/catalog/colors/sync'), { method: 'POST' });
+            const res = await fetch('/api/v1/admin/catalog/colors/sync', { method: 'POST' });
             if (res.ok) {
                 const data = await res.json();
                 toast.success(`Sincronización exitosa: ${data.synced_count} colores actualizados en el catálogo.`);

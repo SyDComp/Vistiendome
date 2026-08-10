@@ -24,9 +24,8 @@ const AdminProfile = () => {
     const loadProfile = async () => {
         setLoading(true);
         try {
-            const API_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || ``);
-            const res = await fetch(`${API_URL}/api/v1/auth/me`, {
-                headers: { 
+            const res = await fetch('/api/v1/auth/me', {
+                headers: {
                     'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
                 }
             });
@@ -52,8 +51,7 @@ const AdminProfile = () => {
         setMessage(null);
         
         try {
-            const API_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || ``);
-            const res = await fetch(`${API_URL}/api/v1/auth/me`, {
+            const res = await fetch('/api/v1/auth/me', {
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json',

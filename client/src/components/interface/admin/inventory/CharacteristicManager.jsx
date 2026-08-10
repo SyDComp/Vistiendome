@@ -9,7 +9,7 @@ import FilterBar from '../../../ui/admin/FilterBar';
 import { useNotification } from '../../../../context/NotificationContext';
 import { Hash, Tag, Palette } from 'lucide-react';
 
-const API_BASE = (import.meta.env.PROD ? '/api/v1/admin/catalog' : 'http://127.0.0.1:8000/api/v1/admin/catalog');
+const API_BASE = '/api/v1/admin/catalog';
 
 const CharacteristicManager = () => {
     const { toast, confirm } = useNotification();
