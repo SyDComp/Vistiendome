@@ -10,8 +10,9 @@ import DetailDrawer from '../../../ui/admin/DetailDrawer';
 import CharacteristicForm from './CharacteristicForm';
 import LibraryPicker from './LibraryPicker';
 import { useNotification } from '../../../../context/NotificationContext';
-import { Search, Image as ImageIcon, Box, Layout, Layers, Settings, Save, ArrowLeft, Trash2, Edit3, Plus, X, Folder, Sparkles, Package, Check, AlertCircle } from 'lucide-react';
+import { Search, Image as ImageIcon, Box, Layout, Layers, Settings, Save, ArrowLeft, Trash2, Edit3, Plus, X, Folder, Sparkles, Package, Check, AlertCircle, SquarePlay } from 'lucide-react';
 import { formatChar, formatOpt } from '../../../../utils/formatters';
+import { getYoutubeEmbedUrl } from '../../../../utils/youtube';
 import AdminFormLayout, { AdminFormRow, AdminFormSection, AdminFormSubmit } from '../../../ui/admin/AdminFormLayout';
 
 const API_BASE = `/api/v1/admin/catalog`;
@@ -483,6 +484,30 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                                     toast.success("Galería y Carrusel sincronizados con éxito");
                                 }}
                             />
+                        </div>
+
+                        <div className="product-carousel-wrapper">
+                            <div className="product-carousel-header">
+                                <h5 className="product-carousel-title">
+                                    <SquarePlay size={16} color="#ef4444" /> Video de YouTube
+                                </h5>
+                            </div>
+                            <p className="product-carousel-desc">
+                                Pega el link del video (subido a YouTube) para mostrarlo embebido en la ficha del producto.
+                            </p>
+                            <input
+                                type="text"
+                                value={values.extras?.video_url || ''}
+                                onChange={(e) => setValues(prev => ({ ...prev, extras: { ...prev.extras, video_url: e.target.value } }))}
+                                placeholder="https://www.youtube.com/watch?v=..."
+                                className="product-carousel-speed-select"
+                                style={{ width: '100%', boxSizing: 'border-box' }}
+                            />
+                            {values.extras?.video_url && !getYoutubeEmbedUrl(values.extras.video_url) && (
+                                <p className="product-carousel-desc" style={{ color: '#dc2626', marginTop: '6px' }}>
+                                    No reconozco ese link como un video de YouTube válido — no se mostrará en el sitio.
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>

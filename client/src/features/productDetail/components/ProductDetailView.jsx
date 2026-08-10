@@ -13,6 +13,7 @@ import useProductDetail from '../hooks/useProductDetail';
 import { generateEAN13, formatSku } from '../utils/skuUtils';
 import { handleShare } from '../utils/shareUtils';
 import { buildWhatsAppMessage } from '../../../utils/cartUtils';
+import { getYoutubeEmbedUrl } from '../../../utils/youtube';
 import { track } from '../../../lib/analytics';
 import '../productDetail.css';
 
@@ -288,6 +289,28 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                                                     <span className="spec-value-refined">{val}</span>
                                                 </div>
                                             ))}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+
+                            {(() => {
+                                const embedUrl = getYoutubeEmbedUrl(producto?.extras?.video_url);
+                                if (!embedUrl) return null;
+                                return (
+                                    <div className="product-video-section" style={{ animationDelay: '0.45s' }}>
+                                        <div className="section-title-wrapper">
+                                            <div className="title-accent" />
+                                            <h3 className="section-title-premium-text">Video</h3>
+                                        </div>
+                                        <div className="product-video-embed-wrapper">
+                                            <iframe
+                                                src={embedUrl}
+                                                title={`Video de ${producto?.name}`}
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                                loading="lazy"
+                                            />
                                         </div>
                                     </div>
                                 );

@@ -238,6 +238,23 @@
 .spec-label-refined { font-size: 10px; font-weight: 700; color: #9d174d; text-transform: uppercase; letter-spacing: 0.5px; }
 .spec-value-refined { font-size: 14px; font-weight: 600; color: #1e293b; }
 
+.product-video-section { margin-top: 32px; }
+.product-video-embed-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* proporción 16:9 */
+    border-radius: 20px;
+    overflow: hidden;
+    background: #0f172a;
+}
+.product-video-embed-wrapper iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
 .cta-grid-desktop {
     display: none;
     grid-template-columns: 2fr 1fr;
