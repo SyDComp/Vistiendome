@@ -139,8 +139,9 @@ export const buildWhatsAppMessage = ({ tipo = 'pedido', cliente, despacho, grupo
 
     if (mensaje) bloques.push([`*Mensaje:* ${mensaje}`]);
 
-    bloques.push(['_Enviado desde el catálogo digital_']);
-
+    // Sin firma final: el subtítulo del saludo ya dice de dónde viene el
+    // mensaje (Nuevo pedido / Consulta desde el sitio web / etc.) — repetirlo
+    // al final era decir lo mismo dos veces.
     return bloques.map(b => b.join('\n')).join('\n\n');
 };
 
