@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import Barcode from 'react-barcode';
 import { generateEAN13 } from '../../../../features/productDetail/utils/skuUtils';
+import { formatCurrency } from '../../../../utils/cartUtils';
 
 // ─── Configuración de tamaños ─────────────────────────────────────────────────
 const PAPER_SIZES = {
@@ -92,23 +93,29 @@ const buildPrintHTML = (slots, paperCfg, labelCfg, grid, options = {}) => {
     const pages = chunkArray(slots, grid.total);
 
     const pagesHTML = pages.map(pageSlots => {
-        const labelItems = pageSlots.map(({ sku, barcode, productName, config }) => {
+        const labelItems = pageSlots.map(({ sku, barcode, productName, config, price }) => {
             const configText = Object.values(config || {}).join(' / ');
             const label = configText ? `${productName} – ${configText}` : productName || sku;
             const color = colorMap[sku] || { bg: '#fff', border: '#ddd', text: '#333' };
             const bgStyle = labelStyle === 'color'
                 ? `background:${color.bg}; border:0.5px solid ${color.border};`
                 : `background:#fff; border:0.3px solid #ddd;`;
-            
+
             const svgContent = svgMap[barcode]
                 ? `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;">${svgMap[barcode]}</div>`
                 : `<div style="font-size:9px;font-family:monospace;color:#000;padding:2px;">${barcode}</div>`;
-            
-            const textContent = showSkuText
-                ? `<div style="font-size:${Math.max(6, labelCfg.bcFontSize * 0.5)}px;color:${labelStyle === 'color' ? color.text : '#555'};text-align:center;margin-top:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:bold;flex-shrink:0;">${label}</div>`
+
+            const fontSize = Math.max(6, labelCfg.bcFontSize * 0.5);
+            const textColor = labelStyle === 'color' ? color.text : '#555';
+            const nameLine = showSkuText
+                ? `<div style="font-size:${fontSize}px;color:${textColor};text-align:center;margin-top:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:bold;flex-shrink:0;">${label}</div>`
                 : '';
-                
-            return `<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2mm;overflow:hidden;page-break-inside:avoid;box-sizing:border-box;${bgStyle}">${svgContent}${textContent}</div>`;
+            // Precio + marca: siempre visible (identifica la prenda aunque el lector de barras no esté a mano)
+            const priceBrandLine = price != null
+                ? `<div style="font-size:${fontSize}px;color:${textColor};text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;"><b>${formatCurrency(price)}</b> · Vistiendomé</div>`
+                : '';
+
+            return `<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2mm;overflow:hidden;page-break-inside:avoid;box-sizing:border-box;${bgStyle}">${svgContent}${nameLine}${priceBrandLine}</div>`;
         }).join('');
         return `<div class="page"><div class="grid">${labelItems}</div></div>`;
     }).join('');
@@ -216,14 +223,14 @@ const BarcodePrinter = () => {
 
     // Ya no re-distribuimos al cambiar papel, solo ajustamos si el usuario hace click en rellenar.
     
-    // Toggle selección de variante — guarda config para el print
-    const toggleSku = (sku, barcode, productName, config) => {
+    // Toggle selección de variante — guarda config y precio para el print
+    const toggleSku = (sku, barcode, productName, config, price) => {
         setSelected(prev => {
             const next = { ...prev };
             if (next[sku]) {
                 delete next[sku];
             } else {
-                next[sku] = { sku, barcode, productName, config: config || {}, copies: 1 };
+                next[sku] = { sku, barcode, productName, config: config || {}, price, copies: 1 };
             }
             return next;
         });
@@ -270,6 +277,7 @@ const BarcodePrinter = () => {
                             barcode: s.barcode || generateEAN13(s.sku),
                             productName: product.name,
                             config: s.config || {},
+                            price: s.price,
                             copies: 1
                         };
                     }
@@ -424,7 +432,7 @@ const BarcodePrinter = () => {
                                             const config = s.config || {};
                                             return (
                                                 <div key={s.sku} className={`barcode-printer-variant-row ${isSel ? 'selected' : ''}`}
-                                                    onClick={() => toggleSku(s.sku, bc, product.name, s.config)}
+                                                    onClick={() => toggleSku(s.sku, bc, product.name, s.config, s.price)}
                                                 >
                                                     <span className={`barcode-printer-variant-icon ${isSel ? 'selected' : 'unselected'}`}>
                                                         {isSel ? <CheckSquare size={15} /> : <Square size={15} />}
@@ -672,6 +680,14 @@ const BarcodePrinter = () => {
                                                                 {label}
                                                             </span>
                                                         )}
+                                                        {slot.price != null && (
+                                                            <span className="barcode-printer-label-text" style={{
+                                                                fontSize: `${txtFs}px`,
+                                                                color: isClassic ? '#444' : color.text,
+                                                            }}>
+                                                                <strong>{formatCurrency(slot.price)}</strong> · Vistiendomé
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 );
                                             })}
@@ -805,6 +821,14 @@ const BarcodePrinter = () => {
                                                                             color: isClassic ? '#444' : color.text,
                                                                         }}>
                                                                             {label}
+                                                                        </span>
+                                                                    )}
+                                                                    {slot.price != null && (
+                                                                        <span className="barcode-printer-label-text" style={{
+                                                                            fontSize: `${txtFs}px`,
+                                                                            color: isClassic ? '#444' : color.text,
+                                                                        }}>
+                                                                            <strong>{formatCurrency(slot.price)}</strong> · Vistiendomé
                                                                         </span>
                                                                     )}
                                                                 </div>
