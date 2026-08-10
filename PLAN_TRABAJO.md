@@ -3,6 +3,8 @@
 Documento vivo. Se actualiza después de cada reunión.
 Referencia de alcance original: [propuesta_vistiendome.md](propuesta_vistiendome.md) (junio 2026 — **desactualizada**, ver nota al final).
 
+**Progreso:** Fase 1 completa (2026-08-10) — commits `1ca9c37` (fix de puerto dinámico, fuera de este plan), `6040641` (gitignore), `3ea313c` (este documento) y `e04b314` (los 5 items de Fase 1). Fase 2 y 3 sin empezar.
+
 **Clasificación comercial** (a completar por Allan antes de enviar a la clienta):
 
 | Etiqueta | Significa | Cómo se comunica |
@@ -13,29 +15,31 @@ Referencia de alcance original: [propuesta_vistiendome.md](propuesta_vistiendome
 
 > El refactor 2.0 **no va como línea aparte**: nadie compra un refactor. Se absorbe dentro del precio de la etiqueta de producto (2.1).
 
+**Decisión de Allan (2026-08-10):** todos los `[N]` de la Fase 3 se hacen **gratis**, con una condición explícita — **con esto se cierra el alcance de esta ronda.** Falta comunicárselo a Paola por escrito con esos mismos términos (gratis + cierre de alcance), no solo de palabra, para que la decisión quede protegida de cara al futuro.
+
 ---
 
 ## ⚠️ Preguntas abiertas — resolver con la clienta
 
-| # | Pregunta | Bloquea |
-|---|---|---|
-| 1 | **"Cómo voy a ingresar? Que aparezca como el modal"** — línea textual de los apuntes que nunca se tradujo. ¿Es el login del admin? ¿Otra cosa? Preguntar textual | Sin clasificar |
-| 2 | **Videos: ¿embebido o enlace?** Ella misma dudó ("videos **o** un botón de enlace"). Y ¿va a nivel colección o producto? Dijo "ver video de vestido tanto", que suena a producto | 2.2 |
-| 3 | **Planilla modificable: ¿qué campos y quién puede editarla?** | 3.2 |
-| 4 | **Precio mayorista: ¿por variante, o default a nivel producto que las variantes sobrescriben?** Única pregunta de modelo | 3.1 |
-| 5 | 💰 **Mostrarle el comprobante que YA existe** (`ShippingLabelPrinter`, sin precios, varios formatos). Si le sirve tal cual, **se borra un item sin escribir una línea de código.** Hacer esto primero | 2.4 |
+| # | Pregunta | Bloquea | Estado |
+|---|---|---|---|
+| 1 | ~~"Cómo voy a ingresar? Que aparezca como el modal"~~ | 3.1 | ✅ **Resuelta.** No es el `WelcomeModal` — Allan aclaró que es un selector de modo tipo "menú de videojuego" (mayorista/particular/iglesia) al entrar. Se descartó: como el precio real lo decide la cantidad (6+ unidades), un selector que no otorga nada solo agrega fricción en la entrada. Se reemplaza por **precio dual visible en el producto** (ver 3.1) |
+| 2 | **Videos: ¿embebido o enlace?** Ella misma dudó ("videos **o** un botón de enlace"). Y ¿va a nivel colección o producto? | 2.2 | Abierta. Allan confirmó el flujo: Paola sube a YouTube, se enlaza desde el sitio. Falta definir si embebido o solo link, y colección vs. producto |
+| 3 | **Planilla modificable: ¿qué campos y quién puede editarla?** | 3.2 | Abierta |
+| 4 | ~~Precio mayorista: ¿por variante o por producto?~~ | 3.1 | ✅ **Resuelta.** Es a nivel **variante** (confirmado) — coincide con cómo ya funciona el resto del sistema de precios (`compute_effective_price`) |
+| 5 | ~~Mostrarle el comprobante que YA existe~~ | 2.4 | ❌ **Corrección, no resuelta.** Se verificó el código a fondo: `ShippingLabelPrinter` es una etiqueta de **envío** (destinatario, dirección, transporte), no lista los productos comprados. El comprobante de compra sin precios **no existe**, es trabajo nuevo real (ver 2.4) |
 
 ---
 
-## Fase 1 — Rápidos (cerrar primero, antes de hablar de dinero)
+## Fase 1 — Rápidos ✅ COMPLETA (commit `e04b314`)
 
-| # | Pedido de la clienta | Traducción técnica | Estado hoy | Clas. |
-|---|---|---|---|---|
-| 1.1 | Precio $0 o $1 para regalos | Ninguna validación de precio mínimo bloquea esto | **Ya funciona.** Solo probar que checkout/WhatsApp no rompan con $0 | `[ ]` |
-| 1.2 | Letra más grande / negrita en la barra rosada | Agregar `font_size` y `bold` al config del banner | `TopBanner.jsx` ya es configurable (color, animación, velocidad). Falta solo tipografía — está fija en `TopBanner.css:13-15`. Agregar 2 controles en `SettingsManager.jsx:558` | `[ ]` |
-| 1.3 | Dirección obligatoria + decir "domicilio particular" | Sumar `direccion` a la validación del checkout | `CheckoutForm.jsx` ya tiene región/comuna/dirección/tipo de despacho. `validate()` solo exige nombre, rut, teléfono | `[ ]` |
-| 1.4 | Botón WhatsApp flotante permanente | Componente FAB fijo, global | El dato (`settings.whatsapp`) ya existe y se usa en enlaces puntuales. Falta el botón persistente | `[ ]` |
-| 1.5 | Ubicación con link a Google Maps / Waze | Campo `map_url` en Settings + botón en Footer y Contacto | Hoy la dirección es solo texto plano (`Contacto.jsx:93`) | `[ ]` |
+| # | Pedido de la clienta | Qué se hizo | Clas. |
+|---|---|---|---|
+| 1.1 | Precio $0 o $1 para regalos | **Se encontró un bug real al verificar** (no era cierto que "ya funcionaba"): `CartContext.addItem` trataba `price === 0` como "aún no cargó" y bloqueaba agregarlo al carrito; el mensaje de WhatsApp además omitía la línea de precio/total en $0 por el mismo error de truthy-check. Ambos corregidos | `[ ]` |
+| 1.2 | Letra más grande / negrita en la barra rosada | `font_size` (normal/grande/muy grande) y `bold` agregados al config del banner, editables desde Settings | `[ ]` |
+| 1.3 | Dirección obligatoria + decir "domicilio particular" | `direccion` ahora obligatoria en el checkout cuando el despacho es a domicilio (no aplica a retiro en tienda/sucursal); label actualizado a "Dirección de Domicilio Particular" | `[ ]` |
+| 1.4 | Botón WhatsApp flotante permanente | Componente `WhatsAppFAB` nuevo, visible en todo el sitio público, se auto-oculta si no hay número configurado | `[ ]` |
+| 1.5 | Ubicación con link a Google Maps / Waze | Campo `map_url` en Settings, botón "Cómo llegar →" en Footer y Contacto | `[ ]` |
 
 ---
 
@@ -46,7 +50,7 @@ Referencia de alcance original: [propuesta_vistiendome.md](propuesta_vistiendome
 | 2.1 | **Etiqueta de producto profesional** — código de barras + Vistiendome + talla + nombre + descripción + precio | Etiqueta nueva, al nivel de la de envíos | `BarcodePrinter.jsx` (868 líneas) imprime nombre + talla/color + código. No imprime precio ni marca. **Ver deuda técnica ↓** | `[ ]` |
 | 2.2 | Videos de YouTube en colecciones | Campo `video_url` en colección + embed | No existe nada. Patrón simple, igual al de imágenes | `[ ]` |
 | 2.3 | **Buscador sobre todas las características del sistema** | Tokenizar la búsqueda y matchear cada token contra nombre, categoría y **los valores de cualquier `Characteristic` definida** | `InstantSearch.jsx:51` es `.includes()` simple: el orden de las palabras importa y no tolera errores de tipeo. **El modelo ya lo permite:** `Characteristic` (`catalog.py:47`) es genérico (`name`, `value_structure`, `domain`, `is_filterable`) y `SKU.config` es un dict libre. Data-driven: al definir una característica nueva (Tela, Escote), el buscador la incorpora sin tocar código | `[ ]` |
-| 2.4 | Comprobante de compra sin precios | — | **Ya existe.** `ShippingLabelPrinter.jsx` genera comprobantes en varios formatos (A4, térmico, ticketera) y ya no muestra precios. Confirmar con la clienta si le sirve tal cual | `[ ]` |
+| 2.4 | Comprobante de compra sin precios | Nuevo layout de impresión sobre el núcleo de 2.0 | **Corrección tras revisar a fondo:** `ShippingLabelPrinter.jsx` y `PrintLabel.jsx` son etiquetas de **envío** (destinatario, dirección, transporte) — ninguno lista los productos comprados. El comprobante **no existe**, es trabajo nuevo real. Es la misma pieza técnica que 3.2 (lista de ítems de una cotización), solo cambia el layout: uno sin precios para la clienta, otro con detalle de confección para el taller | `[ ]` |
 
 ### 2.0 Refactor del núcleo de impresión — **APROBADO, va primero**
 
@@ -82,7 +86,7 @@ Trabajo concreto:
 3. **Selección por rango de características en `BatchVariantEditor`** — hoy la selección es manual; falta poder decir "todas las XL" o "todas las de manga larga" y aplicarles precio de una. Aquí vive el "manejo robusto por rango".
 4. El modal como toggle de visualización.
 
-**Pregunta abierta:** ¿el precio mayorista se define variante por variante, o hay un valor por defecto a nivel producto que las variantes pueden sobrescribir?
+**Resuelto:** el precio mayorista se define **a nivel variante** (`SKU.price_mayorista`), consistente con cómo ya funciona `SKU.price` y con el patrón de `compute_effective_price` (override de SKU sobre el de producto). Sin default a nivel producto por ahora — se puede agregar después si cargar variante por variante resulta tedioso.
 
 ### 3.2 Confección a pedido, orden de corte y planilla
 
