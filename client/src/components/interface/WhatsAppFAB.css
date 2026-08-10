@@ -1,0 +1,36 @@
+.whatsapp-fab {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--color-success);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+    z-index: 1400; /* bajo navbar/modales de producto y carrito, sobre el contenido normal */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.whatsapp-fab:hover,
+.whatsapp-fab:focus-visible {
+    transform: scale(1.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+.whatsapp-fab:focus-visible {
+    outline: 3px solid var(--color-success);
+    outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+    .whatsapp-fab {
+        right: 16px;
+        bottom: 16px;
+        width: 50px;
+        height: 50px;
+    }
+}

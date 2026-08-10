@@ -52,6 +52,10 @@ const CheckoutForm = ({ onClose }) => {
         if (!values.nombre.trim()) errors.nombre = 'El nombre es obligatorio';
         if (!values.rut.trim()) errors.rut = 'El RUT es obligatorio';
         if (!values.telefono.trim()) errors.telefono = 'El teléfono es obligatorio';
+        // La dirección solo se pide (y es obligatoria) cuando el despacho es a domicilio:
+        // retiro en tienda y retiro en sucursal no la necesitan.
+        const requiereDireccion = !values.transporte?.toUpperCase().includes('RETIRO') && values.tipo_despacho !== 'SUCURSAL';
+        if (requiereDireccion && !values.direccion.trim()) errors.direccion = 'La dirección de tu domicilio particular es obligatoria';
         return errors;
     };
     const { values, errors, handleChange, handleSubmit, isSubmitting, setValues } = useForm(getInitialValues(), validate);
@@ -310,8 +314,16 @@ const CheckoutForm = ({ onClose }) => {
                                     </div>
                                 ) : (
                                     <div className="input-group full">
-                                        <label><MapPin size={16} /> Dirección de Despacho</label>
-                                        <input type="text" name="direccion" value={values.direccion} onChange={handleChange} placeholder="Calle, número..." />
+                                        <label><MapPin size={16} /> Dirección de Domicilio Particular *</label>
+                                        <input
+                                            type="text"
+                                            name="direccion"
+                                            value={values.direccion}
+                                            onChange={handleChange}
+                                            placeholder="Calle, número, depto/casa..."
+                                            className={errors.direccion ? 'input-error' : ''}
+                                        />
+                                        {errors.direccion && <span className="error-text">{errors.direccion}</span>}
                                     </div>
                                 )}
                             </>

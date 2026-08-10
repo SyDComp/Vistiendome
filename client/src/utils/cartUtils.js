@@ -111,7 +111,7 @@ export const buildWhatsAppMessage = ({ tipo = 'pedido', cliente, despacho, grupo
             const prefix = productos.length > 1 ? `*${index + 1}. Producto:* ` : '*Producto:* ';
             L.push(`${prefix}${p.name}`);
             if (p.quantity) L.push(`*Cantidad:* ${p.quantity}`);
-            if (p.price) L.push(`*Precio:* ${formatCurrency(p.price)}${p.quantity ? ' c/u' : ''}`);
+            if (p.price != null) L.push(`*Precio:* ${formatCurrency(p.price)}${p.quantity ? ' c/u' : ''}`);
             
             const variantLines = formatVariantAttributes(p);
             variantLines.forEach(line => L.push(line));
@@ -120,7 +120,7 @@ export const buildWhatsAppMessage = ({ tipo = 'pedido', cliente, despacho, grupo
         });
     }
 
-    if (total) {
+    if (total != null) {
         L.push('');
         L.push(`*Total estimado:* ${formatCurrency(total)}`);
     }

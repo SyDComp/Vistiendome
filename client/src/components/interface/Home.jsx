@@ -7,6 +7,7 @@ import ProductDetailView from '../../features/productDetail/components/ProductDe
 import CartDrawer from './cart/CartDrawer';
 import WelcomeModal from './WelcomeModal';
 import TopBanner from './TopBanner';
+import WhatsAppFAB from './WhatsAppFAB';
 
 const Home = ({ isModalView = false }) => {
     const location = useLocation();
@@ -74,6 +75,7 @@ const Home = ({ isModalView = false }) => {
 
             <CartDrawer />
             <WelcomeModal />
+            <WhatsAppFAB />
         </>
     );
 };

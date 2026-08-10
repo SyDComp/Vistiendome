@@ -19,7 +19,9 @@ export const CartProvider = ({ children }) => {
     }, [cart]);
 
     const addItem = (item) => {
-        if (!item || !item.price || item.price <= 0) {
+        // item.price === 0 es válido (producto de regalo); solo bloqueamos
+        // cuando el precio aún no cargó (null/undefined/NaN) o es negativo.
+        if (!item || item.price == null || Number.isNaN(item.price) || item.price < 0) {
             toast.error("Por favor espera a que se cargue el precio del producto antes de agregarlo.", "Precio no disponible");
             return;
         }

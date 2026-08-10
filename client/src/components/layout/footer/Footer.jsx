@@ -91,6 +91,16 @@ const Footer = ({ onNavigate }) => {
                             <div>
                                 <span className="info-label">Taller y Showroom</span>
                                 <p>{contact.address || 'Camino San Camilo Km 1,8, San Carlos.'}</p>
+                                {contact.map_url && (
+                                    <a
+                                        href={contact.map_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{ fontSize: '13px', color: 'var(--color-brand)', fontWeight: 600, textDecoration: 'underline', display: 'inline-block', marginTop: '4px' }}
+                                    >
+                                        Cómo llegar →
+                                    </a>
+                                )}
                             </div>
                         </div>
                         <div className="contact-info-item">

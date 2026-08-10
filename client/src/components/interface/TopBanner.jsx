@@ -9,8 +9,10 @@ const STORAGE_KEY = 'vdm_top_banner';
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
 
+const FONT_SIZES = { normal: '0.85rem', large: '1rem', xlarge: '1.15rem' };
+
 const signature = (cfg) =>
-    [cfg.text, cfg.bg_color, cfg.text_color, cfg.link, cfg.link_label, cfg.frequency].join('|');
+    [cfg.text, cfg.bg_color, cfg.text_color, cfg.link, cfg.link_label, cfg.frequency, cfg.font_size, cfg.bold].join('|');
 
 const shouldShow = (cfg) => {
     if (!cfg || !cfg.active || !cfg.text) return false;
@@ -83,6 +85,8 @@ const TopBanner = () => {
 
     const bg = cfg.bg_color || '#8f0653';
     const textColor = cfg.text_color || (isDarkColor(bg) ? '#ffffff' : '#1e293b');
+    const fontSize = FONT_SIZES[cfg.font_size] || FONT_SIZES.normal;
+    const fontWeight = cfg.bold ? 700 : undefined;
 
     const animated = !!cfg.animated;
     const speed = Number(cfg.speed) > 0 ? Number(cfg.speed) : 20;
@@ -111,7 +115,7 @@ const TopBanner = () => {
     return (
         <div
             className="top-banner"
-            style={{ background: bg, color: textColor, cursor: hasLink ? 'pointer' : 'default' }}
+            style={{ background: bg, color: textColor, fontSize, fontWeight, cursor: hasLink ? 'pointer' : 'default' }}
             onClick={hasLink ? followLink : undefined}
             role={hasLink ? 'link' : undefined}
         >

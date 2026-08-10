@@ -29,7 +29,8 @@ const SettingsManager = () => {
         tiktok: '',
         email: '',
         phone_display: '',
-        address: ''
+        address: '',
+        map_url: ''
     });
     const [shippingMethods, setShippingMethods] = useState([]);
     const [shippingColors, setShippingColors] = useState({});
@@ -63,7 +64,9 @@ const SettingsManager = () => {
         repeat: true,
         link: '',
         link_label: '',
-        frequency: 'session'
+        frequency: 'session',
+        font_size: 'normal',
+        bold: false
     });
     const [nosotros, setNosotros] = useState({ image_asset_id: null, image_url: '' });
     const [loading, setLoading] = useState(true);
@@ -120,7 +123,8 @@ const SettingsManager = () => {
             const contact = {
                 email: settings.email,
                 phone_display: settings.phone_display,
-                address: settings.address
+                address: settings.address,
+                map_url: settings.map_url
             };
 
             await Promise.all([
@@ -302,13 +306,27 @@ const SettingsManager = () => {
                         </div>
                         <div className="input-group">
                             <label style={labelStyle}><Globe size={14} /> Dirección / Taller</label>
-                            <textarea 
-                                name="address" 
-                                value={settings.address} 
+                            <textarea
+                                name="address"
+                                value={settings.address}
                                 onChange={handleChange}
                                 placeholder="San Carlos, Ñuble, Chile."
-                                style={{ ...inputStyle, height: '100px', resize: 'none', paddingTop: '12px' }} 
+                                style={{ ...inputStyle, height: '100px', resize: 'none', paddingTop: '12px' }}
                             />
+                        </div>
+                        <div className="input-group">
+                            <label style={labelStyle}><Globe size={14} /> Link de Google Maps o Waze</label>
+                            <input
+                                type="text"
+                                name="map_url"
+                                value={settings.map_url}
+                                onChange={handleChange}
+                                placeholder="https://maps.app.goo.gl/..."
+                                style={inputStyle}
+                            />
+                            <p style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', lineHeight: 1.5 }}>
+                                Pega el link para compartir de Google Maps o Waze (botón "Compartir" en la app). Si lo dejas vacío, no se muestra el botón de "Cómo llegar".
+                            </p>
                         </div>
                     </div>
                     
@@ -620,6 +638,34 @@ const SettingsManager = () => {
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px' }}>
                             <ColorField label="Fondo" value={topBanner.bg_color} onChange={(v) => setTopBanner(prev => ({ ...prev, bg_color: v }))} />
                             <ColorField label="Texto" value={topBanner.text_color} onChange={(v) => setTopBanner(prev => ({ ...prev, text_color: v }))} />
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '20px' }}>
+                        <div className="input-group">
+                            <label style={labelStyle}>Tamaño de letra</label>
+                            <select
+                                value={topBanner.font_size}
+                                onChange={(e) => setTopBanner(prev => ({ ...prev, font_size: e.target.value }))}
+                                style={inputStyle}
+                            >
+                                <option value="normal">Normal</option>
+                                <option value="large">Grande</option>
+                                <option value="xlarge">Muy grande</option>
+                            </select>
+                        </div>
+                        <div className="input-group">
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', marginTop: '28px' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={topBanner.bold}
+                                    onChange={(e) => setTopBanner(prev => ({ ...prev, bold: e.target.checked }))}
+                                    style={{ width: '20px', height: '20px', accentColor: '#8f0653' }}
+                                />
+                                <span style={{ fontSize: '14px', fontWeight: '700', color: '#334155' }}>
+                                    Negrita
+                                </span>
+                            </label>
                         </div>
                     </div>
 
