@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
+from sqlalchemy import text
 from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel
@@ -66,6 +67,7 @@ class CotizacionItemRead(BaseModel):
 
 class CotizacionRead(BaseModel):
     id: str
+    numero: Optional[int] = None
     persona_id: str
     origen: OrigenCotizacion
     estado: EstadoCotizacion
@@ -215,7 +217,9 @@ def crear_cotizacion(data: CotizacionCreate, session: Session = Depends(get_sess
             session.commit()
             
     # 2. Crear Cotizacion
+    numero = session.execute(text("SELECT nextval('cotizaciones_numero_seq')")).scalar_one()
     cotizacion = Cotizacion(
+        numero=numero,
         persona_id=persona.id,
         origen=data.origen,
         mensaje=data.mensaje,

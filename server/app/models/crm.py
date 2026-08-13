@@ -29,7 +29,13 @@ class Cotizacion(SQLModel, table=True):
     
     id: str = Field(default_factory=generate_ulid, primary_key=True, max_length=26)
     persona_id: str = Field(foreign_key="personas.id", index=True, max_length=26)
-    
+
+    # Correlativo humano ("N° pedido 56") — el id (ULID) identifica la fila,
+    # pero nadie lo puede decir por teléfono ni escribirlo en una etiqueta.
+    # Se asigna explícitamente en el endpoint de creación vía nextval(),
+    # nunca queda en None en una fila real.
+    numero: Optional[int] = Field(default=None, unique=True, index=True)
+
     origen: OrigenCotizacion = Field(default=OrigenCotizacion.CATALOGO)
     estado: EstadoCotizacion = Field(default=EstadoCotizacion.NUEVA)
     
