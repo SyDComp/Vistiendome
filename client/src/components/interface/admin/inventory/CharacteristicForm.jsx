@@ -22,6 +22,7 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
             ? initialData.value_structure 
             : [{ label: 'Valor', key: 'value', type: 'text' }],
         is_filterable: initialData?.is_filterable === false ? false : true,
+        afecta_apariencia: initialData?.afecta_apariencia === true,
         domain: initialData?.domain || []
     });
     
@@ -145,6 +146,14 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                         <input type="checkbox" id="char_is_filterable" checked={localData.is_filterable} onChange={e => setLocalData(p => ({ ...p, is_filterable: e.target.checked }))} />
                         <label htmlFor="char_is_filterable" className="char-form-filter-label">Mostrar en filtros</label>
                     </div>
+                    <div className="char-form-filter-wrap">
+                        <input type="checkbox" id="char_afecta_apariencia" checked={localData.afecta_apariencia} onChange={e => setLocalData(p => ({ ...p, afecta_apariencia: e.target.checked }))} />
+                        <label htmlFor="char_afecta_apariencia" className="char-form-filter-label">Cambia cómo se ve la prenda</label>
+                    </div>
+                    <p className="char-form-hint">
+                        Marca esto en Color o Estampado: el Explorador mostrará una foto por cada valor.
+                        No lo marques en Talla — cambia la prenda, pero no cómo se ve.
+                    </p>
                 </div>
 
                 {/* SECCIÓN 2: LISTA DE VALORES (SCROLLABLE) */}

@@ -26,7 +26,11 @@ class ConnectionManager:
         import time
         message["_ts"] = time.time()
         
-        print(f"📡 Broadcasting: {message['type']} -> {message.get('resource', 'general')} a {len(self.active_connections)} clientes")
+        # Sin emoji a propósito: la consola de Windows usa codepage 850 y no lo
+        # puede escribir. El print reventaba con UnicodeEncodeError DESPUÉS de
+        # guardar en la base, así que cualquier edición devolvía 500 y parecía
+        # haber fallado cuando en realidad se había guardado bien.
+        print(f"Broadcasting: {message['type']} -> {message.get('resource', 'general')} a {len(self.active_connections)} clientes")
         
         for connection in self.active_connections:
             try:

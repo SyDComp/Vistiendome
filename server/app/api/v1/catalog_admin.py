@@ -174,6 +174,7 @@ async def create_attribute(data: Dict[str, Any], db: Session = Depends(get_sessi
         name=norm_name,
         description=data.get("description"),
         is_filterable=data.get("is_filterable", True),
+        afecta_apariencia=data.get("afecta_apariencia", False),
         value_structure=data.get("value_structure", []),
         domain=norm_domain,
         is_system=data.get("is_system", False)
@@ -307,6 +308,7 @@ def get_attribute(attr_id: int, db: Session = Depends(get_session)):
         "name": attr.name,
         "description": attr.description,
         "is_filterable": attr.is_filterable,
+        "afecta_apariencia": attr.afecta_apariencia,
         "is_system": attr.is_system,
         "system_id": attr.system_id,
         "value_structure": attr.value_structure,
