@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useWebSocket } from '../../../context/WebSocketContext';
-import { getProducts, getCategoriesTree, getFiltersMetadata } from '../../../lib/api/endpoints/products.api';
+import { getCatalogo, getCategoriesTree, getFiltersMetadata } from '../../../lib/api/endpoints/products.api';
 import { filterByCategory, filterBySpecs, filterByPriceRange, sortProducts } from '../utils/filterUtils';
 import { track } from '../../../lib/analytics';
 
@@ -14,6 +14,7 @@ export const useCatalog = () => {
     const { lastMessage } = useWebSocket();
 
     const [products, setProducts] = useState([]);
+    const [looks, setLooks] = useState([]);
     const [categories, setCategories] = useState([]);
     const [filtersMetadata, setFiltersMetadata] = useState({});
     const [loading, setLoading] = useState(true);
@@ -29,12 +30,13 @@ export const useCatalog = () => {
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
-            const [prods, tree, meta] = await Promise.all([
-                getProducts(),
+            const [catalogo, tree, meta] = await Promise.all([
+                getCatalogo(),
                 getCategoriesTree(),
                 getFiltersMetadata(),
             ]);
-            setProducts(prods);
+            setProducts(catalogo.products || []);
+            setLooks(catalogo.looks || []);
             setCategories(tree);
             setFiltersMetadata(meta);
         } catch (error) {
@@ -69,6 +71,30 @@ export const useCatalog = () => {
         return result;
     }, [products, selectedCategory, appliedFilters, sortOrder]);
 
+    // Looks de los productos que pasaron el filtro, más el filtro de specs
+    // aplicado a la variante que representa cada look. El catálogo filtra
+    // productos; el explorador filtra looks. Misma fuente, distinta proyección.
+    const filteredLooks = useMemo(() => {
+        const idsVisibles = new Set(filteredProducts.map(p => p.id));
+        const specs = appliedFilters.specs || {};
+        const activos = Object.entries(specs).filter(([, v]) => v && v.length);
+
+        return looks.filter(l => {
+            if (!idsVisibles.has(l.product_id)) return false;
+            return activos.every(([key, values]) => {
+                const lk = key.toLowerCase().trim();
+                const lv = values.map(v => String(v).toLowerCase().trim());
+                // Se mira lo que hay DENTRO del look, no la variante que lo
+                // representa: el look "Noemi · Negro" existe en todas las
+                // tallas, así que filtrar por talla 12 no debe descartarlo.
+                return Object.entries(l.facets || {}).some(
+                    ([fk, fvals]) => fk.toLowerCase().trim() === lk &&
+                        (fvals || []).some(fv => lv.includes(String(fv).toLowerCase().trim()))
+                );
+            });
+        });
+    }, [looks, filteredProducts, appliedFilters.specs]);
+
     // Analítica: registrar cada valor de filtro nuevo que el cliente aplica
     const prevSpecsRef = useRef({});
     useEffect(() => {
@@ -93,6 +119,8 @@ export const useCatalog = () => {
     return {
         products,
         filteredProducts,
+        looks,
+        filteredLooks,
         categories,
         filtersMetadata,
         loading,

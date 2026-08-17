@@ -13,10 +13,17 @@ const DEFAULT_LNG = -71.9544249;
  * esquemas de URL oficiales de cada app (sin API key). Por defecto apunta a
  * la ubicación verificada del taller.
  */
+// La tienda está registrada en Google Business como "VistiendoMé Chile SPA".
+// Mandando sólo coordenadas, Maps rotula el pin con los grados en vez del
+// nombre del comercio; con el nombre en la consulta muestra la ficha real
+// (fotos, horario, reseñas). Las coordenadas quedan igual para Waze, que no
+// tiene ficha de negocio y necesita el punto exacto.
+const NOMBRE_NEGOCIO = 'VistiendoMé Chile SPA';
+
 export const buildMapLinks = (lat = DEFAULT_LAT, lng = DEFAULT_LNG) => {
     if (lat == null || lng == null) return { googleMapsUrl: null, wazeUrl: null };
     return {
-        googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
-        wazeUrl: `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`,
+        googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(NOMBRE_NEGOCIO)}`,
+        wazeUrl: `https://waze.com/ul?ll=${lat},${lng}&navigate=yes&q=${encodeURIComponent(NOMBRE_NEGOCIO)}`,
     };
 };

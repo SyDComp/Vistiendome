@@ -170,12 +170,28 @@ export const useProductDetail = (initialProduct) => {
         if (!configAtributos.length || !skusNormalizados.length) return;
 
         if (Object.keys(selections).length === 0) {
+            // Preselección que viene del explorador: si la clienta filtró por
+            // talla 12, el detalle abre en talla 12 y no en la que le tocó
+            // representar al look. Sólo se aplica si existe un SKU con esa
+            // combinación, para no dejar la ficha en un estado imposible.
+            const pre = location.state?.preseleccion;
+            const conPreseleccion = (base) => {
+                if (!pre || !Object.keys(pre).length) return base;
+                const tentativa = { ...base, ...pre };
+                const existe = skusNormalizados.some(s =>
+                    Object.entries(tentativa).every(([k, v]) =>
+                        String(s.config?.[k] ?? '').toLowerCase().trim() === String(v).toLowerCase().trim()
+                    )
+                );
+                return existe ? tentativa : base;
+            };
+
             // Inicializar desde URL sku
             if (variantSkuCode) {
                 lastUrlSku.current = variantSkuCode;
                 const urlMatch = skusNormalizados.find(s => s.sku === variantSkuCode);
                 if (urlMatch) {
-                    setSelections({ ...urlMatch.config });
+                    setSelections(conPreseleccion({ ...urlMatch.config }));
                     return;
                 }
             }

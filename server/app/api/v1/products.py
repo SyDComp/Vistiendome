@@ -268,12 +268,49 @@ class LookSchema(BaseModel):
     image: Optional[str] = None
     sku: Optional[str] = None
     config: Dict[str, str] = {}
+    # Valores disponibles dentro del look (todas las tallas de ese color, etc.).
+    # El filtro los usa para no descartar un look por la variante que lo
+    # representa, y el detalle para preseleccionar.
+    facets: Dict[str, List[str]] = {}
     price: float
     original_price: float
     on_sale: bool = False
 
 
-@router.get("/looks", response_model=List[LookSchema])
+class ProductCardSchema(BaseModel):
+    """Tarjeta del catálogo: el producto, sin sus variantes."""
+    id: int
+    name: str
+    slug: str
+    category: str
+    category_id: int
+    category_slug: str
+    image: Optional[str] = None
+    sku: Optional[str] = None
+    price: float
+    original_price: float
+    on_sale: bool = False
+    specs: Dict[str, str] = {}
+    extras: Dict[str, Any] = {}
+    # Valores distintos por característica. Reemplaza a mandar todas las
+    # variantes: el catálogo filtra productos (si CUALQUIER variante calza, el
+    # producto aparece) y para eso alcanza con el conjunto de valores.
+    # Noemi: 6 características con ~35 valores, en vez de 451 variantes.
+    facets: Dict[str, List[str]] = {}
+
+
+class CatalogoSchema(BaseModel):
+    """
+    Las dos proyecciones del catálogo en una sola respuesta.
+
+    Se mandan juntas porque las dos vistas comparten el mismo hook y filtran
+    en memoria: pedirlas por separado obligaría a dos viajes.
+    """
+    products: List[ProductCardSchema] = []
+    looks: List[LookSchema] = []
+
+
+@router.get("/looks", response_model=CatalogoSchema)
 def list_looks(db: Session = Depends(get_session)):
     """
     Devuelve una tarjeta por look en vez de todas las variantes.
@@ -293,6 +330,7 @@ def list_looks(db: Session = Depends(get_session)):
     productos = db.exec(select(Product).where(Product.is_deleted == False)).all()
     now = get_chile_time()
     salida: List[LookSchema] = []
+    tarjetas: List[ProductCardSchema] = []
 
     for p in productos:
         skus = list(p.skus)
@@ -306,7 +344,39 @@ def list_looks(db: Session = Depends(get_session)):
         base_min = min([s.price for s in skus] or [0])
 
         por_sku = {s.sku: s for s in skus}
-        portada = p.media_assets[0].url if p.media_assets else None
+        # Respaldo de imagen: portada del producto o, si no tiene, cualquier foto
+        # de sus variantes. Una tarjeta con la foto del producto comunica más que
+        # un recuadro vacío cuando esa combinación todavía no tiene foto propia.
+        portada = (p.media_assets[0].url if p.media_assets else None) \
+            or next((imagen_de[s.id] for s in skus if imagen_de[s.id]), None)
+
+        # Facetas: valores distintos por característica, preservando el orden de
+        # aparición para que el filtro no baile entre cargas.
+        facets: Dict[str, List[str]] = {}
+        for s in skus:
+            for nombre, valor in (s.config or {}).items():
+                if valor in (None, ""):
+                    continue
+                vals = facets.setdefault(nombre, [])
+                if valor not in vals:
+                    vals.append(valor)
+
+        tarjetas.append(ProductCardSchema(
+            id=p.id,
+            name=p.name,
+            slug=p.slug,
+            category=p.category.name,
+            category_id=p.category_id,
+            category_slug=p.category.slug,
+            image=portada or next((imagen_de[s.id] for s in skus if imagen_de[s.id]), None),
+            sku=next((s.sku for s in skus if imagen_de[s.id] and imagen_de[s.id] == portada), None),
+            price=min(efectivos),
+            original_price=base_min,
+            on_sale=any(precio_de[s.id][1] for s in skus),
+            specs=p.specs or {},
+            extras=p.extras or {},
+            facets=facets,
+        ))
 
         for look in colapsar_en_looks(p, skus, imagen_de, visuales):
             s = por_sku.get(look["sku"])
@@ -327,12 +397,13 @@ def list_looks(db: Session = Depends(get_session)):
                 image=look["image"] or portada,
                 sku=look["sku"],
                 config=look["config"],
+                facets=look.get("facets", {}),
                 price=precio,
                 original_price=original,
                 on_sale=en_oferta,
             ))
 
-    return salida
+    return CatalogoSchema(products=tarjetas, looks=salida)
 
 
 @router.get("/{id_or_slug}")

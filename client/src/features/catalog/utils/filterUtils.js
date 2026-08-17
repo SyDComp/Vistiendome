@@ -78,13 +78,23 @@ export const filterBySpecs = (products, specs) => {
                 sk.toLowerCase().trim() === lowerKey && lowerValues.includes(String(sv).toLowerCase().trim())
             );
             
-            const inVariants = p.variants && p.variants.some(v => 
-                v.config && Object.entries(v.config).some(([ck, cv]) => 
+            // facets = valores distintos por característica que trae el
+            // producto. Reemplaza a recorrer todas las variantes: el catálogo
+            // filtra productos (basta con que ALGUNA variante calce) y para eso
+            // el conjunto de valores es suficiente.
+            const inFacets = p.facets && Object.entries(p.facets).some(([fk, fvals]) =>
+                fk.toLowerCase().trim() === lowerKey &&
+                (fvals || []).some(fv => lowerValues.includes(String(fv).toLowerCase().trim()))
+            );
+
+            // Respaldo para los consumidores que aún reciben variantes completas.
+            const inVariants = p.variants && p.variants.some(v =>
+                v.config && Object.entries(v.config).some(([ck, cv]) =>
                     ck.toLowerCase().trim() === lowerKey && lowerValues.includes(String(cv).toLowerCase().trim())
                 )
             );
-            
-            return inSpecs || inVariants;
+
+            return inSpecs || inFacets || inVariants;
         });
     });
 };

@@ -86,45 +86,82 @@ def colapsar_en_looks(producto: Any, variantes: List[Any],
     if not variantes:
         return [_look_del_producto(producto)]
 
-    looks: List[Dict[str, Any]] = []
-    vistos = set()
-
+    # Foto representativa de cada combinación visual: la primera que exista
+    # entre las variantes que la comparten. Sin esto, si la primera variante de
+    # un color no tiene foto, la tarjeta salía vacía aunque otra sí la tuviera.
+    foto_por_visual: Dict[str, str] = {}
     for v in variantes:
-        imagen = imagen_de.get(v.id)
-        visual = clave_visual(v.config, visuales)
+        vis = clave_visual(v.config, visuales)
+        img = imagen_de.get(v.id)
+        if vis and img and vis not in foto_por_visual:
+            foto_por_visual[vis] = img
 
-        if imagen:
-            clave = f"img::{imagen}"
-        elif visual:
+    # Agrupar primero, construir después. Un look reúne varias variantes (todas
+    # las tallas de un color), así que sus datos salen del grupo entero y no de
+    # la primera variante que pasó.
+    grupos: Dict[str, List[Any]] = {}
+    orden: List[str] = []
+    for v in variantes:
+        visual = clave_visual(v.config, visuales)
+        # La clave es la proyección visual; la imagen sólo se muestra. Al revés
+        # se duplicaban tarjetas: una variante con foto y otra sin foto que
+        # compartían estampado salían como dos looks, uno de ellos vacío.
+        if visual:
             clave = f"vis::{visual}"
+        elif imagen_de.get(v.id):
+            clave = f"img::{imagen_de[v.id]}"
         else:
             clave = "base"
+        if clave not in grupos:
+            grupos[clave] = []
+            orden.append(clave)
+        grupos[clave].append(v)
 
-        if clave in vistos:
-            continue
-        vistos.add(clave)
-
+    looks: List[Dict[str, Any]] = []
+    for clave in orden:
+        miembros = grupos[clave]
         if clave == "base":
-            looks.append(_look_del_producto(producto))
+            looks.append({**_look_del_producto(producto),
+                          "facets": _facetas(miembros)})
             continue
 
-        # Descriptor legible: los valores visuales de ESTA variante.
+        primera = miembros[0]
+        visual = clave_visual(primera.config, visuales)
+        imagen = foto_por_visual.get(visual) if visual else imagen_de.get(primera.id)
+
         descriptor = " · ".join(
-            str(val) for nombre, val in sorted((v.config or {}).items())
+            str(val) for nombre, val in sorted((primera.config or {}).items())
             if _es_visual(nombre, visuales) and val not in (None, "")
         )
         looks.append({
-            "id": f"{producto.id}-{v.sku}",
+            "id": f"{producto.id}-{primera.sku}",
             "product_id": producto.id,
             "slug": producto.slug,
             "name": f"{producto.name} · {descriptor}" if descriptor else producto.name,
             "image": imagen,
-            "sku": v.sku,
-            "config": v.config or {},
-            "price": v.price,
+            "sku": primera.sku,
+            "config": primera.config or {},
+            # Qué valores existen DENTRO del look. Sin esto, filtrar por talla 12
+            # descartaba el look si su variante representante era otra talla,
+            # aunque el color sí estuviera disponible en 12.
+            "facets": _facetas(miembros),
+            "price": primera.price,
         })
 
     return looks
+
+
+def _facetas(variantes: List[Any]) -> Dict[str, List[str]]:
+    """Valores distintos por característica entre las variantes de un look."""
+    out: Dict[str, List[str]] = {}
+    for v in variantes:
+        for nombre, valor in (v.config or {}).items():
+            if valor in (None, ""):
+                continue
+            vals = out.setdefault(nombre, [])
+            if valor not in vals:
+                vals.append(valor)
+    return out
 
 
 def _look_del_producto(producto: Any) -> Dict[str, Any]:

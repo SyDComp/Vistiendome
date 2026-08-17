@@ -34,6 +34,23 @@ export const getProducts = async (filters = {}) => {
 };
 
 /**
+ * Catálogo liviano: productos (con sus facetas para filtrar) y looks (una
+ * tarjeta por foto/valor visual distinto).
+ *
+ * Reemplaza a getProducts() en el catálogo y el explorador: antes se
+ * descargaban las 1.049 variantes para dibujar ~60 tarjetas (284 KB).
+ */
+export const getCatalogo = async () => {
+    const cacheKey = buildCacheKey('catalogo');
+    const cached = getCached(cacheKey);
+    if (cached) return cached;
+
+    const data = await get(`${API_ENDPOINTS.PRODUCTS}/looks`);
+    setCached(cacheKey, data);
+    return data;
+};
+
+/**
  * Obtiene un producto por su slug.
  */
 export const getProductBySlug = async (slug) => {

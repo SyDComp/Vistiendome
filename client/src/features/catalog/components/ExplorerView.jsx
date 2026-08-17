@@ -1,18 +1,18 @@
-import { useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useCatalog from '../hooks/useCatalog';
 import FilterBar from './FilterBar';
 import ProductGrid from './ProductGrid';
-import { flattenVariantsByLook } from '../utils/clusterUtils';
 import '../catalog.css';
 
 const ExplorerView = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Usamos el mismo hook del catálogo para obtener los datos y filtros básicos
+    // Mismo hook que el catálogo, distinta proyección: el catálogo muestra
+    // productos, el explorador muestra looks. El colapso ahora viene resuelto
+    // del servidor, así que acá no hay nada que explotar.
     const {
-        filteredProducts,
+        filteredLooks,
         categories,
         filtersMetadata,
         loading,
@@ -24,12 +24,6 @@ const ExplorerView = () => {
         isModalOpen,
     } = useCatalog();
 
-    // Explotamos los productos en sus variantes (una tarjeta por look/foto distinta)
-    const variantCards = useMemo(
-        () => flattenVariantsByLook(filteredProducts, appliedFilters.specs),
-        [filteredProducts, appliedFilters.specs]
-    );
-
     const handleProductClick = (producto, indexActual) => {
         let targetSku = producto.sku; // sku extraído de la variante agrupada
         if (producto.extras?.preview_carousel) {
@@ -40,11 +34,25 @@ const ExplorerView = () => {
             }
         }
         
+        // Si la clienta filtró por talla, el detalle debe abrirse en esa talla y
+        // no en la que le tocó representar al look. Se manda el primer valor
+        // elegido de cada filtro; el detalle lo usa como selección inicial.
+        const preseleccion = {};
+        Object.entries(appliedFilters.specs || {}).forEach(([k, vals]) => {
+            if (!vals || !vals.length) return;
+            const disponibles = (producto.facets?.[k] || []).filter(v =>
+                vals.some(sel => String(sel).toLowerCase().trim() === String(v).toLowerCase().trim())
+            );
+            if (disponibles.length) preseleccion[k] = disponibles[0];
+        });
+
         const targetUrl = targetSku
             ? `/catalogo/producto/${producto.slug}/${targetSku}`
             : `/catalogo/producto/${producto.slug}`;
-            
-        navigate(targetUrl, { state: { backgroundLocation: location, initialProduct: producto } });
+
+        navigate(targetUrl, {
+            state: { backgroundLocation: location, initialProduct: producto, preseleccion }
+        });
     };
 
     return (
@@ -70,7 +78,7 @@ const ExplorerView = () => {
 
                 <main className="catalog-main">
                     <ProductGrid
-                        products={variantCards}
+                        products={filteredLooks}
                         loading={loading}
                         onProductClick={handleProductClick}
                         isModalOpen={isModalOpen}
