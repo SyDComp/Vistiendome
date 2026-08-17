@@ -33,6 +33,21 @@ def _es_visual(nombre: str) -> bool:
     return nombre.strip().lower() not in ATRIBUTOS_NO_VISUALES
 
 
+def imagen_de_variante(sku: Any) -> Optional[str]:
+    """
+    Imagen representativa de una variante, de forma determinista.
+
+    `sku.media_assets` no tiene orden garantizado: Postgres devuelve las filas
+    en el orden que quiera, así que tomar el elemento [0] daba resultados
+    distintos entre consultas. Con variantes que tienen más de una foto (en
+    "vestido perla" hay 6 con dos imágenes cada una) eso cambiaba la cantidad de
+    looks y la foto mostrada entre recargas. Se ordena por id para fijarlo.
+    """
+    if not sku.media_assets:
+        return None
+    return sorted(sku.media_assets, key=lambda m: m.id)[0].url
+
+
 def elegir_atributo_distintivo(variantes: List[Any]) -> Optional[str]:
     """
     Devuelve el nombre de la característica que mejor separa las variantes
