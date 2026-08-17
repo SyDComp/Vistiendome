@@ -46,12 +46,25 @@ export const flattenVariantsByLook = (products, appliedSpecs = {}) => {
             if (!matchesSpecs(variant)) return;
 
             const color = getColor(variant.config);
+            // Sin imagen y sin color no hay nada que distinga visualmente una
+            // variante de otra: se colapsan en una sola tarjeta del producto.
+            // Antes esto caía a una tarjeta por SKU, y un producto sin fotos por
+            // variante (caso legítimo, no un error de carga) llenaba el
+            // Explorador de tarjetas idénticas — 74 en el caso de "vestido perla".
             const lookKey = variant.image
                 ? `${product.id}::img::${variant.image}`
-                : (color ? `${product.id}::col::${String(color).toLowerCase().trim()}` : `${product.id}::sku::${variant.sku}`);
+                : (color ? `${product.id}::col::${String(color).toLowerCase().trim()}` : `${product.id}::base`);
 
             if (seen.has(lookKey)) return;
             seen.add(lookKey);
+
+            // Cuando no hay nada que distinga visualmente, la tarjeta representa
+            // al producto (no a la primera variante que pasó, cuyo precio y
+            // atributos serían arbitrarios).
+            if (!variant.image && !color) {
+                cards.push({ ...product, id: `${product.id}-base`, baseProductId: product.id });
+                return;
+            }
 
             // Descriptor del look: color si existe; si no, el primer atributo que no sea talla
             const descriptor = color || Object.entries(variant.config || {})
