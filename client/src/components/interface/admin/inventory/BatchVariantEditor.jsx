@@ -23,8 +23,12 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
     const [showGlobalGallery, setShowGlobalGallery] = useState(false);
     const [saving, setSaving] = useState(false);
     const [bulkPriceInput, setBulkPriceInput] = useState('');
-    const [viewFilter, setViewFilter] = useState('all'); // 'all', 'selected', 'unselected'
+    const [viewFilter, setViewFilter] = useState('all'); // 'all' | 'selected' | 'unselected' | 'sin_precio'
     const [editingVariantId, setEditingVariantId] = useState(null); // ID de variante para edición individual de fotos
+
+    // Una variante en $0 casi siempre es carga de precios incompleta, no un
+    // regalo: se muestra en el catálogo con precio 0 y no se puede comprar.
+    const sinPrecioCount = useMemo(() => variants.filter(v => !v.price).length, [variants]);
 
     const getImageUrl = (url) => {
         if (!url) return '';
@@ -364,16 +368,30 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
                             {[
                                 { id: 'all', label: 'Todos' },
                                 { id: 'selected', label: 'Seleccionados' },
-                                { id: 'unselected', label: 'Restantes' }
+                                { id: 'unselected', label: 'Restantes' },
+                                { id: 'sin_precio', label: `Sin precio${sinPrecioCount ? ` (${sinPrecioCount})` : ''}` }
                             ].map(btn => (
                                 <button
                                     key={btn.id}
                                     onClick={() => setViewFilter(btn.id)}
                                     className={`batch-editor-view-btn ${viewFilter === btn.id ? 'active' : 'inactive'}`}
+                                    title={btn.id === 'sin_precio' ? 'Variantes en $0: normalmente es carga incompleta, no un regalo' : undefined}
                                 >
                                     {btn.label}
                                 </button>
                             ))}
+                            {sinPrecioCount > 0 && (
+                                <button
+                                    onClick={() => {
+                                        setViewFilter('sin_precio');
+                                        setSelection(new Set(variants.filter(v => !v.price).map(v => v.id)));
+                                    }}
+                                    className="batch-editor-view-btn inactive"
+                                    title="Selecciona las variantes sin precio para corregirlas de una vez"
+                                >
+                                    ⚠ Seleccionar sin precio
+                                </button>
+                            )}
                         </div>
                     </div>
 
@@ -404,6 +422,7 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
                                     .filter(v => {
                                         if (viewFilter === 'selected') return selection.has(v.id);
                                         if (viewFilter === 'unselected') return !selection.has(v.id);
+                                        if (viewFilter === 'sin_precio') return !v.price;
                                         return true;
                                     })
                                     .map((v) => (

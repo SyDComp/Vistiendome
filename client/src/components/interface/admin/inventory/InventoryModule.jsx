@@ -17,7 +17,7 @@ import DetailDrawer from '../../../ui/admin/DetailDrawer';
 import QuickPeek from '../../../ui/admin/QuickPeek';
 import { useNotification } from '../../../../context/NotificationContext';
 import { useLocation } from 'react-router-dom';
-import { Package, Eye, Barcode as BarcodeIcon } from 'lucide-react';
+import { Package, Eye, Barcode as BarcodeIcon, AlertTriangle } from 'lucide-react';
 import { getImageUrl } from '../../../../lib/api/endpoints';
 import ReactBarcode from 'react-barcode';
 
@@ -108,8 +108,16 @@ const PRODUCT_COLUMNS = [
         render: (_, row) => {
             const min = row.price_min || 0;
             const max = row.price_max || 0;
-            if (min === max) return <span className="admin-product-price">${min.toLocaleString()}</span>;
-            return <span className="admin-product-price">${min.toLocaleString()} - ${max.toLocaleString()}</span>;
+            // min en 0 con max mayor = hay variantes sin precio cargado (no es un
+            // regalo: esas variantes se muestran en $0 y no se pueden comprar).
+            const faltanPrecios = min === 0 && max > 0;
+            return (
+                <span className="admin-product-price" style={faltanPrecios ? { display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#b45309' } : undefined}>
+                    {faltanPrecios && <AlertTriangle size={14} />}
+                    {min === max ? `$${min.toLocaleString()}` : `$${min.toLocaleString()} - $${max.toLocaleString()}`}
+                    {faltanPrecios && <em style={{ fontSize: '11px', fontStyle: 'normal', fontWeight: 700 }} title="Hay variantes en $0 — revísalas en Producción › Sin precio">sin precio</em>}
+                </span>
+            );
         }
     },
     { 
@@ -157,7 +165,18 @@ const VARIANT_COLUMNS = [
             </div>
         )
     },
-    { key: 'price', label: 'Precio', width: '110px', render: (v) => <span className="admin-product-price">${v?.toLocaleString()}</span> },
+    {
+        key: 'price',
+        label: 'Precio',
+        width: '110px',
+        render: (v) => v ? (
+            <span className="admin-product-price">${v.toLocaleString()}</span>
+        ) : (
+            <span className="admin-product-price" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#b45309', fontWeight: 700 }} title="Sin precio cargado — no se puede comprar en el sitio">
+                <AlertTriangle size={13} /> $0
+            </span>
+        )
+    },
     { 
         key: 'stock', 
         label: 'Stock', 
