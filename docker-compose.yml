@@ -10,13 +10,23 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vistiendome2024}
       POSTGRES_DB: ${POSTGRES_DB:-postgres}
       POSTGRES_HOST_AUTH_METHOD: trust
+      # El encoding del cluster se fija UNA sola vez, en el initdb del primer
+      # arranque. Antes había LC_ALL=C junto a LANG=en_US.utf8: esa
+      # contradicción hacía que initdb cayera a SQL_ASCII, y con un cluster
+      # SQL_ASCII psycopg3 devuelve bytes en vez de str y revienta con
+      # "cannot use a string pattern on a bytes-like object".
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
       LC_MESSAGES: C
       LANG: en_US.utf8
-      LC_ALL: C
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: 

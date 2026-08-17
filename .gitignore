@@ -43,3 +43,5 @@ server/*.sqlite3
 # Carpetas de archivos temporales o recursos pesados
 server/scratch/
 server/media/
+# Respaldos de base de datos (contienen datos reales de clientes — nunca a git)
+_db_backups/
