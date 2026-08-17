@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useSettings } from '../../context/SettingsContext';
 import { getImageUrl } from '../../lib/api/endpoints/images.api';
 import { isDarkColor } from '../../utils/colorContrast';
@@ -55,17 +55,28 @@ const markSeen = (cfg) => {
 const WelcomeModal = () => {
     const { settings } = useSettings();
     const navigate = useNavigate();
+    const location = useLocation();
     const cfg = settings?.welcome_modal;
     const [open, setOpen] = useState(false);
+
+    // Un modal de bienvenida sobre una ficha de producto interrumpe justo a la
+    // clienta que llegó por un link directo (el canal principal es WhatsApp).
+    // Además tapa el selector de tallas, que tiene un z-index menor.
+    // La promoción se muestra cuando está navegando, no cuando ya eligió qué ver.
+    const enFichaDeProducto = location.pathname.includes('/producto/');
 
     useScrollLock(open);
 
     useEffect(() => {
+        if (enFichaDeProducto) {
+            setOpen(false);
+            return;
+        }
         if (shouldShow(cfg)) {
             const t = setTimeout(() => setOpen(true), 600);
             return () => clearTimeout(t);
         }
-    }, [cfg]);
+    }, [cfg, enFichaDeProducto]);
 
     if (!open || !cfg) return null;
 

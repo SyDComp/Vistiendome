@@ -443,6 +443,18 @@ const CheckoutForm = ({ onClose }) => {
                     .input-group.full { grid-column: span 1; }
                 }
 
+                /* Safari en iOS hace zoom automático al enfocar un campo con
+                   fuente menor a 16px: la página salta justo en el checkout y
+                   la clienta queda sin saber cómo volver. Solo en pantallas
+                   táctiles, para no alterar el diseño de escritorio. */
+                @media (max-width: 768px) {
+                    .input-group input,
+                    .styled-select,
+                    .checkout-form-body textarea {
+                        font-size: 16px;
+                    }
+                }
+
                 .slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
                 @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
             `}</style>
