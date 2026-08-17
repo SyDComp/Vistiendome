@@ -5,6 +5,7 @@ from datetime import datetime
 from ...database import get_session
 from ...models.catalog import Product, Category, SKU, StockMovement, Characteristic, Specification
 from ...core.pricing import compute_effective_price, get_chile_time
+from ...core.looks import colapsar_en_looks, imagen_de_variante
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -255,6 +256,84 @@ def get_filters_metadata(db: Session = Depends(get_session)):
         "attributes": attributes_data,
         "price_range": price_range
     }
+
+class LookSchema(BaseModel):
+    """Una tarjeta del catálogo/explorador. Reemplaza a mandar todas las variantes."""
+    id: str
+    product_id: int
+    slug: str
+    name: str
+    category: str
+    category_slug: str
+    image: Optional[str] = None
+    sku: Optional[str] = None
+    config: Dict[str, str] = {}
+    price: float
+    original_price: float
+    on_sale: bool = False
+
+
+@router.get("/looks", response_model=List[LookSchema])
+def list_looks(db: Session = Depends(get_session)):
+    """
+    Devuelve una tarjeta por look en vez de todas las variantes.
+
+    El navegador venía descargando el producto cartesiano completo (1.049
+    variantes, 278 KB) para dibujar ~60 tarjetas. El colapso se hace acá.
+
+    Qué características separan un look lo declara la clienta en el panel
+    (Characteristic.afecta_apariencia); acá no se adivina nada.
+    """
+    visuales = {
+        c.name.strip().lower()
+        for c in db.exec(select(Characteristic)).all()
+        if c.afecta_apariencia
+    }
+
+    productos = db.exec(select(Product).where(Product.is_deleted == False)).all()
+    now = get_chile_time()
+    salida: List[LookSchema] = []
+
+    for p in productos:
+        skus = list(p.skus)
+        precio_de = {s.id: compute_effective_price(s, p, now) for s in skus}
+        imagen_de = {s.id: imagen_de_variante(s) for s in skus}
+
+        # Precio del producto: el menor entre sus variantes. Sirve de respaldo
+        # para la tarjeta que representa al producto entero (la que no apunta a
+        # una variante concreta).
+        efectivos = [precio_de[s.id][0] for s in skus] or [0]
+        base_min = min([s.price for s in skus] or [0])
+
+        por_sku = {s.sku: s for s in skus}
+        portada = p.media_assets[0].url if p.media_assets else None
+
+        for look in colapsar_en_looks(p, skus, imagen_de, visuales):
+            s = por_sku.get(look["sku"])
+            if s is not None:
+                efectivo, en_oferta, _ = precio_de[s.id]
+                precio, original = efectivo, s.price
+            else:
+                # Tarjeta del producto: precio "desde".
+                precio, original, en_oferta = min(efectivos), base_min, False
+
+            salida.append(LookSchema(
+                id=look["id"],
+                product_id=p.id,
+                slug=p.slug,
+                name=look["name"],
+                category=p.category.name,
+                category_slug=p.category.slug,
+                image=look["image"] or portada,
+                sku=look["sku"],
+                config=look["config"],
+                price=precio,
+                original_price=original,
+                on_sale=en_oferta,
+            ))
+
+    return salida
+
 
 @router.get("/{id_or_slug}")
 def get_product_detail(
