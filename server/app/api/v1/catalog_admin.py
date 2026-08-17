@@ -1473,6 +1473,10 @@ def seed_system_attributes(db: Session = Depends(get_session)):
                 description=f"Característica maestra de {attr_name} (Sistema Vistiendomé)",
                 is_system=True,
                 system_id=system_id,
+                # Color y Estampado cambian cómo se ve la prenda; Talla no.
+                # No es "del sistema => visual": las tres son del sistema y sólo
+                # dos lo son. Sigue siendo editable desde el panel.
+                afecta_apariencia=system_id in ("sys_color", "sys_pattern"),
                 value_structure=v_struct,
                 domain=attr_domain
             )
