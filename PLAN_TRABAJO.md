@@ -30,7 +30,80 @@
 | C4 | Lógica de filtros duplicada (Python + JavaScript), solo se usa una |
 | C5 | Análisis sin hacer: panel de administración, redes lentas |
 
-**Siguiente paso sugerido:** A2 y A3 se pueden hacer ahora sin depender de nadie. Todo el bloque B espera respuestas de Paola — conviene mandárselas juntas.
+**Siguiente paso:** A3 (abajo, diseño completo). A2 ✅ hecho. El bloque B se decide con criterio propio, no se le pregunta a la clienta.
+
+---
+
+## 🎯 A3 · Colapso de looks en el servidor — diseño para retomar
+
+> **Contexto en una línea:** el navegador descarga 1.049 variantes para dibujar 60 tarjetas.
+
+### El problema, medido
+
+| Dato | Valor |
+|---|---|
+| Payload de `/api/v1/products/` | **278 KB**, 0,9 s |
+| Productos | 4 |
+| Variantes | 1.049 |
+| Tarjetas que se dibujan | **60** |
+| Desperdicio | **~17×** |
+
+Cada variante pesa ~265 bytes y **repite las mismas cadenas**: `"Bajo Rodilla"`, `"Tela Sofia"`, `"Redondo"` viajan 451 veces en un solo producto. Se manda el producto cartesiano completo.
+
+Proyección: 20 productos ≈ 1,4 MB · 50 productos ≈ 3,5 MB. Inusable en móvil.
+
+**Esto no es un problema futuro.** El sistema está diseñado para catálogos diversos (biblias, corbatas, lápices) donde cada producto trae su propio conjunto de características. La explosión de variantes es la premisa, no la excepción.
+
+### El orden es forzado, no una preferencia
+
+**Si se paginan las variantes, se rompe el colapso de looks**: las variantes de un producto quedarían repartidas entre páginas y no se puede agrupar por foto lo que aún no llegó — la misma tarjeta aparecería en la página 1 y en la 3.
+
+Por eso:
+
+1. **Colapsar en el servidor** ← prerrequisito
+2. **Paginar los looks** (scroll infinito) ← sobre unidades que ya no se duplican
+3. **Filtros en memoria** mientras los looks quepan (umbral ~2.000-3.000; hoy son 60)
+
+### Por qué el servidor lo hace mejor que el cliente
+
+`clusterUtils.js` busca la clave `COLOR` a mano — asume ropa. El servidor **sí conoce el modelo**: `Characteristic` (`catalog.py:47`) tiene `name`, `is_filterable`, `value_structure`. Puede decidir el agrupamiento con los datos reales en vez de adivinar. Ahí es donde la regla genérica se implementa bien.
+
+### La regla a trasladar (ya probada en el cliente)
+
+De [clusterUtils.js](client/src/features/catalog/utils/clusterUtils.js), en orden:
+
+1. Si la variante tiene **imagen propia** → un look por imagen distinta
+2. Si no, pero tiene **color** → un look por color
+3. Si no tiene ninguno → **una sola tarjeta del producto** (nunca una por SKU)
+
+> El paso 2 es la deuda genérica: asume `COLOR`. Al pasarlo al servidor, reemplazar por "la primera característica filtrable que varía y no es de talla", resuelto contra `Characteristic`.
+
+### Resultado esperado (contrato de verificación)
+
+El endpoint nuevo debe producir **exactamente** estas tarjetas con los datos actuales:
+
+| Producto | Variantes | Tarjetas |
+|---|---|---|
+| Vestido Noemi | 451 | 17 |
+| Tapado Magdalena Verano | 299 | 24 |
+| Tapado Magdalena Invierno | 221 | 17 |
+| vestido perla | 78 | 2 |
+| **Total** | **1.049** | **60** |
+
+### Plan de trabajo sugerido
+
+1. Endpoint nuevo **en paralelo** al actual (no reemplazar todavía).
+2. Comparar su salida contra las 60 tarjetas de arriba.
+3. Recién con eso verde, cambiar `useCatalog` para consumirlo.
+4. Medir el payload nuevo (esperado: de 278 KB a ~15-20 KB).
+5. Después, y solo después, el scroll infinito.
+
+### Cuidado con esto
+
+- `useCatalog` alimenta **catálogo y explorador**, que filtran distinto: el catálogo filtra *productos* (si cualquier variante calza, aparece el producto), el explorador filtra *variantes* (solo los looks que calzan). El endpoint debe servir a ambos.
+- El **buscador** (`InstantSearch` y `Search`) también consume `getProducts()`. Si el payload adelgaza, hay que verificar que el buscador siga encontrando por características — necesita los valores, no las combinaciones.
+- La **ficha de producto** pide su producto completo por separado (`getProductBySlug`) y no se toca.
+- La lógica de filtros existe **dos veces** (Python y JavaScript) y solo se usa la de JavaScript: `useCatalog` llama a `getProducts()` sin argumentos. Al mover cosas al servidor, dejar una sola fuente de verdad.
 
 ---
 
