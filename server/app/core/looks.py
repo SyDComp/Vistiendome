@@ -23,14 +23,14 @@ por variante llenaba el explorador de tarjetas idénticas.
 """
 from typing import Any, Dict, List, Optional
 
-# Características que no cambian cómo se ve la prenda: no sirven para separar
-# looks. Se comparan en minúscula y sin distinguir el nombre exacto que haya
-# cargado la clienta.
-ATRIBUTOS_NO_VISUALES = {"talla", "tallas", "size", "sizes", "medida", "medidas"}
-
-
-def _es_visual(nombre: str) -> bool:
-    return nombre.strip().lower() not in ATRIBUTOS_NO_VISUALES
+def _es_visual(nombre: str, visuales: set) -> bool:
+    """
+    Si una característica cambia la apariencia lo declara la clienta
+    (Characteristic.afecta_apariencia), no lo adivina el sistema. Antes acá
+    había una lista fija con "talla", "size" y "medida": una adivinanza que
+    funcionaba sólo para ropa y se rompía con el primer producto distinto.
+    """
+    return nombre.strip().lower() in visuales
 
 
 def imagen_de_variante(sku: Any) -> Optional[str]:
@@ -48,55 +48,56 @@ def imagen_de_variante(sku: Any) -> Optional[str]:
     return sorted(sku.media_assets, key=lambda m: m.id)[0].url
 
 
-def elegir_atributo_distintivo(variantes: List[Any]) -> Optional[str]:
+def clave_visual(config: Dict[str, Any], visuales: set) -> Optional[str]:
     """
-    Devuelve el nombre de la característica que mejor separa las variantes
-    cuando no hay imágenes: la primera que sea visual y tenga más de un valor.
+    Proyecta una variante sobre sus características visuales.
 
-    Devuelve None si ninguna distingue (todas las variantes se ven igual).
+    Una variante es un punto del producto cartesiano de todas las
+    características. Un look es la proyección de ese punto sobre el subconjunto
+    visual: dos variantes que sólo difieren en talla caen en el mismo look.
+
+    Se usan TODAS las visuales, no una sola: un vestido Rojo/Manga Larga y uno
+    Rojo/Sin Manga son looks distintos si ambas características afectan la
+    apariencia. Devuelve None si la variante no tiene ninguna visual con valor.
     """
-    if not variantes:
-        return None
-
-    valores_por_atributo: Dict[str, set] = {}
-    for v in variantes:
-        for nombre, valor in (v.config or {}).items():
-            if not _es_visual(nombre) or valor in (None, ""):
-                continue
-            valores_por_atributo.setdefault(nombre, set()).add(str(valor).strip().lower())
-
-    # Orden estable: el primero declarado en la config que además varíe.
-    for nombre in valores_por_atributo:
-        if len(valores_por_atributo[nombre]) > 1:
-            return nombre
-    return None
+    partes = []
+    for nombre, valor in sorted((config or {}).items()):
+        if _es_visual(nombre, visuales) and valor not in (None, ""):
+            partes.append(f"{nombre.strip().lower()}={str(valor).strip().lower()}")
+    return "|".join(partes) if partes else None
 
 
 def colapsar_en_looks(producto: Any, variantes: List[Any],
-                      imagen_de: Dict[int, Optional[str]]) -> List[Dict[str, Any]]:
+                      imagen_de: Dict[int, Optional[str]],
+                      visuales: set) -> List[Dict[str, Any]]:
     """
     Colapsa las variantes de UN producto en su lista de looks.
 
-    `imagen_de` mapea sku.id -> url de su imagen propia (o None). Se recibe ya
-    resuelto para no disparar una consulta por variante.
+    `imagen_de` mapea sku.id -> url de su imagen propia (o None), ya resuelto
+    para no disparar una consulta por variante.
+    `visuales` son los nombres (en minúscula) de las características marcadas
+    como que afectan la apariencia.
+
+    Orden de la regla:
+      1. Imagen propia: es la verdad empírica, si tiene otra foto se ve distinta.
+      2. Sin imagen: la proyección sobre las características visuales.
+      3. Ninguna de las dos: una sola tarjeta del producto.
     """
     if not variantes:
         return [_look_del_producto(producto)]
 
-    atributo = elegir_atributo_distintivo(variantes)
     looks: List[Dict[str, Any]] = []
     vistos = set()
 
     for v in variantes:
         imagen = imagen_de.get(v.id)
-        valor = (v.config or {}).get(atributo) if atributo else None
+        visual = clave_visual(v.config, visuales)
 
         if imagen:
             clave = f"img::{imagen}"
-        elif valor:
-            clave = f"attr::{str(valor).strip().lower()}"
+        elif visual:
+            clave = f"vis::{visual}"
         else:
-            # Nada que distinga: una sola tarjeta del producto.
             clave = "base"
 
         if clave in vistos:
@@ -105,17 +106,23 @@ def colapsar_en_looks(producto: Any, variantes: List[Any],
 
         if clave == "base":
             looks.append(_look_del_producto(producto))
-        else:
-            looks.append({
-                "id": f"{producto.id}-{v.sku}",
-                "product_id": producto.id,
-                "slug": producto.slug,
-                "name": f"{producto.name} · {valor}" if valor else producto.name,
-                "image": imagen,
-                "sku": v.sku,
-                "config": v.config or {},
-                "price": v.price,
-            })
+            continue
+
+        # Descriptor legible: los valores visuales de ESTA variante.
+        descriptor = " · ".join(
+            str(val) for nombre, val in sorted((v.config or {}).items())
+            if _es_visual(nombre, visuales) and val not in (None, "")
+        )
+        looks.append({
+            "id": f"{producto.id}-{v.sku}",
+            "product_id": producto.id,
+            "slug": producto.slug,
+            "name": f"{producto.name} · {descriptor}" if descriptor else producto.name,
+            "image": imagen,
+            "sku": v.sku,
+            "config": v.config or {},
+            "price": v.price,
+        })
 
     return looks
 

@@ -46,9 +46,16 @@ class CollectionSKULink(SQLModel, table=True):
 class Characteristic(SQLModel, table=True):
     __tablename__ = "attribute"
     id: Optional[int] = Field(default=None, primary_key=True)
-    name: str = Field(unique=True) 
+    name: str = Field(unique=True)
     description: Optional[str] = Field(default=None)
     is_filterable: bool = Field(default=True)
+
+    # ¿Cambia cómo se ve la prenda? Define qué separa una tarjeta de otra en el
+    # explorador: dos variantes que sólo difieren en características NO visuales
+    # (talla) son el mismo look. Lo declara la clienta desde el panel, igual que
+    # is_filterable — el sistema no puede adivinarlo: hoy es Color y Estampado,
+    # mañana será Idioma o Tapa cuando entren las biblias.
+    afecta_apariencia: bool = Field(default=False)
     
     is_system: bool = Field(default=False)
     system_id: Optional[str] = Field(default=None)
