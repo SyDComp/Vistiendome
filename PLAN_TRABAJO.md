@@ -1,5 +1,39 @@
 # Plan de trabajo — Reunión con clienta (agosto 2026)
 
+## 📋 TABLERO — todo lo abierto, en orden
+
+> Una sola vista de lo pendiente. El detalle de cada punto está más abajo o en [INFORME_MOVIL.md](INFORME_MOVIL.md).
+
+### A · Afecta la venta hoy
+| # | Qué | De quién depende |
+|---|---|---|
+| A1 | 253 variantes de *Tapado Magdalena Verano* sin precio → se muestran en $0 en la tienda | **Paola** (cargar precios; la herramienta ya está en Producción › Sin precio) |
+| A2 | El Explorador explota cuando una variante no tiene imagen: la regla cae a una tarjeta por SKU (*vestido perla* daría ~74 casi idénticas) | Nosotros — arreglo chico |
+| A3 | El catálogo descarga 278 KB con 4 productos; escala con variantes (multiplicativo) | Nosotros — estrategia de looks |
+
+### B · Pedidos de la clienta, pendientes
+| # | Qué | Estado |
+|---|---|---|
+| B1 | Precio mayorista (6+ unidades) | Especificado, listo para construir |
+| B2 | Planilla de pedido / orden de corte | **Falta respuesta de Paola**: qué campos, quién edita |
+| B3 | Comprobante de compra sin precios | Depende de B2 |
+| B4 | Stock real (opción B, decidida) | **Falta que Paola haga la pasada de ajuste** |
+| B5 | Promociones / regalos condicionales | **Falta definir con Paola**: ¿lo elige ella al armar el pedido, o va en la web? |
+| B6 | Video en producto | Hecho, **falta que Paola confirme** embebido vs. link |
+
+### C · Mejoras internas (pueden esperar)
+| # | Qué |
+|---|---|
+| C1 | El caché no deduplica llamadas simultáneas |
+| C2 | 30 controles táctiles bajo 44px (peor: menú a 16×24) |
+| C3 | El SKU ocupa espacio prime en la ficha de producto |
+| C4 | Lógica de filtros duplicada (Python + JavaScript), solo se usa una |
+| C5 | Análisis sin hacer: panel de administración, redes lentas |
+
+**Siguiente paso sugerido:** A2 y A3 se pueden hacer ahora sin depender de nadie. Todo el bloque B espera respuestas de Paola — conviene mandárselas juntas.
+
+---
+
 Documento vivo. Se actualiza después de cada reunión.
 Referencia de alcance original: [propuesta_vistiendome.md](propuesta_vistiendome.md) (junio 2026 — **desactualizada**, ver nota al final).
 
