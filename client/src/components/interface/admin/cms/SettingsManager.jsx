@@ -12,12 +12,14 @@ import {
     Plus,
     X,
     Megaphone,
-    Sliders
+    Sliders,
+    Tag
 } from 'lucide-react';
 import Button from '../../../ui/Button';
 import MediaField from '../../../ui/admin/MediaField';
 import LinkField from '../../../ui/admin/LinkField';
 import { getSiteSettings, updateSiteSetting } from '../../../../lib/api/endpoints';
+import { getFiltersMetadata } from '../../../../lib/api/endpoints/products.api';
 import { useSettings } from '../../../../context/SettingsContext';
 import { getShippingColor } from '../../../../utils/shippingColors';
 
@@ -68,6 +70,10 @@ const SettingsManager = () => {
         bold: false
     });
     const [nosotros, setNosotros] = useState({ image_asset_id: null, image_url: '' });
+    // Tramos de precio por cantidad (mayorista, iglesia, los que ella defina).
+    // Configuración global: aplica a todo el catálogo, no producto por producto.
+    const [priceTiers, setPriceTiers] = useState({ tiers: [] });
+    const [tallas, setTallas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState(null);
@@ -100,6 +106,21 @@ const SettingsManager = () => {
                 if (data.nosotros) {
                     setNosotros(prev => ({ ...prev, ...data.nosotros }));
                 }
+                if (data.price_tiers) {
+                    setPriceTiers(prev => ({ ...prev, ...data.price_tiers }));
+                }
+                // Valores de las características, en su orden real, para poder
+                // elegir el "desde/hasta" de cada tramo sin escribirlo a mano.
+                try {
+                    const meta = await getFiltersMetadata();
+                    const attrs = meta?.attributes || {};
+                    // filters-metadata entrega cada característica como un array
+                    // de valores. Ojo: `array.values` NO es undefined, es
+                    // Array.prototype.values (una función), y pasársela a
+                    // setState hace que React la ejecute como actualizador.
+                    const raw = attrs.TALLA ?? attrs.Talla;
+                    setTallas(Array.isArray(raw) ? raw : (raw?.values ?? []));
+                } catch { /* no bloquea el resto de ajustes */ }
             } catch (err) {
                 console.error("Error loading settings:", err);
             } finally {
@@ -132,7 +153,8 @@ const SettingsManager = () => {
                 updateSiteSetting('shipping_colors', shippingColors),
                 updateSiteSetting('welcome_modal', welcomeModal),
                 updateSiteSetting('top_banner', topBanner),
-                updateSiteSetting('nosotros', nosotros)
+                updateSiteSetting('nosotros', nosotros),
+                updateSiteSetting('price_tiers', priceTiers)
             ]);
             
             if (refreshSettings) await refreshSettings();
@@ -547,6 +569,81 @@ const SettingsManager = () => {
                             Si cambias el contenido, el modal volverá a mostrarse aunque el cliente ya lo haya visto. Deja el botón sin texto si no quieres llamado a la acción.
                         </p>
                     </div>
+                </section>
+
+                <section style={{ background: '#fff', padding: '30px', borderRadius: '24px', border: '1px solid #e2e8f0', gridColumn: '1 / -1' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Tag size={20} />
+                        </div>
+                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#1e1b4b' }}>Precios por cantidad (mayorista, iglesia)</h3>
+                    </div>
+                    <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 20px', lineHeight: 1.6 }}>
+                        El descuento se aplica solo si la clienta lleva el mínimo de unidades <strong>del mismo producto y color</strong>,
+                        y <strong>todas las tallas caen dentro del rango</strong>. Puede mezclar tallas: 5 de la 12 y 1 de la 3XL cuenta como 6.
+                        Si un pedido califica para dos tramos, se cobra el más barato.
+                    </p>
+
+                    {(priceTiers.tiers || []).map((t, i) => (
+                        <div key={i} style={{ border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px', marginBottom: '14px', background: '#f8fafc' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '14px' }}>
+                                <div className="input-group">
+                                    <label style={labelStyle}>Nombre del tramo</label>
+                                    <input type="text" value={t.name || ''} placeholder="Ej: Iglesia"
+                                        onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, name: e.target.value } : x) }))}
+                                        style={inputStyle} />
+                                </div>
+                                <div className="input-group">
+                                    <label style={labelStyle}>Desde talla</label>
+                                    <select value={t.from || ''} style={inputStyle}
+                                        onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, from: e.target.value } : x) }))}>
+                                        <option value="">—</option>
+                                        {tallas.map(v => <option key={v} value={v}>{v}</option>)}
+                                    </select>
+                                </div>
+                                <div className="input-group">
+                                    <label style={labelStyle}>Hasta talla</label>
+                                    <select value={t.to || ''} style={inputStyle}
+                                        onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, to: e.target.value } : x) }))}>
+                                        <option value="">—</option>
+                                        {tallas.map(v => <option key={v} value={v}>{v}</option>)}
+                                    </select>
+                                </div>
+                                <div className="input-group">
+                                    <label style={labelStyle}>Mínimo de unidades</label>
+                                    <input type="number" min="2" value={t.min_qty ?? 6}
+                                        onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, min_qty: parseInt(e.target.value) || 0 } : x) }))}
+                                        style={inputStyle} />
+                                </div>
+                                <div className="input-group">
+                                    <label style={labelStyle}>Tipo de descuento</label>
+                                    <select value={t.discount_type || 'percent'} style={inputStyle}
+                                        onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, discount_type: e.target.value } : x) }))}>
+                                        <option value="percent">Porcentaje (%)</option>
+                                        <option value="amount">Rebaja fija ($)</option>
+                                        <option value="fixed">Precio fijo ($)</option>
+                                    </select>
+                                </div>
+                                <div className="input-group">
+                                    <label style={labelStyle}>Valor</label>
+                                    <input type="number" min="0" value={t.discount_value ?? ''}
+                                        onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, discount_value: parseFloat(e.target.value) || 0 } : x) }))}
+                                        style={inputStyle} />
+                                </div>
+                            </div>
+                            <button type="button"
+                                onClick={() => setPriceTiers(p => ({ ...p, tiers: p.tiers.filter((_, k) => k !== i) }))}
+                                style={{ marginTop: '12px', background: 'transparent', border: 'none', color: '#dc2626', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}>
+                                Eliminar este tramo
+                            </button>
+                        </div>
+                    ))}
+
+                    <button type="button"
+                        onClick={() => setPriceTiers(p => ({ ...p, tiers: [...(p.tiers || []), { name: '', from: '', to: '', min_qty: 6, discount_type: 'percent', discount_value: 10 }] }))}
+                        style={{ background: '#1e1b4b', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '12px', fontWeight: 800, fontSize: '13px', cursor: 'pointer' }}>
+                        + Agregar tramo
+                    </button>
                 </section>
 
                 <section style={{ background: '#fff', padding: '30px', borderRadius: '24px', border: '1px solid #e2e8f0', gridColumn: '1 / -1' }}>
