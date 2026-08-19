@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, Share2, ShieldCheck, Truck, MessageCircle, ShoppingBag, Barcode as BarcodeIcon } from 'lucide-react';
+import { ChevronLeft, Share2, ShieldCheck, Truck, MessageCircle, ShoppingBag, Barcode as BarcodeIcon, Users } from 'lucide-react';
 import ReactBarcode from 'react-barcode';
 import ProductPreviewCarousel from './ProductPreviewCarousel';
 import VariantSelector from './VariantSelector';
@@ -12,7 +12,8 @@ import { getImageUrl } from '../../../lib/api/endpoints/index.js';
 import useProductDetail from '../hooks/useProductDetail';
 import { generateEAN13, formatSku } from '../utils/skuUtils';
 import { handleShare } from '../utils/shareUtils';
-import { buildWhatsAppMessage } from '../../../utils/cartUtils';
+import { buildWhatsAppMessage, formatCurrency } from '../../../utils/cartUtils';
+import { valoresEnRango, aplicarDescuento } from '../../../utils/priceTiers';
 import { getYoutubeEmbedUrl } from '../../../utils/youtube';
 import { track } from '../../../lib/analytics';
 import '../productDetail.css';
@@ -20,7 +21,7 @@ import '../productDetail.css';
 const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { addItem } = useCart();
+    const { addItem, filtersMetadata } = useCart();
     const { toast } = useNotification();
     const { settings } = useSettings();
 
@@ -53,6 +54,30 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
             track('view', { product_id: producto.id });
         }
     }, [producto?.id]);
+
+    // Aviso de precio por cantidad (mayorista, iglesia): sólo se muestra si la
+    // TALLA (o la característica que sea) seleccionada cae dentro del rango
+    // del tramo. No dice "6 unidades de cualquier cosa" — dice el precio real
+    // que tendría, para que la clienta lo vea antes de decidir cuánto llevar.
+    const tierHints = useMemo(() => {
+        const tiers = settings?.price_tiers?.tiers || [];
+        if (!tiers.length || !precioFinal) return [];
+        return tiers
+            .filter(t => t?.active !== false && t.characteristic && t.from && t.to && t.min_qty)
+            .map(t => {
+                const valorActual = Object.entries(selections)
+                    .find(([k]) => k.toLowerCase().trim() === t.characteristic.toLowerCase().trim())?.[1];
+                if (valorActual == null) return null;
+                const crudo = filtersMetadata?.attributes?.[t.characteristic] ?? filtersMetadata?.[t.characteristic];
+                const orden = Array.isArray(crudo) ? crudo : (crudo?.values ?? []);
+                const permitidos = new Set(valoresEnRango(orden, t.from, t.to).map(v => String(v).toLowerCase().trim()));
+                if (!permitidos.has(String(valorActual).toLowerCase().trim())) return null;
+                const precioTramo = aplicarDescuento(precioFinal, t.discount_type, t.discount_value);
+                if (precioTramo >= precioFinal) return null;
+                return { nombre: t.name || 'Mayorista', minQty: t.min_qty, precioTramo };
+            })
+            .filter(Boolean);
+    }, [settings?.price_tiers, selections, filtersMetadata, precioFinal]);
 
     const onShare = async () => {
         const result = await handleShare(producto?.name);
@@ -206,6 +231,18 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                                         );
                                     })()}
                                 </div>
+                                {tierHints.length > 0 && (
+                                    <div className="tier-hints-list">
+                                        {tierHints.map((h, i) => (
+                                            <div key={i} className="tier-hint-row">
+                                                <Users size={14} />
+                                                <span>
+                                                    Desde {h.minQty} unidades ({h.nombre}): <strong>{formatCurrency(h.precioTramo)}</strong> c/u
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </header>
 
                             <div className="product-description-refined">

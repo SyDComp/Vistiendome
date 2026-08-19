@@ -38,7 +38,7 @@ const claveGrupo = (item, caracteristica) => {
     return `${item.productId}|${partes.join('&')}`;
 };
 
-const aplicarDescuento = (precio, tipo, valor) => {
+export const aplicarDescuento = (precio, tipo, valor) => {
     const n = Number(valor);
     if (!Number.isFinite(n) || n <= 0) return precio;
     if (tipo === 'percent') return n < 100 ? Math.round(precio * (1 - n / 100)) : precio;

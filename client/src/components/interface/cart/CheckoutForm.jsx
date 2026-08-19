@@ -136,10 +136,15 @@ const CheckoutForm = ({ onClose }) => {
             },
             productos: cart.map(item => ({
                 name: item.name,
-                variantLabel: item.variantLabel,
+                // Si el precio de tramo (mayorista, iglesia) aplica, es el que
+                // realmente se le va a cobrar — Paola necesita verlo en el
+                // mensaje, no el unitario que ya no corresponde.
+                variantLabel: item.tramoAplicado
+                    ? `${item.variantLabel} · Precio ${item.tramoAplicado}`
+                    : item.variantLabel,
                 selections: item.selections,
                 quantity: item.quantity,
-                price: item.price,
+                price: item.precioTramo ?? item.price,
                 url: item.productUrl,
             })),
             total,
@@ -161,7 +166,7 @@ const CheckoutForm = ({ onClose }) => {
             const items = cart.map(item => ({
                 sku_id: item.sku ? item.sku.id : null,
                 cantidad: item.quantity,
-                precio_unitario_estimado: item.price
+                precio_unitario_estimado: item.precioTramo ?? item.price
             }));
 
             post('/api/v1/crm/', {

@@ -203,6 +203,22 @@
     vertical-align: middle;
 }
 
+.tier-hints-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+}
+.tier-hint-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: #16a34a;
+    font-weight: 600;
+}
+.tier-hint-row strong { font-weight: 800; }
+
 .product-description-refined {
     font-size: 1.05rem;
     line-height: 1.7;

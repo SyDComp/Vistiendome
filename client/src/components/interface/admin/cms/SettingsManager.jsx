@@ -73,7 +73,9 @@ const SettingsManager = () => {
     // Tramos de precio por cantidad (mayorista, iglesia, los que ella defina).
     // Configuración global: aplica a todo el catálogo, no producto por producto.
     const [priceTiers, setPriceTiers] = useState({ tiers: [] });
-    const [tallas, setTallas] = useState([]);
+    // Cada característica -> sus valores en orden real. Un tramo puede ser por
+    // Talla, Material, Idioma, lo que exista: no está fijo a una sola.
+    const [atributosDisponibles, setAtributosDisponibles] = useState({});
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState(null);
@@ -109,8 +111,8 @@ const SettingsManager = () => {
                 if (data.price_tiers) {
                     setPriceTiers(prev => ({ ...prev, ...data.price_tiers }));
                 }
-                // Valores de las características, en su orden real, para poder
-                // elegir el "desde/hasta" de cada tramo sin escribirlo a mano.
+                // Valores de cada característica, en su orden real, para poder
+                // elegir el "desde/hasta" de cualquier tramo sin escribirlo a mano.
                 try {
                     const meta = await getFiltersMetadata();
                     const attrs = meta?.attributes || {};
@@ -118,8 +120,11 @@ const SettingsManager = () => {
                     // de valores. Ojo: `array.values` NO es undefined, es
                     // Array.prototype.values (una función), y pasársela a
                     // setState hace que React la ejecute como actualizador.
-                    const raw = attrs.TALLA ?? attrs.Talla;
-                    setTallas(Array.isArray(raw) ? raw : (raw?.values ?? []));
+                    const normalizado = {};
+                    Object.entries(attrs).forEach(([nombre, raw]) => {
+                        normalizado[nombre] = Array.isArray(raw) ? raw : (raw?.values ?? []);
+                    });
+                    setAtributosDisponibles(normalizado);
                 } catch { /* no bloquea el resto de ajustes */ }
             } catch (err) {
                 console.error("Error loading settings:", err);
@@ -584,7 +589,12 @@ const SettingsManager = () => {
                         Si un pedido califica para dos tramos, se cobra el más barato.
                     </p>
 
-                    {(priceTiers.tiers || []).map((t, i) => (
+                    {(priceTiers.tiers || []).map((t, i) => {
+                        // Los valores de "desde/hasta" dependen de qué característica
+                        // eligió para ESTE tramo — no está fijo a Talla. Si mañana
+                        // define un tramo por Material o por Idioma, funciona igual.
+                        const valoresCaracteristica = t.characteristic ? (atributosDisponibles[t.characteristic] || []) : [];
+                        return (
                         <div key={i} style={{ border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px', marginBottom: '14px', background: '#f8fafc' }}>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '14px' }}>
                                 <div className="input-group">
@@ -594,19 +604,27 @@ const SettingsManager = () => {
                                         style={inputStyle} />
                                 </div>
                                 <div className="input-group">
-                                    <label style={labelStyle}>Desde talla</label>
-                                    <select value={t.from || ''} style={inputStyle}
-                                        onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, from: e.target.value } : x) }))}>
+                                    <label style={labelStyle}>Característica</label>
+                                    <select value={t.characteristic || ''} style={inputStyle}
+                                        onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, characteristic: e.target.value, from: '', to: '' } : x) }))}>
                                         <option value="">—</option>
-                                        {tallas.map(v => <option key={v} value={v}>{v}</option>)}
+                                        {Object.keys(atributosDisponibles).map(nombre => <option key={nombre} value={nombre}>{nombre}</option>)}
                                     </select>
                                 </div>
                                 <div className="input-group">
-                                    <label style={labelStyle}>Hasta talla</label>
-                                    <select value={t.to || ''} style={inputStyle}
+                                    <label style={labelStyle}>Desde</label>
+                                    <select value={t.from || ''} style={inputStyle} disabled={!t.characteristic}
+                                        onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, from: e.target.value } : x) }))}>
+                                        <option value="">—</option>
+                                        {valoresCaracteristica.map(v => <option key={v} value={v}>{v}</option>)}
+                                    </select>
+                                </div>
+                                <div className="input-group">
+                                    <label style={labelStyle}>Hasta</label>
+                                    <select value={t.to || ''} style={inputStyle} disabled={!t.characteristic}
                                         onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, to: e.target.value } : x) }))}>
                                         <option value="">—</option>
-                                        {tallas.map(v => <option key={v} value={v}>{v}</option>)}
+                                        {valoresCaracteristica.map(v => <option key={v} value={v}>{v}</option>)}
                                     </select>
                                 </div>
                                 <div className="input-group">
@@ -637,10 +655,11 @@ const SettingsManager = () => {
                                 Eliminar este tramo
                             </button>
                         </div>
-                    ))}
+                        );
+                    })}
 
                     <button type="button"
-                        onClick={() => setPriceTiers(p => ({ ...p, tiers: [...(p.tiers || []), { name: '', from: '', to: '', min_qty: 6, discount_type: 'percent', discount_value: 10 }] }))}
+                        onClick={() => setPriceTiers(p => ({ ...p, tiers: [...(p.tiers || []), { name: '', characteristic: '', from: '', to: '', min_qty: 6, discount_type: 'percent', discount_value: 10 }] }))}
                         style={{ background: '#1e1b4b', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '12px', fontWeight: 800, fontSize: '13px', cursor: 'pointer' }}>
                         + Agregar tramo
                     </button>

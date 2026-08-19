@@ -68,6 +68,27 @@ Por eso:
 
 `clusterUtils.js` busca la clave `COLOR` a mano — asume ropa. El servidor **sí conoce el modelo**: `Characteristic` (`catalog.py:47`) tiene `name`, `is_filterable`, `value_structure`. Puede decidir el agrupamiento con los datos reales en vez de adivinar. Ahí es donde la regla genérica se implementa bien.
 
+### Datos ya medidos — NO volver a consultarlos
+
+**Características reales en `SKU.config`** (medidas sobre el payload de producción, todas en mayúsculas):
+
+```
+COLOR · CUELLO · LARGO · MATERIAL · MANGAS · TALLA
+```
+
+**Imágenes por variante** (medido con `skumedialink`):
+
+| Producto | Variantes | Imágenes distintas | Variantes sin imagen |
+|---|---|---|---|
+| Vestido Noemi | 451 | 33 | 0 |
+| Tapado Magdalena Invierno | 221 | 17 | 0 |
+| Tapado Magdalena Verano | 299 | 1 | 253 |
+| vestido perla | 78 | 2 | 72 |
+
+> "Sin imagen" es un **estado legítimo**, no un dato incompleto: una variante puede estar bien definida y no tener foto propia. La regla debe manejarlo por diseño.
+
+Con esto, el paso 1 no necesita ninguna consulta a la base.
+
 ### La regla a trasladar (ya probada en el cliente)
 
 De [clusterUtils.js](client/src/features/catalog/utils/clusterUtils.js), en orden:

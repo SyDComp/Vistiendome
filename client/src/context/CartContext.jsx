@@ -1,7 +1,10 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { useNotification } from './NotificationContext';
+import { useSettings } from './SettingsContext';
 import { getCartItemKey } from '../utils/cartUtils';
+import { evaluarTramos } from '../utils/priceTiers';
+import { getFiltersMetadata } from '../lib/api/endpoints/products.api';
 
 const CartContext = createContext(null);
 
@@ -12,6 +15,15 @@ export const CartProvider = ({ children }) => {
     });
     const [isCartOpen, setIsCartOpen] = useState(false);
     const { toast } = useNotification();
+    const { settings } = useSettings();
+
+    // Orden real de las características (TALLA, etc.), para resolver los
+    // rangos de los tramos de precio. Se pide una sola vez; el endpoint ya
+    // cachea la respuesta.
+    const [filtersMetadata, setFiltersMetadata] = useState(null);
+    useEffect(() => {
+        getFiltersMetadata().then(setFiltersMetadata).catch(() => {});
+    }, []);
 
     // Persistencia automática
     useEffect(() => {
@@ -60,9 +72,32 @@ export const CartProvider = ({ children }) => {
 
     const clearCart = () => setCart([]);
 
+    // Tramos por cantidad (mayorista, iglesia): se evalúan sobre el carrito
+    // completo porque el descuento depende de cuántas unidades hay del mismo
+    // producto+color entre todas las tallas del rango, no de una línea sola.
+    const tierMap = useMemo(() => {
+        const cartConKey = cart.map(item => ({
+            ...item,
+            __key: getCartItemKey(item.productId, item.sku, item.selections),
+        }));
+        return evaluarTramos(cartConKey, settings?.price_tiers, filtersMetadata);
+    }, [cart, settings?.price_tiers, filtersMetadata]);
+
+    // El carrito que se expone lleva el precio de tramo ya resuelto, sin que
+    // cada consumidor (drawer, checkout) tenga que volver a evaluar reglas.
+    const cartConTramos = useMemo(() => cart.map(item => {
+        const key = getCartItemKey(item.productId, item.sku, item.selections);
+        const tramo = tierMap.get(key);
+        return {
+            ...item,
+            tramoAplicado: tramo?.tramo ?? null,
+            precioTramo: tramo?.precio ?? null,
+        };
+    }), [cart, tierMap]);
+
     const total = useMemo(() => {
-        return cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    }, [cart]);
+        return cartConTramos.reduce((acc, item) => acc + ((item.precioTramo ?? item.price) * item.quantity), 0);
+    }, [cartConTramos]);
 
     const itemsCount = useMemo(() => {
         return cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -70,7 +105,7 @@ export const CartProvider = ({ children }) => {
 
     return (
         <CartContext.Provider value={{
-            cart,
+            cart: cartConTramos,
             isCartOpen,
             setIsCartOpen,
             addItem,
@@ -79,6 +114,7 @@ export const CartProvider = ({ children }) => {
             clearCart,
             total,
             itemsCount,
+            filtersMetadata,
             toggleCart: () => setIsCartOpen(!isCartOpen)
         }}>
             {children}

@@ -66,8 +66,20 @@ const CartDrawer = () => {
                                             </button>
                                         </div>
                                         <p className="item-variant-label">{item.variantLabel}</p>
+                                        {item.tramoAplicado && (
+                                            <p className="item-tier-badge">
+                                                Precio {item.tramoAplicado} aplicado
+                                            </p>
+                                        )}
                                         <div className="item-price-row">
-                                            <span className="item-price">{formatCurrency(item.price)}</span>
+                                            {item.tramoAplicado ? (
+                                                <span className="item-price">
+                                                    <span className="item-price-original">{formatCurrency(item.price)}</span>
+                                                    {' '}{formatCurrency(item.precioTramo)}
+                                                </span>
+                                            ) : (
+                                                <span className="item-price">{formatCurrency(item.price)}</span>
+                                            )}
                                             <div className="quantity-controls-mini">
                                                 <button onClick={() => updateQuantity(item.productId, item.sku, item.selections, -1)}>
                                                     <Minus size={14} />
