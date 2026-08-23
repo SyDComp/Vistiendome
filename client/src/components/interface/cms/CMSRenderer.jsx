@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { useWebSocket } from '../../../context/WebSocketContext';
 import FeaturedCollections from '../colecciones/FeaturedCollections';
-import { getProducts, getImageUrl } from '../../../services/api';
+import { getProducts, getImageUrl } from '../../../lib/api/endpoints';
 import { ArrowRight, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 
 // Ruta relativa: en dev pasa por el proxy de Vite (vite.config.js), en prod por nginx.

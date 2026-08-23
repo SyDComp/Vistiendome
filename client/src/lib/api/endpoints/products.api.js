@@ -7,26 +7,15 @@ const CACHE_PREFIX_CATEGORIES = 'categoriesTree';
 const CACHE_PREFIX_FILTERS = 'filtersMetadata';
 
 /**
- * Obtiene el listado de productos con filtros opcionales.
- * Cachea por combinación de filtros.
+ * Listado completo de productos con sus variantes. Lo usan el buscador, el
+ * CMS, las colecciones y el modal del admin, que filtran en memoria.
+ *
+ * Ya no arma filtros para el servidor: ninguno de sus llamadores pasaba
+ * ninguno, y el filtrado ocurre en el cliente para que se sienta instantáneo.
+ * El catálogo y el explorador usan getCatalogo() (/looks), mucho más liviano.
  */
-export const getProducts = async (filters = {}) => {
-    const params = new URLSearchParams();
-    if (filters.category) params.append('category', filters.category);
-    if (filters.min_price) params.append('min_price', filters.min_price);
-    if (filters.max_price) params.append('max_price', filters.max_price);
-
-    if (filters.specs && Object.keys(filters.specs).length > 0) {
-        const specParts = [];
-        Object.entries(filters.specs).forEach(([key, values]) => {
-            values.forEach(val => specParts.push(`${key}:${val}`));
-        });
-        if (specParts.length > 0) params.append('specs', specParts.join(','));
-    }
-
-    const cacheKey = buildCacheKey(CACHE_PREFIX, Object.fromEntries(params));
-    return cachedFetch(cacheKey, () => get(`${API_ENDPOINTS.PRODUCTS}/?${params}`));
-};
+export const getProducts = async () =>
+    cachedFetch(CACHE_PREFIX, () => get(`${API_ENDPOINTS.PRODUCTS}/`));
 
 /**
  * Catálogo liviano: productos (con sus facetas para filtrar) y looks (una

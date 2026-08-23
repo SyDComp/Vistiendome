@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select, func
 from datetime import datetime
 from ...database import get_session
@@ -36,18 +36,19 @@ class ProductListSchema(BaseModel):
     extras: Dict[str, Any] = {}
 
 @router.get("/", response_model=List[ProductListSchema])
-def list_products(
-    db: Session = Depends(get_session),
-    category: Optional[str] = Query(None),
-    min_price: Optional[float] = Query(None),
-    max_price: Optional[float] = Query(None),
-    specs: Optional[str] = Query(None) # JSON-like string or comma separated: "Color:Rojo,Material:Lana"
-):
-    query = select(Product).where(Product.is_deleted == False)
-    if category:
-        query = query.join(Category).where(Category.slug == category)
-    
-    products = db.exec(query).all()
+def list_products(db: Session = Depends(get_session)):
+    """
+    Listado completo con variantes. Lo consumen el buscador, el CMS, las
+    colecciones y el modal del admin, que necesitan los valores de cada
+    variante para buscar y filtrar en memoria.
+
+    Ya no recibe filtros (category/min_price/max_price/specs): nadie los pasaba
+    y el filtrado real ocurre en el cliente, en memoria, para que se sienta
+    instantáneo. Mantener una segunda implementación en Python que nunca corría
+    era una trampa — el próximo que arreglara un filtro podía hacerlo acá y no
+    ver ningún efecto. El catálogo y el explorador usan /looks, no este endpoint.
+    """
+    products = db.exec(select(Product).where(Product.is_deleted == False)).all()
     now = get_chile_time()
 
     results = []
@@ -59,25 +60,6 @@ def list_products(
         min_p = min(prices) if prices else 0
         min_base = min(base_prices) if base_prices else 0
         product_on_sale = any(e[1] for e in eff.values())
-
-        # Filtro de precio (aplicado en Python por simplicidad dado que el precio está en SKUs)
-        if min_price is not None and min_p < min_price: continue
-        if max_price is not None and min_p > max_price: continue
-
-        # Filtro de especificaciones/características
-        if specs:
-            parts = specs.split(',')
-            match = True
-            for part in parts:
-                if ':' not in part: continue
-                key, val = part.split(':', 1)
-                # Buscar en specs del producto o en config de sus SKUs
-                in_specs = p.specs.get(key) == val
-                in_config = any(s.config.get(key) == val for s in p.skus)
-                if not (in_specs or in_config):
-                    match = False
-                    break
-            if not match: continue
 
         # Recolectar variantes para el buscador (Deep Search)
         variant_summaries = []
