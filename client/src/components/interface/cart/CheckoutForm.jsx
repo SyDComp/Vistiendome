@@ -166,7 +166,10 @@ const CheckoutForm = ({ onClose }) => {
             const nombres = partesNombre[0] || '';
             const apellidos = partesNombre.slice(1).join(' ') || '';
             const items = cart.map(item => ({
-                sku_id: item.sku ? item.sku.id : null,
+                // item.sku es el CÓDIGO de texto; el vínculo con la base es el
+                // id numérico. Antes se mandaba item.sku.id (".id" de un
+                // string = undefined) y toda venta web quedaba sin variante.
+                sku_id: item.skuId ?? null,
                 cantidad: item.quantity,
                 precio_unitario_estimado: item.precioTramo ?? item.price
             }));

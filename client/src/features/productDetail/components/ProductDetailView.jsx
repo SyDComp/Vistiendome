@@ -120,6 +120,11 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
         addItem({
             productId: producto?.id,
             sku: skuActual?.sku,
+            // Id numérico de la variante. `sku` es el código de texto y no
+            // sirve para vincular en la base: sin esto la cotización llega al
+            // CRM sin variante, y ni la orden de corte ni el descuento de
+            // stock ven la venta.
+            skuId: skuActual?.id,
             name: producto?.name,
             price: precioFinal,
             image: currentImage,
