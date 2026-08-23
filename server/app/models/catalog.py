@@ -184,7 +184,6 @@ class SKU(SQLModel, table=True):
     config: Dict[str, str] = Field(default={}, sa_type=JSON)
     
     price: float
-    stock: int = Field(default=0)
 
     # --- Override de oferta a nivel variante ---
     # sale_type: 'percent' o 'fixed'. Si está activo (dentro de su ventana),

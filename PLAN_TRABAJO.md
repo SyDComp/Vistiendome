@@ -17,7 +17,7 @@
 | B1 | Precio mayorista (6+ unidades) | ✅ Hecho — construido, conectado al carrito y verificado en el navegador |
 | B2 | Planilla de pedido / orden de corte | ✅ Hecho — decidido con criterio propio (ver detalle abajo), no bloqueó en Paola |
 | B3 | Comprobante de compra sin precios | ✅ Hecho — misma pieza que B2, modo `?modo=cliente` sin precios |
-| B4 | Stock real (opción B, decidida) | **Falta que Paola haga la pasada de ajuste** |
+| B4 | Stock real (opción B, decidida) | ✅ Hecho — gancho de venta + columna muerta eliminada. Valores reales: **pendiente que Paola haga su pasada de ajuste** (no bloquea, se cambia libre desde el panel) |
 | B5 | Promociones / regalos condicionales | **Falta definir con Paola**: ¿lo elige ella al armar el pedido, o va en la web? |
 | B6 | Video en producto | Hecho, **falta que Paola confirme** embebido vs. link |
 
@@ -30,7 +30,13 @@
 | C4 | Lógica de filtros duplicada (Python + JavaScript), solo se usa una |
 | C5 | Análisis sin hacer: panel de administración, redes lentas |
 
-**Siguiente paso:** B4 (stock real — falta que Paola haga la pasada de ajuste antes) o B5 (promociones, falta definir con Paola). A2, A3, B1, B2, B3 ✅ hechos. El scroll infinito de A3 queda como opcional, al final de la lista.
+**Siguiente paso:** B5 (promociones) — falta la regla concreta (qué dispara qué regalo/descuento) antes de construir; decidido que va automático en la web, no manual al armar el pedido. A2, A3, B1, B2, B3, B4 ✅ hechos. El scroll infinito de A3 queda como opcional, al final de la lista.
+
+### B4 — decisión tomada (2026-08-23)
+
+Construido el gancho de venta y eliminada la columna muerta `SKU.stock` (migración `d0e1f2a3b4c5`). Al cerrar una `Cotizacion` en `CERRADA_EXITO` se crea un `StockMovement` tipo `SALE` por cada ítem con SKU real; al reabrirla se revierte. Idempotente vía el campo `reference_id` que `StockMovement` ya tenía (no hizo falta columna nueva) — usa `cotizacion_item.id`, así que cerrar/reabrir/cerrar no descuenta dos veces. Verificado el ciclo completo en la base real.
+
+**Valores reales de stock:** por indicación explícita, no se bloqueó en que Paola hiciera antes su pasada de ajuste. Se dejaron 3 variantes con valores de prueba (200, 200, 5) para poder verificar el flujo; el resto del catálogo sigue en 0 por defecto (sin movimientos) — así queda hasta que ella cargue los números reales, algo que puede hacer en cualquier momento desde el panel sin tocar código.
 
 ### B2/B3 — decisión tomada (sin bloquear en Paola)
 

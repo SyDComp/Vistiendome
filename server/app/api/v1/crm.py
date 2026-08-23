@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from app.database import get_session
 from app.models.crm import Cotizacion, CotizacionItem, EstadoCotizacion, OrigenCotizacion, TipoDespacho
 from app.models.iam import Persona, TipoPersona, Direccion, CuentaAcceso
+from app.models.catalog import StockMovement, MovementType
 from app.api.deps import get_current_user, RequirePermiso
 
 router = APIRouter()
@@ -272,6 +273,43 @@ def listar_cotizaciones(session: Session = Depends(get_session), skip: int = 0, 
     cotizaciones = session.exec(select(Cotizacion).order_by(Cotizacion.created_at.desc()).offset(skip).limit(limit)).all()
     return [_get_cotizacion_read(c) for c in cotizaciones]
 
+def _sincronizar_stock_venta(session: Session, cotizacion: Cotizacion, estado_anterior: EstadoCotizacion, estado_nuevo: EstadoCotizacion) -> None:
+    """
+    Al pasar a CERRADA_EXITO, descuenta el stock vendido (un StockMovement SALE
+    por ítem con SKU real). Al salir de CERRADA_EXITO (reabrir), revierte el
+    descuento. Idempotente vía reference_id=item.id: cerrar, reabrir y volver a
+    cerrar no descuenta dos veces, porque siempre revisa si el movimiento de
+    ESE ítem ya existe antes de crearlo — y lo borra al reabrir, así que el
+    siguiente cierre lo vuelve a crear limpio.
+    """
+    entra_a_exito = estado_nuevo == EstadoCotizacion.CERRADA_EXITO and estado_anterior != EstadoCotizacion.CERRADA_EXITO
+    sale_de_exito = estado_anterior == EstadoCotizacion.CERRADA_EXITO and estado_nuevo != EstadoCotizacion.CERRADA_EXITO
+
+    if not entra_a_exito and not sale_de_exito:
+        return
+
+    for item in cotizacion.items:
+        if not item.sku_id:
+            continue
+        existente = session.exec(
+            select(StockMovement).where(
+                StockMovement.sku_id == item.sku_id,
+                StockMovement.type == MovementType.SALE,
+                StockMovement.reference_id == item.id,
+            )
+        ).first()
+
+        if entra_a_exito and not existente:
+            session.add(StockMovement(
+                sku_id=item.sku_id,
+                type=MovementType.SALE,
+                quantity=-item.cantidad,
+                reference_id=item.id,
+                note=f"Venta cotización #{cotizacion.numero}",
+            ))
+        elif sale_de_exito and existente:
+            session.delete(existente)
+
 class EstadoUpdate(BaseModel):
     estado: EstadoCotizacion
 
@@ -281,8 +319,10 @@ def actualizar_estado_cotizacion(cotizacion_id: str, data: EstadoUpdate, session
     if not cotizacion:
         raise HTTPException(status_code=404, detail="Cotización no encontrada")
 
+    estado_anterior = cotizacion.estado
     cotizacion.estado = data.estado
     session.add(cotizacion)
+    _sincronizar_stock_venta(session, cotizacion, estado_anterior, data.estado)
     session.commit()
     session.refresh(cotizacion)
     return _get_cotizacion_read(cotizacion)
