@@ -186,38 +186,6 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                                         producto?.name
                                     )}
                                 </h1>
-                                {skuActual && (
-                                    <div className="detalle-producto-sku-container">
-                                        <div className={`product-sku-pill ${showBarcode ? 'has-barcode' : ''}`}>
-                                            <span className="sku-label">SKU</span>
-                                            <span className="sku-val">{formatSku(skuActual.sku)}</span>
-                                            <button
-                                                onClick={() => setShowBarcode(!showBarcode)}
-                                                className={`barcode-toggle-btn ${showBarcode ? 'active' : ''}`}
-                                                title="Ver código de barras"
-                                            >
-                                                <BarcodeIcon size={14} />
-                                            </button>
-                                        </div>
-
-                                        {showBarcode && (
-                                            <div className="barcode-display-container">
-                                                <div className="barcode-wrapper">
-                                                    <ReactBarcode
-                                                        value={skuActual.barcode || generateEAN13(skuActual.sku) || '000000'}
-                                                        format="CODE128"
-                                                        width={1.2}
-                                                        height={40}
-                                                        fontSize={12}
-                                                        displayValue={true}
-                                                        margin={0}
-                                                        background="transparent"
-                                                    />
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
                                 <div className="price-tag-premium">
                                     {loading && !producto ? (
                                         <div className="skeleton-box" style={{ height: '36px', width: '120px', borderRadius: '8px' }}></div>
@@ -317,7 +285,12 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                                 const validSpecs = Object.entries(producto?.specs || {}).filter(([key, val]) => {
                                     return val && !key.toLowerCase().includes('colección') && !key.toLowerCase().includes('slug');
                                 });
-                                if (validSpecs.length === 0) return null;
+                                // El SKU vive acá, con los datos técnicos, y no entre el
+                                // nombre y el precio: es un código interno que a la
+                                // clienta no le dice nada, y ese espacio es el que
+                                // decide la compra. La sección se muestra igual aunque
+                                // el producto no tenga specs, para no perder el SKU.
+                                if (validSpecs.length === 0 && !skuActual) return null;
                                 return (
                                     <div className="specs-section-premium" style={{ animationDelay: '0.4s' }}>
                                         <div className="section-title-wrapper">
@@ -331,7 +304,38 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                                                     <span className="spec-value-refined">{val}</span>
                                                 </div>
                                             ))}
+                                            {skuActual && (
+                                                <div className="spec-item-refined spec-item-sku">
+                                                    <span className="spec-label-refined">SKU</span>
+                                                    <span className="spec-value-refined sku-inline">
+                                                        {formatSku(skuActual.sku)}
+                                                        <button
+                                                            onClick={() => setShowBarcode(!showBarcode)}
+                                                            className={`barcode-toggle-btn ${showBarcode ? 'active' : ''}`}
+                                                            title="Ver código de barras"
+                                                        >
+                                                            <BarcodeIcon size={14} />
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
+                                        {skuActual && showBarcode && (
+                                            <div className="barcode-display-container">
+                                                <div className="barcode-wrapper">
+                                                    <ReactBarcode
+                                                        value={skuActual.barcode || generateEAN13(skuActual.sku) || '000000'}
+                                                        format="CODE128"
+                                                        width={1.2}
+                                                        height={40}
+                                                        fontSize={12}
+                                                        displayValue={true}
+                                                        margin={0}
+                                                        background="transparent"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })()}

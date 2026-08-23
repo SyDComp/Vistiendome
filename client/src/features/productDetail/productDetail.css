@@ -254,6 +254,20 @@
 .spec-label-refined { font-size: 10px; font-weight: 700; color: #9d174d; text-transform: uppercase; letter-spacing: 0.5px; }
 .spec-value-refined { font-size: 14px; font-weight: 600; color: #1e293b; }
 
+/* SKU dentro de Especificaciones: código interno, así que va en monoespaciada
+   y con menos peso visual que una especificación real (tela, largo). */
+.spec-item-sku .sku-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-family: ui-monospace, 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+    letter-spacing: 0.3px;
+}
+
 .product-video-section { margin-top: 32px; }
 .product-video-embed-wrapper {
     position: relative;
