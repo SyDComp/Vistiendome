@@ -4,6 +4,7 @@ import { useNotification } from './NotificationContext';
 import { useSettings } from './SettingsContext';
 import { getCartItemKey } from '../utils/cartUtils';
 import { evaluarTramos } from '../utils/priceTiers';
+import { evaluarPromociones } from '../utils/promotions';
 import { getFiltersMetadata } from '../lib/api/endpoints/products.api';
 
 const CartContext = createContext(null);
@@ -95,9 +96,27 @@ export const CartProvider = ({ children }) => {
         };
     }), [cart, tierMap]);
 
-    const total = useMemo(() => {
+    // Subtotal antes de promociones (ya con precio de tramo si aplica).
+    const subtotal = useMemo(() => {
         return cartConTramos.reduce((acc, item) => acc + ((item.precioTramo ?? item.price) * item.quantity), 0);
     }, [cartConTramos]);
+
+    // Promociones (lleva X paga Y, regalo). Se evalúan DESPUÉS de los tramos
+    // porque su descuento se calcula sobre el precio que realmente rige.
+    const { descuentos, regalos } = useMemo(
+        () => evaluarPromociones(cartConTramos, settings?.promotions),
+        [cartConTramos, settings?.promotions]
+    );
+
+    const descuentoPromos = useMemo(
+        () => descuentos.reduce((acc, d) => acc + d.monto, 0),
+        [descuentos]
+    );
+
+    const total = useMemo(
+        () => Math.max(0, subtotal - descuentoPromos),
+        [subtotal, descuentoPromos]
+    );
 
     const itemsCount = useMemo(() => {
         return cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -112,6 +131,10 @@ export const CartProvider = ({ children }) => {
             removeItem,
             updateQuantity,
             clearCart,
+            subtotal,
+            descuentos,
+            descuentoPromos,
+            regalos,
             total,
             itemsCount,
             filtersMetadata,

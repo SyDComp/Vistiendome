@@ -18,7 +18,7 @@
 | B2 | Planilla de pedido / orden de corte | ✅ Hecho — decidido con criterio propio (ver detalle abajo), no bloqueó en Paola |
 | B3 | Comprobante de compra sin precios | ✅ Hecho — misma pieza que B2, modo `?modo=cliente` sin precios |
 | B4 | Stock real (opción B, decidida) | ✅ Hecho — gancho de venta + columna muerta eliminada. Valores reales: **pendiente que Paola haga su pasada de ajuste** (no bloquea, se cambia libre desde el panel) |
-| B5 | Promociones / regalos condicionales | **Falta definir con Paola**: ¿lo elige ella al armar el pedido, o va en la web? |
+| B5 | Promociones / regalos condicionales | ✅ Hecho — decidido automático en la web (ver abajo), configurable desde Ajustes |
 | B6 | Video en producto | Hecho, **falta que Paola confirme** embebido vs. link |
 
 ### C · Mejoras internas (pueden esperar)
@@ -30,7 +30,17 @@
 | C4 | Lógica de filtros duplicada (Python + JavaScript), solo se usa una |
 | C5 | Análisis sin hacer: panel de administración, redes lentas |
 
-**Siguiente paso:** B5 (promociones) — falta la regla concreta (qué dispara qué regalo/descuento) antes de construir; decidido que va automático en la web, no manual al armar el pedido. A2, A3, B1, B2, B3, B4 ✅ hechos. El scroll infinito de A3 queda como opcional, al final de la lista.
+**Siguiente paso:** bloque C (mejoras internas) y el scroll infinito de A3, ambos opcionales. **Todo el bloque A y B está cerrado** salvo B6, que solo espera confirmación de Paola sobre embebido vs. link.
+
+### B5 — decisión tomada (2026-08-23)
+
+**Automático en la web, no manual al armar el pedido.** Razón: la mayoría de las compras entran solas por el checkout, donde nadie arma nada a mano — un sistema manual solo cubriría los pedidos que Paola crea ella misma, y la obligaría a acordarse de la regla en cada uno, para siempre. Automático se configura una vez y no se vuelve a tocar.
+
+**"Lleva X paga Y" y "descuento en la segunda unidad" son la misma regla**, no dos: por cada `lleva` unidades, las (`lleva` − `paga`) más baratas reciben `descuento`%. Con 100% la unidad va gratis (3x2 clásico); con 50% queda a mitad de precio. Por eso hay un solo tipo, escrito en las palabras que ella usa. El regalo sí es un tipo aparte, porque agrega en vez de descontar.
+
+Configuración global en `SiteSetting` clave `promotions` (mismo patrón que `price_tiers`): nombre, tipo, lleva/paga/descuento o texto+mínimo del regalo, lista de productos (vacía = todo el catálogo), y vigencia desde/hasta opcional.
+
+**No se acumula con los tramos de B1 por defecto**, con un checkbox por promoción para permitirlo: si no, un pedido grande se lleva los dos descuentos encima y el margen desaparece sin que nadie lo note. El descuento se calcula siempre sobre las prendas más baratas del carrito, que es lo que espera la clienta y lo que hace cualquier tienda.
 
 ### B4 — decisión tomada (2026-08-23)
 

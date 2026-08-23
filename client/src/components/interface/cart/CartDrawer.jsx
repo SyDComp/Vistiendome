@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ShoppingBag, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
+import { X, ShoppingBag, Trash2, Plus, Minus, ArrowRight, Gift } from 'lucide-react';
 import { useCart } from '../../../context/CartContext';
 import { formatCurrency } from '../../../utils/cartUtils';
 import { useScrollLock } from '../../../hooks/useScrollLock';
@@ -7,7 +7,7 @@ import CheckoutForm from './CheckoutForm';
 import './CartDrawer.css';
 
 const CartDrawer = () => {
-    const { cart, isCartOpen, setIsCartOpen, removeItem, updateQuantity, total, itemsCount } = useCart();
+    const { cart, isCartOpen, setIsCartOpen, removeItem, updateQuantity, subtotal, descuentos, regalos, total, itemsCount } = useCart();
     const [showCheckout, setShowCheckout] = useState(false);
 
     useScrollLock(isCartOpen);
@@ -100,8 +100,32 @@ const CartDrawer = () => {
                 {/* Footer */}
                 {cart.length > 0 && (
                     <div className="cart-footer">
+                        {regalos.length > 0 && (
+                            <div className="cart-gifts">
+                                {regalos.map((g, i) => (
+                                    <div key={i} className="cart-gift-row">
+                                        <Gift size={15} />
+                                        <span><strong>{g.nombre}</strong>{g.texto ? `: ${g.texto}` : ''}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {descuentos.length > 0 && (
+                            <>
+                                <div className="cart-total-summary cart-subtotal-row">
+                                    <span>Subtotal</span>
+                                    <span>{formatCurrency(subtotal)}</span>
+                                </div>
+                                {descuentos.map((d, i) => (
+                                    <div key={i} className="cart-total-summary cart-discount-row">
+                                        <span>{d.nombre}</span>
+                                        <span>-{formatCurrency(d.monto)}</span>
+                                    </div>
+                                ))}
+                            </>
+                        )}
                         <div className="cart-total-summary">
-                            <span>Subtotal estimado</span>
+                            <span>{descuentos.length > 0 ? 'Total estimado' : 'Subtotal estimado'}</span>
                             <span className="total-amount-display">{formatCurrency(total)}</span>
                         </div>
                         <p className="cart-notice">Los costos de envío se coordinarán con la vendedora.</p>

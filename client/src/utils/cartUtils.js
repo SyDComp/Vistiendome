@@ -97,7 +97,7 @@ const formatVariantAttributes = (p) => {
 // Cada bloque es un grupo de líneas relacionadas (ej: Cliente+RUT+Contacto).
 // Los bloques se separan entre sí por una única línea en blanco — nada de
 // separadores ASCII, que en WhatsApp se ven como ruido, no como orden.
-export const buildWhatsAppMessage = ({ tipo = 'pedido', cliente, despacho, grupo, productos, total, mensaje } = {}) => {
+export const buildWhatsAppMessage = ({ tipo = 'pedido', cliente, despacho, grupo, productos, descuentos, regalos, total, mensaje } = {}) => {
     const subtitulo = tipo === 'grupo' && grupo?.tipo
         ? `${TITULOS.grupo} · ${grupo.tipo}`
         : (TITULOS[tipo] || 'Nuevo mensaje');
@@ -133,6 +133,15 @@ export const buildWhatsAppMessage = ({ tipo = 'pedido', cliente, despacho, grupo
             if (p.url) prodLines.push(`*Enlace:* ${p.url}`);
         });
         bloques.push(prodLines);
+    }
+
+    // Promociones aplicadas: Paola tiene que ver POR QUÉ el total bajó, y qué
+    // regalo le prometió el sitio, o lo descubre recién al armar el pedido.
+    if (descuentos && descuentos.length) {
+        bloques.push(descuentos.map(d => `*${d.nombre}:* -${formatCurrency(d.monto)}`));
+    }
+    if (regalos && regalos.length) {
+        bloques.push(regalos.map(g => `*Regalo (${g.nombre}):* ${g.texto || 'incluido'}`));
     }
 
     if (total != null) bloques.push([`*Total estimado:* ${formatCurrency(total)}`]);

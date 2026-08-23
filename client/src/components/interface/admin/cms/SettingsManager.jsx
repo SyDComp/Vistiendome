@@ -13,13 +13,14 @@ import {
     X,
     Megaphone,
     Sliders,
-    Tag
+    Tag,
+    Gift
 } from 'lucide-react';
 import Button from '../../../ui/Button';
 import MediaField from '../../../ui/admin/MediaField';
 import LinkField from '../../../ui/admin/LinkField';
 import { getSiteSettings, updateSiteSetting } from '../../../../lib/api/endpoints';
-import { getFiltersMetadata } from '../../../../lib/api/endpoints/products.api';
+import { getFiltersMetadata, getCatalogo } from '../../../../lib/api/endpoints/products.api';
 import { useSettings } from '../../../../context/SettingsContext';
 import { getShippingColor } from '../../../../utils/shippingColors';
 
@@ -76,6 +77,10 @@ const SettingsManager = () => {
     // Cada característica -> sus valores en orden real. Un tramo puede ser por
     // Talla, Material, Idioma, lo que exista: no está fijo a una sola.
     const [atributosDisponibles, setAtributosDisponibles] = useState({});
+    // Promociones (lleva X paga Y, regalo) y la lista de productos para elegir
+    // a cuáles aplica cada una.
+    const [promotions, setPromotions] = useState({ promos: [] });
+    const [productosDisponibles, setProductosDisponibles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState(null);
@@ -111,6 +116,13 @@ const SettingsManager = () => {
                 if (data.price_tiers) {
                     setPriceTiers(prev => ({ ...prev, ...data.price_tiers }));
                 }
+                if (data.promotions) {
+                    setPromotions(prev => ({ ...prev, ...data.promotions }));
+                }
+                try {
+                    const catalogo = await getCatalogo();
+                    setProductosDisponibles(catalogo?.products || []);
+                } catch { /* no bloquea el resto de ajustes */ }
                 // Valores de cada característica, en su orden real, para poder
                 // elegir el "desde/hasta" de cualquier tramo sin escribirlo a mano.
                 try {
@@ -159,7 +171,8 @@ const SettingsManager = () => {
                 updateSiteSetting('welcome_modal', welcomeModal),
                 updateSiteSetting('top_banner', topBanner),
                 updateSiteSetting('nosotros', nosotros),
-                updateSiteSetting('price_tiers', priceTiers)
+                updateSiteSetting('price_tiers', priceTiers),
+                updateSiteSetting('promotions', promotions)
             ]);
             
             if (refreshSettings) await refreshSettings();
@@ -662,6 +675,149 @@ const SettingsManager = () => {
                         onClick={() => setPriceTiers(p => ({ ...p, tiers: [...(p.tiers || []), { name: '', characteristic: '', from: '', to: '', min_qty: 6, discount_type: 'percent', discount_value: 10 }] }))}
                         style={{ background: '#1e1b4b', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '12px', fontWeight: 800, fontSize: '13px', cursor: 'pointer' }}>
                         + Agregar tramo
+                    </button>
+                </section>
+
+                <section style={{ background: '#fff', padding: '30px', borderRadius: '24px', border: '1px solid #e2e8f0', gridColumn: '1 / -1' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fce7f3', color: '#be185d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Gift size={20} />
+                        </div>
+                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#1e1b4b' }}>Promociones</h3>
+                    </div>
+                    <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 20px', lineHeight: 1.6 }}>
+                        <strong>Lleva X, paga Y:</strong> con descuento 100% la unidad va gratis (un 3x2 clásico);
+                        con 50% queda a mitad de precio (la típica "segunda unidad al 50%"). El descuento se aplica
+                        siempre sobre las prendas <strong>más baratas</strong> del carrito.
+                        Si no eliges productos, la promoción aplica a <strong>todo el catálogo</strong>.
+                    </p>
+
+                    {(promotions.promos || []).map((p, i) => {
+                        const editar = (campos) => setPromotions(prev => ({
+                            ...prev,
+                            promos: prev.promos.map((x, k) => k === i ? { ...x, ...campos } : x)
+                        }));
+                        const esRegalo = p.type === 'regalo';
+                        return (
+                            <div key={i} style={{ border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px', marginBottom: '14px', background: '#f8fafc' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '14px' }}>
+                                    <div className="input-group">
+                                        <label style={labelStyle}>Nombre</label>
+                                        <input type="text" value={p.name || ''} placeholder="Ej: Lleva 3 paga 2"
+                                            onChange={e => editar({ name: e.target.value })} style={inputStyle} />
+                                    </div>
+                                    <div className="input-group">
+                                        <label style={labelStyle}>Tipo</label>
+                                        <select value={p.type || 'cantidad'} style={inputStyle}
+                                            onChange={e => editar({ type: e.target.value })}>
+                                            <option value="cantidad">Lleva X, paga Y</option>
+                                            <option value="regalo">Regalo por compra</option>
+                                        </select>
+                                    </div>
+
+                                    {!esRegalo && (
+                                        <>
+                                            <div className="input-group">
+                                                <label style={labelStyle}>Lleva</label>
+                                                <input type="number" min="2" value={p.lleva ?? 3}
+                                                    onChange={e => editar({ lleva: parseInt(e.target.value) || 0 })} style={inputStyle} />
+                                            </div>
+                                            <div className="input-group">
+                                                <label style={labelStyle}>Paga</label>
+                                                <input type="number" min="1" value={p.paga ?? 2}
+                                                    onChange={e => editar({ paga: parseInt(e.target.value) || 0 })} style={inputStyle} />
+                                            </div>
+                                            <div className="input-group">
+                                                <label style={labelStyle}>Descuento (%)</label>
+                                                <input type="number" min="1" max="100" value={p.descuento ?? 100}
+                                                    onChange={e => editar({ descuento: parseInt(e.target.value) || 0 })} style={inputStyle} />
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {esRegalo && (
+                                        <>
+                                            <div className="input-group">
+                                                <label style={labelStyle}>Qué se regala</label>
+                                                <input type="text" value={p.regalo_texto || ''} placeholder="Ej: Un cuello de encaje"
+                                                    onChange={e => editar({ regalo_texto: e.target.value })} style={inputStyle} />
+                                            </div>
+                                            <div className="input-group">
+                                                <label style={labelStyle}>Mínimo de unidades</label>
+                                                <input type="number" min="0" value={p.min_unidades ?? 0}
+                                                    onChange={e => editar({ min_unidades: parseInt(e.target.value) || 0 })} style={inputStyle} />
+                                            </div>
+                                            <div className="input-group">
+                                                <label style={labelStyle}>O monto mínimo ($)</label>
+                                                <input type="number" min="0" value={p.min_monto ?? 0}
+                                                    onChange={e => editar({ min_monto: parseInt(e.target.value) || 0 })} style={inputStyle} />
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div className="input-group">
+                                        <label style={labelStyle}>Válida desde</label>
+                                        <input type="date" value={p.desde || ''}
+                                            onChange={e => editar({ desde: e.target.value })} style={inputStyle} />
+                                    </div>
+                                    <div className="input-group">
+                                        <label style={labelStyle}>Válida hasta</label>
+                                        <input type="date" value={p.hasta || ''}
+                                            onChange={e => editar({ hasta: e.target.value })} style={inputStyle} />
+                                    </div>
+                                </div>
+
+                                <div className="input-group" style={{ marginTop: '14px' }}>
+                                    <label style={labelStyle}>Productos ({(p.productos || []).length === 0 ? 'todo el catálogo' : `${p.productos.length} elegidos`})</label>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', maxHeight: '120px', overflowY: 'auto', padding: '8px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px' }}>
+                                        {productosDisponibles.map(prod => {
+                                            const elegido = (p.productos || []).map(String).includes(String(prod.id));
+                                            return (
+                                                <button key={prod.id} type="button"
+                                                    onClick={() => {
+                                                        const actuales = (p.productos || []).map(String);
+                                                        editar({
+                                                            productos: elegido
+                                                                ? actuales.filter(x => x !== String(prod.id))
+                                                                : [...actuales, String(prod.id)]
+                                                        });
+                                                    }}
+                                                    style={{
+                                                        border: `1px solid ${elegido ? '#be185d' : '#e2e8f0'}`,
+                                                        background: elegido ? '#fce7f3' : '#fff',
+                                                        color: elegido ? '#be185d' : '#64748b',
+                                                        borderRadius: '8px', padding: '5px 10px', fontSize: '12px',
+                                                        fontWeight: 700, cursor: 'pointer'
+                                                    }}>
+                                                    {prod.name}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '14px', cursor: 'pointer' }}>
+                                    <input type="checkbox" checked={p.combinable === true}
+                                        onChange={e => editar({ combinable: e.target.checked })}
+                                        style={{ width: '18px', height: '18px', accentColor: '#be185d' }} />
+                                    <span style={{ fontSize: '13px', color: '#334155', fontWeight: 600 }}>
+                                        Se puede combinar con los precios por cantidad (mayorista/iglesia)
+                                    </span>
+                                </label>
+
+                                <button type="button"
+                                    onClick={() => setPromotions(prev => ({ ...prev, promos: prev.promos.filter((_, k) => k !== i) }))}
+                                    style={{ marginTop: '12px', background: 'transparent', border: 'none', color: '#dc2626', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}>
+                                    Eliminar esta promoción
+                                </button>
+                            </div>
+                        );
+                    })}
+
+                    <button type="button"
+                        onClick={() => setPromotions(p => ({ ...p, promos: [...(p.promos || []), { name: '', type: 'cantidad', lleva: 3, paga: 2, descuento: 100, productos: [], combinable: false }] }))}
+                        style={{ background: '#be185d', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '12px', fontWeight: 800, fontSize: '13px', cursor: 'pointer' }}>
+                        + Agregar promoción
                     </button>
                 </section>
 

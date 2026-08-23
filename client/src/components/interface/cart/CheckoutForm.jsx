@@ -9,7 +9,7 @@ import { formatRUT } from '../../../utils/formatters';
 import { useSettings } from '../../../context/SettingsContext';
 
 const CheckoutForm = ({ onClose }) => {
-    const { cart, total, clearCart } = useCart();
+    const { cart, total, descuentos, regalos, clearCart } = useCart();
     const { settings } = useSettings();
     const rawShippingMethods = settings?.shipping_methods !== undefined 
         ? settings.shipping_methods 
@@ -147,6 +147,8 @@ const CheckoutForm = ({ onClose }) => {
                 price: item.precioTramo ?? item.price,
                 url: item.productUrl,
             })),
+            descuentos,
+            regalos,
             total,
         });
         const contactNumber = settings?.social_links?.whatsapp?.replace(/\D/g, '') || '56931251973';
