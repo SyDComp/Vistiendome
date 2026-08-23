@@ -24,6 +24,7 @@ import CustomerServiceManager from './cms/CustomerServiceManager';
 import SettingsManager from './cms/SettingsManager';
 import ClientesView from './crm/ClientesView';
 import CotizacionesView from './crm/CotizacionesView';
+import OrdenCorteView from './crm/OrdenCorteView';
 import ShippingLabelPrinter from './crm/ShippingLabelPrinter';
 import AnalyticsModule from './analytics/AnalyticsModule';
 import AdminProfile from './profile/AdminProfile';
@@ -117,6 +118,7 @@ const DashboardLayout = () => {
             children: [
                 { label: 'Clientes', path: '/admin/dashboard/crm/clientes' },
                 { label: 'Cotizaciones', path: '/admin/dashboard/crm/cotizaciones' },
+                { label: '✂️ Orden de Corte', path: '/admin/dashboard/crm/orden-corte' },
                 { label: '🏷️ Etiquetas de Envío', path: '/admin/dashboard/crm/shipping-labels' }
             ]
         },
@@ -265,6 +267,7 @@ const DashboardLayout = () => {
                             <Route path="/analytics" element={<AnalyticsModule />} />
                             <Route path="/crm/clientes" element={<ClientesView />} />
                             <Route path="/crm/cotizaciones" element={<CotizacionesView />} />
+                            <Route path="/crm/orden-corte" element={<OrdenCorteView />} />
                             <Route path="/crm/shipping-labels" element={<ShippingLabelPrinter />} />
                             <Route path="/profile" element={<AdminProfile />} />
                             <Route path="*" element={<Navigate to="/admin/dashboard/inventory/products" />} />

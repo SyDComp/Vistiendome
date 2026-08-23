@@ -69,7 +69,12 @@ class CotizacionItem(SQLModel, table=True):
     cantidad: int = Field(default=1)
     precio_unitario_estimado: float = Field(default=0.0)
     nombre_custom: Optional[str] = Field(default=None, max_length=255)
-    
+
+    # Vive en el ítem, no en la Cotizacion: una cotización puede tener piezas
+    # ya cortadas y otras no. El estado de la Cotizacion (NUEVA/EN_PROCESO/...)
+    # es el ciclo de la VENTA; esto es el ciclo de la CONFECCIÓN — ejes distintos.
+    cortado: bool = Field(default=False)
+
     # Relationships
     cotizacion: Cotizacion = Relationship(back_populates="items")
     sku: Optional["SKU"] = Relationship(back_populates="cotizacion_items")

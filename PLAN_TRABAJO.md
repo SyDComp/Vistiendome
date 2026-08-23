@@ -14,9 +14,9 @@
 ### B · Pedidos de la clienta, pendientes
 | # | Qué | Estado |
 |---|---|---|
-| B1 | Precio mayorista (6+ unidades) | Especificado, listo para construir |
-| B2 | Planilla de pedido / orden de corte | **Falta respuesta de Paola**: qué campos, quién edita |
-| B3 | Comprobante de compra sin precios | Depende de B2 |
+| B1 | Precio mayorista (6+ unidades) | ✅ Hecho — construido, conectado al carrito y verificado en el navegador |
+| B2 | Planilla de pedido / orden de corte | ✅ Hecho — decidido con criterio propio (ver detalle abajo), no bloqueó en Paola |
+| B3 | Comprobante de compra sin precios | ✅ Hecho — misma pieza que B2, modo `?modo=cliente` sin precios |
 | B4 | Stock real (opción B, decidida) | **Falta que Paola haga la pasada de ajuste** |
 | B5 | Promociones / regalos condicionales | **Falta definir con Paola**: ¿lo elige ella al armar el pedido, o va en la web? |
 | B6 | Video en producto | Hecho, **falta que Paola confirme** embebido vs. link |
@@ -30,7 +30,13 @@
 | C4 | Lógica de filtros duplicada (Python + JavaScript), solo se usa una |
 | C5 | Análisis sin hacer: panel de administración, redes lentas |
 
-**Siguiente paso:** A3 (abajo, diseño completo). A2 ✅ hecho. El bloque B se decide con criterio propio, no se le pregunta a la clienta.
+**Siguiente paso:** B4 (stock real — falta que Paola haga la pasada de ajuste antes) o B5 (promociones, falta definir con Paola). A2, A3, B1, B2, B3 ✅ hechos. El scroll infinito de A3 queda como opcional, al final de la lista.
+
+### B2/B3 — decisión tomada (sin bloquear en Paola)
+
+**Qué se construyó:** `cortado: bool` en `CotizacionItem` (no en `Cotizacion` — una cotización puede tener piezas ya cortadas y otras no; es un eje distinto al estado de venta NUEVA/EN_PROCESO/CERRADA). "Orden de corte" no es una entidad nueva: es `GET /api/v1/crm/orden-corte`, una consulta filtrable (pendiente/estado/fecha) sobre `CotizacionItem`, con un checkbox por fila que llama a `PUT /crm/items/{id}/cortado`. La planilla y el comprobante son la misma página (`PedidoDetalle.jsx`, ruta `/admin/print/pedido/:id`), un query param `?modo=taller|cliente` decide si se muestran precios.
+
+**Bug real encontrado al probar:** `it.sku.product.featured_image` no existía en el modelo `Product` — cualquier cotización con un ítem de SKU real (es decir, cualquier compra real del catálogo) tumbaba en 500 tanto su propia respuesta como **la lista completa de `GET /crm/`**, porque itera todas las cotizaciones. Estaba enmascarado porque `CheckoutForm.jsx` registra el CRM de forma fire-and-forget (solo `console.error`) y porque los 13 registros de prueba existentes tenían `sku_id=NULL`. Corregido usando `sku.media_assets` / `product.media_assets`, con la foto propia del SKU como preferencia sobre la de portada.
 
 ---
 

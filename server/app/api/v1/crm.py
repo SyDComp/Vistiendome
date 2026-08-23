@@ -64,6 +64,11 @@ class CotizacionItemRead(BaseModel):
     sku_name: Optional[str] = None
     sku_code: Optional[str] = None
     sku_image: Optional[str] = None
+    # Producto y config crudos (no aplanados en sku_name), para armar la
+    # planilla/orden de corte con columnas propias por característica.
+    producto_nombre: Optional[str] = None
+    config: dict = {}
+    cortado: bool = False
 
 class CotizacionRead(BaseModel):
     id: str
@@ -88,32 +93,41 @@ class CotizacionRead(BaseModel):
     class Config:
         from_attributes = True
 
+def _get_item_read(it: CotizacionItem) -> CotizacionItemRead:
+    it_dict = it.dict()
+    if it.sku and it.sku.product:
+        variant_str = ""
+        if isinstance(it.sku.config, dict) and len(it.sku.config) > 0:
+            # Ignorar claves vacías o redundantes
+            vals = [f"{v}" for k, v in it.sku.config.items() if v]
+            if vals:
+                variant_str = " - " + " / ".join(vals)
+        elif it.sku.sku:
+            variant_str = f" ({it.sku.sku})"
+
+        it_dict["sku_name"] = it.nombre_custom or f"{it.sku.product.name}{variant_str}".strip()
+        it_dict["sku_code"] = it.sku.sku
+        # Product no tiene "featured_image" (bug preexistente: esto rompía en
+        # 500 CUALQUIER cotización con un ítem de SKU real, incluida la lista
+        # completa de GET /crm/). La imagen del producto vive en media_assets;
+        # si el SKU tiene foto propia, es más precisa que la de portada.
+        propia = it.sku.media_assets[0].url if it.sku.media_assets else None
+        portada = it.sku.product.media_assets[0].url if it.sku.product.media_assets else None
+        it_dict["sku_image"] = propia or portada
+        it_dict["producto_nombre"] = it.sku.product.name
+        it_dict["config"] = it.sku.config or {}
+    else:
+        it_dict["sku_name"] = it.nombre_custom or "Producto del Catálogo / Especial"
+        it_dict["sku_code"] = "SKU-CUSTOM"
+        it_dict["producto_nombre"] = it.nombre_custom or "Especial"
+        it_dict["config"] = {}
+    return CotizacionItemRead(**it_dict)
+
 def _get_cotizacion_read(c: Cotizacion) -> CotizacionRead:
     c_dict = c.dict()
     if c.persona:
         c_dict["cliente"] = _get_persona_read(c.persona)
-    items_list = []
-    if c.items:
-        for it in c.items:
-            it_dict = it.dict()
-            if it.sku and it.sku.product:
-                variant_str = ""
-                if isinstance(it.sku.config, dict) and len(it.sku.config) > 0:
-                    # Ignorar claves vacías o redundantes
-                    vals = [f"{v}" for k, v in it.sku.config.items() if v]
-                    if vals:
-                        variant_str = " - " + " / ".join(vals)
-                elif it.sku.sku:
-                    variant_str = f" ({it.sku.sku})"
-                
-                it_dict["sku_name"] = it.nombre_custom or f"{it.sku.product.name}{variant_str}".strip()
-                it_dict["sku_code"] = it.sku.sku
-                it_dict["sku_image"] = it.sku.product.featured_image
-            else:
-                it_dict["sku_name"] = it.nombre_custom or "Producto del Catálogo / Especial"
-                it_dict["sku_code"] = "SKU-CUSTOM"
-            items_list.append(CotizacionItemRead(**it_dict))
-    c_dict["items"] = items_list
+    c_dict["items"] = [_get_item_read(it) for it in (c.items or [])]
     return CotizacionRead(**c_dict)
 
 class CotizacionItemCreate(BaseModel):
@@ -266,12 +280,100 @@ def actualizar_estado_cotizacion(cotizacion_id: str, data: EstadoUpdate, session
     cotizacion = session.get(Cotizacion, cotizacion_id)
     if not cotizacion:
         raise HTTPException(status_code=404, detail="Cotización no encontrada")
-    
+
     cotizacion.estado = data.estado
     session.add(cotizacion)
     session.commit()
     session.refresh(cotizacion)
     return _get_cotizacion_read(cotizacion)
+
+@router.get("/cotizaciones/{cotizacion_id}", response_model=CotizacionRead)
+def obtener_cotizacion(cotizacion_id: str, session: Session = Depends(get_session), current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
+    cotizacion = session.get(Cotizacion, cotizacion_id)
+    if not cotizacion:
+        raise HTTPException(status_code=404, detail="Cotización no encontrada")
+    return _get_cotizacion_read(cotizacion)
+
+class CortadoUpdate(BaseModel):
+    cortado: bool
+
+@router.put("/items/{item_id}/cortado", response_model=CotizacionItemRead)
+def actualizar_cortado(item_id: str, data: CortadoUpdate, session: Session = Depends(get_session), current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
+    item = session.get(CotizacionItem, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Ítem no encontrado")
+    item.cortado = data.cortado
+    session.add(item)
+    session.commit()
+    session.refresh(item)
+    return _get_item_read(item)
+
+class OrdenCorteRow(BaseModel):
+    item_id: str
+    cotizacion_id: str
+    numero: Optional[int] = None
+    cliente: str
+    fecha: datetime
+    estado: EstadoCotizacion
+    producto: str
+    config: dict = {}
+    cantidad: int
+    cortado: bool
+
+@router.get("/orden-corte", response_model=List[OrdenCorteRow])
+def orden_corte(
+    pendiente: bool = True,
+    estado: Optional[EstadoCotizacion] = None,
+    desde: Optional[str] = None,
+    hasta: Optional[str] = None,
+    session: Session = Depends(get_session),
+    current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR")),
+):
+    """
+    "Orden de corte" no es una entidad — es esta consulta. Filtra las
+    cotizaciones perdidas (nada que confeccionar) y, por defecto, sólo lo
+    pendiente de cortar. El resto de los filtros (producto, característica)
+    se resuelven en el cliente sobre esta misma lista: a esta escala no
+    justifica una query más fina, y evita duplicar el filtrado que
+    `CotizacionesView` ya hace del mismo modo.
+    """
+    query = (
+        select(CotizacionItem)
+        .join(Cotizacion, CotizacionItem.cotizacion_id == Cotizacion.id)
+        .where(Cotizacion.estado != EstadoCotizacion.CERRADA_PERDIDA)
+    )
+    if pendiente:
+        query = query.where(CotizacionItem.cortado == False)  # noqa: E712
+    if estado:
+        query = query.where(Cotizacion.estado == estado)
+    if desde:
+        query = query.where(Cotizacion.created_at >= datetime.fromisoformat(desde))
+    if hasta:
+        query = query.where(Cotizacion.created_at <= datetime.fromisoformat(hasta))
+    query = query.order_by(Cotizacion.created_at.asc())
+
+    items = session.exec(query).all()
+    filas: List[OrdenCorteRow] = []
+    for it in items:
+        # Sin SKU (ítem custom escrito a mano) no hay nada que cortar.
+        if not it.sku:
+            continue
+        cot = it.cotizacion
+        persona = cot.persona if cot else None
+        cliente = f"{persona.nombres} {persona.apellidos}".strip() if persona else "—"
+        filas.append(OrdenCorteRow(
+            item_id=it.id,
+            cotizacion_id=it.cotizacion_id,
+            numero=cot.numero if cot else None,
+            cliente=cliente or "—",
+            fecha=cot.created_at if cot else datetime.utcnow(),
+            estado=cot.estado if cot else EstadoCotizacion.NUEVA,
+            producto=it.nombre_custom or (it.sku.product.name if it.sku.product else "—"),
+            config=it.sku.config or {},
+            cantidad=it.cantidad,
+            cortado=it.cortado,
+        ))
+    return filas
 
 @router.get("/clientes", response_model=List[PersonaRead])
 def listar_clientes(session: Session = Depends(get_session), skip: int = 0, limit: int = 100, current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):

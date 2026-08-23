@@ -305,6 +305,19 @@ const CotizacionesView = () => {
                             message: `¿Seguro que deseas eliminar la cotización #${row.id}?`,
                             onConfirm: () => toast.success("Simulación: Cotización eliminada")
                         })}
+                        extra={
+                            <button
+                                onClick={() => window.open(`/admin/print/pedido/${row.id}`, '_blank')}
+                                title="Imprimir planilla de pedido"
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 10px',
+                                    background: 'transparent', border: '1px solid transparent', borderRadius: '8px',
+                                    cursor: 'pointer', color: '#8f0653', fontSize: '12px', fontWeight: '600'
+                                }}
+                            >
+                                <Printer size={14} />
+                            </button>
+                        }
                     />
                 )}
             />
