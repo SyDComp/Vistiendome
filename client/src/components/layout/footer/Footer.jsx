@@ -201,6 +201,18 @@ const Footer = ({ onNavigate }) => {
                 .footer-links button:hover {
                     color: #8f0653;
                 }
+                /* En pantalla táctil estos enlaces medían 18px de alto: se
+                   fallaban al tocar. Se les da los 44px por padding (el ancho
+                   ya alcanzaba) y se compensa el gap para que el pie no se
+                   estire de más. En escritorio queda exactamente como estaba. */
+                @media (pointer: coarse) {
+                    .footer-links { gap: 0; }
+                    .footer-links button {
+                        min-height: 44px;
+                        display: flex;
+                        align-items: center;
+                    }
+                }
 
                 /* Social Section */
                 .footer-social-section {
@@ -231,6 +243,10 @@ const Footer = ({ onNavigate }) => {
                     font-size: 13px;
                     font-weight: 700;
                     transition: all 0.3s;
+                }
+                /* 34px de alto en táctil: el ancho sobraba, faltaba el alto. */
+                @media (pointer: coarse) {
+                    .social-btn { min-height: 44px; }
                 }
                 .social-btn:hover {
                     background: #fdf2f8;

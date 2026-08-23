@@ -153,7 +153,7 @@ const TopBanner = () => {
                 </span>
             )}
             <button
-                className="top-banner__close"
+                className="top-banner__close tap-44"
                 onClick={close}
                 aria-label="Cerrar anuncio"
                 style={{ color: textColor }}

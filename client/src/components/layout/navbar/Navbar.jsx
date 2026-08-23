@@ -97,7 +97,7 @@ const Navbar = ({ links = [], vistaActual }) => { // links are passed from Home
                         
                         {/* Hamburger Button (Mobile) */}
                         <button 
-                            className={`menu-toggle ${isMenuOpen ? 'open' : ''}`}
+                            className={`menu-toggle tap-44 ${isMenuOpen ? 'open' : ''}`}
                             onClick={toggleMenu}
                             aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
                             aria-expanded={isMenuOpen}

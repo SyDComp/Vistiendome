@@ -114,7 +114,7 @@ const WelcomeModal = () => {
         <div className="welcome-modal-overlay" onClick={close}>
             <div className="welcome-modal" onClick={(e) => e.stopPropagation()} style={{ background: bg }}>
                 <button
-                    className="welcome-modal__close"
+                    className="welcome-modal__close tap-44"
                     onClick={close}
                     aria-label="Cerrar"
                     style={{ color: closeColor, background: closeBg }}

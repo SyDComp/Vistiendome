@@ -6,7 +6,7 @@ const CartButton = () => {
     const { itemsCount, toggleCart } = useCart();
 
     return (
-        <button className="cart-toggle-btn" onClick={toggleCart} aria-label="Ver carrito">
+        <button className="cart-toggle-btn tap-44" onClick={toggleCart} aria-label="Ver carrito">
             <div className="cart-icon-wrapper">
                 <ShoppingBag size={24} />
                 {itemsCount > 0 && (

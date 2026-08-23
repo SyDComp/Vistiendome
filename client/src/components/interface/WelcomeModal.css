@@ -92,6 +92,10 @@
     border-radius: 8px;
     transition: opacity 0.2s, transform 0.2s;
 }
+/* 39px en táctil: es el llamado a la acción del modal, tiene que ser cómodo. */
+@media (pointer: coarse) {
+    .welcome-modal__cta { min-height: 44px; }
+}
 .welcome-modal__cta:hover {
     opacity: 0.92;
     transform: translateY(-1px);

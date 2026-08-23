@@ -36,3 +36,29 @@ html, body { min-height: 100vh; min-height: 100dvh; }
 
 /* Rotaciones */
 .rotated-180 { transform: rotate(180deg); }
+
+/* --- Área táctil mínima (44px) ---
+   Amplía la zona que responde al dedo SIN cambiar cómo se ve el control ni
+   ocupar espacio en el layout: el pseudo-elemento va absoluto y centrado, así
+   que el botón conserva su tamaño visual y su posición exactos.
+   Se usa en controles chicos (íconos de cerrar, hamburguesa, flechas) donde
+   agregar padding deformaría el diseño — el menú hamburguesa, por ejemplo,
+   separa sus barras con space-between y con padding se abriría. */
+.tap-44 { position: relative; }
+.tap-44::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  /* Solo captura el toque; invisible y sin interferir con el hover del ícono */
+  pointer-events: auto;
+}
+
+/* En puntero fino (mouse) no hace falta: evita que el área invisible tape
+   controles vecinos en escritorio. */
+@media (pointer: fine) {
+  .tap-44::after { display: none; }
+}

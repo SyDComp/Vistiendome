@@ -469,7 +469,7 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
                     </div>
                     <button 
                         onClick={() => !previewMode && navigate(`/coleccion/${config?.collection_id || 'smart_latest'}`)}
-                        style={{ background: 'none', border: 'none', color: '#1e1b4b', fontWeight: '700', fontSize: '11px', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '4px', letterSpacing: '1px' }}
+                        style={{ background: 'none', border: 'none', color: '#1e1b4b', fontWeight: '700', fontSize: '11px', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '4px', letterSpacing: '1px', minHeight: '44px', paddingInline: 0 }}
                     >
                         VER TODO
                     </button>
@@ -481,7 +481,7 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
                         <>
                             <button 
                                 onClick={(e) => { e.stopPropagation(); scroll('left'); }} 
-                                className="floating-nav-btn left"
+                                className="floating-nav-btn left tap-44"
                                 style={{ 
                                     left: isMobile ? '4px' : '-22px',
                                     width: isMobile ? '36px' : '44px',
@@ -492,7 +492,7 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
                             </button>
                             <button 
                                 onClick={(e) => { e.stopPropagation(); scroll('right'); }} 
-                                className="floating-nav-btn right"
+                                className="floating-nav-btn right tap-44"
                                 style={{ 
                                     right: isMobile ? '4px' : '-22px',
                                     width: isMobile ? '36px' : '44px',
@@ -579,7 +579,7 @@ export const RecentProductsBlock = ({ previewMode = false }) => {
                     </div>
                     <button 
                         onClick={() => window.location.href = `/coleccion/${config?.collection_id || 'smart_latest'}`}
-                        style={{ background: 'none', border: 'none', color: '#8f0653', fontWeight: '800', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                        style={{ background: 'none', border: 'none', color: '#8f0653', fontWeight: '800', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', minHeight: '44px' }}
                     >
                         VER TODO <ArrowRight size={16} />
                     </button>
