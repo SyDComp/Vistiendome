@@ -1,5 +1,5 @@
 import { get } from '../client.js';
-import { getCached, setCached, buildCacheKey } from '../cache.js';
+import { cachedFetch, buildCacheKey } from '../cache.js';
 import { API_ENDPOINTS } from '../../constants/api.js';
 
 const CACHE_PREFIX = 'products';
@@ -25,12 +25,7 @@ export const getProducts = async (filters = {}) => {
     }
 
     const cacheKey = buildCacheKey(CACHE_PREFIX, Object.fromEntries(params));
-    const cached = getCached(cacheKey);
-    if (cached) return cached;
-
-    const data = await get(`${API_ENDPOINTS.PRODUCTS}/?${params}`);
-    setCached(cacheKey, data);
-    return data;
+    return cachedFetch(cacheKey, () => get(`${API_ENDPOINTS.PRODUCTS}/?${params}`));
 };
 
 /**
@@ -40,15 +35,8 @@ export const getProducts = async (filters = {}) => {
  * Reemplaza a getProducts() en el catálogo y el explorador: antes se
  * descargaban las 1.049 variantes para dibujar ~60 tarjetas (284 KB).
  */
-export const getCatalogo = async () => {
-    const cacheKey = buildCacheKey('catalogo');
-    const cached = getCached(cacheKey);
-    if (cached) return cached;
-
-    const data = await get(`${API_ENDPOINTS.PRODUCTS}/looks`);
-    setCached(cacheKey, data);
-    return data;
-};
+export const getCatalogo = async () =>
+    cachedFetch(buildCacheKey('catalogo'), () => get(`${API_ENDPOINTS.PRODUCTS}/looks`));
 
 /**
  * Obtiene un producto por su slug.
@@ -61,24 +49,12 @@ export const getProductBySlug = async (slug) => {
  * Obtiene el árbol de categorías.
  * Cacheado globalmente.
  */
-export const getCategoriesTree = async () => {
-    const cached = getCached(CACHE_PREFIX_CATEGORIES);
-    if (cached) return cached;
-
-    const data = await get(`${API_ENDPOINTS.CATEGORIES}/tree`);
-    setCached(CACHE_PREFIX_CATEGORIES, data);
-    return data;
-};
+export const getCategoriesTree = async () =>
+    cachedFetch(CACHE_PREFIX_CATEGORIES, () => get(`${API_ENDPOINTS.CATEGORIES}/tree`));
 
 /**
  * Obtiene los metadatos de filtros disponibles.
  * Cacheado globalmente.
  */
-export const getFiltersMetadata = async () => {
-    const cached = getCached(CACHE_PREFIX_FILTERS);
-    if (cached) return cached;
-
-    const data = await get(API_ENDPOINTS.FILTERS_METADATA);
-    setCached(CACHE_PREFIX_FILTERS, data);
-    return data;
-};
+export const getFiltersMetadata = async () =>
+    cachedFetch(CACHE_PREFIX_FILTERS, () => get(API_ENDPOINTS.FILTERS_METADATA));
