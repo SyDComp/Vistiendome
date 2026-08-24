@@ -113,32 +113,83 @@ archivo original tal cual.
 
 Cada fase se puede terminar, verificar y commitear sola.
 
-### Fase 0 — Sacar las fotos muertas del bundle ← **empezar por acá**
+### Fase 0 — Eliminar la media duplicada del cliente ← **empezar por acá**
 
-La victoria más barata de todo el plan, y no requiere nada de lo demás.
+La victoria más barata de todo el plan, y no depende de nada de lo demás.
 
-`client/src/constants/pruebas.jsx` importa fotos del catálogo **como módulos
-del código** (no desde la BD). `Home.jsx` y `Footer.jsx` importan de ese
-archivo sólo `navLinks` y `soporteLinks` — pero al importar cualquier cosa se
-arrastra el módulo entero, y con él las imágenes.
+**Cada foto del catálogo está guardada dos veces**, byte por byte idéntica:
+una copia registrada en la BD (`server/media/`, la buena) y otra suelta dentro
+del código del cliente (`client/src/assets/`, herencia del prototipo).
 
-| Medido | |
+| Medido por hash de contenido | |
 |---|---|
-| Build total | 5,4 MB |
-| De eso, imágenes de `pruebas.jsx` | **3,8 MB — el 70%** |
-| `client/src/assets/img_catalogo/` en disco | 36 MB |
+| Archivos analizados | 405 |
+| Grupos de archivos repetidos | **72** |
+| De esos, repetidos entre `client` y `server` | **72 — o sea, todos** |
+| Espacio desperdiciado en copias | **77,8 MB** |
 
-Los exports que las arrastran (`elementosCarrusel`, `productosCatalogo`,
-`redesSociales`) **no se usan en ningún lado** — verificado. `elementosColeccion`
-se usa en 1 lugar: revisar ese antes de tocarlo.
+Ejemplo, mismo contenido exacto:
 
-**Qué hacer:** mover `navLinks`/`soporteLinks` a su propio archivo de
-constantes (son datos de navegación, no de prueba), dejar de importar
-`pruebas.jsx` desde código vivo, y eliminar lo que quede sin uso junto con sus
-imágenes.
+```
+client/src/assets/img_catalogo/VESTIDO_NOEMI/CORAL_2.jpg   ┐ 717 KB
+server/media/vestido_noemi_coral_2.jpg                     ┘ cada una
+```
+
+Y esas copias del cliente **viajan al navegador**: de los 5,4 MB del build,
+**3,8 MB (70%) son estas fotos muertas**.
+
+**Inventario de `client/src/assets/`, verificado uno por uno:**
+
+| Carpeta / archivo | Peso | Referencias reales |
+|---|---|---|
+| `img_catalogo/` | 36 MB | 6, todas desde exports muertos de `pruebas.jsx` |
+| `temporales/` | 1,5 MB | **0** |
+| `hero.png` | — | **0** |
+| `react.svg`, `vite.svg` | — | **0** (restos del andamiaje de Vite) |
+
+Quién arrastra `img_catalogo`: `client/src/constants/pruebas.jsx` importa las
+fotos como módulos del código, y `Home.jsx` / `Footer.jsx` importan de ahí sólo
+`navLinks` y `soporteLinks` — pero importar cualquier cosa arrastra el módulo
+entero, imágenes incluidas.
+
+**Verificado: ningún export con imágenes se usa.** `elementosCarrusel`,
+`productosCatalogo` y `redesSociales` no aparecen en ningún lado.
+`elementosColeccion` aparece en `Search.jsx:85` **sólo como nombre de clase
+CSS** (`className="elementosColeccion-premium"`), no como dato importado.
+
+> **El principio que debe quedar:** en `client/` sólo van favicon, iconos y
+> poco más. Eso ya está bien resuelto en `client/public/` (favicon.svg,
+> apple-touch-icon, og-image). Las fotos de catálogo son contenido, no código:
+> viven en `server/media/` y se referencian desde la BD, nunca se importan.
+
+**Qué hacer:**
+1. Mover `navLinks` / `soporteLinks` a su propio archivo de constantes — son
+   datos de navegación, no de prueba.
+2. Que nada vivo importe `pruebas.jsx`; eliminarlo.
+3. Borrar `client/src/assets/img_catalogo/`, `temporales/`, `hero.png`,
+   `react.svg`, `vite.svg`.
+
+> ⚠️ Antes de borrar, confirmar que cada archivo de `img_catalogo` tiene su
+> gemelo en `server/media` (el hash ya lo probó para los 72 grupos). Lo que no
+> tenga copia registrada, **no se borra**: se sube por el panel primero.
 
 **Verificación:** `find dist -iname "*.jpg" | wc -l` debe dar 0, y el build
-debe bajar de 5,4 MB a ~1,6 MB.
+debe bajar de 5,4 MB a ~1,6 MB. El sitio debe verse igual — estas imágenes no
+se muestran en ningún lado.
+
+### Fase 0b — Respaldo de media sincronizado con el de la BD
+
+Consecuencia directa de la decisión de la sección 2b: si los bytes viven en
+disco, el respaldo de la BD **no los protege**. Y peor, un respaldo desfasado
+es casi tan malo como ninguno — la BD tendría registros apuntando a archivos
+que ese respaldo de media todavía no tenía.
+
+**Requisito:** que `server/media/` y el volcado de la BD se respalden **en el
+mismo momento**, como una unidad. Un `mediaasset` sin su archivo es un enlace
+roto; un archivo sin registro es un huérfano invisible.
+
+Ya existe `_db_backups/` en la raíz (de la recuperación desde el VPS): es el
+lugar natural para que convivan los dos respaldos con la misma marca de tiempo.
 
 ### Fase 1 — Generar derivadas (servidor)
 
