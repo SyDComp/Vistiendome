@@ -341,6 +341,31 @@ riesgo de servir una versión vieja.
 **Verificación:** `curl -I` sobre una imagen y ver la cabecera; segunda visita
 sin peticiones de imagen en la pestaña de red.
 
+> ✅ **Hecho (2026-08-24).** Clase `MediaEstatica` en `main.py`:
+> `Cache-Control: public, max-age=604800` (una semana), verificado en
+> originales y derivadas. El `etag` sigue funcionando como red de seguridad
+> (segunda visita → 304, 0 bytes).
+>
+> **Una semana y no "para siempre", a propósito:** las fotos nuevas llegan con
+> nombre único (UUID), pero las 73 que ya estaban tienen nombre legible
+> (`vestido_noemi_coral.jpg`). Si alguna se reemplazara conservando el nombre,
+> una caché eterna la dejaría vieja para siempre; así se corrige sola.
+
+### Sobre el carrusel de las tarjetas — medido, no opinado
+
+Surgió la duda de si rotar la imagen en las tarjetas del catálogo fue mala idea
+y convenía dejar una sola foto. **Los números dicen que ya no hace falta:**
+
+| | Fotos rotando | Costo si se ven todas |
+|---|---|---|
+| Antes de este plan | 33 | **16,1 MB** |
+| Ahora | 33 | **0,55 MB** |
+
+No fue una mala decisión: era **cara con los originales**, y la optimización le
+sacó el 97% del costo. Quitarla hoy ahorraría medio MB repartido en más de un
+minuto de navegación, a cambio de perder una función que la clienta ya vio y
+que muestra los colores disponibles sin hacer clic. **Se deja.**
+
 ### Fase 5 — Los `<img>` crudos del sitio público
 
 Sólo los públicos, **no los del admin** (ese trabajo no lo ve la clienta):

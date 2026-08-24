@@ -37,10 +37,30 @@ app.include_router(geo.router, prefix="/api/v1/geo", tags=["Geografía"])
 app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Inteligencia de Negocio"])
 app.include_router(websockets.router, prefix="/ws", tags=["websockets"])
 
+class MediaEstatica(StaticFiles):
+    """
+    Sirve /media diciéndole al navegador cuánto puede guardarse la imagen.
+
+    Sin `Cache-Control` sólo había `etag`/`last-modified`, así que en cada
+    visita el navegador volvía a preguntar por cada foto: no re-descargaba
+    (recibía 304) pero pagaba el viaje de ida y vuelta por imagen, que con mala
+    señal es justo lo que se siente.
+
+    Una semana es deliberado y no "para siempre": las fotos nuevas llegan con
+    nombre único (UUID), pero las que ya estaban tienen nombre legible
+    (`vestido_noemi_coral.jpg`). Si alguna se reemplazara conservando el
+    nombre, una caché eterna la dejaría vieja para siempre; así se corrige sola.
+    """
+    def file_response(self, *args, **kwargs):
+        respuesta = super().file_response(*args, **kwargs)
+        respuesta.headers["Cache-Control"] = "public, max-age=604800"
+        return respuesta
+
+
 # Servir archivos estáticos
 if not os.path.exists("media"):
     os.makedirs("media")
-app.mount("/media", StaticFiles(directory="media"), name="media")
+app.mount("/media", MediaEstatica(directory="media"), name="media")
 
 @app.on_event("startup")
 def on_startup():
