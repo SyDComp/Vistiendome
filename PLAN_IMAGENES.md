@@ -173,9 +173,21 @@ CSS** (`className="elementosColeccion-premium"`), no como dato importado.
 > gemelo en `server/media` (el hash ya lo probó para los 72 grupos). Lo que no
 > tenga copia registrada, **no se borra**: se sube por el panel primero.
 
-**Verificación:** `find dist -iname "*.jpg" | wc -l` debe dar 0, y el build
-debe bajar de 5,4 MB a ~1,6 MB. El sitio debe verse igual — estas imágenes no
-se muestran en ningún lado.
+**Verificación:** en `dist/` no debe quedar ninguna foto de catálogo. Sí quedan
+—y deben quedar— los iconos del sitio, que vienen de `client/public/` y no del
+bundle: `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png` y
+`og-image.jpg`. El sitio debe verse igual: estas fotos no se mostraban en
+ningún lado.
+
+> ✅ **Hecho (2026-08-23).** Build de **5,4 MB → 2,3 MB**. Se borraron 73
+> archivos con gemelo probado en `server/media`; los **14 sin copia registrada**
+> (`LOGO.jpg`, `hero.png`, `temporales/`) y los 3 `DESCRIPCION.txt` con textos
+> comerciales de Paola **no se borraron**: quedaron en `_media_sin_registrar/`
+> a la espera de decisión. `client/src/assets/` dejó de existir.
+>
+> `og-image.jpg` pesa 572 KB, alto para lo que es. No afecta la carga de la
+> página (sólo lo piden los rastreadores al compartir un enlace), pero conviene
+> comprimirlo cuando se toquen las imágenes.
 
 ### Fase 0b — Respaldo de media sincronizado con el de la BD
 

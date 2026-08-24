@@ -11,7 +11,7 @@ import {
     Map,
     Navigation
 } from 'lucide-react';
-import { navLinks, soporteLinks } from '../../../constants/pruebas';
+import { navLinks, soporteLinks } from '../../../constants/navegacion';
 import { useSettings } from '../../../context/SettingsContext';
 import { buildMapLinks } from '../../../utils/mapLinks';
 

@@ -2,7 +2,7 @@ import React, { Suspense, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../layout/navbar/Navbar';
 import Footer from '../layout/footer/Footer';
-import { navLinks } from '../../constants/pruebas';
+import { navLinks } from '../../constants/navegacion';
 import ProductDetailView from '../../features/productDetail/components/ProductDetailView';
 import CartDrawer from './cart/CartDrawer';
 import WelcomeModal from './WelcomeModal';

@@ -45,3 +45,7 @@ server/scratch/
 server/media/
 # Respaldos de base de datos (contienen datos reales de clientes — nunca a git)
 _db_backups/
+
+# Media rescatada de client/src/assets que NO tiene copia registrada en la BD.
+# Contenido, no codigo: misma regla que server/media/ y _db_backups/.
+_media_sin_registrar/
