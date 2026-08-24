@@ -112,9 +112,10 @@ un error del plan y hay que agregarla.
 - ⬜ Ver reflejado en la ficha de producto
 
 ### 1.9 `/inventory/barcodes` — Códigos de barras
-- ⬜ Seleccionar variantes
-- ⬜ Formatos de papel y tamaño de etiqueta
-- ⬜ Vista previa e impresión
+- ✅ Seleccionar variantes — 3 seleccionadas, contador correcto
+- ✅ Formatos de papel (Carta/Oficio), orientación y 3 tamaños de etiqueta
+- ✅ **Imprime limpio**: genera su propio documento con `@page` y los códigos,
+  sin arrastrar el panel
 
 ### 1.10 `/workspace` — Mesa de Trabajo
 - ✅ Cargar el editor por lotes — 451 variantes de Vestido Noemi
@@ -241,9 +242,11 @@ un error del plan y hay que agregarla.
 - ⬜ WhatsApp flotante, mapas
 
 ### 2.7 Móvil (375px)
-- ⬜ Portada, catálogo, ficha, carrito
-- ⬜ Menú y controles táctiles
-- ⬜ El checkout no hace zoom al escribir
+- ✅ Portada, catálogo (4) y explorador (60) — **sin desborde horizontal**
+- ✅ Ficha: sin desborde, SKU en el encabezado, botones de acción presentes
+- ✅ Controles táctiles: sólo 1 bajo 44px, y es el artefacto conocido de la
+  animación del modal congelada en el navegador de automatización
+- ✅ **El checkout no hace zoom**: los 9 campos a 16px o más
 
 ---
 
