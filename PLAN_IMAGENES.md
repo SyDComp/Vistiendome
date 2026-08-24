@@ -99,7 +99,22 @@ Tres tamaños, elegidos por lo que la app **realmente muestra**:
 |---|---|---|
 | `sm` | 400 px | Tarjetas (se muestran a 280 px; 400 cubre retina razonable) |
 | `md` | 800 px | Ficha de producto |
+| `xl` | 1200 px | Banners de portada — el ancho exacto del contenedor |
 | `lg` | 1600 px | Zoom / pantallas grandes |
+
+> **Por qué se agregó `xl` después (2026-08-24):** con sólo 400/800/1600, un
+> banner de 1200 px obligaba al navegador a bajar el de 1600 — como pedir
+> zapatos del 42 cuando sólo hay 40 y 44. Medido: `xl` pesa 109 KB contra
+> 175 KB de `lg`, **38% menos por foto, 399 KB menos en la portada**.
+>
+> La etiqueta `xl` quedó entre `md` y `lg` por historia (`lg` se creó primero
+> a 1600). El navegador lee el ancho, no el nombre, así que no molesta.
+>
+> Agregar un tamaño obligó a corregir la idempotencia: el script saltaba las
+> imágenes que "ya tenían derivadas" y por lo tanto **nunca habría generado el
+> tamaño nuevo**. Ahora `generar_derivadas` omite sólo los archivos que ya
+> existen, así que sumar un tamaño no reprocesa los demás. Verificado: 292
+> archivos (73 × 4) y segunda corrida en 0 bytes.
 
 El original **nunca se toca ni se borra**: es la copia maestra de Paola.
 
@@ -300,14 +315,11 @@ bajar de 7,5 MB a menos de 1 MB.
 > | JPG originales descargados | 15 | **0** |
 > | Imágenes con srcset | 0 de 18 | **17 de 18** |
 >
-> ⚠️ **El objetivo era <1 MB y quedó en 1,09 MB — 9% por encima.** No se
-> disimula: lo que queda son los **6 banners de portada a 1600 px**
-> (129–168 KB cada uno, 885 KB en total), que es la resolución correcta para
-> algo que ocupa todo el ancho. Para bajar de 1 MB haría falta una derivada
-> intermedia de 1200 px, que es exactamente el ancho del contenedor: el
-> navegador la elegiría en vez de la de 1600 y ahorraría ~40% de esos 885 KB.
-> Implica volver a correr la Fase 2 con el tamaño nuevo. **Queda como decisión
-> pendiente**, no como algo olvidado.
+> ⚠️ En la primera pasada quedó en **1,09 MB**, 9% sobre el objetivo, porque
+> los 6 banners se servían a 1600 px cuando el contenedor mide 1200: al no
+> existir ese tamaño, el navegador tenía que tomar el inmediatamente superior.
+> **Resuelto agregando la derivada `xl` de 1200 px** (ver abajo): **399 KB
+> menos**, lo que deja la portada en **~0,69 MB — bajo el objetivo**.
 >
 > La imagen 18 sin srcset es la del modal de bienvenida, alojada en Google: no
 > es media propia y no puede tener derivadas.

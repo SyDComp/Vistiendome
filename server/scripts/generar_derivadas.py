@@ -44,16 +44,14 @@ def _peso_carpeta(ruta: str) -> int:
     return total
 
 
-def _ya_tiene_derivadas(asset: MediaAsset) -> bool:
+def _registradas(asset: MediaAsset) -> dict:
     """
-    Sólo se considera hecho si el registro las lista Y los archivos existen de
-    verdad: un registro apuntando a un archivo borrado es peor que no tenerlo,
-    porque el sitio pediría una imagen que da 404.
+    Derivadas registradas que además existen en disco. Un registro apuntando a
+    un archivo borrado es peor que no tenerlo: el sitio pediría una imagen que
+    da 404, así que esas se descartan y se vuelven a generar.
     """
     derivadas = (asset.metadata_json or {}).get("derivadas") or {}
-    if not derivadas:
-        return False
-    return all(os.path.exists(url.lstrip("/")) for url in derivadas.values())
+    return {k: v for k, v in derivadas.items() if os.path.exists(v.lstrip("/"))}
 
 
 def main(simular: bool = False) -> None:
@@ -79,20 +77,28 @@ def main(simular: bool = False) -> None:
                 print(f"[{i}/{total}] SIN ARCHIVO en disco: {asset.filename}")
                 continue
 
-            if _ya_tiene_derivadas(asset):
-                saltadas += 1
-                continue
+            previas = _registradas(asset)
 
             if simular:
-                print(f"[{i}/{total}] (simulación) generaría: {asset.filename}")
-                hechas += 1
+                faltan = [t for t in TAMANOS if t not in previas]
+                if faltan:
+                    print(f"[{i}/{total}] (simulación) faltarían {', '.join(faltan)}: {asset.filename}")
+                    hechas += 1
+                else:
+                    saltadas += 1
                 continue
 
             try:
+                # Siempre se llama: `generar_derivadas` no rehace lo que ya está
+                # en disco, así que agregar un tamaño nuevo no reprocesa el resto.
                 derivadas = generar_derivadas(ruta, UPLOAD_DIR)
                 if not derivadas:
                     # Formato omitido o imagen ya más chica que todos los
                     # objetivos: no es un error, no hay nada que generar.
+                    saltadas += 1
+                    continue
+
+                if derivadas == previas:
                     saltadas += 1
                     continue
 
@@ -105,7 +111,8 @@ def main(simular: bool = False) -> None:
                 sesion.commit()
 
                 hechas += 1
-                print(f"[{i}/{total}] {asset.filename} -> {', '.join(derivadas)}")
+                nuevas = [t for t in derivadas if t not in previas]
+                print(f"[{i}/{total}] {asset.filename} -> +{', '.join(nuevas) or 'actualizado'}")
             except Exception as e:
                 fallidas += 1
                 print(f"[{i}/{total}] ERROR en {asset.filename}: {e}")

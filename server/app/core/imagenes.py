@@ -18,7 +18,12 @@ from PIL import Image, ImageOps
 #   sm -> tarjetas de catálogo (se ven a 280 px; 400 cubre pantallas densas)
 #   md -> ficha de producto
 #   lg -> zoom y pantallas grandes
-TAMANOS = {"sm": 400, "md": 800, "lg": 1600}
+#   xl -> el ancho exacto del contenedor de los bloques de portada. Sin este
+#         tamaño el navegador tenía que elegir el de 1600 para llenar 1200 px,
+#         bajando un 40% más de foto del necesario.
+# La etiqueta "xl" queda entre "md" y "lg" por razones históricas: "lg" (1600)
+# se creó primero. Lo que el navegador lee es el ancho, no el nombre.
+TAMANOS = {"sm": 400, "md": 800, "xl": 1200, "lg": 1600}
 
 SUBCARPETA = "derivadas"
 CALIDAD = 82  # WebP a 82 es visualmente indistinguible y pesa la mitad que JPEG 90
@@ -71,11 +76,16 @@ def generar_derivadas(ruta_original: str, directorio_base: str) -> Dict[str, str
             if ancho_real <= ancho:
                 continue
 
-            alto = round(imagen.height * ancho / ancho_real)
-            copia = imagen.resize((ancho, alto), Image.LANCZOS)
-
             archivo = f"{base}_{etiqueta}.webp"
-            copia.save(os.path.join(destino, archivo), "WEBP", quality=CALIDAD, method=6)
+            ruta_salida = os.path.join(destino, archivo)
+
+            # Si ya está, no se rehace: permite agregar un tamaño nuevo y
+            # volver a correr el relleno sin reprocesar los que ya existían.
+            if not os.path.exists(ruta_salida):
+                alto = round(imagen.height * ancho / ancho_real)
+                copia = imagen.resize((ancho, alto), Image.LANCZOS)
+                copia.save(ruta_salida, "WEBP", quality=CALIDAD, method=6)
+
             generadas[etiqueta] = f"/{directorio_base}/{SUBCARPETA}/{archivo}"
 
     return generadas
