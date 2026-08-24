@@ -32,6 +32,10 @@ un error del plan y hay que agregarla.
 
 | H5 | Panel › Galería | Cargaba los **73 originales completos: 35,6 MB cada vez** que se abría. Fotos de 1805×2048 mostradas a 393×280, con las derivadas ya generadas y sin usar. | ✅ Corregido — usa la miniatura `sm` y carga diferida: **34 MB → 1 MB** |
 
+| H6 | Panel › Orden de Corte | **Imprimía el panel completo** —barra lateral, menú y todo— porque `window.print()` desde una vista del dashboard imprime la página entera, y el layout no tiene reglas de impresión. Marcar los controles con `.no-print` no alcanzaba: esas clases sólo existen dentro del componente. | ✅ Corregido — imprime en ventana aparte con su propio HTML, mismo patrón que las etiquetas de envío |
+| H7 | Panel › Orden de Corte | Mandaba a cortar **pedidos sin confirmar**: el filtro era "todo lo que no esté perdido", así que entraban las 6 consultas NUEVA y las 4 EN_PROCESO. Cortar tela es irreversible y cuesta material. Verificado: una consulta sin confirmar de 9 unidades aparecía como pendiente de corte. | ✅ Corregido — por defecto sólo pedidos confirmados, ampliable desde la vista |
+| H8 | Panel › Orden de Corte | Vacía **sin explicar por qué**, lo que se lee como "está rota". Está vacía porque los 17 ítems existentes son previos al arreglo del `sku_id` y no tienen variante asociada. | ✅ Corregido — el vacío ahora explica qué es la vista y cuándo se llena |
+
 ---
 
 ## 1 · Panel de administración
