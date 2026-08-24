@@ -73,6 +73,9 @@ El bundle se carga de forma diferida, así que **la clienta pública no lo paga*
 
 **Sí apareció un defecto real:** el admin **duplica su petición de listado** en las dos páginas revisadas (productos y variantes: `?page=1&page_size=20` dos veces). Es el mismo problema de C1, pero el admin usa su propia capa de fetch y no pasa por la deduplicación que se agregó ahí.
 
+> **Etapa abierta a partir de esto:** [PLAN_IMAGENES.md](PLAN_IMAGENES.md) —
+> plan ejecutable para bajar la portada de 7,5 MB a menos de 1 MB.
+
 #### Recomendación, en orden
 
 1. **Redimensionar las imágenes** (servidor). Es el único cambio que mueve la aguja de verdad: bajaría la portada de ~7,5 MB a menos de 1 MB.
