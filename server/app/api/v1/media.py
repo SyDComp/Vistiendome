@@ -117,6 +117,11 @@ def list_media(db: Session = Depends(get_session)):
     return [{
         "id": a.id,
         "url": a.url,
+        # Miniatura liviana para la grilla: se muestra a ~390 px de ancho, así
+        # que bajar el original (1805x2048, ~500 KB) era descargar 35 MB cada
+        # vez que se abría la galería. El original queda en `url` para quien
+        # necesite verlo en grande.
+        "thumb": (a.metadata_json or {}).get("derivadas", {}).get("sm") or a.url,
         "filename": a.filename,
         "original_name": a.original_name,
         "alias": _display_alias(a)

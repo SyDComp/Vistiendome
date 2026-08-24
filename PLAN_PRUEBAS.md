@@ -30,6 +30,8 @@ un error del plan y hay que agregarla.
 | H3 | Panel › Características | La regla de "visual" se implementó como *del sistema + visual = bloqueado*. Con eso, marcar **TALLA** como visual la dejaba **atrapada para siempre**. La regla real es: la clienta decide libremente, y las **únicas** excepciones son Color y Estampado. | ✅ Corregido — se identifica por `system_id`, no por `is_system` |
 | H4 | Panel › Bodega | Pedía `/admin/catalog/kardex`, `/kardex/{id}/history` y `POST /kardex/movement`, y **ninguno existía** en el backend. Sólo mostraba "Error al cargar saldos". | ✅ Endpoints implementados sobre el libro de movimientos que ya existía. **⚠️ Ver nota abajo: la pantalla no está en el menú.** |
 
+| H5 | Panel › Galería | Cargaba los **73 originales completos: 35,6 MB cada vez** que se abría. Fotos de 1805×2048 mostradas a 393×280, con las derivadas ya generadas y sin usar. | ✅ Corregido — usa la miniatura `sm` y carga diferida: **34 MB → 1 MB** |
+
 ---
 
 ## 1 · Panel de administración
@@ -111,13 +113,16 @@ un error del plan y hay que agregarla.
 - ⬜ Vista previa e impresión
 
 ### 1.10 `/workspace` — Mesa de Trabajo
-- ⬜ Cargar el editor por lotes
-- ⬜ Selección múltiple de variantes
-- ⬜ Aplicar precio en masa
-- ⬜ Asignar imágenes en masa
+- ✅ Cargar el editor por lotes — 451 variantes de Vestido Noemi
+- ✅ **Selección por rango**: un clic en "Beige" selecciona sus 13 variantes
+- ✅ Guarda por `PUT /products/{id}`, el mismo endpoint ya verificado
+- ⬜ Aplicar precio en masa — **no se probó a propósito**: edita precios reales
+  de la clienta y no se tocan sin permiso explícito
 
 ### 1.11 `/media` — Galería
-- ⬜ Subir (una y varias)
+- ✅ Lista 73 imágenes con miniatura liviana (era H5)
+- ✅ Subir genera derivadas; borrar las elimina (verificado en Fase 1)
+- ⬜ Subir (una y varias) desde la interfaz
 - ⬜ Renombrar / alias
 - ⬜ Borrar en lote
 - ⬜ Buscar

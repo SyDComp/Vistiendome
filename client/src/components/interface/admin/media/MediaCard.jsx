@@ -25,8 +25,13 @@ const MediaCard = ({
             className={`media-gallery-card ${isSelected ? 'is-selected' : ''}`}
         >
             <div className="media-gallery-card-img-wrapper">
-                <img 
-                    src={`${img.url}`} 
+                <img
+                    // Miniatura, no el original: la grilla la muestra a ~390 px
+                    // y bajar los originales costaba 35 MB por visita. Si el
+                    // asset no tiene derivada, `thumb` ya viene con la url normal.
+                    src={img.thumb || img.url}
+                    loading="lazy"
+                    decoding="async"
                     className="media-gallery-card-img"
                     alt={img.filename || img.url || 'Imagen'}
                 />
