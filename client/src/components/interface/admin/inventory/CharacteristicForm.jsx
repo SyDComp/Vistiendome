@@ -28,11 +28,11 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
     
     const [pickingImageIndex, setPickingImageIndex] = useState(null);
 
-    // Una característica del sistema que YA es visual no puede dejar de serlo:
-    // es parte de lo que la define, igual que su nombre. Se evalúa contra los
-    // datos guardados, no contra el estado del formulario, para que desmarcar
-    // no se "auto-habilite" al vuelo.
-    const visualBloqueada = initialData?.is_system === true && initialData?.afecta_apariencia === true;
+    // Sólo Color y Estampado tienen fija su propiedad visual. Todo lo demás
+    // —incluida Talla, que también es del sistema— lo decide la clienta.
+    // Se identifican por system_id, no por is_system: si no, marcar Talla como
+    // visual la dejaría atrapada sin poder volver atrás.
+    const visualBloqueada = ['sys_color', 'sys_pattern'].includes(initialData?.system_id);
 
     const isColorType = localData.system_id === 'COLOR' || localData.system_id === 'sys_color' || localData.name.toUpperCase() === 'COLOR';
     const isPatternType = localData.system_id === 'sys_pattern' || localData.system_id === 'ESTAMPADO' || ['ESTAMPADO', 'PATRÓN', 'PATRON', 'DISEÑO', 'DISENO', 'TELA'].includes(localData.name.toUpperCase());

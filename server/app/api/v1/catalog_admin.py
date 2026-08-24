@@ -205,18 +205,20 @@ async def update_attribute(attr_id: int, attr_data: Dict[str, Any], db: Session 
     if db_attr.is_system and attr_data.get("is_system") is False:
          raise HTTPException(status_code=403, detail="No se puede degradar una característica de sistema a usuario")
 
-    # 3. BLOQUEO: en una característica del sistema, si es visual, lo sigue siendo.
-    # El explorador se apoya en que haya al menos una: sin ninguna, deja de poder
-    # separar tarjetas por color y colapsa cada producto a una sola. Que Color y
-    # Estampado sean visuales es parte de lo que define a esa característica,
-    # igual que su nombre — por eso se protege igual que el nombre.
-    # Las características de usuario siguen siendo libres: se puede hacer visual
-    # cualquier otra sin restricción.
-    if (db_attr.is_system and db_attr.afecta_apariencia
+    # 3. BLOQUEO: sólo Color y Estampado tienen fija su propiedad visual.
+    # La clienta decide libremente qué características son visuales — incluidas
+    # las del sistema como Talla, que puede marcar y desmarcar cuando quiera.
+    # Las DOS únicas excepciones son Color y Estampado: el explorador se apoya
+    # en que exista al menos una visual, y si no quedara ninguna dejaría de
+    # poder separar tarjetas, colapsando cada producto a una sola.
+    # Se identifican por system_id y no por "es del sistema": Talla también lo
+    # es, y no debe quedar atrapada si alguna vez se la marca como visual.
+    VISUALES_FIJAS = ("sys_color", "sys_pattern")
+    if (db_attr.system_id in VISUALES_FIJAS
             and attr_data.get("afecta_apariencia") is False):
         raise HTTPException(
             status_code=403,
-            detail=f"'{db_attr.name}' es del sistema y define cómo se ve la prenda: no se le puede quitar esa propiedad"
+            detail=f"'{db_attr.name}' define cómo se ve la prenda y no puede dejar de hacerlo: el Explorador la necesita para separar las tarjetas"
         )
 
     # Normalizar nombre si viene (y no es sistema o es el mismo)

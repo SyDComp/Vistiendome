@@ -340,7 +340,7 @@ const CharacteristicManager = () => {
                         align: 'center',
                         render: (v, row) => (
                             <Badge variant={v ? 'success' : 'default'} size="sm">
-                                {v ? (row.is_system ? 'SÍ · FIJO' : 'SÍ') : 'NO'}
+                                {v ? (['sys_color', 'sys_pattern'].includes(row.system_id) ? 'SÍ · FIJO' : 'SÍ') : 'NO'}
                             </Badge>
                         )
                     }

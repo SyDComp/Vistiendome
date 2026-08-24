@@ -5,145 +5,227 @@
 > navegador real y se anota el resultado.
 >
 > **Regla:** un punto sólo se marca ✅ cuando se ejecutó y se vio funcionar.
-> Si algo se rompe, se anota como hallazgo con su evidencia — no se disimula.
+> Si falla, se anota como hallazgo con su evidencia — no se disimula ni se
+> justifica.
 
----
-
-## Cómo se lee este documento
+**Este índice no se escribió de memoria:** sale de las rutas reales de
+`DashboardLayout.jsx` y `App.jsx`. Si aparece una pantalla que no está acá, es
+un error del plan y hay que agregarla.
 
 | Estado | Significa |
 |---|---|
 | ⬜ | Sin probar |
 | ✅ | Probado y funciona |
-| ❌ | Probado y **falla** — con el detalle abajo |
-| ⚠️ | Funciona pero con una salvedad |
+| ❌ | Probado y **falla** |
+| ⚠️ | Funciona con salvedad |
 
 ---
 
-## Hallazgos abiertos
+## Hallazgos
 
 | # | Dónde | Qué pasa | Estado |
 |---|---|---|---|
-| H1 | Panel › Características | Guardar TALLA (o cualquiera del sistema con valores tipo `XS`, `XL`) daba **403: "La opción de sistema 'XS' es inmutable"**. El formulario pasaba cada valor por `formatOpt`, que baja a minúsculas y capitaliza sólo la primera letra: `XS` → `Xs`. El servidor creía que la habían borrado. **Paola no podía editar TALLA.** | ✅ Corregido — las opciones del sistema ya no se re-normalizan |
-| H2 | Ficha de producto | El SKU terminó primero en un recuadro grande bajo "Especificaciones" y después al pie. Ninguna de las dos era lo pedido: iba arriba, discreto, como estaba. | ✅ Corregido — devuelto a la píldora del encabezado |
+| H1 | Panel › Características | Guardar TALLA daba **403 "La opción de sistema 'XS' es inmutable"**. El formulario pasaba todas las opciones por `formatOpt`, que baja a minúsculas y capitaliza sólo la primera letra: `XS` → `Xs`, `XL` → `Xl`. El servidor las comparaba por valor exacto y creía que las habían borrado. `S` y `M` sobrevivían por tener una sola letra, lo que hacía el fallo más confuso. **Paola no podía editar TALLA.** | ✅ Corregido — las opciones del sistema ya no se re-normalizan |
+| H2 | Ficha de producto | El SKU terminó en un recuadro grande bajo "Especificaciones" y después al pie. Nunca se pidió moverlo: se pidió que dejara de ser grande. | ✅ Corregido — de vuelta en la píldora del encabezado |
+| H3 | Panel › Características | La regla de "visual" se implementó como *del sistema + visual = bloqueado*. Con eso, marcar **TALLA** como visual la dejaba **atrapada para siempre**. La regla real es: la clienta decide libremente, y las **únicas** excepciones son Color y Estampado. | ✅ Corregido — se identifica por `system_id`, no por `is_system` |
 
 ---
 
 ## 1 · Panel de administración
 
-### 1.1 Características (el que más duele)
-- ⬜ Listar: se ven las columnas Nombre, Opciones, Filtro y **Visual**
-- ⬜ Abrir TALLA y **guardar sin cambios** → debe guardar (era H1)
-- ⬜ Agregar una opción nueva a TALLA y guardar → se agrega, las 13 del sistema quedan
-- ⬜ Renombrar una característica del sistema → debe **rechazar**
-- ⬜ Borrar una característica del sistema → botón no disponible
-- ⬜ Quitar "cambia cómo se ve" a COLOR → debe **rechazar** con mensaje claro
-- ⬜ Marcar "cambia cómo se ve" en una característica propia → debe **permitir**
-- ⬜ Crear una característica nueva desde cero, con opciones
-- ⬜ Borrar una característica propia
+> Una entrada por ruta real de `DashboardLayout.jsx`.
 
-### 1.2 Productos
-- ⬜ Listar, buscar, filtrar por categoría
-- ⬜ Crear un producto con variantes
-- ⬜ Editar precio y stock de una variante
-- ⬜ Subir una foto y confirmar que **se generan sus derivadas**
-- ⬜ Borrar una foto y confirmar que **se borran sus derivadas**
-- ⬜ Eliminar un producto
+### 1.1 `/inventory/products` — Productos
+- ⬜ Listar, paginar, buscar
+- ⬜ Filtrar por categoría y por estado de stock
+- ⬜ Crear producto con sus variantes
+- ⬜ Editar: nombre, descripción, precio, specs, video
+- ⬜ Oferta temporal (producto y variante)
+- ⬜ Subir foto → **se generan las derivadas**
+- ⬜ Borrar foto → **se borran sus derivadas**
+- ⬜ Eliminar producto
 
-### 1.3 Variantes y Mesa de Trabajo
-- ⬜ Listar variantes, paginación
-- ⬜ Edición masiva de precio
-- ⬜ Asignar imágenes a varias variantes
+### 1.2 `/inventory/variants` — Variantes
+- ⬜ Listar y paginar (1.049 SKUs)
+- ⬜ Buscar y filtrar
+- ⬜ Editar una variante
+- ⬜ Ver stock por variante
 - ⬜ Detectar variantes en $0
 
-### 1.4 Categorías, Colecciones, Especificaciones
-- ⬜ Crear/editar/borrar categoría; jerarquía padre-hijo
-- ⬜ Crear colección y asignarle variantes
-- ⬜ Especificaciones asociadas a categoría
+### 1.3 `/inventory/collections` — Colecciones
+- ⬜ Crear, editar, activar/desactivar
+- ⬜ Asignar y quitar variantes
+- ⬜ Portada de colección
+- ⬜ Ver reflejada en el sitio público
 
-### 1.5 CRM
-- ⬜ Listar cotizaciones sin error (ojo: rompía con ítems de SKU real)
-- ⬜ Ver detalle de una cotización
-- ⬜ Cambiar estado y confirmar el **descuento de stock** al cerrar
-- ⬜ Reabrir y confirmar que el stock **se revierte**
-- ⬜ Orden de corte: filtros por producto y característica
-- ⬜ Marcar cortado y confirmar que sale de pendientes
+### 1.4 `/inventory/bodega` — Bodega
+- ⬜ Cargar la vista
+- ⬜ Movimientos de stock (ingreso, ajuste)
+- ⬜ El stock mostrado coincide con el libro de movimientos
+
+### 1.5 `/inventory/categories` — Categorías
+- ⬜ Crear, editar, borrar
+- ⬜ Jerarquía padre-hijo
+- ⬜ `is_filterable` y su efecto en los filtros públicos
+
+### 1.6 `/inventory/characteristics` — Características ⚠️ zona sensible
+- ⬜ Listar con columnas Nombre, Opciones, Filtro y **Visual**
+- ⬜ **Abrir TALLA y guardar sin cambios** (H1)
+- ⬜ Agregar opción a TALLA → se agrega y las 13 del sistema quedan
+- ⬜ **Marcar TALLA como visual y volver a desmarcarla** (H3)
+- ⬜ Quitar visual a COLOR → **rechaza**
+- ⬜ Quitar visual a ESTAMPADO → **rechaza**
+- ⬜ Marcar/desmarcar visual en una característica propia
+- ⬜ Renombrar una del sistema → rechaza
+- ⬜ Borrar una del sistema → no disponible
+- ⬜ Crear una nueva con sus opciones
+- ⬜ Editar y borrar una propia
+- ⬜ Color: opciones con código hex
+- ⬜ Estampado: opciones con imagen
+
+### 1.7 `/inventory/filters` — Filtros
+- ⬜ Cargar la vista
+- ⬜ Configurar qué se muestra y verlo en el catálogo
+
+### 1.8 `/inventory/specifications` — Especificaciones
+- ⬜ Crear, editar, borrar
+- ⬜ Asociar a categorías y a características
+- ⬜ Ver reflejado en la ficha de producto
+
+### 1.9 `/inventory/barcodes` — Códigos de barras
+- ⬜ Seleccionar variantes
+- ⬜ Formatos de papel y tamaño de etiqueta
+- ⬜ Vista previa e impresión
+
+### 1.10 `/workspace` — Mesa de Trabajo
+- ⬜ Cargar el editor por lotes
+- ⬜ Selección múltiple de variantes
+- ⬜ Aplicar precio en masa
+- ⬜ Asignar imágenes en masa
+
+### 1.11 `/media` — Galería
+- ⬜ Subir (una y varias)
+- ⬜ Renombrar / alias
+- ⬜ Borrar en lote
+- ⬜ Buscar
+- ⬜ Ver dónde se usa cada imagen
+
+### 1.12 `/cms/homepage` — Portada
+- ⬜ Crear, ordenar, activar/desactivar bloques
+- ⬜ Estudio de escenas: capas de texto e imagen
+- ⬜ Vista móvil vs escritorio
+- ⬜ Ver el cambio en el sitio público
+
+### 1.13 `/cms/help` — Atención al Cliente
+- ⬜ Crear y ordenar secciones de ayuda
+- ⬜ Editar contenido
+- ⬜ Ver reflejado en `/ayuda`
+
+### 1.14 `/cms/settings` — Ajustes
+- ⬜ Redes sociales y contacto
+- ⬜ Métodos de envío y colores
+- ⬜ Modal de bienvenida
+- ⬜ Barra de anuncio
+- ⬜ **Tramos de precio** (mayorista/iglesia): crear, guardar, borrar
+- ⬜ **Promociones**: lleva X paga Y, segunda unidad, regalo, con vigencia
+- ⬜ Página Nosotros
+
+### 1.15 `/analytics` — Estadísticas
+- ⬜ Carga sin error
+- ⬜ Los números coinciden con la actividad real
+
+### 1.16 `/crm/clientes` — Clientes
+- ⬜ Listar, buscar
+- ⬜ Crear, editar
+- ⬜ Dirección y comuna
+
+### 1.17 `/crm/cotizaciones` — Cotizaciones
+- ⬜ Listar sin error (rompía con ítems de SKU real)
+- ⬜ Ver detalle con sus ítems
+- ⬜ Cambiar estado
+- ⬜ Cerrar → **descuenta stock**; reabrir → **lo revierte**
+- ⬜ Crear cotización manual
 - ⬜ Imprimir planilla (taller, con precios)
 - ⬜ Imprimir comprobante (clienta, sin precios)
-- ⬜ Etiquetas de envío
-- ⬜ Crear cotización manual
-- ⬜ Clientes: crear y editar
 
-### 1.6 CMS y Ajustes
-- ⬜ Editar bloques de portada; ver el cambio en el sitio
-- ⬜ Estudio de escenas: agregar capa de imagen
-- ⬜ Modal de bienvenida y barra de anuncio
-- ⬜ Tramos de precio (mayorista/iglesia): crear, guardar, borrar
-- ⬜ Promociones: crear las tres formas, con y sin vigencia
-- ⬜ Métodos de envío, redes, contacto
+### 1.18 `/crm/orden-corte` — Orden de Corte
+- ⬜ Listar pendientes
+- ⬜ Filtrar por producto y por característica
+- ⬜ Marcar cortado → sale de pendientes y persiste
+- ⬜ Imprimir
 
-### 1.7 Códigos de barras y multimedia
-- ⬜ Generar e imprimir códigos de barras
-- ⬜ Galería: subir, renombrar, borrar
+### 1.19 `/crm/shipping-labels` — Etiquetas de Envío
+- ⬜ Seleccionar cotizaciones
+- ⬜ Formatos y copias
+- ⬜ Imprimir
 
-### 1.8 Analítica y perfil
-- ⬜ Panel de estadísticas carga sin error
-- ⬜ Cambiar contraseña / perfil
+### 1.20 `/profile` — Mi Perfil
+- ⬜ Editar datos
+- ⬜ Cambiar contraseña
+- ⬜ Cerrar sesión
+
+### 1.21 Acceso
+- ⬜ `/admin/login`: credenciales correctas e incorrectas
+- ⬜ Sesión expirada redirige al login
+- ⬜ `/admin/bootstrap`
 
 ---
 
 ## 2 · Sitio público
 
-### 2.1 Portada
+### 2.1 `/` — Portada
 - ⬜ Carga sin errores de consola
-- ⬜ Bloques del CMS se ven bien
+- ⬜ Bloques del CMS
 - ⬜ Imágenes: **derivadas, no originales**
 - ⬜ Barra de anuncio y modal de bienvenida
 
-### 2.2 Catálogo y Explorador
+### 2.2 `/catalogo` y `/explorador`
 - ⬜ Catálogo lista productos; Explorador lista looks
 - ⬜ Filtro por talla devuelve **todos** los que la tienen
 - ⬜ Filtro por color/estampado
-- ⬜ Varios filtros a la vez
-- ⬜ Limpiar filtros
+- ⬜ Varios filtros combinados; limpiar
+- ⬜ Ordenamiento
+- ⬜ Carrusel de las tarjetas
 - ⬜ Al abrir el detalle, la talla filtrada llega **preseleccionada**
 
-### 2.3 Ficha de producto
-- ⬜ SKU **arriba, discreto**, con su código de barras
-- ⬜ Cambiar talla/color actualiza precio, foto y SKU
-- ⬜ Combinaciones inexistentes no quedan seleccionables
-- ⬜ Aviso "desde N unidades" cuando corresponde
+### 2.3 Ficha de producto (4 rutas)
+- ⬜ `/producto/:slug`, `/catalogo/producto/...`, `/explorador/producto/...`, `/coleccion/:c/producto/...`
+- ⬜ SKU **arriba, discreto**, con código de barras
+- ⬜ Cambiar talla/color actualiza precio, foto, SKU y URL
+- ⬜ Combinaciones inexistentes no seleccionables
+- ⬜ Aviso "desde N unidades"
 - ⬜ Video, especificaciones, compartir
+- ⬜ Volver no rompe la navegación
 
 ### 2.4 Carrito y cotización
 - ⬜ Agregar, cambiar cantidad, eliminar
-- ⬜ Precio por cantidad (mayorista/iglesia) se aplica y se ve
-- ⬜ Promoción se aplica y se ve el descuento
-- ⬜ Regalo aparece cuando corresponde
-- ⬜ Checkout: validaciones, región/comuna
-- ⬜ El mensaje de WhatsApp sale completo y correcto
-- ⬜ **La cotización llega al CRM con su `sku_id`**
+- ⬜ Precio por cantidad se aplica y se ve
+- ⬜ Promoción y regalo
+- ⬜ Checkout: validaciones, región/comuna, retiro vs domicilio
+- ⬜ Mensaje de WhatsApp completo
+- ⬜ La cotización llega al CRM **con su `sku_id`**
 
-### 2.5 Buscador
-- ⬜ Buscar por nombre, por característica, sin acentos, orden invertido
-- ⬜ Búsqueda instantánea del encabezado
+### 2.5 `/search` y buscador instantáneo
+- ⬜ Por nombre, por característica, sin acentos, orden invertido
+- ⬜ Sin resultados
 
-### 2.6 Resto del sitio
-- ⬜ Colecciones, Nosotros, Contacto, Atención al cliente
+### 2.6 Resto
+- ⬜ `/colecciones` y `/coleccion/:slug`
+- ⬜ `/nosotros`, `/contacto`, `/ayuda`
 - ⬜ Formulario de contacto
 - ⬜ WhatsApp flotante, mapas
 
-### 2.7 Móvil
-- ⬜ Portada, catálogo, ficha y carrito a 375px
-- ⬜ Controles táctiles cómodos
+### 2.7 Móvil (375px)
+- ⬜ Portada, catálogo, ficha, carrito
+- ⬜ Menú y controles táctiles
 - ⬜ El checkout no hace zoom al escribir
 
 ---
 
 ## 3 · Al cierre
 
-- ⬜ Sin errores en consola en ninguna pantalla
-- ⬜ Sin 4xx/5xx inesperados en la pestaña de red
+- ⬜ Sin errores de consola en ninguna pantalla
+- ⬜ Sin 4xx/5xx inesperados en la red
 - ⬜ Datos de prueba eliminados
 - ⬜ Hallazgos corregidos y verificados
 
