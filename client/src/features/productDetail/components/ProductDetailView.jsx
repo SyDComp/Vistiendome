@@ -285,12 +285,7 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                                 const validSpecs = Object.entries(producto?.specs || {}).filter(([key, val]) => {
                                     return val && !key.toLowerCase().includes('colección') && !key.toLowerCase().includes('slug');
                                 });
-                                // El SKU vive acá, con los datos técnicos, y no entre el
-                                // nombre y el precio: es un código interno que a la
-                                // clienta no le dice nada, y ese espacio es el que
-                                // decide la compra. La sección se muestra igual aunque
-                                // el producto no tenga specs, para no perder el SKU.
-                                if (validSpecs.length === 0 && !skuActual) return null;
+                                if (validSpecs.length === 0) return null;
                                 return (
                                     <div className="specs-section-premium" style={{ animationDelay: '0.4s' }}>
                                         <div className="section-title-wrapper">
@@ -304,38 +299,7 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                                                     <span className="spec-value-refined">{val}</span>
                                                 </div>
                                             ))}
-                                            {skuActual && (
-                                                <div className="spec-item-refined spec-item-sku">
-                                                    <span className="spec-label-refined">SKU</span>
-                                                    <span className="spec-value-refined sku-inline">
-                                                        {formatSku(skuActual.sku)}
-                                                        <button
-                                                            onClick={() => setShowBarcode(!showBarcode)}
-                                                            className={`barcode-toggle-btn ${showBarcode ? 'active' : ''}`}
-                                                            title="Ver código de barras"
-                                                        >
-                                                            <BarcodeIcon size={14} />
-                                                        </button>
-                                                    </span>
-                                                </div>
-                                            )}
                                         </div>
-                                        {skuActual && showBarcode && (
-                                            <div className="barcode-display-container">
-                                                <div className="barcode-wrapper">
-                                                    <ReactBarcode
-                                                        value={skuActual.barcode || generateEAN13(skuActual.sku) || '000000'}
-                                                        format="CODE128"
-                                                        width={1.2}
-                                                        height={40}
-                                                        fontSize={12}
-                                                        displayValue={true}
-                                                        margin={0}
-                                                        background="transparent"
-                                                    />
-                                                </div>
-                                            </div>
-                                        )}
                                     </div>
                                 );
                             })()}
@@ -398,6 +362,38 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                                     <span>Despacho Express</span>
                                 </div>
                             </div>
+
+                            {/* El SKU es un código interno y el código de barras es
+                                herramienta de la tienda, no de quien compra: va al
+                                pie, en gris y sin recuadro. No es una especificación
+                                —esas son talla, color, cuello— ni merece el espacio
+                                que decide la compra. */}
+                            {skuActual && (
+                                <div className="sku-discreto">
+                                    <span className="sku-discreto__codigo">{formatSku(skuActual.sku)}</span>
+                                    <button
+                                        onClick={() => setShowBarcode(!showBarcode)}
+                                        className={`barcode-toggle-btn ${showBarcode ? 'active' : ''}`}
+                                        title="Ver código de barras"
+                                    >
+                                        <BarcodeIcon size={13} />
+                                    </button>
+                                    {showBarcode && (
+                                        <div className="sku-discreto__barcode">
+                                            <ReactBarcode
+                                                value={skuActual.barcode || generateEAN13(skuActual.sku) || '000000'}
+                                                format="CODE128"
+                                                width={1.1}
+                                                height={34}
+                                                fontSize={11}
+                                                displayValue={true}
+                                                margin={0}
+                                                background="transparent"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </main>

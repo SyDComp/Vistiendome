@@ -28,6 +28,12 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
     
     const [pickingImageIndex, setPickingImageIndex] = useState(null);
 
+    // Una característica del sistema que YA es visual no puede dejar de serlo:
+    // es parte de lo que la define, igual que su nombre. Se evalúa contra los
+    // datos guardados, no contra el estado del formulario, para que desmarcar
+    // no se "auto-habilite" al vuelo.
+    const visualBloqueada = initialData?.is_system === true && initialData?.afecta_apariencia === true;
+
     const isColorType = localData.system_id === 'COLOR' || localData.system_id === 'sys_color' || localData.name.toUpperCase() === 'COLOR';
     const isPatternType = localData.system_id === 'sys_pattern' || localData.system_id === 'ESTAMPADO' || ['ESTAMPADO', 'PATRÓN', 'PATRON', 'DISEÑO', 'DISENO', 'TELA'].includes(localData.name.toUpperCase());
 
@@ -146,13 +152,26 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                         <input type="checkbox" id="char_is_filterable" checked={localData.is_filterable} onChange={e => setLocalData(p => ({ ...p, is_filterable: e.target.checked }))} />
                         <label htmlFor="char_is_filterable" className="char-form-filter-label">Mostrar en filtros</label>
                     </div>
+                    {/* Si es del sistema y ya es visual, queda fija: el Explorador se
+                        apoya en que exista al menos una para separar las tarjetas.
+                        Se muestra bloqueada y no oculta, para que se entienda por qué. */}
                     <div className="char-form-filter-wrap">
-                        <input type="checkbox" id="char_afecta_apariencia" checked={localData.afecta_apariencia} onChange={e => setLocalData(p => ({ ...p, afecta_apariencia: e.target.checked }))} />
-                        <label htmlFor="char_afecta_apariencia" className="char-form-filter-label">Cambia cómo se ve la prenda</label>
+                        <input
+                            type="checkbox"
+                            id="char_afecta_apariencia"
+                            checked={localData.afecta_apariencia}
+                            disabled={visualBloqueada}
+                            onChange={e => setLocalData(p => ({ ...p, afecta_apariencia: e.target.checked }))}
+                        />
+                        <label htmlFor="char_afecta_apariencia" className="char-form-filter-label">
+                            Cambia cómo se ve la prenda
+                            {visualBloqueada && <span className="char-form-lock"> · fijo del sistema</span>}
+                        </label>
                     </div>
                     <p className="char-form-hint">
-                        Marca esto en Color o Estampado: el Explorador mostrará una foto por cada valor.
-                        No lo marques en Talla — cambia la prenda, pero no cómo se ve.
+                        {visualBloqueada
+                            ? 'Es una característica del sistema y define cómo se ve la prenda, así que no se puede desmarcar: el Explorador la usa para mostrar una tarjeta por cada valor. Sí puedes marcar esta opción en cualquier característica que crees tú.'
+                            : 'Márcalo en Color o Estampado: el Explorador mostrará una foto por cada valor. No lo marques en Talla — cambia la prenda, pero no cómo se ve.'}
                     </p>
                 </div>
 

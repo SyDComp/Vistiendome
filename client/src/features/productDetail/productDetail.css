@@ -254,19 +254,31 @@
 .spec-label-refined { font-size: 10px; font-weight: 700; color: #9d174d; text-transform: uppercase; letter-spacing: 0.5px; }
 .spec-value-refined { font-size: 14px; font-weight: 600; color: #1e293b; }
 
-/* SKU dentro de Especificaciones: código interno, así que va en monoespaciada
-   y con menos peso visual que una especificación real (tela, largo). */
-.spec-item-sku .sku-inline {
+/* SKU al pie: dato interno de la tienda. Sin recuadro, sin título y en gris —
+   tiene que estar disponible, no llamar la atención. */
+.sku-discreto {
     display: flex;
     align-items: center;
-    gap: 8px;
     flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
     font-family: ui-monospace, 'Courier New', monospace;
-    font-size: 12px;
-    font-weight: 500;
-    color: #64748b;
+    font-size: 11px;
+    color: #94a3b8;
     letter-spacing: 0.3px;
 }
+.sku-discreto__codigo { overflow-wrap: anywhere; }
+.sku-discreto .barcode-toggle-btn {
+    background: none;
+    border: none;
+    padding: 2px;
+    color: #94a3b8;
+    cursor: pointer;
+    display: inline-flex;
+}
+.sku-discreto .barcode-toggle-btn:hover,
+.sku-discreto .barcode-toggle-btn.active { color: #64748b; }
+.sku-discreto__barcode { flex-basis: 100%; margin-top: 6px; }
 
 .product-video-section { margin-top: 32px; }
 .product-video-embed-wrapper {

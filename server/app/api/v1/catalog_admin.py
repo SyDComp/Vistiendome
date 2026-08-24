@@ -205,6 +205,20 @@ async def update_attribute(attr_id: int, attr_data: Dict[str, Any], db: Session 
     if db_attr.is_system and attr_data.get("is_system") is False:
          raise HTTPException(status_code=403, detail="No se puede degradar una característica de sistema a usuario")
 
+    # 3. BLOQUEO: en una característica del sistema, si es visual, lo sigue siendo.
+    # El explorador se apoya en que haya al menos una: sin ninguna, deja de poder
+    # separar tarjetas por color y colapsa cada producto a una sola. Que Color y
+    # Estampado sean visuales es parte de lo que define a esa característica,
+    # igual que su nombre — por eso se protege igual que el nombre.
+    # Las características de usuario siguen siendo libres: se puede hacer visual
+    # cualquier otra sin restricción.
+    if (db_attr.is_system and db_attr.afecta_apariencia
+            and attr_data.get("afecta_apariencia") is False):
+        raise HTTPException(
+            status_code=403,
+            detail=f"'{db_attr.name}' es del sistema y define cómo se ve la prenda: no se le puede quitar esa propiedad"
+        )
+
     # Normalizar nombre si viene (y no es sistema o es el mismo)
     if "name" in attr_data:
         attr_data["name"] = normalize_char(attr_data["name"])

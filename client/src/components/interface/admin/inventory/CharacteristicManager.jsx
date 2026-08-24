@@ -319,16 +319,30 @@ const CharacteristicManager = () => {
                             </Badge>
                         ) 
                     },
-                    { 
-                        key: 'is_filterable', 
-                        label: 'Filtro', 
-                        width: '100px', 
-                        align: 'center', 
+                    {
+                        key: 'is_filterable',
+                        label: 'Filtro',
+                        width: '100px',
+                        align: 'center',
                         render: (v) => (
                             <Badge variant={v ? 'success' : 'error'} size="sm">
                                 {v ? 'SÍ' : 'NO'}
                             </Badge>
-                        ) 
+                        )
+                    },
+                    {
+                        // Decide qué separa una tarjeta de otra en el Explorador.
+                        // Antes sólo se veía abriendo el formulario, así que era
+                        // imposible saber de un vistazo cuáles estaban marcadas.
+                        key: 'afecta_apariencia',
+                        label: 'Visual',
+                        width: '110px',
+                        align: 'center',
+                        render: (v, row) => (
+                            <Badge variant={v ? 'success' : 'default'} size="sm">
+                                {v ? (row.is_system ? 'SÍ · FIJO' : 'SÍ') : 'NO'}
+                            </Badge>
+                        )
                     }
                 ]}
                 data={filteredCharacteristics}
