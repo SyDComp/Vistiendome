@@ -28,9 +28,58 @@
 | C2 | 30 controles táctiles bajo 44px (peor: menú a 16×24) |
 | C3 | El SKU ocupa espacio prime en la ficha de producto |
 | C4 | Lógica de filtros duplicada (Python + JavaScript), solo se usa una |
-| C5 | Análisis sin hacer: panel de administración, redes lentas |
+| C5 | ✅ Análisis hecho (2026-08-23) — ver abajo. Conclusión: el cuello de botella son **las imágenes**, no el código |
 
 **Siguiente paso:** bloque C (mejoras internas) y el scroll infinito de A3, ambos opcionales. **Todo el bloque A y B está cerrado** salvo B6, que solo espera confirmación de Paola sobre embebido vs. link.
+
+### C5 — Análisis de rendimiento (2026-08-23)
+
+Medido sobre el **build de producción**, no en desarrollo.
+
+#### El hallazgo que domina todo lo demás: las imágenes
+
+| Qué | Medido |
+|---|---|
+| Peso de la portada | **7,5 MB** |
+| De eso, imágenes | **7,26 MB — el 97%** |
+| Imágenes en la portada | 18 |
+| Con carga diferida (`lazy`) | **0** |
+| Tamaño real vs. mostrado | **1638×2048** para mostrarse a **280×350** |
+| Píxeles de más descargados | **8,6×** (ya contando pantallas retina) |
+| Media total en disco | 320 archivos, **80 MB** |
+
+Lo que eso significa para la clienta, según su conexión:
+
+| Conexión | Tiempo de carga de la portada |
+|---|---|
+| 3G con mala señal (~50 KB/s) | **~2,5 minutos** |
+| 4G promedio (~625 KB/s) | ~12 s |
+| Fibra | ~1,2 s |
+
+**El código no es el problema.** El JS de la portada son 95 KB (comprime bien: 311 KB → 97 KB) y las APIs son livianas. Se puede optimizar todo el resto al máximo y la portada seguiría tardando minutos con mala señal, porque el 97% del peso son fotos sin redimensionar.
+
+**Costo del arreglo, medido:** de 42 `<img>` en el código, sólo 6 pasan por `PremiumImage`. O sea que "poner lazy loading" no es un cambio en un componente: hay que pasar las imágenes por el componente común primero. El redimensionado (servir 560×700 en vez de 1638×2048) es trabajo de servidor, aparte.
+
+#### Panel de administración: sano en datos
+
+| Qué | Medido |
+|---|---|
+| Llamadas por página | 6, todas ≤ 12 KB |
+| Latencia | 14–171 ms |
+| Paginación | Sí (`page_size=20`) — no trae los 1.049 SKUs |
+| Peso del bundle | 734 KB / **196 KB comprimido**, en un solo trozo |
+
+El bundle se carga de forma diferida, así que **la clienta pública no lo paga**; lo paga Paola en su primera visita. No es urgente.
+
+**Sí apareció un defecto real:** el admin **duplica su petición de listado** en las dos páginas revisadas (productos y variantes: `?page=1&page_size=20` dos veces). Es el mismo problema de C1, pero el admin usa su propia capa de fetch y no pasa por la deduplicación que se agregó ahí.
+
+#### Recomendación, en orden
+
+1. **Redimensionar las imágenes** (servidor). Es el único cambio que mueve la aguja de verdad: bajaría la portada de ~7,5 MB a menos de 1 MB.
+2. **Carga diferida** — barato en beneficio, pero requiere unificar los 42 `<img>` bajo `PremiumImage` primero.
+3. **`Cache-Control` en `/media`** — hoy sólo hay `etag`/`last-modified`, así que el navegador revalida en cada visita en vez de servir de caché sin preguntar.
+4. **Deduplicar el fetch del admin** — mismo arreglo que C1, en la otra capa.
+5. Partir el bundle del admin — lo último; sólo afecta a Paola, una vez.
 
 ### B5 — decisión tomada (2026-08-23)
 
