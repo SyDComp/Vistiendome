@@ -57,6 +57,36 @@ con mala señal. No gastar esfuerzo ahí.
 
 ---
 
+## 2b. Decisión: los bytes NO van a la base de datos
+
+Pregunta que surgió antes de empezar, y queda zanjada acá para no rediscutirla.
+
+**La BD guarda el registro (qué imagen existe, dónde, con qué metadatos); el
+disco guarda los bytes.** Es como ya está hecho (`MediaAsset` no tiene columna
+binaria, verificado contra la BD real) y es lo correcto.
+
+| | Hoy | Con los bytes en Postgres |
+|---|---|---|
+| Tamaño de la BD | **11 MB** | **~91 MB**, creciendo con cada foto |
+| Servir una imagen | Archivo estático directo | Consulta + conexión ocupada por foto |
+| Respaldo de la BD | Rápido | Enorme y lento |
+
+Y lo decisivo: las imágenes **son** el cuello de botella de este proyecto.
+Hacerlas pasar por Postgres empeora exactamente lo que este plan quiere
+arreglar.
+
+> **La preocupación legítima detrás de la pregunta:** si las fotos viven sólo en
+> disco, un respaldo de la BD no las protege. Es cierto. La solución es
+> **respaldar `server/media/` junto con la base**, no meter binarios en la BD.
+
+**Estado del registro, medido:** 73 archivos sueltos en `media/` y 73 registros
+en `mediaasset` — correspondencia exacta, cero huérfanos. Cero rutas `/media/`
+escritas a mano en el código. Aparte hay **92 archivos en `media/products/`
+sin ningún registro en BD**: heredados, nadie los referencia. Revisar si se
+borran o se registran, pero fuera del alcance de este plan.
+
+---
+
 ## 3. Estrategia
 
 **Generar derivadas al subir + rellenar las existentes.** No redimensionar al
@@ -82,6 +112,33 @@ archivo original tal cual.
 ## 4. Fases
 
 Cada fase se puede terminar, verificar y commitear sola.
+
+### Fase 0 — Sacar las fotos muertas del bundle ← **empezar por acá**
+
+La victoria más barata de todo el plan, y no requiere nada de lo demás.
+
+`client/src/constants/pruebas.jsx` importa fotos del catálogo **como módulos
+del código** (no desde la BD). `Home.jsx` y `Footer.jsx` importan de ese
+archivo sólo `navLinks` y `soporteLinks` — pero al importar cualquier cosa se
+arrastra el módulo entero, y con él las imágenes.
+
+| Medido | |
+|---|---|
+| Build total | 5,4 MB |
+| De eso, imágenes de `pruebas.jsx` | **3,8 MB — el 70%** |
+| `client/src/assets/img_catalogo/` en disco | 36 MB |
+
+Los exports que las arrastran (`elementosCarrusel`, `productosCatalogo`,
+`redesSociales`) **no se usan en ningún lado** — verificado. `elementosColeccion`
+se usa en 1 lugar: revisar ese antes de tocarlo.
+
+**Qué hacer:** mover `navLinks`/`soporteLinks` a su propio archivo de
+constantes (son datos de navegación, no de prueba), dejar de importar
+`pruebas.jsx` desde código vivo, y eliminar lo que quede sin uso junto con sus
+imágenes.
+
+**Verificación:** `find dist -iname "*.jpg" | wc -l` debe dar 0, y el build
+debe bajar de 5,4 MB a ~1,6 MB.
 
 ### Fase 1 — Generar derivadas (servidor)
 
