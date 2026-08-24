@@ -52,29 +52,22 @@ const ClientesView = () => {
         }
     };
 
-    const handleDelete = (cliente) => {
-        confirm({
-            title: 'Eliminar Cliente',
-            message: `¿Estás seguro de eliminar a ${cliente.nombres}?`,
-            confirmLabel: 'Eliminar',
-            cancelLabel: 'Cancelar',
-            variant: 'danger',
-            onConfirm: async () => {
-                try {
-                    const res = await fetch(`/api/v1/crm/clientes/${cliente.id}`, {
-                        method: 'DELETE'
-                    });
-                    if (res.ok) {
-                        toast.success("Cliente eliminado");
-                        fetchClientes();
-                    } else {
-                        toast.error("Error al eliminar cliente");
-                    }
-                } catch (error) {
-                    toast.error("Error de conexión");
-                }
+    // `confirm` recibe un TEXTO y devuelve una promesa con la respuesta.
+    // Pasarle un objeto lo renderiza como hijo de React y deja la pantalla en
+    // blanco (error #31), que es lo que pasaba al pulsar Eliminar.
+    const handleDelete = async (cliente) => {
+        if (!await confirm(`¿Estás seguro de eliminar a ${cliente.nombres}?`)) return;
+        try {
+            const res = await fetch(`/api/v1/crm/clientes/${cliente.id}`, { method: 'DELETE' });
+            if (res.ok) {
+                toast.success("Cliente eliminado");
+                fetchClientes();
+            } else {
+                toast.error("Error al eliminar cliente");
             }
-        });
+        } catch (error) {
+            toast.error("Error de conexión");
+        }
     };
 
     useEffect(() => {

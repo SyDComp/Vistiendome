@@ -1,277 +1,157 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Scissors, Printer } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Scissors, Plus, Trash2 } from 'lucide-react';
 import SectionHeader from '../../../ui/admin/SectionHeader';
 import { useNotification } from '../../../../context/NotificationContext';
-import { get, put } from '../../../../lib/api/client';
+import { getOrdenesCorte, eliminarOrden } from '../../../../lib/api/endpoints';
+import OrdenCorteForm from './OrdenCorteForm';
+import OrdenCorteDetalle, { ESTADOS, estiloEstado } from './OrdenCorteDetalle';
 
 /**
- * "Orden de corte" no es una entidad — es esta vista: una consulta filtrable
- * sobre los ítems pendientes de confección. Los filtros de producto y
- * característica se resuelven en el cliente sobre lo que el propio backend
- * ya trae (mismo patrón que CotizacionesView), porque a esta escala no
- * justifica pedirle al backend una query más fina.
+ * Órdenes de corte: lista, alta y detalle.
+ *
+ * La orden es una entidad que arma Paola, no una vista derivada de las ventas:
+ * corta para cumplir pedidos, pero también para tener stock. Antes esto era
+ * sólo una lista de piezas pendientes, que cubría la mitad de su trabajo.
  */
 const OrdenCorteView = () => {
-    const { toast } = useNotification();
-    const [filas, setFilas] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [soloPendiente, setSoloPendiente] = useState(true);
-    // Por defecto sólo lo confirmado: cortar tela es irreversible y cuesta
-    // material, así que no se corta para una consulta que nadie acepto todavía.
-    // Se puede ampliar a los pedidos en proceso para adelantar trabajo.
-    const [alcance, setAlcance] = useState('CERRADA_EXITO');
-    const [productoFiltro, setProductoFiltro] = useState('');
-    const [caracteristicaFiltro, setCaracteristicaFiltro] = useState('');
-    const [valorFiltro, setValorFiltro] = useState('');
+    const { toast, confirm } = useNotification();
+    const [vista, setVista] = useState('lista');   // lista | nueva | detalle
+    const [ordenes, setOrdenes] = useState([]);
+    const [actual, setActual] = useState(null);
+    const [filtro, setFiltro] = useState('');
+    const [cargando, setCargando] = useState(true);
 
     const cargar = useCallback(async () => {
-        setLoading(true);
+        setCargando(true);
         try {
-            const estado = alcance === 'TODAS' ? '' : `&estado=${alcance}`;
-            const data = await get(`/api/v1/crm/orden-corte?pendiente=${soloPendiente}${estado}`);
-            setFilas(data || []);
-        } catch (err) {
-            toast.error('No se pudo cargar la orden de corte');
+            setOrdenes(await getOrdenesCorte(filtro || undefined) || []);
+        } catch {
+            toast.error('No se pudieron cargar las órdenes de corte');
         } finally {
-            setLoading(false);
+            setCargando(false);
         }
-    }, [soloPendiente, alcance]);
+    }, [filtro]);
 
-    useEffect(() => { cargar(); }, [cargar]);
+    useEffect(() => { if (vista === 'lista') cargar(); }, [vista, cargar]);
 
-    const productos = useMemo(() => [...new Set(filas.map(f => f.producto))].sort(), [filas]);
-    const caracteristicas = useMemo(() => {
-        const nombres = new Set();
-        filas.forEach(f => Object.keys(f.config || {}).forEach(k => nombres.add(k)));
-        return [...nombres].sort();
-    }, [filas]);
-    const valoresDisponibles = useMemo(() => {
-        if (!caracteristicaFiltro) return [];
-        const vals = new Set();
-        filas.forEach(f => {
-            const v = f.config?.[caracteristicaFiltro];
-            if (v) vals.add(v);
-        });
-        return [...vals].sort();
-    }, [filas, caracteristicaFiltro]);
-
-    const filasFiltradas = useMemo(() => {
-        return filas.filter(f => {
-            if (productoFiltro && f.producto !== productoFiltro) return false;
-            if (caracteristicaFiltro && valorFiltro && f.config?.[caracteristicaFiltro] !== valorFiltro) return false;
-            return true;
-        });
-    }, [filas, productoFiltro, caracteristicaFiltro, valorFiltro]);
-
-    const toggleCortado = async (fila) => {
-        const nuevoValor = !fila.cortado;
-        setFilas(prev => prev.map(f => f.item_id === fila.item_id ? { ...f, cortado: nuevoValor } : f));
+    // `confirm` toma un TEXTO y devuelve la respuesta, no un objeto con callback.
+    const borrar = async (o) => {
+        if (!await confirm(`¿Eliminar la orden N° ${o.numero} y sus piezas? No se puede deshacer.`)) return;
         try {
-            await put(`/api/v1/crm/items/${fila.item_id}/cortado`, { cortado: nuevoValor });
-            if (soloPendiente && nuevoValor) {
-                setFilas(prev => prev.filter(f => f.item_id !== fila.item_id));
-            }
+            await eliminarOrden(o.id);
+            toast.success('Orden eliminada');
+            cargar();
         } catch (err) {
-            setFilas(prev => prev.map(f => f.item_id === fila.item_id ? { ...f, cortado: !nuevoValor } : f));
-            toast.error('No se pudo actualizar');
+            toast.error(err?.message || 'No se pudo eliminar');
         }
     };
 
-    /**
-     * Imprime en una ventana aparte con su propio HTML.
-     *
-     * `window.print()` a secas imprimía el panel completo —barra lateral, menú
-     * y todo— porque esta vista vive dentro del dashboard y el layout no tiene
-     * reglas de impresión. Marcar los controles con `.no-print` no alcanzaba:
-     * esas clases sólo existen dentro de este componente.
-     *
-     * Es el mismo patrón que ya usan las etiquetas de envío.
-     */
-    const imprimir = () => {
-        const filasHtml = filasFiltradas.map(f => `
-            <tr>
-                <td>${f.numero ?? '—'}</td>
-                <td>${f.cliente}</td>
-                <td>${new Date(f.fecha).toLocaleDateString('es-CL')}</td>
-                <td>${f.producto}</td>
-                <td>${Object.entries(f.config || {}).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join(' · ')}</td>
-                <td class="num">${f.cantidad}</td>
-                <td class="check"></td>
-            </tr>`).join('');
+    if (vista === 'nueva') {
+        return (
+            <OrdenCorteForm
+                onVolver={() => setVista('lista')}
+                onCreada={(o) => { setActual(o); setVista('detalle'); }}
+            />
+        );
+    }
 
-        const total = filasFiltradas.reduce((a, f) => a + (f.cantidad || 0), 0);
-        const w = window.open('', '_blank', 'width=1000,height=800');
-        if (!w) return toast.error('El navegador bloqueó la ventana de impresión');
-        w.document.write(`<!doctype html><html><head><meta charset="utf-8">
-            <title>Orden de Corte</title>
-            <style>
-                *{box-sizing:border-box}
-                body{font-family:system-ui,-apple-system,sans-serif;margin:0;padding:18mm 12mm;color:#000}
-                h1{font-size:20px;margin:0 0 4px}
-                .meta{font-size:12px;color:#555;margin-bottom:16px}
-                table{width:100%;border-collapse:collapse;font-size:12px}
-                th{text-align:left;border-bottom:2px solid #000;padding:6px 4px;font-size:10px;text-transform:uppercase;letter-spacing:.5px}
-                td{padding:7px 4px;border-bottom:1px solid #ddd;vertical-align:top}
-                .num{text-align:right}
-                /* Casilla en papel: se marca a mano en el taller */
-                .check{width:34px}
-                .check:after{content:'';display:block;width:15px;height:15px;border:1.5px solid #000;margin:0 auto}
-                tfoot td{border:0;padding-top:10px;font-weight:700}
-                @page{margin:10mm}
-            </style></head><body>
-            <h1>Orden de Corte</h1>
-            <div class="meta">${filasFiltradas.length} piezas · ${total} unidades · ${new Date().toLocaleDateString('es-CL')}</div>
-            <table>
-                <thead><tr><th>N° Pedido</th><th>Cliente</th><th>Fecha</th><th>Producto</th><th>Características</th><th class="num">Cant.</th><th></th></tr></thead>
-                <tbody>${filasHtml}</tbody>
-                <tfoot><tr><td colspan="5"></td><td class="num">${total}</td><td></td></tr></tfoot>
-            </table>
-            <script>window.onload=function(){setTimeout(function(){window.print();window.close();},400)}<\/script>
-            </body></html>`);
-        w.document.close();
-    };
+    if (vista === 'detalle' && actual) {
+        return (
+            <OrdenCorteDetalle
+                orden={actual}
+                onVolver={() => { setActual(null); setVista('lista'); }}
+                onCambio={(act, opts) => setActual(opts?.navegarA || act)}
+            />
+        );
+    }
 
     return (
-        <div className="admin-module fade-in orden-corte-view">
-            <div className="no-print">
+        <div className="admin-module fade-in oc-lista">
+            <div className="oc-encabezado">
                 <SectionHeader
-                    title="Orden de Corte"
-                    subtitle={`${filasFiltradas.length} piezas ${soloPendiente ? 'pendientes de cortar' : 'en total'}`}
+                    title="Órdenes de Corte"
+                    subtitle={`${ordenes.length} ${ordenes.length === 1 ? 'orden' : 'órdenes'}`}
                     icon={Scissors}
                 />
-
-                <div className="orden-corte-filters">
-                    <label className="filter-check">
-                        <input type="checkbox" checked={soloPendiente} onChange={e => setSoloPendiente(e.target.checked)} />
-                        Sólo pendientes
-                    </label>
-
-                    <select value={alcance} onChange={e => setAlcance(e.target.value)} className="filter-select">
-                        <option value="CERRADA_EXITO">Sólo pedidos confirmados</option>
-                        <option value="EN_PROCESO">Sólo en proceso</option>
-                        <option value="TODAS">Todos (incluye consultas sin confirmar)</option>
+                <div className="oc-acciones">
+                    <select value={filtro} onChange={e => setFiltro(e.target.value)} className="oc-select">
+                        <option value="">Todos los estados</option>
+                        {ESTADOS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                     </select>
-
-                    <select value={productoFiltro} onChange={e => setProductoFiltro(e.target.value)} className="filter-select">
-                        <option value="">Todos los productos</option>
-                        {productos.map(p => <option key={p} value={p}>{p}</option>)}
-                    </select>
-
-                    <select value={caracteristicaFiltro} onChange={e => { setCaracteristicaFiltro(e.target.value); setValorFiltro(''); }} className="filter-select">
-                        <option value="">Cualquier característica</option>
-                        {caracteristicas.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-
-                    {caracteristicaFiltro && (
-                        <select value={valorFiltro} onChange={e => setValorFiltro(e.target.value)} className="filter-select">
-                            <option value="">Cualquier valor</option>
-                            {valoresDisponibles.map(v => <option key={v} value={v}>{v}</option>)}
-                        </select>
-                    )}
-
-                    <button className="btn-print" onClick={imprimir} disabled={!filasFiltradas.length}>
-                        <Printer size={16} /> Imprimir
+                    <button className="oc-btn-nueva" onClick={() => setVista('nueva')}>
+                        <Plus size={17} strokeWidth={3} /> Nueva orden de corte
                     </button>
                 </div>
             </div>
 
-            {loading ? (
-                <div className="orden-corte-empty">Cargando...</div>
-            ) : filasFiltradas.length === 0 ? (
-                /* Un vacío sin explicación se lee como "esto está roto". Se dice
-                   qué falta para que aparezca algo. */
-                <div className="orden-corte-empty">
-                    {(productoFiltro || valorFiltro) ? (
-                        <>Ningún pedido pendiente coincide con estos filtros.</>
-                    ) : soloPendiente ? (
-                        <>
-                            <strong>No hay piezas pendientes de cortar.</strong>
-                            <p>
-                                Acá aparece cada prenda de un pedido que todavía no se cortó.
-                                Se llena solo cuando entra un pedido nuevo desde la tienda o lo
-                                creas en Cotizaciones. Quita "Sólo pendientes" para ver también
-                                lo ya cortado.
-                            </p>
-                        </>
-                    ) : (
-                        <>Todavía no hay piezas registradas.</>
-                    )}
+            {cargando ? (
+                <div className="oc-vacio">Cargando...</div>
+            ) : ordenes.length === 0 ? (
+                <div className="oc-vacio">
+                    <strong>Todavía no hay órdenes de corte.</strong>
+                    <p>
+                        Una orden de corte reúne lo que vas a cortar: piezas de pedidos ya
+                        confirmados y también prendas para tener en stock. Al finalizarla,
+                        las piezas de pedidos quedan marcadas como cortadas y las de stock
+                        entran al inventario.
+                    </p>
+                    <button className="oc-btn-nueva" onClick={() => setVista('nueva')}>
+                        <Plus size={17} strokeWidth={3} /> Crear la primera
+                    </button>
                 </div>
             ) : (
-                <table className="orden-corte-table">
+                <table className="oc-tabla">
                     <thead>
-                        <tr>
-                            <th className="no-print">Cortado</th>
-                            <th>N° Pedido</th>
-                            <th>Cliente</th>
-                            <th>Fecha</th>
-                            <th>Producto</th>
-                            <th>Características</th>
-                            <th className="col-num">Cantidad</th>
-                        </tr>
+                        <tr><th>N°</th><th>Estado</th><th>Fecha</th><th className="num">Piezas</th><th className="num">Unidades</th><th>Notas</th><th></th></tr>
                     </thead>
                     <tbody>
-                        {filasFiltradas.map(f => (
-                            <tr key={f.item_id} className={f.cortado ? 'row-cortado' : ''}>
-                                <td className="no-print">
-                                    <input type="checkbox" checked={f.cortado} onChange={() => toggleCortado(f)} />
-                                </td>
-                                <td>{f.numero ?? '—'}</td>
-                                <td>{f.cliente}</td>
-                                <td>{new Date(f.fecha).toLocaleDateString('es-CL')}</td>
-                                <td>{f.producto}</td>
-                                <td>
-                                    <div className="config-badges">
-                                        {Object.entries(f.config || {}).filter(([, v]) => v).map(([k, v]) => (
-                                            <span key={k} className="config-badge">{k}: {v}</span>
-                                        ))}
-                                    </div>
-                                </td>
-                                <td className="col-num">{f.cantidad}</td>
-                            </tr>
-                        ))}
+                        {ordenes.map(o => {
+                            const est = estiloEstado(o.estado);
+                            return (
+                                <tr key={o.id} onClick={() => { setActual(o); setVista('detalle'); }} className="oc-fila">
+                                    <td className="oc-numero">{o.numero}</td>
+                                    <td><span className="oc-estado" style={{ color: est.color, background: est.bg }}>{est.label}</span></td>
+                                    <td>{new Date(o.created_at).toLocaleDateString('es-CL')}</td>
+                                    <td className="num">{o.items.length}</td>
+                                    <td className="num">{o.total_unidades}</td>
+                                    <td className="oc-notas">
+                                        {o.notas || '—'}
+                                        {o.veces_repetida > 0 && <span className="oc-badge-rep">repetida {o.veces_repetida}×</span>}
+                                    </td>
+                                    <td>
+                                        {o.estado !== 'FINALIZADA' && (
+                                            <button className="oc-quitar" title="Eliminar"
+                                                onClick={e => { e.stopPropagation(); borrar(o); }}>
+                                                <Trash2 size={14} />
+                                            </button>
+                                        )}
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             )}
 
             <style>{`
-                .orden-corte-filters {
-                    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
-                    margin-bottom: 20px; padding: 14px 16px; background: #f8fafc;
-                    border: 1px solid #e2e8f0; border-radius: 12px;
-                }
-                .filter-check { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #334155; }
-                .filter-select {
-                    height: 38px; padding: 0 10px; border-radius: 8px; border: 1px solid #e2e8f0;
-                    font-size: 13px; background: #fff; color: #1e1b4b;
-                }
-                .btn-print {
-                    display: flex; align-items: center; gap: 6px; margin-left: auto;
-                    background: #1e1b4b; color: #fff; border: none; padding: 8px 16px;
-                    border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer;
-                }
-                .orden-corte-empty { padding: 56px 20px; text-align: center; color: #64748b; font-size: 14px; }
-                .orden-corte-empty strong { display: block; color: #334155; font-size: 15px; margin-bottom: 8px; }
-                .orden-corte-empty p { max-width: 480px; margin: 0 auto; line-height: 1.6; font-size: 13px; }
-
-                .orden-corte-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-                .orden-corte-table th {
-                    text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
-                    color: #64748b; border-bottom: 2px solid #1e1b4b; padding: 8px 10px;
-                }
-                .orden-corte-table td { padding: 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
-                .orden-corte-table .col-num { text-align: right; }
-                .row-cortado { opacity: 0.45; }
-                .config-badges { display: flex; flex-wrap: wrap; gap: 4px; }
-                .config-badge {
-                    font-size: 11px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px;
-                    padding: 2px 6px; color: #334155; white-space: nowrap;
-                }
-
-                @media print {
-                    .no-print { display: none !important; }
-                    .orden-corte-view { padding: 0 !important; }
-                }
+                .oc-encabezado { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:18px; }
+                .oc-acciones { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+                .oc-select { height:40px; padding:0 12px; border:1px solid #e2e8f0; border-radius:10px; background:#fff; font-size:13px; }
+                .oc-btn-nueva { display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#8f0653,#d946ef); color:#fff; border:none; padding:11px 18px; border-radius:10px; font-weight:800; font-size:13px; cursor:pointer; box-shadow:0 4px 12px rgba(143,6,83,.25); }
+                .oc-vacio { padding:56px 20px; text-align:center; color:#64748b; font-size:14px; }
+                .oc-vacio strong { display:block; color:#334155; font-size:16px; margin-bottom:8px; }
+                .oc-vacio p { max-width:520px; margin:0 auto 18px; line-height:1.6; font-size:13px; }
+                .oc-tabla { width:100%; border-collapse:collapse; font-size:13px; }
+                .oc-tabla th { text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:#64748b; border-bottom:2px solid #1e1b4b; padding:8px 6px; }
+                .oc-tabla td { padding:11px 6px; border-bottom:1px solid #e2e8f0; }
+                .oc-tabla .num { text-align:right; }
+                .oc-fila { cursor:pointer; }
+                .oc-fila:hover { background:#f8fafc; }
+                .oc-numero { font-weight:800; color:#1e1b4b; }
+                .oc-estado { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:4px 10px; border-radius:20px; }
+                .oc-notas { color:#64748b; font-size:12px; }
+                .oc-badge-rep { margin-left:8px; font-size:10px; font-weight:800; color:#4338ca; background:#eef2ff; padding:2px 7px; border-radius:6px; }
+                .oc-quitar { background:none; border:none; color:#dc2626; cursor:pointer; padding:4px; }
             `}</style>
         </div>
     );

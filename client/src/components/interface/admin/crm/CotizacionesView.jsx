@@ -300,11 +300,12 @@ const CotizacionesView = () => {
                 rowActions={(row) => (
                     <RowActions
                         onView={() => { setDetailData(row); setShowDetail(true); }}
-                        onDelete={() => confirm({
-                            title: 'Eliminar Cotización',
-                            message: `¿Seguro que deseas eliminar la cotización #${row.id}?`,
-                            onConfirm: () => toast.success("Simulación: Cotización eliminada")
-                        })}
+                        onDelete={async () => {
+                            // confirm() toma un texto y devuelve la respuesta;
+                            // con un objeto la pantalla quedaba en blanco.
+                            if (!await confirm(`¿Seguro que deseas eliminar la cotización #${row.numero ?? row.id}?`)) return;
+                            toast.success("Simulación: Cotización eliminada");
+                        }}
                         extra={
                             <button
                                 onClick={() => window.open(`/admin/print/pedido/${row.id}`, '_blank')}

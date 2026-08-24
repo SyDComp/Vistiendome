@@ -36,6 +36,8 @@ un error del plan y hay que agregarla.
 | H7 | Panel › Orden de Corte | Mandaba a cortar **pedidos sin confirmar**: el filtro era "todo lo que no esté perdido", así que entraban las 6 consultas NUEVA y las 4 EN_PROCESO. Cortar tela es irreversible y cuesta material. Verificado: una consulta sin confirmar de 9 unidades aparecía como pendiente de corte. | ✅ Corregido — por defecto sólo pedidos confirmados, ampliable desde la vista |
 | H8 | Panel › Orden de Corte | Vacía **sin explicar por qué**, lo que se lee como "está rota". Está vacía porque los 17 ítems existentes son previos al arreglo del `sku_id` y no tienen variante asociada. | ✅ Corregido — el vacío ahora explica qué es la vista y cuándo se llena |
 
+| H9 | Panel › Clientes y Cotizaciones | **El botón Eliminar dejaba el panel en blanco.** `confirm()` recibe un TEXTO y devuelve una promesa, pero cuatro lugares lo llamaban con un objeto `{title, message, onConfirm}`. React intentaba renderizar ese objeto y reventaba (error #31). Dos eran preexistentes (Clientes, Cotizaciones) y dos míos, recién escritos copiando ese mismo patrón equivocado. | ✅ Corregido en los cuatro |
+
 ---
 
 ## 1 · Panel de administración
