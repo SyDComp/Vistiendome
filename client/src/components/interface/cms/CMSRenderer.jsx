@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { useWebSocket } from '../../../context/WebSocketContext';
 import FeaturedCollections from '../colecciones/FeaturedCollections';
-import { getProducts, getImageUrl } from '../../../lib/api/endpoints';
+import { getProducts, getImageUrl, getSrcSet } from '../../../lib/api/endpoints';
 import { ArrowRight, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 
 // Ruta relativa: en dev pasa por el proxy de Vite (vite.config.js), en prod por nginx.
@@ -69,10 +69,15 @@ const LayerRenderer = ({ layers = [], navigate, isMobile }) => {
                                 {layer.content}
                             </div>
                         ) : (
-                            <img 
-                                src={layer.url ? (layer.url.startsWith('http') ? layer.url : `${layer.url}`) : ''} 
-                                style={{ display: 'block', width: '100%', height: 'auto', pointerEvents: 'none' }} 
-                                alt="" 
+                            <img
+                                src={layer.url ? (layer.url.startsWith('http') ? layer.url : `${layer.url}`) : ''}
+                                srcSet={getSrcSet(layer.srcset) || undefined}
+                                // Las capas ocupan el ancho del bloque, no de una
+                                // tarjeta: por eso el tamaño declarado es mayor.
+                                sizes="(max-width: 1050px) 100vw, 1200px"
+                                decoding="async"
+                                style={{ display: 'block', width: '100%', height: 'auto', pointerEvents: 'none' }}
+                                alt=""
                             />
                         )}
                     </div>
@@ -368,6 +373,10 @@ const ProductCard = ({ product, previewMode }) => {
             }}>
                 <img 
                     src={product.image ? getImageUrl(product.image) : (product.images?.[0]?.url ? getImageUrl(product.images[0].url) : '')} 
+                    srcSet={getSrcSet(product.image_srcset) || undefined}
+                    sizes="(max-width: 768px) 50vw, 300px"
+                    loading="lazy"
+                    decoding="async"
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     alt={product.name}
                 />
@@ -604,6 +613,10 @@ export const RecentProductsBlock = ({ previewMode = false }) => {
                         }}>
                             <img 
                                 src={product.image ? getImageUrl(product.image) : (product.images?.[0]?.url ? getImageUrl(product.images[0].url) : '')} 
+                                srcSet={getSrcSet(product.image_srcset) || undefined}
+                                sizes="(max-width: 768px) 50vw, 300px"
+                                loading="lazy"
+                                decoding="async"
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 alt={product.name}
                             />

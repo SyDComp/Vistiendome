@@ -1,14 +1,27 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const PremiumImage = ({ 
-    src, 
-    alt, 
-    className = '', 
-    skeletonClassName = '', 
+/**
+ * @param srcSet   Versiones livianas que manda el servidor ("url 400w, url 800w, ...").
+ *                 Vacío = se usa `src` tal cual, así que las fotos sin derivadas
+ *                 siguen funcionando igual.
+ * @param sizes    Cuánto espacio ocupará la imagen, para que el navegador elija
+ *                 bien ANTES de conocer el layout. Sin esto asume el ancho de la
+ *                 pantalla completa y baja una versión más grande de la necesaria.
+ * @param priority true para la imagen principal visible al entrar: esa no se
+ *                 difiere, porque diferirla es justo lo que se ve tardar.
+ */
+const PremiumImage = ({
+    src,
+    srcSet = '',
+    sizes = '(max-width: 768px) 50vw, 300px',
+    priority = false,
+    alt,
+    className = '',
+    skeletonClassName = '',
     aspectRatio = '3/4',
     objectFit = 'cover',
     style = {},
-    ...props 
+    ...props
 }) => {
     const [isLoaded, setIsLoaded] = useState(false);
     const [hasError, setHasError] = useState(false);
@@ -23,7 +36,9 @@ const PremiumImage = ({
         if (imgRef.current && imgRef.current.complete) {
             setIsLoaded(true);
         }
-    }, [src]);
+        // También depende de srcSet: si cambian las derivadas sin cambiar el
+        // src, la imagen se recarga y el esqueleto tiene que volver a aparecer.
+    }, [src, srcSet]);
 
     // Si no hay src o hubo un error al cargar
     if (!src || hasError) {
@@ -76,6 +91,11 @@ const PremiumImage = ({
             <img
                 ref={imgRef}
                 src={src}
+                srcSet={srcSet || undefined}
+                sizes={srcSet ? sizes : undefined}
+                loading={priority ? 'eager' : 'lazy'}
+                decoding="async"
+                fetchPriority={priority ? 'high' : undefined}
                 alt={alt}
                 onLoad={() => setIsLoaded(true)}
                 onError={() => setHasError(true)}

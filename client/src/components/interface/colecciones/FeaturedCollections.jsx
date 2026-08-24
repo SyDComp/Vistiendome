@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getCollections, getImageUrl } from '../../../lib/api/endpoints';
+import { getCollections, getImageUrl, getSrcSet } from '../../../lib/api/endpoints';
 import { ChevronRight, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useWebSocket } from '../../../context/WebSocketContext';
@@ -66,8 +66,12 @@ const FeaturedCollections = () => {
                         <div className="card-image-container">
                             {coll.image_url ? (
                                 <>
-                                    <img src={getImageUrl(coll.image_url)} alt="" className="card-image-blur" aria-hidden="true" />
-                                    <img src={getImageUrl(coll.image_url)} alt={coll.name} className="card-image" />
+                                    <img src={getImageUrl(coll.image_url)} srcSet={getSrcSet(coll.image_srcset) || undefined}
+                                         sizes="(max-width: 768px) 100vw, 400px" loading="lazy" decoding="async"
+                                         alt="" className="card-image-blur" aria-hidden="true" />
+                                    <img src={getImageUrl(coll.image_url)} srcSet={getSrcSet(coll.image_srcset) || undefined}
+                                         sizes="(max-width: 768px) 100vw, 400px" loading="lazy" decoding="async"
+                                         alt={coll.name} className="card-image" />
                                 </>
                             ) : (
                                 <div className="card-image-placeholder" />

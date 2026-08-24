@@ -81,6 +81,50 @@ def generar_derivadas(ruta_original: str, directorio_base: str) -> Dict[str, str
     return generadas
 
 
+def srcset_de(asset) -> str:
+    """
+    Arma el `srcset` de un MediaAsset a partir de las derivadas que tenga
+    registradas, para que el navegador elija el tamaño según la pantalla.
+
+    El ancho lo pone el servidor, que es quien sabe con qué medida generó cada
+    archivo: el cliente no tiene por qué conocer esos números.
+
+    Devuelve "" si la imagen no tiene derivadas (fotos anteriores al relleno,
+    GIF, o imágenes ya más chicas que todos los objetivos). Un srcset vacío
+    hace que el navegador use el `src` de siempre, así que nada se rompe.
+    """
+    derivadas = (getattr(asset, "metadata_json", None) or {}).get("derivadas") or {}
+    partes = [
+        f"{derivadas[etiqueta]} {ancho}w"
+        for etiqueta, ancho in TAMANOS.items()
+        if derivadas.get(etiqueta)
+    ]
+    return ", ".join(partes)
+
+
+def srcset_desde_url(url: Optional[str], directorio_base: str = "media") -> str:
+    """
+    Igual que `srcset_de`, pero para cuando sólo se tiene la URL de la imagen y
+    no su MediaAsset (por ejemplo la portada de una colección, que se guarda
+    como texto).
+
+    Comprueba en disco que cada derivada exista antes de anunciarla: si se
+    anunciara una que no está, el navegador la elegiría y la imagen no cargaría.
+    Son un par de comprobaciones por imagen, y sólo en las pocas que llegan por
+    URL suelta.
+    """
+    if not url or url.startswith("http"):
+        return ""
+
+    base, _ = os.path.splitext(os.path.basename(url))
+    partes = []
+    for etiqueta, ancho in TAMANOS.items():
+        archivo = f"{base}_{etiqueta}.webp"
+        if os.path.exists(os.path.join(directorio_base, SUBCARPETA, archivo)):
+            partes.append(f"/{directorio_base}/{SUBCARPETA}/{archivo} {ancho}w")
+    return ", ".join(partes)
+
+
 def eliminar_derivadas(ruta_original: str, directorio_base: str) -> int:
     """
     Borra las derivadas de una imagen. Se usa al eliminar o reemplazar el

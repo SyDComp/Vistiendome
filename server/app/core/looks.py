@@ -43,9 +43,20 @@ def imagen_de_variante(sku: Any) -> Optional[str]:
     "vestido perla" hay 6 con dos imágenes cada una) eso cambiaba la cantidad de
     looks y la foto mostrada entre recargas. Se ordena por id para fijarlo.
     """
+    asset = asset_de_variante(sku)
+    return asset.url if asset else None
+
+
+def asset_de_variante(sku: Any):
+    """
+    El MediaAsset representativo de una variante, con el mismo criterio
+    determinista que `imagen_de_variante`. Se expone aparte porque quien arma
+    la respuesta necesita algo más que la URL: también las derivadas livianas,
+    que viven en el metadata del asset.
+    """
     if not sku.media_assets:
         return None
-    return sorted(sku.media_assets, key=lambda m: m.id)[0].url
+    return sorted(sku.media_assets, key=lambda m: m.id)[0]
 
 
 def clave_visual(config: Dict[str, Any], visuales: set) -> Optional[str]:

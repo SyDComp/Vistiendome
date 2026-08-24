@@ -2,6 +2,7 @@ from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Body, Query
 from sqlmodel import Session, select
 from ...database import get_session
+from ...core.imagenes import srcset_de
 from ...models.cms import HomepageSection, HelpSection
 from ...models.catalog import MediaAsset
 from pydantic import BaseModel
@@ -23,6 +24,9 @@ def _resolve_layer_media(node, db: Session):
             asset = db.get(MediaAsset, aid)
             if asset:
                 resolved["url"] = asset.url
+                # Las capas de los bloques hero son las imágenes más grandes de
+                # la portada: sin esto se bajaban completas (~450 KB cada una).
+                resolved["srcset"] = srcset_de(asset)
         return resolved
     if isinstance(node, list):
         return [_resolve_layer_media(x, db) for x in node]

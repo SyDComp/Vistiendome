@@ -5,7 +5,8 @@ from datetime import datetime
 from ...database import get_session
 from ...models.catalog import Product, Category, SKU, StockMovement, Characteristic, Specification
 from ...core.pricing import compute_effective_price, get_chile_time
-from ...core.looks import colapsar_en_looks, imagen_de_variante
+from ...core.looks import colapsar_en_looks, imagen_de_variante, asset_de_variante
+from ...core.imagenes import srcset_de
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -27,6 +28,7 @@ class ProductListSchema(BaseModel):
     category_id: int
     category_slug: str
     image: Optional[str] = None
+    image_srcset: str = ""
     sku: Optional[str] = None
     price: float                       # menor precio efectivo entre variantes
     original_price: float              # menor precio base entre variantes
@@ -34,6 +36,41 @@ class ProductListSchema(BaseModel):
     variants: List[VariantSummary] = []
     specs: Dict[str, str] = {}
     extras: Dict[str, Any] = {}
+
+def _extras_con_carrusel(producto, media_id_to_sku: Optional[Dict[int, str]] = None) -> Dict[str, Any]:
+    """
+    Copia los `extras` del producto agregándole a cada foto del carrusel su
+    `srcset` (y su `sku`, si se pasa el mapa).
+
+    Vive acá y no en cada endpoint porque el catálogo (`/looks`) y el listado
+    completo (`/`) muestran el mismo carrusel: si sólo uno enriquece, esa
+    página baja los originales completos sin que nada avise.
+    """
+    extras = dict(producto.extras) if producto.extras else {}
+    if "preview_carousel" not in extras:
+        return extras
+
+    # Los assets del carrusel pueden colgar del producto o de sus variantes.
+    assets_por_id = {}
+    for s in producto.skus:
+        for m in s.media_assets:
+            assets_por_id.setdefault(m.id, m)
+    for m in producto.media_assets:
+        assets_por_id.setdefault(m.id, m)
+
+    nuevo = []
+    for item in extras["preview_carousel"]:
+        media_id = item.get("id")
+        # Copia: mutar el original tocaría el dict que vive en memoria compartida
+        nuevo_item = dict(item)
+        if media_id_to_sku and media_id in media_id_to_sku:
+            nuevo_item["sku"] = media_id_to_sku[media_id]
+        if media_id in assets_por_id:
+            nuevo_item["srcset"] = srcset_de(assets_por_id[media_id])
+        nuevo.append(nuevo_item)
+    extras["preview_carousel"] = nuevo
+    return extras
+
 
 @router.get("/", response_model=List[ProductListSchema])
 def list_products(db: Session = Depends(get_session)):
@@ -79,10 +116,14 @@ def list_products(db: Session = Depends(get_session)):
 
         # Encontrar imagen principal del producto
         main_img = None
+        main_srcset = ""
         if p.media_assets:
             main_img = p.media_assets[0].url
-        elif variant_summaries and variant_summaries[0].image:
-            main_img = variant_summaries[0].image
+            main_srcset = srcset_de(p.media_assets[0])
+        elif p.skus and p.skus[0].media_assets:
+            asset = p.skus[0].media_assets[0]
+            main_img = asset.url
+            main_srcset = srcset_de(asset)
             
         # Encontrar el SKU que "posee" esta imagen principal para Deep Linking
         main_sku_code = None
@@ -100,17 +141,7 @@ def list_products(db: Session = Depends(get_session)):
                 if m.id not in media_id_to_sku:
                     media_id_to_sku[m.id] = s.sku
 
-        modified_extras = dict(p.extras) if p.extras else {}
-        if "preview_carousel" in modified_extras:
-            new_carousel = []
-            for item in modified_extras["preview_carousel"]:
-                media_id = item.get("id")
-                # Crear un nuevo dict para evitar mutar el original en memoria compartida
-                new_item = dict(item)
-                if media_id in media_id_to_sku:
-                    new_item["sku"] = media_id_to_sku[media_id]
-                new_carousel.append(new_item)
-            modified_extras["preview_carousel"] = new_carousel
+        modified_extras = _extras_con_carrusel(p, media_id_to_sku)
 
         results.append(ProductListSchema(
             id=p.id,
@@ -120,6 +151,7 @@ def list_products(db: Session = Depends(get_session)):
             category_id=p.category_id,
             category_slug=p.category.slug,
             image=main_img,
+            image_srcset=main_srcset,
             sku=main_sku_code,
             price=min_p,
             original_price=min_base,
@@ -248,6 +280,9 @@ class LookSchema(BaseModel):
     category: str
     category_slug: str
     image: Optional[str] = None
+    # Versiones livianas de `image`, listas para el atributo srcset del <img>.
+    # Vacio = esa foto no tiene derivadas y se usa `image` tal cual.
+    image_srcset: str = ""
     sku: Optional[str] = None
     config: Dict[str, str] = {}
     # Valores disponibles dentro del look (todas las tallas de ese color, etc.).
@@ -268,6 +303,7 @@ class ProductCardSchema(BaseModel):
     category_id: int
     category_slug: str
     image: Optional[str] = None
+    image_srcset: str = ""
     sku: Optional[str] = None
     price: float
     original_price: float
@@ -318,6 +354,12 @@ def list_looks(db: Session = Depends(get_session)):
         skus = list(p.skus)
         precio_de = {s.id: compute_effective_price(s, p, now) for s in skus}
         imagen_de = {s.id: imagen_de_variante(s) for s in skus}
+        # Por URL y no por sku: el look guarda la foto que eligió, y varias
+        # variantes pueden compartirla.
+        srcset_por_url = {
+            a.url: srcset_de(a)
+            for a in (asset_de_variante(s) for s in skus) if a
+        }
 
         # Precio del producto: el menor entre sus variantes. Sirve de respaldo
         # para la tarjeta que representa al producto entero (la que no apunta a
@@ -329,8 +371,10 @@ def list_looks(db: Session = Depends(get_session)):
         # Respaldo de imagen: portada del producto o, si no tiene, cualquier foto
         # de sus variantes. Una tarjeta con la foto del producto comunica más que
         # un recuadro vacío cuando esa combinación todavía no tiene foto propia.
-        portada = (p.media_assets[0].url if p.media_assets else None) \
-            or next((imagen_de[s.id] for s in skus if imagen_de[s.id]), None)
+        asset_portada = (p.media_assets[0] if p.media_assets else None) \
+            or next((a for a in (asset_de_variante(s) for s in skus) if a), None)
+        portada = asset_portada.url if asset_portada else None
+        portada_srcset = srcset_de(asset_portada) if asset_portada else ""
 
         # Facetas: valores distintos por característica, preservando el orden de
         # aparición para que el filtro no baile entre cargas.
@@ -350,13 +394,14 @@ def list_looks(db: Session = Depends(get_session)):
             category=p.category.name,
             category_id=p.category_id,
             category_slug=p.category.slug,
-            image=portada or next((imagen_de[s.id] for s in skus if imagen_de[s.id]), None),
+            image=portada,
+            image_srcset=portada_srcset,
             sku=next((s.sku for s in skus if imagen_de[s.id] and imagen_de[s.id] == portada), None),
             price=min(efectivos),
             original_price=base_min,
             on_sale=any(precio_de[s.id][1] for s in skus),
             specs=p.specs or {},
-            extras=p.extras or {},
+            extras=_extras_con_carrusel(p),
             facets=facets,
         ))
 
@@ -377,6 +422,9 @@ def list_looks(db: Session = Depends(get_session)):
                 category=p.category.name,
                 category_slug=p.category.slug,
                 image=look["image"] or portada,
+                # El srcset tiene que corresponder a la MISMA foto que `image`:
+                # si el look cae en la portada del producto, va el de la portada.
+                image_srcset=(srcset_por_url.get(look["image"], "") if look["image"] else portada_srcset),
                 sku=look["sku"],
                 config=look["config"],
                 facets=look.get("facets", {}),

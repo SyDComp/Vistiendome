@@ -12,6 +12,12 @@ const ProductCard = ({
     interval = 3000,
     isPaused = false,
     image,
+    // srcset que manda el servidor para `image`. Vacio = se usa la foto
+    // original tal cual, asi que nada se rompe si no tiene derivadas.
+    imageSrcSet = '',
+    // Derivadas de las fotos del carrusel, por URL.
+    srcSetPorUrl = {},
+    priority = false,
     price,
     originalPrice,
     onSale = false,
@@ -79,6 +85,8 @@ const ProductCard = ({
                 {onSale && <span className="product-card__sale-badge">Oferta</span>}
                 <PremiumImage
                     src={currentImage}
+                    srcSet={srcSetPorUrl[currentImage] || (currentImage === image ? imageSrcSet : '')}
+                    priority={priority}
                     alt={name}
                     className="product-card__image product-card__image--current"
                     style={{ position: 'absolute' }}
@@ -87,6 +95,7 @@ const ProductCard = ({
                 {isTransitioning && (
                     <PremiumImage
                         src={nextImage}
+                        srcSet={srcSetPorUrl[nextImage] || ''}
                         alt={name}
                         className="product-card__image product-card__image--next"
                         style={{ position: 'absolute' }}

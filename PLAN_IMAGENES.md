@@ -290,6 +290,47 @@ número de `MediaAsset` con `metadata_json["derivadas"]` poblado.
 **Verificación:** en el build de producción, medir de nuevo la portada. Debe
 bajar de 7,5 MB a menos de 1 MB.
 
+> ✅ **Hecho (2026-08-24), junto con la Fase 5.** Resultado medido en el build
+> de producción:
+>
+> | Página | Antes | Ahora |
+> |---|---|---|
+> | **Portada** | **7,50 MB** | **1,09 MB** (−85%) |
+> | Catálogo | 5,14 MB | **0,47 MB** (−91%) |
+> | JPG originales descargados | 15 | **0** |
+> | Imágenes con srcset | 0 de 18 | **17 de 18** |
+>
+> ⚠️ **El objetivo era <1 MB y quedó en 1,09 MB — 9% por encima.** No se
+> disimula: lo que queda son los **6 banners de portada a 1600 px**
+> (129–168 KB cada uno, 885 KB en total), que es la resolución correcta para
+> algo que ocupa todo el ancho. Para bajar de 1 MB haría falta una derivada
+> intermedia de 1200 px, que es exactamente el ancho del contenedor: el
+> navegador la elegiría en vez de la de 1600 y ahorraría ~40% de esos 885 KB.
+> Implica volver a correr la Fase 2 con el tamaño nuevo. **Queda como decisión
+> pendiente**, no como algo olvidado.
+>
+> La imagen 18 sin srcset es la del modal de bienvenida, alojada en Google: no
+> es media propia y no puede tener derivadas.
+>
+> **Corrección al orden de las fases:** el criterio de verificación de esta
+> fase (el peso de la portada) NO dependía sólo de la Fase 3. La portada la
+> dibujan `<img>` crudos, que eran la Fase 5 — así que hubo que hacer las dos
+> juntas. Con sólo la Fase 3, el catálogo bajaba pero la portada quedaba igual.
+>
+> **Endpoints que hubo que enriquecer** (el plan advertía que las URL de imagen
+> se arman en varios lados, y se quedó corto — eran cinco fuentes distintas):
+>
+> | Fuente | Alimenta |
+> |---|---|
+> | `/products/looks` (tarjeta + look) | catálogo, explorador |
+> | `/products/` (portada + variantes) | buscador, colecciones, CMS |
+> | `extras.preview_carousel` | el carrusel de cada tarjeta |
+> | `/collections/` y `/collections/{slug}` | portadas de colección |
+> | `/homepage/` (capas de escena) | los banners del estudio CMS |
+>
+> El carrusel fue el caso más engañoso: rota cada 3 segundos, así que bajaba
+> varios originales completos por tarjeta sin que se notara en una foto fija.
+
 ### Fase 4 — Caché de `/media`
 
 Hoy sólo hay `etag`/`last-modified`, así que el navegador **revalida en cada
@@ -307,6 +348,18 @@ Sólo los públicos, **no los del admin** (ese trabajo no lo ve la clienta):
 `WelcomeModal`, `InstantSearch`, `CartDrawer`.
 
 Pasarlos por `PremiumImage` para que hereden `srcset` y `lazy`.
+
+> ✅ **Hecho (2026-08-24)** para los que pesan: `CMSRenderer` (tarjeta de
+> producto, carrusel y capas de escena) y `FeaturedCollections`. Se les agregó
+> `srcSet` + `sizes` + `loading="lazy"` directamente, en vez de reescribirlos
+> con `PremiumImage`: el cambio es el mismo y no arrastra el estado de carga ni
+> el esqueleto de ese componente a bloques que no lo necesitan.
+>
+> **Sin hacer, a propósito:** `WelcomeModal` (su imagen es una URL externa de
+> Google, sin derivadas posibles), `InstantSearch` y `CartDrawer` (miniaturas
+> chicas, fuera de la carga inicial), y todos los `<img>` del panel de admin
+> —que son la mayoría— porque no los ve la clienta y C5 midió que el admin no
+> es el cuello de botella.
 
 ---
 

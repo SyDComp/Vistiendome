@@ -1,5 +1,5 @@
 import ProductCard from '../../../components/shared/ProductCard/ProductCard';
-import { getImageUrl } from '../../../lib/api/endpoints/images.api';
+import { getImageUrl, getSrcSet } from '../../../lib/api/endpoints/images.api';
 import { track } from '../../../lib/analytics';
 
 const ProductGrid = ({ products, loading, onProductClick, isModalOpen, onClearAll, activeFilters }) => {
@@ -31,7 +31,7 @@ const ProductGrid = ({ products, loading, onProductClick, isModalOpen, onClearAl
 
     return (
         <div className="catalog-grid">
-            {products.map(producto => {
+            {products.map((producto, index) => {
                 // Buscar variante coincidente si hay filtros aplicados
                 let bestVariant = null;
                 if (activeFilters?.specs && Object.keys(activeFilters.specs).length > 0 && producto.variants) {
@@ -47,20 +47,32 @@ const ProductGrid = ({ products, loading, onProductClick, isModalOpen, onClearAl
                     });
                 }
 
+                // Mapa URL -> srcset: se pasa aparte en vez de cambiar la forma
+                // del arreglo de imagenes, que el carrusel usa para comparar y
+                // reordenar por URL.
+                const srcSetPorUrl = {};
                 let images = producto.extras?.preview_carousel
-                    ? producto.extras.preview_carousel.map(img =>
-                        typeof img === 'string' ? getImageUrl(img) : getImageUrl(img.url)
-                    )
+                    ? producto.extras.preview_carousel.map(img => {
+                        const url = getImageUrl(typeof img === 'string' ? img : img.url);
+                        if (typeof img !== 'string' && img.srcset) {
+                            srcSetPorUrl[url] = getSrcSet(img.srcset);
+                        }
+                        return url;
+                    })
                     : [];
 
                 let mainImage = producto.image
                     ? getImageUrl(producto.image)
                     : (producto.images?.[0]?.url ? getImageUrl(producto.images[0].url) : null);
+                // Derivadas livianas de la foto principal. Si la variante filtrada
+                // aporta su propia foto (abajo), ese srcset ya no corresponde.
+                let mainSrcSet = getSrcSet(producto.image_srcset);
 
                 // Si encontramos una mejor variante y tiene imagen propia, la ponemos primera
                 if (bestVariant && bestVariant.image) {
                     const variantImageUrl = getImageUrl(bestVariant.image);
                     mainImage = variantImageUrl;
+                    mainSrcSet = '';
                     images = [variantImageUrl, ...images.filter(img => img !== variantImageUrl)];
                 }
 
@@ -88,6 +100,11 @@ const ProductGrid = ({ products, loading, onProductClick, isModalOpen, onClearAl
                             onSale={onSale && hasPrice}
                             pricePrefix={pricePrefix}
                             image={mainImage}
+                            imageSrcSet={mainSrcSet}
+                            srcSetPorUrl={srcSetPorUrl}
+                            // Las primeras filas se ven al entrar: diferirlas es
+                            // justo lo que la clienta percibe como lentitud.
+                            priority={index < 4}
                             images={images}
                             interval={producto.extras?.carousel_speed}
                             isPaused={isModalOpen}
