@@ -14,6 +14,7 @@ from ...models.cms import HomepageSection
 from ...models.settings import SiteSetting
 from ...api.deps import RequirePermiso
 from ...models.iam import CuentaAcceso
+from ...core.imagenes import generar_derivadas, eliminar_derivadas
 
 router = APIRouter()
 
@@ -75,7 +76,16 @@ async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_se
     try:
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-            
+
+        # Versiones livianas para no mandar la foto completa donde se ve chica.
+        # Si falla, la subida NO se cae: el original ya está guardado y es lo
+        # único irrecuperable. Las derivadas se pueden regenerar después.
+        derivadas = {}
+        try:
+            derivadas = generar_derivadas(file_path, UPLOAD_DIR)
+        except Exception as e:
+            print(f"No se pudieron generar derivadas de {unique_filename}: {e}")
+
         # Inserción Relacional en la Base de Datos
         asset = MediaAsset(
             filename=unique_filename,
@@ -83,7 +93,8 @@ async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_se
             alias=_auto_alias(file.filename) or None,
             url=f"/media/{unique_filename}",
             mime_type=file.content_type,
-            file_size=os.path.getsize(file_path)
+            file_size=os.path.getsize(file_path),
+            metadata_json={"derivadas": derivadas} if derivadas else {}
         )
         db.add(asset)
         db.commit()
@@ -237,7 +248,9 @@ async def delete_media_batch(ids: List[int], db: Session = Depends(get_session),
             db.delete(asset)
             db.commit()
 
-            # 2. Eliminar archivo físico
+            # 2. Eliminar archivo físico y sus versiones livianas, o quedarían
+            # ocupando disco sin que nada las referencie.
+            eliminar_derivadas(file_path, UPLOAD_DIR)
             if os.path.exists(file_path):
                 os.remove(file_path)
                 deleted_count += 1

@@ -220,6 +220,24 @@ lugar natural para que convivan los dos respaldos con la misma marca de tiempo.
 **Verificación:** subir una foto desde el panel y confirmar que aparecen los
 tres archivos y que `metadata_json` los lista.
 
+> ✅ **Hecho (2026-08-23).** `server/app/core/imagenes.py`, enganchado en
+> `upload_file` y en el borrado por lote (las derivadas se eliminan con su
+> original, sin quedar huérfanas).
+>
+> Medido sobre una foto real de 1640×2048 (570 KB):
+>
+> | Tamaño | Resultado | vs. original |
+> |---|---|---|
+> | `sm` 400 px | **18 KB** | **32× más liviana** |
+> | `md` 800 px | 55 KB | 10× |
+> | `lg` 1600 px | 216 KB | 2,6× |
+>
+> Casos borde probados: no agranda imágenes chicas (300×200 → ninguna
+> derivada; 600×400 → sólo `sm`), conserva transparencia en PNG, omite GIF
+> (podrían ser animados) y `eliminar_derivadas` borra lo que corresponde.
+> Verificado extremo a extremo por HTTP: subida → 3 archivos + registro en
+> `metadata_json` → borrado → 0 huérfanos.
+
 ### Fase 2 — Rellenar las 320 existentes
 
 Script en `server/scripts/` (no un endpoint: se corre una vez).
