@@ -186,6 +186,38 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                                         producto?.name
                                     )}
                                 </h1>
+                                {skuActual && (
+                                    <div className="detalle-producto-sku-container">
+                                        <div className={`product-sku-pill ${showBarcode ? 'has-barcode' : ''}`}>
+                                            <span className="sku-label">SKU</span>
+                                            <span className="sku-val">{formatSku(skuActual.sku)}</span>
+                                            <button
+                                                onClick={() => setShowBarcode(!showBarcode)}
+                                                className={`barcode-toggle-btn ${showBarcode ? 'active' : ''}`}
+                                                title="Ver código de barras"
+                                            >
+                                                <BarcodeIcon size={14} />
+                                            </button>
+                                        </div>
+
+                                        {showBarcode && (
+                                            <div className="barcode-display-container">
+                                                <div className="barcode-wrapper">
+                                                    <ReactBarcode
+                                                        value={skuActual.barcode || generateEAN13(skuActual.sku) || '000000'}
+                                                        format="CODE128"
+                                                        width={1.2}
+                                                        height={40}
+                                                        fontSize={12}
+                                                        displayValue={true}
+                                                        margin={0}
+                                                        background="transparent"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                                 <div className="price-tag-premium">
                                     {loading && !producto ? (
                                         <div className="skeleton-box" style={{ height: '36px', width: '120px', borderRadius: '8px' }}></div>
@@ -363,37 +395,7 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                                 </div>
                             </div>
 
-                            {/* El SKU es un código interno y el código de barras es
-                                herramienta de la tienda, no de quien compra: va al
-                                pie, en gris y sin recuadro. No es una especificación
-                                —esas son talla, color, cuello— ni merece el espacio
-                                que decide la compra. */}
-                            {skuActual && (
-                                <div className="sku-discreto">
-                                    <span className="sku-discreto__codigo">{formatSku(skuActual.sku)}</span>
-                                    <button
-                                        onClick={() => setShowBarcode(!showBarcode)}
-                                        className={`barcode-toggle-btn ${showBarcode ? 'active' : ''}`}
-                                        title="Ver código de barras"
-                                    >
-                                        <BarcodeIcon size={13} />
-                                    </button>
-                                    {showBarcode && (
-                                        <div className="sku-discreto__barcode">
-                                            <ReactBarcode
-                                                value={skuActual.barcode || generateEAN13(skuActual.sku) || '000000'}
-                                                format="CODE128"
-                                                width={1.1}
-                                                height={34}
-                                                fontSize={11}
-                                                displayValue={true}
-                                                margin={0}
-                                                background="transparent"
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                            
                         </div>
                     </div>
                 </main>

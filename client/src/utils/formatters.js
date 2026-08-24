@@ -27,10 +27,19 @@ export const normalizeConfig = (config) => {
  * Normaliza el dominio de una característica
  */
 export const normalizeDomain = (domain) => {
-    return (domain || []).map(item => ({
-        ...item,
-        value: item.value ? formatOpt(item.value) : item.value
-    }));
+    return (domain || []).map(item => {
+        // Las opciones del sistema (vOS) no se tocan: son inmutables y el
+        // servidor las compara por valor exacto. `formatOpt` las rompía —
+        // baja todo a minúsculas y sólo capitaliza la primera letra, así que
+        // "XS" salía como "Xs" y "XL" como "Xl". El backend entonces creía
+        // que se habían eliminado y devolvía 403, dejando TALLA imposible de
+        // guardar desde el panel.
+        if (item.is_system) return item;
+        return {
+            ...item,
+            value: item.value ? formatOpt(item.value) : item.value
+        };
+    });
 };
 
 export const formatRUT = (rut) => {
