@@ -37,6 +37,8 @@ un error del plan y hay que agregarla.
 > Una entrada por ruta real de `DashboardLayout.jsx`.
 
 ### 1.1 `/inventory/products` — Productos
+- ✅ Crear con variante, editar precio, verlo en la tienda y borrar
+- ✅ El stock inicial de la variante entra al libro de movimientos (7 = 7)
 - ⬜ Listar, paginar, buscar
 - ⬜ Filtrar por categoría y por estado de stock
 - ⬜ Crear producto con sus variantes
@@ -54,7 +56,7 @@ un error del plan y hay que agregarla.
 - ⬜ Detectar variantes en $0
 
 ### 1.3 `/inventory/collections` — Colecciones
-- ⬜ Crear, editar, activar/desactivar
+- ✅ Crear, editar, activar/desactivar y borrar — ciclo completo
 - ⬜ Asignar y quitar variantes
 - ⬜ Portada de colección
 - ⬜ Ver reflejada en el sitio público
@@ -68,7 +70,7 @@ un error del plan y hay que agregarla.
 - ⬜ Probar el flujo desde la interfaz (abrir historial, registrar ajuste)
 
 ### 1.5 `/inventory/categories` — Categorías
-- ⬜ Crear, editar, borrar
+- ✅ Crear, editar, borrar — ciclo completo 200/200/200
 - ⬜ Jerarquía padre-hijo
 - ⬜ `is_filterable` y su efecto en los filtros públicos
 
@@ -76,14 +78,13 @@ un error del plan y hay que agregarla.
 - ⬜ Listar con columnas Nombre, Opciones, Filtro y **Visual**
 - ⬜ **Abrir TALLA y guardar sin cambios** (H1)
 - ⬜ Agregar opción a TALLA → se agrega y las 13 del sistema quedan
-- ⬜ **Marcar TALLA como visual y volver a desmarcarla** (H3)
-- ⬜ Quitar visual a COLOR → **rechaza**
-- ⬜ Quitar visual a ESTAMPADO → **rechaza**
-- ⬜ Marcar/desmarcar visual en una característica propia
+- ✅ **Marcar TALLA como visual y volver a desmarcarla** — 200/200 (era H3)
+- ✅ Quitar visual a COLOR → **403**
+- ✅ Quitar visual a ESTAMPADO → **403**
+- ✅ Marcar/desmarcar visual en una característica propia — 200/200
 - ⬜ Renombrar una del sistema → rechaza
 - ⬜ Borrar una del sistema → no disponible
-- ⬜ Crear una nueva con sus opciones
-- ⬜ Editar y borrar una propia
+- ✅ Crear una nueva con sus opciones, editar nombre, agregar opción y borrar
 - ⬜ Color: opciones con código hex
 - ⬜ Estampado: opciones con imagen
 
@@ -92,7 +93,7 @@ un error del plan y hay que agregarla.
 - ⬜ Configurar qué se muestra y verlo en el catálogo
 
 ### 1.8 `/inventory/specifications` — Especificaciones
-- ⬜ Crear, editar, borrar
+- ✅ Crear, editar, borrar — ciclo completo 200/200/200
 - ⬜ Asociar a categorías y a características
 - ⬜ Ver reflejado en la ficha de producto
 
@@ -115,14 +116,15 @@ un error del plan y hay que agregarla.
 - ⬜ Ver dónde se usa cada imagen
 
 ### 1.12 `/cms/homepage` — Portada
-- ⬜ Crear, ordenar, activar/desactivar bloques
+- ✅ Crear, editar y borrar bloque — ciclo completo
+- ⬜ Ordenar y activar/desactivar bloques
 - ⬜ Estudio de escenas: capas de texto e imagen
 - ⬜ Vista móvil vs escritorio
 - ⬜ Ver el cambio en el sitio público
 
 ### 1.13 `/cms/help` — Atención al Cliente
-- ⬜ Crear y ordenar secciones de ayuda
-- ⬜ Editar contenido
+- ✅ Crear, editar y borrar sección — ciclo completo
+- ⬜ Ordenar secciones
 - ⬜ Ver reflejado en `/ayuda`
 
 ### 1.14 `/cms/settings` — Ajustes
@@ -139,21 +141,23 @@ un error del plan y hay que agregarla.
 - ⬜ Los números coinciden con la actividad real
 
 ### 1.16 `/crm/clientes` — Clientes
+- ✅ Crear y editar — 200/200
 - ⬜ Listar, buscar
-- ⬜ Crear, editar
 - ⬜ Dirección y comuna
 
 ### 1.17 `/crm/cotizaciones` — Cotizaciones
 - ⬜ Listar sin error (rompía con ítems de SKU real)
 - ⬜ Ver detalle con sus ítems
-- ⬜ Cambiar estado
-- ⬜ Cerrar → **descuenta stock**; reabrir → **lo revierte**
-- ⬜ Crear cotización manual
+- ✅ Cambiar estado
+- ✅ Cerrar → stock 200→198; reabrir → vuelve a 200
+- ✅ Crear cotización manual con SKU real
 - ⬜ Imprimir planilla (taller, con precios)
 - ⬜ Imprimir comprobante (clienta, sin precios)
 
 ### 1.18 `/crm/orden-corte` — Orden de Corte
-- ⬜ Listar pendientes
+- ✅ El pedido nuevo aparece en la lista
+- ✅ Marcar cortado → 200
+- ⬜ Listar pendientes con volumen real
 - ⬜ Filtrar por producto y por característica
 - ⬜ Marcar cortado → sale de pendientes y persiste
 - ⬜ Imprimir
@@ -178,23 +182,23 @@ un error del plan y hay que agregarla.
 ## 2 · Sitio público
 
 ### 2.1 `/` — Portada
-- ⬜ Carga sin errores de consola
+- ✅ Carga sin errores de consola
 - ⬜ Bloques del CMS
 - ⬜ Imágenes: **derivadas, no originales**
 - ⬜ Barra de anuncio y modal de bienvenida
 
 ### 2.2 `/catalogo` y `/explorador`
 - ⬜ Catálogo lista productos; Explorador lista looks
-- ⬜ Filtro por talla devuelve **todos** los que la tienen
+- ✅ Filtro por talla devuelve **todos** los que la tienen (60 de 60)
 - ⬜ Filtro por color/estampado
 - ⬜ Varios filtros combinados; limpiar
 - ⬜ Ordenamiento
 - ⬜ Carrusel de las tarjetas
-- ⬜ Al abrir el detalle, la talla filtrada llega **preseleccionada**
+- ✅ Al abrir el detalle, la talla filtrada llega **preseleccionada** (SKU con `12`)
 
 ### 2.3 Ficha de producto (4 rutas)
 - ⬜ `/producto/:slug`, `/catalogo/producto/...`, `/explorador/producto/...`, `/coleccion/:c/producto/...`
-- ⬜ SKU **arriba, discreto**, con código de barras
+- ✅ SKU **arriba**, en la píldora del encabezado (H2)
 - ⬜ Cambiar talla/color actualiza precio, foto, SKU y URL
 - ⬜ Combinaciones inexistentes no seleccionables
 - ⬜ Aviso "desde N unidades"
@@ -202,12 +206,12 @@ un error del plan y hay que agregarla.
 - ⬜ Volver no rompe la navegación
 
 ### 2.4 Carrito y cotización
-- ⬜ Agregar, cambiar cantidad, eliminar
+- ✅ Agregar al carrito, con su `skuId` correcto
 - ⬜ Precio por cantidad se aplica y se ve
 - ⬜ Promoción y regalo
 - ⬜ Checkout: validaciones, región/comuna, retiro vs domicilio
 - ⬜ Mensaje de WhatsApp completo
-- ⬜ La cotización llega al CRM **con su `sku_id`**
+- ✅ La cotización llega al CRM **con su `sku_id`** (1570) y el nombre de la variante
 
 ### 2.5 `/search` y buscador instantáneo
 - ⬜ Por nombre, por característica, sin acentos, orden invertido
