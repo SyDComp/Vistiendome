@@ -28,6 +28,7 @@ un error del plan y hay que agregarla.
 | H1 | Panel › Características | Guardar TALLA daba **403 "La opción de sistema 'XS' es inmutable"**. El formulario pasaba todas las opciones por `formatOpt`, que baja a minúsculas y capitaliza sólo la primera letra: `XS` → `Xs`, `XL` → `Xl`. El servidor las comparaba por valor exacto y creía que las habían borrado. `S` y `M` sobrevivían por tener una sola letra, lo que hacía el fallo más confuso. **Paola no podía editar TALLA.** | ✅ Corregido — las opciones del sistema ya no se re-normalizan |
 | H2 | Ficha de producto | El SKU terminó en un recuadro grande bajo "Especificaciones" y después al pie. Nunca se pidió moverlo: se pidió que dejara de ser grande. | ✅ Corregido — de vuelta en la píldora del encabezado |
 | H3 | Panel › Características | La regla de "visual" se implementó como *del sistema + visual = bloqueado*. Con eso, marcar **TALLA** como visual la dejaba **atrapada para siempre**. La regla real es: la clienta decide libremente, y las **únicas** excepciones son Color y Estampado. | ✅ Corregido — se identifica por `system_id`, no por `is_system` |
+| H4 | Panel › Bodega | **La pantalla completa estaba muerta.** Pedía `/admin/catalog/kardex`, `/kardex/{id}/history` y `POST /kardex/movement`, y **ninguno de los tres existía** en el backend (cero coincidencias de "kardex" en el Python). Sólo mostraba "Error al cargar saldos". No se podía ver stock, ni historial, ni registrar ingresos o mermas. | ✅ Corregido — los tres implementados sobre el libro de movimientos que ya existía |
 
 ---
 
@@ -59,9 +60,12 @@ un error del plan y hay que agregarla.
 - ⬜ Ver reflejada en el sitio público
 
 ### 1.4 `/inventory/bodega` — Bodega
-- ⬜ Cargar la vista
-- ⬜ Movimientos de stock (ingreso, ajuste)
-- ⬜ El stock mostrado coincide con el libro de movimientos
+- ✅ Cargar la vista — 1.049 variantes, sin error de consola (era H4)
+- ✅ Saldos: 323 variantes con stock, calculados desde el libro
+- ✅ Historial por variante, con tipo, cantidad y nota
+- ✅ Registrar ingreso y ajuste — 200 → 205 → 200, verificado en la base
+- ✅ Validaciones: cantidad 0 → 400, tipo inválido → 400, variante inexistente → 404
+- ⬜ Probar el flujo desde la interfaz (abrir historial, registrar ajuste)
 
 ### 1.5 `/inventory/categories` — Categorías
 - ⬜ Crear, editar, borrar

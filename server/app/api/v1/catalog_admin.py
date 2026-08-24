@@ -289,6 +289,126 @@ async def update_attribute(attr_id: int, attr_data: Dict[str, Any], db: Session 
     
     return db_attr
 
+# --- BODEGA (KARDEX) ---
+# La pantalla de Bodega pedía estos tres endpoints y NINGUNO existía: la
+# vista quedaba muerta con "Error al cargar saldos". El libro de movimientos
+# (StockMovement) ya era la autoridad del stock en todo el sistema; sólo
+# faltaba exponerlo.
+#
+# El front usa los tipos en minúscula ('receipt', 'sale', 'adjustment') y el
+# modelo los guarda en mayúscula, así que se traducen en el borde.
+
+_TIPOS_MOVIMIENTO = {
+    "receipt": MovementType.RECEIPT,
+    "sale": MovementType.SALE,
+    "adjustment": MovementType.ADJUSTMENT,
+    "return": MovementType.RETURN,
+    "reservation": MovementType.RESERVATION,
+}
+
+
+class MovimientoKardex(BaseModel):
+    sku_id: int
+    type: str
+    quantity: int
+    note: Optional[str] = None
+
+
+@router.get("/kardex")
+def kardex_saldos(db: Session = Depends(get_session)):
+    """Saldo actual de cada variante, sumando su libro de movimientos."""
+    saldos = dict(
+        db.exec(
+            select(StockMovement.sku_id, func.sum(StockMovement.quantity))
+            .group_by(StockMovement.sku_id)
+        ).all()
+    )
+    filas = []
+    for sku, product_name in db.exec(
+        select(SKU, Product.name).join(Product, SKU.product_id == Product.id)
+    ).all():
+        filas.append({
+            "sku_id": sku.id,
+            "sku": sku.sku,
+            "product_name": product_name,
+            "config": sku.config or {},
+            "current_stock": saldos.get(sku.id, 0) or 0,
+        })
+    return filas
+
+
+@router.get("/kardex/{sku_id}/history")
+def kardex_historial(sku_id: int, db: Session = Depends(get_session)):
+    """Movimientos de una variante, del más reciente al más antiguo."""
+    sku = db.get(SKU, sku_id)
+    if not sku:
+        raise HTTPException(status_code=404, detail="Variante no encontrada")
+
+    movimientos = db.exec(
+        select(StockMovement)
+        .where(StockMovement.sku_id == sku_id)
+        .order_by(StockMovement.created_at.desc(), StockMovement.id.desc())
+    ).all()
+
+    return {
+        "sku_id": sku.id,
+        "sku": sku.sku,
+        "product_name": sku.product.name if sku.product else "",
+        "config": sku.config or {},
+        "current_stock": sum(m.quantity for m in movimientos),
+        "history": [
+            {
+                "id": m.id,
+                # En minúscula: es lo que la pantalla compara para elegir icono
+                # y etiqueta. Si llegara en mayúscula, todo saldría como "Ajuste".
+                "type": m.type.value.lower() if hasattr(m.type, "value") else str(m.type).lower(),
+                "quantity": m.quantity,
+                "note": m.note,
+                "reference_id": m.reference_id,
+                "created_at": m.created_at.isoformat() if m.created_at else None,
+            }
+            for m in movimientos
+        ],
+    }
+
+
+@router.post("/kardex/movement")
+async def kardex_registrar_movimiento(data: MovimientoKardex, db: Session = Depends(get_session)):
+    """
+    Registra un movimiento manual (ingreso o ajuste).
+
+    La cantidad llega ya firmada desde la pantalla: positiva para ingreso,
+    negativa para merma. No se corrige acá para no contradecir lo que el
+    usuario vio al confirmar.
+    """
+    if not db.get(SKU, data.sku_id):
+        raise HTTPException(status_code=404, detail="Variante no encontrada")
+
+    tipo = _TIPOS_MOVIMIENTO.get((data.type or "").lower())
+    if tipo is None:
+        raise HTTPException(status_code=400, detail=f"Tipo de movimiento no válido: '{data.type}'")
+
+    if data.quantity == 0:
+        raise HTTPException(status_code=400, detail="La cantidad no puede ser cero")
+
+    movimiento = StockMovement(
+        sku_id=data.sku_id,
+        type=tipo,
+        quantity=data.quantity,
+        note=data.note,
+    )
+    db.add(movimiento)
+    db.commit()
+    db.refresh(movimiento)
+
+    await manager.broadcast({"type": "invalidate_cache", "resource": "products"})
+
+    total = db.exec(
+        select(func.sum(StockMovement.quantity)).where(StockMovement.sku_id == data.sku_id)
+    ).one() or 0
+    return {"ok": True, "id": movimiento.id, "current_stock": total}
+
+
 @router.delete("/attributes/{attr_id}")
 async def delete_attribute(attr_id: int, db: Session = Depends(get_session)):
     db_attr = db.get(Characteristic, attr_id)
