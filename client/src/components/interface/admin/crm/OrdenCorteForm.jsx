@@ -3,7 +3,7 @@ import { ArrowLeft, Save, Plus, Trash2, Package, Scissors } from 'lucide-react';
 import SectionHeader from '../../../ui/admin/SectionHeader';
 import { useNotification } from '../../../../context/NotificationContext';
 import { getPiezasPendientes, crearOrdenCorte } from '../../../../lib/api/endpoints';
-import { get } from '../../../../lib/api/client';
+import SelectorVariantes from './SelectorVariantes';
 
 /**
  * Arma una orden de corte.
@@ -23,9 +23,6 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
     const [cargando, setCargando] = useState(true);
     const [guardando, setGuardando] = useState(false);
 
-    // Buscador de variantes para las líneas de stock
-    const [variantes, setVariantes] = useState([]);
-    const [busqueda, setBusqueda] = useState('');
 
     useEffect(() => {
         getPiezasPendientes()
@@ -33,17 +30,6 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
             .catch(() => toast.error('No se pudieron cargar las piezas pendientes'))
             .finally(() => setCargando(false));
     }, []);
-
-    // Las variantes se piden sólo cuando se busca: son 1.049 y no hacen falta antes.
-    useEffect(() => {
-        if (busqueda.trim().length < 2) { setVariantes([]); return; }
-        const t = setTimeout(() => {
-            get(`/api/v1/admin/catalog/skus?page=1&page_size=25&search=${encodeURIComponent(busqueda)}`)
-                .then(d => setVariantes(d?.items || d?.data || d || []))
-                .catch(() => setVariantes([]));
-        }, 350);
-        return () => clearTimeout(t);
-    }, [busqueda]);
 
     const totalUnidades = useMemo(
         () => Object.values(elegidas).reduce((a, p) => a + p.cantidad, 0)
@@ -66,9 +52,10 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
             config: v.config || {},
             cantidad: 1,
         }]);
-        setBusqueda('');
-        setVariantes([]);
     };
+
+    // Para que el explorador marque lo que ya está en la orden
+    const yaElegidas = useMemo(() => new Set(paraStock.map(l => l.sku_id)), [paraStock]);
 
     const guardar = async () => {
         const items = [
@@ -147,23 +134,7 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
                     unidades <strong>entran al inventario</strong>.
                 </p>
 
-                <input
-                    type="text"
-                    className="oc-buscador"
-                    placeholder="Buscar variante por SKU o producto..."
-                    value={busqueda}
-                    onChange={e => setBusqueda(e.target.value)}
-                />
-                {variantes.length > 0 && (
-                    <div className="oc-resultados">
-                        {variantes.map(v => (
-                            <button key={v.id} type="button" className="oc-resultado" onClick={() => agregarStock(v)}>
-                                <Plus size={13} />
-                                <span>{v.product_name || v.producto} — {etiquetaConfig(v.config) || v.sku}</span>
-                            </button>
-                        ))}
-                    </div>
-                )}
+                <SelectorVariantes onElegir={agregarStock} yaElegidas={yaElegidas} />
 
                 {paraStock.length > 0 && (
                     <table className="oc-tabla">

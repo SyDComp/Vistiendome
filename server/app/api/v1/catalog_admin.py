@@ -12,6 +12,7 @@ from ...models.catalog import (
     StockMovement, MovementType, ColorSwatch
 )
 import string
+from ...core.imagenes import srcset_de
 
 def normalize_char(text: str) -> str:
     """Normaliza características a MAYÚSCULAS"""
@@ -976,18 +977,22 @@ def list_products_admin(
 
     # 3. Carga masiva de imágenes (Optimizado: 1 query para todas las imágenes principales/fallbacks)
     image_map = {}
+    srcset_map = {}
     if product_ids:
         # Obtenemos todos los links y URLs para estos productos
         all_links = db.exec(
-            select(ProductMediaLink.product_id, ProductMediaLink.is_main, MediaAsset.url)
+            select(ProductMediaLink.product_id, ProductMediaLink.is_main, MediaAsset)
             .join(MediaAsset, ProductMediaLink.media_asset_id == MediaAsset.id)
             .where(ProductMediaLink.product_id.in_(product_ids))
         ).all()
-        
+
         # Procesamos para elegir la mejor imagen (is_main primero, luego cualquiera)
-        for pid, is_main, url in all_links:
+        for pid, is_main, asset in all_links:
             if pid not in image_map or is_main:
-                image_map[pid] = url
+                image_map[pid] = asset.url
+                # Derivadas para las miniaturas del panel: sin esto, una grilla
+                # de tarjetas de 120 px baja los originales de ~500 KB cada uno.
+                srcset_map[pid] = srcset_de(asset)
 
     # 4. Construir resultados
     results = []
@@ -997,6 +1002,7 @@ def list_products_admin(
             "name": p.name,
             "slug": p.slug,
             "image": image_map.get(p.id),
+            "image_srcset": srcset_map.get(p.id, ""),
             "category": p.category.name if p.category else "Sin Categoría",
             "category_id": p.category_id,
             "price_min": price_ranges.get(p.id, [0,0])[0],
