@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 
 from .database import init_db
-from .api.v1 import auth, products, admin, websockets, media, catalog_admin, catalog_collections, collections, cms, settings as site_settings, crm, geo, analytics
+from .api.v1 import auth, products, admin, websockets, media, catalog_admin, catalog_collections, collections, cms, settings as site_settings, crm, geo, analytics, taller
 
 app = FastAPI(
     title="Vistiendomé API",
@@ -27,6 +27,7 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["Autenticación"])
 app.include_router(products.router, prefix="/api/v1/products", tags=["Catálogo Público"])
 app.include_router(collections.router, prefix="/api/v1/collections", tags=["Colecciones Públicas"])
 app.include_router(cms.router, prefix="/api/v1/homepage", tags=["CMS de Portada"])
+app.include_router(taller.router, prefix="/api/v1/ordenes-corte", tags=["Órdenes de Corte"])
 app.include_router(catalog_admin.router, prefix="/api/v1/admin/catalog", tags=["Gestión de Catálogo"])
 app.include_router(catalog_collections.router, prefix="/api/v1/admin/catalog", tags=["Colecciones"])
 app.include_router(admin.router, prefix="/api/v1/admin", tags=["Administración"])

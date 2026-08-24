@@ -4,11 +4,13 @@ from .cms import HomepageSection
 from .settings import SiteSetting
 from .crm import Cotizacion, CotizacionItem
 from .analytics import AnalyticsEvent
+from .taller import OrdenCorte, OrdenCorteItem, EstadoOrdenCorte
 
 # Para que SQLAlchemy/SQLModel detecte las tablas de la Nueva Arquitectura
 __all__ = [
     "Persona", "TipoPersona", "CuentaAcceso", "EstadoCuenta", "Permiso", "PoliticaAcceso",
     "UsuarioPermisosDirectos", "Category", "Product", "Characteristic",
     "ProductOption", "SKU", "HomepageSection", "SiteSetting",
-    "Cotizacion", "CotizacionItem", "AnalyticsEvent"
+    "Cotizacion", "CotizacionItem", "AnalyticsEvent",
+    "OrdenCorte", "OrdenCorteItem", "EstadoOrdenCorte"
 ]
