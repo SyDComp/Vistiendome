@@ -28,7 +28,7 @@ un error del plan y hay que agregarla.
 | H1 | Panel › Características | Guardar TALLA daba **403 "La opción de sistema 'XS' es inmutable"**. El formulario pasaba todas las opciones por `formatOpt`, que baja a minúsculas y capitaliza sólo la primera letra: `XS` → `Xs`, `XL` → `Xl`. El servidor las comparaba por valor exacto y creía que las habían borrado. `S` y `M` sobrevivían por tener una sola letra, lo que hacía el fallo más confuso. **Paola no podía editar TALLA.** | ✅ Corregido — las opciones del sistema ya no se re-normalizan |
 | H2 | Ficha de producto | El SKU terminó en un recuadro grande bajo "Especificaciones" y después al pie. Nunca se pidió moverlo: se pidió que dejara de ser grande. | ✅ Corregido — de vuelta en la píldora del encabezado |
 | H3 | Panel › Características | La regla de "visual" se implementó como *del sistema + visual = bloqueado*. Con eso, marcar **TALLA** como visual la dejaba **atrapada para siempre**. La regla real es: la clienta decide libremente, y las **únicas** excepciones son Color y Estampado. | ✅ Corregido — se identifica por `system_id`, no por `is_system` |
-| H4 | Panel › Bodega | **La pantalla completa estaba muerta.** Pedía `/admin/catalog/kardex`, `/kardex/{id}/history` y `POST /kardex/movement`, y **ninguno de los tres existía** en el backend (cero coincidencias de "kardex" en el Python). Sólo mostraba "Error al cargar saldos". No se podía ver stock, ni historial, ni registrar ingresos o mermas. | ✅ Corregido — los tres implementados sobre el libro de movimientos que ya existía |
+| H4 | Panel › Bodega | Pedía `/admin/catalog/kardex`, `/kardex/{id}/history` y `POST /kardex/movement`, y **ninguno existía** en el backend. Sólo mostraba "Error al cargar saldos". | ✅ Endpoints implementados sobre el libro de movimientos que ya existía. **⚠️ Ver nota abajo: la pantalla no está en el menú.** |
 
 ---
 
@@ -61,7 +61,15 @@ un error del plan y hay que agregarla.
 - ⬜ Portada de colección
 - ⬜ Ver reflejada en el sitio público
 
-### 1.4 `/inventory/bodega` — Bodega
+### 1.4 `/inventory/bodega` — Bodega ⚠️ pantalla parqueada
+
+> **No tiene entrada en el menú.** La ruta existe y el componente renderiza,
+> pero sólo se llega escribiendo la URL a mano. No forma parte de la navegación
+> de esta versión.
+>
+> Se implementaron sus tres endpoints (H4) porque faltaban y el libro de
+> movimientos ya existía, pero **es trabajo para algo que hoy nadie puede
+> abrir**. Queda como decisión: conectarla al menú o dejarla parqueada.
 - ✅ Cargar la vista — 1.049 variantes, sin error de consola (era H4)
 - ✅ Saldos: 323 variantes con stock, calculados desde el libro
 - ✅ Historial por variante, con tipo, cantidad y nota
