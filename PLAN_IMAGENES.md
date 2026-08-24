@@ -250,6 +250,32 @@ Script en `server/scripts/` (no un endpoint: se corre una vez).
 **Verificación:** contar archivos en `media/derivadas/` y comparar contra el
 número de `MediaAsset` con `metadata_json["derivadas"]` poblado.
 
+> ✅ **Hecho (2026-08-23).** `server/scripts/generar_derivadas.py`, con modo
+> `--simular` para ver qué haría antes de tocar nada.
+>
+> **73 de 73 procesadas, cero errores.** Contrato verificado: 219 archivos en
+> `media/derivadas/` (73 × 3 exacto), 73 registros con derivadas en la base, y
+> **0 referencias rotas** (toda derivada registrada existe en disco).
+> Idempotencia probada: la segunda corrida informó "ya estaban: 73" y sumó
+> 0 bytes.
+>
+> **Costo en disco:** media pasó de 78,4 MB a **95,8 MB (+17,4 MB)**. Barato
+> para lo que devuelve.
+>
+> | | Total | Promedio por foto |
+> |---|---|---|
+> | Originales | 35,6 MB | 500 KB |
+> | `sm` | 1,2 MB | **17 KB** |
+> | `md` | 3,7 MB | 52 KB |
+> | `lg` | 12,5 MB | — |
+>
+> **Proyección para la Fase 3:** la portada (18 fotos) pasaría de **~8,8 MB a
+> ~305 KB**, por debajo del objetivo de 1 MB con margen.
+>
+> Nota: sólo se procesaron las **73 imágenes registradas en la base**. Los 92
+> archivos de `media/products/` siguen sin registro y sin derivadas — nada los
+> referencia, generarlas sería gastar disco al pepe.
+
 ### Fase 3 — Servirlas (cliente)
 
 1. Que la API exponga las derivadas junto a `url`. **Ojo:** varios endpoints
