@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { Maximize2, ChevronRight, ChevronLeft } from 'lucide-react';
 import ProductLightbox from './ProductLightbox';
 import './ProductPreviewCarousel.css';
-import { getImageUrl } from '../../../lib/api/endpoints/index.js';
+import { getImageUrl, getSrcSet} from '../../../lib/api/endpoints/index.js';
 
 /**
  * ProductPreviewCarousel - Componente de galería premium aislado
@@ -54,6 +54,15 @@ const ProductPreviewCarousel = ({
             });
         };
 
+        // La API manda `image_srcsets` en paralelo a `image_urls`. Se indexa por
+        // URL porque la galería junta fotos de varias variantes y luego sólo
+        // conserva la URL. Sin esto se bajaban los originales: 17,6 MB por ficha.
+        const srcsetPorUrl = {};
+        skus.forEach(s => (s.image_urls || []).forEach((u, i) => {
+            const ss = s.image_srcsets?.[i];
+            if (ss) srcsetPorUrl[u] = ss;
+        }));
+
         // Primero recolectamos todo el universo de fotos
         // (Damos prioridad a la variante de la portada para que todas sus fotos vayan juntas al inicio)
         let sortedSkus = [...skus];
@@ -74,6 +83,7 @@ const ProductPreviewCarousel = ({
 
         // 2. Mapeo final con propiedad isFromActiveSku para UI
         return allUniqueImages.map(img => {
+            img.srcset = srcsetPorUrl[img.url] || '';
             let isActive = false;
             if (skuActual && skuActual.image_urls) {
                 const imgNorm = getFileName(img.url);
@@ -82,6 +92,9 @@ const ProductPreviewCarousel = ({
             return { ...img, isFromActiveSku: isActive };
         });
     }, [skus, coverImage, skuActual, coverFileName]);
+
+    // El srcset de una URL cualquiera, buscándolo en la lista ya construida.
+    const srcsetDe = (url) => finalImages.find(i => i.url === url)?.srcset || '';
 
     // 3. Fuente de Verdad para la Imagen a mostrar
     // Derivamos la URL directamente para evitar estados intermedios vacíos
@@ -244,10 +257,14 @@ const ProductPreviewCarousel = ({
                 onTouchEnd={handleTouchEnd}
             >
                 {displayUrl && (
-                    <img src={getImageUrl(displayUrl)} alt="" className="main-blur-bg" aria-hidden="true" />
+                    <img src={getImageUrl(displayUrl)} alt="" className="main-blur-bg" aria-hidden="true"
+                         srcSet={getSrcSet(srcsetDe(displayUrl)) || undefined}
+                         sizes="200px" decoding="async" />
                 )}
                 <img 
                     src={getImageUrl(displayUrl)} 
+                    srcSet={getSrcSet(srcsetDe(displayUrl)) || undefined}
+                    sizes="(max-width: 1023px) 100vw, 640px"
                     alt="Vista del producto" 
                     className="main-large-image"
                     style={{ 
@@ -282,6 +299,9 @@ const ProductPreviewCarousel = ({
                             >
                                 <img 
                                     src={getImageUrl(img.url)} 
+                                    srcSet={getSrcSet(img.srcset) || undefined}
+                                    sizes="90px"
+                                    loading="lazy"
                                     alt={`Previsualización ${idx + 1}`} 
                                     onError={(e) => {
                                         e.target.onerror = null; // Prevenir loop infinito

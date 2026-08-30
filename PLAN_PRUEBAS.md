@@ -38,6 +38,8 @@ un error del plan y hay que agregarla.
 
 | H9 | Panel › Clientes y Cotizaciones | **El botón Eliminar dejaba el panel en blanco.** `confirm()` recibe un TEXTO y devuelve una promesa, pero cuatro lugares lo llamaban con un objeto `{title, message, onConfirm}`. React intentaba renderizar ese objeto y reventaba (error #31). Dos eran preexistentes (Clientes, Cotizaciones) y dos míos, recién escritos copiando ese mismo patrón equivocado. | ✅ Corregido en los cuatro |
 
+| H10 | Ficha de producto | **La página pesaba 17,64 MB** — más del doble que la portada antes de optimizar, y es donde se decide la compra. 52 imágenes, **cero con srcset**, 33 originales descargados. Los peores: 17 muestras de color bajando fotos de 500 KB para círculos de 48 px, y la galería mostrando 633×1013 con archivos de 1641×2048. | ✅ Corregido — **17,64 MB → 0,57 MB** con todo cargado, y 0,02 MB al abrir |
+
 ---
 
 ## 1 · Panel de administración

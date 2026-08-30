@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { getProductBySlug, getImageUrl } from '../../../lib/api/endpoints/index.js';
+import { getProductBySlug, getImageUrl, getSrcSet } from '../../../lib/api/endpoints/index.js';
 import useMediaQuery from '../../../hooks/useMediaQuery.js';
 import useScrollLock from '../../../hooks/useScrollLock.js';
 
@@ -123,13 +123,19 @@ export const useProductDetail = (initialProduct) => {
 
             const opcionesConMetadata = opcionesAProcesar.map(opc => {
                 let thumb = null;
+                let thumbSrcSet = '';
                 if (isColor && opc !== VALOR_NA) {
                     const representativeSku = skusNormalizados.find(
                         s => s.config[key] === opc && s.image_urls?.length > 0
                     );
-                    if (representativeSku) thumb = getImageUrl(representativeSku.image_urls[0]);
+                    if (representativeSku) {
+                        thumb = getImageUrl(representativeSku.image_urls[0]);
+                        // Una muestra de color mide ~40 px: sin esto bajaba la
+                        // foto completa de ~500 KB, 17 veces en la misma ficha.
+                        thumbSrcSet = getSrcSet(representativeSku.image_srcsets?.[0] || '');
+                    }
                 }
-                return { valor: opc, thumb };
+                return { valor: opc, thumb, thumbSrcSet };
             }).sort((a, b) => {
                 if (a.valor === VALOR_NA) return 1;
                 if (b.valor === VALOR_NA) return -1;

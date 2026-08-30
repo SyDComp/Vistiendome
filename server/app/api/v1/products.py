@@ -470,7 +470,10 @@ def get_product_detail(
             "on_sale": on_sale,
             "sale_ends": sale_ends.isoformat() if sale_ends else None,
             "stock": stock,
-            "image_urls": [m.url for m in s.media_assets]
+            "image_urls": [m.url for m in s.media_assets],
+            # Derivadas por cada foto de la variante. La galería mostraba
+            # 633x1013 y bajaba 1641x2048: 17,6 MB en la ficha de un producto.
+            "image_srcsets": [srcset_de(m) for m in s.media_assets],
         })
 
     # Encontrar imagen principal (portada)
@@ -491,6 +494,7 @@ def get_product_detail(
         "specs": product.specs,
         "category": {"name": product.category.name, "slug": product.category.slug},
         "image": main_img,
-        "images": [{"url": m.url, "config_match": {}, "is_main": (i==0), "ui_config": {}} for i, m in enumerate(product.media_assets)],
+        "image_srcset": srcset_de(product.media_assets[0]) if product.media_assets else "",
+        "images": [{"url": m.url, "srcset": srcset_de(m), "config_match": {}, "is_main": (i == 0), "ui_config": {}} for i, m in enumerate(product.media_assets)],
         "skus": skus_data
     }

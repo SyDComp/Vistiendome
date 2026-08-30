@@ -111,7 +111,9 @@ const VariantSelector = ({
                                         {isVisual ? (
                                             <div className="swatch-container">
                                                 {opcObj.thumb ? (
-                                                    <img src={opcObj.thumb} alt={opc} className="swatch-img" />
+                                                    <img src={opcObj.thumb} alt={opc} className="swatch-img"
+                                                         srcSet={opcObj.thumbSrcSet || undefined}
+                                                         sizes="48px" loading="lazy" decoding="async" />
                                                 ) : (
                                                     <div style={{ 
                                                         width: '100%', 
