@@ -58,6 +58,11 @@ const WelcomeModal = () => {
     const location = useLocation();
     const cfg = settings?.welcome_modal;
     const [open, setOpen] = useState(false);
+    // Si la imagen no carga, el modal va sin imagen y ya. Un icono de foto rota
+    // es lo primero que ve una visitante nueva, y se lee como sitio abandonado.
+    // Pasó de verdad: la URL configurada apuntaba al perfil de Google Business,
+    // que entrega enlaces temporales y ese ya había expirado.
+    const [imagenFallo, setImagenFallo] = useState(false);
 
     // Un modal de bienvenida sobre una ficha de producto interrumpe justo a la
     // clienta que llegó por un link directo (el canal principal es WhatsApp).
@@ -100,6 +105,7 @@ const WelcomeModal = () => {
 
     const imageSrc = cfg.image_url ? getImageUrl(cfg.image_url) : null;
 
+
     const bg = cfg.bg_color || '#ffffff';
     const darkBg = isDarkColor(bg);
     // La X se adapta al fondo del modal para mantener contraste
@@ -122,7 +128,7 @@ const WelcomeModal = () => {
                     <X size={20} />
                 </button>
 
-                {imageSrc && (
+                {imageSrc && !imagenFallo && (
                     <div 
                         className="welcome-modal__image"
                         style={{
@@ -136,6 +142,7 @@ const WelcomeModal = () => {
                         <img 
                             src={imageSrc} 
                             alt={cfg.title || 'Bienvenida'}
+                            onError={() => setImagenFallo(true)}
                             style={{
                                 objectFit: imageFit,
                                 objectPosition: imagePos,
