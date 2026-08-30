@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import useSrcSet from '../../hooks/useSrcSet.js';
 
 /**
  * @param srcSet   Versiones livianas que manda el servidor ("url 400w, url 800w, ...").
- *                 Vacío = se usa `src` tal cual, así que las fotos sin derivadas
- *                 siguen funcionando igual.
+ *                 Si no se pasa, se buscan solas por la URL: no hay que
+ *                 acordarse. Sin derivadas se usa `src` tal cual, así que las
+ *                 fotos que no las tengan siguen funcionando igual.
  * @param sizes    Cuánto espacio ocupará la imagen, para que el navegador elija
  *                 bien ANTES de conocer el layout. Sin esto asume el ancho de la
  *                 pantalla completa y baja una versión más grande de la necesaria.
@@ -27,6 +29,11 @@ const PremiumImage = ({
     const [hasError, setHasError] = useState(false);
     const imgRef = useRef(null);
 
+    // Si el que llama no pasó srcSet, se resuelve por la URL. `listo` en false
+    // significa que todavía no se sabe: pintar el <img> ahí manda al navegador
+    // a buscar el original, así que se deja el esqueleto un instante más.
+    const { srcSet: srcSetResuelto, listo } = useSrcSet(src, srcSet);
+
     // Resetear el estado si cambia el src (para galerías)
     useEffect(() => {
         setIsLoaded(false);
@@ -38,7 +45,7 @@ const PremiumImage = ({
         }
         // También depende de srcSet: si cambian las derivadas sin cambiar el
         // src, la imagen se recarga y el esqueleto tiene que volver a aparecer.
-    }, [src, srcSet]);
+    }, [src, srcSetResuelto]);
 
     // Si no hay src o hubo un error al cargar
     if (!src || hasError) {
@@ -88,11 +95,11 @@ const PremiumImage = ({
             )}
             
             {/* Imagen Real (Oculta hasta cargar, fade-in suave) */}
-            <img
+            {listo && <img
                 ref={imgRef}
                 src={src}
-                srcSet={srcSet || undefined}
-                sizes={srcSet ? sizes : undefined}
+                srcSet={srcSetResuelto || undefined}
+                sizes={srcSetResuelto ? sizes : undefined}
                 loading={priority ? 'eager' : 'lazy'}
                 decoding="async"
                 fetchPriority={priority ? 'high' : undefined}
@@ -111,7 +118,7 @@ const PremiumImage = ({
                     display: 'block'
                 }}
                 {...props}
-            />
+            />}
         </div>
     );
 };

@@ -14,7 +14,7 @@ from ...models.cms import HomepageSection
 from ...models.settings import SiteSetting
 from ...api.deps import RequirePermiso
 from ...models.iam import CuentaAcceso
-from ...core.imagenes import generar_derivadas, eliminar_derivadas
+from ...core.imagenes import generar_derivadas, eliminar_derivadas, srcset_de
 
 router = APIRouter()
 
@@ -109,6 +109,27 @@ async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_se
         "original_name": asset.original_name,
         "alias": _display_alias(asset)
     }
+
+@router.get("/srcsets")
+def mapa_srcsets(db: Session = Depends(get_session)):
+    """
+    Un solo mapa `url -> srcset` con TODAS las imágenes de la biblioteca.
+
+    Existe porque el problema no era una pantalla: cada vista nueva que muestra
+    fotos tiene que acordarse de pedir las derivadas, y ya se olvidó cuatro
+    veces (galería, tarjetas del panel, selector de variantes, ficha de
+    producto). Cada olvido son megabytes.
+
+    Con esto el cliente lo pide una vez y cualquier imagen puede resolver sus
+    derivadas por su URL, sin que el endpoint que la sirvió se haya acordado de
+    nada. El precio es una petición chica y cacheada; la alternativa era tocar
+    trece serializadores y volver a olvidarse en el siguiente.
+
+    Sólo URLs y anchos: ni nombres de archivo, ni alias, ni nada de la biblioteca.
+    """
+    assets = db.exec(select(MediaAsset)).all()
+    return {a.url: srcset_de(a) for a in assets if a.url and srcset_de(a)}
+
 
 @router.get("/")
 def list_media(db: Session = Depends(get_session)):

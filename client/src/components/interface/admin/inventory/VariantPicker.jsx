@@ -4,6 +4,7 @@ import Button from '../../../ui/Button';
 import Accordion from '../../../ui/Accordion';
 import LibraryPicker from './LibraryPicker';
 import MediaGallery from '../media/MediaGallery';
+import Imagen from '../../../ui/Imagen';
 import { generateEAN13 } from '../../../../features/productDetail/utils/skuUtils';
 
 // Calcula qué filas (índices) coinciden con los filtros rápidos activos.
@@ -548,7 +549,7 @@ const VariantPicker = ({
                                         <div className="variant-picker-photos-wrap">
                                             {row.media_assets?.map((asset, iIdx) => (
                                                 <div key={asset.id || iIdx} className="variant-picker-photo-thumb">
-                                                    <img src={`${asset.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    <Imagen url={asset.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} sizes="120px" alt="" />
                                                 </div>
                                             ))}
                                             {(!row.media_assets || row.media_assets?.length === 0) && <div className="variant-picker-photo-empty" />}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Plus, Trash2, Settings2, Save, ArrowLeft, 
+import {
+    Plus, Trash2, Settings2, Save, ArrowLeft,
     Hash, Type, LayoutList, Layers, GripVertical, ChevronRight, Settings, Lock, Image
 } from 'lucide-react';
 import Button from '../../../ui/Button';
@@ -9,6 +9,7 @@ import { useNotification } from '../../../../context/NotificationContext';
 import Badge from '../../../ui/Badge';
 import { formatChar, normalizeDomain } from '../../../../utils/formatters';
 import MediaGallery from '../media/MediaGallery';
+import Imagen from '../../../ui/Imagen';
 
 const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false }) => {
     const { prompt } = useNotification();
@@ -230,7 +231,7 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                                     <div className="char-form-row-content" style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
                                         <div style={{ width: '38px', height: '38px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                             {row.image_url ? (
-                                                <img src={row.image_url} alt="patrón" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                <Imagen url={row.image_url} alt="patrón" style={{ width: '100%', height: '100%', objectFit: 'cover' }} sizes="40px" />
                                             ) : (
                                                 <Image size={18} color="#94a3b8" />
                                             )}

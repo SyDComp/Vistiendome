@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCollections, getImageUrl } from '../../../lib/api/endpoints';
+import { getCollections } from '../../../lib/api/endpoints';
 import { Sparkles, Layers, Flame, Star, Shuffle, ArrowRight } from 'lucide-react';
+import Imagen from '../../ui/Imagen';
 
 const SMART_COLLECTIONS = [
     {
@@ -73,14 +74,14 @@ const ColeccionesIndex = () => {
                         </div>
                         <div className="collections-grid user-collections">
                             {collections.map(c => (
-                                <div 
-                                    key={c.id} 
+                                <div
+                                    key={c.id}
                                     className="collection-card user-card"
                                     onClick={() => navigate(`/coleccion/${c.slug}`)}
                                 >
                                     <div className="card-image-box">
                                         {c.image_url ? (
-                                            <img src={getImageUrl(c.image_url)} alt={c.name} />
+                                            <Imagen url={c.image_url} alt={c.name} sizes="(max-width: 768px) 100vw, 400px" />
                                         ) : (
                                             <div className="no-image-placeholder">
                                                 <Layers size={32} color="#cbd5e1" />

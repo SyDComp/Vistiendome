@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Sparkles, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import Imagen from '../../../ui/Imagen';
 
 /**
  * MediaLightbox Component (Presentational)
@@ -73,10 +74,11 @@ const MediaLightbox = ({
                 <button className="media-gallery-lightbox-arrow-left" onClick={onPrev}>
                     <ChevronLeft size={64} />
                 </button>
-                <img 
-                    className="media-gallery-lightbox-img" 
-                    src={`${img.url}`} 
-                    alt={img.filename || ''} 
+                <Imagen
+                    className="media-gallery-lightbox-img"
+                    url={img.url}
+                    alt={img.filename || ''}
+                    sizes="90vw"
                 />
                 <button className="media-gallery-lightbox-arrow-right" onClick={onNext}>
                     <ChevronRight size={64} />

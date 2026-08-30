@@ -3,6 +3,7 @@ import { X, ShoppingBag, Trash2, Plus, Minus, ArrowRight, Gift } from 'lucide-re
 import { useCart } from '../../../context/CartContext';
 import { formatCurrency } from '../../../utils/cartUtils';
 import { useScrollLock } from '../../../hooks/useScrollLock';
+import Imagen from '../../ui/Imagen';
 import CheckoutForm from './CheckoutForm';
 import './CartDrawer.css';
 
@@ -52,7 +53,7 @@ const CartDrawer = () => {
                             {cart.map((item) => (
                                 <div key={`${item.productId}-${item.sku}`} className="cart-item-card">
                                     <div className="item-image-wrapper">
-                                        <img src={item.image} alt={item.name} />
+                                        <Imagen url={item.image} alt={item.name} sizes="80px" />
                                     </div>
                                     <div className="item-details">
                                         <div className="item-header-row">

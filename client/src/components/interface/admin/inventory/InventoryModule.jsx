@@ -13,12 +13,12 @@ import FilterBar from '../../../ui/admin/FilterBar';
 import DataTable from '../../../ui/admin/DataTable';
 import Pagination from '../../../ui/admin/Pagination';
 import RowActions from '../../../ui/admin/RowActions';
+import Imagen from '../../../ui/Imagen';
 import DetailDrawer from '../../../ui/admin/DetailDrawer';
 import QuickPeek from '../../../ui/admin/QuickPeek';
 import { useNotification } from '../../../../context/NotificationContext';
 import { useLocation } from 'react-router-dom';
 import { Package, Eye, Barcode as BarcodeIcon, AlertTriangle } from 'lucide-react';
-import { getImageUrl } from '../../../../lib/api/endpoints';
 import ReactBarcode from 'react-barcode';
 
 const API_BASE = `/api/v1/admin/catalog`;
@@ -91,7 +91,7 @@ const PRODUCT_COLUMNS = [
                 className="admin-product-thumb"
             >
                 {v ? (
-                    <img src={getImageUrl(v)} alt="" />
+                    <Imagen url={v} sizes="70px" alt="" />
                 ) : (
                     <div className="admin-product-thumb-placeholder">
                         <Package size={22} />
@@ -143,7 +143,7 @@ const VARIANT_COLUMNS = [
                 className="admin-product-thumb"
             >
                 {v ? (
-                    <img src={getImageUrl(v)} alt="" />
+                    <Imagen url={v} sizes="70px" alt="" />
                 ) : (
                     <div className="admin-product-thumb-placeholder">
                         <Package size={22} />

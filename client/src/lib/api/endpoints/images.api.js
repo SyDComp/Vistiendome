@@ -1,4 +1,6 @@
-import { API_BASE_URL } from '../../constants/api.js';
+import { API_BASE_URL, API_ENDPOINTS } from '../../constants/api.js';
+import { get } from '../client.js';
+import { cachedFetch } from '../cache.js';
 
 /**
  * Construye una URL completa para una imagen.
@@ -34,3 +36,24 @@ export const getSrcSet = (srcset) => {
         .filter(Boolean)
         .join(', ');
 };
+
+/**
+ * Mapa `url -> srcset` de toda la biblioteca de medios, resuelto a URLs
+ * completas.
+ *
+ * Se pide una sola vez: `cachedFetch` deduplica las peticiones en vuelo, así
+ * que veinte imágenes montándose a la vez producen una petición, no veinte.
+ *
+ * Existe para que ninguna pantalla nueva tenga que acordarse de pedir las
+ * derivadas. Ver el endpoint `/media/srcsets` para el porqué.
+ */
+export const getMapaSrcsets = () =>
+    cachedFetch('media:srcsets', async () => {
+        const crudo = await get(`${API_ENDPOINTS.MEDIA}/srcsets`);
+        const mapa = {};
+        Object.entries(crudo || {}).forEach(([url, srcset]) => {
+            mapa[url] = getSrcSet(srcset);
+        });
+        return mapa;
+    }, 10 * 60 * 1000); // 10 min: las derivadas de una foto no cambian nunca;
+                        // lo único que cambia es que aparezcan fotos nuevas.

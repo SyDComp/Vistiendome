@@ -5,6 +5,7 @@ import Button from '../Button';
 import MediaGallery from '../../interface/admin/media/MediaGallery';
 import LibraryPicker from '../../interface/admin/inventory/LibraryPicker';
 import Input from '../Input';
+import Imagen from '../Imagen';
 import { useScrollLock } from '../../../hooks/useScrollLock';
 import { useSettings } from '../../../context/SettingsContext';
 import { getShippingColor } from '../../../utils/shippingColors';
@@ -1523,7 +1524,7 @@ const DetailDrawer = ({
                                                                     margin: '0 auto'
                                                                 }}>
                                                                     {opt.image_url ? (
-                                                                        <img src={opt.image_url} alt={val} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                                        <Imagen url={opt.image_url} alt={val} style={{ width: '100%', height: '100%', objectFit: 'cover' }} sizes="40px" />
                                                                     ) : (
                                                                         <ImageIcon size={20} color="#94a3b8" />
                                                                     )}
@@ -1676,11 +1677,11 @@ const DetailDrawer = ({
                                             {(section.currentAssets || []).map((asset, i) => {
                                                 const isMain = i === 0;
                                                 return (
-                                                    <div key={asset.id || i} className="detail-drawer-img-wrapper" style={{ 
+                                                    <div key={asset.id || i} className="detail-drawer-img-wrapper" style={{
                                                         border: isMain ? '2.5px solid #8f0653' : '1px solid #e2e8f0',
                                                         boxShadow: isMain ? '0 4px 12px rgba(143,6,83,0.15)' : 'none'
                                                     }}>
-                                                        <img src={`${asset.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                        <Imagen url={asset.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} sizes="120px" alt="" />
                                                         
                                                         {/* Botón Eliminar */}
                                                         <button 

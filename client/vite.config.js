@@ -9,6 +9,16 @@ const apiTarget = process.env.VITE_API_BASE || 'http://127.0.0.1:8000'
 const wsTarget = apiTarget.replace(/^http/, 'ws')
 
 // https://vite.dev/config/
+// Un solo proxy para `dev` y `preview`. Sin esto, `vite preview` (la build de
+// producción) no alcanza al backend, y medir sobre build es justamente donde
+// las mediciones son ciertas: en `dev`, StrictMode duplica los efectos.
+const proxy = {
+  '/api': { target: apiTarget, changeOrigin: true },
+  '/ws': { target: wsTarget, ws: true },
+  '/static': { target: apiTarget, changeOrigin: true },
+  '/media': { target: apiTarget, changeOrigin: true },
+}
+
 export default defineConfig({
   plugins: [
     react(),
@@ -18,26 +28,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
   },
-  server: {
-    proxy: {
-      '/api': {
-        target: apiTarget,
-        changeOrigin: true
-      },
-      '/ws': {
-        target: wsTarget,
-        ws: true
-      },
-      '/static': {
-        target: apiTarget,
-        changeOrigin: true
-      },
-      '/media': {
-        target: apiTarget,
-        changeOrigin: true
-      }
-    }
-  }
+  server: { proxy },
+  preview: { proxy },
 })
 
 

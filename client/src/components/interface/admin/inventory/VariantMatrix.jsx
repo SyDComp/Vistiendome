@@ -1,5 +1,6 @@
 import React from 'react';
 import { Trash2, AlertCircle, Image as ImageIcon, Plus, Tag, Box } from 'lucide-react';
+import Imagen from '../../../ui/Imagen';
 
 /**
  * VariantList — Visualización de Combinaciones en formato de tarjetas.
@@ -111,7 +112,7 @@ const VariantMatrix = ({ variants, onUpdate, onDelete, productImages = [], baseP
                             <div className="vmatrix-photos-wrapper">
                                 {(v.media_assets || []).map((asset, iIndex) => (
                                     <div key={asset.id || iIndex} className="vmatrix-photo-thumb">
-                                        <img src={`${asset.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <Imagen url={asset.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} sizes="120px" alt="" />
                                     </div>
                                 ))}
                                 
@@ -131,14 +132,14 @@ const VariantMatrix = ({ variants, onUpdate, onDelete, productImages = [], baseP
                                         {productImages.map((img, iIdx) => {
                                             const assetId = img.media_asset_id || img.id;
                                             const isSelected = v.media_assets?.some(a => a.id === assetId);
-                                            
+
                                             return (
-                                                <div 
-                                                    key={iIdx} 
+                                                <div
+                                                    key={iIdx}
                                                     onClick={() => handleToggleImageToVariant(idx, { id: assetId, url: img.url })}
                                                     className={`vmatrix-picker-thumb ${isSelected ? 'selected' : ''}`}
                                                 >
-                                                    <img src={`${img.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    <Imagen url={img.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} sizes="120px" alt="" />
                                                 </div>
                                             );
                                         })}

@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
     COLLECTIONS: '/api/v1/collections',
     SETTINGS: '/api/v1/settings',
     ADMIN_CATALOG: '/api/v1/admin/catalog',
+    MEDIA: '/api/v1/media',
 };
 
 export const WS_URL = (() => {

@@ -40,6 +40,10 @@ un error del plan y hay que agregarla.
 
 | H10 | Ficha de producto | **La página pesaba 17,64 MB** — más del doble que la portada antes de optimizar, y es donde se decide la compra. 52 imágenes, **cero con srcset**, 33 originales descargados. Los peores: 17 muestras de color bajando fotos de 500 KB para círculos de 48 px, y la galería mostrando 633×1013 con archivos de 1641×2048. | ✅ Corregido — **17,64 MB → 0,57 MB** con todo cargado, y 0,02 MB al abrir |
 
+| H11 | Detalle de colección `/coleccion/{slug}` | Bajaba **7 originales, 2,70 MB**, mostrando 383×511. Lo llamativo: **el endpoint ya mandaba el `image_srcset`** — el componente sencillamente nunca lo leyó. Quinta repetición de la misma falla. | ✅ Corregido — **2,70 MB → 0,181 MB**, y ahora cargan 11 imágenes en vez de 7 |
+| H12 | Portada › modal de bienvenida | La imagen del modal **está rota** (`naturalWidth = 0`). Apunta a `lh3.googleusercontent.com/gps-cs-s/...`, una URL temporal del perfil de Google Business que ya expiró. Es lo primero que ve una visitante nueva. | ⚠️ **No corregido a propósito**: es configuración de Paola (`welcome_modal.image_url`), no código. Se arregla subiendo la foto a la galería y eligiéndola ahí |
+| H13 | Tallas — mayúsculas inconsistentes | El sistema guarda `XS, S, M, L, XL` en mayúscula y `2xl, 3xl, 4xl, 5xl, 6xl, 7xl` en minúscula. Son 81 variantes de cada una, y esos valores son los que se muestran tal cual en el selector de talla: la clienta ve "XL" y justo debajo "2xl". | ⚠️ **No corregido a propósito**: normalizarlo escribe sobre datos reales (config de 486 variantes + dominio de la característica del sistema). Requiere tu visto bueno |
+
 ---
 
 ## 1 · Panel de administración
@@ -206,11 +210,13 @@ un error del plan y hay que agregarla.
 ### 2.1 `/` — Portada
 - ✅ Carga sin errores de consola
 - ⬜ Bloques del CMS
-- ⬜ Imágenes: **derivadas, no originales**
+- ✅ Imágenes: **13 cargadas, 13 con srcset, 0 originales, 0,718 MB**
 - ⬜ Barra de anuncio y modal de bienvenida
 
 ### 2.2 `/catalogo` y `/explorador`
-- ⬜ Catálogo lista productos; Explorador lista looks
+- ✅ Catálogo lista 4 productos; Explorador, 60 looks (API + navegador)
+- ✅ Catálogo: 4 imágenes, 4 con srcset, 0 originales, **0,095 MB**
+- ✅ Colecciones (`/colecciones` y `/coleccion/{slug}`): srcset en las 13, 0 originales
 - ✅ Filtro por talla devuelve **todos** los que la tienen (60 de 60)
 - ⬜ Filtro por color/estampado
 - ⬜ Varios filtros combinados; limpiar

@@ -11,7 +11,7 @@ import DetailDrawer from '../../../ui/admin/DetailDrawer';
 import Accordion from '../../../ui/Accordion';
 import FilterBar from '../../../ui/admin/FilterBar';
 import { Save, ArrowLeft, Layers, Plus, Trash2, Search, Settings2, Folder, X, ChevronRight, Hash, Sparkles, Check, Package, Image as ImageIcon, Eye } from 'lucide-react';
-import { getImageUrl } from '../../../../lib/api/endpoints';
+import Imagen from '../../../ui/Imagen';
 import QuickPeek from '../../../ui/admin/QuickPeek';
 
 const API_BASE = `/api/v1/admin/catalog`;
@@ -190,12 +190,12 @@ const CollectionManager = () => {
                                 {/* Portada de Colección */}
                                 <div className="coll-manager-cover-col">
                                     <label className="coll-manager-label-upper">Portada de Colección</label>
-                                    <div 
+                                    <div
                                         onClick={() => setShowCoverGallery(true)}
                                         className="coll-manager-cover-box"
                                     >
                                         {formData.image_url ? (
-                                            <img src={`${formData.image_url}`} className="coll-manager-cover-img" />
+                                            <Imagen url={formData.image_url} className="coll-manager-cover-img" sizes="200px" alt="" />
                                         ) : (
                                             <div className="coll-manager-cover-placeholder">
                                                 <ImageIcon size={48} color="#cbd5e1" />
@@ -223,13 +223,13 @@ const CollectionManager = () => {
                                                     }
                                                     
                                                     return uniqueImages.map((sku, i) => (
-                                                        <button 
+                                                        <button
                                                             key={i}
                                                             onClick={() => setFormData(p => ({ ...p, image_url: sku.image || sku.image_url }))}
                                                             className="coll-manager-rec-btn"
                                                             style={{ border: formData.image_url === (sku.image || sku.image_url) ? '2px solid #8f0653' : '1px solid #e2e8f0', opacity: formData.image_url === (sku.image || sku.image_url) ? 1 : 0.7 }}
                                                         >
-                                                            <img src={`${sku.image || sku.image_url}`} className="coll-manager-cover-img" />
+                                                            <Imagen url={sku.image || sku.image_url} className="coll-manager-cover-img" sizes="120px" alt="" />
                                                         </button>
                                                     ));
                                                 })()}
@@ -278,7 +278,7 @@ const CollectionManager = () => {
                                         <div key={sku.id} className="coll-manager-sku-item">
                                             <div className="coll-manager-sku-img-box">
                                                 {sku.image_url ? (
-                                                    <img src={`${sku.image_url}`} className="coll-manager-cover-img" />
+                                                    <Imagen url={sku.image_url} className="coll-manager-cover-img" sizes="120px" alt="" />
                                                 ) : <Package size={24} color="#cbd5e1" style={{ margin: '12px' }} />}
                                             </div>
                                             <div className="coll-manager-sku-info">
@@ -373,9 +373,11 @@ const CollectionManager = () => {
                                     onClick={(e) => { e.stopPropagation(); onPeek(row); }}
                                 >
                                     {row.image_url ? (
-                                        <img 
-                                            src={getImageUrl(row.image_url)} 
+                                        <Imagen
+                                            url={row.image_url}
                                             className="coll-manager-dt-img"
+                                            sizes="70px"
+                                            alt=""
                                         />
                                     ) : (
                                         <ImageIcon size={22} style={{ margin: '13px', color: '#94a3b8' }} />

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, Loader2 } from 'lucide-react';
-import { getProducts, getImageUrl } from '../../../lib/api/endpoints';
+import { getProducts } from '../../../lib/api/endpoints';
 import { searchProducts } from '../../../features/catalog/utils/productSearch';
+import Imagen from '../../ui/Imagen';
 
 const InstantSearch = ({ isMobile = false, onResultClick }) => {
     const navigate = useNavigate();
@@ -91,13 +92,13 @@ const InstantSearch = ({ isMobile = false, onResultClick }) => {
                         <div className="results-list">
                             <div className="results-header">Resultados Sugeridos</div>
                             {results.map(result => (
-                                <div 
-                                    key={result.id} 
+                                <div
+                                    key={result.id}
                                     className="result-item"
                                     onClick={() => handleResultSelect(result)}
                                 >
                                     <div className="result-img">
-                                        <img src={getImageUrl(result.image)} alt={result.display_name} />
+                                        <Imagen url={result.image} alt={result.display_name} sizes="48px" />
                                     </div>
                                     <div className="result-info">
                                         <span className="result-name">{result.display_name}</span>

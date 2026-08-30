@@ -3,6 +3,11 @@
 ## 📋 TABLERO — todo lo abierto, en orden
 
 > Una sola vista de lo pendiente. El detalle de cada punto está más abajo o en [INFORME_MOVIL.md](INFORME_MOVIL.md).
+>
+> **Cierre del recorrido:** [CONCLUSIONES_FLUJO.md](CONCLUSIONES_FLUJO.md) — cómo
+> quedó el flujo completo (venta → orden de corte → stock), qué sobra y qué
+> falta. El punto que manda: el flujo **nunca se ejecutó entero**, porque los 17
+> ítems de pedido son anteriores al arreglo del `sku_id` y no tienen variante.
 
 ### A · Afecta la venta hoy
 | # | Qué | De quién depende |

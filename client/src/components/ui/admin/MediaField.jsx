@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Image as ImageIcon, Link2, X } from 'lucide-react';
 import MediaGallery from '../../interface/admin/media/MediaGallery';
-import { getImageUrl } from '../../../lib/api/endpoints';
+import Imagen from '../Imagen';
 
 /**
  * Campo reutilizable de imagen: elegir de la galería (guarda asset_id, robusto ante
@@ -32,7 +32,7 @@ const MediaField = ({ value, onChange, label }) => {
 
             {url ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px', padding: '8px', border: '1px solid #e2e8f0', borderRadius: '12px', background: '#f8fafc' }}>
-                    <img src={getImageUrl(url)} alt="" style={{ width: '56px', height: '56px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />
+                    <Imagen url={url} alt="" style={{ width: '56px', height: '56px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} sizes="56px" />
                     <span style={{ flex: 1, fontSize: '12px', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {v.asset_id ? `Galería · ${url}` : url}
                     </span>

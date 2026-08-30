@@ -241,6 +241,8 @@ const DetalleColeccion = () => {
                                         {variant.image ? (
                                             <PremiumImage 
                                                 src={getImageUrl(variant.image)} 
+                                                srcSet={variant.image_srcset}
+                                                sizes="(max-width: 768px) 50vw, 400px"
                                                 alt={variant.sku} 
                                                 objectFit="contain"
                                             />
@@ -297,6 +299,8 @@ const DetalleColeccion = () => {
                                             {variant.image ? (
                                                 <PremiumImage 
                                                     src={getImageUrl(variant.image)} 
+                                                    srcSet={variant.image_srcset}
+                                                    sizes="(max-width: 768px) 50vw, 400px"
                                                     alt={variant.sku} 
                                                     objectFit="contain"
                                                 />

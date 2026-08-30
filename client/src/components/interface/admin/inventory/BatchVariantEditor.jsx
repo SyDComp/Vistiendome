@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-    X, Search, Tag, ImageIcon, Check, Layers, ArrowLeft, Save, 
-    Sparkles, Package, AlertCircle, Loader2, ChevronRight, Hash 
+import {
+    X, Search, Tag, ImageIcon, Check, Layers, ArrowLeft, Save,
+    Sparkles, Package, AlertCircle, Loader2, ChevronRight, Hash
 } from 'lucide-react';
 import Button from '../../../ui/Button';
 import Accordion from '../../../ui/Accordion';
 import MediaGallery from '../media/MediaGallery';
+import Imagen from '../../../ui/Imagen';
 import { useNotification } from '../../../../context/NotificationContext';
 
 const API_BASE = `/api/v1/admin/catalog`;
@@ -454,7 +455,7 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
                                                 <div className="batch-editor-photos-wrapper">
                                                     {v.media_assets?.map((asset, i) => (
                                                         <div key={asset.id || i} className="batch-editor-photo-thumb">
-                                                            <img src={getImageUrl(asset.url)} className="batch-editor-photo-img" />
+                                                            <Imagen url={asset.url} className="batch-editor-photo-img" sizes="120px" alt="" />
                                                         </div>
                                                     ))}
                                                     {(!v.media_assets || v.media_assets.length === 0) && (

@@ -438,3 +438,85 @@ performance.getEntriesByType('resource')
 
 Documento vivo. El tablero general sigue en [PLAN_TRABAJO.md](PLAN_TRABAJO.md);
 esto es el detalle de la etapa de imágenes.
+
+---
+
+## Fase 6 — Que la forma fácil sea la correcta (estructural)
+
+> **Por qué esta fase existe.** Las fases 0–5 arreglaron pantallas. Cada una
+> quedó bien, y en la siguiente volvió a pasar lo mismo: galería 35 MB, ficha de
+> producto 17,6 MB, tarjetas del panel, selector de variantes, detalle de
+> colección 2,7 MB. **Cinco veces.** El detalle de colección es el caso que lo
+> deja claro: el servidor **ya mandaba** el `srcset` y el componente nunca lo
+> leyó. Con eso, "acordarse mejor" dejó de ser un plan.
+
+### El problema real
+
+Mostrar una foto bien exigía dos aciertos simultáneos:
+
+1. que el endpoint se acordara de incluir el `srcset`, y
+2. que la vista se acordara de usarlo.
+
+Y `<img src={getImageUrl(x)}>` —la forma incorrecta— es más corta de escribir
+que la correcta. Mientras eso sea así, la falla se repite.
+
+### La decisión: parche o estructural
+
+Se evaluaron las dos.
+
+**Parche** — arreglar los `<img>` que faltaban. Se descartó al medir el
+alcance: los payloads del panel **no traen** `srcset`, así que arreglar las
+vistas obligaba igual a tocar **13 serializadores del servidor**. El parche
+costaba más que el arreglo de fondo, y dejaba el problema intacto para la
+próxima pantalla.
+
+**Estructural** — lo que se hizo:
+
+- **`GET /api/v1/media/srcsets`** — un mapa `url → srcset` de toda la
+  biblioteca, que el cliente pide **una sola vez** (`cachedFetch` deduplica las
+  peticiones en vuelo: veinte imágenes montándose a la vez producen una
+  petición). 73 entradas, 20,9 KB (1,5 KB si se comprime; el servidor todavía no
+  tiene gzip, ver pendientes).
+- **`useSrcSet(url, srcsetExplicito)`** — el único lugar donde vive la
+  resolución. Si el payload ya trae el srcset lo usa y no consulta nada; si no,
+  lo busca en el mapa.
+- **`<Imagen>`** y **`<PremiumImage>`** usan ese hook. Escribir
+  `<Imagen url={...} sizes="90px" />` ya baja la derivada correcta **aunque el
+  endpoint no haya mandado nada**.
+
+### Lo que casi se hace mal
+
+Se consideró que el cliente **dedujera** las derivadas por convención de nombre
+(`x.jpg` → `x_sm.webp`), sin pedir mapa. Se descartó al leer el generador:
+`generar_derivadas` **no agranda**, así que una foto chica no tiene `xl` ni
+`lg`. Un candidato inexistente dentro de un `srcSet` **no cae de vuelta al
+`src`**: rompe la imagen. La convención habría funcionado con las 73 fotos de
+hoy y habría fallado el día que Paola suba una foto chica.
+
+El otro punto fino es **cuándo se pinta**. Si el `<img>` se pinta antes de
+conocer sus derivadas, el navegador ya arrancó a bajar el original y el srcset
+llega tarde — la foto se ve igual de bien y la falla es invisible en pantalla.
+Por eso, mientras el mapa no está, se pinta el hueco. Sólo ocurre la primera
+vez de la sesión. Hay **4 pruebas automáticas** que cubren justamente esto
+(`client/src/components/ui/__tests__/Imagen.test.jsx`), porque es lo que un
+cambio futuro puede romper sin que se note.
+
+### Medido, sobre build de producción
+
+| Pantalla | Antes | Después |
+|---|---|---|
+| Ficha de producto | 17,64 MB · 0/52 con srcset | **0,57 MB** (techo) · 35/35 · 0,02 MB al abrir |
+| Detalle de colección | 2,70 MB · 7 imágenes · 0 con srcset | **0,181 MB** · 11 imágenes · 11 con srcset |
+| Portada | — | 0,718 MB · 13/13 · 0 originales |
+| Catálogo | — | 0,095 MB · 4/4 · 0 originales |
+
+20 `<img>` del panel convertidas en 14 archivos (delegado a un subagente
+mecánico, con el diff revisado: dejó un import muerto, corregido).
+
+### Pendiente relacionado
+
+- **gzip en el servidor.** No hay `GZipMiddleware`. El mapa viaja en 20,9 KB
+  donde podrían ser 1,5 KB, y lo mismo vale para toda respuesta JSON. Es una
+  línea, pero cambia el comportamiento de **todos** los endpoints, así que no se
+  tocó dentro de esta fase.
+- **Fase 0b** — respaldo de medios en sincronía con el de la base. Sigue abierta.

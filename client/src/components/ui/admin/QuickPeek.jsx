@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Tag, Layers, ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { getImageUrl } from '../../../lib/api/endpoints';
+import Imagen from '../Imagen';
 
 const QuickPeek = ({ isOpen, onClose, data, type = 'product' }) => {
     const [activeImg, setActiveImg] = useState(0);
@@ -103,10 +103,11 @@ const QuickPeek = ({ isOpen, onClose, data, type = 'product' }) => {
                 <div style={{ position: 'relative', aspectRatio: '1/1', background: '#f8fafc' }}>
                     {images.length > 0 ? (
                         <>
-                            <img 
-                                src={getImageUrl(images[activeImg]?.url || images[activeImg])} 
+                            <Imagen
+                                url={images[activeImg]?.url || images[activeImg]}
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 alt={name}
+                                sizes="400px"
                             />
                             {images.length > 1 && (
                                 <>

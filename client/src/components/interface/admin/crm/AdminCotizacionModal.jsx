@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Search, Plus, Trash2, Check, User, Package, MapPin, FileText, ShoppingBag, Send, AlertCircle, DollarSign } from 'lucide-react';
 import { getProducts } from '../../../../lib/api/endpoints/products.api';
 import { useNotification } from '../../../../context/NotificationContext';
+import Imagen from '../../../ui/Imagen';
 
 const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = null }) => {
     const { toast } = useNotification();
@@ -577,7 +578,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                                 >
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                         {varItem.image && (
-                                                            <img src={varItem.image} alt="" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
+                                                            <Imagen url={varItem.image} alt="" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} sizes="32px" />
                                                         )}
                                                         <div>
                                                             <div style={{ fontWeight: '700', fontSize: '13px', color: '#1e293b' }}>
@@ -612,7 +613,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                             }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 200px' }}>
                                                     {it.image ? (
-                                                        <img src={it.image} alt="" style={{ width: '36px', height: '36px', borderRadius: '6px', objectFit: 'cover' }} />
+                                                        <Imagen url={it.image} alt="" style={{ width: '36px', height: '36px', borderRadius: '6px', objectFit: 'cover' }} sizes="36px" />
                                                     ) : (
                                                         <div style={{ width: '36px', height: '36px', borderRadius: '6px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                             <ShoppingBag size={18} color="#64748b" />

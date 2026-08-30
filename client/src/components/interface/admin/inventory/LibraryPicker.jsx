@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Search, Check, Folder, ChevronRight, Hash, Layers, List, Package, Tag, Box, Palette, Sparkles, Lock, SlidersHorizontal } from 'lucide-react';
 import Button from '../../../ui/Button';
+import Imagen from '../../../ui/Imagen';
 
 const CATEGORY_FACET = '__category';
 const PRODUCT_FACET = '__product';
@@ -216,7 +217,7 @@ const LibraryPicker = ({
                 <div className="library-picker-preview-variant">
                     {variantImage && (
                         <div className="library-picker-preview-variant-img-wrap">
-                            <img src={`${variantImage}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <Imagen url={variantImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} sizes="120px" alt="" />
                         </div>
                     )}
                     <div className="library-picker-preview-variant-info">
