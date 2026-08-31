@@ -9,6 +9,7 @@ from app.database import get_session
 from app.models.crm import Cotizacion, CotizacionItem, EstadoCotizacion, OrigenCotizacion, TipoDespacho
 from app.models.iam import Persona, TipoPersona, Direccion, CuentaAcceso
 from app.models.catalog import StockMovement, MovementType
+from app.models.taller import OrdenCorte, OrdenCorteItem, EstadoOrdenCorte
 from app.api.deps import get_current_user, RequirePermiso
 
 router = APIRouter()
@@ -71,6 +72,27 @@ class CotizacionItemRead(BaseModel):
     config: dict = {}
     cortado: bool = False
 
+class OrdenDeCorteDelPedido(BaseModel):
+    """Lo justo para nombrarla y poder saltar a ella."""
+    id: str
+    numero: int
+    estado: EstadoOrdenCorte
+
+
+class ProduccionRead(BaseModel):
+    """
+    En qué va la confección de este pedido. **Todo derivado**, nada declarado.
+
+    Por eso no existe un estado "en corte" en el pedido: el sistema ya sabe
+    pieza por pieza si está cortada (lo pone la orden de corte al finalizar), y
+    pedir que además alguien lo declare abre la puerta a que las dos versiones
+    no coincidan.
+    """
+    piezas: int = 0          # ítems con variante real: sólo eso se puede cortar
+    cortadas: int = 0
+    ordenes: List[OrdenDeCorteDelPedido] = []
+
+
 class CotizacionRead(BaseModel):
     id: str
     numero: Optional[int] = None
@@ -90,6 +112,7 @@ class CotizacionRead(BaseModel):
     updated_at: datetime
     cliente: Optional[PersonaRead] = None
     items: List[CotizacionItemRead] = []
+    produccion: ProduccionRead = ProduccionRead()
 
     class Config:
         from_attributes = True
@@ -124,11 +147,48 @@ def _get_item_read(it: CotizacionItem) -> CotizacionItemRead:
         it_dict["config"] = {}
     return CotizacionItemRead(**it_dict)
 
-def _get_cotizacion_read(c: Cotizacion) -> CotizacionRead:
+def _mapa_ordenes_de_corte(session: Session, cotizacion_ids: List[str]) -> dict:
+    """
+    `{cotizacion_id: [orden, ...]}` en UNA consulta.
+
+    En un bucle por cotización serían N consultas; hoy son 14 pedidos y no se
+    notaría, pero el listado crece con el negocio y esto no cuesta más escribirlo.
+    Se excluyen las canceladas: una orden cancelada no dice nada de la pieza.
+    """
+    if not cotizacion_ids:
+        return {}
+
+    filas = session.exec(
+        select(CotizacionItem.cotizacion_id, OrdenCorte)
+        .join(OrdenCorteItem, OrdenCorteItem.cotizacion_item_id == CotizacionItem.id)
+        .join(OrdenCorte, OrdenCorte.id == OrdenCorteItem.orden_id)
+        .where(CotizacionItem.cotizacion_id.in_(cotizacion_ids))
+        .where(OrdenCorte.estado != EstadoOrdenCorte.CANCELADA)
+    ).all()
+
+    mapa: dict = {}
+    for cot_id, orden in filas:
+        vistas = mapa.setdefault(cot_id, {})
+        vistas[orden.id] = OrdenDeCorteDelPedido(
+            id=orden.id, numero=orden.numero, estado=orden.estado
+        )
+    return {k: list(v.values()) for k, v in mapa.items()}
+
+
+def _get_cotizacion_read(c: Cotizacion, ordenes: Optional[List[OrdenDeCorteDelPedido]] = None) -> CotizacionRead:
     c_dict = c.dict()
     if c.persona:
         c_dict["cliente"] = _get_persona_read(c.persona)
-    c_dict["items"] = [_get_item_read(it) for it in (c.items or [])]
+    items = list(c.items or [])
+    c_dict["items"] = [_get_item_read(it) for it in items]
+    # Sólo cuentan las piezas con variante real: un ítem escrito a mano no se
+    # puede cortar, y sumarlo al total daría un "2 de 3" que nunca llega a 3.
+    cortables = [it for it in items if it.sku_id]
+    c_dict["produccion"] = ProduccionRead(
+        piezas=len(cortables),
+        cortadas=sum(1 for it in cortables if it.cortado),
+        ordenes=ordenes or [],
+    )
     return CotizacionRead(**c_dict)
 
 class CotizacionItemCreate(BaseModel):
@@ -271,7 +331,8 @@ def crear_cotizacion(data: CotizacionCreate, session: Session = Depends(get_sess
 @router.get("/", response_model=List[CotizacionRead])
 def listar_cotizaciones(session: Session = Depends(get_session), skip: int = 0, limit: int = 100, current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
     cotizaciones = session.exec(select(Cotizacion).order_by(Cotizacion.created_at.desc()).offset(skip).limit(limit)).all()
-    return [_get_cotizacion_read(c) for c in cotizaciones]
+    ordenes = _mapa_ordenes_de_corte(session, [c.id for c in cotizaciones])
+    return [_get_cotizacion_read(c, ordenes.get(c.id, [])) for c in cotizaciones]
 
 def _sincronizar_stock_venta(session: Session, cotizacion: Cotizacion, estado_anterior: EstadoCotizacion, estado_nuevo: EstadoCotizacion) -> None:
     """
@@ -330,14 +391,14 @@ def actualizar_estado_cotizacion(cotizacion_id: str, data: EstadoUpdate, session
     _sincronizar_stock_venta(session, cotizacion, estado_anterior, data.estado)
     session.commit()
     session.refresh(cotizacion)
-    return _get_cotizacion_read(cotizacion)
+    return _get_cotizacion_read(cotizacion, _mapa_ordenes_de_corte(session, [cotizacion.id]).get(cotizacion.id, []))
 
 @router.get("/cotizaciones/{cotizacion_id}", response_model=CotizacionRead)
 def obtener_cotizacion(cotizacion_id: str, session: Session = Depends(get_session), current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
     cotizacion = session.get(Cotizacion, cotizacion_id)
     if not cotizacion:
         raise HTTPException(status_code=404, detail="Cotización no encontrada")
-    return _get_cotizacion_read(cotizacion)
+    return _get_cotizacion_read(cotizacion, _mapa_ordenes_de_corte(session, [cotizacion.id]).get(cotizacion.id, []))
 
 # Acá vivían `PUT /items/{id}/cortado` y `GET /orden-corte`, del diseño anterior
 # a que la orden de corte fuera una entidad propia (`app/models/taller.py`).

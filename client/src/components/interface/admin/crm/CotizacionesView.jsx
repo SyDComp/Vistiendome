@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import SectionHeader from '../../../ui/admin/SectionHeader';
 import DataTable from '../../../ui/admin/DataTable';
 import FilterBar from '../../../ui/admin/FilterBar';
@@ -8,6 +8,7 @@ import DetailDrawer from '../../../ui/admin/DetailDrawer';
 import { useNotification } from '../../../../context/NotificationContext';
 import { useSettings } from '../../../../context/SettingsContext';
 import { getShippingColor } from '../../../../utils/shippingColors';
+import { estadoDeProduccion, TONOS } from '../../../../utils/produccion';
 import { FileText, Calendar, MessageCircle, MapPin, Printer, Plus } from 'lucide-react';
 import AdminCotizacionModal from './AdminCotizacionModal';
 
@@ -101,6 +102,28 @@ const CotizacionesView = () => {
     const [detailData, setDetailData] = useState(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // Se llega acá desde la orden de corte con ?pedido=<id>: se abre ese pedido
+    // solo. Se limpia el parámetro después, para que recargar la página no lo
+    // vuelva a abrir sobre lo que la clienta estuviera mirando.
+    useEffect(() => {
+        const id = searchParams.get('pedido');
+        if (!id || !cotizaciones.length) return;
+        const pedido = cotizaciones.find(c => c.id === id);
+        if (pedido) {
+            setDetailData(pedido);
+            setShowDetail(true);
+        } else {
+            toast.error('Ese pedido ya no está en la lista');
+        }
+        setSearchParams(prev => {
+            const p = new URLSearchParams(prev);
+            p.delete('pedido');
+            return p;
+        }, { replace: true });
+    }, [cotizaciones, searchParams, setSearchParams]);
+
     useEffect(() => {
         const fetchCotizaciones = async () => {
             setLoading(true);
@@ -165,6 +188,48 @@ const CotizacionesView = () => {
                     }} 
                 />
             )
+        },
+        {
+            // Derivado de las piezas cortadas, no un estado que alguien mantenga.
+            // Va al lado del estado porque responde la pregunta siguiente:
+            // "confirmada, ¿y en qué va?".
+            key: 'produccion',
+            label: 'Confección',
+            render: (_, row) => {
+                const { texto, tono, ordenes } = estadoDeProduccion(row);
+                if (!texto) return <span style={{ color: '#cbd5e1', fontSize: '12px' }}>—</span>;
+                const estilo = TONOS[tono];
+                return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start' }}>
+                        <span style={{
+                            fontSize: '11px', fontWeight: '700', color: estilo.color,
+                            background: estilo.bg, padding: '4px 9px', borderRadius: '20px',
+                            lineHeight: 1.3,
+                        }}>
+                            {texto}
+                        </span>
+                        {ordenes.map(o => (
+                            <button
+                                key={o.id}
+                                type="button"
+                                onClick={(e) => {
+                                    // La fila entera abre el pedido; este botón va a
+                                    // otro lado, así que corta la propagación.
+                                    e.stopPropagation();
+                                    navigate(`/admin/dashboard/crm/orden-corte?orden=${o.id}`);
+                                }}
+                                style={{
+                                    background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                                    fontSize: '11px', color: '#64748b', textDecoration: 'underline',
+                                    textUnderlineOffset: '2px', fontWeight: '600',
+                                }}
+                            >
+                                Orden de corte N° {o.numero}
+                            </button>
+                        ))}
+                    </div>
+                );
+            }
         },
         {
             key: 'detalles',

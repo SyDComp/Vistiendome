@@ -59,6 +59,9 @@ class ItemSalida(BaseModel):
     para_stock: bool = False
     pedido_numero: Optional[int] = None
     cliente: Optional[str] = None
+    # Para poder saltar al pedido desde acá: el número sirve para leerlo, el id
+    # para llegar. Sin esto había que ir a Cotizaciones y buscarlo a mano.
+    cotizacion_id: Optional[str] = None
 
 
 class OrdenSalida(BaseModel):
@@ -93,6 +96,7 @@ def _salida(orden: OrdenCorte, db: Session) -> OrdenSalida:
             para_stock=it.cotizacion_item_id is None,
             pedido_numero=cot.numero if cot else None,
             cliente=f"{persona.nombres} {persona.apellidos}".strip() if persona else None,
+            cotizacion_id=cot.id if cot else None,
         ))
 
     repetida_de = db.get(OrdenCorte, orden.repetida_de_id) if orden.repetida_de_id else None

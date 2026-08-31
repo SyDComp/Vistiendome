@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Printer, Copy, Scissors } from 'lucide-react';
 import SectionHeader from '../../../ui/admin/SectionHeader';
 import { useNotification } from '../../../../context/NotificationContext';
@@ -20,6 +21,7 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
     const { toast, confirm } = useNotification();
     const [guardando, setGuardando] = useState(false);
     const columnasCorte = useCaracteristicasCorte();
+    const navigate = useNavigate();
     // Dos preguntas distintas sobre la misma orden, y hay que poder hacer las
     // dos: por modelo se corta (se tiende la tela de un modelo y salen todas
     // sus tallas juntas); por clienta se arma y se entrega, que es como está
@@ -139,11 +141,20 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
                 columnasExtra={agruparPor === 'cliente' ? [] : [{
                     clave: 'origen',
                     etiqueta: 'Para',
+                    // Enlace, no etiqueta: desde acá se llega al pedido sin
+                    // tener que ir a Cotizaciones y buscarlo a mano.
                     valor: (i) => (i.para_stock
                         ? <span className="oc-origen stock">Stock</span>
-                        : <span className="oc-origen pedido">
+                        : <button
+                            type="button"
+                            className="oc-origen pedido oc-enlace"
+                            disabled={!i.cotizacion_id}
+                            title={i.cotizacion_id ? 'Ver este pedido' : undefined}
+                            onClick={() => i.cotizacion_id
+                                && navigate(`/admin/dashboard/crm/cotizaciones?pedido=${i.cotizacion_id}`)}
+                          >
                             Pedido N° {i.pedido_numero ?? '—'}{i.cliente ? ` · ${i.cliente}` : ''}
-                          </span>),
+                          </button>),
                 }]}
                 vacio="Esta orden no tiene piezas."
             />
@@ -166,6 +177,8 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
                 .oc-notas-vista { font-size:13px; color:#475569; background:#f8fafc; padding:10px 14px; border-radius:10px; margin:0 0 14px; }
                 .oc-origen { font-size:11px; font-weight:700; padding:3px 9px; border-radius:6px; }
                 .oc-origen.stock { background:#eef2ff; color:#4338ca; }
+                .oc-enlace { border:none; font:inherit; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+                .oc-enlace:disabled { cursor:default; text-decoration:none; opacity:.7; }
                 .oc-origen.pedido { background:#f1f5f9; color:#475569; }
             `}</style>
         </div>

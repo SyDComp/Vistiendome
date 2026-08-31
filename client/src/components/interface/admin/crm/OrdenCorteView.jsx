@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Scissors, Plus, Trash2 } from 'lucide-react';
 import SectionHeader from '../../../ui/admin/SectionHeader';
 import { useNotification } from '../../../../context/NotificationContext';
@@ -20,6 +21,7 @@ const OrdenCorteView = () => {
     const [actual, setActual] = useState(null);
     const [filtro, setFiltro] = useState('');
     const [cargando, setCargando] = useState(true);
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const cargar = useCallback(async () => {
         setCargando(true);
@@ -33,6 +35,25 @@ const OrdenCorteView = () => {
     }, [filtro]);
 
     useEffect(() => { if (vista === 'lista') cargar(); }, [vista, cargar]);
+
+    // Se llega acá desde un pedido con ?orden=<id>: se abre esa orden sola. Se
+    // limpia el parámetro después, para que recargar no la vuelva a abrir.
+    useEffect(() => {
+        const id = searchParams.get('orden');
+        if (!id || !ordenes.length) return;
+        const orden = ordenes.find(o => o.id === id);
+        if (orden) {
+            setActual(orden);
+            setVista('detalle');
+        } else {
+            toast.error('Esa orden de corte ya no existe');
+        }
+        setSearchParams(prev => {
+            const p = new URLSearchParams(prev);
+            p.delete('orden');
+            return p;
+        }, { replace: true });
+    }, [ordenes, searchParams, setSearchParams]);
 
     // `confirm` toma un TEXTO y devuelve la respuesta, no un objeto con callback.
     const borrar = async (o) => {

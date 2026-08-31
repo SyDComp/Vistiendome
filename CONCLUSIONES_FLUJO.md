@@ -51,6 +51,36 @@ semanas antes de que la prenda existiera. Ahora sale cuando sale de verdad.
 Hay un interruptor junto al botón, encendido por omisión, que se puede apagar
 para reimprimir una etiqueta sin volver a despachar.
 
+### Cómo se ve la confección, sin declarar nada
+
+La lista de pedidos tiene una columna **Confección** que sale de contar las
+piezas cortadas — las marca la orden de corte al finalizar, nadie las declara:
+
+| Se muestra | Cuándo |
+|---|---|
+| *Por cortar · sin orden todavía* | confirmada y sus piezas no están en ninguna orden |
+| *Por cortar* | ya están en una orden, sin finalizar |
+| *2 de 3 cortadas* | la orden se finalizó parcialmente, o hay piezas en varias |
+| *Lista para despachar* | todas cortadas y todavía en el taller |
+| *Cortada* | todas cortadas y ya despachada |
+| — | el pedido no llegó a confirmarse, o no tiene piezas con variante |
+
+Sólo cuenta las piezas **con variante real**: un ítem escrito a mano no se puede
+cortar, y sumarlo daría un "2 de 3" que nunca llega a 3.
+
+### Las tres pantallas, conectadas
+
+Antes eran tres islas. Ahora:
+
+- Desde el **pedido** → *Orden de corte N° 2* abre esa orden.
+- Desde la **orden** → *Pedido N° 23 · Cliente* abre esa ficha.
+- Desde la **ficha del pedido** → planilla del taller, comprobante de la clienta
+  y el sistema de etiquetas (esto ya estaba).
+
+Los enlaces van por URL (`?orden=…`, `?pedido=…`) y el parámetro se limpia
+después de abrir: recargar la página no vuelve a abrir algo encima de lo que se
+esté mirando.
+
 ## 2. El flujo se ejecutó entero — 2026-08-31
 
 > Esta sección decía "el flujo nunca se ejecutó entero". **Ya no.** Se corrió de
