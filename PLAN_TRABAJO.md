@@ -35,6 +35,42 @@
 | C4 | Lógica de filtros duplicada (Python + JavaScript), solo se usa una |
 | C5 | ✅ Análisis hecho (2026-08-23) — ver abajo. Conclusión: el cuello de botella son **las imágenes**, no el código |
 
+### D · Para la entrega (al final, cuando lo demás esté listo)
+
+> Levantados por Allan el 2026-08-30. Van al final a propósito, pero se anotan
+> ahora porque se pierden si no quedan escritos.
+
+| # | Qué | Notas |
+|---|---|---|
+| D1 | **Pantalla de bienvenida del administrador** — el típico paso a paso con botón "Siguiente", explicando las cosas la primera vez que Paola entra | Va justo antes de entregar, cuando ya no cambie nada de lo que habría que explicar |
+| D2 | **Qué datos sobreviven a la entrega** | Ver abajo — es más grande de lo que parece |
+
+#### D2 — El seed de entrega
+
+Hoy la base es de desarrollo. El día de la entrega el panel tiene que arrancar
+limpio, pero **no vacío**: hay datos que son configuración y datos que son
+prueba, y hoy conviven.
+
+Primer corte, según lo que dijo Allan:
+
+- **Se conservan:** categorías, características (con sus opciones), productos y
+  sus variantes.
+- **Se limpian:** cotizaciones, órdenes de corte, movimientos de stock, clientes
+  de prueba.
+- **Sin decidir todavía:** la configuración del sitio (`site_settings`:
+  redes, envíos, banner, modal de bienvenida), los medios de la galería, el CMS
+  de la portada.
+
+**Lo que hay que saber antes de planificarlo** (verificado el 2026-08-30): la
+maquinaria de ingesta está a medio pudrir. De los cinco scripts de
+`server/scripts/ingesta/`, **tres no cargan**: `ingest_assets.py`,
+`ingest_catalog_v2.py` e `ingest_novias_v3.py` importan el modelo `Attribute`,
+que se renombró a `Characteristic` hace tiempo. Sólo `seed_master.py` e
+`ingest_hierarchy.py` siguen en pie. Si el seed de entrega se va a apoyar en
+esos scripts, primero hay que arreglarlos o reescribirlos.
+
+---
+
 **Siguiente paso:** bloque C (mejoras internas) y el scroll infinito de A3, ambos opcionales. **Todo el bloque A y B está cerrado** salvo B6, que solo espera confirmación de Paola sobre embebido vs. link.
 
 ### C5 — Análisis de rendimiento (2026-08-23)

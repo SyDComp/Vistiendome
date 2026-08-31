@@ -169,12 +169,6 @@ class Category(SQLModel, table=True):
         sa_relationship_kwargs={"remote_side": "Category.id"}
     )
 
-class ProductOption(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    product_id: int = Field(foreign_key="product.id")
-    characteristic_id: int = Field(foreign_key="attribute.id")
-    allowed_values: List[str] = Field(default=[], sa_type=JSON)
-
 class SKU(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     product_id: int = Field(foreign_key="product.id")
