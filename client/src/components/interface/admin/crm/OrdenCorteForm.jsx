@@ -4,6 +4,7 @@ import SectionHeader from '../../../ui/admin/SectionHeader';
 import { useNotification } from '../../../../context/NotificationContext';
 import { getPiezasPendientes, crearOrdenCorte } from '../../../../lib/api/endpoints';
 import SelectorVariantes from './SelectorVariantes';
+import TablaPrendas from './TablaPrendas';
 
 /**
  * Arma una orden de corte.
@@ -82,9 +83,6 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
         }
     };
 
-    const etiquetaConfig = (config) =>
-        Object.entries(config || {}).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join(' · ');
-
     return (
         <div className="admin-module fade-in oc-form">
             <div className="oc-form-top">
@@ -107,23 +105,22 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
                         igual, agregando abajo lo que quieras cortar para stock.
                     </div>
                 ) : (
-                    <table className="oc-tabla">
-                        <thead>
-                            <tr><th></th><th>N° Pedido</th><th>Cliente</th><th>Producto</th><th>Características</th><th className="num">Cant.</th></tr>
-                        </thead>
-                        <tbody>
-                            {pendientes.map(p => (
-                                <tr key={p.cotizacion_item_id} className={elegidas[p.cotizacion_item_id] ? 'elegida' : ''}>
-                                    <td><input type="checkbox" checked={!!elegidas[p.cotizacion_item_id]} onChange={() => togglePieza(p)} /></td>
-                                    <td>{p.pedido_numero ?? '—'}</td>
-                                    <td>{p.cliente}</td>
-                                    <td>{p.producto}</td>
-                                    <td className="oc-config">{etiquetaConfig(p.config)}</td>
-                                    <td className="num">{p.cantidad}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <TablaPrendas
+                        items={pendientes}
+                        claseFila={(p) => (elegidas[p.cotizacion_item_id] ? 'tp-elegida' : '')}
+                        casilla={(p) => (
+                            <input
+                                type="checkbox"
+                                aria-label={`Incluir ${p.producto} del pedido ${p.pedido_numero ?? ''}`}
+                                checked={!!elegidas[p.cotizacion_item_id]}
+                                onChange={() => togglePieza(p)}
+                            />
+                        )}
+                        columnasExtra={[
+                            { clave: 'pedido', etiqueta: 'N° Pedido', valor: (p) => p.pedido_numero ?? '—' },
+                            { clave: 'cliente', etiqueta: 'Cliente', valor: (p) => p.cliente },
+                        ]}
+                    />
                 )}
             </section>
 
@@ -137,28 +134,28 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
                 <SelectorVariantes onElegir={agregarStock} yaElegidas={yaElegidas} />
 
                 {paraStock.length > 0 && (
-                    <table className="oc-tabla">
-                        <thead><tr><th>Producto</th><th>Características</th><th className="num">Cantidad</th><th></th></tr></thead>
-                        <tbody>
-                            {paraStock.map((l, i) => (
-                                <tr key={i}>
-                                    <td>{l.producto || l.sku}</td>
-                                    <td className="oc-config">{etiquetaConfig(l.config)}</td>
-                                    <td className="num">
-                                        <input type="number" min="1" value={l.cantidad}
-                                            onChange={e => setParaStock(prev => prev.map((x, k) => k === i ? { ...x, cantidad: e.target.value } : x))}
-                                            className="oc-cantidad" />
-                                    </td>
-                                    <td>
-                                        <button type="button" className="oc-quitar"
-                                            onClick={() => setParaStock(prev => prev.filter((_, k) => k !== i))}>
-                                            <Trash2 size={14} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <TablaPrendas
+                        items={paraStock}
+                        cantidad={(l) => (
+                            <input
+                                type="number" min="1" value={l.cantidad} className="oc-cantidad"
+                                aria-label={`Cantidad de ${l.producto || l.sku}`}
+                                onChange={e => setParaStock(prev => prev.map(
+                                    x => x.sku_id === l.sku_id ? { ...x, cantidad: e.target.value } : x
+                                ))}
+                            />
+                        )}
+                        columnasExtra={[{
+                            clave: 'quitar', etiqueta: '',
+                            valor: (l) => (
+                                <button type="button" className="oc-quitar"
+                                    aria-label={`Quitar ${l.producto || l.sku}`}
+                                    onClick={() => setParaStock(prev => prev.filter(x => x.sku_id !== l.sku_id))}>
+                                    <Trash2 size={14} />
+                                </button>
+                            ),
+                        }]}
+                    />
                 )}
             </section>
 
@@ -181,12 +178,6 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
                 .oc-bloque h3 { margin:0 0 4px; font-size:15px; font-weight:800; color:#1e1b4b; }
                 .oc-hint { margin:0 0 14px; font-size:13px; color:#64748b; line-height:1.5; }
                 .oc-vacio { padding:20px; text-align:center; color:#64748b; font-size:13px; background:#f8fafc; border-radius:10px; }
-                .oc-tabla { width:100%; border-collapse:collapse; font-size:13px; }
-                .oc-tabla th { text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:#64748b; border-bottom:2px solid #1e1b4b; padding:8px 6px; }
-                .oc-tabla td { padding:9px 6px; border-bottom:1px solid #e2e8f0; vertical-align:middle; }
-                .oc-tabla .num { text-align:right; }
-                .oc-tabla tr.elegida { background:#f0fdf4; }
-                .oc-config { color:#64748b; font-size:12px; }
                 .oc-buscador { width:100%; height:42px; padding:0 14px; border:1px solid #e2e8f0; border-radius:10px; font-size:14px; margin-bottom:10px; }
                 .oc-resultados { display:flex; flex-direction:column; gap:4px; margin-bottom:12px; max-height:220px; overflow-y:auto; }
                 .oc-resultado { display:flex; align-items:center; gap:8px; text-align:left; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 10px; font-size:13px; cursor:pointer; color:#334155; }

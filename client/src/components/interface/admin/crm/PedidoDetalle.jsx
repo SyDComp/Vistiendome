@@ -100,21 +100,8 @@ const PedidoDetalle = () => {
                 .pedido-meta { display: flex; flex-wrap: wrap; gap: 18px; margin-bottom: 24px; font-size: 14px; }
                 .pedido-meta-item { display: flex; align-items: center; gap: 6px; }
 
-                .items-pedido-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-                .items-pedido-table th {
-                    text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
-                    color: #4b5563; border-bottom: 2px solid #000; padding: 8px 6px;
-                }
-                .items-pedido-table td { padding: 10px 6px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-                .items-pedido-table .col-num { text-align: right; }
-                .config-badges { display: flex; flex-wrap: wrap; gap: 4px; }
-                .config-badge {
-                    font-size: 11px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px;
-                    padding: 2px 6px; color: #334155; white-space: nowrap;
-                }
-                .total-label { text-align: right; font-weight: 800; border-bottom: none; padding-top: 14px; }
-                .total-value { font-weight: 900; font-size: 15px; border-bottom: none; padding-top: 14px; }
-
+                /* La tabla de prendas trae su propio estilo (TablaPrendas);
+                   acá sólo queda lo del documento. */
                 .pedido-footer-note { margin-top: 20px; font-size: 12px; color: #64748b; text-align: center; }
 
                 @media print {

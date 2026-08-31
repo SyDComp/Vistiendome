@@ -1,51 +1,60 @@
 import React from 'react';
+import TablaPrendas from './TablaPrendas';
 import { formatCurrency } from '../../../../utils/cartUtils';
 
 /**
- * Tabla de ítems de un pedido — usada tanto en la planilla (con precios, para
- * el taller) como en el comprobante (sin precios, para la clienta). Misma
- * pieza técnica, un solo prop decide qué columnas mostrar.
+ * Las prendas de un pedido: planilla para el taller (con precios) o comprobante
+ * para la clienta (sin precios). Misma pieza, un prop decide.
+ *
+ * Una columna por característica, agrupado por modelo — igual que la planilla
+ * de papel que ya usa la clienta, que en esto acertaba. Antes iba todo apilado
+ * en una celda ("CUELLO: En V · MANGAS: Larga · COLOR: Negro · TALLA: XS"), que
+ * obliga a leer una frase por fila en vez de bajar la vista por una columna.
  */
 const ItemsPedidoTable = ({ items = [], mostrarPrecios = true }) => {
-    const total = items.reduce((acc, it) => acc + (it.cantidad || 0) * (it.precio_unitario_estimado || 0), 0);
+    const total = items.reduce(
+        (acc, it) => acc + (it.cantidad || 0) * (it.precio_unitario_estimado || 0), 0
+    );
+
+    const columnasExtra = mostrarPrecios ? [
+        {
+            clave: 'precio', etiqueta: 'Precio', alinear: 'derecha',
+            valor: (i) => formatCurrency(i.precio_unitario_estimado),
+        },
+        {
+            clave: 'subtotal', etiqueta: 'Subtotal', alinear: 'derecha',
+            valor: (i) => formatCurrency((i.cantidad || 0) * (i.precio_unitario_estimado || 0)),
+        },
+    ] : [];
 
     return (
-        <table className="items-pedido-table">
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Características</th>
-                    <th className="col-num">Cant.</th>
-                    {mostrarPrecios && <th className="col-num">Precio</th>}
-                    {mostrarPrecios && <th className="col-num">Subtotal</th>}
-                </tr>
-            </thead>
-            <tbody>
-                {items.map((it) => (
-                    <tr key={it.id}>
-                        <td>{it.producto_nombre || it.sku_name}</td>
-                        <td>
-                            <div className="config-badges">
-                                {Object.entries(it.config || {}).filter(([, v]) => v).map(([k, v]) => (
-                                    <span key={k} className="config-badge">{k}: {v}</span>
-                                ))}
-                            </div>
-                        </td>
-                        <td className="col-num">{it.cantidad}</td>
-                        {mostrarPrecios && <td className="col-num">{formatCurrency(it.precio_unitario_estimado)}</td>}
-                        {mostrarPrecios && <td className="col-num">{formatCurrency((it.cantidad || 0) * (it.precio_unitario_estimado || 0))}</td>}
-                    </tr>
-                ))}
-            </tbody>
-            {mostrarPrecios && (
-                <tfoot>
-                    <tr>
-                        <td colSpan={4} className="col-num total-label">Total</td>
-                        <td className="col-num total-value">{formatCurrency(total)}</td>
-                    </tr>
-                </tfoot>
+        <div className="items-pedido">
+            <TablaPrendas
+                items={items}
+                columnasExtra={columnasExtra}
+                // El taller marca sobre la hoja lo que va saliendo; la clienta
+                // recibe un comprobante, no una lista de tareas.
+                casilla={mostrarPrecios}
+                filasEnBlanco={mostrarPrecios ? 1 : 0}
+                vacio="Este pedido no tiene prendas."
+            />
+
+            {mostrarPrecios && items.length > 0 && (
+                <div className="items-pedido-total">
+                    <span>Total del pedido</span>
+                    <strong>{formatCurrency(total)}</strong>
+                </div>
             )}
-        </table>
+
+            <style>{`
+                .items-pedido-total {
+                    display: flex; justify-content: space-between; align-items: baseline;
+                    margin-top: 16px; padding-top: 12px; border-top: 2px solid #000;
+                    font-size: 14px; font-weight: 800;
+                }
+                .items-pedido-total strong { font-size: 16px; }
+            `}</style>
+        </div>
     );
 };
 

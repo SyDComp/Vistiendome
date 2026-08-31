@@ -3,6 +3,8 @@ import { ArrowLeft, Printer, Copy, Scissors } from 'lucide-react';
 import SectionHeader from '../../../ui/admin/SectionHeader';
 import { useNotification } from '../../../../context/NotificationContext';
 import { cambiarEstadoOrden, repetirOrden } from '../../../../lib/api/endpoints';
+import TablaPrendas from './TablaPrendas';
+import { imprimirOrdenCorte } from './imprimirOrdenCorte';
 
 export const ESTADOS = [
     { value: 'PENDIENTE', label: 'Pendiente', color: '#64748b', bg: '#f1f5f9' },
@@ -12,9 +14,6 @@ export const ESTADOS = [
 ];
 
 export const estiloEstado = (e) => ESTADOS.find(x => x.value === e) || ESTADOS[0];
-
-const etiquetaConfig = (config) =>
-    Object.entries(config || {}).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join(' · ');
 
 const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
     const { toast, confirm } = useNotification();
@@ -57,46 +56,10 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
         }
     };
 
-    /** Documento propio: si se usara window.print() saldría el panel entero. */
     const imprimir = () => {
-        const filas = orden.items.map(i => `
-            <tr>
-                <td>${i.producto || '—'}</td>
-                <td>${etiquetaConfig(i.config)}</td>
-                <td>${i.para_stock ? 'Stock' : `Pedido N° ${i.pedido_numero ?? '—'}${i.cliente ? ' · ' + i.cliente : ''}`}</td>
-                <td class="num">${i.cantidad}</td>
-                <td class="check"></td>
-            </tr>`).join('');
-
-        const w = window.open('', '_blank', 'width=1000,height=800');
-        if (!w) return toast.error('El navegador bloqueó la ventana de impresión');
-        w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Orden de Corte N° ${orden.numero}</title>
-        <style>
-            *{box-sizing:border-box}
-            body{font-family:system-ui,-apple-system,sans-serif;margin:0;padding:16mm 12mm;color:#000}
-            h1{font-size:20px;margin:0 0 2px}
-            .meta{font-size:12px;color:#555;margin-bottom:14px}
-            .notas{font-size:12px;background:#f5f5f5;padding:8px 10px;border-radius:4px;margin-bottom:14px}
-            table{width:100%;border-collapse:collapse;font-size:12px}
-            th{text-align:left;border-bottom:2px solid #000;padding:6px 4px;font-size:10px;text-transform:uppercase;letter-spacing:.5px}
-            td{padding:7px 4px;border-bottom:1px solid #ddd;vertical-align:top}
-            .num{text-align:right}
-            .check{width:34px}
-            .check:after{content:'';display:block;width:15px;height:15px;border:1.5px solid #000;margin:0 auto}
-            tfoot td{border:0;padding-top:10px;font-weight:700}
-            @page{margin:10mm}
-        </style></head><body>
-        <h1>Orden de Corte N° ${orden.numero}</h1>
-        <div class="meta">${estiloEstado(orden.estado).label} · ${orden.items.length} piezas · ${orden.total_unidades} unidades · ${new Date(orden.created_at).toLocaleDateString('es-CL')}</div>
-        ${orden.notas ? `<div class="notas">${orden.notas}</div>` : ''}
-        <table>
-            <thead><tr><th>Producto</th><th>Características</th><th>Origen</th><th class="num">Cant.</th><th></th></tr></thead>
-            <tbody>${filas}</tbody>
-            <tfoot><tr><td colspan="3"></td><td class="num">${orden.total_unidades}</td><td></td></tr></tfoot>
-        </table>
-        <script>window.onload=function(){setTimeout(function(){window.print();window.close();},400)}<\/script>
-        </body></html>`);
-        w.document.close();
+        if (!imprimirOrdenCorte(orden, estiloEstado(orden.estado).label)) {
+            toast.error('El navegador bloqueó la ventana de impresión');
+        }
     };
 
     const est = estiloEstado(orden.estado);
@@ -140,25 +103,20 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
 
             {orden.notas && <p className="oc-notas-vista">{orden.notas}</p>}
 
-            <table className="oc-tabla">
-                <thead>
-                    <tr><th>Producto</th><th>Características</th><th>Origen</th><th className="num">Cantidad</th></tr>
-                </thead>
-                <tbody>
-                    {orden.items.map(i => (
-                        <tr key={i.id}>
-                            <td>{i.producto || '—'}</td>
-                            <td className="oc-config">{etiquetaConfig(i.config)}</td>
-                            <td>
-                                {i.para_stock
-                                    ? <span className="oc-origen stock">Stock</span>
-                                    : <span className="oc-origen pedido">Pedido N° {i.pedido_numero ?? '—'}{i.cliente ? ` · ${i.cliente}` : ''}</span>}
-                            </td>
-                            <td className="num">{i.cantidad}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <TablaPrendas
+                items={orden.items}
+                casilla
+                columnasExtra={[{
+                    clave: 'origen',
+                    etiqueta: 'Para',
+                    valor: (i) => (i.para_stock
+                        ? <span className="oc-origen stock">Stock</span>
+                        : <span className="oc-origen pedido">
+                            Pedido N° {i.pedido_numero ?? '—'}{i.cliente ? ` · ${i.cliente}` : ''}
+                          </span>),
+                }]}
+                vacio="Esta orden no tiene piezas."
+            />
 
             <style>{`
                 .oc-top { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:16px; }
@@ -171,11 +129,6 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
                 .oc-nota-rep { font-size:12px; color:#64748b; margin-left:auto; }
                 .oc-aviso { font-size:13px; color:#15803d; background:#f0fdf4; border:1px solid #bbf7d0; padding:10px 14px; border-radius:10px; margin:0 0 14px; }
                 .oc-notas-vista { font-size:13px; color:#475569; background:#f8fafc; padding:10px 14px; border-radius:10px; margin:0 0 14px; }
-                .oc-tabla { width:100%; border-collapse:collapse; font-size:13px; }
-                .oc-tabla th { text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:#64748b; border-bottom:2px solid #1e1b4b; padding:8px 6px; }
-                .oc-tabla td { padding:10px 6px; border-bottom:1px solid #e2e8f0; }
-                .oc-tabla .num { text-align:right; }
-                .oc-config { color:#64748b; font-size:12px; }
                 .oc-origen { font-size:11px; font-weight:700; padding:3px 9px; border-radius:6px; }
                 .oc-origen.stock { background:#eef2ff; color:#4338ca; }
                 .oc-origen.pedido { background:#f1f5f9; color:#475569; }
