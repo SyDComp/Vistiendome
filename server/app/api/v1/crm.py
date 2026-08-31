@@ -334,86 +334,10 @@ def obtener_cotizacion(cotizacion_id: str, session: Session = Depends(get_sessio
         raise HTTPException(status_code=404, detail="Cotización no encontrada")
     return _get_cotizacion_read(cotizacion)
 
-class CortadoUpdate(BaseModel):
-    cortado: bool
-
-@router.put("/items/{item_id}/cortado", response_model=CotizacionItemRead)
-def actualizar_cortado(item_id: str, data: CortadoUpdate, session: Session = Depends(get_session), current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
-    item = session.get(CotizacionItem, item_id)
-    if not item:
-        raise HTTPException(status_code=404, detail="Ítem no encontrado")
-    item.cortado = data.cortado
-    session.add(item)
-    session.commit()
-    session.refresh(item)
-    return _get_item_read(item)
-
-class OrdenCorteRow(BaseModel):
-    item_id: str
-    cotizacion_id: str
-    numero: Optional[int] = None
-    cliente: str
-    fecha: datetime
-    estado: EstadoCotizacion
-    producto: str
-    config: dict = {}
-    cantidad: int
-    cortado: bool
-
-@router.get("/orden-corte", response_model=List[OrdenCorteRow])
-def orden_corte(
-    pendiente: bool = True,
-    estado: Optional[EstadoCotizacion] = None,
-    desde: Optional[str] = None,
-    hasta: Optional[str] = None,
-    session: Session = Depends(get_session),
-    current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR")),
-):
-    """
-    "Orden de corte" no es una entidad — es esta consulta. Filtra las
-    cotizaciones perdidas (nada que confeccionar) y, por defecto, sólo lo
-    pendiente de cortar. El resto de los filtros (producto, característica)
-    se resuelven en el cliente sobre esta misma lista: a esta escala no
-    justifica una query más fina, y evita duplicar el filtrado que
-    `CotizacionesView` ya hace del mismo modo.
-    """
-    query = (
-        select(CotizacionItem)
-        .join(Cotizacion, CotizacionItem.cotizacion_id == Cotizacion.id)
-        .where(Cotizacion.estado != EstadoCotizacion.CERRADA_PERDIDA)
-    )
-    if pendiente:
-        query = query.where(CotizacionItem.cortado == False)  # noqa: E712
-    if estado:
-        query = query.where(Cotizacion.estado == estado)
-    if desde:
-        query = query.where(Cotizacion.created_at >= datetime.fromisoformat(desde))
-    if hasta:
-        query = query.where(Cotizacion.created_at <= datetime.fromisoformat(hasta))
-    query = query.order_by(Cotizacion.created_at.asc())
-
-    items = session.exec(query).all()
-    filas: List[OrdenCorteRow] = []
-    for it in items:
-        # Sin SKU (ítem custom escrito a mano) no hay nada que cortar.
-        if not it.sku:
-            continue
-        cot = it.cotizacion
-        persona = cot.persona if cot else None
-        cliente = f"{persona.nombres} {persona.apellidos}".strip() if persona else "—"
-        filas.append(OrdenCorteRow(
-            item_id=it.id,
-            cotizacion_id=it.cotizacion_id,
-            numero=cot.numero if cot else None,
-            cliente=cliente or "—",
-            fecha=cot.created_at if cot else datetime.utcnow(),
-            estado=cot.estado if cot else EstadoCotizacion.NUEVA,
-            producto=it.nombre_custom or (it.sku.product.name if it.sku.product else "—"),
-            config=it.sku.config or {},
-            cantidad=it.cantidad,
-            cortado=it.cortado,
-        ))
-    return filas
+# Acá vivían `PUT /items/{id}/cortado` y `GET /orden-corte`, del diseño anterior
+# a que la orden de corte fuera una entidad propia (`app/models/taller.py`).
+# Se borraron el 2026-08-31: nadie los llamaba — el cliente usa
+# `/api/v1/ordenes-corte/*` — y dejarlos invitaba a creer que seguían en uso.
 
 @router.get("/clientes", response_model=List[PersonaRead])
 def listar_clientes(session: Session = Depends(get_session), skip: int = 0, limit: int = 100, current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
