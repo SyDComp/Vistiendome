@@ -43,7 +43,12 @@ const peso = (clave) => {
     return i === -1 ? PRIMERAS.length : i;
 };
 
-const ordenarColumnas = (claves) =>
+/**
+ * El mismo orden en todas partes: la talla siempre en el mismo lugar, en la
+ * hoja de taller y en el explorador de variantes. Si cada pantalla ordenara a
+ * su manera, habría que releer el encabezado en cada una.
+ */
+export const ordenarCaracteristicas = (claves) =>
     [...claves].sort((a, b) => {
         const d = peso(a) - peso(b);
         return d !== 0 ? d : a.localeCompare(b);
@@ -91,7 +96,7 @@ export const agrupar = (items = [], { por = 'producto', permitidas = null } = {}
 
     return [...grupos.values()].map(({ titulo, claves, filas, unidades }) => ({
         titulo,
-        columnas: ordenarColumnas(claves),
+        columnas: ordenarCaracteristicas(claves),
         filas,
         unidades,
         // Agrupado por clienta, el producto deja de ser el título del grupo y

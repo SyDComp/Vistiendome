@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { ArrowLeft, Search, Check, Package } from 'lucide-react';
 import { get } from '../../../../lib/api/client';
 import { getImageUrl, getSrcSet } from '../../../../lib/api/endpoints';
+import { ordenarCaracteristicas } from '../../../../utils/prendas';
 
 /**
  * Explorador de variantes en dos niveles: producto base → sus variantes.
@@ -73,6 +74,18 @@ const SelectorVariantes = ({ onElegir, yaElegidas = new Set() }) => {
         return productos.filter(p => (p.name || '').toLowerCase().includes(t));
     }, [productos, busqueda]);
 
+    // Las columnas de la lista: en este nivel todas las variantes son del MISMO
+    // producto, así que comparten las mismas características y se pueden
+    // alinear. Antes se mostraban los valores corridos y sin su etiqueta
+    // ("En V · Larga · Negro · Tela Sofia · XS"): había que adivinar cuál era
+    // cuál, y como los valores no quedaban alineados entre filas, tampoco se
+    // podía recorrer una columna con la vista.
+    const columnas = useMemo(
+        () => ordenarCaracteristicas(Object.keys(caracteristicas)),
+        [caracteristicas]
+    );
+
+    // Sólo si una variante no tiene ninguna característica cargada.
     const etiqueta = (config) =>
         Object.entries(config || {}).filter(([, v]) => v).map(([, v]) => v).join(' · ');
 
@@ -139,23 +152,39 @@ const SelectorVariantes = ({ onElegir, yaElegidas = new Set() }) => {
             ) : variantesFiltradas.length === 0 ? (
                 <div className="sv-vacio">Ninguna variante coincide con estos filtros.</div>
             ) : (
-                <div className="sv-lista">
-                    {variantesFiltradas.map(v => {
-                        const ya = yaElegidas.has(v.id);
-                        return (
-                            <button key={v.id} type="button" className={`sv-variante ${ya ? 'ya' : ''}`}
-                                onClick={() => !ya && onElegir({ ...v, product_name: producto.name })}>
-                                <div className="sv-mini">
-                                    {v.image_urls?.[0]
-                                        ? <img src={getImageUrl(v.image_urls[0])} loading="lazy" alt="" />
-                                        : <Package size={15} />}
-                                </div>
-                                <span className="sv-etiqueta">{etiqueta(v.config) || v.sku}</span>
-                                {ya ? <span className="sv-ya"><Check size={13} /> agregada</span> : <span className="sv-mas">+</span>}
-                            </button>
-                        );
-                    })}
-                </div>
+                <>
+                    {columnas.length > 0 && (
+                        <div className="sv-cab-cols" style={{ '--cols': columnas.length }} aria-hidden="true">
+                            <span />
+                            {columnas.map(c => <span key={c}>{c}</span>)}
+                            <span />
+                        </div>
+                    )}
+                    <div className="sv-lista">
+                        {variantesFiltradas.map(v => {
+                            const ya = yaElegidas.has(v.id);
+                            return (
+                                <button key={v.id} type="button" className={`sv-variante ${ya ? 'ya' : ''}`}
+                                    style={{ '--cols': columnas.length }}
+                                    onClick={() => !ya && onElegir({ ...v, product_name: producto.name })}>
+                                    <div className="sv-mini">
+                                        {v.image_urls?.[0]
+                                            ? <img src={getImageUrl(v.image_urls[0])} loading="lazy" alt="" />
+                                            : <Package size={15} />}
+                                    </div>
+                                    {columnas.length > 0
+                                        ? columnas.map(c => (
+                                            <span key={c} className={v.config?.[c] ? 'sv-valor' : 'sv-valor sv-sin'}>
+                                                {v.config?.[c] || '—'}
+                                            </span>
+                                        ))
+                                        : <span className="sv-etiqueta">{etiqueta(v.config) || v.sku}</span>}
+                                    {ya ? <span className="sv-ya"><Check size={13} /> agregada</span> : <span className="sv-mas">+</span>}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </>
             )}
             <Estilos />
         </div>
@@ -179,7 +208,13 @@ const Estilos = () => (
         .sv-filtros { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
         .sv-filtros select { height:34px; padding:0 10px; border:1px solid #e2e8f0; border-radius:8px; font-size:12px; background:#fff; color:#334155; }
         .sv-lista { display:flex; flex-direction:column; gap:5px; max-height:300px; overflow-y:auto; padding:2px; }
-        .sv-variante { display:flex; align-items:center; gap:10px; background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:7px 10px; cursor:pointer; text-align:left; }
+        /* El encabezado y las filas comparten la MISMA rejilla: si no, los
+           valores no quedan bajo su etiqueta y volvemos al problema original. */
+        .sv-cab-cols, .sv-variante { display:grid; grid-template-columns:34px repeat(var(--cols), minmax(0,1fr)) 60px; align-items:center; gap:10px; }
+        .sv-cab-cols { padding:0 10px 5px; font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:#94a3b8; font-weight:800; }
+        .sv-variante { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:7px 10px; cursor:pointer; text-align:left; }
+        .sv-valor { font-size:13px; color:#334155; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .sv-sin { color:#cbd5e1; }
         .sv-variante:hover { background:#f8fafc; border-color:#8f0653; }
         .sv-variante.ya { opacity:.55; cursor:default; }
         .sv-mini { width:34px; height:42px; border-radius:6px; overflow:hidden; background:#f1f5f9; display:flex; align-items:center; justify-content:center; color:#cbd5e1; flex-shrink:0; }

@@ -120,6 +120,29 @@ y ahí es donde sirve la propiedad "Sale en la orden de corte" para recortarla.
 > **con** un `padding: 12mm` del body. Los dos se suman, así que la hoja usaba
 > 171,9 de 215,9 mm — tiraba el 20% del ancho sin que se notara.
 
+## El explorador de variantes — el mismo problema, la misma solución
+
+Mostraba cada variante así:
+
+```
+En V · Larga · Negro · Tela Sofia · XS
+Redondo · 3/4 · Floral Primavera · Tela Punto Roma · 12
+```
+
+Dos defectos, y el segundo es el que duele:
+
+1. **No dice qué es cada valor.** "En V" es el cuello, "Larga" son las mangas,
+   "XS" la talla. Hay que saberlo de memoria.
+2. **Los valores no quedan alineados entre filas**, porque cada uno mide
+   distinto. No se puede recorrer una columna con la vista para encontrar todas
+   las negras: hay que leer fila por fila, entera.
+
+En ese nivel **todas las variantes son del mismo producto**, así que comparten
+exactamente las mismas características. Ahora van en columnas con encabezado,
+igual que las tablas, y usando la misma regla de orden
+(`ordenarCaracteristicas`) para que la talla esté siempre en el mismo lugar en
+todas las pantallas.
+
 ## Dónde vive esto
 
 | Pieza | Responsabilidad |
@@ -140,10 +163,6 @@ impresión) y la planilla/comprobante de pedido.
 - **El orden de las columnas** usa una lista corta (talla, color, estampado
   primero). Es sólo presentación, pero lo correcto es un campo `orden` en la
   característica que Paola arrastre desde el panel. Hoy ese campo no existe.
-- **El explorador de variantes** (`SelectorVariantes`) todavía muestra los
-  valores corridos: `En V · Larga · Negro · Tela Sofia · XS`. Es un selector,
-  no un documento de trabajo, pero tiene el mismo problema de lectura y sería el
-  siguiente en recibir el mismo trato.
 - **Vista por clienta de una orden de corte de grupo.** Si una orden junta
   piezas de varias clientas, hoy se agrupa por modelo (para cortar). Falta el
   otro corte —por clienta— para armar los paquetes. Es la vista que el papel ya
