@@ -174,8 +174,9 @@ un error del plan y hay que agregarla.
 - ⬜ Dirección y comuna
 
 ### 1.17 `/crm/cotizaciones` — Cotizaciones
-- ⬜ Listar sin error (rompía con ítems de SKU real)
-- ⬜ Ver detalle con sus ítems
+- ✅ Listar sin error **con un ítem de SKU real dentro** (era lo que rompía) — 2026-08-31
+- ✅ Ver detalle con sus ítems
+- ✅ Cambiar estado a ÉXITO desde la lista → dispara la venta
 - ✅ Cambiar estado
 - ✅ Cerrar → stock 200→198; reabrir → vuelve a 200
 - ✅ Crear cotización manual con SKU real
@@ -184,11 +185,22 @@ un error del plan y hay que agregarla.
 
 ### 1.18 `/crm/orden-corte` — Orden de Corte
 - ✅ El pedido nuevo aparece en la lista
-- ✅ Marcar cortado → 200
-- ⬜ Listar pendientes con volumen real
+- ✅ Vacío explicado cuando no hay órdenes (era H8)
+- ✅ **Piezas pendientes reales**: las 2 del pedido N°23, con todas sus características
+- ✅ Crear orden desde esas piezas → Orden N°2, PENDIENTE
+- ✅ Pendiente → En proceso → Finalizada, con confirmación previa (era H9)
+- ✅ Al finalizar, los ítems quedan `cortado` y **no** se inventa un ingreso
 - ⬜ Filtrar por producto y por característica
-- ⬜ Marcar cortado → sale de pendientes y persiste
-- ⬜ Imprimir
+- ⬜ Repetir una orden
+- ⬜ Imprimir — **no se probó en esta pasada**: el diálogo de impresión cuelga el navegador de automatización. El arreglo (H6) está verificado en el código
+
+### 1.22 Flujo completo de punta a punta ✅ 2026-08-31
+> La prueba que faltaba. Detalle y mediciones en [CONCLUSIONES_FLUJO.md](CONCLUSIONES_FLUJO.md) §2.
+- ✅ Compra web → cotización N°23 con `sku_id` en sus ítems (primera vez en la base)
+- ✅ Confirmar → `SALE −1` en las dos variantes
+- ✅ Con stock: 200 → 199 · Sin stock: 0 → **−1** (la deuda)
+- ✅ Orden de corte N°2 creada, finalizada, piezas marcadas cortadas
+- ⚠️ Quedaron datos de prueba: cotización N°23 y orden N°2, a nombre de **"PRUEBA FLUJO BORRAR"**
 
 ### 1.19 `/crm/shipping-labels` — Etiquetas de Envío
 - ⬜ Seleccionar cotizaciones

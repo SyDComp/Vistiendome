@@ -34,41 +34,48 @@ de nuevo.
 
 ---
 
-## 2. El hallazgo importante: el flujo nunca se ejecutó entero
+## 2. El flujo se ejecutó entero — 2026-08-31
 
-Esto es lo que hay que saber antes que cualquier otra cosa.
+> Esta sección decía "el flujo nunca se ejecutó entero". **Ya no.** Se corrió de
+> punta a punta en el navegador, contra el build de producción, con Allan
+> iniciando sesión en el panel.
 
-| Medición sobre la base real | Resultado |
+**Lo que se hizo, y lo que se midió en cada paso:**
+
+| Paso | Resultado |
 |---|---|
-| Ítems de cotización | 17 |
-| …de esos, **con variante asociada** (`sku_id`) | **0** |
-| Cotizaciones en CERRADA_EXITO | 2 |
-| Movimientos de venta (`SALE`) que generaron | **0** |
-| Movimientos en el libro de stock | 324 |
-| …de esos, de tipo `ADJUSTMENT` | **324 (el 100%)** |
+| Compra desde la tienda, dos prendas | Cotización **N°23**, origen CATALOGO, estado NUEVA |
+| Los ítems llegan con su variante | `sku_id` 1604 y 2108 — **primera vez en toda la base**; los 17 anteriores tienen NULL |
+| Confirmar el pedido (→ CERRADA_EXITO) | 2 movimientos `SALE −1`, nota "Venta cotización #23" |
+| Prenda **con** stock (1604) | 200 → **199** |
+| Prenda **sin** stock (2108) | 0 → **−1** ← la deuda, en vivo |
+| Las piezas aparecen para cortar | Las dos, con todas sus características |
+| Crear orden de corte | Orden **N°2**, estado PENDIENTE |
+| Pendiente → En proceso → Finalizada | Transiciones OK, con confirmación previa |
+| Al finalizar | Ambos ítems `cortado = True`; **ningún ingreso fantasma**, correcto: son líneas de pedido |
+| Saldos finales | 199 y −1, sin movimientos de más |
 
-Los 17 ítems son **anteriores** al arreglo del `sku_id` (el carrito mandaba a
-CRM sin la variante). Sin variante, un ítem no puede descontar stock ni entrar
-a una orden de corte: no se sabe *qué* se vendió, sólo *cuánto*.
+**Se compró a propósito una prenda con stock y otra sin stock**, para ver en la
+misma operación el caso normal y la deuda.
 
-Consecuencias, en orden de importancia:
+El enganche `sku_id` que se arregló hace unas semanas queda confirmado en
+condiciones reales: es lo que hacía que B2 (orden de corte) y B4 (stock)
+estuvieran conectados pero sin poder ejecutarse nunca.
 
-1. **Las dos cotizaciones cerradas con éxito no descontaron nada.** No es que
-   el enganche falle: no tiene a qué agarrarse.
-2. **El libro de stock lo escribe hoy un solo lugar**: el formulario de
-   producto. Los otros cuatro escritores (venta, orden de corte, bodega, carga
-   inicial) están conectados y probados uno por uno, pero **nunca corrieron
-   sobre datos reales**.
-3. **La pantalla de órdenes de corte se ve vacía y parece rota**, y en realidad
-   está correcta: no hay una sola pieza pendiente que tenga variante. Ya se le
-   puso un texto que lo explica (H8), pero la causa de fondo es ésta.
+### Lo que sigue pendiente de esto
 
-**Lo que falta para cerrar esto no es código: es un pedido de prueba de punta a
-punta.** Una compra en la web → confirmarla → armar la orden de corte →
-finalizarla, y ver los tres movimientos aparecer. Es el único punto del sistema
-que sigue siendo teoría, y se prueba en diez minutos.
+- Los **17 ítems viejos** siguen con `sku_id` NULL. No se pueden recuperar (no
+  se sabe qué variante se vendió) y no van a entrar nunca a una orden de corte.
+  Se limpian junto con el resto de las cotizaciones en el seed de entrega (D2).
+- El libro de movimientos ya no es 100% `ADJUSTMENT`: tiene sus dos primeras
+  ventas reales.
 
----
+### Datos de prueba que quedaron
+
+Cotización **N°23** y orden de corte **N°2**, a nombre de
+**"PRUEBA FLUJO BORRAR"** (RUT 11.111.111-1). Se dejaron a propósito para poder
+mirarlos. Al borrarlos hay que borrar también sus dos movimientos `SALE`, o el
+saldo de 1604 queda en 199 y el de 2108 en −1 sin motivo.
 
 ## 3. Redundancias reales
 
