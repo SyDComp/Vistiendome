@@ -6,18 +6,27 @@
  * que son dos formas distintas de mostrar lo mismo — si cada una decidiera sus
  * columnas por su cuenta, se separarían con el primer cambio.
  *
- * El problema que resuelve: las características venían apiladas en una sola
- * celda ("CUELLO: En V · MANGAS: Larga · COLOR: Negro · TALLA: XS"). Eso obliga
- * a leer una frase por fila. En la planilla de papel que ya usa la clienta cada
- * característica tiene su columna, y se lee bajando la vista. Eso es mejor y hay
- * que conservarlo.
+ * Las dos formas de agrupar, y por qué existen las dos
+ * ----------------------------------------------------
+ * Son dos preguntas distintas sobre los mismos datos, y la planilla de papel
+ * las mezcla en una sola hoja:
  *
- * Lo que el papel hace mal y acá no: sus columnas son fijas (TALLA, COLOR,
- * MANGAS, LARGO) y sirven para un tipo de prenda. Un producto con cinco
- * características no cabe, y lo que no cabe se pierde. Acá las columnas SALEN
- * DE LOS DATOS, y por eso se agrupa por producto: cada modelo trae su propio
- * juego de características, y mezclarlos en una sola tabla dejaría media tabla
- * vacía.
+ *   POR MODELO   "¿qué tengo que cortar?" — se tiende la tela de un modelo y se
+ *                cortan todas sus tallas juntas, sin importar de quién sean.
+ *                Cada modelo trae exactamente sus características, así que la
+ *                tabla queda densa.
+ *
+ *   POR CLIENTA  "¿qué le entrego a cada persona?" — es lo que hace el papel.
+ *                Acá el producto pasa a ser UNA COLUMNA MÁS, porque una clienta
+ *                compra varios modelos distintos. El precio de esto es que las
+ *                columnas son la unión de las características de todos sus
+ *                modelos, así que aparecen celdas "—" donde no aplica. Es
+ *                inevitable: no se puede alinear en una fila lo que no comparte
+ *                el mismo juego de características.
+ *
+ * En papel tamaño CARTA hay unos 192 mm útiles. Cada columna que sobra se paga
+ * ahí, y por eso existe la propiedad "Sale en la orden de corte": es lo que
+ * permite recortar la hoja hasta que entre.
  */
 
 // Sólo afecta el ORDEN EN QUE SE MUESTRAN las columnas, nunca qué características
@@ -40,32 +49,39 @@ const ordenarColumnas = (claves) =>
         return d !== 0 ? d : a.localeCompare(b);
     });
 
-const nombreDe = (item) =>
+export const nombreDeProducto = (item) =>
     item.producto || item.producto_nombre || item.sku_name || 'Sin producto';
 
-/**
- * Agrupa las prendas por producto y calcula, para cada grupo, qué columnas
- * necesita.
- *
- * @param permitidas `Set` con los nombres de las características que la clienta
- *        eligió que salgan (propiedad "Sale en la orden de corte"). `null` o
- *        `undefined` = salen todas; NO es lo mismo que un Set vacío, que
- *        significa "no quiere ninguna".
- * @returns {{producto: string, columnas: string[], filas: object[], unidades: number}[]}
- *          En el orden en que los productos aparecen en el pedido.
- */
-export const agruparPorProducto = (items = [], permitidas = null) => {
-    const sale = (clave) => !permitidas || permitidas.has(String(clave).toUpperCase());
-    const grupos = new Map();
+// Una línea cortada para stock no tiene clienta, y eso es información: se
+// agrupa aparte en vez de caer en un grupo "sin nombre".
+const nombreDeCliente = (item) =>
+    item.para_stock ? 'Para stock' : (item.cliente || 'Sin clienta');
 
+/**
+ * @param items
+ * @param por          'producto' (para cortar) o 'cliente' (para entregar).
+ * @param permitidas   `Set` con los nombres de las características que la
+ *                     clienta eligió que salgan ("Sale en la orden de corte").
+ *                     `null`/`undefined` = salen todas; NO es lo mismo que un
+ *                     Set vacío, que significa "no quiere ninguna".
+ * @returns {{titulo: string, columnas: string[], filas: object[],
+ *            unidades: number, conColumnaProducto: boolean}[]}
+ *          En el orden en que aparecen en el pedido.
+ */
+export const agrupar = (items = [], { por = 'producto', permitidas = null } = {}) => {
+    const sale = (clave) => !permitidas || permitidas.has(String(clave).toUpperCase());
+    const porCliente = por === 'cliente';
+    const titularDe = porCliente ? nombreDeCliente : nombreDeProducto;
+
+    const grupos = new Map();
     items.forEach(item => {
-        const producto = nombreDe(item);
-        if (!grupos.has(producto)) {
-            grupos.set(producto, { producto, claves: new Set(), filas: [], unidades: 0 });
+        const titulo = titularDe(item);
+        if (!grupos.has(titulo)) {
+            grupos.set(titulo, { titulo, claves: new Set(), filas: [], unidades: 0 });
         }
-        const grupo = grupos.get(producto);
-        // Sólo se hace columna la característica que tiene valor en alguna fila:
-        // una columna entera vacía es ruido para quien lee.
+        const grupo = grupos.get(titulo);
+        // Sólo se hace columna la característica que tiene valor en alguna fila
+        // del grupo: una columna entera vacía es ruido para quien lee.
         Object.entries(item.config || {}).forEach(([clave, valor]) => {
             if (valor && sale(clave)) grupo.claves.add(clave);
         });
@@ -73,11 +89,14 @@ export const agruparPorProducto = (items = [], permitidas = null) => {
         grupo.unidades += Number(item.cantidad) || 0;
     });
 
-    return [...grupos.values()].map(({ producto, claves, filas, unidades }) => ({
-        producto,
+    return [...grupos.values()].map(({ titulo, claves, filas, unidades }) => ({
+        titulo,
         columnas: ordenarColumnas(claves),
         filas,
         unidades,
+        // Agrupado por clienta, el producto deja de ser el título del grupo y
+        // pasa a ser una columna: una clienta compra varios modelos.
+        conColumnaProducto: porCliente,
     }));
 };
 

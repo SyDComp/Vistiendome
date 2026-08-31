@@ -82,18 +82,43 @@ Las características **son datos que configura la clienta**, así que las column
 tienen que salir de los datos y no estar escritas en el diseño. Todo lo demás
 se sigue de ahí.
 
-## Por qué el papel agrupa por clienta y nosotros por modelo
+## Las dos vistas — y por qué hacen falta las dos
 
-Son dos preguntas distintas sobre los mismos datos:
+Son dos preguntas distintas sobre los mismos datos, y el papel las mezcla en una
+sola hoja:
 
-- **"¿Qué le entrego a cada persona?"** → agrupar por clienta. Es lo que hace el
-  papel, y para armar los paquetes está bien.
-- **"¿Qué tengo que cortar?"** → agrupar por modelo. Es la orden de corte.
+| | Agrupa por | Para qué | El producto es |
+|---|---|---|---|
+| **Por modelo** | modelo | cortar: se tiende la tela de un modelo y salen todas sus tallas juntas | el título del grupo |
+| **Por clienta** | clienta | armar y entregar: es lo que hace el papel | **una columna más** |
 
-El papel fuerza la primera vista y por eso obliga a contar a mano para la
-segunda. Acá la **orden de corte** va por modelo; la **planilla de pedido**
-(`/admin/print/pedido/:id`) es de una clienta, así que ya está agrupada por
-persona.
+La orden de corte tiene las dos, con un selector arriba, y **se imprime la que
+esté elegida**. No hay que decidir cuál es "la correcta": dependen de qué se
+está haciendo en ese momento.
+
+### El costo de la vista por clienta
+
+Una clienta compra varios modelos, y cada modelo trae su propio juego de
+características. Las columnas pasan a ser **la unión** de todos, así que
+aparecen celdas `—` donde no aplica: el tapado no tiene ESTAMPADO, el vestido
+perla no tiene COLOR.
+
+Es inevitable —no se puede alinear en una fila lo que no comparte el mismo juego
+de características— y por eso se marca con `—` en vez de dejarlo en blanco: una
+celda vacía no distingue "no aplica" de "se les olvidó".
+
+### El ancho de la hoja (tamaño carta), medido
+
+Carta son **215,9 mm**. Con `@page margin: 12mm` quedan **191,9 mm útiles**.
+
+Medido sobre la hoja real, en la vista por clienta: 9 columnas (casilla +
+Producto + 6 características + Cant.) ocupan **exactamente 191,9 mm**, sin
+desbordar. Ése es el techo: **con más de 6 o 7 características la hoja se pasa**,
+y ahí es donde sirve la propiedad "Sale en la orden de corte" para recortarla.
+
+> Defecto que había y se corrigió: el documento apilaba `@page margin: 10mm`
+> **con** un `padding: 12mm` del body. Los dos se suman, así que la hoja usaba
+> 171,9 de 215,9 mm — tiraba el 20% del ancho sin que se notara.
 
 ## Dónde vive esto
 
