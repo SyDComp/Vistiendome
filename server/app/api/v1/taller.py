@@ -119,7 +119,7 @@ def _salida(orden: OrdenCorte, db: Session) -> OrdenSalida:
 
 @router.get("/pendientes")
 def piezas_pendientes(
-    estado: Optional[str] = "CERRADA_EXITO",
+    estado: Optional[str] = "CONFIRMADA",
     db: Session = Depends(get_session),
     admin: CuentaAcceso = _ADMIN,
 ):
@@ -128,6 +128,10 @@ def piezas_pendientes(
 
     Es la materia prima para armar una orden, no la orden en sí. Se excluye lo
     que ya está en una orden viva para no cortar dos veces lo mismo.
+
+    Por omisión sólo pedidos CONFIRMADA: cortar tela es irreversible y cuesta
+    material, así que no entra lo que la clienta todavía no aceptó. Se puede
+    ampliar con ?estado=TODAS.
     """
     ya_asignados = {
         oi.cotizacion_item_id
@@ -143,7 +147,7 @@ def piezas_pendientes(
     if estado and estado != "TODAS":
         query = query.where(Cotizacion.estado == estado)
     else:
-        query = query.where(Cotizacion.estado != "CERRADA_PERDIDA")
+        query = query.where(Cotizacion.estado != "CANCELADA")
 
     filas = []
     for it in db.exec(query.order_by(Cotizacion.created_at.asc())).all():

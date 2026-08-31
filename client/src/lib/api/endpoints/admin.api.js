@@ -50,6 +50,17 @@ export const getAdminAttributes = async () => {
     return get(`${ADMIN_BASE}/attributes`);
 };
 
+// ==================== CRM ====================
+
+/**
+ * Cambia el estado de un pedido.
+ *
+ * Ojo con DESPACHADA: ese estado descuenta el stock. No es una etiqueta, es un
+ * hecho — ver `EstadoCotizacion` en el servidor.
+ */
+export const actualizarEstadoCotizacion = (id, estado) =>
+    put(`/api/v1/crm/cotizaciones/${id}/estado`, { estado });
+
 // ==================== COLLECTIONS ====================
 
 export const getAdminCollections = async () => {

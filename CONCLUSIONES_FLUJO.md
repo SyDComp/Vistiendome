@@ -7,32 +7,49 @@
 
 ## 1. El recorrido completo, tal como está hoy
 
+> Reescrito el 2026-08-31. Los estados del pedido tenían nombres sin un
+> significado decidido — el glosario de la pantalla definía "EN PROCESO" como
+> *"contactando al cliente **o armando pedido**"*, dos cosas en una línea.
+
 ```
 Clienta en la web
    │  agrega al carrito, envía el pedido
    ▼
-COTIZACIÓN  (origen CATALOGO)          ← también se crea a mano: origen MANUAL
-   │  estados: NUEVA → EN_PROCESO → CERRADA_EXITO / CERRADA_PERDIDA
-   │
-   ├─ al pasar a CERRADA_EXITO ──────► libro de stock: SALE −N   (reversible)
-   │
-   └─ sus ítems, si el pedido está confirmado, aparecen como
-      "piezas pendientes de corte"
-             ▼
-      ORDEN DE CORTE  (entidad propia, correlativo, la arma Paola)
-         estados: PENDIENTE → EN_PROCESO → FINALIZADA / CANCELADA
-         dos tipos de línea:
-           · línea de pedido  → al finalizar marca el ítem como `cortado`
-           · línea de stock   → al finalizar suma al inventario: RECEIPT +N
-         "repetir" clona la orden como una nueva, dejando historial
+PEDIDO  ──  NUEVA ── EN CONVERSACIÓN ── CONFIRMADA ── DESPACHADA
+                                            │             │
+                                            │             └─► libro de stock: SALE −N
+                                            │                 (reversible)
+                                            └─► sus piezas aparecen como
+                                                "pendientes de corte"
+                                                      ▼
+                                        ORDEN DE CORTE (la arma Paola)
+                                        PENDIENTE → EN PROCESO → FINALIZADA
+                                          · línea de pedido → marca `cortado`
+                                          · línea de stock  → RECEIPT +N
 ```
 
-**El diseño está bien.** Separa lo que de verdad es distinto: vender (CRM) y
-producir (taller). Paola manda en la producción, el sistema no le adivina
-cuándo terminó de cortar; y a la vez le arma la lista para que no la escriba
-de nuevo.
+**La regla con la que se eligieron los estados:** existe uno sólo si alguien
+tiene que declararlo **y** algo depende de él.
 
----
+| Estado | Lo declara | Qué depende de él |
+|---|---|---|
+| NUEVA | nadie (automático) | — |
+| EN CONVERSACIÓN | Paola | nada, es informativo |
+| **CONFIRMADA** | Paola | **habilita cortar**: las piezas entran a pendientes |
+| **DESPACHADA** | se marca al **imprimir la etiqueta** | **descuenta el stock** |
+| CANCELADA | Paola | libera lo pendiente |
+
+**No existe un estado "en corte"**, a propósito: eso el sistema ya lo sabe
+(`CotizacionItem.cortado`, que pone la orden de corte). Pedirle a Paola que
+además lo declare abre la puerta a que las dos versiones no coincidan. Se
+muestra derivado: *"por cortar"*, *"2 de 3 cortadas"*, *"lista para despachar"*.
+
+**Lo que esto arregló:** el stock salía de bodega cuando la clienta *aceptaba*,
+semanas antes de que la prenda existiera. Ahora sale cuando sale de verdad.
+
+**Y el estado nuevo no cuesta un clic:** imprimir la etiqueta *es* el despacho.
+Hay un interruptor junto al botón, encendido por omisión, que se puede apagar
+para reimprimir una etiqueta sin volver a despachar.
 
 ## 2. El flujo se ejecutó entero — 2026-08-31
 

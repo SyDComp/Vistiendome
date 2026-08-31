@@ -8,19 +8,39 @@ import DetailDrawer from '../../../ui/admin/DetailDrawer';
 import { useNotification } from '../../../../context/NotificationContext';
 import { useSettings } from '../../../../context/SettingsContext';
 import { getShippingColor } from '../../../../utils/shippingColors';
-import { FileText, Calendar, MessageCircle, MapPin, Info, Printer, Plus } from 'lucide-react';
+import { FileText, Calendar, MessageCircle, MapPin, Printer, Plus } from 'lucide-react';
 import AdminCotizacionModal from './AdminCotizacionModal';
+
+/**
+ * Los estados de un pedido, con su significado, en un solo lugar.
+ *
+ * El `significa` no es documentación suelta: se pinta en el glosario de la
+ * pantalla. Antes el glosario estaba escrito aparte y decía de EN PROCESO
+ * "contactando al cliente O armando pedido" — dos cosas en una línea. Teniendo
+ * el texto acá, el que cambia un estado ve lo que va a leer la clienta.
+ *
+ * Regla con la que se eligieron: un estado existe sólo si alguien tiene que
+ * declararlo Y algo depende de él. Por eso no hay "en corte": eso lo sabe el
+ * sistema solo, y se muestra derivado.
+ */
+export const ESTADOS = [
+    { value: 'NUEVA', label: 'NUEVA', color: '#10b981', bg: '#ecfdf5',
+      significa: 'Llegó y todavía nadie la revisó.' },
+    { value: 'EN_CONVERSACION', label: 'EN CONVERSACIÓN', color: '#f59e0b', bg: '#fef3c7',
+      significa: 'Hablando con la clienta: tallas, precio, plazos.' },
+    { value: 'CONFIRMADA', label: 'CONFIRMADA', color: '#3b82f6', bg: '#eff6ff',
+      significa: 'La clienta aceptó. Recién acá las piezas entran a la orden de corte.' },
+    { value: 'DESPACHADA', label: 'DESPACHADA', color: '#7c3aed', bg: '#f5f3ff',
+      significa: 'Salió del taller. Acá se descuenta del stock, no antes.' },
+    { value: 'CANCELADA', label: 'CANCELADA', color: '#ef4444', bg: '#fef2f2',
+      significa: 'No se concretó, o un pedido confirmado se cayó.' },
+];
 
 const StateSelector = ({ cotizacion, onUpdate }) => {
     const { toast } = useNotification();
     const [loading, setLoading] = useState(false);
 
-    const states = [
-        { value: 'NUEVA', label: 'NUEVA', color: '#10b981', bg: '#ecfdf5' },
-        { value: 'EN_PROCESO', label: 'EN PROCESO', color: '#f59e0b', bg: '#fef3c7' },
-        { value: 'CERRADA_EXITO', label: 'ÉXITO', color: '#3b82f6', bg: '#eff6ff' },
-        { value: 'CERRADA_PERDIDA', label: 'PERDIDA', color: '#ef4444', bg: '#fef2f2' }
-    ];
+    const states = ESTADOS;
 
     const currentStyle = states.find(s => s.value === cotizacion.estado) || states[0];
 
@@ -79,7 +99,6 @@ const CotizacionesView = () => {
     const [activeFilters, setActiveFilters] = useState({});
     const [showDetail, setShowDetail] = useState(false);
     const [detailData, setDetailData] = useState(null);
-    const [showLegend, setShowLegend] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
     useEffect(() => {
@@ -220,73 +239,31 @@ const CotizacionesView = () => {
                     >
                         <Printer size={16} /> 📦 Etiquetas de Envío (Ahorro Papel y Tinta)
                     </button>
-                    <button 
-                        onClick={() => setShowLegend(!showLegend)}
-                        style={{ 
-                            background: showLegend ? '#f1f5f9' : 'transparent', 
-                            border: '1px solid #e2e8f0', 
-                            borderRadius: '10px', 
-                            padding: '10px 14px', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center',
-                            gap: '8px', 
-                            color: '#475569', 
-                            cursor: 'pointer', 
-                            fontSize: '13px', 
-                            fontWeight: '600',
-                            flex: '1 1 200px'
-                        }}
-                    >
-                        <Info size={15} /> {showLegend ? 'Ocultar Glosario' : '¿Qué significan los estados?'}
-                    </button>
                 </div>
             </div>
 
-            {showLegend && (
-                <div style={{
-                    backgroundColor: '#f8fafc',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                    padding: '16px 20px',
-                    marginBottom: '20px',
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                    gap: '20px',
-                    fontSize: '12px',
-                    animation: 'fadeIn 0.2s ease-in-out'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#10b981', flexShrink: 0, marginTop: '4px' }}></span>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                            <span style={{ fontWeight: '700', color: '#1e293b', letterSpacing: '0.5px' }}>NUEVA</span>
-                            <span style={{ color: '#64748b', lineHeight: '1.4' }}>Recién recibida, pendiente de revisión.</span>
+            {/* Siempre visible, no detrás de un botón: un glosario que hay que
+                ir a buscar no cumple su función. La prueba es que la
+                ambigüedad de "EN PROCESO" estaba escrita ahí y nadie la vio. */}
+            <div className="cot-glosario">
+                {ESTADOS.map(e => (
+                    <div key={e.value} className="cot-glosario-item">
+                        <span className="cot-glosario-punto" style={{ backgroundColor: e.color }} />
+                        <div>
+                            <span className="cot-glosario-nombre">{e.label}</span>
+                            <span className="cot-glosario-texto">{e.significa}</span>
                         </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#f59e0b', flexShrink: 0, marginTop: '4px' }}></span>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                            <span style={{ fontWeight: '700', color: '#1e293b', letterSpacing: '0.5px' }}>EN PROCESO</span>
-                            <span style={{ color: '#64748b', lineHeight: '1.4' }}>Contactando al cliente o armando pedido.</span>
-                        </div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#3b82f6', flexShrink: 0, marginTop: '4px' }}></span>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                            <span style={{ fontWeight: '700', color: '#1e293b', letterSpacing: '0.5px' }}>ÉXITO</span>
-                            <span style={{ color: '#64748b', lineHeight: '1.4' }}>El cliente aceptó la cotización.</span>
-                        </div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#ef4444', flexShrink: 0, marginTop: '4px' }}></span>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                            <span style={{ fontWeight: '700', color: '#1e293b', letterSpacing: '0.5px' }}>PERDIDA</span>
-                            <span style={{ color: '#64748b', lineHeight: '1.4' }}>Cliente rechazó o no contestó.</span>
-                        </div>
-                    </div>
-                </div>
-            )}
-            
+                ))}
+            </div>
+            <style>{`
+                .cot-glosario { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px 20px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px 18px; margin-bottom:18px; }
+                .cot-glosario-item { display:flex; align-items:flex-start; gap:9px; }
+                .cot-glosario-punto { width:9px; height:9px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+                .cot-glosario-nombre { display:block; font-size:11px; font-weight:800; letter-spacing:.4px; color:#1e293b; }
+                .cot-glosario-texto { display:block; font-size:12px; color:#64748b; line-height:1.4; margin-top:1px; }
+            `}</style>
+
             <FilterBar 
                 onSearch={setSearchTerm} 
                 placeholder="Buscar por ID, origen o estado..."

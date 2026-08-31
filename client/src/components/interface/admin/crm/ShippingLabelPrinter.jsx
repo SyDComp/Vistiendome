@@ -9,6 +9,8 @@ import Barcode from 'react-barcode';
 import Button from '../../../ui/Button';
 import { useSettings } from '../../../../context/SettingsContext';
 import { getShippingColor } from '../../../../utils/shippingColors';
+import { actualizarEstadoCotizacion } from '../../../../lib/api/endpoints';
+import { useNotification } from '../../../../context/NotificationContext';
 
 // Formatos de disposición de papel/rollo
 const LABEL_FORMATS = {
@@ -87,6 +89,7 @@ const ShippingLabelPrinter = () => {
     const navigate = useNavigate();
     const initialSelectedId = searchParams.get('id');
 
+    const { toast } = useNotification();
     const [cotizaciones, setCotizaciones] = useState([]);
     const [clientesMap, setClientesMap] = useState({});
     const [loading, setLoading] = useState(true);
@@ -94,6 +97,12 @@ const ShippingLabelPrinter = () => {
 
     // Selección: mapa de id -> { coti, cliente, copies }
     const [selected, setSelected] = useState({});
+    // Imprimir la etiqueta ES el despacho: es el momento en que la prenda sale
+    // del taller. Marcarlo acá evita pedir un clic aparte para algo que ya se
+    // está haciendo — y ese estado es el que descuenta el stock.
+    // Va encendido por omisión y se puede apagar para reimprimir una etiqueta
+    // sin volver a despachar.
+    const [marcarDespachadas, setMarcarDespachadas] = useState(true);
 
     // Configuración de impresión
     const [formatKey, setFormatKey] = useState('a4_2x2');
@@ -255,8 +264,31 @@ const ShippingLabelPrinter = () => {
         return result;
     }, [previewSlots, slotsPerPage]);
 
+    const marcarComoDespachadas = async () => {
+        const pendientes = selectedList
+            .map(sel => sel.coti)
+            .filter(c => c && c.estado !== 'DESPACHADA');
+        if (!pendientes.length) return;
+
+        const resultados = await Promise.allSettled(
+            pendientes.map(c => actualizarEstadoCotizacion(c.id, 'DESPACHADA'))
+        );
+        const fallaron = resultados.filter(r => r.status === 'rejected').length;
+
+        if (fallaron) {
+            // Se dice cuántos, no un "hubo un error": la clienta necesita saber
+            // cuáles revisar a mano, porque de eso depende el stock.
+            toast.error(`${fallaron} de ${pendientes.length} no se pudieron marcar como despachadas. Revísalos en Cotizaciones.`);
+        } else {
+            toast.success(pendientes.length === 1
+                ? 'Pedido marcado como despachado'
+                : `${pendientes.length} pedidos marcados como despachados`);
+        }
+        fetchData();
+    };
+
     // Manejar Impresión en ventana limpia
-    const handlePrint = () => {
+    const handlePrint = async () => {
         if (totalCopies === 0) return;
         const printContent = printContainerRef.current?.innerHTML;
         if (!printContent) return;
@@ -266,6 +298,10 @@ const ShippingLabelPrinter = () => {
             alert('Por favor permite las ventanas emergentes (pop-ups) en tu navegador para imprimir.');
             return;
         }
+
+        // Se marca después de abrir la ventana: si el navegador bloquea el
+        // pop-up no se imprimió nada, y no corresponde dar por despachado.
+        if (marcarDespachadas) marcarComoDespachadas();
 
         printWindow.document.write(`
             <!DOCTYPE html>
@@ -576,6 +612,17 @@ const ShippingLabelPrinter = () => {
                     >
                         <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Actualizar
                     </Button>
+                    <label
+                        title="Al imprimir, los pedidos seleccionados pasan a DESPACHADA y se descuentan del stock"
+                        style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12px', fontWeight: '700', color: '#475569', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    >
+                        <input
+                            type="checkbox"
+                            checked={marcarDespachadas}
+                            onChange={e => setMarcarDespachadas(e.target.checked)}
+                        />
+                        Marcar como despachadas
+                    </label>
                     <Button
                         variant="primary"
                         onClick={handlePrint}

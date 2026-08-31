@@ -1088,12 +1088,12 @@ def list_skus_admin(
         statement = statement.outerjoin(stock_subquery, SKU.id == stock_subquery.c.sku_id)
         
         if stock_status == "agotado":
-            # `<= 0`, no `== 0`. Un saldo negativo es posible y real: la venta
-            # descuenta al confirmar el pedido (CERRADA_EXITO) y la prenda hecha
-            # a pedido se corta despues, asi que la variante pasa toda la
-            # produccion en negativo. Con `== 0` no caia en "agotado", ni en
-            # "bajo stock" (pide > 0), ni en "disponible": desaparecia de los
-            # tres filtros, justo en la pantalla que existe para decir que falta.
+            # `<= 0`, no `== 0`. Un saldo negativo es posible y real: una prenda
+            # hecha a pedido nunca estuvo en bodega, asi que al despacharla el
+            # saldo queda en negativo — es la deuda, y es informacion buena.
+            # Con `== 0` no caia en "agotado", ni en "bajo stock" (pide > 0), ni
+            # en "disponible": desaparecia de los tres filtros, justo en la
+            # pantalla que existe para decir que falta.
             statement = statement.where(or_(stock_subquery.c.total_stock <= 0, stock_subquery.c.total_stock == None))
         elif stock_status == "bajo_stock":
             statement = statement.where(and_(stock_subquery.c.total_stock > 0, stock_subquery.c.total_stock <= stock_threshold))

@@ -7,7 +7,7 @@ import { get, post, put, del } from '../client.js';
 const BASE = '/api/v1/ordenes-corte';
 
 /** Piezas de pedidos que todavía no están en ninguna orden. Materia prima. */
-export const getPiezasPendientes = (estado = 'CERRADA_EXITO') =>
+export const getPiezasPendientes = (estado = 'CONFIRMADA') =>
     get(`${BASE}/pendientes?estado=${encodeURIComponent(estado)}`);
 
 export const getOrdenesCorte = (estado) =>

@@ -8,10 +8,40 @@ def generate_ulid() -> str:
     return str(ulid.ULID())
 
 class EstadoCotizacion(str, Enum):
+    """
+    El recorrido de un pedido, con un significado por estado.
+
+    Regla con la que se eligieron: **un estado existe sólo si alguien tiene que
+    declararlo Y algo depende de él.** Lo que el sistema ya sabe no se pregunta.
+    Por eso NO hay un estado "en corte": si una pieza está cortada lo sabe el
+    sistema (`CotizacionItem.cortado`, que pone la orden de corte), y pedirle a
+    la clienta que además lo declare abre la puerta a que las dos versiones no
+    coincidan.
+
+    Antes eran NUEVA / EN_PROCESO / CERRADA_EXITO / CERRADA_PERDIDA. El problema
+    no era cómo estaban implementados sino que nunca se decidió qué querían
+    decir: el glosario de la pantalla definía EN_PROCESO como "contactando al
+    cliente **o armando pedido**" — dos cosas distintas en una línea.
+    """
+
+    # Llegó del sitio o se cargó a mano. No requiere ningún clic.
     NUEVA = "NUEVA"
-    EN_PROCESO = "EN_PROCESO"
-    CERRADA_EXITO = "CERRADA_EXITO"
-    CERRADA_PERDIDA = "CERRADA_PERDIDA"
+
+    # Se está hablando con la clienta: tallas, precio, plazos. Informativo.
+    EN_CONVERSACION = "EN_CONVERSACION"
+
+    # La clienta aceptó. ES LA PUERTA DE LA PRODUCCIÓN: recién acá las piezas
+    # aparecen como pendientes de corte, porque cortar tela es irreversible y
+    # cuesta material.
+    CONFIRMADA = "CONFIRMADA"
+
+    # Salió del taller. ACÁ SALE EL STOCK, y no antes: hasta este momento la
+    # prenda seguía en la casa. Se marca sola al imprimir la etiqueta de envío,
+    # que es el momento real del despacho, así que no cuesta un clic extra.
+    DESPACHADA = "DESPACHADA"
+
+    # No se concretó: la clienta no aceptó, o un pedido confirmado se cayó.
+    CANCELADA = "CANCELADA"
 
 class OrigenCotizacion(str, Enum):
     CATALOGO = "CATALOGO"
@@ -71,7 +101,7 @@ class CotizacionItem(SQLModel, table=True):
     nombre_custom: Optional[str] = Field(default=None, max_length=255)
 
     # Vive en el ítem, no en la Cotizacion: una cotización puede tener piezas
-    # ya cortadas y otras no. El estado de la Cotizacion (NUEVA/EN_PROCESO/...)
+    # ya cortadas y otras no. El estado de la Cotizacion (NUEVA/CONFIRMADA/...)
     # es el ciclo de la VENTA; esto es el ciclo de la CONFECCIÓN — ejes distintos.
     cortado: bool = Field(default=False)
 

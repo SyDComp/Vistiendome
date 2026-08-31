@@ -275,17 +275,22 @@ def listar_cotizaciones(session: Session = Depends(get_session), skip: int = 0, 
 
 def _sincronizar_stock_venta(session: Session, cotizacion: Cotizacion, estado_anterior: EstadoCotizacion, estado_nuevo: EstadoCotizacion) -> None:
     """
-    Al pasar a CERRADA_EXITO, descuenta el stock vendido (un StockMovement SALE
-    por ítem con SKU real). Al salir de CERRADA_EXITO (reabrir), revierte el
-    descuento. Idempotente vía reference_id=item.id: cerrar, reabrir y volver a
-    cerrar no descuenta dos veces, porque siempre revisa si el movimiento de
-    ESE ítem ya existe antes de crearlo — y lo borra al reabrir, así que el
-    siguiente cierre lo vuelve a crear limpio.
-    """
-    entra_a_exito = estado_nuevo == EstadoCotizacion.CERRADA_EXITO and estado_anterior != EstadoCotizacion.CERRADA_EXITO
-    sale_de_exito = estado_anterior == EstadoCotizacion.CERRADA_EXITO and estado_nuevo != EstadoCotizacion.CERRADA_EXITO
+    Al pasar a DESPACHADA descuenta el stock (un StockMovement SALE por ítem con
+    SKU real); al salir de DESPACHADA lo revierte.
 
-    if not entra_a_exito and not sale_de_exito:
+    En DESPACHADA y no antes: la prenda deja la bodega cuando sale del taller,
+    no cuando la clienta acepta. Antes el gancho estaba en "aceptó", así que el
+    stock bajaba semanas antes de que la prenda existiera siquiera.
+
+    Idempotente vía reference_id=item.id: despachar, revertir y volver a
+    despachar no descuenta dos veces, porque siempre revisa si el movimiento de
+    ESE ítem ya existe antes de crearlo — y lo borra al revertir, así que el
+    siguiente despacho lo vuelve a crear limpio.
+    """
+    entra_a_despacho = estado_nuevo == EstadoCotizacion.DESPACHADA and estado_anterior != EstadoCotizacion.DESPACHADA
+    sale_de_despacho = estado_anterior == EstadoCotizacion.DESPACHADA and estado_nuevo != EstadoCotizacion.DESPACHADA
+
+    if not entra_a_despacho and not sale_de_despacho:
         return
 
     for item in cotizacion.items:
@@ -299,15 +304,15 @@ def _sincronizar_stock_venta(session: Session, cotizacion: Cotizacion, estado_an
             )
         ).first()
 
-        if entra_a_exito and not existente:
+        if entra_a_despacho and not existente:
             session.add(StockMovement(
                 sku_id=item.sku_id,
                 type=MovementType.SALE,
                 quantity=-item.cantidad,
                 reference_id=item.id,
-                note=f"Venta cotización #{cotizacion.numero}",
+                note=f"Despacho pedido #{cotizacion.numero}",
             ))
-        elif sale_de_exito and existente:
+        elif sale_de_despacho and existente:
             session.delete(existente)
 
 class EstadoUpdate(BaseModel):
