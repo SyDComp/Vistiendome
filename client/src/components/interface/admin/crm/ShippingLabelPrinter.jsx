@@ -11,6 +11,38 @@ import { useSettings } from '../../../../context/SettingsContext';
 import { getShippingColor } from '../../../../utils/shippingColors';
 import { actualizarEstadoCotizacion } from '../../../../lib/api/endpoints';
 import { useNotification } from '../../../../context/NotificationContext';
+import { estadoDeProduccion, TONOS } from '../../../../utils/produccion';
+
+/**
+ * Qué pedidos se ven. Existe porque la pantalla traía TODOS —nuevos, en
+ * conversación y hasta los cancelados— y desde que imprimir marca DESPACHADA,
+ * imprimir la etiqueta de un pedido sin confirmar le descontaría el stock a una
+ * venta que nadie aceptó.
+ *
+ * La vista por omisión es un conjunto de trabajo que SE VACÍA: lo que está por
+ * despachar deja la lista al despacharse. Por eso no crece sin techo; la que
+ * crece es "Todas", y para eso está el buscador.
+ */
+const VISTAS = {
+    por_despachar: {
+        etiqueta: 'Por despachar',
+        detalle: 'confirmadas, todavía en el taller',
+        estados: ['CONFIRMADA'],
+    },
+    despachadas: {
+        etiqueta: 'Ya despachadas',
+        detalle: 'para reimprimir una etiqueta',
+        estados: ['DESPACHADA'],
+    },
+    todas: {
+        etiqueta: 'Todas',
+        detalle: 'incluye las que no se pueden despachar',
+        estados: null,
+    },
+};
+
+// Sólo un pedido aceptado o ya despachado tiene sentido en una etiqueta.
+const SE_PUEDE_DESPACHAR = ['CONFIRMADA', 'DESPACHADA'];
 
 // Formatos de disposición de papel/rollo
 const LABEL_FORMATS = {
@@ -103,6 +135,8 @@ const ShippingLabelPrinter = () => {
     // Va encendido por omisión y se puede apagar para reimprimir una etiqueta
     // sin volver a despachar.
     const [marcarDespachadas, setMarcarDespachadas] = useState(true);
+    const [vista, setVista] = useState('por_despachar');
+    const [conteos, setConteos] = useState({});
 
     // Configuración de impresión
     const [formatKey, setFormatKey] = useState('a4_2x2');
@@ -127,10 +161,17 @@ const ShippingLabelPrinter = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [cotiRes, cliRes] = await Promise.all([
-                fetch('/api/v1/crm/'),
-                fetch('/api/v1/crm/clientes')
+            // Se pide sólo lo de la vista activa: traer todo y filtrar acá
+            // funciona con 14 pedidos y falla en el 101, porque el limit del
+            // servidor corta antes de que el filtro llegue a mirar.
+            const estados = VISTAS[vista].estados;
+            const query = estados ? '?' + estados.map(e => `estado=${e}`).join('&') : '';
+            const [cotiRes, cliRes, conteoRes] = await Promise.all([
+                fetch(`/api/v1/crm/${query}`),
+                fetch('/api/v1/crm/clientes'),
+                fetch('/api/v1/crm/conteo-estados'),
             ]);
+            if (conteoRes.ok) setConteos(await conteoRes.json());
             if (cotiRes.ok && cliRes.ok) {
                 const cotiData = await cotiRes.json();
                 const cliData = await cliRes.json();
@@ -168,7 +209,11 @@ const ShippingLabelPrinter = () => {
 
     useEffect(() => {
         fetchData();
-    }, [initialSelectedId]);
+        // Al cambiar de vista se limpia la selección: dejar seleccionado algo
+        // que ya no se ve es la forma más fácil de imprimir una etiqueta que
+        // nadie quiso.
+        setSelected({});
+    }, [initialSelectedId, vista]);
 
     // Filtrar cotizaciones
     const filteredCotizaciones = useMemo(() => {
@@ -190,6 +235,7 @@ const ShippingLabelPrinter = () => {
     const totalCopies = selectedList.reduce((acc, curr) => acc + (curr.copies || 1), 0);
 
     const toggleSelect = (coti) => {
+        if (!SE_PUEDE_DESPACHAR.includes(coti.estado)) return;
         setSelected(prev => {
             const next = { ...prev };
             if (next[coti.id]) {
@@ -219,7 +265,10 @@ const ShippingLabelPrinter = () => {
 
     const selectAllFiltered = () => {
         const next = { ...selected };
-        filteredCotizaciones.forEach(c => {
+        // "Todos" es todos los que SE PUEDEN despachar. En la vista "Todas"
+        // hay canceladas y sin confirmar, y meterlas en la selección seria
+        // despacharlas con un clic.
+        filteredCotizaciones.filter(c => SE_PUEDE_DESPACHAR.includes(c.estado)).forEach(c => {
             if (!next[c.id]) {
                 next[c.id] = {
                     coti: c,
@@ -661,6 +710,35 @@ const ShippingLabelPrinter = () => {
                             </div>
                         </div>
 
+                        <div style={{ display: 'flex', gap: '5px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                            {Object.entries(VISTAS).map(([clave, v]) => {
+                                const activa = vista === clave;
+                                const n = v.estados
+                                    ? v.estados.reduce((a, e) => a + (conteos[e] || 0), 0)
+                                    : Object.values(conteos).reduce((a, b) => a + b, 0);
+                                return (
+                                    <button
+                                        key={clave}
+                                        type="button"
+                                        onClick={() => setVista(clave)}
+                                        title={v.detalle}
+                                        style={{
+                                            border: `1.5px solid ${activa ? '#8f0653' : '#e2e8f0'}`,
+                                            background: activa ? '#8f0653' : '#fff',
+                                            color: activa ? '#fff' : '#475569',
+                                            borderRadius: '20px', padding: '4px 11px', cursor: 'pointer',
+                                            fontSize: '11px', fontWeight: '800', whiteSpace: 'nowrap',
+                                        }}
+                                    >
+                                        {v.etiqueta} ({n})
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <p style={{ margin: '0 0 8px', fontSize: '11px', color: '#94a3b8', lineHeight: 1.35 }}>
+                            {VISTAS[vista].detalle}
+                        </p>
+
                         <div style={{ position: 'relative', width: '100%', boxSizing: 'border-box' }}>
                             <Search size={13} style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                             <input
@@ -690,17 +768,24 @@ const ShippingLabelPrinter = () => {
                                 const fullName = cli ? `${cli.nombres || ''} ${cli.apellidos || ''}`.trim() : 'Cliente sin registro';
                                 const isSel = !!selected[c.id];
                                 const copies = isSel ? selected[c.id].copies : 0;
+                                // Un pedido sin confirmar o cancelado no se
+                                // despacha. No se ofrece la casilla en gris: no
+                                // se ofrece — y se dice por qué, que si no
+                                // parece que la pantalla está rota.
+                                const despachable = SE_PUEDE_DESPACHAR.includes(c.estado);
+                                const confeccion = estadoDeProduccion(c);
 
                                 return (
                                     <div
                                         key={c.id}
-                                        onClick={() => toggleSelect(c)}
+                                        onClick={() => despachable && toggleSelect(c)}
                                         style={{
                                             padding: '12px',
                                             borderRadius: '12px',
                                             border: `1.5px solid ${isSel ? '#8f0653' : '#e2e8f0'}`,
                                             background: isSel ? '#fdf2f8' : '#fff',
-                                            cursor: 'pointer',
+                                            cursor: despachable ? 'pointer' : 'default',
+                                            opacity: despachable ? 1 : 0.6,
                                             display: 'flex',
                                             justifyContent: 'space-between',
                                             alignItems: 'center',
@@ -710,7 +795,9 @@ const ShippingLabelPrinter = () => {
                                     >
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                             <div style={{ color: isSel ? '#8f0653' : '#cbd5e1' }}>
-                                                {isSel ? <CheckSquare size={18} /> : <Square size={18} />}
+                                                {!despachable
+                                                    ? <span style={{ width: 18, display: 'inline-block' }} />
+                                                    : isSel ? <CheckSquare size={18} /> : <Square size={18} />}
                                             </div>
                                             <div>
                                                 <div style={{ fontSize: '13px', fontWeight: '800', color: '#1e1b4b', marginBottom: '2px' }}>
@@ -730,6 +817,21 @@ const ShippingLabelPrinter = () => {
                                                         );
                                                     })()}
                                                 </div>
+                                                {/* Si no se puede despachar, se dice por qué: una fila
+                                                    apagada sin explicación se lee como pantalla rota.
+                                                    Si se puede, se dice si de verdad está lista — no
+                                                    conviene despachar algo que todavía no se cortó. */}
+                                                {!despachable ? (
+                                                    <div style={{ fontSize: '10.5px', color: '#b91c1c', marginTop: '3px', fontWeight: '700' }}>
+                                                        {c.estado === 'CANCELADA'
+                                                            ? 'Cancelada — no se despacha'
+                                                            : 'Sin confirmar — la clienta todavía no acepta'}
+                                                    </div>
+                                                ) : confeccion.texto && (
+                                                    <div style={{ fontSize: '10.5px', color: TONOS[confeccion.tono].color, marginTop: '3px', fontWeight: '700' }}>
+                                                        {confeccion.texto}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
 

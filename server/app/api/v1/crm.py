@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session, select
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlmodel import Session, select, func
 from sqlalchemy import text
 from typing import List, Optional
 from datetime import datetime
@@ -328,9 +328,41 @@ def crear_cotizacion(data: CotizacionCreate, session: Session = Depends(get_sess
     
     return _get_cotizacion_read(cotizacion)
 
+@router.get("/conteo-estados")
+def conteo_por_estado(session: Session = Depends(get_session), current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
+    """
+    Cuántos pedidos hay en cada estado. Una consulta, sin traer las filas.
+
+    Existe para que una pantalla pueda decir "Por despachar (2)" sin cargar
+    todos los pedidos sólo para contarlos.
+    """
+    filas = session.exec(
+        select(Cotizacion.estado, func.count()).group_by(Cotizacion.estado)
+    ).all()
+    return {str(estado.value if hasattr(estado, "value") else estado): n for estado, n in filas}
+
+
 @router.get("/", response_model=List[CotizacionRead])
-def listar_cotizaciones(session: Session = Depends(get_session), skip: int = 0, limit: int = 100, current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
-    cotizaciones = session.exec(select(Cotizacion).order_by(Cotizacion.created_at.desc()).offset(skip).limit(limit)).all()
+def listar_cotizaciones(
+    session: Session = Depends(get_session),
+    skip: int = 0,
+    limit: int = 100,
+    estado: Optional[List[EstadoCotizacion]] = Query(default=None),
+    current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR")),
+):
+    """
+    `?estado=CONFIRMADA&estado=DESPACHADA` acota la lista en el servidor.
+
+    Importa para pantallas como la de etiquetas: traer todo y filtrar en el
+    navegador funciona con 14 pedidos y deja de funcionar en el 101, porque el
+    `limit` corta antes de que el filtro llegue a mirar.
+    """
+    consulta = select(Cotizacion)
+    if estado:
+        consulta = consulta.where(Cotizacion.estado.in_(estado))
+    cotizaciones = session.exec(
+        consulta.order_by(Cotizacion.created_at.desc()).offset(skip).limit(limit)
+    ).all()
     ordenes = _mapa_ordenes_de_corte(session, [c.id for c in cotizaciones])
     return [_get_cotizacion_read(c, ordenes.get(c.id, [])) for c in cotizaciones]
 

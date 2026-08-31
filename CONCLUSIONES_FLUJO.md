@@ -68,6 +68,42 @@ piezas cortadas — las marca la orden de corte al finalizar, nadie las declara:
 Sólo cuenta las piezas **con variante real**: un ítem escrito a mano no se puede
 cortar, y sumarlo daría un "2 de 3" que nunca llega a 3.
 
+### La pantalla de etiquetas: qué se muestra, y por qué
+
+Traía **todos** los pedidos sin filtrar: nuevos, en conversación y hasta los
+cancelados. Eso era desprolijo hasta que imprimir pasó a marcar DESPACHADA —
+desde ahí, imprimir la etiqueta de un pedido sin confirmar le habría descontado
+el stock a una venta que nadie aceptó.
+
+Tres vistas, y la de por omisión es un **conjunto de trabajo que se vacía**:
+
+| Vista | Qué trae | Para qué |
+|---|---|---|
+| **Por despachar** (por omisión) | CONFIRMADA | lo que está listo o casi, en el taller |
+| Ya despachadas | DESPACHADA | reimprimir una etiqueta |
+| Todas | todo | buscar algo puntual |
+
+**Por eso el listado no crece sin techo:** lo que está por despachar deja la
+lista al despacharse. La que crece es "Todas", y para eso está el buscador.
+
+Detalles que importan:
+
+- **Se pide al servidor sólo lo de la vista activa** (`?estado=`). Traer todo y
+  filtrar en el navegador anda con 14 pedidos y falla en el 101, porque el
+  `limit` corta antes de que el filtro llegue a mirar.
+- Los contadores de cada vista salen de **una consulta aparte**
+  (`/crm/conteo-estados`), sin traer las filas.
+- Un pedido que **no se puede despachar no tiene casilla** —no una casilla en
+  gris: ninguna— y **dice por qué**: *"Sin confirmar — la clienta todavía no
+  acepta"*, *"Cancelada — no se despacha"*. Una fila apagada sin explicación se
+  lee como pantalla rota.
+- "Todos" selecciona sólo lo despachable. Verificado en la vista Todas: de 14
+  filas seleccionó 3.
+- Cada fila despachable muestra su **confección** (*"Lista para despachar"*,
+  *"2 de 3 cortadas"*): no conviene despachar algo que todavía no se cortó.
+- Cambiar de vista **limpia la selección**: dejar seleccionado algo que ya no se
+  ve es la forma más fácil de imprimir una etiqueta que nadie quiso.
+
 ### Las tres pantallas, conectadas
 
 Antes eran tres islas. Ahora:
