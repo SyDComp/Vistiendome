@@ -24,7 +24,7 @@
 | B3 | Comprobante de compra sin precios | ✅ Hecho — misma pieza que B2, modo `?modo=cliente` sin precios |
 | B4 | Stock real (opción B, decidida) | ✅ Hecho — gancho de venta + columna muerta eliminada. Valores reales: **pendiente que Paola haga su pasada de ajuste** (no bloquea, se cambia libre desde el panel) |
 | B5 | Promociones / regalos condicionales | ✅ Hecho — decidido automático en la web (ver abajo), configurable desde Ajustes |
-| B6 | Video en producto | Hecho, **falta que Paola confirme** embebido vs. link |
+| B6 | Video | ✅ **Cerrado** (2026-08-31). Sólo YouTube, decidido con criterio: Facebook e Instagram exigen su SDK y rompen los embeds seguido. Si Paola publica ahí, que suba el mismo video a YouTube **como "no listado"** — no aparece en búsquedas y da un embed que no se rompe. Se carga **con fachada** (miniatura + play; YouTube se descarga recién al hacer clic) y hay un **bloque de video en el CMS**, así ella decide dónde va en la portada |
 
 ### C · Mejoras internas (pueden esperar)
 | # | Qué |

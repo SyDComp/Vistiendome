@@ -685,6 +685,31 @@ const DetailDrawer = ({
                 ]
             });
 
+            if (currData.type === 'video') {
+                s.push({
+                    title: 'Video de YouTube',
+                    icon: <LayoutDashboard size={18} />,
+                    editable: true,
+                    type: 'form',
+                    inputs: [
+                        {
+                            // Se acepta el link tal cual: watch?v=, youtu.be,
+                            // shorts o embed. Nadie tiene que extraer un id.
+                            label: 'Link del video (YouTube)',
+                            type: 'text', name: 'video_url',
+                            value: editData.config?.video_url || '',
+                            onChange: (e) => setEditData({ ...editData, config: { ...editData.config, video_url: e.target.value } }),
+                        },
+                        {
+                            label: 'Título visible (opcional)',
+                            type: 'text', name: 'v_title',
+                            value: editData.config?.title || '',
+                            onChange: (e) => setEditData({ ...editData, config: { ...editData.config, title: e.target.value } }),
+                        },
+                    ],
+                });
+            }
+
             if (currData.type === 'hero') {
                 s.push({
                     title: 'Contenido del Hero',

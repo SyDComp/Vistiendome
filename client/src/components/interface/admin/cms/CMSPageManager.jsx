@@ -17,8 +17,7 @@ import {
     ShoppingBag,
     ChevronUp,
     ChevronDown,
-    ArrowUpDown
-} from 'lucide-react';
+    ArrowUpDown, Video } from 'lucide-react';
 import DetailDrawer from '../../../ui/admin/DetailDrawer';
 import StudioEditor from '../../../ui/admin/cms/studio/StudioEditor';
 import DataTableStudio from '../../../ui/admin/cms/studio/DataTableStudio';
@@ -210,6 +209,7 @@ const CMSPageManager = ({
             case 'composition_carousel': return <Layers size={18} />;
             case 'text_post': return <Type size={18} />;
             case 'data_table': return <TableIcon size={18} />;
+            case 'video': return <Video size={18} />;
             case 'recent_products':
             case 'product_carousel': return <ShoppingBag size={18} />;
             default: return <Layout size={18} />;
@@ -249,6 +249,7 @@ const CMSPageManager = ({
                             <button onClick={() => handleCreate('text_post')}><Type size={14} /> Bloque de Texto</button>
                             <button onClick={() => handleCreate('data_table')}><TableIcon size={14} /> Tabla de Datos</button>
                             <button onClick={() => handleCreate('product_carousel')}><ShoppingBag size={14} /> Carrusel de Productos</button>
+                            <button onClick={() => handleCreate('video')}><Video size={14} /> Video de YouTube</button>
                         </div>
                     </div>
                 </div>

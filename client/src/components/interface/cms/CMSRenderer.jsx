@@ -1,3 +1,4 @@
+import VideoYoutube from '../../ui/VideoYoutube';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DOMPurify from 'dompurify';
@@ -630,6 +631,32 @@ export const RecentProductsBlock = ({ previewMode = false }) => {
     );
 };
 
+/**
+ * Un video de YouTube como bloque de portada.
+ *
+ * Existe para que Paola decida DÓNDE va el video, con el mismo editor con el
+ * que ya ordena los demás bloques, en vez de que nosotros inventemos un lugar
+ * fijo en el diseño.
+ *
+ * Usa la fachada: hasta que alguien apriete play no se descarga nada de
+ * YouTube. Sin eso, un video en la portada le sumaría cerca de 1 MB a una
+ * página que hoy pesa 0,7.
+ */
+const VideoBlock = ({ config = {}, title }) => {
+    if (!config.video_url) return null;
+    const encabezado = config.title || title;
+    return (
+        <section className="cms-video-block">
+            {encabezado && <h2 className="cms-video-titulo">{encabezado}</h2>}
+            <VideoYoutube url={config.video_url} titulo={encabezado || 'Video'} />
+            <style>{`
+                .cms-video-block { max-width: 960px; margin: 0 auto; padding: 8px 16px 24px; }
+                .cms-video-titulo { font-size: 22px; font-weight: 800; color: #1e1b4b; margin: 0 0 14px; text-align: center; }
+            `}</style>
+        </section>
+    );
+};
+
 const CMSRenderer = ({ page = 'homepage', data = null, previewMode = false, activeId = null, forceMobile = null }) => {
     const isMobile = useIsMobile(1050, forceMobile);
     const [sections, setSections] = useState([]);
@@ -697,6 +724,8 @@ const CMSRenderer = ({ page = 'homepage', data = null, previewMode = false, acti
                             return <DataTableBlock config={section.config} title={section.title} previewMode={previewMode} forceMobile={forceMobile} />;
                         case 'recent_products':
                             return <RecentProductsBlock previewMode={previewMode} />;
+                        case 'video':
+                            return <VideoBlock config={section.config} title={section.title} />;
                         case 'product_carousel':
                             return <ProductCarouselBlock config={section.config} title={section.title} previewMode={previewMode} forceMobile={forceMobile} />;
                         default:
