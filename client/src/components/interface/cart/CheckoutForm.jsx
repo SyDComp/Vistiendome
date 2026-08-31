@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Send, User, Mail, Phone, MapPin } from 'lucide-react';
 import { useForm } from '../../../hooks/useForm';
+import { validarRut } from '../../../utils/rut';
 import { useCart } from '../../../context/CartContext';
 import { buildWhatsAppMessage, openWhatsApp } from '../../../utils/cartUtils';
 import { track } from '../../../lib/analytics';
@@ -55,11 +56,27 @@ const CheckoutForm = ({ onClose }) => {
             .catch(err => console.error('Error fetching regiones:', err));
     }, []);
 
+    // Los largos son los de las columnas de la base. Si el formulario deja
+    // pasar algo más largo, el servidor no lo guarda y el pedido se pierde:
+    // pasó de verdad con un RUT de más (ver H17).
+    const LARGOS = { nombre: 200, email: 255, telefono: 20, direccion: 255 };
+
     const validate = (values) => {
         const errors = {};
         if (!values.nombre.trim()) errors.nombre = 'El nombre es obligatorio';
-        if (!values.rut.trim()) errors.rut = 'El RUT es obligatorio';
+        else if (values.nombre.length > LARGOS.nombre) errors.nombre = 'El nombre es demasiado largo';
+
+        // Dígito verificador, no un largo máximo: un RUT con un dígito de más
+        // no es un engaño, es un error de tipeo, y el módulo 11 lo detecta sin
+        // tener que interpretar la intención de nadie.
+        const rut = validarRut(values.rut);
+        if (!rut.valido) errors.rut = rut.motivo;
+
         if (!values.telefono.trim()) errors.telefono = 'El teléfono es obligatorio';
+        else if (values.telefono.length > LARGOS.telefono) errors.telefono = 'El teléfono es demasiado largo';
+
+        if (values.email && values.email.length > LARGOS.email) errors.email = 'El correo es demasiado largo';
+        if (values.direccion && values.direccion.length > LARGOS.direccion) errors.direccion = 'La dirección es demasiado larga';
         // La dirección sólo se pide cuando un transportista la lleva hasta la
         // casa. Ni el retiro en el local ni el despacho a la agencia la
         // necesitan. Se mira el MODO, no el nombre del transporte.
@@ -68,6 +85,7 @@ const CheckoutForm = ({ onClose }) => {
         return errors;
     };
     const { values, errors, handleChange, handleSubmit, isSubmitting, setValues } = useForm(getInitialValues(), validate);
+    const [falloRegistro, setFalloRegistro] = useState(false);
 
     useEffect(() => {
         localStorage.setItem('checkoutDraft', JSON.stringify(values));
@@ -134,6 +152,7 @@ const CheckoutForm = ({ onClose }) => {
     };
 
     const onSubmit = async (formData) => {
+        let registrado = false;
         const whatsappMsg = buildWhatsAppMessage({
             tipo: 'pedido',
             cliente: { nombre: formData.nombre, rut: formData.rut, email: formData.email, telefono: formData.telefono },
@@ -178,8 +197,10 @@ const CheckoutForm = ({ onClose }) => {
         // Registrar la cotización en el CRM en segundo plano sin demorar ni bloquear el salto a WhatsApp
         try {
             const partesNombre = formData.nombre.trim().split(' ');
-            const nombres = partesNombre[0] || '';
-            const apellidos = partesNombre.slice(1).join(' ') || '';
+            // Cada mitad va a su propia columna de 100; el formulario limita el
+            // total, pero un nombre de una sola palabra larguísima igual entraría.
+            const nombres = (partesNombre[0] || '').slice(0, 100);
+            const apellidos = (partesNombre.slice(1).join(' ') || '').slice(0, 100);
             const items = cart.map(item => ({
                 // item.sku es el CÓDIGO de texto; el vínculo con la base es el
                 // id numérico. Antes se mandaba item.sku.id (".id" de un
@@ -206,12 +227,21 @@ const CheckoutForm = ({ onClose }) => {
                 direccion: formData.direccion,
                 tipo_despacho: formData.tipo_despacho,
                 items: items
-            }).catch(error => console.error("Error al registrar cotización en CRM", error));
+            });
+            registrado = true;
         } catch (error) {
-            console.error("Error de red al preparar cotización", error);
+            console.error("Error al registrar el pedido", error);
         }
 
-        // Limpiamos datos tras "enviar"
+        // Si el registro falló NO se limpia nada. Antes se vaciaba el carrito
+        // igual: la clienta veía su mensaje de WhatsApp irse y creía que el
+        // pedido estaba hecho, cuando no había entrado al sistema. Perder un
+        // pedido en silencio es lo peor que puede hacer esta pantalla.
+        if (!registrado) {
+            setFalloRegistro(true);
+            return;
+        }
+
         localStorage.removeItem('checkoutDraft');
         clearCart();
         onClose();
@@ -368,6 +398,16 @@ const CheckoutForm = ({ onClose }) => {
                         )}
                     </div>
 
+                    {falloRegistro && (
+                        <div className="checkout-fallo">
+                            <strong>Tu mensaje de WhatsApp se envió, pero no pudimos registrar el pedido.</strong>
+                            <span>
+                                Dejamos tus productos en el carrito para que puedas intentarlo otra vez.
+                                Si vuelve a fallar, escríbenos por WhatsApp y lo tomamos igual.
+                            </span>
+                        </div>
+                    )}
+
                     <div className="checkout-footer-actions">
                         <button type="button" className="btn-cancel" onClick={onClose}>Volver</button>
                         <button type="submit" className="btn-submit-whatsapp" disabled={isSubmitting}>
@@ -486,6 +526,14 @@ const CheckoutForm = ({ onClose }) => {
                     font-weight: 700;
                     cursor: pointer;
                 }
+                .checkout-fallo {
+                    display: flex; flex-direction: column; gap: 4px;
+                    margin: 0 0 12px; padding: 12px 14px; border-radius: 12px;
+                    background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
+                    font-size: 13px; line-height: 1.4;
+                }
+                .checkout-fallo strong { font-size: 13px; }
+                .checkout-fallo span { color: #b91c1c; }
                 .btn-submit-whatsapp {
                     flex: 2;
                     height: 52px;

@@ -3,7 +3,7 @@ from sqlmodel import Session, select, func
 from sqlalchemy import text
 from typing import List, Optional
 from datetime import datetime
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from app.database import get_session
 from app.models.crm import Cotizacion, CotizacionItem, EstadoCotizacion, OrigenCotizacion, TipoDespacho, ModoEntrega
@@ -220,12 +220,22 @@ def _modo_de(data) -> ModoEntrega:
 
 
 class CotizacionCreate(BaseModel):
+    """
+    Los largos son los de las columnas, para que un texto de más devuelva 422
+    —un error claro— y no 500.
+
+    No es cosmético: este endpoint se llama desde la tienda sin esperar
+    respuesta, así que un 500 significa un pedido perdido y nadie enterándose.
+    Pasó con un RUT de más (H17). El formulario ya valida, pero el servidor no
+    puede confiar en que el único que lo llama sea ese formulario.
+    """
+
     persona_id: Optional[str] = None
-    rut: Optional[str] = None
-    nombres: Optional[str] = ""
-    apellidos: Optional[str] = ""
-    email_personal: Optional[str] = None
-    telefono: Optional[str] = None
+    rut: Optional[str] = Field(default=None, max_length=12)
+    nombres: Optional[str] = Field(default="", max_length=100)
+    apellidos: Optional[str] = Field(default="", max_length=100)
+    email_personal: Optional[str] = Field(default=None, max_length=255)
+    telefono: Optional[str] = Field(default=None, max_length=20)
     
     origen: OrigenCotizacion = OrigenCotizacion.CATALOGO
     mensaje: Optional[str] = None
@@ -236,10 +246,10 @@ class CotizacionCreate(BaseModel):
     # Retiro o despacho. Se acepta None por compatibilidad con lo que ya
     # existía; el servidor lo completa abajo.
     modo_entrega: Optional[ModoEntrega] = None
-    transporte: Optional[str] = None
+    transporte: Optional[str] = Field(default=None, max_length=100)
     tipo_despacho: Optional[TipoDespacho] = None
-    region: Optional[str] = None
-    comuna: Optional[str] = None
+    region: Optional[str] = Field(default=None, max_length=100)
+    comuna: Optional[str] = Field(default=None, max_length=100)
     comuna_id: Optional[int] = None
 
     @field_validator("comuna_id", mode="before")
@@ -255,7 +265,7 @@ class CotizacionCreate(BaseModel):
         pedido nunca entraba al sistema.
         """
         return None if v in ("", None) else v
-    direccion: Optional[str] = None
+    direccion: Optional[str] = Field(default=None, max_length=255)
     
     items: List[CotizacionItemCreate] = []
 
