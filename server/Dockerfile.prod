@@ -20,5 +20,9 @@ RUN mkdir -p /app/media
 
 EXPOSE 8000
 
-# Comando de producción (sin --reload)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]
+# El arranque aplica las migraciones antes de servir. Ver entrypoint.prod.sh:
+# sin esto, desplegar codigo nuevo contra un esquema viejo devuelve 500 en todo.
+COPY entrypoint.prod.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
