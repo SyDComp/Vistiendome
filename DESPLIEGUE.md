@@ -116,6 +116,37 @@ Restaura los dos juntos —no deja restaurar uno solo— y al terminar **comprue
 que la base y los archivos coincidan**. Si algún registro quedó apuntando a una
 foto que no está, falla en vez de decir que salió bien.
 
+## Mudarse a otro VPS
+
+Se revisó y **nada está atado a la máquina actual**: el compose no tiene IPs ni
+rutas absolutas, los volúmenes son nombrados y el dominio lo resuelve
+Cloudflare. La mudanza es mecánica:
+
+```bash
+# 1. En el servidor VIEJO: respaldo completo y llevárselo
+./scripts/respaldo.sh
+scp -P <puerto> -r _db_backups/<marca> nuevo-servidor:~/
+
+# 2. En el NUEVO: traer el código y recrear el .env
+git clone <repo> && cd Vistiendome
+cp .env.example .env      # y completarlo — es lo ÚNICO que no viaja solo
+
+# 3. Levantar (el arranque aplica las migraciones)
+docker compose -f docker-compose-prod.yml up -d --build
+
+# 4. Restaurar los datos y comprobar que quedaron completos
+./scripts/restaurar.sh ~/<marca>
+
+# 5. Recién ahora, apuntar el DNS de Cloudflare a la IP nueva
+```
+
+El orden importa: **el DNS se cambia al final**, cuando el servidor nuevo ya
+responde. Al revés, hay una ventana en la que el dominio apunta a algo que
+todavía no funciona.
+
+Lo único que hay que rehacer a mano es el `.env`. Es a propósito: si viajara con
+el código, las contraseñas de producción estarían en git.
+
 ## Cómo saber que quedó bien
 
 ```bash
