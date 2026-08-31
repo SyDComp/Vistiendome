@@ -45,6 +45,27 @@
 | D1 | **Pantalla de bienvenida del administrador** — el típico paso a paso con botón "Siguiente", explicando las cosas la primera vez que Paola entra | Va justo antes de entregar, cuando ya no cambie nada de lo que habría que explicar |
 | D2 | **Qué datos sobreviven a la entrega** | Ver abajo — es más grande de lo que parece |
 
+#### D3 — Los métodos de envío son texto libre, escrito de tres formas
+
+Hoy conviven **tres nombres para lo mismo**: `RETIRO EN LOCAL` (checkout y
+PersonaFields), `RETIRO EN TIENDA` (modal del panel) y `RETIRO_LOCAL` (lo que
+está guardado en la base). Y al enviar un pedido a sucursal el transporte se
+guarda como `"STARKEN (retiro en sucursal)"`, que **contiene la palabra
+"retiro" y es un despacho de verdad**.
+
+Consecuencia: cualquier regla que decida algo leyendo ese texto se equivoca. La
+tienda ya lo hace (`transporte.includes('RETIRO')` para decidir si pide
+dirección) y funciona de casualidad, porque valida antes de que el texto se
+reescriba.
+
+Cuando haga falta que el sistema distinga un retiro en local de un despacho —
+por ejemplo para no marcarlo como despachado al imprimir la etiqueta— **la forma
+correcta no es leer el nombre**, sino que Paola marque qué métodos son retiro,
+igual que marca qué características salen en la orden de corte. La clienta
+declara, el sistema no adivina.
+
+Mientras tanto no hace falta: la acción de despachar **se puede deshacer**.
+
 #### D2 — El seed de entrega
 
 Hoy la base es de desarrollo. El día de la entrega el panel tiene que arrancar

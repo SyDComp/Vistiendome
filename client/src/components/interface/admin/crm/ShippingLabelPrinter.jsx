@@ -137,6 +137,18 @@ const ShippingLabelPrinter = () => {
     const [marcarDespachadas, setMarcarDespachadas] = useState(true);
     const [vista, setVista] = useState('por_despachar');
     const [conteos, setConteos] = useState({});
+    // Qué se acaba de marcar, para poder deshacerlo.
+    //
+    // Por qué deshacer y no una regla que detecte los retiros en local: el
+    // método de envío es texto libre que edita la clienta desde Ajustes, y hoy
+    // ya conviven tres formas de escribir lo mismo — "RETIRO EN LOCAL" en la
+    // tienda, "RETIRO EN TIENDA" en el panel y "RETIRO_LOCAL" en la base.
+    // Peor: al enviar un pedido a sucursal el transporte se guarda como
+    // "STARKEN (retiro en sucursal)", que contiene la palabra "retiro" y ES un
+    // despacho de verdad. Cualquier regla que lea ese nombre se equivoca.
+    // Deshacer no necesita clasificar nada y cubre además los casos que no
+    // se nos ocurrieron.
+    const [ultimoDespacho, setUltimoDespacho] = useState(null);
 
     // Configuración de impresión
     const [formatKey, setFormatKey] = useState('a4_2x2');
@@ -324,6 +336,9 @@ const ShippingLabelPrinter = () => {
         );
         const fallaron = resultados.filter(r => r.status === 'rejected').length;
 
+        const marcados = pendientes.filter((_, i) => resultados[i].status === 'fulfilled');
+        setUltimoDespacho(marcados.length ? marcados.map(c => c.id) : null);
+
         if (fallaron) {
             // Se dice cuántos, no un "hubo un error": la clienta necesita saber
             // cuáles revisar a mano, porque de eso depende el stock.
@@ -333,6 +348,23 @@ const ShippingLabelPrinter = () => {
                 ? 'Pedido marcado como despachado'
                 : `${pendientes.length} pedidos marcados como despachados`);
         }
+        fetchData();
+    };
+
+    const deshacerDespacho = async () => {
+        const ids = ultimoDespacho || [];
+        // Volver a CONFIRMADA borra los movimientos de venta: el gancho de
+        // stock revierte al salir de DESPACHADA. No queda rastro contable.
+        const r = await Promise.allSettled(ids.map(id => actualizarEstadoCotizacion(id, 'CONFIRMADA')));
+        const fallaron = r.filter(x => x.status === 'rejected').length;
+        if (fallaron) {
+            toast.error(`${fallaron} de ${ids.length} no se pudieron revertir. Revísalos en Cotizaciones.`);
+        } else {
+            toast.success(ids.length === 1
+                ? 'Se deshizo el despacho: el pedido volvió a Confirmada'
+                : `Se deshizo el despacho de ${ids.length} pedidos`);
+        }
+        setUltimoDespacho(null);
         fetchData();
     };
 
@@ -682,6 +714,34 @@ const ShippingLabelPrinter = () => {
                     </Button>
                 </div>
             </header>
+
+            {ultimoDespacho && (
+                <div style={{
+                    display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
+                    padding: '9px 16px', background: '#f5f3ff', borderBottom: '1px solid #ddd6fe',
+                    fontSize: '12px', color: '#5b21b6', fontWeight: '700',
+                }}>
+                    <span>
+                        {ultimoDespacho.length === 1
+                            ? 'Se marcó 1 pedido como despachado y se descontó del stock.'
+                            : `Se marcaron ${ultimoDespacho.length} pedidos como despachados y se descontaron del stock.`}
+                    </span>
+                    <button
+                        type="button"
+                        onClick={deshacerDespacho}
+                        style={{ background: '#5b21b6', color: '#fff', border: 'none', borderRadius: '8px', padding: '5px 12px', fontSize: '12px', fontWeight: '800', cursor: 'pointer' }}
+                    >
+                        Deshacer
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setUltimoDespacho(null)}
+                        style={{ background: 'none', border: 'none', color: '#7c3aed', fontSize: '12px', fontWeight: '700', cursor: 'pointer', marginLeft: 'auto' }}
+                    >
+                        Entendido
+                    </button>
+                </div>
+            )}
 
             {/* SPLIT PANEL CONTENT */}
             <div style={{ flex: 1, display: 'flex', flexDirection: isStacked ? 'column' : 'row', overflow: isStacked ? 'auto' : 'hidden', width: '100%', boxSizing: 'border-box' }}>
