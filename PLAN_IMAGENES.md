@@ -519,4 +519,4 @@ mecánico, con el diff revisado: dejó un import muerto, corregido).
   donde podrían ser 1,5 KB, y lo mismo vale para toda respuesta JSON. Es una
   línea, pero cambia el comportamiento de **todos** los endpoints, así que no se
   tocó dentro de esta fase.
-- **Fase 0b** — respaldo de medios en sincronía con el de la base. Sigue abierta.
+- ~~**Fase 0b**~~ — ✅ **Cerrada el 2026-08-31**: `scripts/respaldo.sh` guarda base y medios como una unidad, `scripts/restaurar.sh` los devuelve juntos, y `app/scripts/verificar_medios.py` demuestra que coinciden. Probado restaurando en una base aparte: 0 errores, seis tablas idénticas.

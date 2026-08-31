@@ -90,9 +90,31 @@ docker compose -f docker-compose-prod.yml up -d --build
 docker compose -f docker-compose-prod.yml logs -f backend
 ```
 
-El paso 1 no es ceremonia: **la base y los medios se respaldan juntos**. Si se
-restaura uno sin el otro quedan registros apuntando a archivos que no están —
-es la Fase 0b que sigue pendiente en el plan de imágenes.
+El paso 1 no es ceremonia: **la base y los medios se respaldan juntos**, y el
+script lo hace en el orden correcto (ver `scripts/respaldo.sh`).
+
+### Que el respaldo no dependa de acordarse
+
+Un respaldo que hay que recordar no es un respaldo. En el servidor:
+
+```bash
+crontab -e
+# Todos los días a las 3 de la mañana
+0 3 * * * cd /ruta/del/proyecto && ./scripts/respaldo.sh >> /var/log/respaldo-vistiendome.log 2>&1
+```
+
+Conserva los 14 últimos y borra los viejos solo: un disco lleno deja de
+respaldar sin avisar, que es la forma más común de quedarse sin respaldos.
+
+### Restaurar
+
+```bash
+./scripts/restaurar.sh _db_backups/20260831_120000
+```
+
+Restaura los dos juntos —no deja restaurar uno solo— y al terminar **comprueba
+que la base y los archivos coincidan**. Si algún registro quedó apuntando a una
+foto que no está, falla en vez de decir que salió bien.
 
 ## Cómo saber que quedó bien
 
