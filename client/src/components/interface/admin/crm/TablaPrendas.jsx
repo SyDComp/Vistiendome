@@ -21,6 +21,8 @@ import { agruparPorProducto } from '../../../../utils/prendas';
  * @param claseFila      clase extra por fila (marcar la elegida, por ejemplo).
  * @param filasEnBlanco  filas vacías al final de cada modelo, para anotar a
  *                       mano. La planilla de papel las tiene y se usan.
+ * @param columnasPermitidas `Set` de características que la clienta eligió
+ *                       mostrar. `null` = todas.
  */
 const TablaPrendas = ({
     items = [],
@@ -29,13 +31,14 @@ const TablaPrendas = ({
     cantidad,
     claseFila,
     filasEnBlanco = 0,
+    columnasPermitidas = null,
     vacio = 'Este pedido no tiene prendas.',
 }) => {
     const hayCasilla = Boolean(casilla);
     const pintarCasilla = typeof casilla === 'function'
         ? casilla
         : () => <span className="tp-cuadro" />;
-    const grupos = agruparPorProducto(items);
+    const grupos = agruparPorProducto(items, columnasPermitidas);
 
     if (!grupos.length) return <p className="tp-vacio">{vacio}</p>;
 
@@ -56,7 +59,7 @@ const TablaPrendas = ({
                                 <tr>
                                     {hayCasilla && <th className="tp-casilla" aria-label="Marcar" />}
                                     {columnas.map(c => <th key={c}>{c}</th>)}
-                                    <th className="tp-num">Cant.</th>
+                                    <th className="tp-cant">Cant.</th>
                                     {columnasExtra.map(c => (
                                         <th key={c.clave} className={c.alinear === 'derecha' ? 'tp-num' : ''}>
                                             {c.etiqueta}
@@ -75,7 +78,7 @@ const TablaPrendas = ({
                                                 {fila.config?.[c] || '—'}
                                             </td>
                                         ))}
-                                        <td className="tp-num tp-cant">
+                                        <td className="tp-cant">
                                             {cantidad ? cantidad(fila) : fila.cantidad}
                                         </td>
                                         {columnasExtra.map(c => (
@@ -111,23 +114,25 @@ const TablaPrendas = ({
                     border-bottom: 2px solid #1e1b4b; padding-bottom: 4px; margin-bottom: 0;
                 }
                 .tp-producto {
-                    margin: 0; font-size: 15px; font-weight: 900; color: #1e1b4b;
+                    margin: 0; font-size: 17px; font-weight: 900; color: #1e1b4b;
                     text-transform: uppercase; letter-spacing: .4px;
                 }
-                .tp-unidades { font-size: 12px; font-weight: 800; color: #1e1b4b; }
+                .tp-unidades { font-size: 13px; font-weight: 800; color: #1e1b4b; }
 
                 /* El ancho lo puede pasar el número de características: que
                    ruede la tabla, nunca la página. */
                 .tp-scroll { overflow-x: auto; }
-                .tp-tabla { width: 100%; border-collapse: collapse; font-size: 13px; }
+                .tp-tabla { width: 100%; border-collapse: collapse; font-size: 15px; }
                 .tp-tabla th {
-                    text-align: left; font-size: 10px; letter-spacing: .5px; text-transform: uppercase;
+                    text-align: left; font-size: 11.5px; letter-spacing: .5px; text-transform: uppercase;
                     color: var(--color-text-light, #64748b); border-bottom: 1px solid #cbd5e1;
                     padding: 7px 8px; white-space: nowrap;
                 }
-                .tp-tabla td { padding: 9px 8px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
-                .tp-num { text-align: right; }
-                .tp-cant { font-weight: 800; }
+                .tp-tabla td { padding: 10px 8px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+                                .tp-num { text-align: right; }
+                /* La cantidad va centrada: es la columna que se busca de un
+                   vistazo y centrada se encuentra sin recorrer la fila. */
+                .tp-cant, th.tp-cant { text-align: center; font-weight: 800; }
                 .tp-sin-dato { color: #cbd5e1; }
                 .tp-casilla { width: 30px; }
                 .tp-cuadro { display: block; width: 14px; height: 14px; border: 1.5px solid #1e1b4b; border-radius: 3px; }

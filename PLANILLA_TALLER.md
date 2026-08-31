@@ -53,6 +53,29 @@ cuando hay una excepción.
    marcada como cortada al finalizar.
 5. **Se copia a mano**, con los errores de transcripción que eso trae.
 
+## Quién decide qué columnas salen
+
+Las columnas salen de los datos, pero **cuáles de esas salen impresas lo decide
+Paola**, característica por característica, con la propiedad
+**"Sale en la orden de corte"** (Catálogo › Características).
+
+La costurera necesita talla y color; el material o el tipo de cuello pueden
+sobrarle, y una columna de más en una hoja de taller es ruido. Antes salían
+todas y nadie podía decidirlo.
+
+Detalles que importan:
+
+- **Arranca en SÍ.** Quitar una columna es una decisión; que falte por omisión
+  sería un olvido, y un olvido acá se descubre cuando la prenda ya está mal
+  cortada.
+- Se ve **en la tabla de características**, no sólo dentro de la ficha: la
+  pregunta es "cuáles salen", en plural, y se responde mirando la lista.
+- Si la lista no se puede cargar, **salen todas**. Una columna de más molesta;
+  una hoja sin la talla manda a cortar mal.
+- Afecta la orden de corte —vista, formulario e impresión—. La planilla de
+  pedido y el comprobante de la clienta muestran todo, porque son otro
+  documento.
+
 ## La abstracción, en una frase
 
 Las características **son datos que configura la clienta**, así que las columnas
@@ -86,6 +109,9 @@ impresión) y la planilla/comprobante de pedido.
 
 ## Lo que quedó pendiente
 
+- **Una vista por clienta** ya está descrita abajo; con la propiedad nueva, esa
+  vista podría querer su propio juego de columnas (a la clienta le importa el
+  material; a la costurera quizá no).
 - **El orden de las columnas** usa una lista corta (talla, color, estampado
   primero). Es sólo presentación, pero lo correcto es un campo `orden` en la
   característica que Paola arrastre desde el panel. Hoy ese campo no existe.

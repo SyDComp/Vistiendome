@@ -31,7 +31,7 @@ const tablaDe = ({ producto, columnas, filas, unidades }) => {
         <tr>
             <td class="check"></td>
             ${columnas.map(c => `<td>${escapar(i.config?.[c] || '—')}</td>`).join('')}
-            <td class="num fuerte">${escapar(i.cantidad)}</td>
+            <td class="cant">${escapar(i.cantidad)}</td>
             <td class="origen">${escapar(origenDe(i))}</td>
         </tr>`).join('');
     const blancas = Array.from({ length: FILAS_EN_BLANCO }, () => `
@@ -48,14 +48,17 @@ const tablaDe = ({ producto, columnas, filas, unidades }) => {
             <span>${unidades} ${unidades === 1 ? 'unidad' : 'unidades'}</span>
         </div>
         <table>
-            <thead><tr><th class="check"></th>${encabezados}<th class="num">Cant.</th><th class="ancha">Para</th></tr></thead>
+            <thead><tr><th class="check"></th>${encabezados}<th class="cant">Cant.</th><th class="ancha">Para</th></tr></thead>
             <tbody>${cuerpo}${blancas}</tbody>
         </table>
     </section>`;
 };
 
-export const imprimirOrdenCorte = (orden, etiquetaEstado) => {
-    const grupos = agruparPorProducto(orden.items || []);
+export const imprimirOrdenCorte = (orden, etiquetaEstado, columnasPermitidas = null) => {
+    // Las columnas son las que la clienta eligió en cada característica
+    // ("Sale en la orden de corte"). Si todavía no se sabe, salen todas: una
+    // columna de más molesta, una hoja sin la talla manda a cortar mal.
+    const grupos = agruparPorProducto(orden.items || [], columnasPermitidas);
     const fecha = new Date(orden.created_at).toLocaleDateString('es-CL');
 
     const w = window.open('', '_blank', 'width=1000,height=800');
@@ -77,21 +80,23 @@ export const imprimirOrdenCorte = (orden, etiquetaEstado) => {
     .modelo{margin-bottom:20px;page-break-inside:avoid}
     .modelo-cab{display:flex;justify-content:space-between;align-items:baseline;
                 border-bottom:1.5px solid #000;padding-bottom:3px;margin-bottom:0}
-    .modelo-cab h2{font-size:14px;margin:0;text-transform:uppercase;letter-spacing:.4px}
-    .modelo-cab span{font-size:12px;font-weight:700}
+    .modelo-cab h2{font-size:16px;margin:0;text-transform:uppercase;letter-spacing:.4px}
+    .modelo-cab span{font-size:13px;font-weight:700}
 
-    table{width:100%;border-collapse:collapse;font-size:12px}
+    table{width:100%;border-collapse:collapse;font-size:13.5px}
     /* Las características se ajustan a su contenido y "Para" se come el resto.
        Sin esto la tabla reparte el ancho por igual y TALLA ocupa lo mismo que
        MATERIAL, con huecos en medio que cuesta seguir con la vista. */
     th,td{white-space:nowrap}
     th.ancha,td.origen{width:99%;white-space:normal}
-    th{text-align:left;padding:5px 6px;font-size:9.5px;text-transform:uppercase;
+    th{text-align:left;padding:5px 6px;font-size:11px;text-transform:uppercase;
        letter-spacing:.5px;border-bottom:1px solid #000;color:#333}
-    td{padding:7px 6px;border-bottom:1px solid #ccc}
+    td{padding:8px 6px;border-bottom:1px solid #ccc}
     .num{text-align:right}
+    /* La cantidad centrada: es lo que se busca de un vistazo en la mesa. */
+    .cant,th.cant{text-align:center;font-weight:800}
     .fuerte{font-weight:800}
-    .origen{font-size:11px;color:#444}
+    .origen{font-size:12px;color:#444}
     .check{width:26px}
     td.check:after{content:'';display:block;width:13px;height:13px;border:1.5px solid #000}
     .blanca td{height:26px}

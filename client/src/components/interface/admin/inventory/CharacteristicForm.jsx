@@ -24,6 +24,9 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
             : [{ label: 'Valor', key: 'value', type: 'text' }],
         is_filterable: initialData?.is_filterable === false ? false : true,
         afecta_apariencia: initialData?.afecta_apariencia === true,
+        // Por omisión sí sale: quitar una columna de la hoja de taller es una
+        // decisión, no un olvido.
+        en_orden_corte: initialData?.en_orden_corte === false ? false : true,
         domain: initialData?.domain || []
     });
     
@@ -173,6 +176,22 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                         {visualBloqueada
                             ? 'Es una característica del sistema y define cómo se ve la prenda, así que no se puede desmarcar: el Explorador la usa para mostrar una tarjeta por cada valor. Sí puedes marcar esta opción en cualquier característica que crees tú.'
                             : 'Márcalo en Color o Estampado: el Explorador mostrará una foto por cada valor. No lo marques en Talla — cambia la prenda, pero no cómo se ve.'}
+                    </p>
+                    <div className="char-form-filter-wrap">
+                        <input
+                            type="checkbox"
+                            id="char_en_orden_corte"
+                            checked={localData.en_orden_corte}
+                            onChange={e => setLocalData(p => ({ ...p, en_orden_corte: e.target.checked }))}
+                        />
+                        <label htmlFor="char_en_orden_corte" className="char-form-filter-label">
+                            Sale en la orden de corte
+                        </label>
+                    </div>
+                    <p className="char-form-hint">
+                        La hoja que va a la mesa de corte lleva una columna por
+                        característica. Deja marcadas sólo las que la costurera
+                        necesita ver: una columna de más es ruido en el taller.
                     </p>
                 </div>
 

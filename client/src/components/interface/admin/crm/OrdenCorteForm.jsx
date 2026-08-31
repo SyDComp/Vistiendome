@@ -5,6 +5,7 @@ import { useNotification } from '../../../../context/NotificationContext';
 import { getPiezasPendientes, crearOrdenCorte } from '../../../../lib/api/endpoints';
 import SelectorVariantes from './SelectorVariantes';
 import TablaPrendas from './TablaPrendas';
+import useCaracteristicasCorte from '../../../../hooks/useCaracteristicasCorte';
 
 /**
  * Arma una orden de corte.
@@ -23,6 +24,7 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
     const [notas, setNotas] = useState('');
     const [cargando, setCargando] = useState(true);
     const [guardando, setGuardando] = useState(false);
+    const columnasCorte = useCaracteristicasCorte();
 
 
     useEffect(() => {
@@ -107,6 +109,7 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
                 ) : (
                     <TablaPrendas
                         items={pendientes}
+                        columnasPermitidas={columnasCorte}
                         claseFila={(p) => (elegidas[p.cotizacion_item_id] ? 'tp-elegida' : '')}
                         casilla={(p) => (
                             <input
@@ -136,6 +139,7 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
                 {paraStock.length > 0 && (
                     <TablaPrendas
                         items={paraStock}
+                        columnasPermitidas={columnasCorte}
                         cantidad={(l) => (
                             <input
                                 type="number" min="1" value={l.cantidad} className="oc-cantidad"

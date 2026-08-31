@@ -56,6 +56,14 @@ class Characteristic(SQLModel, table=True):
     # is_filterable — el sistema no puede adivinarlo: hoy es Color y Estampado,
     # mañana será Idioma o Tapa cuando entren las biblias.
     afecta_apariencia: bool = Field(default=False)
+
+    # ¿Sale impresa en la orden de corte? Lo decide la clienta, característica
+    # por característica. La costurera necesita talla y color; el material puede
+    # sobrarle, y una columna de más en una hoja de taller es ruido.
+    # Por omisión TRUE: quitar es una decisión, no un olvido. Si arrancara en
+    # false, una característica nueva desaparecería de la hoja sin que nadie se
+    # entere, y eso se descubre cuando la prenda ya está mal cortada.
+    en_orden_corte: bool = Field(default=True)
     
     is_system: bool = Field(default=False)
     system_id: Optional[str] = Field(default=None)

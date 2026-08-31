@@ -343,6 +343,21 @@ const CharacteristicManager = () => {
                                 {v ? (['sys_color', 'sys_pattern'].includes(row.system_id) ? 'SÍ · FIJO' : 'SÍ') : 'NO'}
                             </Badge>
                         )
+                    },
+                    {
+                        // Qué columnas salen impresas en la hoja del taller. Se
+                        // muestra en la tabla y no sólo dentro del formulario,
+                        // porque la pregunta es "cuáles salen", en plural: se
+                        // responde mirando la lista, no abriendo siete fichas.
+                        key: 'en_orden_corte',
+                        label: 'Orden de corte',
+                        width: '130px',
+                        align: 'center',
+                        render: (v) => (
+                            <Badge variant={v ? 'success' : 'default'} size="sm">
+                                {v ? 'SÍ' : 'NO'}
+                            </Badge>
+                        )
                     }
                 ]}
                 data={filteredCharacteristics}

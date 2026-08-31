@@ -47,10 +47,15 @@ const nombreDe = (item) =>
  * Agrupa las prendas por producto y calcula, para cada grupo, qué columnas
  * necesita.
  *
+ * @param permitidas `Set` con los nombres de las características que la clienta
+ *        eligió que salgan (propiedad "Sale en la orden de corte"). `null` o
+ *        `undefined` = salen todas; NO es lo mismo que un Set vacío, que
+ *        significa "no quiere ninguna".
  * @returns {{producto: string, columnas: string[], filas: object[], unidades: number}[]}
  *          En el orden en que los productos aparecen en el pedido.
  */
-export const agruparPorProducto = (items = []) => {
+export const agruparPorProducto = (items = [], permitidas = null) => {
+    const sale = (clave) => !permitidas || permitidas.has(String(clave).toUpperCase());
     const grupos = new Map();
 
     items.forEach(item => {
@@ -62,7 +67,7 @@ export const agruparPorProducto = (items = []) => {
         // Sólo se hace columna la característica que tiene valor en alguna fila:
         // una columna entera vacía es ruido para quien lee.
         Object.entries(item.config || {}).forEach(([clave, valor]) => {
-            if (valor) grupo.claves.add(clave);
+            if (valor && sale(clave)) grupo.claves.add(clave);
         });
         grupo.filas.push(item);
         grupo.unidades += Number(item.cantidad) || 0;

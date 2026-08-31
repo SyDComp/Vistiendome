@@ -5,6 +5,7 @@ import { useNotification } from '../../../../context/NotificationContext';
 import { cambiarEstadoOrden, repetirOrden } from '../../../../lib/api/endpoints';
 import TablaPrendas from './TablaPrendas';
 import { imprimirOrdenCorte } from './imprimirOrdenCorte';
+import useCaracteristicasCorte from '../../../../hooks/useCaracteristicasCorte';
 
 export const ESTADOS = [
     { value: 'PENDIENTE', label: 'Pendiente', color: '#64748b', bg: '#f1f5f9' },
@@ -18,6 +19,7 @@ export const estiloEstado = (e) => ESTADOS.find(x => x.value === e) || ESTADOS[0
 const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
     const { toast, confirm } = useNotification();
     const [guardando, setGuardando] = useState(false);
+    const columnasCorte = useCaracteristicasCorte();
 
     const cambiar = async (estado) => {
         const aplicar = async () => {
@@ -57,7 +59,7 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
     };
 
     const imprimir = () => {
-        if (!imprimirOrdenCorte(orden, estiloEstado(orden.estado).label)) {
+        if (!imprimirOrdenCorte(orden, estiloEstado(orden.estado).label, columnasCorte)) {
             toast.error('El navegador bloqueó la ventana de impresión');
         }
     };
@@ -105,6 +107,7 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
 
             <TablaPrendas
                 items={orden.items}
+                columnasPermitidas={columnasCorte}
                 casilla
                 columnasExtra={[{
                     clave: 'origen',
