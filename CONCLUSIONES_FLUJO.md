@@ -207,32 +207,24 @@ Medido, con una variante forzada a −2:
 
 Faltaba exactamente una: la que estaba en negativo. Corregido a `<= 0`.
 
-### 6.3 Lo que queda abierto, y no lo decido yo
+### 6.3 DECIDIDO — el negativo se queda: es una deuda
 
-Con el defecto de los filtros corregido, el negativo ya no esconde nada. Queda
-una pregunta de negocio, no de programación, y hay dos lecturas legítimas:
+**Allan, 2026-08-30:** *"es una deuda básicamente"*. Esa es la lectura, y con
+eso la decisión está tomada: **el saldo negativo es información útil y se
+mantiene tal como está.** "−3" significa "debo tres prendas". Es literal, no
+inventa movimientos que no ocurrieron, y desde el arreglo de los filtros (6.2)
+se ve en el panel.
 
-- **(a) El negativo es información útil.** "−3" significa "debo tres prendas".
-  Es literal, no inventa movimientos, y ahora se ve en el panel. No se toca nada
-  más.
-- **(b) El negativo sobra**, porque la orden de corte ya dice qué se debe, con
-  más detalle (de quién es el pedido, en qué estado va). En ese caso lo correcto
-  **no** es sumar un ingreso falso, sino **no descontar de entrada**: si la
-  prenda se hace a pedido, nunca salió de bodega, así que no hubo movimiento.
+**No se hace nada más.** En concreto, quedan descartadas:
 
-Hay una variante fina de (b) que es la más honesta contablemente: **descontar
-sólo lo que existía**. Si el saldo es 3 y se venden 5, se registra `SALE −3`
-(eso sí salió de bodega) y las otras 2 van a producción sin movimiento. El saldo
-aterriza en 0, nunca hay negativos y nunca hay ingresos fantasma. Cuesta más
-código y depende del orden de los eventos, así que sólo vale la pena si Paola
-efectivamente distingue los dos casos.
+- *Sumar un ingreso al finalizar la orden de corte* — metía en el libro una
+  entrada de una prenda que nunca estuvo en bodega, y ni siquiera resolvía el
+  problema, porque el negativo aparece al confirmar, no al finalizar.
+- *No descontar de entrada para las prendas hechas a pedido* — dejaría el saldo
+  en 0, pero se pierde la deuda, que es justamente lo que Paola quiere ver.
 
-**La evidencia que zanja esto es una sola pregunta a Paola:**
-
-> Cuando vendes algo que todavía no está hecho, ¿te sirve que el sistema te diga
-> *"debes 3"*, o con la orden de corte te basta?
-
-Si le sirve → (a), y ya está listo. Si le basta la orden → (b).
+Si algún día esto se replantea, la razón de la decisión es ésta: **el libro sólo
+anota hechos reales, y "vendí algo que todavía no hice" es un hecho real.**
 
 ### 6.4 Un problema aparte que salió de acá
 
