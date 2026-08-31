@@ -12,8 +12,8 @@
 ### A · Afecta la venta hoy
 | # | Qué | De quién depende |
 |---|---|---|
-| A1 | 253 variantes de *Tapado Magdalena Verano* sin precio → se muestran en $0 en la tienda | **Paola** (cargar precios; la herramienta ya está en Producción › Sin precio) |
-| A2 | El Explorador explota cuando una variante no tiene imagen: la regla cae a una tarjeta por SKU (*vestido perla* daría ~74 casi idénticas) | Nosotros — arreglo chico |
+| A1 | 253 variantes de *Tapado Magdalena Verano* sin precio → la tienda muestra "Consultar" (verificado 2026-08-31: siguen en $0) | **Paola** (cargar precios; la herramienta ya está en Producción › Sin precio) |
+| A2 | ~~El Explorador explota cuando una variante no tiene imagen~~ | ✅ **Resuelto** (verificado 2026-08-31): el colapso por look ya no depende de que la variante tenga foto propia. El Explorador genera **60 tarjetas, una por color**; *Tapado Magdalena Verano* da 23 y no 299, teniendo 253 variantes sin foto |
 | A3 | El catálogo descarga 278 KB con 4 productos; escala con variantes (multiplicativo) | Nosotros — estrategia de looks |
 
 ### B · Pedidos de la clienta, pendientes
