@@ -328,7 +328,11 @@ const ShippingLabelPrinter = () => {
     const marcarComoDespachadas = async () => {
         const pendientes = selectedList
             .map(sel => sel.coti)
-            .filter(c => c && c.estado !== 'DESPACHADA');
+            .filter(c => c && c.estado !== 'DESPACHADA')
+            // Un retiro no se despacha al imprimir: la prenda sigue en el local
+            // hasta que la clienta viene a buscarla. Ahora esto NO se adivina
+            // leyendo el nombre del transporte — el pedido declara su modo.
+            .filter(c => c.modo_entrega !== 'RETIRO');
         if (!pendientes.length) return;
 
         const resultados = await Promise.allSettled(
@@ -703,6 +707,7 @@ const ShippingLabelPrinter = () => {
                             onChange={e => setMarcarDespachadas(e.target.checked)}
                         />
                         Marcar como despachadas
+                        <span style={{ fontWeight: 600, color: '#94a3b8' }}>(no aplica a retiros)</span>
                     </label>
                     <Button
                         variant="primary"
@@ -886,6 +891,11 @@ const ShippingLabelPrinter = () => {
                                                         {c.estado === 'CANCELADA'
                                                             ? 'Cancelada — no se despacha'
                                                             : 'Sin confirmar — la clienta todavía no acepta'}
+                                                    </div>
+                                                ) : c.modo_entrega === 'RETIRO' ? (
+                                                    <div style={{ fontSize: '10.5px', color: '#0369a1', marginTop: '3px', fontWeight: '700' }}>
+                                                        Retiro en el local — se marca al entregarla
+                                                        {confeccion.texto ? ` · ${confeccion.texto}` : ''}
                                                     </div>
                                                 ) : confeccion.texto && (
                                                     <div style={{ fontSize: '10.5px', color: TONOS[confeccion.tono].color, marginTop: '3px', fontWeight: '700' }}>

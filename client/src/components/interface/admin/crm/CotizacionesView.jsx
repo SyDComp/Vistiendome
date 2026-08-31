@@ -32,7 +32,11 @@ export const ESTADOS = [
     { value: 'CONFIRMADA', label: 'CONFIRMADA', color: '#3b82f6', bg: '#eff6ff',
       significa: 'La clienta aceptó. Recién acá las piezas entran a la orden de corte.' },
     { value: 'DESPACHADA', label: 'DESPACHADA', color: '#7c3aed', bg: '#f5f3ff',
-      significa: 'Salió del taller. Acá se descuenta del stock, no antes.' },
+      // En un retiro la palabra correcta es "entregada": nadie la despachó, la
+      // clienta vino a buscarla. El hecho que registra el estado es el mismo
+      // —la prenda salió del local— y por eso es un solo valor con dos nombres.
+      etiquetaRetiro: 'ENTREGADA',
+      significa: 'Salió del local. Acá se descuenta del stock, no antes. En un retiro se llama ENTREGADA.' },
     { value: 'CANCELADA', label: 'CANCELADA', color: '#ef4444', bg: '#fef2f2',
       significa: 'No se concretó, o un pedido confirmado se cayó.' },
 ];
@@ -43,7 +47,10 @@ const StateSelector = ({ cotizacion, onUpdate }) => {
 
     const states = ESTADOS;
 
-    const currentStyle = states.find(s => s.value === cotizacion.estado) || states[0];
+    const base = states.find(s => s.value === cotizacion.estado) || states[0];
+    const currentStyle = (cotizacion.modo_entrega === 'RETIRO' && base.etiquetaRetiro)
+        ? { ...base, label: base.etiquetaRetiro }
+        : base;
 
     const handleChange = async (e) => {
         const newState = e.target.value;
@@ -84,7 +91,11 @@ const StateSelector = ({ cotizacion, onUpdate }) => {
                 opacity: loading ? 0.5 : 1
             }}
         >
-            {states.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+            {states.map(s => (
+                <option key={s.value} value={s.value}>
+                    {cotizacion.modo_entrega === 'RETIRO' && s.etiquetaRetiro ? s.etiquetaRetiro : s.label}
+                </option>
+            ))}
         </select>
     );
 };

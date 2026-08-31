@@ -49,8 +49,38 @@ class OrigenCotizacion(str, Enum):
     CONTACTO_GRUPAL = "CONTACTO_GRUPAL"
     MANUAL = "MANUAL"
 
+class ModoEntrega(str, Enum):
+    """
+    Cómo llega la prenda a la clienta. Son dos cosas distintas de verdad, no dos
+    nombres de lo mismo.
+
+    Antes esto vivía DENTRO del campo del transportista, que es texto libre que
+    la clienta edita: convivían "RETIRO EN LOCAL", "RETIRO EN TIENDA" y
+    "RETIRO_LOCAL" para el mismo caso, y encima un despacho a sucursal se
+    guardaba como "STARKEN (retiro en sucursal)" — que contiene la palabra
+    "retiro" y ES un despacho. Cualquier regla que leyera ese texto se
+    equivocaba.
+
+    OJO con "retiro en sucursal": ES UN DESPACHO. Starken se llevó la prenda del
+    local de Paola y la clienta la retira DE LA AGENCIA. Eso vive en
+    `tipo_despacho`, que responde otra pregunta: a dónde la lleva el
+    transportista.
+    """
+
+    # La clienta viene al local de Paola. No hay transportista, no hay
+    # dirección, y la prenda NO SALE hasta que ella la busca.
+    RETIRO = "RETIRO"
+
+    # Sale con un transportista. El cuál y el a dónde los responden
+    # `transporte` y `tipo_despacho`.
+    DESPACHO = "DESPACHO"
+
+
 class TipoDespacho(str, Enum):
+    """A dónde la lleva el transportista. Sólo aplica si el modo es DESPACHO."""
     DOMICILIO = "DOMICILIO"
+    # A la agencia del transportista, donde la clienta la retira. Sigue siendo
+    # un despacho: la prenda ya salió del local.
     SUCURSAL = "SUCURSAL"
 
 
@@ -68,6 +98,10 @@ class Cotizacion(SQLModel, table=True):
 
     origen: OrigenCotizacion = Field(default=OrigenCotizacion.CATALOGO)
     estado: EstadoCotizacion = Field(default=EstadoCotizacion.NUEVA)
+
+    # Retiro o despacho. Nullable sólo por los pedidos anteriores a que este
+    # campo existiera; los nuevos siempre lo traen.
+    modo_entrega: Optional[ModoEntrega] = Field(default=None)
     
     # Datos de Contacto/Mensaje
     mensaje: Optional[str] = Field(default=None)

@@ -3,10 +3,10 @@ from sqlmodel import Session, select, func
 from sqlalchemy import text
 from typing import List, Optional
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from app.database import get_session
-from app.models.crm import Cotizacion, CotizacionItem, EstadoCotizacion, OrigenCotizacion, TipoDespacho
+from app.models.crm import Cotizacion, CotizacionItem, EstadoCotizacion, OrigenCotizacion, TipoDespacho, ModoEntrega
 from app.models.iam import Persona, TipoPersona, Direccion, CuentaAcceso
 from app.models.catalog import StockMovement, MovementType
 from app.models.taller import OrdenCorte, OrdenCorteItem, EstadoOrdenCorte
@@ -103,6 +103,7 @@ class CotizacionRead(BaseModel):
     tipo_grupo: Optional[str] = None
     cantidad_aprox: Optional[int] = None
     fecha_evento: Optional[str] = None
+    modo_entrega: Optional[ModoEntrega] = None
     transporte: Optional[str] = None
     tipo_despacho: Optional[TipoDespacho] = None
     region: Optional[str] = None
@@ -197,6 +198,27 @@ class CotizacionItemCreate(BaseModel):
     precio_unitario_estimado: float = 0.0
     nombre_custom: Optional[str] = None
 
+def _modo_de(data) -> ModoEntrega:
+    """
+    El modo que declara el pedido. Si no viene —clientes viejos que todavía no
+    mandan el campo— se infiere del nombre del transporte, que es justo lo que
+    NO queremos hacer: por eso la inferencia vive acá, en el borde, y no
+    repartida por el sistema.
+
+    "…(retiro en sucursal)" es un DESPACHO y se descarta primero, porque
+    contiene la palabra "retiro" y si no se mirara antes caería del lado
+    equivocado.
+    """
+    if getattr(data, "modo_entrega", None):
+        return data.modo_entrega
+    texto = (data.transporte or "").upper()
+    if "SUCURSAL" in texto:
+        return ModoEntrega.DESPACHO
+    if texto in ("RETIRO_LOCAL", "RETIRO EN LOCAL", "RETIRO EN TIENDA", "RETIRO"):
+        return ModoEntrega.RETIRO
+    return ModoEntrega.DESPACHO
+
+
 class CotizacionCreate(BaseModel):
     persona_id: Optional[str] = None
     rut: Optional[str] = None
@@ -211,11 +233,28 @@ class CotizacionCreate(BaseModel):
     cantidad_aprox: Optional[int] = None
     fecha_evento: Optional[str] = None
     
+    # Retiro o despacho. Se acepta None por compatibilidad con lo que ya
+    # existía; el servidor lo completa abajo.
+    modo_entrega: Optional[ModoEntrega] = None
     transporte: Optional[str] = None
     tipo_despacho: Optional[TipoDespacho] = None
     region: Optional[str] = None
     comuna: Optional[str] = None
     comuna_id: Optional[int] = None
+
+    @field_validator("comuna_id", mode="before")
+    @classmethod
+    def _comuna_vacia_es_nula(cls, v):
+        """
+        Un formulario que no llenó la comuna manda "", no null, y eso no parsea
+        como entero: el pedido moría con 422.
+
+        Pasaba en TODO pedido de retiro hecho desde la web —no hay comuna que
+        elegir— y no se veía, porque el registro en CRM se dispara sin esperar
+        respuesta. El resultado: la clienta mandaba su pedido por WhatsApp y el
+        pedido nunca entraba al sistema.
+        """
+        return None if v in ("", None) else v
     direccion: Optional[str] = None
     
     items: List[CotizacionItemCreate] = []
@@ -301,8 +340,11 @@ def crear_cotizacion(data: CotizacionCreate, session: Session = Depends(get_sess
         tipo_grupo=data.tipo_grupo,
         cantidad_aprox=data.cantidad_aprox,
         fecha_evento=data.fecha_evento,
-        transporte=data.transporte,
-        tipo_despacho=data.tipo_despacho,
+        modo_entrega=_modo_de(data),
+        # Un retiro no tiene transportista ni destino: guardarlos sería dejar
+        # datos que contradicen el modo.
+        transporte=data.transporte if _modo_de(data) == ModoEntrega.DESPACHO else None,
+        tipo_despacho=data.tipo_despacho if _modo_de(data) == ModoEntrega.DESPACHO else None,
         region=data.region,
         comuna=data.comuna,
         direccion=data.direccion,

@@ -14,7 +14,14 @@ const CheckoutForm = ({ onClose }) => {
     const rawShippingMethods = settings?.shipping_methods !== undefined 
         ? settings.shipping_methods 
         : ['STARKEN', 'CORREOS DE CHILE', 'RETIRO EN LOCAL', 'OTRO'];
-    const shippingMethodsList = rawShippingMethods.filter(m => !m.toUpperCase().includes('CHILEXPRESS'));
+    // El retiro dejó de ser un "método de envío" y pasó a ser su propio modo de
+    // entrega, arriba. Si además siguiera apareciendo acá, la clienta podría
+    // elegir "despacho" y de transportista "retiro en local", que se
+    // contradicen. El filtro por nombre es cosmético —lo peor que pasa es una
+    // opción de más en una lista—, no decide nada del stock.
+    const shippingMethodsList = rawShippingMethods.filter(
+        m => !m.toUpperCase().includes('CHILEXPRESS') && !m.toUpperCase().includes('RETIRO')
+    );
     const shippingMethods = shippingMethodsList.length > 0 ? shippingMethodsList : ['STARKEN', 'CORREOS DE CHILE', 'RETIRO EN LOCAL', 'OTRO'];
     
     const baseInitialValues = {
@@ -27,7 +34,8 @@ const CheckoutForm = ({ onClose }) => {
         comuna: '',
         comuna_id: '',
         direccion: '',
-        tipo_despacho: 'DOMICILIO'
+        tipo_despacho: 'DOMICILIO',
+        modo_entrega: 'DESPACHO'
     };
 
     const getInitialValues = () => {
@@ -52,9 +60,10 @@ const CheckoutForm = ({ onClose }) => {
         if (!values.nombre.trim()) errors.nombre = 'El nombre es obligatorio';
         if (!values.rut.trim()) errors.rut = 'El RUT es obligatorio';
         if (!values.telefono.trim()) errors.telefono = 'El teléfono es obligatorio';
-        // La dirección solo se pide (y es obligatoria) cuando el despacho es a domicilio:
-        // retiro en tienda y retiro en sucursal no la necesitan.
-        const requiereDireccion = !values.transporte?.toUpperCase().includes('RETIRO') && values.tipo_despacho !== 'SUCURSAL';
+        // La dirección sólo se pide cuando un transportista la lleva hasta la
+        // casa. Ni el retiro en el local ni el despacho a la agencia la
+        // necesitan. Se mira el MODO, no el nombre del transporte.
+        const requiereDireccion = values.modo_entrega === 'DESPACHO' && values.tipo_despacho !== 'SUCURSAL';
         if (requiereDireccion && !values.direccion.trim()) errors.direccion = 'La dirección de tu domicilio particular es obligatoria';
         return errors;
     };
@@ -129,8 +138,14 @@ const CheckoutForm = ({ onClose }) => {
             tipo: 'pedido',
             cliente: { nombre: formData.nombre, rut: formData.rut, email: formData.email, telefono: formData.telefono },
             despacho: {
-                transporte: formData.tipo_despacho === 'SUCURSAL' ? `${formData.transporte} (retiro en sucursal)` : formData.transporte,
-                direccion: formData.tipo_despacho === 'SUCURSAL' ? null : formData.direccion,
+                transporte: formData.modo_entrega === 'RETIRO'
+                    ? 'RETIRO EN EL LOCAL'
+                    : (formData.tipo_despacho === 'SUCURSAL'
+                        ? `${formData.transporte} (a sucursal)`
+                        : formData.transporte),
+                direccion: (formData.modo_entrega === 'RETIRO' || formData.tipo_despacho === 'SUCURSAL')
+                    ? null
+                    : formData.direccion,
                 comuna: formData.comuna,
                 region: formData.region,
             },
@@ -181,10 +196,13 @@ const CheckoutForm = ({ onClose }) => {
                 email_personal: formData.email,
                 telefono: formData.telefono,
                 origen: 'CATALOGO',
+                // El modo lo declara el pedido: el servidor ya no tiene que
+                // adivinarlo leyendo el nombre del transporte.
+                modo_entrega: formData.modo_entrega,
                 transporte: formData.transporte,
                 region: formData.region,
                 comuna: formData.comuna,
-                comuna_id: formData.comuna_id,
+                comuna_id: formData.comuna_id || null,
                 direccion: formData.direccion,
                 tipo_despacho: formData.tipo_despacho,
                 items: items
@@ -260,17 +278,32 @@ const CheckoutForm = ({ onClose }) => {
                             {errors.telefono && <span className="error-text">{errors.telefono}</span>}
                         </div>
 
-                        {/* Despacho - Opcional */}
+                        {/* Primero CÓMO la recibe. Son dos cosas distintas: en el
+                            retiro la prenda no se mueve hasta que la clienta
+                            viene; en el despacho sale con un transportista.
+                            Antes esto estaba escondido como una opción más de la
+                            lista de transportistas. */}
                         <div className="input-group full">
-                            <label><MapPin size={16} /> Método de Envío *</label>
-                            <select name="transporte" value={values.transporte} onChange={handleChange} className="styled-select">
-                                {shippingMethods.map((method, idx) => (
-                                    <option key={idx} value={method}>{method}</option>
+                            <label><MapPin size={16} /> ¿Cómo la recibes? *</label>
+                            <div className="modo-entrega">
+                                {[
+                                    { valor: 'DESPACHO', titulo: 'Despacho', detalle: 'Te la enviamos por transporte' },
+                                    { valor: 'RETIRO', titulo: 'Retiro en el local', detalle: 'La buscas en San Carlos' },
+                                ].map(op => (
+                                    <button
+                                        key={op.valor}
+                                        type="button"
+                                        className={values.modo_entrega === op.valor ? 'modo-op activa' : 'modo-op'}
+                                        onClick={() => handleChange({ target: { name: 'modo_entrega', value: op.valor } })}
+                                    >
+                                        <strong>{op.titulo}</strong>
+                                        <span>{op.detalle}</span>
+                                    </button>
                                 ))}
-                            </select>
+                            </div>
                         </div>
 
-                        {values.transporte?.toUpperCase().includes('RETIRO') ? (
+                        {values.modo_entrega === 'RETIRO' ? (
                             <div className="input-group full">
                                 <p style={{ margin: 0, fontSize: '13px', color: '#0369a1', background: '#e0f2fe', padding: '12px 14px', borderRadius: '12px', border: '1px solid #bae6fd' }}>
                                     📍 <strong>Retiro presencial en Tienda / Taller en San Carlos, Región de Ñuble.</strong> Te contactaremos por WhatsApp con la dirección exacta y horarios disponibles para la entrega.
@@ -279,10 +312,18 @@ const CheckoutForm = ({ onClose }) => {
                         ) : (
                             <>
                                 <div className="input-group full">
-                                    <label><MapPin size={16} /> Tipo de Entrega *</label>
+                                    <label><MapPin size={16} /> Transporte *</label>
+                                    <select name="transporte" value={values.transporte} onChange={handleChange} className="styled-select">
+                                        {shippingMethods.map((method, idx) => (
+                                            <option key={idx} value={method}>{method}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="input-group full">
+                                    <label><MapPin size={16} /> ¿A dónde la lleva? *</label>
                                     <select name="tipo_despacho" value={values.tipo_despacho} onChange={handleChange} className="styled-select">
-                                        <option value="DOMICILIO">Despacho a Domicilio</option>
-                                        <option value="SUCURSAL">Retiro en Sucursal (Agencia)</option>
+                                        <option value="DOMICILIO">A mi domicilio</option>
+                                        <option value="SUCURSAL">A la sucursal del transporte (la retiro ahí)</option>
                                     </select>
                                 </div>
                                 <div className="input-group">
@@ -402,6 +443,20 @@ const CheckoutForm = ({ onClose }) => {
                 .input-group input:focus, .styled-select:focus { outline: none; border-color: #1e1b4b; box-shadow: 0 0 0 3px rgba(30, 27, 75, 0.05); }
                 .input-group input.input-error { border-color: #ef4444; background: #fffafb; }
                 .error-text { font-size: 12px; color: #ef4444; font-weight: 600; }
+                /* Dos opciones que se excluyen y hay que comparar de un
+                   vistazo: botones, no un desplegable que las esconde. */
+                .modo-entrega { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+                .modo-op {
+                    display: flex; flex-direction: column; gap: 2px; align-items: flex-start;
+                    padding: 12px 14px; border-radius: 12px; border: 1.5px solid #e2e8f0;
+                    background: #fff; cursor: pointer; text-align: left; font: inherit;
+                }
+                .modo-op strong { font-size: 14px; color: #1e1b4b; }
+                .modo-op span { font-size: 12px; color: #64748b; line-height: 1.3; }
+                .modo-op.activa { border-color: #8f0653; background: #fdf2f8; }
+                .modo-op.activa strong { color: #8f0653; }
+                @media (max-width: 520px) { .modo-entrega { grid-template-columns: 1fr; } }
+
                 .styled-select {
                     height: 48px;
                     padding: 0 16px;
