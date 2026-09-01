@@ -35,6 +35,11 @@ CARPETA_MEDIA="${CARPETA_MEDIA:-}"
 
 CONSERVAR="${CONSERVAR:-14}"
 
+# De donde salen el usuario y el nombre de la base. Ver el archivo: NO se leen
+# del .env a proposito.
+. "$(dirname "$0")/_credenciales.sh"
+averiguar_credenciales_db "$CONTENEDOR_DB"
+
 MARCA="$(date +%Y%m%d_%H%M%S)"
 CARPETA="$DESTINO/$MARCA"
 mkdir -p "$CARPETA"
@@ -52,7 +57,7 @@ fi
 
 # 2. La base PRIMERO. Ver el comentario de arriba sobre el orden.
 echo "[2/4] volcando la base..."
-docker exec "$CONTENEDOR_DB" pg_dump -U "${POSTGRES_USER:-postgres}" "${POSTGRES_DB:-postgres}" > "$CARPETA/base.sql"
+docker exec "$CONTENEDOR_DB" pg_dump -U "$USUARIO_DB" "$NOMBRE_DB" > "$CARPETA/base.sql"
 
 # 3. Los medios DESPUÉS.
 echo "[3/4] archivando los medios..."

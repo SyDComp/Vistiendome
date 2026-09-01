@@ -1,0 +1,5 @@
+# Los .sh se ejecutan en Linux: en los contenedores y en el VPS. Con finales
+# de linea de Windows no arrancan —'/bin/bash^M: bad interpreter'— y el error
+# no dice nada util. Se fuerza LF sin importar como este configurado el Git
+# de la maquina que los edite.
+*.sh text eol=lf

@@ -12,16 +12,21 @@ CONTENEDOR_DB="${CONTENEDOR_DB:-vistiendome_db_prod}"
 CONTENEDOR_BACKEND="${CONTENEDOR_BACKEND:-vistiendome_backend_prod}"
 VOLUMEN_MEDIA="${VOLUMEN_MEDIA:-vistiendome_media_volume_prod}"
 
+# De donde salen el usuario y el nombre de la base. Ver el archivo: NO se leen
+# del .env a proposito.
+. "$(dirname "$0")/_credenciales.sh"
+averiguar_credenciales_db "$CONTENEDOR_DB"
+
 [ -f "$CARPETA/base.sql" ]   || { echo "No esta base.sql en $CARPETA"; exit 1; }
 [ -f "$CARPETA/medios.tgz" ] || { echo "No esta medios.tgz en $CARPETA"; exit 1; }
 
 echo "Esto REEMPLAZA la base y los medios actuales por los de $CARPETA."
-read -r -p "Escribi RESTAURAR para continuar: " respuesta
+read -r -p "Escribe RESTAURAR para continuar: " respuesta
 [ "$respuesta" = "RESTAURAR" ] || { echo "Cancelado."; exit 1; }
 
 echo "[1/3] restaurando la base..."
-docker exec -i "$CONTENEDOR_DB" psql -U "${POSTGRES_USER:-postgres}" \
-    -d "${POSTGRES_DB:-postgres}" < "$CARPETA/base.sql"
+docker exec -i "$CONTENEDOR_DB" psql -U "$USUARIO_DB" \
+    -d "$NOMBRE_DB" < "$CARPETA/base.sql"
 
 echo "[2/3] restaurando los medios..."
 docker run --rm \
