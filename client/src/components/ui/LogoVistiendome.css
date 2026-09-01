@@ -22,7 +22,11 @@
     display: inline-flex;
     align-items: center;
     font-family: var(--logo-fuente);
-    font-weight: 700;
+    /* Bevan solo existe en peso 400. Pedir 700 hace que el navegador
+       FABRIQUE la negrita engordando el trazo, y al engordarlo recorta
+       la punta del acento de la 'e'. Verificado comparando 400 vs 700
+       lado a lado: en 400 el acento sale entero. */
+    font-weight: 400;
     color: var(--logo-tinta);
     line-height: 1;
     white-space: nowrap;
