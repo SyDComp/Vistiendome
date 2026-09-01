@@ -209,9 +209,16 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
         setSaving(true);
         try {
             // Usamos el endpoint de actualización masiva del producto, que es el oficial y robusto
+            // Esta pantalla edita precios, fotos y características — NO stock.
+            // Se quita `stock` de cada variante a propósito: mandarlo le diría
+            // al servidor "el stock es este", con el valor que se cargó al
+            // ABRIR la pantalla. Si mientras tanto se vendió algo, guardar un
+            // precio borraba esa venta con un ajuste. Reproducido: 10 -> venta
+            // -1 -> 9, se guarda el precio y volvía a 10.
+            // El servidor entiende la ausencia como "no toques el stock".
             const payload = {
                 ...product,
-                skus: variants // Enviamos el set completo de variantes actualizado
+                skus: variants.map(({ stock, ...resto }) => resto),
             };
 
             const res = await fetch(`${API_BASE}/products/${product.id}`, {

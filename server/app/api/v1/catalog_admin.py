@@ -44,7 +44,16 @@ class SKUCreate(BaseModel):
     sku: str
     barcode: Optional[str] = None
     price: float
-    stock: int
+
+    # OPCIONAL a proposito: `None` significa "no estoy gestionando el stock en
+    # esta peticion", y entonces no se toca. Antes era obligatorio, asi que
+    # cualquier pantalla que devolviera el producto entero —como la Mesa de
+    # Trabajo, que edita precios— tenia que mandar un valor de stock. Si ese
+    # valor era el que habia cargado al abrir la pantalla y mientras tanto se
+    # vendia algo, al guardar el servidor "corregia" el stock a ese valor viejo
+    # y BORRABA la venta en silencio. Reproducido: stock 10 -> venta -1 -> 9,
+    # se guarda un precio y vuelve a 10 con un ajuste de +1.
+    stock: Optional[int] = None
     config: Dict[str, str]
     media_ids: List[int] = []
     # Oferta a nivel variante (sobrescribe la del producto). type: 'percent'|'fixed'
@@ -1111,10 +1120,6 @@ def list_skus_admin(
         # Aseguramos que no exista ningún límite residual en el statement
         full_statement = statement.limit(None).offset(None)
         skus_data = db.exec(full_statement).all()
-        print(f"\n--- DEBUG WORKSPACE ---")
-        print(f"Producto: {product_id}")
-        print(f"SKUs recuperados: {len(skus_data)}")
-        print(f"-----------------------\n")
     else:
         offset = (page - 1) * page_size
         skus_data = db.exec(statement.offset(offset).limit(page_size)).all()
@@ -1229,7 +1234,7 @@ async def create_product(data: ProductCreate, db: Session = Depends(get_session)
                 db.add(SKUMediaLink(sku_id=sku.id, media_asset_id=media_id))
 
             # Crear movimiento inicial de stock (RECEIPT)
-            if s_data.stock > 0:
+            if s_data.stock is not None and s_data.stock > 0:
                 movement = StockMovement(
                     sku_id=sku.id,
                     type=MovementType.RECEIPT,
@@ -1410,11 +1415,12 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
                     for media_id in s_data.media_ids:
                         db.add(SKUMediaLink(sku_id=sku.id, media_asset_id=media_id))
                 
-                # Conciliación de stock (Optimizado usando el mapa local)
-                # Nota: sku.id ahora es seguro de usar gracias al flush()
+                # Conciliación de stock. Sólo si la petición DECLARA un stock:
+                # si viene None, quien llama no lo está gestionando y el saldo
+                # se deja como está. Ver el comentario en SKUCreate.stock.
                 current_stock = stock_map.get(sku.id, 0)
-                
-                if s_data.stock != current_stock:
+
+                if s_data.stock is not None and s_data.stock != current_stock:
                     adjustment = s_data.stock - current_stock
                     move = StockMovement(
                         sku_id=sku.id,

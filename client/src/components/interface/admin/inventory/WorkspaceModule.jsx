@@ -13,21 +13,28 @@ const WorkspaceModule = () => {
     const [productVariants, setProductVariants] = useState([]);
     const [allAttributes, setAllAttributes] = useState([]);
     const [categoryAttributes, setCategoryAttributes] = useState([]);
+    // Sin esto, un fallo del servidor se veia como "no se encontro el producto":
+    // la pantalla le echaba la culpa a la clienta de un error que no era suyo.
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
                 // 1. Cargamos productos (Sin límites)
                 const resP = await fetch(`${API_BASE}/products?page_size=999999`);
+                if (!resP.ok) throw new Error(`No se pudo cargar el catálogo (${resP.status})`);
                 const dataP = await resP.json();
                 setProducts(dataP.items || []);
 
                 // 2. Cargamos TODOS los atributos del catálogo (Crucial para ver todas las opciones)
                 const resA = await fetch(`${API_BASE}/attributes`);
+                if (!resA.ok) throw new Error(`No se pudieron cargar las características (${resA.status})`);
                 const dataA = await resA.json();
                 setAllAttributes(dataA || []);
+                setError(null);
             } catch (err) {
                 console.error(err);
+                setError(err.message || 'No se pudo cargar la mesa de trabajo');
             } finally {
                 setLoading(false);
             }
@@ -70,6 +77,7 @@ const WorkspaceModule = () => {
             setShowBatchEditor(true);
         } catch (err) {
             console.error(err);
+            setError(err.message || 'No se pudo abrir este producto');
         } finally {
             setLoading(false);
         }
@@ -132,6 +140,11 @@ const WorkspaceModule = () => {
                 <div className="workspace-results-wrapper">
                     {loading ? (
                         <div className="workspace-loading">Preparando mesa de trabajo...</div>
+                    ) : error ? (
+                        <div className="workspace-error">
+                            <strong>{error}</strong>
+                            <span>Revisa que la sesión siga abierta y vuelve a intentarlo.</span>
+                        </div>
                     ) : filteredProducts.length > 0 ? (
                         filteredProducts.map(p => (
                             <button
@@ -153,7 +166,11 @@ const WorkspaceModule = () => {
                         ))
                     ) : (
                         <div className="workspace-empty-msg">
-                            No se encontró el lienzo solicitado. Verifica el nombre.
+                            {/* Vacío por búsqueda y catálogo vacío no son lo mismo:
+                                antes los dos decían "verifica el nombre". */}
+                            {searchTerm
+                                ? `Ningún producto coincide con "${searchTerm}".`
+                                : 'Todavía no hay productos en el catálogo.'}
                         </div>
                     )}
                 </div>
