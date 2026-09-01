@@ -1,3 +1,4 @@
+import LogoVistiendome from '../../ui/LogoVistiendome';
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, Navigate, Link, useLocation } from 'react-router-dom';
 import { 
@@ -171,7 +172,7 @@ const DashboardLayout = () => {
                         <div className="admin-sidebar-logo-box">V</div>
                         {(!isCollapsed || isMobile) && (
                             <div className="admin-sidebar-title-container">
-                                <h3 className="admin-sidebar-title">VISTIENDOMÉ</h3>
+                                <h3 className="admin-sidebar-title"><LogoVistiendome tamano="1.05rem" invertido /></h3>
                                 <span className="admin-sidebar-subtitle">Consola Admin</span>
                             </div>
                         )}

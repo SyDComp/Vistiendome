@@ -1,3 +1,4 @@
+import LogoVistiendome from '../../ui/LogoVistiendome';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import QRCode from 'react-qr-code'; 
@@ -55,7 +56,7 @@ const AdminLogin = () => {
     return (
         <div className="admin-login-container">
             <h2 className="admin-login-title">
-                <span className="admin-login-brand">Vistiendomé</span> Access
+                <LogoVistiendome className="admin-login-brand" tamano="1.5rem" /> Access
             </h2>
 
             {authStatus && (

@@ -1,3 +1,4 @@
+import LogoVistiendome from '../../ui/LogoVistiendome';
 import { NavLink, useNavigate } from 'react-router-dom';
 import Heartbeat from '../../interface/Heartbeat';
 import { useEffect, useRef, useState } from 'react';
@@ -68,7 +69,7 @@ const Navbar = ({ links = [], vistaActual }) => { // links are passed from Home
                 <nav className="navbar container">
                     {/* Logo Section */}
                     <div className="navbar-logo" onClick={() => { navigate('/'); setIsMenuOpen(false); }}>
-                        <span className="logo-text">Vistiendomé</span>
+                        <LogoVistiendome />
                         {/* <Heartbeat /> */}
                     </div>
 

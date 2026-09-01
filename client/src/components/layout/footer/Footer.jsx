@@ -1,3 +1,4 @@
+import LogoVistiendome from '../../ui/LogoVistiendome';
 import React from 'react';
 import { 
     Camera,
@@ -36,7 +37,7 @@ const Footer = ({ onNavigate }) => {
             <div className="container footer-grid">
                 {/* Columna 1: Marca y Bio */}
                 <div className="footer-col brand-col">
-                    <h2 className="logo-text">Vistiendomé</h2>
+                    <LogoVistiendome tamano="32px" />
                     <p className="footer-bio">
                         Diseño y confección propia de moda modesta y elegante en San Carlos, Chile. 
                         Especialistas en tallaje inclusivo (12 a 7XL) y uniformes congregacionales.
@@ -157,13 +158,10 @@ const Footer = ({ onNavigate }) => {
                     flex-direction: column;
                     gap: 20px;
                 }
-                .logo-text {
-                    font-family: 'Playfair Display', serif;
-                    font-size: 32px;
-                    font-weight: 900;
-                    color: #1e1b4b;
-                    margin: 0;
-                }
+                /* Acá vivía una regla .logo-text con Playfair Display. Como
+                   este bloque de estilos es global, se escapaba del pie y le
+                   cambiaba la fuente al logo del navbar, que creía estar en
+                   Cormorant. El logo ahora es un componente con su propia hoja. */
                 .footer-bio {
                     font-size: 15px;
                     line-height: 1.6;
