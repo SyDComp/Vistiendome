@@ -9,10 +9,13 @@
  * espacios y las letras juntos.
  */
 .logo-vm {
-    /* Cooper Black NO es una fuente web: viene con Office, la tiene quien la
-       tiene. La reserva es la que ya usa el sitio, para que si no está el logo
-       siga siendo el de la marca y no una serif cualquiera. */
-    --logo-fuente: "Cooper Black", 'Cormorant Garamond', Georgia, serif;
+    /* Bevan, cargada desde Google en index.html. Tiene que ser una fuente WEB:
+       un logo no puede verse distinto según lo que la visitante tenga instalado.
+       Acá decía "Cooper Black", que viene con Office y no es una fuente web —se
+       midió y no estaba ni siquiera en la máquina donde se diseñó—, así que cada
+       visita caía en una reserva distinta.
+       Se cambia SÓLO acá: es el único lugar donde el logo nombra su tipografía. */
+    --logo-fuente: 'Bevan', 'Cormorant Garamond', serif;
     --logo-tinta: #1a1a1a;
     --logo-papel: #ffffff;
 

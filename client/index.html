@@ -5,6 +5,16 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Vistiendomé</title>
+
+    <!-- La fuente del logo. Se carga acá y no con @import dentro del CSS
+         porque un @import bloquea el renderizado hasta que baja.
+         Es una fuente WEB a proposito: el logo tiene que verse igual en toda
+         maquina. Antes el CSS pedia "Cooper Black", que no es una fuente web
+         —viene con Office— y en la practica no estaba en ninguna parte: cada
+         visita veia la reserva que le tocara. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bevan&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div id="root"></div>
