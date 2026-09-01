@@ -1,0 +1,47 @@
+.no-encontrada {
+    max-width: 40rem;
+    margin: 0 auto;
+    padding: 6rem 1.5rem 8rem;
+    text-align: center;
+}
+
+.no-encontrada__codigo {
+    font-size: 4rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #d9d2d6;
+    margin: 0 0 0.5rem;
+}
+
+.no-encontrada__titulo {
+    font-size: 1.75rem;
+    margin: 0 0 0.75rem;
+}
+
+.no-encontrada__texto {
+    color: #6b6169;
+    margin: 0 0 2rem;
+}
+
+.no-encontrada__acciones {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.no-encontrada__boton {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 999px;
+    background: #8c1856;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.no-encontrada__boton--suave {
+    background: transparent;
+    color: #8c1856;
+    box-shadow: inset 0 0 0 1px #8c1856;
+}

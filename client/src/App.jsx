@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect } from 'react'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 
 import Home from './components/interface/Home'
 import { WebSocketProvider } from './context/WebSocketContext'
@@ -15,6 +15,7 @@ import CatalogView from './features/catalog/components/CatalogView'
 import ExplorerView from './features/catalog/components/ExplorerView'
 import ColeccionesIndex from './components/interface/vistas/ColeccionesIndex'
 import ProductDetailView from './features/productDetail/components/ProductDetailView'
+import NoEncontrada from './components/interface/vistas/NoEncontrada'
 
 // Rutas lazy-loadadas (pesadas o secundarias)
 const SuperSetup = React.lazy(() => import('./components/interface/admin/SuperSetup'))
@@ -66,8 +67,14 @@ function App() {
                    <Route path="explorador/producto/:slug/:sku?/:imgIndex?" element={<ProductDetailView />} />
                    <Route path="coleccion/:slug" element={<DetalleColeccion />} />
                    <Route path="coleccion/:collectionSlug/producto/:slug/:sku?/:imgIndex?" element={<ProductDetailView />} />
+                   {/* Cualquier direccion que no coincida. Va ultimo y dentro del
+                       layout, asi conserva el menu y el pie. Sin esto la pantalla
+                       quedaba en blanco. */}
+                   <Route path="*" element={<NoEncontrada />} />
                 </Route>
                 
+                {/* Escribir /admin a secas es lo que hace todo el mundo. */}
+                <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
                 <Route path="/admin/bootstrap" element={<SuperSetup />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/dashboard/*" element={<DashboardLayout />} />
