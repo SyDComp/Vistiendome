@@ -291,8 +291,15 @@
 }
 @media (min-width: 1024px) { .cta-grid-desktop { display: grid; } }
 
+/* El color de la marca, el mismo del atributo seleccionado y el mismo que ya
+   usa este boton en movil (.btn-mobile-buy). En escritorio habia quedado en
+   un lila palido: al lado de un atributo seleccionado en magenta pleno, el
+   boton principal se leia como el elemento secundario. Y como el estado
+   deshabilitado es opacity .5, partir de un color ya palido hacia que
+   habilitado y deshabilitado se parecieran demasiado — que es exactamente
+   lo que reporto QA: "parece apagado". */
 .btn-primary-premium {
-    background: #d1a3d4;
+    background: #8f0653;
     color: white;
     border: none;
     padding: 18px;
@@ -309,7 +316,7 @@
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 0 4px 10px rgba(209, 163, 212, 0.3);
 }
-.btn-primary-premium:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(209, 163, 212, 0.45); background: #c592c8; }
+.btn-primary-premium:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(143, 6, 83, 0.35); background: #6d0440; }
 
 .btn-secondary-premium {
     background: #fff;

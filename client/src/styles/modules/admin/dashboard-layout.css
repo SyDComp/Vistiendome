@@ -275,9 +275,20 @@
     height: calc(100% - 60px);
 }
 
+/* ACA SCROLLEA EL PANEL.
+   Estaba en `overflow: hidden`, igual que .admin-layout, .admin-main y
+   .admin-content-inner: cuatro contenedores anidados, ninguno con scroll
+   vertical. Sumado a que las rutas /admin bloquean el scroll del body
+   (useScrollLock en App.jsx), el contenido mas alto que la ventana quedaba
+   literalmente fuera de alcance — no habia forma de llegar a el.
+   El unico que si podia desplazarse era el menu lateral
+   (.admin-sidebar-nav), y por eso el sintoma se leia como "no me deja hacer
+   scroll hacia abajo" en una pantalla puntual, cuando era de todo el panel.
+   El sidebar y el encabezado siguen fijos: lo que rueda es el contenido. */
 .admin-content-wrapper {
     flex: 1;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     background-color: #f8fafc;
     display: flex;
     flex-direction: column;
@@ -294,7 +305,9 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    /* Visible, no hidden: quien scrollea es el wrapper de arriba. Si este
+       recortara, el contenido volveria a quedar inalcanzable. */
+    overflow: visible;
     max-width: 1400px;
     width: 100%;
     margin: 0 auto;

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { Package, User, Phone } from 'lucide-react';
+import { Package, User, Phone, Printer } from 'lucide-react';
 import ItemsPedidoTable from './ItemsPedidoTable';
 import { formatCurrency } from '../../../../utils/cartUtils';
 
@@ -40,6 +40,14 @@ const PedidoDetalle = () => {
 
     return (
         <div className="pedido-detalle-wrapper">
+            {/* La hoja ya estaba pensada para imprimirse —tiene sus estilos de
+                impresion y hasta una clase .no-print— pero nadie habia puesto el
+                boton, asi que habia que saber que existe Ctrl+P. */}
+            <div className="no-print pedido-acciones">
+                <button type="button" onClick={() => window.print()} className="pedido-boton-imprimir">
+                    <Printer size={16} /> Imprimir
+                </button>
+            </div>
             <div className="pedido-detalle-card">
                 <header className="pedido-header">
                     <h1>VISTIENDOMÉ CHILE</h1>
@@ -96,6 +104,16 @@ const PedidoDetalle = () => {
                 .pedido-header h1 { font-size: 28px; font-weight: 900; margin: 0 0 4px; letter-spacing: 1px; }
                 .pedido-subtitle { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #4b5563; margin: 0; }
                 .pedido-numero { font-size: 13px; font-weight: 700; color: #8f0653; margin: 4px 0 0; }
+
+                .pedido-acciones { position: fixed; top: 20px; right: 20px; z-index: 10; }
+                .pedido-boton-imprimir {
+                    display: flex; align-items: center; gap: 8px;
+                    background: #8f0653; color: #fff; border: none;
+                    padding: 10px 18px; border-radius: 8px;
+                    font-size: 13px; font-weight: 700; cursor: pointer;
+                    font-family: inherit; box-shadow: 0 2px 8px rgba(0,0,0,.15);
+                }
+                .pedido-boton-imprimir:hover { background: #6d0440; }
 
                 .pedido-meta { display: flex; flex-wrap: wrap; gap: 18px; margin-bottom: 24px; font-size: 14px; }
                 .pedido-meta-item { display: flex; align-items: center; gap: 6px; }

@@ -149,6 +149,20 @@ const TablaPrendas = ({
                    de otra, así que se destaca. */
                 .tp-producto-col { font-weight: 700; white-space: normal; }
                 .tp-elegida { background: #f0fdf4; }
+
+                /* En pantalla la tabla puede rodar de lado. En papel no hay a
+                   donde rodar: lo que se sale del ancho simplemente no se
+                   imprime, y la hoja sale incompleta sin avisar. Al imprimir
+                   se suelta el scroll y se aprieta lo justo para que entre
+                   entera; si algun texto no cabe, preferimos que baje de
+                   linea antes que perder una columna. */
+                @media print {
+                    .tp-scroll { overflow: visible !important; }
+                    .tp-tabla { font-size: 12px; table-layout: auto; }
+                    .tp-tabla th { padding: 5px 5px; }
+                    .tp-tabla td { padding: 6px 5px; }
+                    .tp-tabla th, .tp-tabla td { white-space: normal; }
+                }
             `}</style>
         </div>
     );
