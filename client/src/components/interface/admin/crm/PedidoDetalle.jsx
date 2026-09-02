@@ -42,7 +42,7 @@ const PedidoDetalle = () => {
         <div className="pedido-detalle-wrapper">
             <div className="pedido-detalle-card">
                 <header className="pedido-header">
-                    <h1>VISTIÉNDOME CHILE</h1>
+                    <h1>VISTIENDOMÉ CHILE</h1>
                     <p className="pedido-subtitle">{esTaller ? 'Planilla de Pedido' : 'Comprobante de Compra'}</p>
                     <p className="pedido-numero">N° {cotizacion.numero ?? '—'}</p>
                 </header>

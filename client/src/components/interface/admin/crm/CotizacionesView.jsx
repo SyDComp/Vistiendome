@@ -154,9 +154,17 @@ const CotizacionesView = () => {
         fetchCotizaciones();
     }, []);
 
+    // Se busca por lo que una persona tiene en la cabeza cuando llega hasta aca:
+    // el nombre de la clienta, o el N de pedido que figura en la planilla y en
+    // la orden de corte. Antes solo miraba id/origen/estado, asi que escribir un
+    // nombre —lo primero que cualquiera intenta— no devolvia nada y la busqueda
+    // parecia rota. El ULID se sigue aceptando por si alguien lo pega.
     const filteredCotizaciones = cotizaciones.filter(coti => {
-        const term = searchTerm.toLowerCase();
+        const term = searchTerm.trim().toLowerCase();
+        if (!term) return true;
         return (
+            (coti.cliente?.nombres?.toLowerCase() || '').includes(term) ||
+            (coti.numero != null && String(coti.numero).includes(term)) ||
             (coti.id?.toLowerCase() || '').includes(term) ||
             (coti.origen?.toLowerCase() || '').includes(term) ||
             (coti.estado?.toLowerCase() || '').includes(term)
@@ -164,10 +172,29 @@ const CotizacionesView = () => {
     });
 
     const columns = [
-        { 
-            key: 'id', 
-            label: 'ID',
-            render: (value) => <span className="font-mono text-xs text-slate-500 uppercase">{value?.substring(0, 8)}</span>
+        {
+            // Quien mira esta lista busca a una persona, no una fila: el nombre
+            // va primero. Pero el nombre NO identifica —dos clientas pueden
+            // llamarse igual, y en esta misma tabla hay repetidos—, asi que
+            // debajo va el identificador.
+            //
+            // Y el identificador es el N de pedido, no el ULID: el ULID nombra
+            // la fila para la maquina y nadie lo puede decir por telefono. El N
+            // de pedido ya es el que aparece en la planilla, en la orden de
+            // corte y en la etiqueta; mostrar otra cosa aca obligaba a traducir
+            // entre dos numeraciones.
+            key: 'cliente',
+            label: 'Pedido',
+            render: (_, row) => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
+                    <span style={{ fontWeight: '700', fontSize: '13px', color: '#1e293b', textTransform: 'capitalize' }}>
+                        {row.cliente?.nombres || 'Sin nombre'}
+                    </span>
+                    <span className="font-mono" style={{ fontSize: '11px', color: '#94a3b8' }}>
+                        {row.numero != null ? `N° ${row.numero}` : row.id?.substring(0, 8).toUpperCase()}
+                    </span>
+                </div>
+            )
         },
         { 
             key: 'fecha', 
@@ -342,7 +369,7 @@ const CotizacionesView = () => {
 
             <FilterBar 
                 onSearch={setSearchTerm} 
-                placeholder="Buscar por ID, origen o estado..."
+                placeholder="Buscar por nombre, N° de pedido o estado..."
             />
 
             <DataTable 

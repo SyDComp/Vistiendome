@@ -1088,7 +1088,7 @@ const ShippingLabelPrinter = () => {
                                                     {/* ENCABEZADO MARCA */}
                                                     <div>
                                                         <div className="brand-box" style={{ borderBottom: inkMode === 'eco' ? '1.5px solid #000' : 'none', background: inkMode === 'standard' ? '#000' : 'transparent', color: inkMode === 'standard' ? '#fff' : '#000', padding: inkMode === 'standard' ? '8px' : '0 0 8px 0', marginBottom: '8px', textAlign: 'center', borderRadius: inkMode === 'standard' ? '4px' : '0' }}>
-                                                            <div style={{ fontSize: '14px', fontWeight: '900', letterSpacing: '0.5px' }}>VISTIÉNDOME CHILE</div>
+                                                            <div style={{ fontSize: '14px', fontWeight: '900', letterSpacing: '0.5px' }}>VISTIENDOMÉ CHILE</div>
                                                             <div style={{ fontSize: '8px', fontWeight: '700', color: inkMode === 'standard' ? '#cbd5e1' : '#4a5568', letterSpacing: '1.5px' }}>TIENDA DE MODA CRISTIANA</div>
                                                         </div>
 
@@ -1183,7 +1183,7 @@ const ShippingLabelPrinter = () => {
                                             >
                                                 <div>
                                                     <div className="brand-box">
-                                                        <div className="brand-title">VISTIÉNDOME CHILE</div>
+                                                        <div className="brand-title">VISTIENDOMÉ CHILE</div>
                                                         <div className="brand-sub">TIENDA DE MODA CRISTIANA</div>
                                                     </div>
 
