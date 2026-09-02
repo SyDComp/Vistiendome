@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { describirEntrega } from '../../../../utils/entrega';
 import { X, Search, Plus, Trash2, Check, User, Package, MapPin, FileText, ShoppingBag, Send, AlertCircle, DollarSign } from 'lucide-react';
 import { getProducts } from '../../../../lib/api/endpoints/products.api';
 import { useNotification } from '../../../../context/NotificationContext';
@@ -34,6 +35,12 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
 
     // Datos adicionales de Cotización
     const [transporte, setTransporte] = useState('STARKEN');
+    // Retiro o despacho es la PRIMERA decision, no un valor escondido dentro del
+    // nombre del transportista. Antes el retiro se elegia como si fuera una
+    // empresa de transporte ('RETIRO EN TIENDA' en el desplegable de Transporte),
+    // y el pedido nunca declaraba su modo: quedaba como despacho a domicilio con
+    // un transportista inventado, y asi salia impreso en la etiqueta.
+    const [modoEntrega, setModoEntrega] = useState('DESPACHO');
     const [tipoDespacho, setTipoDespacho] = useState('DOMICILIO');
     const [region, setRegion] = useState('');
     const [comuna, setComuna] = useState('');
@@ -242,11 +249,14 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                 email_personal: clientMode === 'select' ? selectedCliente.email_personal : newClienteData.email_personal,
                 telefono: clientMode === 'select' ? selectedCliente.telefono : newClienteData.telefono,
                 origen: "MANUAL",
-                transporte,
-                tipo_despacho: tipoDespacho,
-                region,
-                comuna,
-                direccion,
+                modo_entrega: modoEntrega,
+                // Un retiro no viaja: no se le guarda transportista ni destino. Si
+                // se guardaran, la etiqueta y el mensaje los imprimirian.
+                transporte: modoEntrega === 'RETIRO' ? null : transporte,
+                tipo_despacho: modoEntrega === 'RETIRO' ? null : tipoDespacho,
+                region: modoEntrega === 'RETIRO' ? '' : region,
+                comuna: modoEntrega === 'RETIRO' ? '' : comuna,
+                direccion: modoEntrega === 'RETIRO' ? '' : direccion,
                 mensaje,
                 items: items.map(it => ({
                     sku_id: typeof it.sku_id === 'number' ? it.sku_id : null,
@@ -290,7 +300,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                            (clientMode === 'select' ? selectedCliente?.nombres : newClienteData.nombres) || "Cliente";
 
         const itemsSummary = items.map(it => `• ${it.cantidad}x ${it.sku_name} ($${(it.cantidad * it.precio_unitario_estimado).toLocaleString()})`).join('\n');
-        const textMessage = `¡Hola ${clientName}! 👗✨ Te enviamos el detalle de la cotización #${createdCotizacion?.id?.substring(0, 8) || ''} en Vistiendomé:\n\n${itemsSummary}\n\n*Total Estimado: $${totalCotizacion.toLocaleString()}*\n🚚 Despacho: ${transporte} (${tipoDespacho === 'SUCURSAL' ? 'A sucursal' : 'A domicilio'})\n${mensaje ? `📌 Nota: ${mensaje}\n\n` : '\n'}Quedamos atentas para confirmar tu pedido o resolver cualquier duda que tengas. ¡Un abrazo! 💕`;
+        const textMessage = `¡Hola ${clientName}! 👗✨ Te enviamos el detalle de la cotización #${createdCotizacion?.id?.substring(0, 8) || ''} en Vistiendomé:\n\n${itemsSummary}\n\n*Total Estimado: $${totalCotizacion.toLocaleString()}*\n${describirEntrega({ modo_entrega: modoEntrega, tipo_despacho: tipoDespacho, transporte, direccion }).esRetiro ? '🏪 Retiro en el local' : `🚚 Despacho: ${transporte} (${tipoDespacho === 'SUCURSAL' ? 'A sucursal' : 'A domicilio'})`}\n${mensaje ? `📌 Nota: ${mensaje}\n\n` : '\n'}Quedamos atentas para confirmar tu pedido o resolver cualquier duda que tengas. ¡Un abrazo! 💕`;
 
         let cleanPhone = clientPhone.replace(/\D/g, '');
         if (cleanPhone.startsWith('0')) cleanPhone = cleanPhone.substring(1);
@@ -681,7 +691,20 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                     <MapPin size={18} color="#8f0653" /> 3. Envío y Observaciones
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '12px' }}>
-                                    <div>
+                                    <div style={{ gridColumn: '1 / -1' }}>
+                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Tipo de entrega</label>
+                                        <select
+                                            value={modoEntrega} onChange={e => setModoEntrega(e.target.value)}
+                                            style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', fontWeight: '700' }}
+                                        >
+                                            <option value="DESPACHO">DESPACHO — la prenda viaja con un transportista</option>
+                                            <option value="RETIRO">RETIRO EN LOCAL — la clienta la viene a buscar</option>
+                                        </select>
+                                    </div>
+                                    {/* Lo de abajo es del despacho. En un retiro no existe: no hay
+                                        transportista, ni direccion, ni comuna de destino. */}
+                                    {modoEntrega === 'DESPACHO' && (<>
+<div>
                                         <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Transporte</label>
                                         <select
                                             value={transporte} onChange={e => setTransporte(e.target.value)}
@@ -689,7 +712,6 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                         >
                                             <option value="STARKEN">STARKEN</option>
                                             <option value="CHILEXPRESS">CHILEXPRESS</option>
-                                            <option value="RETIRO EN TIENDA">RETIRO EN TIENDA</option>
                                             <option value="DESPACHO PROPIO">DESPACHO PROPIO / OTRO</option>
                                         </select>
                                     </div>
@@ -727,6 +749,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                             style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
                                         />
                                     </div>
+                                    </>)}
                                     <div style={{ gridColumn: '1 / -1' }}>
                                         <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Nota u Observación Interna</label>
                                         <textarea

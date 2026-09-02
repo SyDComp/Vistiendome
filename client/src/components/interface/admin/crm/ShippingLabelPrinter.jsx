@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { describirEntrega } from '../../../../utils/entrega';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
     Printer, Search, CheckSquare, Square, Package, Settings2, RefreshCw,
@@ -1063,6 +1064,7 @@ const ShippingLabelPrinter = () => {
                                         {pageSlots.map((slot, sIdx) => {
                                             const coti = slot.coti;
                                             const cli = slot.cliente;
+                                            const entrega = describirEntrega(coti);
                                             const fullName = cli ? `${cli.nombres || ''} ${cli.apellidos || ''}`.trim() : 'Destinatario';
                                             const barcodeVal = coti.id ? `COTI-${coti.id}` : 'COTI-0000';
                                             const scaleClass = formatKey === 'a4_2x3' || formatKey === 'thermal_80mm' ? 'scale-compact' : formatKey === 'a4_full' ? 'scale-large' : '';
@@ -1107,23 +1109,23 @@ const ShippingLabelPrinter = () => {
                                                         {/* INFORMACIÓN DE DESPACHO */}
                                                         <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '8px' }}>
                                                             <div style={{ fontSize: '8px', fontWeight: '800', color: '#64748b', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>
-                                                                DESPACHO • {coti.tipo_despacho === 'SUCURSAL' ? 'RETIRO SUCURSAL' : 'A DOMICILIO'}
+                                                                {entrega.titulo}
                                                             </div>
-                                                            {(() => {
-                                                                const transColor = getShippingColor(coti.transporte || 'STARKEN', shippingColors);
+                                                            {entrega.transporte && (() => {
+                                                                const transColor = getShippingColor(entrega.transporte, shippingColors);
                                                                 return (
                                                                     <div style={{ fontSize: '11px', fontWeight: '900', border: showTransportColor ? `2px solid ${transColor}` : '1.5px solid #000', padding: '4px 8px', borderRadius: '4px', display: 'inline-block', marginBottom: '8px', background: showTransportColor ? `${transColor}15` : '#fff', color: showTransportColor ? transColor : '#000' }}>
-                                                                        TRANSPORTE: {(coti.transporte || 'STARKEN').toUpperCase()}
+                                                                        TRANSPORTE: {entrega.transporte.toUpperCase()}
                                                                     </div>
                                                                 );
                                                             })()}
 
-                                                            <div style={{ fontSize: '8px', fontWeight: '800', color: '#64748b', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>DIRECCIÓN</div>
+                                                            <div style={{ fontSize: '8px', fontWeight: '800', color: '#64748b', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>{entrega.etiquetaDestino}</div>
                                                             <div style={{ fontSize: '13px', fontWeight: '800', marginBottom: '8px', color: '#000' }}>
-                                                                {(coti.direccion || 'POR CONFIRMAR / SUCURSAL').toUpperCase()}
+                                                                {entrega.destino.toUpperCase()}
                                                             </div>
 
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', border: '1.5px solid #000', padding: '6px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '900', background: inkMode === 'standard' ? '#f8fafc' : '#fff', boxSizing: 'border-box', width: '100%', maxWidth: '100%' }}>
+                                                            <div style={{ display: entrega.muestraComuna ? 'flex' : 'none', justifyContent: 'space-between', border: '1.5px solid #000', padding: '6px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '900', background: inkMode === 'standard' ? '#f8fafc' : '#fff', boxSizing: 'border-box', width: '100%', maxWidth: '100%' }}>
                                                                 <div>
                                                                     <div style={{ fontSize: '7px', color: '#64748b' }}>COMUNA</div>
                                                                     <div>{(coti.comuna || '---').toUpperCase()}</div>
@@ -1172,6 +1174,7 @@ const ShippingLabelPrinter = () => {
                                     {pageSlots.map((slot, sIdx) => {
                                         const coti = slot.coti;
                                         const cli = slot.cliente;
+                                        const entrega = describirEntrega(coti);
                                         const fullName = cli ? `${cli.nombres || ''} ${cli.apellidos || ''}`.trim() : 'Destinatario';
                                         const barcodeVal = coti.id ? `COTI-${coti.id}` : 'COTI-0000';
                                         const scaleClass = formatKey === 'a4_2x3' || formatKey === 'thermal_80mm' ? 'scale-compact' : formatKey === 'a4_full' ? 'scale-large' : '';
@@ -1199,22 +1202,22 @@ const ShippingLabelPrinter = () => {
                                                     </div>
 
                                                     <div className="address-box">
-                                                        <div className="sec-title">DESPACHO • {coti.tipo_despacho === 'SUCURSAL' ? 'RETIRO SUCURSAL' : 'A DOMICILIO'}</div>
-                                                        {(() => {
-                                                            const transColor = getShippingColor(coti.transporte || 'STARKEN', shippingColors);
+                                                        <div className="sec-title">{entrega.titulo}</div>
+                                                        {entrega.transporte && (() => {
+                                                            const transColor = getShippingColor(entrega.transporte, shippingColors);
                                                             return (
                                                                 <div className="transport-tag" style={showTransportColor ? { borderColor: transColor, backgroundColor: `${transColor}15`, color: transColor } : { borderColor: '#000', backgroundColor: '#fff', color: '#000' }}>
-                                                                    TRANSPORTE: {(coti.transporte || 'STARKEN').toUpperCase()}
+                                                                    TRANSPORTE: {entrega.transporte.toUpperCase()}
                                                                 </div>
                                                             );
                                                         })()}
 
-                                                        <div className="sec-title" style={{ marginTop: '2mm' }}>DIRECCIÓN</div>
+                                                        <div className="sec-title" style={{ marginTop: '2mm' }}>{entrega.etiquetaDestino}</div>
                                                         <div className="main-address">
-                                                            {(coti.direccion || 'POR CONFIRMAR / SUCURSAL').toUpperCase()}
+                                                            {entrega.destino.toUpperCase()}
                                                         </div>
 
-                                                        <div className="city-box">
+                                                        <div className="city-box" style={{ display: entrega.muestraComuna ? undefined : 'none' }}>
                                                             <div className="city-col" style={{ flex: 1 }}>
                                                                 <div className="city-label">COMUNA</div>
                                                                 <div className="city-val">{(coti.comuna || '---').toUpperCase()}</div>
