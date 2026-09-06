@@ -52,7 +52,7 @@ const LABEL_FORMATS = {
         subtitle: 'Ahorro 75% Papel • Aprox. 10.5 × 14.8 cm (A6)',
         cols: 2,
         rows: 2,
-        pageClass: 'format-a4-grid cols-2',
+        pageClass: 'format-a4-grid cols-2 rows-2',
         width: '105mm',
         height: '148mm'
     },
@@ -61,7 +61,7 @@ const LABEL_FORMATS = {
         subtitle: 'Ahorro 50% Papel • Aprox. 21 × 14.8 cm (Media Carta/A5)',
         cols: 1,
         rows: 2,
-        pageClass: 'format-a4-grid cols-1',
+        pageClass: 'format-a4-grid cols-1 rows-2',
         width: '210mm',
         height: '148mm'
     },
@@ -435,6 +435,17 @@ const ShippingLabelPrinter = () => {
 
                     .format-a4-grid.cols-2 { grid-template-columns: 1fr 1fr; }
                     .format-a4-grid.cols-1 { grid-template-columns: 1fr; }
+                    /* Las filas se fijan por formato, NO por cuantas etiquetas haya.
+                       Sin grid-template-rows, el grid crea una fila implicita por
+                       cada etiqueta y —como .format-a4-grid tiene flex:1 dentro de
+                       una hoja de 100vh— esa unica fila se estira a la pagina
+                       entera: una sola etiqueta salia impresa del alto de la hoja
+                       en vez de su cuarto A6.
+                       Los formatos de 2 filas declaraban rows:2 en su config pero
+                       su pageClass no incluia la clase, y la regla .rows-2 ni
+                       siquiera existia. El de 2x3 sí la tenia, y por eso era el
+                       unico que salia bien. */
+                    .format-a4-grid.rows-2 { grid-template-rows: 1fr 1fr; }
                     .format-a4-grid.rows-3 { grid-template-rows: 1fr 1fr 1fr; }
 
                     .format-thermal-100x150 {
