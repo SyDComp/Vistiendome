@@ -870,16 +870,39 @@ const ShippingLabelPrinter = () => {
                                                     {fullName}
                                                 </div>
                                                 <div style={{ fontSize: '11px', color: '#64748b', display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
-                                                    <span style={{ fontWeight: '700', color: '#8f0653' }}>#{c.id.slice(-6)}</span>
-                                                    <span>•</span>
-                                                    <span>{c.comuna || 'Sin comuna'}</span>
-                                                    <span>•</span>
+                                                    {/* El N de pedido, que es el que figura en la planilla y en
+                                                        la etiqueta. Antes iba el final del ULID, que no coincide
+                                                        con ningun numero que la clienta pueda ver o decir. */}
+                                                    <span style={{ fontWeight: '700', color: '#8f0653' }}>
+                                                        {c.numero != null ? `N° ${c.numero}` : `#${c.id.slice(-6)}`}
+                                                    </span>
                                                     {(() => {
-                                                        const transColor = getShippingColor(c.transporte || 'STARKEN', shippingColors);
+                                                        // La tarjeta decia "STARKEN" y "Sin comuna" en un retiro,
+                                                        // porque pintaba el transporte con un valor por defecto sin
+                                                        // mirar el modo. Es el mismo invento que salia impreso en la
+                                                        // etiqueta, y es lo que hizo dudar a QA de si el pedido era
+                                                        // un retiro o un despacho.
+                                                        const e = describirEntrega(c);
+                                                        if (e.esRetiro) {
+                                                            return (
+                                                                <>
+                                                                    <span>•</span>
+                                                                    <span style={{ fontWeight: '800', color: '#0369a1', background: '#0369a115', padding: '1px 5px', borderRadius: '4px', border: '1px solid #0369a140', textTransform: 'uppercase', fontSize: '10px' }}>
+                                                                        Retiro en local
+                                                                    </span>
+                                                                </>
+                                                            );
+                                                        }
+                                                        const transColor = getShippingColor(e.transporte || 'STARKEN', shippingColors);
                                                         return (
-                                                            <span style={{ fontWeight: '800', color: transColor, background: `${transColor}15`, padding: '1px 5px', borderRadius: '4px', border: `1px solid ${transColor}40`, textTransform: 'uppercase', fontSize: '10px' }}>
-                                                                {c.transporte || 'Starken'}
-                                                            </span>
+                                                            <>
+                                                                <span>•</span>
+                                                                <span>{c.comuna || 'Sin comuna'}</span>
+                                                                <span>•</span>
+                                                                <span style={{ fontWeight: '800', color: transColor, background: `${transColor}15`, padding: '1px 5px', borderRadius: '4px', border: `1px solid ${transColor}40`, textTransform: 'uppercase', fontSize: '10px' }}>
+                                                                    {e.transporte || 'Sin transporte'}
+                                                                </span>
+                                                            </>
                                                         );
                                                     })()}
                                                 </div>

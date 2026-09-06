@@ -367,9 +367,17 @@ const CotizacionesView = () => {
                 .cot-glosario-texto { display:block; font-size:12px; color:#64748b; line-height:1.4; margin-top:1px; }
             `}</style>
 
-            <FilterBar 
-                onSearch={setSearchTerm} 
-                placeholder="Buscar por nombre, N° de pedido o estado..."
+            {/* Los nombres son los que FilterBar declara: `onSearchChange` y
+                `searchPlaceholder`. Estaban escritos como `onSearch` y
+                `placeholder`, que FilterBar no conoce — y React ignora en
+                silencio un prop que no existe, sin un aviso en consola. El
+                resultado era que setSearchTerm NUNCA se llamaba: el termino
+                quedaba siempre vacio y la lista no se filtraba jamas. Eso es lo
+                que QA reporto como "el buscador no hace nada", y era literal.
+                Las otras siete pantallas del panel ya usaban el nombre correcto. */}
+            <FilterBar
+                onSearchChange={setSearchTerm}
+                searchPlaceholder="Buscar por nombre, N° de pedido o estado..."
             />
 
             <DataTable 
