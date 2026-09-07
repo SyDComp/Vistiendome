@@ -239,10 +239,21 @@ export const TextBlock = ({ config, title, previewMode = false, forceMobile = nu
         : content;
 
     return (
-        <div style={{ marginBottom: previewMode ? '30px' : (isMobile ? '40px' : '60px'), textAlign: align }}>
-            <div style={{ 
-                maxWidth: previewMode ? '100%' : '1000px', 
-                margin: align === 'center' ? '0 auto' : '0'
+        // Mismo encuadre que las demas secciones: contenedor centrado, ancho
+        // maximo 1200 y padding lateral. Antes este bloque era el unico que no
+        // lo hacia —maxWidth 1000 y `margin: 0` cuando la alineacion era a la
+        // izquierda—, asi que se pegaba al borde y quedaba corrido respecto de
+        // todo lo demas de la portada.
+        //
+        // `align` alinea el TEXTO dentro del bloque, que es lo que significa;
+        // no mueve el bloque fuera del margen de la pagina.
+        <div style={{ marginBottom: previewMode ? '30px' : (isMobile ? '40px' : '60px'), width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <div style={{
+                width: '100%',
+                maxWidth: previewMode ? '100%' : '1200px',
+                padding: previewMode ? '0 10px' : (isMobile ? '0 16px' : '0 20px'),
+                boxSizing: 'border-box',
+                textAlign: align
             }}>
                 {title && <h2 style={{ fontSize: previewMode ? '20px' : (isMobile ? '22px' : '28px'), fontWeight: '900', color: '#1e1b4b', marginBottom: '24px' }}>{title}</h2>}
                 <div 
