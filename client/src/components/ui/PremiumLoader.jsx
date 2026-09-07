@@ -1,5 +1,6 @@
 import React from 'react';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import LogoVistiendome from './LogoVistiendome';
 
 const PremiumLoader = ({ text = "Cargando..." }) => {
     useScrollLock(true);
@@ -10,7 +11,13 @@ const PremiumLoader = ({ text = "Cargando..." }) => {
                 <div className="luxury-spinner">
                     <div className="spinner-inner"></div>
                 </div>
-                <h2 className="loading-title">Vistiendomé</h2>
+                {/* El logo, no el nombre escrito a mano. Esta pantalla es la
+                    marca presentandose sola —no una palabra dentro de una frase—
+                    y era el unico lugar donde salia en otra tipografia, en
+                    mayusculas y con el espaciado cambiado. */}
+                <div className="loading-marca">
+                    <LogoVistiendome tamano="1.9rem" />
+                </div>
                 <p className="loading-subtitle">{text}</p>
             </div>
             <style>{`
@@ -45,13 +52,10 @@ const PremiumLoader = ({ text = "Cargando..." }) => {
                     border-radius: 50%;
                     animation: luxurySpin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
                 }
-                .loading-title {
-                    font-size: 28px;
-                    font-weight: 900;
-                    color: #1e1b4b;
-                    letter-spacing: 4px;
-                    text-transform: uppercase;
-                    margin-bottom: 8px;
+                .loading-marca {
+                    display: flex;
+                    justify-content: center;
+                    margin-bottom: 10px;
                 }
                 .loading-subtitle {
                     font-size: 13px;
