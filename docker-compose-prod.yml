@@ -38,6 +38,10 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       SECRET_KEY: ${SECRET_KEY}
+      # El .env vive en el host y NO entra a la imagen, asi que lo que no se
+      # pase por aca la app no lo ve. Sin esto corria como "development", y en
+      # ese modo borrar un producto elimina fisicamente su historial de ventas.
+      APP_ENV: ${APP_ENV:-production}
     depends_on:
       db:
         condition: service_healthy
