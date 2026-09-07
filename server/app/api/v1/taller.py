@@ -33,7 +33,11 @@ _ADMIN = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))
 # --- Esquemas ---
 
 class ItemEntrada(BaseModel):
-    sku_id: int
+    # Sin SKU cuando la pieza no existe en el catalogo (item libre de una
+    # cotizacion personalizada). En ese caso manda el nombre, que es lo unico
+    # que la identifica en la planilla del taller.
+    sku_id: Optional[int] = None
+    nombre_custom: Optional[str] = None
     cantidad: int = 1
     cotizacion_item_id: Optional[str] = None
 
@@ -49,7 +53,7 @@ class EstadoEntrada(BaseModel):
 
 class ItemSalida(BaseModel):
     id: str
-    sku_id: int
+    sku_id: Optional[int] = None
     sku: Optional[str] = None
     producto: Optional[str] = None
     config: Dict[str, Any] = {}
@@ -81,7 +85,7 @@ class OrdenSalida(BaseModel):
 def _salida(orden: OrdenCorte, db: Session) -> OrdenSalida:
     items: List[ItemSalida] = []
     for it in orden.items:
-        sku = it.sku or db.get(SKU, it.sku_id)
+        sku = it.sku or (db.get(SKU, it.sku_id) if it.sku_id else None)
         cot_item = db.get(CotizacionItem, it.cotizacion_item_id) if it.cotizacion_item_id else None
         cot = cot_item.cotizacion if cot_item else None
         persona = cot.persona if cot else None
@@ -89,7 +93,7 @@ def _salida(orden: OrdenCorte, db: Session) -> OrdenSalida:
             id=it.id,
             sku_id=it.sku_id,
             sku=sku.sku if sku else None,
-            producto=sku.product.name if sku and sku.product else None,
+            producto=(sku.product.name if sku and sku.product else None) or it.nombre_custom,
             config=(sku.config or {}) if sku else {},
             cantidad=it.cantidad,
             cotizacion_item_id=it.cotizacion_item_id,
@@ -155,16 +159,22 @@ def piezas_pendientes(
 
     filas = []
     for it in db.exec(query.order_by(Cotizacion.created_at.asc())).all():
-        if it.id in ya_asignados or it.cortado or not it.sku:
+        # `not it.sku` descartaba aca las piezas personalizadas: existian en el
+        # pedido pero no aparecian nunca para cortar. Ahora entran con su
+        # nombre; lo unico que no tienen es variante ni caracteristicas.
+        if it.id in ya_asignados or it.cortado:
+            continue
+        if not it.sku and not (it.nombre_custom or "").strip():
             continue
         cot = it.cotizacion
         persona = cot.persona if cot else None
         filas.append({
             "cotizacion_item_id": it.id,
             "sku_id": it.sku_id,
-            "sku": it.sku.sku,
-            "producto": it.sku.product.name if it.sku.product else "—",
-            "config": it.sku.config or {},
+            "sku": it.sku.sku if it.sku else None,
+            "nombre_custom": it.nombre_custom,
+            "producto": (it.sku.product.name if it.sku and it.sku.product else None) or it.nombre_custom or "—",
+            "config": (it.sku.config or {}) if it.sku else {},
             "cantidad": it.cantidad,
             "pedido_numero": cot.numero if cot else None,
             "cliente": f"{persona.nombres} {persona.apellidos}".strip() if persona else "—",
@@ -203,13 +213,20 @@ def crear(data: OrdenCrear, db: Session = Depends(get_session), admin: CuentaAcc
     db.refresh(orden)
 
     for entrada in data.items:
-        if not db.get(SKU, entrada.sku_id):
-            raise HTTPException(status_code=404, detail=f"Variante {entrada.sku_id} no encontrada")
+        # Con SKU se valida contra el catalogo. Sin SKU es una pieza
+        # personalizada y lo unico exigible es que tenga nombre: una linea sin
+        # variante y sin nombre no le dice nada a quien corta.
+        if entrada.sku_id is not None:
+            if not db.get(SKU, entrada.sku_id):
+                raise HTTPException(status_code=404, detail=f"Variante {entrada.sku_id} no encontrada")
+        elif not (entrada.nombre_custom or "").strip():
+            raise HTTPException(status_code=400, detail="Una pieza sin variante necesita un nombre")
         if entrada.cantidad <= 0:
             raise HTTPException(status_code=400, detail="La cantidad debe ser mayor que cero")
         db.add(OrdenCorteItem(
             orden_id=orden.id,
             sku_id=entrada.sku_id,
+            nombre_custom=(entrada.nombre_custom or "").strip() or None,
             cantidad=entrada.cantidad,
             cotizacion_item_id=entrada.cotizacion_item_id,
         ))
@@ -306,7 +323,7 @@ def repetir(orden_id: str, db: Session = Depends(get_session), admin: CuentaAcce
     db.refresh(nueva)
 
     for it in original.items:
-        db.add(OrdenCorteItem(orden_id=nueva.id, sku_id=it.sku_id, cantidad=it.cantidad))
+        db.add(OrdenCorteItem(orden_id=nueva.id, sku_id=it.sku_id, nombre_custom=it.nombre_custom, cantidad=it.cantidad))
     db.commit()
     db.refresh(nueva)
     return _salida(nueva, db)

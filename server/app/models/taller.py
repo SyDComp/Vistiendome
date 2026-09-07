@@ -56,7 +56,16 @@ class OrdenCorteItem(SQLModel, table=True):
     id: str = Field(default_factory=generate_ulid, primary_key=True, max_length=26)
     orden_id: str = Field(foreign_key="ordenes_corte.id", index=True, max_length=26)
 
-    sku_id: int = Field(foreign_key="sku.id", index=True)
+    # OPCIONAL a proposito. Una cotizacion puede llevar una pieza que no existe
+    # en el catalogo —el "item libre" que arma la clienta a mano para un
+    # encargo especial— y esa pieza tambien hay que cortarla. Mientras esto fue
+    # obligatorio, la orden de corte no podia representarla: el pedido entraba
+    # al taller sin ella y nadie la confeccionaba.
+    #
+    # Sin SKU, el nombre es lo unico que identifica la pieza, y la costurera
+    # necesita leerlo en la planilla.
+    sku_id: Optional[int] = Field(default=None, foreign_key="sku.id", index=True)
+    nombre_custom: Optional[str] = Field(default=None, max_length=255)
     cantidad: int = Field(default=1)
 
     # De dónde salió esta línea. Con pedido: al finalizar se marca esa pieza

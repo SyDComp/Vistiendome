@@ -63,7 +63,10 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
     const guardar = async () => {
         const items = [
             ...Object.values(elegidas).map(p => ({
-                sku_id: p.sku_id,
+                sku_id: p.sku_id ?? null,
+                // Una pieza personalizada no tiene variante del catalogo: el
+                // nombre es lo unico que la identifica en la planilla.
+                nombre_custom: p.nombre_custom ?? null,
                 cantidad: p.cantidad,
                 cotizacion_item_id: p.cotizacion_item_id,
             })),
