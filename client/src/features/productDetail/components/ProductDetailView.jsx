@@ -36,6 +36,8 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
         isMobile,
         precioFinal,
         handleOptionChange,
+        ultimoAjuste,
+        setUltimoAjuste,
         handleJumpToSKU,
         checkOptionReachability,
         handleClose: hookHandleClose,
@@ -47,6 +49,23 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
         collectionSlug,
         slug,
     } = useProductDetail(location.state?.initialProduct || initialProduct);
+
+    // Cuando el catálogo no tiene la combinación pedida, la selección se acomoda
+    // sola a la más parecida. Es correcto —no se puede vender lo que no existe—
+    // pero pasaba sin decir nada: se elegía un color y la talla cambiaba sola.
+    // Explicarlo es la diferencia entre "me ajustó la talla" y "esto está roto".
+    useEffect(() => {
+        if (!ultimoAjuste) return;
+        const { pedido, ajustes } = ultimoAjuste;
+        const dice = ajustes
+            .map(a => `${a.clave.toLowerCase()} ${a.a}`)
+            .join(' y ');
+        toast.info(
+            `${pedido.valor} no está disponible con lo que tenías elegido. Te dejamos ${dice}.`,
+            'Ajustamos tu selección'
+        );
+        setUltimoAjuste(null);
+    }, [ultimoAjuste, toast, setUltimoAjuste]);
 
     // Analítica: registrar vista de producto
     useEffect(() => {

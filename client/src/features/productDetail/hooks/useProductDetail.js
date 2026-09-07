@@ -257,6 +257,9 @@ export const useProductDetail = (initialProduct) => {
         });
     }, []);
 
+    // Ultimo ajuste automatico de la seleccion, para poder explicarlo en pantalla.
+    const [ultimoAjuste, setUltimoAjuste] = useState(null);
+
     const handleOptionChange = useCallback((attrId, value) => {
         setSelections(prev => {
             const currentSelections = { ...prev, [attrId]: value };
@@ -280,6 +283,19 @@ export const useProductDetail = (initialProduct) => {
                     });
                     const finalSelections = { ...currentSelections };
                     llavesMaestras.forEach(k => { finalSelections[k] = bestMatch.config[k]; });
+
+                    // Que se ajusto solo, aparte de lo que el usuario toco.
+                    //
+                    // Esto NO es un error: si la clienta elige Lila y ese color no
+                    // existe en XL, hay que moverse a una talla que si exista. El
+                    // problema era que pasaba en silencio — la talla cambiaba sola y
+                    // parecia que la pagina hiciera algo raro. Se avisa, y deja de
+                    // parecer un bug.
+                    const ajustes = llavesMaestras
+                        .filter(k => k !== attrId && currentSelections[k] && finalSelections[k] !== currentSelections[k])
+                        .map(k => ({ clave: k, de: currentSelections[k], a: finalSelections[k] }));
+                    if (ajustes.length) setUltimoAjuste({ pedido: { clave: attrId, valor: value }, ajustes });
+
                     return finalSelections;
                 }
             }
@@ -300,6 +316,8 @@ export const useProductDetail = (initialProduct) => {
         isMobile,
         precioFinal,
         handleOptionChange,
+        ultimoAjuste,
+        setUltimoAjuste,
         handleJumpToSKU,
         checkOptionReachability,
         handleClose,
