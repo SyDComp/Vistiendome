@@ -95,6 +95,16 @@ const Search = () => {
                                     name={item.display_name}
                                     price={item.price ? `$ ${item.price.toLocaleString('es-CL')}` : 'Consultar'}
                                     image={getImageUrl(item.image)}
+                                    // ProductCard ya sabe pintar la oferta —es la misma tarjeta
+                                    // del catálogo—, pero acá no se le pasaban estos dos props.
+                                    // Resultado: buscando, una prenda rebajada se veía a precio
+                                    // normal, y sólo se descubría la oferta entrando a la ficha.
+                                    onSale={!!item.on_sale && !!item.price}
+                                    originalPrice={
+                                        item.on_sale && item.original_price > item.price
+                                            ? `$ ${item.original_price.toLocaleString('es-CL')}`
+                                            : null
+                                    }
                                 />
                             </Link>
                         ))}

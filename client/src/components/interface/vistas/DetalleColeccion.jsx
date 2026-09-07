@@ -249,9 +249,13 @@ const DetalleColeccion = () => {
                                         ) : (
                                             <div className="no-image" />
                                         )}
-                                        {variant.compare_at_price && variant.compare_at_price > variant.price && (
+                                        {/* `compare_at_price` no existe en esta API: es un nombre de otra
+                                            plataforma que quedo copiado. La condicion daba siempre falso, asi
+                                            que el descuento no se mostraba NUNCA en las colecciones. Los campos
+                                            reales son `on_sale` y `original_price`, los que ya usa el catalogo. */}
+                                        {variant.on_sale && variant.original_price > variant.price && (
                                             <div className="sku-tag discount-tag">
-                                                -{Math.round((1 - variant.price / variant.compare_at_price) * 100)}%
+                                                -{Math.round((1 - variant.price / variant.original_price) * 100)}%
                                             </div>
                                         )}
                                     </div>
@@ -307,9 +311,9 @@ const DetalleColeccion = () => {
                                             ) : (
                                                 <div className="no-image" />
                                             )}
-                                            {variant.compare_at_price && variant.compare_at_price > variant.price && (
+                                            {variant.on_sale && variant.original_price > variant.price && (
                                                 <div className="sku-tag discount-tag">
-                                                    -{Math.round((1 - variant.price / variant.compare_at_price) * 100)}%
+                                                    -{Math.round((1 - variant.price / variant.original_price) * 100)}%
                                                 </div>
                                             )}
                                         </div>
