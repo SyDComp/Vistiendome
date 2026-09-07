@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select, func
 from datetime import datetime
 from ...database import get_session
@@ -434,6 +434,53 @@ def list_looks(db: Session = Depends(get_session)):
             ))
 
     return CatalogoSchema(products=tarjetas, looks=salida)
+
+
+class PrecioVigente(BaseModel):
+    sku: str
+    price: float                       # lo que cuesta HOY
+    original_price: float              # el precio base, sin oferta
+    on_sale: bool
+
+
+@router.get("/precios", response_model=List[PrecioVigente])
+def precios_vigentes(
+    skus: str = Query(..., description="Codigos de SKU separados por coma"),
+    db: Session = Depends(get_session),
+):
+    """
+    Cuanto cuestan HOY estos SKU.
+
+    Existe para el carrito. El carrito vive en el navegador de la clienta y
+    guarda el precio que tenia la prenda cuando la agrego; si la oferta termina
+    —o si la clienta vuelve a la semana siguiente— ese numero queda viejo y se
+    cotiza a un precio que ya no existe. Reportado por QA: agrego con oferta,
+    la oferta vencio, y el carrito seguia mostrando el precio rebajado.
+
+    No sirve `GET /products/` para esto por dos razones: pesa 284 KB con las
+    1.049 variantes, y esta cacheado en el cliente, asi que devolveria
+    exactamente el precio viejo que queremos corregir.
+
+    Va ANTES de `/{id_or_slug}`: si no, la ruta se traga "precios" como si
+    fuera el slug de un producto.
+    """
+    codigos = [c.strip() for c in skus.split(",") if c.strip()][:200]
+    if not codigos:
+        return []
+
+    filas = db.exec(select(SKU).where(SKU.sku.in_(codigos))).all()
+    now = get_chile_time()
+
+    salida = []
+    for s in filas:
+        precio, en_oferta, _ = compute_effective_price(s, s.product, now)
+        salida.append(PrecioVigente(
+            sku=s.sku,
+            price=precio,
+            original_price=s.price or 0.0,
+            on_sale=en_oferta,
+        ))
+    return salida
 
 
 @router.get("/{id_or_slug}")

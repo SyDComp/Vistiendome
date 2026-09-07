@@ -28,6 +28,19 @@ export const getCatalogo = async () =>
     cachedFetch(buildCacheKey('catalogo'), () => get(`${API_ENDPOINTS.PRODUCTS}/looks`));
 
 /**
+ * Cuánto cuestan HOY estos SKU.
+ *
+ * SIN cachedFetch, a propósito: se usa para corregir los precios viejos que el
+ * carrito guardó en el navegador, así que pedirlo del caché devolvería
+ * exactamente el número equivocado que se quiere arreglar.
+ */
+export const getPreciosVigentes = async (skus = []) => {
+    const codigos = [...new Set(skus.filter(Boolean).map(String))];
+    if (!codigos.length) return [];
+    return get(`${API_ENDPOINTS.PRODUCTS}/precios?skus=${encodeURIComponent(codigos.join(','))}`);
+};
+
+/**
  * Obtiene un producto por su slug.
  */
 export const getProductBySlug = async (slug) => {

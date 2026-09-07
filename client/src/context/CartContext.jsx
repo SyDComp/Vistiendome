@@ -1,11 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
 import { useNotification } from './NotificationContext';
 import { useSettings } from './SettingsContext';
 import { getCartItemKey } from '../utils/cartUtils';
 import { evaluarTramos } from '../utils/priceTiers';
 import { evaluarPromociones } from '../utils/promotions';
-import { getFiltersMetadata } from '../lib/api/endpoints/products.api';
+import { getFiltersMetadata, getPreciosVigentes } from '../lib/api/endpoints/products.api';
+import { aplicarPreciosVigentes } from '../utils/revalidarCarrito';
 
 const CartContext = createContext(null);
 
@@ -30,6 +31,50 @@ export const CartProvider = ({ children }) => {
     useEffect(() => {
         localStorage.setItem('vistiendome-cart', JSON.stringify(cart));
     }, [cart]);
+
+    // El carrito NO es la fuente de verdad del precio; el catálogo lo es.
+    //
+    // Lo que guarda localStorage es el precio que la prenda tenía cuando se
+    // agregó, y no se volvía a mirar nunca: si la oferta terminaba, o si la
+    // clienta volvía días después, seguía cotizando a un precio que ya no
+    // existe. Se revisa al cargar la página y cada vez que se abre el carrito,
+    // que son los dos momentos en que el número se va a leer.
+    //
+    // Si algo cambió se avisa. Un precio que sube solo, sin decir nada, es peor
+    // que el precio viejo: la clienta ve un total distinto al que recordaba y
+    // no entiende por qué.
+    const revalidando = useRef(false);
+    const revalidarPrecios = React.useCallback(async () => {
+        if (revalidando.current) return;
+        const skus = cart.map(i => i.sku).filter(Boolean);
+        if (!skus.length) return;
+
+        revalidando.current = true;
+        try {
+            const precios = await getPreciosVigentes(skus);
+            const { items, cambios } = aplicarPreciosVigentes(cart, precios);
+            if (!cambios.length) return;
+
+            setCart(items);
+            toast.info(
+                cambios.length === 1
+                    ? `El precio de "${cambios[0].nombre}" cambió a $${Number(cambios[0].ahora).toLocaleString('es-CL')}.`
+                    : `${cambios.length} productos de tu cotización cambiaron de precio.`,
+                'Precios actualizados'
+            );
+        } catch {
+            // Sin red se sigue con lo que hay: es mejor un carrito con un precio
+            // viejo que un carrito que no se puede abrir.
+        } finally {
+            revalidando.current = false;
+        }
+    }, [cart, toast]);
+
+    // Al entrar al sitio.
+    useEffect(() => { revalidarPrecios(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
+
+    // Y al abrir el carrito, que es cuando se leen los números.
+    useEffect(() => { if (isCartOpen) revalidarPrecios(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [isCartOpen]);
 
     const addItem = (item) => {
         // item.price === 0 es válido (producto de regalo); solo bloqueamos
