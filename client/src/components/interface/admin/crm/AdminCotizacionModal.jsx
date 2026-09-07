@@ -143,15 +143,32 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
         }
     });
 
+    // Se busca palabra por palabra, no la frase entera.
+    //
+    // Antes se preguntaba `sku_name.includes(term)` con el texto completo, asi
+    // que "noemi lila m" no encontraba nada: el nombre real es
+    // "Vestido Noemi (CUELLO: Redondo | COLOR: Lila | ... | TALLA: M)" y esa
+    // cadena literal no aparece nunca. Escribir el modelo, el color y la talla
+    // juntos es exactamente como llega el pedido por telefono, y era lo unico
+    // que no funcionaba. Mismo criterio que el buscador del sitio.
+    //
+    // Los terminos de una o dos letras se comparan como palabra completa: si no,
+    // la talla "M" coincidiria con "Mangas" y "Material" y devolveria todo.
     const filteredVariants = (() => {
-        const term = searchProductTerm.trim().toLowerCase();
+        const sinTildes = (x) => String(x || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+        const term = searchProductTerm.trim();
         if (term === '') {
             return isProductSearchFocused ? allVariants.slice(0, 15) : [];
         }
-        return allVariants.filter(v => 
-            (v.sku_name && v.sku_name.toLowerCase().includes(term)) ||
-            (v.sku_code && v.sku_code.toLowerCase().includes(term))
-        ).slice(0, 25);
+        const tokens = sinTildes(term).split(/\s+/).filter(Boolean);
+        return allVariants.filter(v => {
+            const heno = `${sinTildes(v.sku_name)} ${sinTildes(v.sku_code)}`;
+            return tokens.every(t => (
+                t.length <= 2
+                    ? new RegExp(`(^|[^a-z0-9])${t}([^a-z0-9]|$)`).test(heno)
+                    : heno.includes(t)
+            ));
+        }).slice(0, 25);
     })();
 
     const handleAddItem = (variant) => {
