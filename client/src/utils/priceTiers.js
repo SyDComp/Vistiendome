@@ -18,8 +18,22 @@ const norm = (v) => String(v ?? '').toLowerCase().trim();
  */
 export const valoresEnRango = (valoresOrdenados, desde, hasta) => {
     if (!valoresOrdenados?.length) return [];
-    const i = valoresOrdenados.findIndex(v => norm(v) === norm(desde));
-    const j = valoresOrdenados.findIndex(v => norm(v) === norm(hasta));
+
+    // Un extremo en blanco NO restringe ese lado. Dejarlo vacío es como se
+    // escribe "cualquiera" en un formulario, y es lo que necesita un tramo
+    // mayorista, que aplica a todos los colores.
+    //
+    // Antes se buscaba el índice de la cadena vacía dentro de los valores, no
+    // aparecía, y la función devolvía []. Quien la llama hace `continue` con
+    // una lista vacía, así que el tramo quedaba configurado y visible en el
+    // panel pero no se aplicaba nunca, sin un solo aviso. Así estaba el tramo
+    // "mayorista" en producción: from "" y to "", descartado en silencio.
+    const sinDesde = !String(desde ?? '').trim();
+    const sinHasta = !String(hasta ?? '').trim();
+    if (sinDesde && sinHasta) return [...valoresOrdenados];
+
+    const i = sinDesde ? 0 : valoresOrdenados.findIndex(v => norm(v) === norm(desde));
+    const j = sinHasta ? valoresOrdenados.length - 1 : valoresOrdenados.findIndex(v => norm(v) === norm(hasta));
     if (i === -1 || j === -1) return [];
     const [a, b] = i <= j ? [i, j] : [j, i];
     return valoresOrdenados.slice(a, b + 1);
