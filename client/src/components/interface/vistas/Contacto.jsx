@@ -6,6 +6,7 @@ import { buildWhatsAppMessage } from '../../../utils/cartUtils';
 import { buildMapLinks } from '../../../utils/mapLinks';
 import Button from '../../ui/Button';
 import { get, post } from '../../../lib/api/client';
+import { useScrollLock } from '../../../hooks/useScrollLock';
 
 const Contacto = () => {
     const { settings } = useSettings();
@@ -20,6 +21,12 @@ const Contacto = () => {
     const finalShippingMethods = shippingMethods.length > 0 ? shippingMethods : ['STARKEN', 'CORREOS DE CHILE', 'RETIRO EN LOCAL', 'OTRO'];
 
     const [tipoContacto, setTipoContacto] = useState('seleccion'); // 'seleccion', 'individual', 'grupo'
+
+    // Con el formulario abierto, la rueda del mouse fuera de la tarjeta movía
+    // la página de atrás: se perdía de vista el formulario que se estaba
+    // llenando. Es el mismo candado que ya usan el carrito y los otros
+    // modales; a éste no se le había puesto.
+    useScrollLock(tipoContacto !== 'seleccion');
     const [formData, setFormData] = useState({
         rut: '',
         nombre: '',

@@ -134,7 +134,17 @@ def mapa_srcsets(db: Session = Depends(get_session)):
 @router.get("/")
 def list_media(db: Session = Depends(get_session)):
     """Lista todos los archivos de medios (Directo desde la BD)"""
-    assets = db.exec(select(MediaAsset)).all()
+    # De la mas reciente a la mas antigua: quien abre la galeria viene casi
+    # siempre de subir una foto y la busca arriba. Sin orden explicito, Postgres
+    # devuelve las filas como quiere, y la recien subida podia caer al final de
+    # 73 miniaturas.
+    #
+    # Se desempata por id porque varias fotos subidas en la misma tanda comparten
+    # created_at al segundo, y sin desempate el orden entre ellas queda al azar
+    # en cada consulta.
+    assets = db.exec(
+        select(MediaAsset).order_by(MediaAsset.created_at.desc(), MediaAsset.id.desc())
+    ).all()
     return [{
         "id": a.id,
         "url": a.url,

@@ -642,7 +642,12 @@ const SettingsManager = () => {
                                 </div>
                                 <div className="input-group">
                                     <label style={labelStyle}>Mínimo de unidades</label>
-                                    <input type="number" min="2" value={t.min_qty ?? 6}
+                                    {/* `|| ''` y no `?? 0`: con type="number", React compara el
+                                        valor NUMERICAMENTE, asi que "03545" y 3545 le parecen iguales
+                                        y no toca el DOM. El cero inicial se quedaba pegado adelante
+                                        mientras se escribia. Un campo sin valor ahora se ve vacio, que
+                                        ademas es lo que significa: sin minimo. */}
+                                    <input type="number" min="2" value={t.min_qty || ''}
                                         onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, min_qty: parseInt(e.target.value) || 0 } : x) }))}
                                         style={inputStyle} />
                                 </div>
@@ -719,17 +724,17 @@ const SettingsManager = () => {
                                         <>
                                             <div className="input-group">
                                                 <label style={labelStyle}>Lleva</label>
-                                                <input type="number" min="2" value={p.lleva ?? 3}
+                                                <input type="number" min="2" value={p.lleva || ''}
                                                     onChange={e => editar({ lleva: parseInt(e.target.value) || 0 })} style={inputStyle} />
                                             </div>
                                             <div className="input-group">
                                                 <label style={labelStyle}>Paga</label>
-                                                <input type="number" min="1" value={p.paga ?? 2}
+                                                <input type="number" min="1" value={p.paga || ''}
                                                     onChange={e => editar({ paga: parseInt(e.target.value) || 0 })} style={inputStyle} />
                                             </div>
                                             <div className="input-group">
                                                 <label style={labelStyle}>Descuento (%)</label>
-                                                <input type="number" min="1" max="100" value={p.descuento ?? 100}
+                                                <input type="number" min="1" max="100" value={p.descuento || ''}
                                                     onChange={e => editar({ descuento: parseInt(e.target.value) || 0 })} style={inputStyle} />
                                             </div>
                                         </>
@@ -744,12 +749,12 @@ const SettingsManager = () => {
                                             </div>
                                             <div className="input-group">
                                                 <label style={labelStyle}>Mínimo de unidades</label>
-                                                <input type="number" min="0" value={p.min_unidades ?? 0}
+                                                <input type="number" min="0" value={p.min_unidades || ''}
                                                     onChange={e => editar({ min_unidades: parseInt(e.target.value) || 0 })} style={inputStyle} />
                                             </div>
                                             <div className="input-group">
                                                 <label style={labelStyle}>O monto mínimo ($)</label>
-                                                <input type="number" min="0" value={p.min_monto ?? 0}
+                                                <input type="number" min="0" value={p.min_monto || ''}
                                                     onChange={e => editar({ min_monto: parseInt(e.target.value) || 0 })} style={inputStyle} />
                                             </div>
                                         </>
