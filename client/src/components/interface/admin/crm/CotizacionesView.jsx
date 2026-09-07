@@ -391,8 +391,28 @@ const CotizacionesView = () => {
                         onDelete={async () => {
                             // confirm() toma un texto y devuelve la respuesta;
                             // con un objeto la pantalla quedaba en blanco.
-                            if (!await confirm(`¿Seguro que deseas eliminar la cotización #${row.numero ?? row.id}?`)) return;
-                            toast.success("Simulación: Cotización eliminada");
+                            if (!await confirm(`¿Seguro que deseas eliminar el pedido N° ${row.numero ?? row.id}?`)) return;
+                            // Antes esto sólo decía "Simulación: Cotización eliminada" y no
+                            // borraba nada: el pedido seguía ahí al recargar.
+                            try {
+                                const token = localStorage.getItem('admin_token');
+                                const res = await fetch(`/api/v1/crm/cotizaciones/${row.id}`, {
+                                    method: 'DELETE',
+                                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                                });
+                                if (!res.ok) {
+                                    // El backend explica POR QUÉ no se puede (ya despachado,
+                                    // ya cortado, o tomado por una orden). Se muestra tal cual:
+                                    // saber qué hacer en su lugar es la mitad del mensaje.
+                                    const { detail } = await res.json().catch(() => ({}));
+                                    toast.error(detail || 'No se pudo eliminar el pedido', 'No se eliminó');
+                                    return;
+                                }
+                                setCotizaciones(prev => prev.filter(c => c.id !== row.id));
+                                toast.success(`Pedido N° ${row.numero ?? ''} eliminado`);
+                            } catch {
+                                toast.error('No se pudo conectar con el servidor', 'Sin conexión');
+                            }
                         }}
                         extra={
                             <button

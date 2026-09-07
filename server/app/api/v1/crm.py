@@ -489,6 +489,74 @@ def obtener_cotizacion(cotizacion_id: str, session: Session = Depends(get_sessio
 # Se borraron el 2026-08-31: nadie los llamaba — el cliente usa
 # `/api/v1/ordenes-corte/*` — y dejarlos invitaba a creer que seguían en uso.
 
+@router.delete("/cotizaciones/{cotizacion_id}")
+def eliminar_cotizacion(
+    cotizacion_id: str,
+    db: Session = Depends(get_session),
+    admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR")),
+):
+    """
+    Borra un pedido, pero solo mientras no haya dejado rastro en otro lado.
+
+    Antes esto no existia: el boton del panel pedia confirmacion y despues
+    mostraba "Simulacion: Cotizacion eliminada". El pedido seguia ahi al
+    recargar. Un boton que dice que borro y no borro es peor que no tener boton.
+
+    NO se borra cuando ya paso algo irreversible, porque el borrado dejaria al
+    resto del sistema mintiendo:
+
+      · DESPACHADA          ya descontó stock. Sin el pedido, ese descuento
+                            queda sin explicacion en el historial.
+      · en una orden de corte  el taller ya la tomó para cortar.
+      · con piezas cortadas    la tela ya se corto: el gasto existio.
+
+    En esos casos la salida es CANCELAR, que ya existe y sí revierte lo que
+    hay que revertir. El mensaje lo dice, en vez de fallar sin explicar.
+
+    Mismo criterio que el borrado de ordenes de corte, que ya se negaba a
+    borrar una finalizada.
+    """
+    cot = db.get(Cotizacion, cotizacion_id)
+    if not cot:
+        raise HTTPException(status_code=404, detail="Pedido no encontrado")
+
+    if cot.estado == EstadoCotizacion.DESPACHADA:
+        raise HTTPException(
+            status_code=409,
+            detail="Este pedido ya salió del local y descontó stock. No se borra: cancélalo.",
+        )
+
+    items = db.exec(select(CotizacionItem).where(CotizacionItem.cotizacion_id == cot.id)).all()
+
+    if any(it.cortado for it in items):
+        raise HTTPException(
+            status_code=409,
+            detail="Este pedido ya tiene piezas cortadas en el taller. No se borra: cancélalo.",
+        )
+
+    ids = [it.id for it in items]
+    if ids:
+        en_orden = db.exec(
+            select(OrdenCorteItem)
+            .join(OrdenCorte, OrdenCorteItem.orden_id == OrdenCorte.id)
+            .where(
+                OrdenCorteItem.cotizacion_item_id.in_(ids),
+                OrdenCorte.estado != EstadoOrdenCorte.CANCELADA,
+            )
+        ).first()
+        if en_orden:
+            raise HTTPException(
+                status_code=409,
+                detail="Este pedido está en una orden de corte. Sácalo de la orden o cancela el pedido.",
+            )
+
+    for it in items:
+        db.delete(it)
+    db.delete(cot)
+    db.commit()
+    return {"ok": True, "numero": cot.numero}
+
+
 @router.get("/clientes", response_model=List[PersonaRead])
 def listar_clientes(session: Session = Depends(get_session), skip: int = 0, limit: int = 100, current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
     # Se consideran leads/clientes
