@@ -1,6 +1,13 @@
 const stripAccents = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
 const normalize = (s) => stripAccents(String(s || '').toLowerCase().trim());
 
+// Cómo pide la gente ver lo rebajado. No son características del catálogo:
+// se tratan aparte, como un filtro.
+const PALABRAS_DE_OFERTA = new Set([
+    'oferta', 'ofertas', 'rebaja', 'rebajas', 'rebajado', 'rebajados',
+    'descuento', 'descuentos', 'promocion', 'promociones', 'liquidacion', 'sale',
+]);
+
 /**
  * Busca productos por nombre, categoría o cualquier valor de variante (talla,
  * color, o cualquier característica que se defina en el catálogo — no hay
@@ -13,23 +20,40 @@ const normalize = (s) => stripAccents(String(s || '').toLowerCase().trim());
  * Search (página de resultados) llaman a esta misma función.
  */
 export const searchProducts = (products, query) => {
-    const tokens = normalize(query).split(/\s+/).filter(Boolean);
-    if (!tokens.length) return [];
+    const escritos = normalize(query).split(/\s+/).filter(Boolean);
+    if (!escritos.length) return [];
+
+    // "ofertas" no es un nombre ni una característica: es una intención. Se saca
+    // de los tokens —si se dejara, se exigiría encontrar la palabra "oferta"
+    // dentro del nombre o del color, y no aparecería nunca— y pasa a filtrar por
+    // el campo que el backend ya calcula. Así "ofertas" solo devuelve lo
+    // rebajado, y "vestido oferta" devuelve los vestidos rebajados.
+    const pideOferta = escritos.some(t => PALABRAS_DE_OFERTA.has(t));
+    const tokens = escritos.filter(t => !PALABRAS_DE_OFERTA.has(t));
+    // Sin tokens (se escribió sólo "ofertas") every() da true y pasa todo, que
+    // sumado al filtro de oferta es exactamente lo que se pidió.
+    const coincide = (heno) => tokens.every(t => heno.includes(t));
 
     const results = [];
 
     (products || []).forEach(product => {
         const productHaystack = normalize(`${product.name} ${product.category || ''}`);
-        const nameMatch = tokens.every(t => productHaystack.includes(t));
+        const nameMatch = coincide(productHaystack) && (!pideOferta || product.on_sale);
 
         if (nameMatch) {
             results.push({ ...product, display_name: product.name, matchType: 'product' });
         }
 
         (product.variants || []).forEach(variant => {
-            const configValues = Object.values(variant.config || {}).map(v => normalize(v));
-            const variantHaystack = `${productHaystack} ${configValues.join(' ')}`;
-            if (!tokens.every(t => variantHaystack.includes(t))) return;
+            // Clave Y valor, no sólo el valor. Quien busca escribe lo que ve en la
+            // ficha —"COLOR: Azul Marino"— así que teclea "color azul". Con sólo
+            // los valores indexados, "azul" encontraba 6 piezas y "color azul"
+            // ninguna: el token "color" no existía en ningún lado y el filtro
+            // exige que estén todos. Lo mismo con "talla XL" y "cuello en v".
+            const configPartes = Object.entries(variant.config || {}).flat().map(v => normalize(v));
+            const variantHaystack = `${productHaystack} ${configPartes.join(' ')}`;
+            if (!coincide(variantHaystack)) return;
+            if (pideOferta && !variant.on_sale) return;
 
             const variantLabel = Object.values(variant.config || {}).join(' - ');
             // Excluye la talla del "grupo" para que colores/estilos distintos del
@@ -45,6 +69,11 @@ export const searchProducts = (products, query) => {
                 display_name: `${product.name} - ${variantLabel}`,
                 image: variant.image || product.image,
                 price: variant.price,
+                // Sin esto el resultado se quedaba con el precio de la variante
+                // pero con la oferta del producto: la tarjeta no sabía si pintar
+                // la etiqueta ni contra qué precio tachar.
+                original_price: variant.original_price ?? product.original_price,
+                on_sale: variant.on_sale ?? false,
                 sku: variant.sku,
                 variant_group: variantGroup,
                 matchType: 'variant'
