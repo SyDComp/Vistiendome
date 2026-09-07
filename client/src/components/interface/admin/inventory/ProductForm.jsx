@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { conservarDatosCargados } from '../../../../utils/conservarVariantes';
 import { useForm } from '../../../../hooks/useForm';
 import Input from '../../../ui/Input';
 import Button from '../../../ui/Button';
@@ -251,7 +252,20 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                 body: JSON.stringify(payload)
             });
             const data = await res.json();
-            setGeneratedVariants(data);
+            // El endpoint devuelve cada combinacion con precio 0 —no puede saber
+            // otra cosa—, y antes esa respuesta reemplazaba la lista entera. En un
+            // producto que ya existe eso borraba todos los precios: agregar una
+            // caracteristica a un vestido de 100 variantes tarifadas las devolvia
+            // las 100 a $0.
+            const { variantes, heredadas, nuevas } = conservarDatosCargados(data, generatedVariants);
+            setGeneratedVariants(variantes);
+            if (heredadas) {
+                toast.info(
+                    `Se conservó el precio de ${heredadas} ${heredadas === 1 ? 'versión' : 'versiones'}` +
+                    (nuevas ? `. Revisa el stock de las ${nuevas} nuevas.` : '.'),
+                    'Datos conservados'
+                );
+            }
         } catch (err) { console.error(err); }
     };
 
