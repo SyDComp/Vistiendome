@@ -384,6 +384,29 @@ def kardex_historial(sku_id: int, db: Session = Depends(get_session)):
     }
 
 
+@router.post("/kardex/reparar")
+def kardex_reparar(db: Session = Depends(get_session)):
+    """
+    Deja el inventario consistente y dice que hizo.
+
+    Existe porque un stock negativo no es informacion, es una inconsistencia: en
+    la pantalla aparece como "-1 und.", igual que cualquier otro numero, cuando
+    en realidad significa que una prenda salio sin que su entrada se registrara.
+
+    Hace dos cosas, en este orden: borra los movimientos que restan por un
+    pedido que ya no existe, y lo que siga negativo lo lleva a cero con un
+    AJUSTE que lo compensa —no con un UPDATE, para que quede el rastro de que
+    hubo que corregirlo, como un asiento contrario en contabilidad.
+
+    Es un endpoint y no un script suelto para que se pueda volver a correr
+    cuando haga falta, con permiso de administracion y sin entrar al servidor.
+    Correrlo dos veces no hace nada la segunda: ya no queda nada negativo.
+    """
+    resultado = existencias_core.reparar(db)
+    db.commit()
+    return resultado
+
+
 @router.post("/kardex/movement")
 async def kardex_registrar_movimiento(data: MovimientoKardex, db: Session = Depends(get_session)):
     """

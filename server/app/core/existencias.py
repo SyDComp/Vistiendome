@@ -90,3 +90,89 @@ def deja_negativo(db: Session, sku_id: int, delta: int) -> Tuple[bool, int]:
         return (False, existencias(db, sku_id))
     hay = existencias(db, sku_id)
     return (hay + delta < 0, hay)
+
+
+def huerfanos(db: Session) -> List[StockMovement]:
+    """
+    Movimientos cuyo motivo ya no existe.
+
+    Una venta se justifica con el ítem de pedido que la produjo
+    (`reference_id`). Si ese ítem se borró —se anuló el pedido, se quitó la
+    prenda— el movimiento se quedó sin razón de ser: sigue restando stock por
+    algo que ya nadie puede consultar.
+
+    Solo se miran las VENTAS: un ingreso o un ajuste no apuntan a un ítem de
+    pedido, así que no tener referencia es lo normal en ellos.
+    """
+    from ..models.crm import CotizacionItem
+    from ..models.catalog import MovementType
+
+    ventas = db.exec(
+        select(StockMovement).where(StockMovement.type == MovementType.SALE)
+    ).all()
+    con_referencia = [m for m in ventas if m.reference_id]
+    if not con_referencia:
+        return []
+
+    ids = {m.reference_id for m in con_referencia}
+    vivos = {
+        i.id for i in db.exec(
+            select(CotizacionItem).where(CotizacionItem.id.in_(ids))
+        ).all()
+    }
+    return [m for m in con_referencia if m.reference_id not in vivos]
+
+
+def reparar(db: Session) -> Dict[str, object]:
+    """
+    Deja el inventario consistente y explica qué hizo.
+
+    DOS COSAS, EN ESTE ORDEN
+    1. Se borran los movimientos huérfanos: restan por un pedido que ya no
+       existe. Mientras estén, el total está mal y volver a calcularlo no
+       arregla nada.
+    2. Lo que siga negativo se lleva a cero con un movimiento de AJUSTE que lo
+       compensa.
+
+    POR QUE UN AJUSTE Y NO UN `UPDATE`
+    Cambiar el número a mano borraría que la inconsistencia existió. Un ajuste
+    con su nota deja el inventario correcto Y el rastro de que hubo que
+    corregirlo: quien mire el historial de ese SKU ve la venta sin respaldo y,
+    debajo, la corrección. Es lo mismo que hace una contabilidad: no se borra
+    un asiento, se hace el contrario.
+
+    Es idempotente: correrlo dos veces no crea un segundo ajuste, porque la
+    segunda vez ya no hay nada en negativo.
+    """
+    from ..models.catalog import MovementType
+
+    sueltos = huerfanos(db)
+    for m in sueltos:
+        db.delete(m)
+    if sueltos:
+        db.flush()
+
+    movimientos = db.exec(select(StockMovement)).all()
+    total: Dict[int, int] = {}
+    for m in movimientos:
+        total[m.sku_id] = total.get(m.sku_id, 0) + m.quantity
+
+    corregidos = []
+    for sku_id, hay in total.items():
+        if hay >= 0:
+            continue
+        db.add(StockMovement(
+            sku_id=sku_id,
+            type=MovementType.ADJUSTMENT,
+            quantity=-hay,
+            note=(
+                f"Corrección automática: el stock estaba en {hay} por salidas "
+                "sin su entrada registrada. Se lleva a 0."
+            ),
+        ))
+        corregidos.append({"sku_id": sku_id, "estaba_en": hay})
+
+    return {
+        "huerfanos_borrados": len(sueltos),
+        "skus_corregidos": corregidos,
+    }
