@@ -27,6 +27,19 @@
     --arm-bien: #15803d;
     --arm-duda: #a16207;
 
+}
+
+/* EL MARCO NO ES DEL ARMADOR
+   Antes esta clase pintaba su propia tarjeta —borde, fondo, redondeo, padding—
+   y como en la web ya vive dentro de un modal que pinta OTRA tarjeta, se veian
+   dos marcos, uno blanco y uno rosa, comiendose 36px de ancho por lado entre
+   los tres paddings. En un celular eso es casi un cuarto de la pantalla.
+
+   Quien decide el marco es quien lo hospeda: dentro de un modal no hace falta
+   ninguno, y en medio de un formulario si, para que se distinga de lo demas.
+   Por eso el marco es una variante que se pide, no algo que el armador trae
+   puesto. */
+.armador--tarjeta {
     border: 1px solid var(--arm-acento-suave);
     background: var(--arm-fondo);
     border-radius: 12px;

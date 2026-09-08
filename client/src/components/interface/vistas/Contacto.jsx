@@ -707,11 +707,30 @@ const Contacto = () => {
                 }
                 .btn-armar-prenda:hover { background: #fae8ff; }
 
+                /* UNA SOLA CAJA, NO TRES
+                   Antes el overlay ponia 16px, la caja 6px y el armador otros
+                   14px con su propio borde: 36px de marco por lado y dos bordes
+                   dibujados, uno blanco y uno rosa. En un telefono de 360px eso
+                   se comia un quinto del ancho para no mostrar nada.
+                   Ahora el marco lo pone la caja y nadie mas. */
                 .armador-overlay {
                     position: fixed; inset: 0; z-index: 1200; background: rgba(15,23,42,.45);
-                    display: flex; align-items: center; justify-content: center; padding: 16px;
+                    display: flex; align-items: center; justify-content: center; padding: 12px;
                 }
-                .armador-caja { width: 100%; max-width: 620px; max-height: 88vh; overflow-y: auto; background: #fff; border-radius: 14px; padding: 6px; }
+                .armador-caja { width: 100%; max-width: 620px; max-height: 88vh; overflow-y: auto; background: #fff; border-radius: 14px; padding: 16px; box-sizing: border-box; }
+
+                /* En un telefono no hay ancho que regalar: el modal ocupa la
+                   pantalla entera y el marco desaparece, que es donde de verdad
+                   se nota. */
+                @media (max-width: 600px) {
+                    .armador-overlay { padding: 0; align-items: flex-end; }
+                    .armador-caja {
+                        max-width: none;
+                        max-height: 92vh;
+                        border-radius: 14px 14px 0 0;
+                        padding: 14px 12px calc(12px + env(safe-area-inset-bottom));
+                    }
+                }
 
                 .contact-modal-header h2 { margin: 0; font-size: 1.25rem; font-weight: 800; color: #1e1b4b; }
                 

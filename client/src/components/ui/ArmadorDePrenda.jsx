@@ -39,7 +39,7 @@ const TEXTOS_POR_PUBLICO = {
     },
 };
 
-const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true, textoBoton = "Agregar al pedido", contexto = 'publico', onAgregar, onCancelar }) => {
+const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true, textoBoton = "Agregar al pedido", contexto = 'publico', enmarcado = false, onAgregar, onCancelar }) => {
     const [prenda, setPrenda] = useState('');
     const [prendaLibre, setPrendaLibre] = useState('');
     const [precio, setPrecio] = useState('');
@@ -210,7 +210,7 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
     };
 
     return (
-        <div className="armador">
+        <div className={`armador${enmarcado ? ' armador--tarjeta' : ''}`}>
             <div className="armador__cabecera">
                 <strong className="armador__titulo">Pieza personalizada</strong>
                 <button type="button" onClick={onCancelar} className="armador__cerrar">

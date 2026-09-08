@@ -621,6 +621,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                 {mostrandoFormLibre && (
                                     <ArmadorDePrenda
                                         contexto="panel"
+                                        enmarcado
                                         atributos={atributosCatalogo}
                                         onAgregar={handleAgregarPersonalizado}
                                         onCancelar={() => setMostrandoFormLibre(false)}
