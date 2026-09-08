@@ -145,7 +145,10 @@ def _get_item_read(it: CotizacionItem) -> CotizacionItemRead:
         it_dict["sku_name"] = it.nombre_custom or "Producto del Catálogo / Especial"
         it_dict["sku_code"] = "SKU-CUSTOM"
         it_dict["producto_nombre"] = it.nombre_custom or "Especial"
-        it_dict["config"] = {}
+        # Sus caracteristicas van en el mismo campo que las de una variante del
+        # catalogo: la planilla y la orden de corte las pintan igual, sin tener
+        # que saber de donde salio la pieza.
+        it_dict["config"] = it.config_custom or {}
     return CotizacionItemRead(**it_dict)
 
 def _mapa_ordenes_de_corte(session: Session, cotizacion_ids: List[str]) -> dict:
@@ -197,6 +200,9 @@ class CotizacionItemCreate(BaseModel):
     cantidad: int = 1
     precio_unitario_estimado: float = 0.0
     nombre_custom: Optional[str] = None
+    # Caracteristicas de una pieza que no esta en el catalogo, para que se
+    # pueda cortar igual que las demas. Mismo formato que SKU.config.
+    config_custom: Optional[dict] = None
 
 def _modo_de(data) -> ModoEntrega:
     """
@@ -371,7 +377,8 @@ def crear_cotizacion(data: CotizacionCreate, session: Session = Depends(get_sess
             sku_id=item_data.sku_id,
             cantidad=item_data.cantidad,
             precio_unitario_estimado=item_data.precio_unitario_estimado,
-            nombre_custom=item_data.nombre_custom
+            nombre_custom=item_data.nombre_custom,
+            config_custom=item_data.config_custom or None,
         )
         session.add(item)
     

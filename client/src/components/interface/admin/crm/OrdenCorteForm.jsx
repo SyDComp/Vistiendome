@@ -67,6 +67,9 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
                 // Una pieza personalizada no tiene variante del catalogo: el
                 // nombre es lo unico que la identifica en la planilla.
                 nombre_custom: p.nombre_custom ?? null,
+                // Las caracteristicas de la pieza personalizada viajan con ella:
+                // sin esto la orden de corte dice el nombre y nada mas.
+                config_custom: (p.sku_id == null && p.config && Object.keys(p.config).length) ? p.config : null,
                 cantidad: p.cantidad,
                 cotizacion_item_id: p.cotizacion_item_id,
             })),

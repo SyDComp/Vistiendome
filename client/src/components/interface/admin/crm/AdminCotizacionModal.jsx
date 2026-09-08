@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ItemPersonalizadoForm from './ItemPersonalizadoForm';
 import { describirEntrega } from '../../../../utils/entrega';
 import { X, Search, Plus, Trash2, Check, User, Package, MapPin, FileText, ShoppingBag, Send, AlertCircle, DollarSign } from 'lucide-react';
 import { getProducts } from '../../../../lib/api/endpoints/products.api';
@@ -28,6 +29,10 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
     const [productsList, setProductsList] = useState([]);
     const [loadingProducts, setLoadingProducts] = useState(false);
     const [searchProductTerm, setSearchProductTerm] = useState('');
+    // Pieza fuera de catalogo: se arma con las MISMAS caracteristicas del
+    // catalogo para que pueda cortarse igual que las demas.
+    const [mostrandoFormLibre, setMostrandoFormLibre] = useState(false);
+    const [atributosCatalogo, setAtributosCatalogo] = useState({});
     const [isProductSearchFocused, setIsProductSearchFocused] = useState(false);
 
     // Ítems agregados a la Cotización
@@ -83,6 +88,14 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
         } finally {
             setLoadingClientes(false);
         }
+    };
+
+    const fetchAtributos = async () => {
+        try {
+            const r = await fetch('/api/v1/products/filters-metadata');
+            const d = await r.json();
+            setAtributosCatalogo(d?.attributes || {});
+        } catch { /* sin esto la pieza se puede agregar igual, solo que sin caracteristicas */ }
     };
 
     const fetchCatalog = async () => {
@@ -194,22 +207,21 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
         toast.success(`Añadido: ${variant.sku_name}`);
     };
 
-    const handleAddCustomItem = () => {
-        const customName = prompt("Nombre o descripción del ítem / confección personalizada:", "Confección a Medida / Ajuste");
-        if (!customName) return;
-        const priceStr = prompt("Precio unitario estimado ($):", "25000");
-        const price = parseFloat(priceStr) || 0;
-        setItems(prev => [
-            ...prev,
-            {
-                sku_id: null,
-                sku_name: customName,
-                sku_code: "CUSTOM",
-                precio_unitario_estimado: price,
-                cantidad: 1,
-                image: null
-            }
-        ]);
+    // Antes esto eran dos prompt() —nombre y precio— y la pieza entraba al pedido
+    // como un texto suelto, sin talla ni color: llegaba a la orden de corte sin
+    // nada con que confeccionarla.
+    const handleAgregarPersonalizado = ({ nombre, precio, config }) => {
+        setItems(prev => [...prev, {
+            sku_id: null,
+            sku_name: nombre,
+            sku_code: 'CUSTOM',
+            precio_unitario_estimado: precio,
+            cantidad: 1,
+            image: null,
+            config_custom: config,
+        }]);
+        setMostrandoFormLibre(false);
+        toast.success(`Añadido: ${nombre}`);
     };
 
     const handleQuantityChange = (index, delta) => {
@@ -278,7 +290,13 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                 items: items.map(it => ({
                     sku_id: typeof it.sku_id === 'number' ? it.sku_id : null,
                     cantidad: it.cantidad,
-                    precio_unitario_estimado: it.precio_unitario_estimado
+                    precio_unitario_estimado: it.precio_unitario_estimado,
+                    // Sin esto la pieza personalizada se guardaba SIN nombre y sin
+                    // caracteristicas: el backend los acepta desde siempre, pero el
+                    // formulario no los mandaba. Llegaba al taller como un renglon
+                    // vacio, imposible de cortar.
+                    nombre_custom: it.sku_id == null ? (it.sku_name || null) : null,
+                    config_custom: it.sku_id == null ? (it.config_custom || null) : null,
                 }))
             };
 
@@ -570,12 +588,20 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                     </div>
                                     <button
                                         type="button"
-                                        onClick={handleAddCustomItem}
+                                        onClick={() => { setMostrandoFormLibre(v => !v); if (!Object.keys(atributosCatalogo).length) fetchAtributos(); }}
                                         style={{ background: '#fdf2f8', border: '1px solid #fbcfe8', color: '#8f0653', borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
                                     >
                                         <Plus size={14} /> + Ítem Libre / Personalizado
                                     </button>
                                 </div>
+
+                                {mostrandoFormLibre && (
+                                    <ItemPersonalizadoForm
+                                        atributos={atributosCatalogo}
+                                        onAgregar={handleAgregarPersonalizado}
+                                        onCancelar={() => setMostrandoFormLibre(false)}
+                                    />
+                                )}
 
                                 {/* Buscador de Catálogo */}
                                 <div style={{ position: 'relative', marginBottom: '14px' }}>

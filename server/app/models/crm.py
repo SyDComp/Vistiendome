@@ -1,6 +1,7 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Dict
 from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import JSON
 from enum import Enum
 import ulid
 
@@ -133,6 +134,17 @@ class CotizacionItem(SQLModel, table=True):
     cantidad: int = Field(default=1)
     precio_unitario_estimado: float = Field(default=0.0)
     nombre_custom: Optional[str] = Field(default=None, max_length=255)
+
+    # Las caracteristicas de una pieza que NO esta en el catalogo.
+    #
+    # Un encargo especial se corta igual que cualquier otra prenda: hace falta
+    # la talla, el color, el cuello. Mientras el item libre fue solo un nombre y
+    # un precio, esa pieza llegaba al taller sin nada que permitiera cortarla
+    # —"vestido a medida" y nada mas— y la costurera tenia que preguntar.
+    #
+    # Mismo formato que SKU.config ({"TALLA": "M", "COLOR": "Uva"}), para que la
+    # planilla del taller las muestre en columnas sin distinguir el origen.
+    config_custom: Optional[Dict[str, str]] = Field(default=None, sa_type=JSON)
 
     # Vive en el ítem, no en la Cotizacion: una cotización puede tener piezas
     # ya cortadas y otras no. El estado de la Cotizacion (NUEVA/CONFIRMADA/...)

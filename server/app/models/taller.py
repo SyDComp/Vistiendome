@@ -8,8 +8,9 @@ no una vista derivada de las ventas.
 """
 
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Dict
 from enum import Enum
+from sqlalchemy import JSON
 
 from sqlmodel import SQLModel, Field, Relationship
 import ulid
@@ -66,6 +67,10 @@ class OrdenCorteItem(SQLModel, table=True):
     # necesita leerlo en la planilla.
     sku_id: Optional[int] = Field(default=None, foreign_key="sku.id", index=True)
     nombre_custom: Optional[str] = Field(default=None, max_length=255)
+    # Caracteristicas de la pieza personalizada, en el mismo formato que
+    # SKU.config. Viajan con ella para que la planilla del taller diga que hay
+    # que cortar y no solo como se llama.
+    config_custom: Optional[Dict[str, str]] = Field(default=None, sa_type=JSON)
     cantidad: int = Field(default=1)
 
     # De dónde salió esta línea. Con pedido: al finalizar se marca esa pieza
