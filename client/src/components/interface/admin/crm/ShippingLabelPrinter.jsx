@@ -828,7 +828,7 @@ const ShippingLabelPrinter = () => {
                     <div style={{ flex: 1, overflowY: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {loading ? (
                             <div style={{ textAlign: 'center', padding: '40px', color: '#64748b', fontSize: '13px' }}>
-                                <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 12px auto' }} />
+                                <RefreshCw size={24} className="animate-spin" />
                                 Cargando cotizaciones...
                             </div>
                         ) : filteredCotizaciones.length === 0 ? (
@@ -1242,17 +1242,17 @@ const ShippingLabelPrinter = () => {
                                                             );
                                                         })()}
 
-                                                        <div className="sec-title" style={{ marginTop: '2mm' }}>{entrega.etiquetaDestino}</div>
+                                                        <div className="sec-title">{entrega.etiquetaDestino}</div>
                                                         <div className="main-address">
                                                             {entrega.destino.toUpperCase()}
                                                         </div>
 
                                                         <div className="city-box" style={{ display: entrega.muestraComuna ? undefined : 'none' }}>
-                                                            <div className="city-col" style={{ flex: 1 }}>
+                                                            <div className="city-col">
                                                                 <div className="city-label">COMUNA</div>
                                                                 <div className="city-val">{(coti.comuna || '---').toUpperCase()}</div>
                                                             </div>
-                                                            <div className="city-col" style={{ flex: 1 }}>
+                                                            <div className="city-col">
                                                                 <div className="city-label">REGIÓN</div>
                                                                 <div className="city-val">{(coti.region || '---').toUpperCase()}</div>
                                                             </div>

@@ -191,7 +191,7 @@ const CotizacionesView = () => {
                     <span style={{ fontWeight: '700', fontSize: '13px', color: '#1e293b', textTransform: 'capitalize' }}>
                         {row.cliente?.nombres || 'Sin nombre'}
                     </span>
-                    <span className="font-mono" style={{ fontSize: '11px', color: '#94a3b8' }}>
+                    <span className="font-mono">
                         {row.numero != null ? `N° ${row.numero}` : row.id?.substring(0, 8).toUpperCase()}
                     </span>
                 </div>

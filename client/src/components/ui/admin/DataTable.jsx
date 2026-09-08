@@ -101,11 +101,6 @@ const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {
                             {data.map((row, i) => (
                                 <tr
                                     key={row.id || i}
-                                    style={{
-                                        borderBottom: '1px solid #f1f5f9',
-                                        transition: 'background 0.15s ease',
-                                        cursor: 'default'
-                                    }}
                                     className="table-row-hover"
                                 >
                                     {columns.map(col => (

@@ -24,3 +24,11 @@
 @media (max-width: 600px) {
     .hide-on-mobile { display: none !important; }
 }
+
+/* Declaraciones que estaban incrustadas en el JSX sobre estas mismas
+   clases. Se movieron acá tal cual: mismo valor, mismo efecto, pero
+   ahora el estilo del componente vive en un solo sitio. */
+.dt-studio-workspace {
+    padding: 20px;
+    overflow: hidden;
+}

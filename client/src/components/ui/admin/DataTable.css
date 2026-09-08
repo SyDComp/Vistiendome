@@ -14,3 +14,12 @@
 .table-row-hover:hover .actions-cell {
     background-color: #fafafa !important;
 }
+
+/* Declaraciones que estaban incrustadas en el JSX sobre estas mismas
+   clases. Se movieron acá tal cual: mismo valor, mismo efecto, pero
+   ahora el estilo del componente vive en un solo sitio. */
+.table-row-hover {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s ease;
+    cursor: default;
+}

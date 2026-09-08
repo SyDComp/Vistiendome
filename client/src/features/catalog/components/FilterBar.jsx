@@ -129,7 +129,7 @@ const FilterBar = ({
                     </div>
 
                     {activeFilterTags.length > 0 && (
-                        <div className="active-filters-container" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '16px', alignItems: 'center' }}>
+                        <div className="active-filters-container">
                             <span style={{ fontSize: '13px', fontWeight: '600', color: '#64748b' }}>Filtros activos:</span>
                             {activeFilterTags.map((tag, i) => (
                                 <button

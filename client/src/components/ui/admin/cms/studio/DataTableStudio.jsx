@@ -268,7 +268,7 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                                             textAlign: 'center', 
                                             padding: '10px' 
                                         }}>
-                                            <div className="row-actions" style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center', opacity: 0.4 }}>
+                                            <div className="row-actions">
                                                 <span style={{ fontSize: '10px', fontWeight: '800', color: '#64748b' }}>{rowIndex + 1}</span>
                                                 <div style={{ display: 'flex', gap: '4px' }}>
                                                     <button onClick={() => addRow(rowIndex)} style={miniButtonStyle} title="Insertar fila debajo"><Plus size={10} /></button>

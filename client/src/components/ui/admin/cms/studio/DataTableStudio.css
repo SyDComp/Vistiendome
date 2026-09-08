@@ -13,3 +13,14 @@ th:hover .col-actions { opacity: 1; }
 .row-actions { opacity: 0.3; transition: opacity 0.2s; }
 tr:hover .row-actions { opacity: 1; }
 textarea { resize: none; overflow: hidden; }
+
+/* Declaraciones que estaban incrustadas en el JSX sobre estas mismas
+   clases. Se movieron acá tal cual: mismo valor, mismo efecto, pero
+   ahora el estilo del componente vive en un solo sitio. */
+.row-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+    opacity: 0.4;
+}

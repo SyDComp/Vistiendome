@@ -10,3 +10,16 @@
 .shipping-label-generator-wrap, .shipping-label-generator-wrap * {
     box-sizing: border-box !important;
 }
+
+/* Declaraciones que estaban incrustadas en el JSX sobre estas mismas
+   clases. Se movieron acá tal cual: mismo valor, mismo efecto, pero
+   ahora el estilo del componente vive en un solo sitio. */
+.animate-spin {
+    margin: 0 auto 12px auto;
+}
+.sec-title {
+    margin-top: 2mm;
+}
+.city-col {
+    flex: 1;
+}

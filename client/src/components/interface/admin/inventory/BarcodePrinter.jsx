@@ -788,7 +788,7 @@ const BarcodePrinter = () => {
                                         const txtFs = Math.max(7, Math.min(10, cellH * 0.18));
 
                                         return (
-                                            <div className="barcode-printer-pages" style={{ gap: '32px' }}>
+                                            <div className="barcode-printer-pages">
                                                 {previewPages.map((pageSlots, pageIndex) => (
                                                     <div key={pageIndex} className="barcode-printer-page" style={{
                                                         width: `${SHEET_W}px`,
@@ -845,7 +845,7 @@ const BarcodePrinter = () => {
                         </div>
                         {expandedSection === 'copies' && (
                             <div style={{ padding: '16px 24px', borderTop: '1px solid #e2e8f0', background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                                <button onClick={redistribute} className="barcode-printer-copies-btn-fill" style={{ fontSize: '14px', padding: '10px 20px', height: '44px' }}>
+                                <button onClick={redistribute} className="barcode-printer-copies-btn-fill">
                                     <RefreshCw size={16} /> Rellenar páginas completas
                                 </button>
                                 <button onClick={() => setExpandedSection(null)} style={{ background: '#1e1b4b', color: '#fff', border: 'none', padding: '0 24px', height: '44px', borderRadius: '12px', fontSize: '14px', fontWeight: '800', cursor: 'pointer' }}>

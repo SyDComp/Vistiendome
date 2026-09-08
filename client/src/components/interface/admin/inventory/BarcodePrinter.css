@@ -11,3 +11,15 @@
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
+
+/* Declaraciones que estaban incrustadas en el JSX sobre estas mismas
+   clases. Se movieron acá tal cual: mismo valor, mismo efecto, pero
+   ahora el estilo del componente vive en un solo sitio. */
+.barcode-printer-pages {
+    gap: 32px;
+}
+.barcode-printer-copies-btn-fill {
+    font-size: 14px;
+    padding: 10px 20px;
+    height: 44px;
+}

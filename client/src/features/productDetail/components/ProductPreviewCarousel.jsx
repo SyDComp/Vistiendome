@@ -267,14 +267,6 @@ const ProductPreviewCarousel = ({
                     sizes="(max-width: 1023px) 100vw, 640px"
                     alt="Vista del producto" 
                     className="main-large-image"
-                    style={{ 
-                        display: 'block',
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain',
-                        position: 'relative',
-                        zIndex: 2
-                    }}
                     onError={(e) => {
                         e.target.src = getImageUrl(coverImage);
                     }}

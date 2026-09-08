@@ -1228,26 +1228,24 @@ const DetailDrawer = ({
                                 type="button"
                                 onClick={goBack}
                                 className="detail-drawer-back-btn"
-                                style={{ flexShrink: 0 }}
                             >
                                 <ArrowLeft size={18} />
                             </button>
                         )}
                         <div style={{ flex: '1 1 auto', minWidth: 0 }}>
-                            <h2 className="detail-drawer-title-h2" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                            <h2 className="detail-drawer-title-h2">
                                 {loading ? 'Cargando...' : currTitle}
                             </h2>
-                            <p className="detail-drawer-subtitle-p" style={{ wordBreak: 'break-word' }}>
+                            <p className="detail-drawer-subtitle-p">
                                 {history.length > 0 ? `Regresar a ${history[history.length-1].title}` : 'Ficha técnica detallada'}
                             </p>
                         </div>
                     </div>
-                    <div className="detail-drawer-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                    <div className="detail-drawer-header-actions">
                         <button 
                             type="button"
                             onClick={onClose}
                             className="detail-drawer-close-btn"
-                            style={{ flexShrink: 0 }}
                             title="Cerrar panel"
                         >
                             <X size={20} />

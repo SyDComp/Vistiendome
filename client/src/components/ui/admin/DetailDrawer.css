@@ -26,3 +26,26 @@
     from { transform: scale(0.95) translateY(20px); opacity: 0; } 
     to { transform: scale(1) translateY(0); opacity: 1; } 
 }
+
+/* Declaraciones que estaban incrustadas en el JSX sobre estas mismas
+   clases. Se movieron acá tal cual: mismo valor, mismo efecto, pero
+   ahora el estilo del componente vive en un solo sitio. */
+.detail-drawer-back-btn {
+    flex-shrink: 0;
+}
+.detail-drawer-title-h2 {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+.detail-drawer-subtitle-p {
+    word-break: break-word;
+}
+.detail-drawer-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.detail-drawer-close-btn {
+    flex-shrink: 0;
+}

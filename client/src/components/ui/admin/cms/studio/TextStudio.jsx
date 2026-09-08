@@ -80,7 +80,7 @@ const TextStudio = ({ isOpen, onClose, data, onSave }) => {
 
             {/* CANVAS / EDITOR */}
             <div className="dt-studio-layout">
-                <div className="dt-studio-workspace" style={{ padding: '20px', overflow: 'hidden' }}>
+                <div className="dt-studio-workspace">
                     <div style={{ 
                         width: '100%', 
                         maxWidth: '900px', 
