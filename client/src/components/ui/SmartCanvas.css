@@ -1,0 +1,37 @@
+/*
+ * Cómo se ve el calibrador de imagen del panel.
+ *
+ * Estaba escrito como estilos sueltos entre la lógica. Los deslizadores llevan
+ * su color en una variante porque cada uno regula una cosa distinta —posición,
+ * brillo, giro— y el color es lo que los distingue de un vistazo.
+ */
+
+.lienzo-rotulo { display: block; margin-bottom: 0.3125rem; }
+.lienzo-control { width: 100%; accent-color: #8f0653; }
+.lienzo-control--brillo { accent-color: #ffd700; }
+.lienzo-control--giro { accent-color: #333; }
+.lienzo-ancho { width: 100%; }
+.lienzo-separado { margin-top: 0.625rem; }
+
+.lienzo-pareja { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9375rem; }
+.lienzo-pareja--junta { display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem; margin-top: 0.625rem; }
+
+.lienzo-restablecer {
+    margin-top: 0.9375rem;
+    width: 100%;
+    padding: 0.3125rem;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-family: inherit;
+    min-height: 2.25rem;
+}
+
+.lienzo-vacio {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #999;
+}

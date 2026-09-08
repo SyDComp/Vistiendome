@@ -217,7 +217,7 @@ const LibraryPicker = ({
                 <div className="library-picker-preview-variant">
                     {variantImage && (
                         <div className="library-picker-preview-variant-img-wrap">
-                            <Imagen url={variantImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} sizes="120px" alt="" />
+                            <Imagen url={variantImage} className="adm-imagen-llena" sizes="120px" alt="" />
                         </div>
                     )}
                     <div className="library-picker-preview-variant-info">
@@ -251,7 +251,7 @@ const LibraryPicker = ({
                 </div>
             );
         }
-        return item.description ? <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#94a3b8' }}>{item.description}</p> : null;
+        return item.description ? <p className="adm-pie-nota">{item.description}</p> : null;
     };
 
     return (
@@ -309,7 +309,7 @@ const LibraryPicker = ({
                     </div>
 
                     {facetDefs.length > 0 && (
-                        <div style={{ marginTop: '12px' }}>
+                        <div className="adm-margen-arriba">
                             <button
                                 type="button"
                                 onClick={() => setShowFacets(s => !s)}
@@ -330,18 +330,18 @@ const LibraryPicker = ({
                                 <button
                                     type="button"
                                     onClick={() => setActiveFacets({})}
-                                    style={{ marginLeft: '10px', border: 'none', background: 'none', color: '#ef4444', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                                    className="adm-quitar-enlace"
                                 >
                                     Limpiar filtros
                                 </button>
                             )}
 
                             {showFacets && (
-                                <div style={{ marginTop: '12px', padding: '16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', maxHeight: '220px', overflowY: 'auto' }}>
+                                <div className="adm-facetas">
                                     {facetDefs.map(fd => (
-                                        <div key={fd.field} style={{ marginBottom: '14px' }}>
-                                            <div style={{ fontSize: '11px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>{fd.label}</div>
-                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                        <div key={fd.field} className="adm-margen-abajo">
+                                            <div className="adm-rotulo-menudo">{fd.label}</div>
+                                            <div className="adm-etiquetas-fila">
                                                 {fd.values.map(v => {
                                                     const on = (activeFacets[fd.field] || []).includes(v);
                                                     return (
@@ -481,15 +481,15 @@ const LibraryPicker = ({
                             </span>
                         </div>
                         <div className="library-picker-footer-actions">
-                            <Button type="button" variant="outline" onClick={onClose} style={{ height: '52px', padding: '0 24px', borderRadius: '16px' }}>Cerrar</Button>
+                            <Button type="button" variant="outline" onClick={onClose} className="adm-boton-alto">Cerrar</Button>
                             <Button 
                                 type="button"
                                 onClick={handleConfirm} 
                                 variant="primary" 
                                 disabled={selectedIds.length === 0}
-                                style={{ height: '52px', padding: '0 32px', borderRadius: '16px', boxShadow: '0 10px 15px -3px rgba(143, 6, 83, 0.2)' }}
+                                className="adm-boton-alto adm-boton-alto--destacado"
                             >
-                                {confirmLabel} <ChevronRight size={18} style={{ marginLeft: '8px' }} />
+                                {confirmLabel} <ChevronRight size={18} className="adm-a-la-derecha" />
                             </Button>
                         </div>
                     </div>

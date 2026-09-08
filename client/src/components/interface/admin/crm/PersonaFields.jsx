@@ -87,8 +87,8 @@ const PersonaFields = ({ formData, handleChange, isLead = false }) => {
                 description="Información de envío y preferencia de transporte."
             >
                 <AdminFormRow balanced>
-                    <div style={{ width: '100%' }}>
-                        <label style={{ fontSize: '13.5px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '8px' }}>Región</label>
+                    <div className="adm-ancho">
+                        <label className="adm-etiqueta-persona">Región</label>
                         <select 
                             name="region_id" 
                             value={formData.region_id || ''}
@@ -96,7 +96,7 @@ const PersonaFields = ({ formData, handleChange, isLead = false }) => {
                                 handleChange(e);
                                 handleChange({ target: { name: 'comuna_id', value: '' } });
                             }}
-                            style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontWeight: '600', outline: 'none' }}
+                            className="adm-campo-persona"
                         >
                             <option value="">Seleccione una región</option>
                             {regiones.map(r => (
@@ -104,14 +104,14 @@ const PersonaFields = ({ formData, handleChange, isLead = false }) => {
                             ))}
                         </select>
                     </div>
-                    <div style={{ width: '100%' }}>
-                        <label style={{ fontSize: '13.5px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '8px' }}>Comuna</label>
+                    <div className="adm-ancho">
+                        <label className="adm-etiqueta-persona">Comuna</label>
                         <select 
                             name="comuna_id" 
                             value={formData.comuna_id || ''}
                             onChange={handleChange}
                             disabled={!formData.region_id}
-                            style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: formData.region_id ? '#f8fafc' : '#f1f5f9', fontWeight: '600', outline: 'none' }}
+                            className={`adm-campo-persona${formData.region_id ? '' : ' adm-campo-persona--espera'}`}
                         >
                             <option value="">Seleccione una comuna</option>
                             {comunas.map(c => (
@@ -128,13 +128,13 @@ const PersonaFields = ({ formData, handleChange, isLead = false }) => {
                         onChange={handleChange}
                         placeholder="Ej: Av. Providencia 1234, Depto 5"
                     />
-                    <div style={{ width: '100%' }}>
-                        <label style={{ fontSize: '13.5px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '8px' }}>Transporte Preferido</label>
+                    <div className="adm-ancho">
+                        <label className="adm-etiqueta-persona">Transporte Preferido</label>
                         <select 
                             name="transporte_preferido" 
                             value={formData.transporte_preferido || ''}
                             onChange={handleChange}
-                            style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontWeight: '600', outline: 'none' }}
+                            className="adm-campo-persona"
                         >
                             <option value="">No especificado (Retiro, Por coordinar...)</option>
                             <option value="STARKEN">Starken</option>
@@ -147,13 +147,13 @@ const PersonaFields = ({ formData, handleChange, isLead = false }) => {
             </AdminFormSection>
 
             {isLead && (
-                <div style={{ marginTop: '24px', marginBottom: '32px' }}>
-                    <label style={{ fontSize: '13.5px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '8px' }}>Tipo de Registro</label>
+                <div className="adm-margen-bloque">
+                    <label className="adm-etiqueta-persona">Tipo de Registro</label>
                     <select 
                         name="tipo_persona" 
                         value={formData.tipo_persona}
                         onChange={handleChange}
-                        style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontWeight: '600', outline: 'none' }}
+                        className="adm-campo-persona"
                     >
                         <option value="CLIENTE">Cliente (Comprador confirmado)</option>
                         <option value="LEAD">Prospecto (Cotizador / Interesado)</option>
