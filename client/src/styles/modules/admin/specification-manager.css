@@ -39,3 +39,35 @@
 .spec-list-name { font-weight: 800; color: #1e1b4b; }
 .spec-list-chars-wrapper { display: flex; gap: 6px; flex-wrap: wrap; }
 .spec-list-char-tag { font-size: 11px; background: #f8fafc; color: #64748b; padding: 3px 10px; border-radius: 8px; border: 1px solid #e2e8f0; }
+
+/* Piezas del gestor de especificaciones. */
+.esp-vista { padding: 1.25rem 1.25rem 5rem 1.25rem; }
+.esp-cuerpo { padding: 0 1.5rem; }
+.esp-columna { display: flex; flex-direction: column; gap: 1rem; }
+.esp-fila { display: flex; align-items: center; gap: 0.5rem; }
+.esp-rotulo {
+    font-size: 0.6875rem;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+}
+/* La muestra de color de una opcion: su color viene del dato, la forma no. */
+.esp-muestra {
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+}
+.esp-icono {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    display: flex;
+    font-family: inherit;
+}
+.esp-icono--holgado { padding: 0.25mm; padding: 0.25rem; }
+.esp-celda-plana { padding: 0; border: none; text-align: left; }
+.esp-separacion { margin-right: 0.5rem; }
+.esp-fijo { flex-shrink: 0; }

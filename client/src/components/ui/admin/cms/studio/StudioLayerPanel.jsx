@@ -33,16 +33,16 @@ const StudioLayerPanel = ({
     <div className="est-panel-capas">
 
         {/* Lista */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '18px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                <span style={{ fontSize: '10px', fontWeight: '900', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Capas</span>
-                <span style={{ fontSize: '9px', background: 'rgba(255,255,255,0.06)', padding: '2px 8px', borderRadius: '100px', fontWeight: '800' }}>{layers.length}</span>
+        <div className="est-lista-capas">
+            <div className="est-cabecera-panel">
+                <span className="est-titulo-panel">Capas</span>
+                <span className="est-capa-numero">{layers.length}</span>
             </div>
 
             {/* Fondo */}
             <div style={{ ...row(false), marginBottom: '6px' }}>
                 <div style={{ ...thumb, background: bgColor, border: '2px solid rgba(255,255,255,0.15)' }} />
-                <div style={{ flex: 1, fontSize: '11px', fontWeight: '900' }}>Fondo</div>
+                <div className="est-capa-nombre">Fondo</div>
                 <div className="est-relativo">
                     <Palette size={13} color="rgba(255,255,255,0.4)" />
                     <input type="color" value={bgColor} onChange={e => onBgColorChange(e.target.value)}
@@ -51,11 +51,11 @@ const StudioLayerPanel = ({
             </div>
 
             {/* Capas (orden Z desc) */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <div className="est-columna--menuda">
                 {layers.length === 0 && (
                     <div className="est-panel-vacio">
                         <Layers size={24} className="est-grupo--junto" />
-                        <p style={{ fontSize: '10px', margin: 0 }}>Sin elementos</p>
+                        <p className="est-linea">Sin elementos</p>
                         <p className="est-menudo">Añade texto o imágenes</p>
                     </div>
                 )}
@@ -70,14 +70,14 @@ const StudioLayerPanel = ({
                                     : <img src={`${layer.url}`} className="est-imagen-llena" alt="" />}
                             </div>
                             <div className="est-encogible">
-                                <div style={{ fontSize: '11px', fontWeight: '900', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                <div className="est-capa-nombre">
                                     {layer.type === 'text' ? (layer.content || 'Texto') : 'Imagen'}
                                 </div>
-                                <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.3)', fontWeight: '700' }}>Z: {layer.zIndex}</div>
+                                <div className="est-capa-tipo">Z: {layer.zIndex}</div>
                             </div>
                             {active && (
                                 <button onClick={e => { e.stopPropagation(); onRemoveLayer(orig); }}
-                                    style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: '2px' }}
+                                    className="est-boton-plano"
                                     onMouseEnter={e => e.currentTarget.style.color = '#ff4d4d'}
                                     onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}>
                                     <Trash2 size={11} />
@@ -96,7 +96,7 @@ const StudioLayerPanel = ({
                     Editando capas MÓVIL
                 </p>
             )}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+            <div className="est-pareja">
                 {[
                     { label: 'TEXTO',    icon: <Type size={16}/>,        action: onAddText,        span: false },
                     { label: 'GALERÍA',  icon: <ImageIcon size={16}/>,   action: onAddFromGallery, span: false },

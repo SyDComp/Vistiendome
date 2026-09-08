@@ -219,15 +219,15 @@ const CMSPageManager = ({
     };
 
     return (
-        <div style={{ flex: 1, minHeight: 0, height: '100%', display: 'flex', flexDirection: 'column', gap: '24px', overflow: 'hidden', padding: isMobileScreen ? '10px 0' : '0', boxSizing: 'border-box', fontFamily: 'Inter, system-ui, sans-serif' }}>
-            <div style={{ display: 'flex', flexDirection: isMobileScreen ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobileScreen ? 'center' : 'center', gap: '16px', padding: isMobileScreen ? '0 16px' : '0', textAlign: isMobileScreen ? 'center' : 'left' }}>
+        <div className="cms-pg">
+            <div className="cms-pg-cabecera">
                 <div>
                     <h1 className="adm-titulo-grande">{title}</h1>
                     <p className="cms-adm-bajada">{subtitle}</p>
                 </div>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', width: isMobileScreen ? '100%' : 'auto', justifyContent: isMobileScreen ? 'space-between' : 'flex-end' }}>
+                <div className="cms-pg-acciones">
                     {hasChanges && (
-                        <div style={{ display: 'flex', gap: '8px' }}>
+                        <div className="cms-pg-fila">
                             <Button onClick={handleDiscard} variant="outline" disabled={isSaving}>Descartar</Button>
                             <Button onClick={handleBulkSave} variant="primary" disabled={isSaving} style={{ background: '#059669' }}>
                                 {isSaving ? 'Guardando...' : <><Save size={18} /> Guardar</>}
@@ -237,12 +237,12 @@ const CMSPageManager = ({
                     <Button 
                         variant={isReordering ? "primary" : "outline"} 
                         onClick={() => setIsReordering(!isReordering)}
-                        style={{ height: '48px', padding: '0 20px', borderRadius: '14px', gap: '8px', background: isReordering ? '#fdf2f8' : '#fff', color: isReordering ? '#8f0653' : '#64748b', borderColor: isReordering ? '#8f0653' : '#e2e8f0' }}
+                        className={`cms-pg-reordenar${isReordering ? ' cms-pg-reordenar--activo' : ''}`}
                     >
                         <ArrowUpDown size={18} /> {isReordering ? 'Hecho' : 'Mover'}
                     </Button>
-                    <div className="dropdown" style={{ position: 'relative', flex: isMobileScreen ? 1 : 'none' }}>
-                        <Button variant="primary" style={{ height: 'auto', minHeight: '48px', padding: '12px 16px', borderRadius: '14px', gap: '8px', width: '100%', display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <div className="dropdown cms-pg-buscador">
+                        <Button variant="primary" className="cms-pg-anadir">
                             <Plus size={18} /> Añadir Bloque
                         </Button>
                         <div className="dropdown-content">
@@ -309,7 +309,7 @@ const CMSPageManager = ({
                                 >
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
                                         {isReordering && (
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginLeft: '-10px', padding: '0 8px' }}>
+                                            <div className="cms-pg-arrastre">
                                                 <button 
                                                     disabled={index === 0}
                                                     onClick={() => handleMove(index, -1)}
@@ -329,7 +329,7 @@ const CMSPageManager = ({
                                         <div className="cms-adm-emblema cms-adm-emblema--marca">
                                             {getIcon(section.type)}
                                         </div>
-                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div className="cms-pg-encogible">
                                             {editingTitleId === section.id ? (
                                                 <input autoFocus style={{ border: 'none', borderBottom: '2px solid #8f0653', outline: 'none', background: 'transparent', fontWeight: '800', width: '100%', fontSize: '13px' }} value={section.title} onChange={e => setSections(sections.map(s => s.id === section.id ? { ...s, title: e.target.value } : s))} onBlur={() => setEditingTitleId(null)} onKeyDown={e => e.key === 'Enter' && setEditingTitleId(null)} />
                                             ) : (
@@ -338,7 +338,7 @@ const CMSPageManager = ({
                                         </div>
                                     </div>
 
-                                    <div style={{ display: 'flex', gap: '6px', justifyContent: isMobileScreen ? 'flex-end' : 'flex-start' }}>
+                                    <div className="cms-pg-acciones-fila">
                                         <button onClick={(e) => { e.stopPropagation(); handleToggleActive(section); }} title="Activar/Desactivar" className={`cms-adm-accion${section.is_active ? ' cms-adm-accion--activa' : ''}`}>{section.is_active ? <Eye size={14} /> : <EyeOff size={14} />}</button>
                                         <button onClick={(e) => { 
                                             e.stopPropagation();
@@ -376,7 +376,7 @@ const CMSPageManager = ({
                         height: '100%',
                         minHeight: 0
                     }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div className="cms-pg-fila--repartida">
                             <h3 className="adm-titulo-seccion">
                                 <Monitor size={15} /> ESPEJO DEL SITIO (LIVE)
                             </h3>
@@ -479,7 +479,7 @@ const CMSPageManager = ({
                                     <Smartphone size={16} />
                                 </button>
                             </div>
-                            <span style={{ fontWeight: '900', fontSize: '13px', color: '#1e1b4b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            <span className="cms-pg-nombre">
                                 Previa: {previewDevice === 'mobile' ? 'Móvil' : 'Escritorio'}
                             </span>
                         </div>
@@ -490,7 +490,7 @@ const CMSPageManager = ({
                             Cerrar
                         </button>
                     </div>
-                    <div style={{ flex: 1, overflow: 'auto', padding: '20px 10px', background: '#f8fafc' }}>
+                    <div className="cms-pg-lienzo">
                         <div style={{ 
                             margin: '0 auto', 
                             width: previewDevice === 'mobile' ? 'min(375px, 100%)' : '1200px', 

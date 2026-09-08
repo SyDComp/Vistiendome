@@ -240,7 +240,7 @@ const SpecificationManager = () => {
         const selectedCats = allCategories.filter(c => formData.category_ids.includes(c.id));
 
         return (
-            <div className="admin-inventory-form-container desktop" style={{ padding: '20px 20px 80px 20px' }}>
+            <div className="admin-inventory-form-container desktop esp-vista">
                 <div className="spec-form-container">
                     <div className="spec-form-header">
                         <div className="spec-form-header-left">
@@ -253,8 +253,8 @@ const SpecificationManager = () => {
                         </div>
                         <div className="spec-form-header-right">
                             <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
-                            <Button variant="primary" onClick={handleSave} style={{ padding: '0 24px' }}>
-                                <Save size={18} style={{ marginRight: '8px' }} /> Guardar Grupo
+                            <Button variant="primary" onClick={handleSave} className="esp-cuerpo">
+                                <Save size={18} className="esp-separacion" /> Guardar Grupo
                             </Button>
                         </div>
                     </div>
@@ -288,7 +288,7 @@ const SpecificationManager = () => {
 
                                 {/* Scrollable Area */}
                                 <div className="spec-char-scroll">
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                    <div className="esp-columna">
                                         {selectedChars.map(c => {
                                             const config = formData.characteristics.find(fc => fc.id === c.id);
                                             const hasDomain = c.domain && c.domain.length > 0;
@@ -309,16 +309,16 @@ const SpecificationManager = () => {
                                                     extraHeader={
                                                         <button 
                                                             onClick={(e) => { e.stopPropagation(); removeChar(c.id); }}
-                                                            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', display: 'flex' }}
+                                                            className="esp-icono esp-icono--holgado"
                                                         >
                                                             <Trash2 size={16} />
                                                         </button>
                                                     }
                                                 >
                                                     <div className="spec-char-accordion-header">
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <div className="esp-fila">
                                                             <Sparkles size={14} color="#8f0653" />
-                                                            <span style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Selecciona Opciones Disponibles</span>
+                                                            <span className="esp-rotulo">Selecciona Opciones Disponibles</span>
                                                         </div>
                                                         
                                                         <button
@@ -350,16 +350,16 @@ const SpecificationManager = () => {
                                                                     className={`spec-char-btn-val ${isSelected ? 'active' : ''}`}
                                                                 >
                                                                     {isColor && hex && (
-                                                                        <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: hex, border: '1px solid rgba(0,0,0,0.1)', flexShrink: 0 }} />
+                                                                        <div className="esp-muestra" style={{ background: hex }} />
                                                                     )}
                                                                     <span className="spec-char-btn-val-text">{val}</span>
-                                                                    {isSelected && <Check size={14} style={{ flexShrink: 0 }} />}
+                                                                    {isSelected && <Check size={14} className="esp-fijo" />}
                                                                 </button>
                                                             );
                                                         })}
                                                     </div>
                                                 ) : (
-                                                    <p className="spec-char-empty-msg" style={{ padding: 0, border: 'none', textAlign: 'left' }}>
+                                                    <p className="spec-char-empty-msg esp-celda-plana">
                                                         No hay opciones en la biblioteca para {c.name}.
                                                     </p>
                                                 )}
@@ -398,7 +398,7 @@ const SpecificationManager = () => {
                                     <div key={cat.id} className="spec-cat-tag">
                                         <Folder size={12} />
                                         {cat.name}
-                                        <button onClick={() => removeCategory(cat.id)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex' }}>
+                                        <button onClick={() => removeCategory(cat.id)} className="esp-icono">
                                             <X size={14} />
                                         </button>
                                     </div>
