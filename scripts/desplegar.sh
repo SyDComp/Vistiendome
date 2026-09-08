@@ -43,6 +43,21 @@ echo "    quedamos en: $(git log --oneline -1)"
 echo "[3/4] reconstruyendo..."
 $COMPOSE up -d --build
 
+# El proxy NO se reconstruye —usa la imagen oficial de nginx— asi que compose lo
+# deja corriendo tal cual, y su configuracion entra por un bind mount de UN
+# ARCHIVO: nginx/production.conf -> /etc/nginx/conf.d/default.conf.
+#
+# Docker resuelve ese montaje al inodo, no a la ruta. `git pull` no edita el
+# archivo: lo reemplaza, con inodo nuevo. El contenedor se queda mirando el
+# viejo, que ya no existe en el arbol, y sigue sirviendo la configuracion
+# anterior. Ni recargar nginx lo arregla: recarga el archivo viejo.
+#
+# Resultado: TODO cambio a nginx que se subio hasta hoy nunca llego a
+# produccion, y el despliegue igual decia "Listo". Recrear el contenedor vuelve
+# a resolver el montaje contra el archivo actual.
+echo "    recreando el proxy para que tome nginx/production.conf..."
+$COMPOSE up -d --force-recreate nginx
+
 # 4. Que compile no significa que ande.
 echo "[4/4] comprobando que responda..."
 sleep 8
