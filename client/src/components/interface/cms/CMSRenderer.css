@@ -46,3 +46,71 @@
 
 .cms-video-block { max-width: 960px; margin: 0 auto; padding: 8px 16px 24px; }
 .cms-video-titulo { font-size: 22px; font-weight: 800; color: #1e1b4b; margin: 0 0 14px; text-align: center; }
+
+/* Lo que estaba escrito como estilos sueltos dentro del JSX. Los tamaños van en
+   `rem` para que crezcan si la persona sube la letra de su navegador; los
+   colores, en variables, para dejar de repetir el color de marca en cada sitio
+   donde hacía falta. */
+.cms-portada {
+    --cms-marca: #8f0653;
+    --cms-tinta: #1e1b4b;
+}
+
+.cms-imagen-llena { width: 100%; height: 100%; object-fit: cover; }
+.cms-imagen-ancha { display: block; width: 100%; height: auto; pointer-events: none; }
+.cms-relativo { position: relative; }
+.cms-vacio { padding: 2.5rem; text-align: center; }
+.cms-respiro { padding: 0 0.25rem; }
+
+.cms-antetitulo {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--cms-marca, #8f0653);
+    text-transform: uppercase;
+    letter-spacing: 0.125rem;
+}
+.cms-titulo {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--cms-tinta, #1e1b4b);
+    margin: 0.25rem 0 0 0;
+}
+
+.cms-precio-linea { display: inline-flex; align-items: baseline; gap: 0.375rem; flex-wrap: wrap; }
+
+/* La cabecera de una sección: título a un lado, "ver todo" al otro. Se envuelve
+   en pantalla angosta en vez de aplastar el título. */
+.cms-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    padding: 0 0.25rem;
+}
+.cms-cabecera--amplia { align-items: center; margin-bottom: 2rem; padding: 0 1.25rem; }
+
+/* 2.75rem de alto: el mínimo que se pulsa cómodo con el dedo. */
+.cms-enlace {
+    background: none;
+    border: none;
+    color: var(--cms-marca, #8f0653);
+    font-weight: 800;
+    font-size: 0.875rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    font-family: inherit;
+}
+.cms-enlace--discreto {
+    color: var(--cms-tinta, #1e1b4b);
+    font-weight: 700;
+    font-size: 0.6875rem;
+    text-decoration: underline;
+    text-underline-offset: 0.25rem;
+    letter-spacing: 0.0625rem;
+    padding-inline: 0;
+}

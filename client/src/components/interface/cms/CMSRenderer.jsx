@@ -42,7 +42,7 @@ const PrecioConOferta = ({ product, previewMode, tamano }) => {
         return <span style={{ fontSize: tamano, fontWeight: '900', color: '#8f0653' }}>Consultar</span>;
     }
     return (
-        <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
+        <span className="cms-precio-linea">
             {enOferta && (
                 <span style={{ fontSize: `calc(${tamano} * 0.8)`, color: '#94a3b8', textDecoration: 'line-through', fontWeight: 500 }}>
                     $ {product.original_price.toLocaleString('es-CL')}
@@ -111,7 +111,7 @@ const LayerRenderer = ({ layers = [], navigate, isMobile }) => {
                                 // tarjeta: por eso el tamaño declarado es mayor.
                                 sizes="(max-width: 1050px) 100vw, 1200px"
                                 decoding="async"
-                                style={{ display: 'block', width: '100%', height: 'auto', pointerEvents: 'none' }}
+                                className="cms-imagen-ancha"
                                 alt=""
                             />
                         )}
@@ -405,14 +405,14 @@ const ProductCard = ({ product, previewMode }) => {
                     sizes="(max-width: 768px) 50vw, 300px"
                     loading="lazy"
                     decoding="async"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    className="cms-imagen-llena"
                     alt={product.name}
                 />
                 <div className="add-to-cart-banner">
                     + Añadir al Carrito
                 </div>
             </div>
-            <div style={{ padding: '0 4px' }}>
+            <div className="cms-respiro">
                 <h4 style={{ 
                     margin: '0 0 4px 0', 
                     fontSize: previewMode ? '12px' : '15px', 
@@ -492,7 +492,7 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
                 onMouseEnter={() => setShowArrows(true)}
                 onMouseLeave={() => setShowArrows(false)}
             >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: '24px', padding: '0 4px' }}>
+                <div className="cms-cabecera">
                     <div>
                         <h2 style={{ fontSize: previewMode ? '16px' : (isMobile ? '18px' : '24px'), fontWeight: '900', color: '#1e1b4b', margin: 0, textTransform: 'uppercase', letterSpacing: '1.2px' }}>
                             {title || 'Nuestros Favoritos'}
@@ -500,13 +500,13 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
                     </div>
                     <button 
                         onClick={() => !previewMode && navigate(`/coleccion/${config?.collection_id || 'smart_latest'}`)}
-                        style={{ background: 'none', border: 'none', color: '#1e1b4b', fontWeight: '700', fontSize: '11px', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '4px', letterSpacing: '1px', minHeight: '44px', paddingInline: 0 }}
+                        className="cms-enlace cms-enlace--discreto"
                     >
                         VER TODO
                     </button>
                 </div>
 
-                <div style={{ position: 'relative' }}>
+                <div className="cms-relativo">
                     {/* Flechas Flotantes Estilo Lounge */}
                     {(isMobile || (showArrows && products.length > 4)) && (
                         <>
@@ -582,14 +582,14 @@ export const RecentProductsBlock = ({ previewMode = false }) => {
     return (
         <div style={{ marginBottom: previewMode ? '30px' : '60px' }}>
             {!previewMode && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', padding: '0 20px' }}>
+                <div className="cms-cabecera cms-cabecera--amplia">
                     <div>
-                        <span style={{ fontSize: '12px', fontWeight: '800', color: '#8f0653', textTransform: 'uppercase', letterSpacing: '2px' }}>Novedades</span>
-                        <h2 style={{ fontSize: '32px', fontWeight: '900', color: '#1e1b4b', margin: '4px 0 0 0' }}>Últimos Lanzamientos</h2>
+                        <span className="cms-antetitulo">Novedades</span>
+                        <h2 className="cms-titulo">Últimos Lanzamientos</h2>
                     </div>
                     <button 
                         onClick={() => window.location.href = `/coleccion/${config?.collection_id || 'smart_latest'}`}
-                        style={{ background: 'none', border: 'none', color: '#8f0653', fontWeight: '800', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', minHeight: '44px' }}
+                        className="cms-enlace"
                     >
                         VER TODO <ArrowRight size={16} />
                     </button>
@@ -603,7 +603,7 @@ export const RecentProductsBlock = ({ previewMode = false }) => {
                 padding: previewMode ? '0' : '0 20px'
             }}>
                 {products.map(product => (
-                    <div key={product.id} style={{ position: 'relative' }}>
+                    <div key={product.id} className="cms-relativo">
                         <div style={{ 
                             borderRadius: previewMode ? '20px' : '32px', 
                             overflow: 'hidden', 
@@ -618,7 +618,7 @@ export const RecentProductsBlock = ({ previewMode = false }) => {
                                 sizes="(max-width: 768px) 50vw, 300px"
                                 loading="lazy"
                                 decoding="async"
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                className="cms-imagen-llena"
                                 alt={product.name}
                             />
                         </div>
@@ -688,7 +688,7 @@ const CMSRenderer = ({ page = 'homepage', data = null, previewMode = false, acti
 
     if (loading) {
         return (
-            <div style={{ padding: '40px', textAlign: 'center' }}>
+            <div className="cms-vacio">
                 <div className="loading-spinner"></div>
             </div>
         );
