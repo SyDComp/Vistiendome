@@ -1,0 +1,154 @@
+/*
+ * Piezas del estudio del CMS: el editor oscuro donde se arma la portada.
+ *
+ * Es una pantalla con tema propio —fondo oscuro, texto claro— y por eso sus
+ * colores se declaran acá arriba una vez, en vez de repetir `rgba(255,255,255,
+ * 0.05)` en cada caja como estaba.
+ *
+ * Lo que depende de un dato —el color que se elige para una escena, cuál
+ * pestaña está activa— sigue en el JSX: eso no se puede escribir en una hoja.
+ */
+
+.est {
+    --est-marca: #8f0653;
+    --est-velo: rgba(255, 255, 255, 0.05);
+    --est-velo-borde: rgba(255, 255, 255, 0.08);
+    --est-rotulo: rgba(255, 255, 255, 0.35);
+    --est-apagado: rgba(255, 255, 255, 0.4);
+    --est-medio: rgba(255, 255, 255, 0.5);
+    --est-peligro: #ff4d4d;
+}
+
+/* El rótulo de un control. Diminuto y en mayúsculas: acompaña, no compite. */
+.est-rotulo {
+    font-size: 0.5625rem;
+    font-weight: 900;
+    color: var(--est-rotulo, rgba(255, 255, 255, 0.35));
+    letter-spacing: 0.08em;
+    display: block;
+    margin-bottom: 0.375rem;
+}
+.est-rotulo--pegado { margin-bottom: 0; }
+.est-rotulo--suelto { margin-bottom: 1.25rem; }
+.est-rotulo--claro { margin-bottom: 0.625rem; color: #fff; }
+
+.est-campo {
+    background: var(--est-velo, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--est-velo-borde, rgba(255, 255, 255, 0.08));
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.625rem;
+    color: #fff;
+    font-size: 0.8125rem;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+.est-campo--junto { margin-bottom: 0.375rem; }
+.est-campo--menor { font-size: 0.6875rem; }
+.est-campo--codigo { font-family: monospace; font-size: 0.75rem; }
+
+.est-fila { display: flex; gap: 0.5rem; }
+.est-fila--centrada { display: flex; gap: 0.5rem; align-items: center; }
+.est-fila--separada { display: flex; gap: 0.5rem; margin-bottom: 0.375rem; }
+.est-fila--suelta { display: flex; gap: 0.625rem; align-items: center; }
+.est-fila--envuelve { display: flex; gap: 0.375rem; flex-wrap: wrap; align-items: center; }
+.est-columna { display: flex; flex-direction: column; gap: 0.5rem; }
+.est-columna--amplia { display: flex; flex-direction: column; gap: 1.125rem; }
+.est-flexible { flex: 1; }
+
+.est-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.375rem;
+}
+.est-titulo { flex: 1; text-align: center; font-weight: 900; font-size: 0.9375rem; }
+
+/* Grupo de pestañas sobre un velo, para que se lean como un solo control. */
+.est-pestanas {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.25rem;
+    background: var(--est-velo, rgba(255, 255, 255, 0.05));
+    border-radius: 0.625rem;
+}
+.est-pestana {
+    padding: 0.5rem;
+    background: transparent;
+    border: 1px solid var(--est-velo-borde, rgba(255, 255, 255, 0.1));
+    color: #fff;
+    font-size: 0.625rem;
+    font-weight: 800;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: normal;
+    word-wrap: break-word;
+    font-family: inherit;
+    min-height: 2.25rem;
+}
+.est-pestana--activa { background: var(--est-marca, #8f0653); border-color: transparent; }
+
+.est-caja {
+    padding: 0.875rem;
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--est-velo-borde, rgba(255, 255, 255, 0.05));
+}
+.est-nota {
+    padding: 0.875rem;
+    border-radius: 0.75rem;
+    background: rgba(143, 6, 83, 0.05);
+    border: 1px solid rgba(143, 6, 83, 0.15);
+    font-size: 0.625rem;
+    color: var(--est-apagado, rgba(255, 255, 255, 0.4));
+    line-height: 1.6;
+}
+
+.est-insignia {
+    font-size: 0.5625rem;
+    background: rgba(143, 6, 83, 0.2);
+    color: #c56fa8;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.375rem;
+    font-weight: 900;
+}
+.est-valor {
+    font-size: 0.625rem;
+    font-weight: 800;
+    min-width: 2.25rem;
+    text-align: right;
+    color: var(--est-medio, rgba(255, 255, 255, 0.5));
+}
+
+.est-quitar {
+    padding: 0.625rem;
+    border-radius: 0.625rem;
+    border: 1px solid rgba(255, 77, 77, 0.3);
+    color: var(--est-peligro, #ff4d4d);
+    background: transparent;
+    font-weight: 800;
+    font-size: 0.6875rem;
+    cursor: pointer;
+    margin-top: 0.25rem;
+    font-family: inherit;
+    min-height: 2.25rem;
+}
+.est-enlace {
+    background: none;
+    border: none;
+    color: var(--est-marca, #8f0653);
+    font-size: 0.5625rem;
+    font-weight: 800;
+    margin-top: 0.375rem;
+    cursor: pointer;
+    text-decoration: underline;
+    font-family: inherit;
+}
+.est-icono {
+    width: 1.625rem;
+    height: 1.625rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+}

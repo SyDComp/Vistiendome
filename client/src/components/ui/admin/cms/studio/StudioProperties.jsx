@@ -1,21 +1,20 @@
 import React from 'react';
+import './estudio.css';
 
-const label = { fontSize: '9px', fontWeight: '900', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.08em', display: 'block', marginBottom: '6px' };
-const inputStyle = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', padding: '10px 12px', borderRadius: '10px', color: '#fff', fontSize: '13px', width: '100%', boxSizing: 'border-box' };
 const zBtn = { flex: 1, padding: '8px', background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', borderRadius: '8px', cursor: 'pointer', fontWeight: '800', fontSize: '10px' };
 const swatch = (active, c) => ({ width: '26px', height: '26px', borderRadius: '50%', background: c, border: active ? '3px solid #fff' : '2px solid rgba(255,255,255,0.1)', cursor: 'pointer' });
 
 const Prop = ({ label: lbl, children }) => (
     <div>
-        <span style={label}>{lbl}</span>
+        <span className="est-rotulo">{lbl}</span>
         {children}
     </div>
 );
 
 const Slider = ({ min, max, step = 1, value, unit, onChange }) => (
-    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-        <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1 }} />
-        <span style={{ fontSize: '10px', fontWeight: '800', minWidth: '36px', textAlign: 'right', color: 'rgba(255,255,255,0.5)' }}>{value}{unit}</span>
+    <div className="est-fila--suelta">
+        <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} className="est-flexible" />
+        <span className="est-valor">{value}{unit}</span>
     </div>
 );
 
@@ -31,17 +30,17 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
     if (activeLayer) {
         return (
             <div style={{ width: isDeviceMobile ? '100%' : '290px', background: 'rgba(0,0,0,0.3)', borderLeft: '1px solid rgba(255,255,255,0.05)', padding: isDeviceMobile ? '16px' : '22px', overflowY: 'auto', flexShrink: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
-                    <span style={{ ...label, marginBottom: 0 }}>PROPIEDADES DE CAPA</span>
-                    <span style={{ fontSize: '9px', background: 'rgba(143,6,83,0.2)', color: '#c56fa8', padding: '2px 8px', borderRadius: '6px', fontWeight: '900' }}>
+                <div className="est-cabecera">
+                    <span className="est-rotulo est-rotulo--pegado">PROPIEDADES DE CAPA</span>
+                    <span className="est-insignia">
                         {activeLayer.type === 'text' ? 'TEXTO' : 'IMAGEN'}
                     </span>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                <div className="est-columna--amplia">
 
                     <Prop label="¿DÓNDE MOSTRAR ESTE ELEMENTO?">
-                        <div style={{ display: 'flex', gap: '8px' }}>
+                        <div className="est-fila">
                             {[
                                 { id: 'both', lbl: 'AMBOS' },
                                 { id: 'desktop', lbl: 'SOLO PC' },
@@ -72,7 +71,7 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                     <Prop label="ENLACE (URL)">
                         <input 
                             type="text" 
-                            style={{ ...inputStyle, fontSize: '11px' }} 
+                            className="est-campo est-campo--menor" 
                             placeholder="/catalogo/producto/nombre-producto"
                             value={activeLayer.link || ''} 
                             onChange={e => onUpdateLayer({ link: e.target.value })} 
@@ -82,11 +81,11 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                     {activeLayer.type === 'text' && (
                         <>
                             <Prop label="CONTENIDO">
-                                <input type="text" style={inputStyle} value={activeLayer.content || ''} onChange={e => onUpdateLayer({ content: e.target.value })} />
+                                <input type="text" className="est-campo" value={activeLayer.content || ''} onChange={e => onUpdateLayer({ content: e.target.value })} />
                             </Prop>
                             <Prop label="FUENTE">
                                 <select 
-                                    style={{ ...inputStyle, marginBottom: '6px' }}
+                                    className="est-campo est-campo--junto"
                                     value={activeLayer.fontFamily || 'Outfit'}
                                     onChange={e => onUpdateLayer({ fontFamily: e.target.value })}
                                 >
@@ -101,7 +100,7 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                                 </select>
                             </Prop>
                             <Prop label="ESTILO (NEGRITA / CURSIVA)">
-                                <div style={{ display: 'flex', gap: '8px', marginBottom: '6px' }}>
+                                <div className="est-fila--separada">
                                     {[
                                         { id: 'normal', lbl: 'N', weight: '400' },
                                         { id: 'bold', lbl: 'B', weight: '700' },
@@ -139,11 +138,11 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                                 <Slider min={10} max={200} value={isMobile ? (activeLayer.mf ?? activeLayer.fontSize ?? 48) : (activeLayer.fontSize || 48)} unit="px" onChange={v => onUpdateLayer(isMobile ? { mf: v } : { fontSize: v })} />
                             </Prop>
                             <Prop label="COLOR">
-                                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                                <div className="est-fila--envuelve">
                                     {COLORS.map(c => (
                                         <button key={c} style={swatch(activeLayer.color === c, c)} onClick={() => onUpdateLayer({ color: c })} />
                                     ))}
-                                    <input type="color" value={activeLayer.color || '#fff'} onChange={e => onUpdateLayer({ color: e.target.value })} style={{ width: '26px', height: '26px', border: 'none', background: 'none', cursor: 'pointer' }} />
+                                    <input type="color" value={activeLayer.color || '#fff'} onChange={e => onUpdateLayer({ color: e.target.value })} className="est-icono" />
                                 </div>
                             </Prop>
                         </>
@@ -158,14 +157,14 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                     </Prop>
 
                     <Prop label="ORDEN Z">
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <div className="est-fila--centrada">
                             <button style={zBtn} onClick={() => onMoveLayerZ(activeLayerIdx, 'down')}>↓ BAJAR</button>
-                            <span style={{ flex: 1, textAlign: 'center', fontWeight: '900', fontSize: '15px' }}>{activeLayer.zIndex}</span>
+                            <span className="est-titulo">{activeLayer.zIndex}</span>
                             <button style={zBtn} onClick={() => onMoveLayerZ(activeLayerIdx, 'up')}>↑ SUBIR</button>
                         </div>
                     </Prop>
 
-                    <button onClick={onRemoveLayer} style={{ padding: '10px', borderRadius: '10px', border: '1px solid rgba(255,77,77,0.3)', color: '#ff4d4d', background: 'transparent', fontWeight: '800', fontSize: '11px', cursor: 'pointer', marginTop: '4px' }}>
+                    <button onClick={onRemoveLayer} className="est-quitar">
                         Eliminar capa
                     </button>
                 </div>
@@ -177,15 +176,15 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
     return (
         <div style={{ width: isDeviceMobile ? '100%' : '320px', background: 'rgba(0,0,0,0.4)', borderLeft: '1px solid rgba(255,255,255,0.05)', padding: isDeviceMobile ? '16px' : '22px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
             {/* Header Sticky */}
-            <span style={{ ...label, marginBottom: '20px', display: 'block' }}>PROPIEDADES DEL LIENZO</span>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            <span className="est-rotulo est-rotulo--suelto">PROPIEDADES DEL LIENZO</span>
+            <div className="est-columna--amplia">
 
                 <Prop label="COLOR DE FONDO">
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <div className="est-fila--suelta">
                         <div style={{ position: 'relative', width: '42px', height: '42px', borderRadius: '10px', background: isMobile ? (scene.mobile_bg_color || scene.bg_color) : (scene.bg_color || '#1e1b4b'), border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', flexShrink: 0 }}>
                             <input type="color" value={isMobile ? (scene.mobile_bg_color || scene.bg_color || '#1e1b4b') : (scene.bg_color || '#1e1b4b')} onChange={e => onUpdateScene({ bg_color: e.target.value })} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }} />
                         </div>
-                        <input type="text" style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '12px' }} value={isMobile ? (scene.mobile_bg_color || scene.bg_color || '#1e1b4b') : (scene.bg_color || '#1e1b4b')} onChange={e => onUpdateScene({ bg_color: e.target.value })} />
+                        <input type="text" className="est-campo est-campo--codigo" value={isMobile ? (scene.mobile_bg_color || scene.bg_color || '#1e1b4b') : (scene.bg_color || '#1e1b4b')} onChange={e => onUpdateScene({ bg_color: e.target.value })} />
                     </div>
                 </Prop>
 
@@ -225,7 +224,7 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                     {isMobile && scene.mobile_border_type && (
                         <button 
                             onClick={() => onUpdateScene({ mobile_border_type: null })}
-                            style={{ background: 'none', border: 'none', color: '#8f0653', fontSize: '9px', fontWeight: '800', marginTop: '6px', cursor: 'pointer', textDecoration: 'underline' }}
+                            className="est-enlace"
                         >
                             RESTAURAR SEGÚN ESCRITORIO
                         </button>
@@ -233,7 +232,7 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                 </Prop>
 
                 <Prop label={isMobile ? "PROPORCIÓN (MÓVIL)" : "PROPORCIÓN (ESCRITORIO)"}>
-                    <div style={{ display: 'flex', gap: '8px', padding: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px' }}>
+                    <div className="est-pestanas">
                         {[
                             { id: isMobile ? '9/16' : '21/9', lbl: isMobile ? 'VERTICAL' : 'ULTRAWIDE' },
                             { id: '16/9', lbl: 'CLÁSICO' },
@@ -271,12 +270,12 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                             <Slider min={1} max={15} step={0.5} value={carouselInterval} unit="s" onChange={v => onUpdateCarouselInterval(v)} />
                         </Prop>
 
-                        <div style={{ padding: '14px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <span style={{ ...label, marginBottom: '10px', color: '#fff' }}>DISEÑO GLOBAL</span>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div className="est-caja">
+                            <span className="est-rotulo est-rotulo--claro">DISEÑO GLOBAL</span>
+                            <div className="est-columna">
                                 <button 
                                     onClick={onApplyBgToAllScenes}
-                                    style={{ padding: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '10px', fontWeight: '800', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'normal', wordWrap: 'break-word' }}
+                                    className="est-pestana"
                                     onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
                                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                 >
@@ -284,7 +283,7 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                                 </button>
                                 <button 
                                     onClick={onDuplicateDesignToAllScenes}
-                                    style={{ padding: '8px', background: '#8f0653', border: 'none', color: '#fff', fontSize: '10px', fontWeight: '800', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'normal', wordWrap: 'break-word' }}
+                                    className="est-pestana est-pestana--activa"
                                     onMouseEnter={e => e.currentTarget.style.background = '#a60862'}
                                     onMouseLeave={e => e.currentTarget.style.background = '#8f0653'}
                                 >
@@ -295,7 +294,7 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                     </>
                 )}
 
-                <div style={{ padding: '14px', borderRadius: '12px', background: 'rgba(143,6,83,0.05)', border: '1px solid rgba(143,6,83,0.15)', fontSize: '10px', color: 'rgba(255,255,255,0.4)', lineHeight: '1.6' }}>
+                <div className="est-nota">
                     Selecciona una capa en el lienzo o en el panel izquierdo para editar sus propiedades.
                 </div>
             </div>
