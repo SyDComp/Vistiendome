@@ -272,23 +272,13 @@ const PreviewModal = ({ preview, onClose, navigate }) => {
     };
 
     return (
-        <div onClick={onClose} style={{
-            position: 'fixed', inset: 0, zIndex: 3000, background: 'rgba(15,23,42,0.5)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
-        }}>
-            <div onClick={(e) => e.stopPropagation()} style={{
-                width: '100%', maxWidth: '460px', background: '#fff', borderRadius: '20px',
-                overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-            }}>
+        <div onClick={onClose} className="ana-overlay">
+            <div onClick={(e) => e.stopPropagation()} className="ana-ventana">
                 <div className="ana-foto">
                     {loading ? <span className="ana-suave">Cargando…</span>
                         : img ? <img src={img} alt={preview.title}  />
                               : <span className="ana-apagado">Sin imagen</span>}
-                    <button onClick={onClose} aria-label="Cerrar" style={{
-                        position: 'absolute', top: '12px', right: '12px', width: '34px', height: '34px',
-                        border: 'none', borderRadius: '50%', background: 'rgba(255,255,255,0.9)', color: '#1e293b',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-                    }}><X size={18} /></button>
+                    <button onClick={onClose} aria-label="Cerrar" className="ana-cerrar"><X size={18} /></button>
                 </div>
 
                 <div className="ana-cuerpo">
@@ -314,11 +304,7 @@ const PreviewModal = ({ preview, onClose, navigate }) => {
                             background: '#fff', color: '#334155', fontSize: '14px', fontWeight: '700',
                             cursor: detail?.slug ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                         }}><ExternalLink size={16} /> Ver en la tienda</button>
-                        <button onClick={goToAdmin} style={{
-                            flex: 1, height: '46px', border: 'none', borderRadius: '12px',
-                            background: '#8f0653', color: '#fff', fontSize: '14px', fontWeight: '700',
-                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                        }}><Pencil size={16} /> {isVariant ? 'Editar variante' : 'Editar producto'}</button>
+                        <button onClick={goToAdmin} className="ana-accion"><Pencil size={16} /> {isVariant ? 'Editar variante' : 'Editar producto'}</button>
                     </div>
                 </div>
             </div>

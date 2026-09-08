@@ -257,11 +257,7 @@ const CotizacionesView = () => {
                                     e.stopPropagation();
                                     navigate(`/admin/dashboard/crm/orden-corte?orden=${o.id}`);
                                 }}
-                                style={{
-                                    background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-                                    fontSize: '11px', color: '#64748b', textDecoration: 'underline',
-                                    textUnderlineOffset: '2px', fontWeight: '600',
-                                }}
+                                className="cotv-enlace"
                             >
                                 Orden de corte N° {o.numero}
                             </button>
@@ -303,43 +299,13 @@ const CotizacionesView = () => {
                 <div className="adm-vista-filtros">
                     <button
                         onClick={() => setShowCreateModal(true)}
-                        style={{
-                            background: 'linear-gradient(135deg, #8f0653 0%, #d946ef 100%)',
-                            border: 'none',
-                            borderRadius: '10px',
-                            padding: '10px 18px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '8px',
-                            color: '#ffffff',
-                            cursor: 'pointer',
-                            fontSize: '13px',
-                            fontWeight: '800',
-                            boxShadow: '0 4px 12px rgba(143, 6, 83, 0.25)',
-                            flex: '1 1 200px'
-                        }}
+                        className="cotv-accion"
                     >
                         <Plus size={18} strokeWidth={3} /> + Nueva Cotización Manual
                     </button>
                     <button
                         onClick={() => navigate('/admin/dashboard/crm/shipping-labels')}
-                        style={{
-                            background: '#fdf2f8',
-                            border: '1px solid #fbcfe8',
-                            borderRadius: '10px',
-                            padding: '10px 16px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '8px',
-                            color: '#8f0653',
-                            cursor: 'pointer',
-                            fontSize: '13px',
-                            fontWeight: '800',
-                            boxShadow: '0 2px 6px rgba(143, 6, 83, 0.1)',
-                            flex: '1 1 240px'
-                        }}
+                        className="cotv-accion cotv-accion--suave"
                     >
                         <Printer size={16} /> 📦 Etiquetas de Envío (Ahorro Papel y Tinta)
                     </button>
@@ -412,11 +378,7 @@ const CotizacionesView = () => {
                             <button
                                 onClick={() => window.open(`/admin/print/pedido/${row.id}`, '_blank')}
                                 title="Imprimir planilla de pedido"
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 10px',
-                                    background: 'transparent', border: '1px solid transparent', borderRadius: '8px',
-                                    cursor: 'pointer', color: '#8f0653', fontSize: '12px', fontWeight: '600'
-                                }}
+                                className="cotv-accion cotv-accion--plana"
                             >
                                 <Printer size={14} />
                             </button>

@@ -367,3 +367,78 @@
     gap: 0.75rem;
     background: linear-gradient(135deg, var(--cot-marca-suave) 0%, #ffffff 100%);
 }
+
+/* Ultimas piezas del modal de cotizacion. */
+.cot-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+}
+.cot-whatsapp {
+    background: #25d366;
+    color: #fff;
+    border: none;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+    font-family: inherit;
+    min-height: 2.75rem;
+}
+.cot-franja {
+    background: var(--cot-marca-suave, #fdf2f8);
+    border: 1px solid var(--cot-marca-borde, #fbcfe8);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+/* Sugerencias que caen bajo el campo de busqueda. */
+.cot-sugerencias {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: #ffffff;
+    border: 1px solid var(--cot-campo, #cbd5e1);
+    border-radius: 0.625rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    margin-top: 0.25rem;
+    max-height: 16.25rem;
+    overflow-y: auto;
+}
+.cot-resumen-fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625rem 0.875rem;
+    background: #f8fafc;
+    border: 1px solid var(--cot-linea, #e2e8f0);
+    border-radius: 0.625rem;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+}
+.cot-pie {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    background-color: #f8fafc;
+}

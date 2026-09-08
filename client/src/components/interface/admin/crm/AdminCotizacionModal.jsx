@@ -370,14 +370,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
     };
 
     return (
-        <div style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            backdropFilter: 'blur(6px)',
-            zIndex: 1000,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '20px'
-        }}>
+        <div className="cot-overlay">
             <div className="cot cot-tarjeta">
                 {/* Cabezal */}
                 <div className="cot-cabecera">
@@ -428,11 +421,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                             <div className="cot-exito-acciones">
                                 <button
                                     onClick={handleOpenWhatsApp}
-                                    style={{
-                                        background: '#25D366', color: '#fff', border: 'none', borderRadius: '12px',
-                                        padding: '12px 24px', fontSize: '14px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer',
-                                        boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)'
-                                    }}
+                                    className="cot-whatsapp"
                                 >
                                     <Send size={18} /> Enviar Resumen al WhatsApp del Cliente
                                 </button>
@@ -481,10 +470,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                 {clientMode === 'select' ? (
                                     <div>
                                         {selectedCliente ? (
-                                            <div style={{
-                                                background: '#fdf2f8', border: '1px solid #fbcfe8', borderRadius: '12px', padding: '12px 16px',
-                                                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                                            }}>
+                                            <div className="cot-franja">
                                                 <div>
                                                     <div className="cot-precio">
                                                         {selectedCliente.nombres} {selectedCliente.apellidos} {selectedCliente.rut ? `(${selectedCliente.rut})` : ''}
@@ -628,11 +614,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                         className="adm-campo adm-campo--con-icono"
                                     />
                                     {filteredVariants.length > 0 && (
-                                        <div style={{
-                                            position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
-                                            background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px',
-                                            boxShadow: '0 10px 25px rgba(0,0,0,0.15)', marginTop: '4px', maxHeight: '260px', overflowY: 'auto'
-                                        }}>
+                                        <div className="cot-sugerencias">
                                             {filteredVariants.map((varItem, idx) => (
                                                 <div
                                                     key={idx}
@@ -672,10 +654,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                 ) : (
                                     <div className="cot-columna">
                                         {items.map((it, idx) => (
-                                            <div key={idx} style={{
-                                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                                padding: '10px 14px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', flexWrap: 'wrap', gap: '10px'
-                                            }}>
+                                            <div key={idx} className="cot-resumen-fila">
                                                 <div className="cot-fila-encogible">
                                                     {it.image ? (
                                                         <Imagen url={it.image} alt="" className="cot-miniatura" sizes="36px" />
@@ -822,12 +801,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
 
                 {/* Pie del modal */}
                 {!createdCotizacion && (
-                    <div style={{
-                        padding: '16px 24px',
-                        borderTop: '1px solid #f1f5f9',
-                        display: 'flex', justifyContent: 'flex-end', gap: '12px',
-                        backgroundColor: '#f8fafc'
-                    }}>
+                    <div className="cot-pie">
                         <button
                             type="button"
                             onClick={onClose}

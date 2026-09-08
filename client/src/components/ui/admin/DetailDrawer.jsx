@@ -1524,14 +1524,7 @@ const DetailDrawer = ({
                                                             </>
                                                         ) : section.isPattern || (typeof opt === 'object' && opt !== null && opt.image_url !== undefined) ? (
                                                             <>
-                                                                <div style={{ 
-                                                                    width: '48px', height: '48px', borderRadius: '8px', 
-                                                                    overflow: 'hidden',
-                                                                    background: '#f8fafc', 
-                                                                    border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                                    margin: '0 auto'
-                                                                }}>
+                                                                <div className="dd-miniatura">
                                                                     {opt.image_url ? (
                                                                         <Imagen url={opt.image_url} alt={val} className="dd-imagen-llena" sizes="40px" />
                                                                     ) : (
@@ -1550,13 +1543,7 @@ const DetailDrawer = ({
                                                         ) : (
                                                             <div className="dd-ancho-total">
                                                                 <div className="dd-fila-centrada">
-                                                                    <span style={{ 
-                                                                        display: 'block', 
-                                                                        fontSize: '18px', 
-                                                                        fontWeight: '900', 
-                                                                        color: '#8f0653',
-                                                                        lineHeight: '1.2'
-                                                                    }}>
+                                                                    <span className="dd-cifra">
                                                                         {val}
                                                                     </span>
                                                                     {opt.is_system && (
@@ -1767,16 +1754,7 @@ const DetailDrawer = ({
                     
                     {currType === 'cotizacion' && currData?.id && (
                         <div className="dd-separador">
-                            <div style={{
-                                background: 'linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)',
-                                border: '1.5px solid #fbcfe8',
-                                borderRadius: '16px',
-                                padding: '24px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '16px',
-                                boxShadow: '0 10px 25px -5px rgba(143, 6, 83, 0.1)'
-                            }}>
+                            <div className="dd-bloque-destacado">
                                 <div className="dd-fila--arriba">
                                     <div className="dd-emblema">
                                         <Printer size={22} />
@@ -1796,23 +1774,7 @@ const DetailDrawer = ({
                                         onClose();
                                         window.location.href = `/admin/dashboard/crm/shipping-labels?id=${currData.id}`;
                                     }}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '8px',
-                                        background: '#8f0653',
-                                        color: '#fff',
-                                        border: 'none',
-                                        padding: '16px 20px',
-                                        borderRadius: '12px',
-                                        cursor: 'pointer',
-                                        fontWeight: '800',
-                                        fontSize: '14px',
-                                        width: '100%',
-                                        boxShadow: '0 4px 14px rgba(143, 6, 83, 0.3)',
-                                        transition: 'all 0.2s'
-                                    }}
+                                    className="dd-accion-principal"
                                 >
                                     Ir al Sistema de Etiquetas (Ahorro y Formato) 🚀
                                 </button>
@@ -1820,12 +1782,7 @@ const DetailDrawer = ({
                                     <button
                                         type="button"
                                         onClick={() => window.open(`/admin/print/pedido/${currData.id}`, '_blank')}
-                                        style={{
-                                            flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                            background: '#fff', color: '#8f0653', border: '1.5px solid #8f0653',
-                                            padding: '12px 16px', borderRadius: '12px', cursor: 'pointer',
-                                            fontWeight: '800', fontSize: '13px'
-                                        }}
+                                        className="dd-accion-secundaria"
                                     >
                                         Planilla de Pedido (taller)
                                     </button>

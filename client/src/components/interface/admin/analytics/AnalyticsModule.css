@@ -215,3 +215,56 @@
 
 .ana-pulsable { cursor: pointer; }
 .ana-bloque { display: block; }
+
+/* Ventana de detalle de la analitica. */
+.ana-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: rgba(15, 23, 42, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+}
+.ana-ventana {
+    width: 100%;
+    max-width: 28.75rem;
+    max-height: 100dvh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 1.25rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+.ana-cerrar {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-family: inherit;
+}
+.ana-accion {
+    flex: 1;
+    min-height: 2.875rem;
+    border: none;
+    border-radius: 0.75rem;
+    background: var(--ana-marca, #8f0653);
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: inherit;
+}
