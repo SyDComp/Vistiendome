@@ -393,16 +393,20 @@ def kardex_reparar(db: Session = Depends(get_session)):
     la pantalla aparece como "-1 und.", igual que cualquier otro numero, cuando
     en realidad significa que una prenda salio sin que su entrada se registrara.
 
-    Hace dos cosas, en este orden: borra los movimientos que restan por un
-    pedido que ya no existe, y lo que siga negativo lo lleva a cero con un
-    AJUSTE que lo compensa —no con un UPDATE, para que quede el rastro de que
-    hubo que corregirlo, como un asiento contrario en contabilidad.
+    Borra los movimientos que no son historia real del negocio: los que restan
+    por un pedido que ya no existe, y las ventas que dejan un SKU en negativo
+    —salidas sin que la entrada se registrara nunca—. Esas prendas quedan como
+    salieron de fabrica: en cero y sin movimientos.
+
+    No se conserva un "rastro" de la inconsistencia: documentaria un error del
+    sistema sobre datos de prueba, y se le entregaria a la duena como si fuera
+    historia de su negocio.
 
     Es un endpoint y no un script suelto para que se pueda volver a correr
     cuando haga falta, con permiso de administracion y sin entrar al servidor.
     Correrlo dos veces no hace nada la segunda: ya no queda nada negativo.
     """
-    resultado = existencias_core.reparar(db)
+    resultado = existencias_core.limpiar(db)
     db.commit()
     return resultado
 

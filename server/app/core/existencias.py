@@ -123,56 +123,83 @@ def huerfanos(db: Session) -> List[StockMovement]:
     return [m for m in con_referencia if m.reference_id not in vivos]
 
 
-def reparar(db: Session) -> Dict[str, object]:
+def limpiar(db: Session) -> Dict[str, object]:
     """
-    Deja el inventario consistente y explica qué hizo.
+    Deja en cero, y SIN historial, las existencias que quedaron inconsistentes.
 
-    DOS COSAS, EN ESTE ORDEN
-    1. Se borran los movimientos huérfanos: restan por un pedido que ya no
-       existe. Mientras estén, el total está mal y volver a calcularlo no
-       arregla nada.
-    2. Lo que siga negativo se lleva a cero con un movimiento de AJUSTE que lo
-       compensa.
+    POR QUE SE BORRA Y NO SE COMPENSA
+    La primera version de esto anadia un movimiento de ajuste que dejaba el
+    total en cero pero conservaba la venta sin respaldo, "para que quedara el
+    rastro". Eso esta bien en un sistema en produccion con anos de operacion; en
+    este, que todavia no se entrega, es lo contrario de lo que hace falta: el
+    rastro documenta un error DEL SISTEMA con datos de prueba, y se le
+    entregaria a la duena como si fuera historia de su negocio.
 
-    POR QUE UN AJUSTE Y NO UN `UPDATE`
-    Cambiar el número a mano borraría que la inconsistencia existió. Un ajuste
-    con su nota deja el inventario correcto Y el rastro de que hubo que
-    corregirlo: quien mire el historial de ese SKU ve la venta sin respaldo y,
-    debajo, la corrección. Es lo mismo que hace una contabilidad: no se borra
-    un asiento, se hace el contrario.
+    Antes de entregar, lo que no es un registro real del negocio se va. Estas
+    prendas quedan como salieron de fabrica: en cero y sin movimientos.
 
-    Es idempotente: correrlo dos veces no crea un segundo ajuste, porque la
-    segunda vez ya no hay nada en negativo.
+    QUE SE BORRA, EXACTAMENTE
+      · Los ajustes que puso la version anterior de esta funcion.
+      · Las ventas que dejan un SKU en negativo, es decir las que salieron sin
+        que existiera la entrada.
+      · Los movimientos huerfanos: los que restan por un pedido que ya no
+        existe.
+
+    Lo que NO se toca: cualquier SKU cuyo total ya sea cero o positivo. Ahi los
+    movimientos cuadran y son historia legitima.
     """
     from ..models.catalog import MovementType
 
-    sueltos = huerfanos(db)
-    for m in sueltos:
+    borrados = 0
+
+    # 1. Los ajustes de la version anterior, reconocibles por su nota.
+    mios = db.exec(
+        select(StockMovement).where(
+            StockMovement.type == MovementType.ADJUSTMENT,
+            StockMovement.note.like("Correccion automatica:%"),
+        )
+    ).all()
+    mios += db.exec(
+        select(StockMovement).where(
+            StockMovement.type == MovementType.ADJUSTMENT,
+            StockMovement.note.like("Corrección automática:%"),
+        )
+    ).all()
+    for m in mios:
         db.delete(m)
-    if sueltos:
+        borrados += 1
+
+    # 2. Los huerfanos.
+    for m in huerfanos(db):
+        db.delete(m)
+        borrados += 1
+
+    if borrados:
         db.flush()
 
+    # 3. Lo que siga negativo: se quitan sus ventas sin respaldo hasta que
+    #    cuadre en cero. Se empieza por la mas reciente, que es la que sobra.
     movimientos = db.exec(select(StockMovement)).all()
     total: Dict[int, int] = {}
     for m in movimientos:
         total[m.sku_id] = total.get(m.sku_id, 0) + m.quantity
 
-    corregidos = []
+    limpiados = []
     for sku_id, hay in total.items():
         if hay >= 0:
             continue
-        db.add(StockMovement(
-            sku_id=sku_id,
-            type=MovementType.ADJUSTMENT,
-            quantity=-hay,
-            note=(
-                f"Corrección automática: el stock estaba en {hay} por salidas "
-                "sin su entrada registrada. Se lleva a 0."
-            ),
-        ))
-        corregidos.append({"sku_id": sku_id, "estaba_en": hay})
+        ventas = sorted(
+            [m for m in movimientos if m.sku_id == sku_id and m.quantity < 0],
+            key=lambda m: m.id or 0,
+            reverse=True,
+        )
+        estaba_en = hay
+        for venta in ventas:
+            if hay >= 0:
+                break
+            db.delete(venta)
+            borrados += 1
+            hay -= venta.quantity  # quantity es negativo: sumar de vuelta
+        limpiados.append({"sku_id": sku_id, "estaba_en": estaba_en})
 
-    return {
-        "huerfanos_borrados": len(sueltos),
-        "skus_corregidos": corregidos,
-    }
+    return {"movimientos_borrados": borrados, "skus_limpiados": limpiados}
