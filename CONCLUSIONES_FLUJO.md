@@ -22,7 +22,7 @@ PEDIDO  ──  NUEVA ── EN CONVERSACIÓN ── CONFIRMADA ── DESPACHAD
                                             └─► sus piezas aparecen como
                                                 "pendientes de corte"
                                                       ▼
-                                        ORDEN DE CORTE (la arma Paola)
+                                        ORDEN DE CORTE (la arma el taller)
                                         PENDIENTE → EN PROCESO → FINALIZADA
                                           · línea de pedido → marca `cortado`
                                           · línea de stock  → RECEIPT +N
@@ -34,13 +34,13 @@ tiene que declararlo **y** algo depende de él.
 | Estado | Lo declara | Qué depende de él |
 |---|---|---|
 | NUEVA | nadie (automático) | — |
-| EN CONVERSACIÓN | Paola | nada, es informativo |
-| **CONFIRMADA** | Paola | **habilita cortar**: las piezas entran a pendientes |
+| EN CONVERSACIÓN | el taller | nada, es informativo |
+| **CONFIRMADA** | el taller | **habilita cortar**: las piezas entran a pendientes |
 | **DESPACHADA** | se marca al **imprimir la etiqueta** | **descuenta el stock** |
-| CANCELADA | Paola | libera lo pendiente |
+| CANCELADA | el taller | libera lo pendiente |
 
 **No existe un estado "en corte"**, a propósito: eso el sistema ya lo sabe
-(`CotizacionItem.cortado`, que pone la orden de corte). Pedirle a Paola que
+(`CotizacionItem.cortado`, que pone la orden de corte). Pedirle al taller que
 además lo declare abre la puerta a que las dos versiones no coincidan. Se
 muestra derivado: *"por cortar"*, *"2 de 3 cortadas"*, *"lista para despachar"*.
 
@@ -173,7 +173,7 @@ saldo de 1604 queda en 199 y el de 2108 en −1 sin motivo.
 El segundo es cómodo pero borra el porqué: en el libro queda *"ajuste manual
 desde edición masiva"* y nada más. **Los 324 movimientos de hoy son de ése.**
 
-No propongo sacarlo — es la forma en que Paola cargó todo y funciona. Pero
+No propongo sacarlo — es la forma en que el taller cargó todo y funciona. Pero
 conviene decidir cuál manda: si el libro es la verdad, el campo del formulario
 debería servir sólo para la carga inicial, y después el stock se mueve por
 Bodega. Hoy conviven sin que nadie lo haya decidido.
@@ -243,7 +243,7 @@ vez de una columna que se pisa.
 
 **Primero, la secuencia real** (verificada en el código, no supuesta):
 
-1. Paola marca la cotización **CERRADA_EXITO**. Para ella eso significa
+1. el taller marca la cotización **CERRADA_EXITO**. Para ella eso significa
    "confirmado, a cortar" — es el estado con el que `piezas_pendientes` filtra
    por defecto.
 2. En ese mismo instante se dispara la venta: `SALE −1`. **Saldo: −1.**
@@ -284,7 +284,7 @@ estaba el defecto de verdad.
 El filtro de estado de stock preguntaba `agotado := total == 0`, `bajo_stock :=
 total > 0 y <= umbral`, `disponible := total > umbral`. Una variante en negativo
 **no coincidía con ninguno de los tres**: desaparecía de la única pantalla que
-existe para decirle a Paola qué le falta hacer.
+existe para decirle al taller qué le falta hacer.
 
 Medido, con una variante forzada a −2:
 
@@ -311,7 +311,7 @@ se ve en el panel.
   entrada de una prenda que nunca estuvo en bodega, y ni siquiera resolvía el
   problema, porque el negativo aparece al confirmar, no al finalizar.
 - *No descontar de entrada para las prendas hechas a pedido* — dejaría el saldo
-  en 0, pero se pierde la deuda, que es justamente lo que Paola quiere ver.
+  en 0, pero se pierde la deuda, que es justamente lo que el taller quiere ver.
 
 Si algún día esto se replantea, la razón de la decisión es ésta: **el libro sólo
 anota hechos reales, y "vendí algo que todavía no hice" es un hecho real.**

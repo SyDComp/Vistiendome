@@ -1,7 +1,7 @@
 """
 Órdenes de corte.
 
-Producción, no ventas: Paola arma la orden con lo que va a cortar, sea para
+Producción, no ventas: El taller arma la orden con lo que va a cortar, sea para
 cumplir pedidos o para tener stock. Por eso vive aparte del CRM.
 
 Al finalizar una orden el sistema cierra el círculo solo:

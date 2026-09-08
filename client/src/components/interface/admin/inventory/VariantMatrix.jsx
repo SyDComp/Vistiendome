@@ -4,7 +4,7 @@ import Imagen from '../../../ui/Imagen';
 
 /**
  * VariantList — Visualización de Combinaciones en formato de tarjetas.
- * Proporciona un entorno claro, espacioso y preciso para Paola.
+ * Proporciona un entorno claro, espacioso y preciso para el taller.
  */
 const VariantMatrix = ({ variants, onUpdate, onDelete, productImages = [], basePrice = 0 }) => {
     

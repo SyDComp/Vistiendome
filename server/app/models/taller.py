@@ -2,7 +2,7 @@
 Taller: las órdenes de corte.
 
 Se separan de `crm.py` a propósito. Una cotización es una VENTA; una orden de
-corte es PRODUCCIÓN, y no dependen entre sí: Paola corta para cumplir pedidos,
+corte es PRODUCCIÓN, y no dependen entre sí: El taller corta para cumplir pedidos,
 pero también corta para tener stock. Por eso la orden es una entidad propia y
 no una vista derivada de las ventas.
 """

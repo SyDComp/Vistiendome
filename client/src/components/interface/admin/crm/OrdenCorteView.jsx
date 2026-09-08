@@ -10,7 +10,7 @@ import OrdenCorteDetalle, { ESTADOS, estiloEstado } from './OrdenCorteDetalle';
 /**
  * Órdenes de corte: lista, alta y detalle.
  *
- * La orden es una entidad que arma Paola, no una vista derivada de las ventas:
+ * La orden es una entidad que arma el taller, no una vista derivada de las ventas:
  * corta para cumplir pedidos, pero también para tener stock. Antes esto era
  * sólo una lista de piezas pendientes, que cubría la mitad de su trabajo.
  */

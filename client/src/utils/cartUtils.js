@@ -104,7 +104,7 @@ export const buildWhatsAppMessage = ({ tipo = 'pedido', cliente, despacho, grupo
 
     const bloques = [];
 
-    bloques.push([`¡Hola Paola! *${subtitulo}*`]);
+    bloques.push([`¡Hola! *${subtitulo}*`]);
 
     const clienteLines = [];
     if (cliente?.nombre) clienteLines.push(`*Cliente:* ${cliente.nombre}`);
@@ -135,7 +135,7 @@ export const buildWhatsAppMessage = ({ tipo = 'pedido', cliente, despacho, grupo
         bloques.push(prodLines);
     }
 
-    // Promociones aplicadas: Paola tiene que ver POR QUÉ el total bajó, y qué
+    // Promociones aplicadas: El taller tiene que ver POR QUÉ el total bajó, y qué
     // regalo le prometió el sitio, o lo descubre recién al armar el pedido.
     if (descuentos && descuentos.length) {
         bloques.push(descuentos.map(d => `*${d.nombre}:* -${formatCurrency(d.monto)}`));

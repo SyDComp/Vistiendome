@@ -15,7 +15,7 @@
  *
  * Configuración global en ajustes (clave `promotions`), igual que los tramos
  * de precio. Nada hardcodeado: productos, cantidades, porcentaje y vigencia
- * son datos que Paola define desde el panel.
+ * son datos que el taller define desde el panel.
  */
 
 /** ¿La promoción está vigente hoy? Sin fechas, siempre lo está. */

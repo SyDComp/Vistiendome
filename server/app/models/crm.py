@@ -63,12 +63,12 @@ class ModoEntrega(str, Enum):
     equivocaba.
 
     OJO con "retiro en sucursal": ES UN DESPACHO. Starken se llevó la prenda del
-    local de Paola y la clienta la retira DE LA AGENCIA. Eso vive en
+    local del taller y la clienta la retira DE LA AGENCIA. Eso vive en
     `tipo_despacho`, que responde otra pregunta: a dónde la lleva el
     transportista.
     """
 
-    # La clienta viene al local de Paola. No hay transportista, no hay
+    # La clienta viene al local del taller. No hay transportista, no hay
     # dirección, y la prenda NO SALE hasta que ella la busca.
     RETIRO = "RETIRO"
 

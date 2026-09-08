@@ -169,10 +169,10 @@ const Contacto = () => {
             return;
         }
 
-        // Abrir WhatsApp de Paola con el resumen (sincrónico, dentro del gesto del usuario,
+        // Abrir WhatsApp del taller con el resumen (sincrónico, dentro del gesto del usuario,
         // para evitar bloqueo de pop-ups). Además se guarda en el CRM más abajo.
-        const numeroPaola = (social.whatsapp || '').replace(/\D/g, '');
-        if (numeroPaola) {
+        const numeroTaller = (social.whatsapp || '').replace(/\D/g, '');
+        if (numeroTaller) {
             const esGrupo = tipoContacto === 'grupo';
             const esRetiro = formData.transporte?.toUpperCase().includes('RETIRO');
             const mensajeWA = buildWhatsAppMessage({
@@ -189,7 +189,7 @@ const Contacto = () => {
                 grupo: esGrupo ? { tipo: formData.tipoGrupo, cantidad: formData.cantidad, evento: formData.evento } : undefined,
                 mensaje: formData.mensaje,
             });
-            const whatsappUrl = `https://wa.me/${numeroPaola}?text=${encodeURIComponent(mensajeWA)}`;
+            const whatsappUrl = `https://wa.me/${numeroTaller}?text=${encodeURIComponent(mensajeWA)}`;
             const isIOSOrIPad = /iPad|iPhone|iPod/i.test(navigator.userAgent) || 
                                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
                                 /Android/i.test(navigator.userAgent);
@@ -331,7 +331,7 @@ const Contacto = () => {
 
                     <form className="contact-form" onSubmit={handleSubmit}>
                         <div className="contact-form-body">
-                            <p className="form-intro">Déjanos tus datos y Paola te contactará a la brevedad.</p>
+                            <p className="form-intro">Déjanos tus datos y te contactaremos a la brevedad.</p>
                 <div className="form-group">
                     <label><User size={16} /> RUT *</label>
                     <input 
@@ -510,7 +510,7 @@ const Contacto = () => {
                                         )}
                                         {pr.propuestos && Object.keys(pr.propuestos).length > 0 && (
                                             <span className="prenda-propuesta">
-                                                A confirmar con Paola: {Object.keys(pr.propuestos).join(', ').toLowerCase()}
+                                                A confirmar con el taller: {Object.keys(pr.propuestos).join(', ').toLowerCase()}
                                             </span>
                                         )}
                                     </div>
@@ -546,7 +546,7 @@ const Contacto = () => {
                             </Button>
                             
                             {status === 'success' && (
-                                <div className="success-banner">¡Listo! Te abrimos WhatsApp para enviar tu solicitud a Paola. Si no se abrió, revisa que tu navegador permita ventanas emergentes.</div>
+                                <div className="success-banner">¡Listo! Te abrimos WhatsApp para enviar tu solicitud. Si no se abrió, revisa que tu navegador permita ventanas emergentes.</div>
                             )}
                         </div>
                     </form>

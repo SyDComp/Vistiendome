@@ -38,7 +38,18 @@
 .logo-vm__caja {
     background: var(--logo-tinta);
     color: var(--logo-papel);
-    padding: 0.02em 0.23em 0.08em;
+
+    /* El aire de arriba y el de abajo son el MISMO, y no porque estén afinados
+       a mano: la caja mide una eme de alto y el glifo se centra dentro con
+       flex. Antes decía `padding: 0.02em 0.23em 0.08em` — cuatro veces más
+       abajo que arriba, un número puesto a ojo — y se veía una franja negra de
+       más bajo la letra. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 1em;
+    padding: 0 0.23em;
+
     margin-left: 0.28em;
     margin-right: 0.03em;
 }

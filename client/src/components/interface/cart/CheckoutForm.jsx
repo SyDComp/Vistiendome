@@ -171,7 +171,7 @@ const CheckoutForm = ({ onClose }) => {
             productos: cart.map(item => ({
                 name: item.name,
                 // Si el precio de tramo (mayorista, iglesia) aplica, es el que
-                // realmente se le va a cobrar — Paola necesita verlo en el
+                // realmente se le va a cobrar — El taller necesita verlo en el
                 // mensaje, no el unitario que ya no corresponde.
                 variantLabel: item.tramoAplicado
                     ? `${item.variantLabel} · Precio ${item.tramoAplicado}`

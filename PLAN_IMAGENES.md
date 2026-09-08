@@ -116,7 +116,7 @@ Tres tamaños, elegidos por lo que la app **realmente muestra**:
 > existen, así que sumar un tamaño no reprocesa los demás. Verificado: 292
 > archivos (73 × 4) y segunda corrida en 0 bytes.
 
-El original **nunca se toca ni se borra**: es la copia maestra de Paola.
+El original **nunca se toca ni se borra**: es la copia maestra del taller.
 
 Formato: **WebP** para las derivadas (~30% menos que JPEG con calidad
 equivalente, soportado por todos los navegadores vigentes), conservando el
@@ -197,7 +197,7 @@ ningún lado.
 > ✅ **Hecho (2026-08-23).** Build de **5,4 MB → 2,3 MB**. Se borraron 73
 > archivos con gemelo probado en `server/media`; los **14 sin copia registrada**
 > (`LOGO.jpg`, `hero.png`, `temporales/`) y los 3 `DESCRIPCION.txt` con textos
-> comerciales de Paola **no se borraron**: quedaron en `_media_sin_registrar/`
+> comerciales del taller **no se borraron**: quedaron en `_media_sin_registrar/`
 > a la espera de decisión. `client/src/assets/` dejó de existir.
 >
 > `og-image.jpg` pesa 572 KB, alto para lo que es. No afecta la carga de la
@@ -223,7 +223,7 @@ lugar natural para que convivan los dos respaldos con la misma marca de tiempo.
 1. Módulo nuevo `server/app/core/imagenes.py` — una responsabilidad: dado un
    archivo, producir sus derivadas y devolver sus rutas. Sin tocar la BD.
    - Respetar la orientación EXIF (`ImageOps.exif_transpose`) o las fotos
-     verticales de Paola salen rotadas.
+     verticales del taller salen rotadas.
    - **No agrandar**: si el original mide menos que el objetivo, se omite ese
      tamaño (no inventar píxeles).
    - Guardar como `media/derivadas/{nombre}_{sm|md|lg}.webp`.
@@ -491,7 +491,7 @@ Se consideró que el cliente **dedujera** las derivadas por convención de nombr
 `generar_derivadas` **no agranda**, así que una foto chica no tiene `xl` ni
 `lg`. Un candidato inexistente dentro de un `srcSet` **no cae de vuelta al
 `src`**: rompe la imagen. La convención habría funcionado con las 73 fotos de
-hoy y habría fallado el día que Paola suba una foto chica.
+hoy y habría fallado el día que el taller suba una foto chica.
 
 El otro punto fino es **cuándo se pinta**. Si el `<img>` se pinta antes de
 conocer sus derivadas, el navegador ya arrancó a bajar el original y el srcset

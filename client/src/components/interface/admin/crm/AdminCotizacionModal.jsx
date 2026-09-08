@@ -3,6 +3,7 @@ import ArmadorDePrenda from '../../../ui/ArmadorDePrenda';
 import { describirEntrega } from '../../../../utils/entrega';
 import { X, Search, Plus, Trash2, Check, User, Package, MapPin, FileText, ShoppingBag, Send, AlertCircle, DollarSign } from 'lucide-react';
 import { getProducts } from '../../../../lib/api/endpoints/products.api';
+import { getAdminAttributes } from '../../../../lib/api/endpoints/admin.api';
 import { useNotification } from '../../../../context/NotificationContext';
 import Imagen from '../../../ui/Imagen';
 
@@ -90,11 +91,28 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
         }
     };
 
+    // El panel NO come de la mesa del publico.
+    //
+    // Antes esto pedia /products/filters-metadata, que es el endpoint publico y
+    // devuelve SOLO las caracteristicas marcadas como filtrables: en su propio
+    // panel se veian menos caracteristicas de las que existen, y una que no
+    // fuera filtrable no se podia usar para armar una pieza.
+    //
+    // El catalogo completo es dato privado y se pide por el endpoint privado,
+    // que exige permiso de administracion.
     const fetchAtributos = async () => {
         try {
-            const r = await fetch('/api/v1/products/filters-metadata');
-            const d = await r.json();
-            setAtributosCatalogo(d?.attributes || {});
+            const attrs = await getAdminAttributes();
+            const mapa = {};
+            (attrs || []).forEach(a => {
+                const valores = (a.domain || [])
+                    .slice()
+                    .sort((x, y) => (x?.order ?? 9999) - (y?.order ?? 9999))
+                    .map(o => (typeof o === 'string' ? o : o?.value))
+                    .filter(Boolean);
+                if (valores.length) mapa[a.name] = valores;
+            });
+            setAtributosCatalogo(mapa);
         } catch { /* sin esto la pieza se puede agregar igual, solo que sin caracteristicas */ }
     };
 
@@ -602,6 +620,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
 
                                 {mostrandoFormLibre && (
                                     <ArmadorDePrenda
+                                        contexto="panel"
                                         atributos={atributosCatalogo}
                                         onAgregar={handleAgregarPersonalizado}
                                         onCancelar={() => setMostrandoFormLibre(false)}

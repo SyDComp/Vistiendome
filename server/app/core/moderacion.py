@@ -2,7 +2,7 @@
 Filtrar lo que un cliente escribe antes de que llegue al catálogo.
 
 Esto existe porque el texto lo escribe cualquiera desde internet. Una opción
-propuesta va a parar a la bandeja de Paola y, si se aprueba, al catálogo que ve
+propuesta va a parar a la bandeja del taller y, si se aprueba, al catálogo que ve
 todo el mundo. Hay dos formas de ensuciarlo, y son distintas:
 
   · A PROPÓSITO  "color caca", insultos, propaganda. Se rechaza en el momento:
@@ -17,7 +17,7 @@ de las reglas del negocio, porque quién decide qué es ofensivo es la clienta y
 no nosotros. Acá sólo hay un mínimo razonable por si nadie configuró nada.
 
 Y aun con filtro, la red de seguridad de verdad es que NADA propuesto se
-publica solo: Paola aprueba una por una.
+publica solo: El taller aprueba una por una.
 """
 
 import re

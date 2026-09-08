@@ -1,18 +1,18 @@
 """
-Las opciones que proponen los clientes, y qué hace Paola con ellas.
+Las opciones que proponen los clientes, y qué hace el taller con ellas.
 
 Dos públicos distintos:
 
   · el cliente, al armar su prenda, necesita saber en el momento si lo que
     escribió sirve — que no sea una grosería, que no sea un tipeo de un color
     que ya existe. Eso es `POST /propuestas/revisar`, y es público.
-  · Paola necesita verlas agrupadas, saber cuántas se la pidieron, y aprobar o
+  · El taller necesita verlas agrupadas, saber cuántas se la pidieron, y aprobar o
     rechazar. Eso es el resto, y va con permiso de administración.
 """
 
 from typing import Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlmodel import Session, select
 
@@ -24,16 +24,26 @@ from ...models.propuestas import OpcionPropuesta, EstadoPropuesta
 from ...models.settings import SiteSetting
 from ...core import propuestas as core
 from ...core import moderacion
+from ...core.limites import VentanaDeslizante
 from ..deps import RequirePermiso
 
 router = APIRouter()
 
 _ADMIN = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))
 
+# `revisar` es el único endpoint de este módulo sin sesión: quien está armando su
+# prenda todavía no se identificó. Abierto y sin tope, cada revisión abre la base
+# y compara texto contra todo el dominio de una característica, así que se le
+# pone un techo por IP.
+#
+# 30 por minuto es holgado para una persona escribiendo —una revisión por campo,
+# al salir del campo— y estrecho para un script.
+_LIMITE_REVISAR = VentanaDeslizante(maximo=30, ventana_seg=60)
+
 
 def _bloqueadas(db: Session) -> Optional[List[str]]:
     """
-    Los términos que Paola no quiere ver, desde ajustes.
+    Los términos que el taller no quiere ver, desde ajustes.
 
     Si nunca configuró nada se devuelve None y el filtro usa su mínimo por
     defecto: es preferible filtrar de más que dejar el catálogo abierto.
@@ -54,7 +64,7 @@ def _campos_faltantes(caracteristica: Optional[Characteristic]) -> List[dict]:
     image_url}. El cliente sólo escribió el `value` —es lo único que puede
     escribir— así que el resto queda pendiente.
 
-    Se devuelven para que el panel se los pida a Paola en el momento de
+    Se devuelven para que el panel se los pida al taller en el momento de
     aprobar. Aprobar sin ellos dejaría un color sin color.
     """
     if not caracteristica:
@@ -86,13 +96,16 @@ class RevisionSalida(BaseModel):
 
 
 @router.post("/revisar", response_model=RevisionSalida)
-def revisar_valor(data: RevisionEntrada, db: Session = Depends(get_session)):
+def revisar_valor(data: RevisionEntrada, request: Request, db: Session = Depends(get_session)):
     """
     ¿Sirve lo que el cliente acaba de escribir?
 
     Se responde en el momento y en su idioma, no con un código de error: la
     persona está pidiendo una prenda, no rellenando un formulario técnico.
     """
+    if not _LIMITE_REVISAR.permite(request.client.host if request.client else "?"):
+        raise HTTPException(status_code=429, detail="Demasiadas revisiones seguidas. Espera un momento.")
+
     caracteristica = db.exec(
         select(Characteristic).where(Characteristic.name == data.caracteristica)
     ).first()
@@ -118,12 +131,12 @@ def revisar_valor(data: RevisionEntrada, db: Session = Depends(get_session)):
         "ofensivo": "Ese texto no lo podemos aceptar. Escribe el nombre de la opción que necesitas.",
         "muy_corto": "Escribe el nombre completo de la opción.",
         "parecido": f"¿Quisiste decir «{sugerencia}»? Si es otra cosa, puedes dejarla como la escribiste.",
-        "ok": "Lo tendremos en cuenta. Paola la revisará antes de confirmar tu pedido.",
+        "ok": "Lo tendremos en cuenta: se revisa antes de confirmar el pedido.",
     }
     return RevisionSalida(veredicto=veredicto, sugerencia=sugerencia, mensaje=mensajes[veredicto])
 
 
-# ── Para Paola, en el panel ──────────────────────────────────────────────────
+# ── Para el taller, en el panel ──────────────────────────────────────────────────
 
 class Proponente(BaseModel):
     persona_id: Optional[str] = None
@@ -144,7 +157,7 @@ class PropuestaAgrupada(BaseModel):
 
     Agrupada y no fila por fila porque la decisión es sobre la opción, no sobre
     cada vez que alguien la pidió: si tres clientas quieren "Turquesa Perla",
-    Paola aprueba el color una vez, no tres.
+    El taller aprueba el color una vez, no tres.
     """
     caracteristica: str
     attribute_id: int
@@ -157,7 +170,7 @@ class PropuestaAgrupada(BaseModel):
     # Las características del sistema traen opciones con estructura: un COLOR
     # lleva su código hex, un ESTAMPADO su imagen. El cliente no puede darlos
     # —sólo escribió un nombre— así que quedan pendientes y hay que pedírselos
-    # a Paola AL APROBAR. Sin esto, la opción entraría al catálogo sin su color
+    # al taller AL APROBAR. Sin esto, la opción entraría al catálogo sin su color
     # real y se pintaría gris en toda la tienda.
     es_del_sistema: bool = False
     campos_faltantes: List[CampoFaltante] = []
@@ -172,7 +185,7 @@ def listar(
     """
     Las propuestas, agrupadas por valor y ordenadas por las más pedidas.
 
-    El orden no es cronológico a propósito: lo que le sirve a Paola para decidir
+    El orden no es cronológico a propósito: lo que le sirve al taller para decidir
     es cuántas personas quieren lo mismo, no cuál llegó primero.
     """
     consulta = select(OpcionPropuesta)
@@ -231,7 +244,7 @@ class ResolucionEntrada(BaseModel):
 @router.post("/aprobar")
 def aprobar(data: ResolucionEntrada, db: Session = Depends(get_session), admin: CuentaAcceso = _ADMIN):
     """
-    La opción pasa al catálogo como una opción de Paola.
+    La opción pasa al catálogo como una opción del taller.
 
     Desde acá deja de ser "propuesta": queda en el `domain` de su característica
     con `is_system: false`, exactamente igual que las que ella crea a mano. No

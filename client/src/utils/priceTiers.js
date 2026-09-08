@@ -1,5 +1,5 @@
 /**
- * Tramos de precio por cantidad (mayorista, iglesia, los que Paola defina).
+ * Tramos de precio por cantidad (mayorista, iglesia, los que el taller defina).
  *
  * El precio no depende de quién dice ser el cliente sino de qué compra: si
  * lleva N unidades del mismo producto y todas las tallas caen dentro del rango

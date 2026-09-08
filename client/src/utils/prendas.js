@@ -34,7 +34,7 @@
 // Existe porque quien lee necesita la talla siempre en el mismo lugar: si el
 // orden cambia entre un producto y otro, hay que volver a leer el encabezado
 // cada vez.
-// Lo correcto a futuro es un campo `orden` en la característica, que Paola
+// Lo correcto a futuro es un campo `orden` en la característica, que el taller
 // arrastre desde el panel; mientras no exista, esto es la aproximación.
 const PRIMERAS = ['talla', 'color', 'estampado'];
 

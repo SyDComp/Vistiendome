@@ -672,7 +672,7 @@ export const RecentProductsBlock = ({ previewMode = false }) => {
 /**
  * Un video de YouTube como bloque de portada.
  *
- * Existe para que Paola decida DÓNDE va el video, con el mismo editor con el
+ * Existe para que el taller decida DÓNDE va el video, con el mismo editor con el
  * que ya ordena los demás bloques, en vez de que nosotros inventemos un lugar
  * fijo en el diseño.
  *

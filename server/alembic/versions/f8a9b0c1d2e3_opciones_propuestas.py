@@ -4,7 +4,7 @@ Revision ID: f8a9b0c1d2e3
 Revises: e7f8a9b0c1d2
 
 Una opcion de una caracteristica puede venir de tres lados y hay que
-distinguirlos: del sistema, creada por Paola, o PROPUESTA por un cliente.
+distinguirlos: del sistema, creada por el taller, o PROPUESTA por un cliente.
 
 Las dos primeras ya se distinguen dentro del `domain` de la caracteristica
 (is_system true/false). La tercera no existia.

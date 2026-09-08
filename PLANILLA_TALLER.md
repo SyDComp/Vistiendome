@@ -1,6 +1,6 @@
 # La planilla del taller — qué copiamos del papel y qué cambiamos
 
-> Referencia: la planilla que Paola usa hoy, en papel. Foto del 2026-08-31.
+> Referencia: la planilla que el taller usa hoy, en papel. Foto del 2026-08-31.
 > No se hizo una réplica: se tomó lo que el papel hace bien y se corrigió lo
 > que hace mal.
 
@@ -56,7 +56,7 @@ cuando hay una excepción.
 ## Quién decide qué columnas salen
 
 Las columnas salen de los datos, pero **cuáles de esas salen impresas lo decide
-Paola**, característica por característica, con la propiedad
+El taller**, característica por característica, con la propiedad
 **"Sale en la orden de corte"** (Catálogo › Características).
 
 La costurera necesita talla y color; el material o el tipo de cuello pueden
@@ -162,7 +162,7 @@ impresión) y la planilla/comprobante de pedido.
   material; a la costurera quizá no).
 - **El orden de las columnas** usa una lista corta (talla, color, estampado
   primero). Es sólo presentación, pero lo correcto es un campo `orden` en la
-  característica que Paola arrastre desde el panel. Hoy ese campo no existe.
+  característica que el taller arrastre desde el panel. Hoy ese campo no existe.
 - **Vista por clienta de una orden de corte de grupo.** Si una orden junta
   piezas de varias clientas, hoy se agrupa por modelo (para cortar). Falta el
   otro corte —por clienta— para armar los paquetes. Es la vista que el papel ya

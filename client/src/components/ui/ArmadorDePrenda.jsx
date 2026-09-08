@@ -23,7 +23,22 @@ import { Plus, X, Sliders } from 'lucide-react';
 
 const OTRO = '__OTRO__';
 
-const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true, textoBoton = "Agregar al pedido", onAgregar, onCancelar }) => {
+// El mismo armador se usa en dos lados y NO lo lee la misma persona: en la web
+// es la clienta pidiendo su prenda, en el panel es el taller armando el pedido.
+// Decirle a quien aprueba que "revisaremos su propuesta" no tiene sentido.
+//
+// El servidor decide SI el valor sirve; cómo se le cuenta eso a cada uno es
+// decision de la pantalla, que es la unica que sabe quien esta mirando.
+const TEXTOS_POR_PUBLICO = {
+    publico: {
+        ok: 'Lo tendremos en cuenta: revisaremos esta opción antes de confirmar tu pedido.',
+    },
+    panel: {
+        ok: 'Es una opción nueva: queda registrada como propuesta para aprobarla después.',
+    },
+};
+
+const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true, textoBoton = "Agregar al pedido", contexto = 'publico', onAgregar, onCancelar }) => {
     const [prenda, setPrenda] = useState('');
     const [prendaLibre, setPrendaLibre] = useState('');
     const [precio, setPrecio] = useState('');
@@ -290,7 +305,8 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
                                             color: revisiones[clave].veredicto === 'ofensivo' ? '#dc2626'
                                                  : revisiones[clave].veredicto === 'ok' ? '#15803d' : '#a16207',
                                         }}>
-                                            {revisiones[clave].mensaje}
+                                            {TEXTOS_POR_PUBLICO[contexto]?.[revisiones[clave].veredicto]
+                                                || revisiones[clave].mensaje}
                                             {revisiones[clave].sugerencia && (
                                                 <button type="button"
                                                     onClick={() => aceptarSugerencia(clave, revisiones[clave].sugerencia)}

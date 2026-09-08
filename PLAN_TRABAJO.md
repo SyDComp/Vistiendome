@@ -12,7 +12,7 @@
 ### A · Afecta la venta hoy
 | # | Qué | De quién depende |
 |---|---|---|
-| A1 | 253 variantes de *Tapado Magdalena Verano* sin precio → la tienda muestra "Consultar" (verificado 2026-08-31: siguen en $0) | **Paola** (cargar precios; la herramienta ya está en Producción › Sin precio) |
+| A1 | 253 variantes de *Tapado Magdalena Verano* sin precio → la tienda muestra "Consultar" (verificado 2026-08-31: siguen en $0) | **el taller** (cargar precios; la herramienta ya está en Producción › Sin precio) |
 | A2 | ~~El Explorador explota cuando una variante no tiene imagen~~ | ✅ **Resuelto** (verificado 2026-08-31): el colapso por look ya no depende de que la variante tenga foto propia. El Explorador genera **60 tarjetas, una por color**; *Tapado Magdalena Verano* da 23 y no 299, teniendo 253 variantes sin foto |
 | A3 | El catálogo descarga 278 KB con 4 productos; escala con variantes (multiplicativo) | Nosotros — estrategia de looks |
 
@@ -20,11 +20,11 @@
 | # | Qué | Estado |
 |---|---|---|
 | B1 | Precio mayorista (6+ unidades) | ✅ Hecho — construido, conectado al carrito y verificado en el navegador |
-| B2 | Planilla de pedido / orden de corte | ✅ Hecho — decidido con criterio propio (ver detalle abajo), no bloqueó en Paola |
+| B2 | Planilla de pedido / orden de corte | ✅ Hecho — decidido con criterio propio (ver detalle abajo), no bloqueó en el taller |
 | B3 | Comprobante de compra sin precios | ✅ Hecho — misma pieza que B2, modo `?modo=cliente` sin precios |
-| B4 | Stock real (opción B, decidida) | ✅ Hecho — gancho de venta + columna muerta eliminada. Valores reales: **pendiente que Paola haga su pasada de ajuste** (no bloquea, se cambia libre desde el panel) |
+| B4 | Stock real (opción B, decidida) | ✅ Hecho — gancho de venta + columna muerta eliminada. Valores reales: **pendiente que el taller haga su pasada de ajuste** (no bloquea, se cambia libre desde el panel) |
 | B5 | Promociones / regalos condicionales | ✅ Hecho — decidido automático en la web (ver abajo), configurable desde Ajustes |
-| B6 | Video | ✅ **Cerrado** (2026-08-31). Sólo YouTube, decidido con criterio: Facebook e Instagram exigen su SDK y rompen los embeds seguido. Si Paola publica ahí, que suba el mismo video a YouTube **como "no listado"** — no aparece en búsquedas y da un embed que no se rompe. Se carga **con fachada** (miniatura + play; YouTube se descarga recién al hacer clic) y hay un **bloque de video en el CMS**, así ella decide dónde va en la portada |
+| B6 | Video | ✅ **Cerrado** (2026-08-31). Sólo YouTube, decidido con criterio: Facebook e Instagram exigen su SDK y rompen los embeds seguido. Si el taller publica ahí, que suba el mismo video a YouTube **como "no listado"** — no aparece en búsquedas y da un embed que no se rompe. Se carga **con fachada** (miniatura + play; YouTube se descarga recién al hacer clic) y hay un **bloque de video en el CMS**, así ella decide dónde va en la portada |
 
 ### C · Mejoras internas (pueden esperar)
 | # | Qué |
@@ -42,7 +42,7 @@
 
 | # | Qué | Notas |
 |---|---|---|
-| D1 | **Pantalla de bienvenida del administrador** — el típico paso a paso con botón "Siguiente", explicando las cosas la primera vez que Paola entra | Va justo antes de entregar, cuando ya no cambie nada de lo que habría que explicar |
+| D1 | **Pantalla de bienvenida del administrador** — el típico paso a paso con botón "Siguiente", explicando las cosas la primera vez que el taller entra | Va justo antes de entregar, cuando ya no cambie nada de lo que habría que explicar |
 | D2 | **Qué datos sobreviven a la entrega** | Ver abajo — es más grande de lo que parece |
 
 #### D3 — Los métodos de envío son texto libre, escrito de tres formas
@@ -60,7 +60,7 @@ reescriba.
 
 Cuando haga falta que el sistema distinga un retiro en local de un despacho —
 por ejemplo para no marcarlo como despachado al imprimir la etiqueta— **la forma
-correcta no es leer el nombre**, sino que Paola marque qué métodos son retiro,
+correcta no es leer el nombre**, sino que el taller marque qué métodos son retiro,
 igual que marca qué características salen en la orden de corte. La clienta
 declara, el sistema no adivina.
 
@@ -92,7 +92,7 @@ esos scripts, primero hay que arreglarlos o reescribirlos.
 
 ---
 
-**Siguiente paso:** bloque C (mejoras internas) y el scroll infinito de A3, ambos opcionales. **Todo el bloque A y B está cerrado** salvo B6, que solo espera confirmación de Paola sobre embebido vs. link.
+**Siguiente paso:** bloque C (mejoras internas) y el scroll infinito de A3, ambos opcionales. **Todo el bloque A y B está cerrado** salvo B6, que solo espera confirmación del taller sobre embebido vs. link.
 
 ### C5 — Análisis de rendimiento (2026-08-23)
 
@@ -131,7 +131,7 @@ Lo que eso significa para la clienta, según su conexión:
 | Paginación | Sí (`page_size=20`) — no trae los 1.049 SKUs |
 | Peso del bundle | 734 KB / **196 KB comprimido**, en un solo trozo |
 
-El bundle se carga de forma diferida, así que **la clienta pública no lo paga**; lo paga Paola en su primera visita. No es urgente.
+El bundle se carga de forma diferida, así que **la clienta pública no lo paga**; lo paga el taller en su primera visita. No es urgente.
 
 **Sí apareció un defecto real:** el admin **duplica su petición de listado** en las dos páginas revisadas (productos y variantes: `?page=1&page_size=20` dos veces). Es el mismo problema de C1, pero el admin usa su propia capa de fetch y no pasa por la deduplicación que se agregó ahí.
 
@@ -144,11 +144,11 @@ El bundle se carga de forma diferida, así que **la clienta pública no lo paga*
 2. **Carga diferida** — barato en beneficio, pero requiere unificar los 42 `<img>` bajo `PremiumImage` primero.
 3. **`Cache-Control` en `/media`** — hoy sólo hay `etag`/`last-modified`, así que el navegador revalida en cada visita en vez de servir de caché sin preguntar.
 4. **Deduplicar el fetch del admin** — mismo arreglo que C1, en la otra capa.
-5. Partir el bundle del admin — lo último; sólo afecta a Paola, una vez.
+5. Partir el bundle del admin — lo último; sólo afecta al taller, una vez.
 
 ### B5 — decisión tomada (2026-08-23)
 
-**Automático en la web, no manual al armar el pedido.** Razón: la mayoría de las compras entran solas por el checkout, donde nadie arma nada a mano — un sistema manual solo cubriría los pedidos que Paola crea ella misma, y la obligaría a acordarse de la regla en cada uno, para siempre. Automático se configura una vez y no se vuelve a tocar.
+**Automático en la web, no manual al armar el pedido.** Razón: la mayoría de las compras entran solas por el checkout, donde nadie arma nada a mano — un sistema manual solo cubriría los pedidos que el taller crea ella misma, y la obligaría a acordarse de la regla en cada uno, para siempre. Automático se configura una vez y no se vuelve a tocar.
 
 **"Lleva X paga Y" y "descuento en la segunda unidad" son la misma regla**, no dos: por cada `lleva` unidades, las (`lleva` − `paga`) más baratas reciben `descuento`%. Con 100% la unidad va gratis (3x2 clásico); con 50% queda a mitad de precio. Por eso hay un solo tipo, escrito en las palabras que ella usa. El regalo sí es un tipo aparte, porque agrega en vez de descontar.
 
@@ -160,9 +160,9 @@ Configuración global en `SiteSetting` clave `promotions` (mismo patrón que `pr
 
 Construido el gancho de venta y eliminada la columna muerta `SKU.stock` (migración `d0e1f2a3b4c5`). Al cerrar una `Cotizacion` en `CERRADA_EXITO` se crea un `StockMovement` tipo `SALE` por cada ítem con SKU real; al reabrirla se revierte. Idempotente vía el campo `reference_id` que `StockMovement` ya tenía (no hizo falta columna nueva) — usa `cotizacion_item.id`, así que cerrar/reabrir/cerrar no descuenta dos veces. Verificado el ciclo completo en la base real.
 
-**Valores reales de stock:** por indicación explícita, no se bloqueó en que Paola hiciera antes su pasada de ajuste. Se dejaron 3 variantes con valores de prueba (200, 200, 5) para poder verificar el flujo; el resto del catálogo sigue en 0 por defecto (sin movimientos) — así queda hasta que ella cargue los números reales, algo que puede hacer en cualquier momento desde el panel sin tocar código.
+**Valores reales de stock:** por indicación explícita, no se bloqueó en que el taller hiciera antes su pasada de ajuste. Se dejaron 3 variantes con valores de prueba (200, 200, 5) para poder verificar el flujo; el resto del catálogo sigue en 0 por defecto (sin movimientos) — así queda hasta que ella cargue los números reales, algo que puede hacer en cualquier momento desde el panel sin tocar código.
 
-### B2/B3 — decisión tomada (sin bloquear en Paola)
+### B2/B3 — decisión tomada (sin bloquear en el taller)
 
 **Qué se construyó:** `cortado: bool` en `CotizacionItem` (no en `Cotizacion` — una cotización puede tener piezas ya cortadas y otras no; es un eje distinto al estado de venta NUEVA/EN_PROCESO/CERRADA). "Orden de corte" no es una entidad nueva: es `GET /api/v1/crm/orden-corte`, una consulta filtrable (pendiente/estado/fecha) sobre `CotizacionItem`, con un checkbox por fila que llama a `PUT /crm/items/{id}/cortado`. La planilla y el comprobante son la misma página (`PedidoDetalle.jsx`, ruta `/admin/print/pedido/:id`), un query param `?modo=taller|cliente` decide si se muestran precios.
 
@@ -277,7 +277,7 @@ Referencia de alcance original: [propuesta_vistiendome.md](propuesta_vistiendome
 | `[A]` Ajuste sin costo | Nuevo pero mínimo | Se regala, **pero se le dice que se regaló** — trabajo gratis que nadie sabe que fue gratis no vale nada |
 | `[N]` Desarrollo nuevo | Alcance nuevo real | Lleva plazo y valor. **No se empieza sin aprobación** |
 
-**Decisión de Allan (2026-08-10):** todos los `[N]` de la Fase 3 se hacen **gratis**, con una condición explícita — **con esto se cierra el alcance de esta ronda.** Falta comunicárselo a Paola por escrito con esos mismos términos (gratis + cierre de alcance), no solo de palabra, para que la decisión quede protegida de cara al futuro.
+**Decisión de Allan (2026-08-10):** todos los `[N]` de la Fase 3 se hacen **gratis**, con una condición explícita — **con esto se cierra el alcance de esta ronda.** Falta comunicárselo al taller por escrito con esos mismos términos (gratis + cierre de alcance), no solo de palabra, para que la decisión quede protegida de cara al futuro.
 
 ---
 
@@ -286,7 +286,7 @@ Referencia de alcance original: [propuesta_vistiendome.md](propuesta_vistiendome
 | # | Pregunta | Bloquea | Estado |
 |---|---|---|---|
 | 1 | ~~"Cómo voy a ingresar? Que aparezca como el modal"~~ | 3.1 | ✅ **Resuelta.** No es el `WelcomeModal` — Allan aclaró que es un selector de modo tipo "menú de videojuego" (mayorista/particular/iglesia) al entrar. Se descartó: como el precio real lo decide la cantidad (6+ unidades), un selector que no otorga nada solo agrega fricción en la entrada. Se reemplaza por **precio dual visible en el producto** (ver 3.1) |
-| 2 | ~~Videos: ¿embebido o enlace?~~ | 2.2 | ⚠️ **Implementado con decisión propia, sin confirmar con Paola.** Se eligió embebido + a nivel producto (la pista "ver video de vestido tanto" apuntaba a eso). Si prefería solo link o a nivel colección, avisar para ajustar — es un cambio chico |
+| 2 | ~~Videos: ¿embebido o enlace?~~ | 2.2 | ⚠️ **Implementado con decisión propia, sin confirmar con el taller.** Se eligió embebido + a nivel producto (la pista "ver video de vestido tanto" apuntaba a eso). Si prefería solo link o a nivel colección, avisar para ajustar — es un cambio chico |
 | 3 | **Planilla modificable: ¿qué campos y quién puede editarla?** | 3.2 | Abierta |
 | 4 | ~~Precio mayorista: ¿por variante o por producto?~~ | 3.1 | ✅ **Resuelta.** Es a nivel **variante** (confirmado) — coincide con cómo ya funciona el resto del sistema de precios (`compute_effective_price`) |
 | 5 | ~~Mostrarle el comprobante que YA existe~~ | 2.4 | ❌ **Corrección, no resuelta.** Se verificó el código a fondo: `ShippingLabelPrinter` es una etiqueta de **envío** (destinatario, dirección, transporte), no lista los productos comprados. El comprobante de compra sin precios **no existe**, es trabajo nuevo real (ver 2.4) |
@@ -387,7 +387,7 @@ Estado verificado del modelo (mejor de lo esperado):
 
 **Fuera de alcance:** `MovementType.RESERVATION` ("checkout iniciado"). Si todo se cierra por WhatsApp, reservar al iniciar checkout agrega complejidad sin beneficio.
 
-> ⚠️ **Tarea operativa para la clienta, NO es código.** El stock hoy solo ha subido, nunca bajado: **ninguna venta histórica está reflejada.** Antes de encender el descuento, Paola debe hacer una pasada de ajuste con las cantidades reales. Si no, el libro arranca cuadrado sobre una línea base falsa.
+> ⚠️ **Tarea operativa para la clienta, NO es código.** El stock hoy solo ha subido, nunca bajado: **ninguna venta histórica está reflejada.** Antes de encender el descuento, el taller debe hacer una pasada de ajuste con las cantidades reales. Si no, el libro arranca cuadrado sobre una línea base falsa.
 
 > 🔑 **Encender el libro ≠ encender el bloqueo.** Son dos decisiones separadas. El stock se registra y se ve, pero **la tienda sigue sin bloquear la compra por stock 0**, tal como está hoy. Razones: venden a pedido, la línea base será imperfecta los primeros meses, y bloquear ventas con datos malos es el peor resultado posible. El stock puede irse a negativo — un negativo es información útil ("vendimos 3 más de los cargados"), no un error.
 

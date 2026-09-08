@@ -251,11 +251,31 @@ export const useProductDetail = (initialProduct) => {
 
     const handleJumpToSKU = useCallback((config) => {
         setSelections(prev => {
+            // Una foto muestra un COLOR, un estampado, un largo. No muestra una
+            // talla: la misma prenda en 2XL se ve igual en la foto.
+            //
+            // Antes esto copiaba la config ENTERA del SKU de la foto, así que
+            // elegir talla XL y después mirar otra foto devolvía la talla a la
+            // de esa variante. Reportado por QA: "al cambiarme desde abajo, la
+            // talla cambia".
+            //
+            // Ahora la talla elegida se conserva SIEMPRE que esa combinación
+            // exista; si el color de la foto no viene en esa talla, no hay nada
+            // que conservar y se toma la de la foto.
             const next = { ...prev };
             Object.entries(config).forEach(([k, v]) => { next[k] = v; });
-            return next;
+
+            const claveTalla = Object.keys(prev).find(k => /talla|size|medida/i.test(k));
+            const tallaElegida = claveTalla ? prev[claveTalla] : null;
+            if (!tallaElegida || next[claveTalla] === tallaElegida) return next;
+
+            const conSuTalla = { ...next, [claveTalla]: tallaElegida };
+            const existe = skusNormalizados.some(sk =>
+                Object.entries(conSuTalla).every(([k, v]) => sk.config[k] === v)
+            );
+            return existe ? conSuTalla : next;
         });
-    }, []);
+    }, [skusNormalizados]);
 
     // Ultimo ajuste automatico de la seleccion, para poder explicarlo en pantalla.
     const [ultimoAjuste, setUltimoAjuste] = useState(null);

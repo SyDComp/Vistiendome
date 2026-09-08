@@ -101,13 +101,13 @@ def aprobar(
     extras: Optional[Dict[str, str]] = None,
 ) -> Optional[dict]:
     """
-    Sube la opción al catálogo como una opción normal de Paola.
+    Sube la opción al catálogo como una opción normal del taller.
 
     Recibe TODAS las filas del mismo valor: aprobar "Turquesa Perla" resuelve de
     una vez las tres veces que la pidieron, no la primera.
 
     La opción entra al `domain` con `is_system: false`, que es como quedan las
-    que crea Paola a mano — desde el momento en que se aprueba, deja de ser
+    que crea el taller a mano — desde el momento en que se aprueba, deja de ser
     "propuesta" y es una opción suya, sin distinción.
 
     Los pedidos que la originaron NO se tocan: son contratos y dicen lo que
@@ -132,7 +132,7 @@ def aprobar(
             "is_system": False,
         }
         # Los datos que el cliente no podía dar —el hex de un color, la imagen
-        # de un estampado— y que Paola completa al aprobar. Sin ellos, una
+        # de un estampado— y que el taller completa al aprobar. Sin ellos, una
         # opción de una característica del sistema entra incompleta y se ve mal
         # en toda la tienda.
         for k, v in (extras or {}).items():

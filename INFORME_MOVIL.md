@@ -25,7 +25,7 @@ Recorrido completo: portada → catálogo → ficha de producto → selector de 
 |---|---|
 | **Medido** | `welcome-modal-overlay` z-index **4000** vs `variant-drawer-overlay` z-index **2000**. `elementFromPoint` en el centro de la pantalla devuelve `welcome-modal__text` |
 | **Impacto** | La clienta toca "elegir talla", el selector abre **detrás** del modal y no puede seleccionar |
-| **Por qué importa** | Pasa en la ficha de producto — justo donde caen las clientas que entran por los links que Paola comparte por WhatsApp, su canal principal |
+| **Por qué importa** | Pasa en la ficha de producto — justo donde caen las clientas que entran por los links que el taller comparte por WhatsApp, su canal principal |
 
 ### 2. iOS hace zoom automático en el checkout
 
@@ -67,4 +67,4 @@ En la ficha, el bloque SKU ocupa **dos líneas completas** justo encima del prec
 
 **Medido:** portada, catálogo, ficha de producto, selector de variantes, carrito, checkout — a 375px, con datos reales.
 
-**NO medido (queda pendiente):** dispositivo físico real, redes lentas (3G), tablet, las vistas de colecciones/contacto/nosotros, y **todo el panel de administración** — que es donde Paola trabaja a diario y merece su propio recorrido.
+**NO medido (queda pendiente):** dispositivo físico real, redes lentas (3G), tablet, las vistas de colecciones/contacto/nosotros, y **todo el panel de administración** — que es donde el taller trabaja a diario y merece su propio recorrido.

@@ -7,19 +7,19 @@ lados, y hay que poder distinguirlos:
 
   · del sistema   las que trae la plataforma. En el `domain` de la
                   característica van con `is_system: true`.
-  · de la clienta las que crea Paola desde el panel. Van en el mismo `domain`
+  · de la clienta las que crea el taller desde el panel. Van en el mismo `domain`
                   con `is_system: false`.
   · propuesta     la que pide un cliente y todavía NO existe en el catálogo.
-                  Vive acá, fuera del `domain`, hasta que Paola la apruebe.
+                  Vive acá, fuera del `domain`, hasta que el taller la apruebe.
 
 QUIÉN puede crear QUÉ
-Paola crea las características que quiera y las opciones que quiera. El cliente
+El taller crea las características que quiera y las opciones que quiera. El cliente
 NO crea características: sólo puede proponer una opción dentro de una que ya
 existe. Por eso esta tabla apunta siempre a un `attribute` existente.
 
 POR QUÉ UNA FILA POR PROPUESTA Y NO UNA MARCA EN LA OPCIÓN
 Si tres clientas piden "Turquesa Perla", la opción es UNA y las proponentes son
-TRES. Esa cuenta es la señal que necesita Paola para decidir si vale la pena
+TRES. Esa cuenta es la señal que necesita el taller para decidir si vale la pena
 crear el color: con una marca sí/no se pierde.
 
 Y guardado dentro del JSON del `domain` no habría relación real con la persona
@@ -27,8 +27,8 @@ ni con el pedido —ni forma cómoda de contar—, así que va en su propia tabl
 una fila por cada vez que alguien la propone, agrupables por valor.
 
 QUÉ PASA AL APROBAR
-La opción se agrega al `domain` de su característica como una opción normal de
-Paola (`is_system: false`) y estas filas quedan como historial: quién la pidió
+La opción se agrega al `domain` de su característica como una opción normal
+del taller (`is_system: false`) y estas filas quedan como historial: quién la pidió
 primero y cuántos la pidieron. El pedido que la originó no se toca — es un
 contrato y dice lo que decía cuando se firmó.
 """
@@ -46,7 +46,7 @@ def generate_ulid() -> str:
 
 
 class EstadoPropuesta(str, Enum):
-    # Esperando que Paola la mire.
+    # Esperando que el taller la mire.
     PENDIENTE = "PENDIENTE"
     # Aprobada: ya existe como opción en el `domain` de la característica.
     APROBADA = "APROBADA"

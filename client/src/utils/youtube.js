@@ -1,4 +1,4 @@
-// Acepta watch?v=, youtu.be/, shorts/ y embed/ — cualquier link que Paola
+// Acepta watch?v=, youtu.be/, shorts/ y embed/ — cualquier link que el taller
 // pegue tal cual desde el navegador o la app de YouTube.
 const YOUTUBE_ID_PATTERN = /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
 
