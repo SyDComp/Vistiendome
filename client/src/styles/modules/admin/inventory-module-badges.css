@@ -62,10 +62,16 @@
 .type-badge.accesorio { background: #fdf4ff; color: #9333ea; }
 .type-badge.default { background: #f1f5f9; color: #64748b; }
 
+/* UNA PILDORA NO PARTE SU TEXTO
+   Era un `span` en linea sin `white-space`, asi que en cuanto la columna
+   apretaba, "2399 und." se partia en dos lineas dentro de la pildora y se veia
+   rota. Con `nowrap` el texto se mantiene entero y la pildora crece con el. */
 .stock-badge {
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 12px;
+    display: inline-block;
+    white-space: nowrap;
+    padding: 0.1875rem 0.625rem;
+    border-radius: 1.25rem;
+    font-size: 0.75rem;
     font-weight: 700;
 }
 .stock-badge.empty { background: #fef2f2; color: #ef4444; }
@@ -106,11 +112,14 @@
 .admin-product-name.parent { font-weight: 600; color: #64748b; }
 .admin-product-price { font-weight: 800; color: #16a34a; }
 
+/* Misma razon que `.stock-badge`: "2399 und." se partia en dos lineas. */
 .admin-stock-val {
+    display: inline-block;
+    white-space: nowrap;
     font-weight: 800;
-    padding: 4px 10px;
-    border-radius: 8px;
-    font-size: 12px;
+    padding: 0.25rem 0.625rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
 }
 .admin-stock-val.positive { color: #1e1b4b; background: #f1f5f9; }
 .admin-stock-val.negative { color: #ef4444; background: #fef2f2; }
