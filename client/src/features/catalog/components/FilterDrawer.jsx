@@ -90,7 +90,7 @@ const FilterDrawer = ({
         const hasChildren = cat.children && cat.children.length > 0;
 
         return (
-            <div key={categoryKey} style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+            <div key={categoryKey} className="fd-columna">
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -148,7 +148,7 @@ const FilterDrawer = ({
                     )}
                 </div>
                 {hasChildren && expandedCategories[categoryKey] && (
-                    <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                    <div className="fd-columna">
                         <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -210,7 +210,7 @@ const FilterDrawer = ({
 
                 <div className="filter-drawer-content">
                     {hideSpecs ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0', marginBottom: '24px' }}>
+                        <div className="fd-grupo">
                             {sortCategories(catsToRender).map(cat => renderCategoryNode(cat, 0))}
                         </div>
                     ) : (
@@ -224,7 +224,7 @@ const FilterDrawer = ({
                                 {expandedSections['categories'] ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                             </button>
                             {expandedSections['categories'] && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0', marginTop: '16px', marginBottom: '24px' }}>
+                                <div className="fd-grupo fd-grupo--separado">
                                     {sortCategories(catsToRender).map(cat => renderCategoryNode(cat, 0))}
                                 </div>
                             )}
@@ -269,13 +269,13 @@ const FilterDrawer = ({
                             {expandedSections.price ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                         </button>
                         {expandedSections.price && (
-                            <div className="filter-price-range" style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '16px' }}>
+                            <div className="filter-price-range fd-fila">
                                 <input 
                                     type="number" 
                                     placeholder={`Mín ($${metadata.price_range?.min?.toLocaleString()})`} 
                                     value={localFilters.priceRange?.min ?? ''}
                                     onChange={(e) => handlePriceChange('min', e.target.value)}
-                                    style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none' }}
+                                    className="fd-campo"
                                 />
                                 <span>-</span>
                                 <input 
@@ -283,7 +283,7 @@ const FilterDrawer = ({
                                     placeholder={`Máx ($${metadata.price_range?.max?.toLocaleString()})`} 
                                     value={localFilters.priceRange?.max ?? ''}
                                     onChange={(e) => handlePriceChange('max', e.target.value)}
-                                    style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none' }}
+                                    className="fd-campo"
                                 />
                             </div>
                         )}
@@ -294,14 +294,14 @@ const FilterDrawer = ({
                     <Button
                         variant="outline"
                         onClick={() => { onClear(); onClose(); }}
-                        style={{ flex: 1, gap: '8px' }}
+                        className="fd-flexible"
                     >
                         <RotateCcw size={16} /> Limpiar
                     </Button>
                     <Button
                         variant="primary"
                         onClick={() => { onApply(localFilters); onClose(); }}
-                        style={{ flex: 2 }}
+                        className="fd-flexible-doble"
                     >
                         Aplicar Filtros
                     </Button>

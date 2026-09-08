@@ -138,3 +138,23 @@
     from { transform: translateX(100%); }
     to { transform: translateX(0); }
 }
+
+/* Lo que estaba escrito como estilos sueltos dentro del JSX. Los dos grupos de
+   filtros eran la misma declaración repetida, con la única diferencia de un
+   margen arriba: ahora es una clase y una variante. */
+.fd-columna { display: flex; flex-direction: column; width: 100%; }
+.fd-grupo { display: flex; flex-direction: column; gap: 0; margin-bottom: 1.5rem; }
+.fd-grupo--separado { margin-top: 1rem; }
+.fd-fila { display: flex; gap: 0.5rem; align-items: center; margin-top: 1rem; }
+.fd-campo {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+    outline: none;
+    font-family: inherit;
+    /* Debajo de 1rem el teléfono hace zoom solo al enfocar el campo. */
+    font-size: max(1rem, 0.875rem);
+}
+.fd-flexible { flex: 1; gap: 0.5rem; }
+.fd-flexible-doble { flex: 2; }
