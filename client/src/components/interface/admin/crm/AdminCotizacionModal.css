@@ -1,0 +1,369 @@
+/*
+ * Cómo se ve el modal de crear una cotización a mano.
+ *
+ * Lo compartido con el resto del panel —etiquetas, campos, tarjetas— vive en
+ * `styles/modules/admin/campos.css`. Acá solo lo propio de esta pantalla.
+ *
+ * Medidas en `rem` para que crezcan con el tamaño de letra del navegador.
+ */
+
+.cot {
+    --cot-marca: #8f0653;
+    --cot-marca-suave: #fdf2f8;
+    --cot-marca-borde: #fbcfe8;
+    --cot-tinta: #1e293b;
+    --cot-texto: #64748b;
+    --cot-gris: #94a3b8;
+    --cot-linea: #e2e8f0;
+    --cot-campo: #cbd5e1;
+}
+
+.cot-cuerpo {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Cabecera del modal */
+.cot-emblema {
+    width: 2.625rem;
+    height: 2.625rem;
+    border-radius: 0.75rem;
+    background: var(--cot-marca);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(143, 6, 83, 0.25);
+    flex-shrink: 0;
+}
+.cot-titulo { margin: 0; font-size: 1.375rem; font-weight: 800; color: var(--cot-tinta); }
+.cot-subtitulo { margin: 0.125rem 0 0 0; font-size: 0.8125rem; color: var(--cot-texto); }
+
+/* Título de cada paso: "1. Selección del cliente" */
+.cot-paso {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 800;
+    font-size: 0.875rem;
+    color: var(--cot-tinta);
+    margin-bottom: 0.875rem;
+}
+.cot-paso-icono { color: var(--cot-marca); }
+
+/* Bloque con borde de una sección */
+.cot-caja {
+    background: #ffffff;
+    border: 1px solid var(--cot-campo);
+    border-radius: 1rem;
+    padding: 1.125rem;
+}
+
+.cot-buscador { position: relative; margin-bottom: 0.875rem; }
+.cot-buscador--junto { position: relative; margin-bottom: 0.625rem; }
+
+/* La lista de resultados no crece sin fin: se desplaza dentro de su caja. */
+.cot-resultados {
+    max-height: 8.75rem;
+    overflow-y: auto;
+    border: 1px solid var(--cot-linea);
+    border-radius: 0.625rem;
+    background: #ffffff;
+}
+.cot-resultados-vacio { padding: 1rem; text-align: center; font-size: 0.8125rem; color: var(--cot-gris); }
+.cot-resultados-cargando { padding: 1rem; text-align: center; font-size: 0.8125rem; color: var(--cot-texto); }
+
+.cot-fila { display: flex; align-items: center; gap: 0.75rem; }
+.cot-fila-ancha { display: flex; align-items: center; gap: 0.875rem; flex-wrap: wrap; }
+.cot-fila-encogible { display: flex; align-items: center; gap: 0.625rem; flex: 1 1 12.5rem; }
+.cot-fila-junta { display: flex; align-items: center; gap: 0.625rem; }
+.cot-fila-apretada { display: flex; align-items: center; gap: 0.25rem; }
+.cot-columna { display: flex; flex-direction: column; gap: 0.5rem; }
+
+/* Rejilla de campos: cae sola a menos columnas en pantalla angosta. */
+.cot-rejilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.25rem), 1fr));
+    gap: 0.75rem;
+}
+.cot-rejilla--estrecha {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.625rem), 1fr));
+    gap: 0.75rem;
+}
+
+/* Miniatura de una prenda en la lista */
+.cot-miniatura { width: 2.25rem; height: 2.25rem; border-radius: 0.375rem; object-fit: cover; }
+.cot-miniatura--vacia {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.375rem;
+    background: var(--cot-linea);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.cot-miniatura--chica { width: 2rem; height: 2rem; border-radius: 0.375rem; object-fit: cover; }
+
+/* Textos sueltos */
+.cot-dato { font-size: 0.8125rem; color: var(--cot-texto); }
+.cot-dato-fuerte { font-size: 0.8125rem; font-weight: 700; color: var(--cot-texto); }
+.cot-dato-menor { font-size: 0.75rem; color: var(--cot-texto); margin-top: 0.125rem; }
+.cot-dato-minimo { font-size: 0.6875rem; color: var(--cot-texto); font-weight: 700; }
+.cot-explicacion { margin: 0; font-size: 0.875rem; color: var(--cot-texto); max-width: 30rem; line-height: 1.5; }
+
+/* `text-transform`, no `uppercase`: lo que había escrito no es una propiedad
+   de CSS y no hacía absolutamente nada — el texto se veía tal cual. */
+.cot-rotulo {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--cot-texto);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+/* Precios y totales */
+.cot-precio { font-weight: 800; font-size: 0.875rem; color: var(--cot-marca); }
+.cot-precio--alineado { min-width: 4.6875rem; text-align: right; }
+.cot-precio-menor { font-weight: 800; color: var(--cot-marca); font-size: 0.8125rem; }
+.cot-total { font-size: 1.125rem; font-weight: 900; color: var(--cot-marca); }
+.cot-linea-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--cot-tinta);
+    margin-bottom: 0.25rem;
+}
+.cot-pie-total {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--cot-linea);
+}
+
+/* Insignias */
+.cot-insignia {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--cot-marca);
+    background: var(--cot-marca-suave);
+    padding: 0.1875rem 0.5rem;
+    border-radius: 0.375rem;
+}
+.cot-insignia--gris {
+    font-size: 0.625rem;
+    background-color: var(--cot-linea);
+    color: #334155;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    margin-left: 0.375rem;
+    font-weight: 800;
+}
+.cot-aviso-ok { font-size: 0.6875rem; color: #16a34a; margin-left: 0.375rem; }
+
+/* Cantidad: menos, número, más */
+.cot-cantidad {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: #ffffff;
+    border: 1px solid var(--cot-campo);
+    border-radius: 0.5rem;
+    padding: 0.125rem 0.375rem;
+}
+.cot-cantidad-boton {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 0.875rem;
+    color: var(--cot-marca);
+    padding: 0 0.25rem;
+    font-family: inherit;
+}
+.cot-cantidad-boton:disabled { color: var(--cot-texto); cursor: not-allowed; }
+.cot-cantidad-valor { font-size: 0.8125rem; font-weight: 800; min-width: 1.25rem; text-align: center; }
+
+/* Botones */
+.cot-boton-marca {
+    background: var(--cot-marca-suave);
+    border: 1px solid var(--cot-marca-borde);
+    color: var(--cot-marca);
+    border-radius: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    cursor: pointer;
+    font-family: inherit;
+    min-height: 2.25rem;
+}
+.cot-boton-claro {
+    background: #ffffff;
+    border: 1px solid var(--cot-marca-borde);
+    border-radius: 0.5rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--cot-marca);
+    cursor: pointer;
+    font-family: inherit;
+    min-height: 2.25rem;
+}
+.cot-boton-neutro {
+    background: #ffffff;
+    border: 1px solid var(--cot-campo);
+    border-radius: 0.625rem;
+    padding: 0.625rem 1.125rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--cot-texto);
+    cursor: pointer;
+    font-family: inherit;
+    min-height: 2.75rem;
+}
+.cot-boton-cancelar {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid var(--cot-campo);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    min-height: 2.75rem;
+}
+.cot-boton-icono {
+    background: #f8fafc;
+    border: 1px solid var(--cot-linea);
+    border-radius: 0.625rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cot-texto);
+    cursor: pointer;
+}
+.cot-boton-borrar {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    border-radius: 0.375rem;
+    padding: 0.375rem;
+    color: #ef4444;
+    cursor: pointer;
+    min-height: 2.25rem;
+    min-width: 2.25rem;
+}
+
+/* Selector de dos opciones (cliente existente / nuevo) */
+.cot-alternador { display: flex; background: var(--cot-linea); border-radius: 0.5rem; padding: 0.125rem; }
+
+/* Zona donde todavía no se agregó nada */
+.cot-vacio {
+    text-align: center;
+    padding: 1.5rem;
+    border: 2px dashed var(--cot-linea);
+    border-radius: 0.75rem;
+    color: var(--cot-gris);
+    font-size: 0.8125rem;
+}
+
+/* Pantalla de "listo, se creó" */
+.cot-exito {
+    text-align: center;
+    padding: 1.875rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+.cot-exito-emblema {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background: #dcfce7;
+    color: #16a34a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 20px rgba(22, 163, 74, 0.15);
+}
+.cot-exito-titulo { margin: 0; font-size: 1.125rem; font-weight: 800; color: var(--cot-tinta); }
+.cot-exito-resumen {
+    background: #f8fafc;
+    border: 1px solid var(--cot-linea);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    width: 100%;
+    max-width: 26.25rem;
+    text-align: left;
+    margin-top: 0.5rem;
+}
+.cot-exito-acciones {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Resumen de entrega */
+.cot-entrega {
+    background: var(--cot-marca-suave);
+    border: 1.5px solid var(--cot-marca-borde);
+    border-radius: 0.75rem;
+    padding: 0.625rem 1.125rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Campo de precio corto dentro de una fila */
+.cot-campo-corto {
+    width: 5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--cot-campo);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--cot-tinta);
+    font-family: inherit;
+}
+
+/* La tarjeta del modal, y donde viven las variables de color: si se declaran en
+   una clase que ningun elemento lleva, cada `var(--cot-…)` se queda sin valor y
+   los colores desaparecen. Pasó: el emblema del titulo salio descolorido. */
+.cot-tarjeta {
+    background-color: #ffffff;
+    border-radius: 1.25rem;
+    width: 100%;
+    max-width: 53.125rem;
+    /* `dvh`: en un telefono `vh` ignora la barra del navegador y el pie del
+       modal quedaba fuera de la pantalla. */
+    max-height: 90dvh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.cot-cabecera {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, var(--cot-marca-suave) 0%, #ffffff 100%);
+}

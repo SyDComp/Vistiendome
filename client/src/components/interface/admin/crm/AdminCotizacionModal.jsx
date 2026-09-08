@@ -6,6 +6,7 @@ import { getProducts } from '../../../../lib/api/endpoints/products.api';
 import { getAdminAttributes } from '../../../../lib/api/endpoints/admin.api';
 import { useNotification } from '../../../../context/NotificationContext';
 import Imagen from '../../../ui/Imagen';
+import './AdminCotizacionModal.css';
 
 const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = null }) => {
     const { toast } = useNotification();
@@ -377,68 +378,54 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: '20px'
         }}>
-            <div style={{
-                backgroundColor: '#ffffff',
-                borderRadius: '20px',
-                width: '100%', maxWidth: '850px',
-                maxHeight: '90vh',
-                display: 'flex', flexDirection: 'column',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-                overflow: 'hidden',
-                animation: 'fadeIn 0.2s ease-out'
-            }}>
+            <div className="cot cot-tarjeta">
                 {/* Cabezal */}
-                <div style={{
-                    padding: '20px 24px',
-                    borderBottom: '1px solid #f1f5f9',
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#8f0653', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(143, 6, 83, 0.25)' }}>
+                <div className="cot-cabecera">
+                    <div className="cot-fila">
+                        <div className="cot-emblema">
                             <FileText size={22} />
                         </div>
                         <div>
-                            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#1e293b' }}>
+                            <h3 className="cot-exito-titulo">
                                 Crear Cotización desde Administración
                             </h3>
-                            <p style={{ margin: '2px 0 0 0', fontSize: '13px', color: '#64748b' }}>
+                            <p className="cot-subtitulo">
                                 Arma una cotización personalizada para un cliente registrado o nuevo
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', cursor: 'pointer' }}
+                        className="cot-boton-icono"
                     >
                         <X size={18} />
                     </button>
                 </div>
 
                 {/* Contenido (Formulario o Pantalla de Éxito) */}
-                <div style={{ padding: '24px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div className="cot-cuerpo">
                     {createdCotizacion ? (
-                        <div style={{ textAlign: 'center', padding: '30px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(22, 163, 74, 0.15)' }}>
+                        <div className="cot-exito">
+                            <div className="cot-exito-emblema">
                                 <Check size={36} strokeWidth={3} />
                             </div>
-                            <h3 style={{ margin: 0, fontSize: '22px', fontWeight: '800', color: '#1e293b' }}>
+                            <h3 className="cot-titulo">
                                 ¡Cotización #{createdCotizacion.id?.substring(0, 8)} creada!
                             </h3>
-                            <p style={{ margin: 0, fontSize: '14px', color: '#64748b', maxWidth: '480px', lineHeight: 1.5 }}>
+                            <p className="cot-explicacion">
                                 La cotización quedó registrada en el CRM. Ahora puedes enviarle el resumen directamente al WhatsApp de tu cliente si lo deseas.
                             </p>
-                            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px', width: '100%', maxWidth: '420px', textAlign: 'left', marginTop: '8px' }}>
-                                <div style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', uppercase: 'true', marginBottom: '8px' }}>RESUMEN</div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: '700', color: '#1e293b', marginBottom: '4px' }}>
+                            <div className="cot-exito-resumen">
+                                <div className="cot-rotulo">RESUMEN</div>
+                                <div className="cot-linea-total">
                                     <span>Total Estimado:</span>
-                                    <span style={{ color: '#8f0653' }}>${totalCotizacion.toLocaleString()}</span>
+                                    <span className="cot-paso-icono">${totalCotizacion.toLocaleString()}</span>
                                 </div>
-                                <div style={{ fontSize: '13px', color: '#64748b' }}>
+                                <div className="cot-dato">
                                     {items.length} ítem(s) • Transporte: {transporte}
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', gap: '12px', marginTop: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                            <div className="cot-exito-acciones">
                                 <button
                                     onClick={handleOpenWhatsApp}
                                     style={{
@@ -451,7 +438,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                 </button>
                                 <button
                                     onClick={onClose}
-                                    style={{ background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1', borderRadius: '12px', padding: '12px 20px', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}
+                                    className="cot-boton-cancelar"
                                 >
                                     Cerrar y Volver
                                 </button>
@@ -465,7 +452,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                     <div className="adm-seccion-titulo">
                                         <User size={18} color="#8f0653" /> 1. Selección del Cliente
                                     </div>
-                                    <div style={{ display: 'flex', background: '#e2e8f0', borderRadius: '8px', padding: '2px' }}>
+                                    <div className="cot-alternador">
                                         <button
                                             type="button"
                                             onClick={() => setClientMode('select')}
@@ -499,24 +486,24 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                                             }}>
                                                 <div>
-                                                    <div style={{ fontWeight: '800', fontSize: '14px', color: '#8f0653' }}>
+                                                    <div className="cot-precio">
                                                         {selectedCliente.nombres} {selectedCliente.apellidos} {selectedCliente.rut ? `(${selectedCliente.rut})` : ''}
                                                     </div>
-                                                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                                                    <div className="cot-dato-menor">
                                                         📞 {selectedCliente.telefono || 'Sin teléfono'} • 📧 {selectedCliente.email_personal || 'Sin correo'}
                                                     </div>
                                                 </div>
                                                 <button
                                                     type="button"
                                                     onClick={() => setSelectedCliente(null)}
-                                                    style={{ background: '#ffffff', border: '1px solid #fbcfe8', borderRadius: '8px', padding: '6px 10px', fontSize: '12px', fontWeight: '700', color: '#8f0653', cursor: 'pointer' }}
+                                                    className="cot-boton-claro"
                                                 >
                                                     Cambiar
                                                 </button>
                                             </div>
                                         ) : (
                                             <div>
-                                                <div style={{ position: 'relative', marginBottom: '10px' }}>
+                                                <div className="cot-buscador--junto">
                                                     <Search size={16} color="#94a3b8" className="adm-campo-icono" />
                                                     <input
                                                         type="text"
@@ -526,11 +513,11 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                                         className="adm-campo adm-campo--con-icono"
                                                     />
                                                 </div>
-                                                <div style={{ maxHeight: '140px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '10px', background: '#ffffff' }}>
+                                                <div className="cot-resultados">
                                                     {loadingClientes ? (
-                                                        <div style={{ padding: '16px', textAlign: 'center', fontSize: '13px', color: '#64748b' }}>Cargando clientes...</div>
+                                                        <div className="cot-resultados-cargando">Cargando clientes...</div>
                                                     ) : filteredClientes.length === 0 ? (
-                                                        <div style={{ padding: '16px', textAlign: 'center', fontSize: '13px', color: '#94a3b8' }}>No se encontraron clientes coincidentes.</div>
+                                                        <div className="cot-resultados-vacio">No se encontraron clientes coincidentes.</div>
                                                     ) : (
                                                         filteredClientes.map(c => (
                                                             <div
@@ -549,7 +536,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                                                     <div className="adm-dato">{c.nombres} {c.apellidos}</div>
                                                                     <div className="adm-dato-secundario">{c.rut || 'Sin RUT'} • {c.telefono || c.email_personal || 'Sin contacto'}</div>
                                                                 </div>
-                                                                <span style={{ fontSize: '11px', fontWeight: '700', color: '#8f0653', background: '#fdf2f8', padding: '3px 8px', borderRadius: '6px' }}>Seleccionar</span>
+                                                                <span className="cot-insignia">Seleccionar</span>
                                                             </div>
                                                         ))
                                                     )}
@@ -558,7 +545,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                         )}
                                     </div>
                                 ) : (
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+                                    <div className="cot-rejilla">
                                         <div>
                                             <label className="adm-etiqueta">RUT (Opcional)</label>
                                             <input
@@ -604,7 +591,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                             </div>
 
                             {/* PASO 2: PRODUCTOS Y CANTIDADES */}
-                            <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '16px', padding: '18px' }}>
+                            <div className="cot-caja">
                                 <div className="adm-seccion-cabecera">
                                     <div className="adm-seccion-titulo">
                                         <Package size={18} color="#8f0653" /> 2. Productos o Confecciones ({items.length})
@@ -612,7 +599,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                     <button
                                         type="button"
                                         onClick={() => { setMostrandoFormLibre(v => !v); if (!Object.keys(atributosCatalogo).length) fetchAtributos(); }}
-                                        style={{ background: '#fdf2f8', border: '1px solid #fbcfe8', color: '#8f0653', borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+                                        className="cot-boton-marca"
                                     >
                                         <Plus size={14} /> + Ítem Libre / Personalizado
                                     </button>
@@ -629,7 +616,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                 )}
 
                                 {/* Buscador de Catálogo */}
-                                <div style={{ position: 'relative', marginBottom: '14px' }}>
+                                <div className="cot-buscador">
                                     <Search size={16} color="#94a3b8" className="adm-campo-icono" />
                                     <input
                                         type="text"
@@ -654,22 +641,22 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                                     onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#fdf2f8'}
                                                     onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
                                                 >
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <div className="cot-fila-junta">
                                                         {varItem.image && (
-                                                            <Imagen url={varItem.image} alt="" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} sizes="32px" />
+                                                            <Imagen url={varItem.image} alt="" className="cot-miniatura--chica" sizes="32px" />
                                                         )}
                                                         <div>
                                                             <div className="adm-dato">
                                                                 {varItem.sku_name}
                                                                 {varItem.is_product_base && (
-                                                                    <span style={{ fontSize: '10px', backgroundColor: '#e2e8f0', color: '#334155', padding: '2px 6px', borderRadius: '4px', marginLeft: '6px', fontWeight: '800' }}>GENERAL</span>
+                                                                    <span className="cot-insignia--gris">GENERAL</span>
                                                                 )}
                                                             </div>
                                                             <div className="adm-dato-secundario">SKU: {varItem.sku_code}</div>
                                                         </div>
                                                     </div>
-                                                    <span style={{ fontWeight: '800', color: '#8f0653', fontSize: '13px' }}>
-                                                        ${varItem.price.toLocaleString('es-CL')} <span style={{ fontSize: '11px', color: '#16a34a', marginLeft: '6px' }}>+ Añadir</span>
+                                                    <span className="cot-precio-menor">
+                                                        ${varItem.price.toLocaleString('es-CL')} <span className="cot-aviso-ok">+ Añadir</span>
                                                     </span>
                                                 </div>
                                             ))}
@@ -679,21 +666,21 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
 
                                 {/* Tabla de Ítems */}
                                 {items.length === 0 ? (
-                                    <div style={{ textAlign: 'center', padding: '24px', border: '2px dashed #e2e8f0', borderRadius: '12px', color: '#94a3b8', fontSize: '13px' }}>
+                                    <div className="cot-vacio">
                                         No has añadido ítems. Usa el buscador arriba o añade un ítem libre.
                                     </div>
                                 ) : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <div className="cot-columna">
                                         {items.map((it, idx) => (
                                             <div key={idx} style={{
                                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                                 padding: '10px 14px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', flexWrap: 'wrap', gap: '10px'
                                             }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 200px' }}>
+                                                <div className="cot-fila-encogible">
                                                     {it.image ? (
-                                                        <Imagen url={it.image} alt="" style={{ width: '36px', height: '36px', borderRadius: '6px', objectFit: 'cover' }} sizes="36px" />
+                                                        <Imagen url={it.image} alt="" className="cot-miniatura" sizes="36px" />
                                                     ) : (
-                                                        <div style={{ width: '36px', height: '36px', borderRadius: '6px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        <div className="cot-miniatura--vacia">
                                                             <ShoppingBag size={18} color="#64748b" />
                                                         </div>
                                                     )}
@@ -703,39 +690,39 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                                     </div>
                                                 </div>
 
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                        <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '700' }}>Precio ($):</span>
+                                                <div className="cot-fila-ancha">
+                                                    <div className="cot-fila-apretada">
+                                                        <span className="cot-dato-minimo">Precio ($):</span>
                                                         <input
                                                             type="number"
                                                             value={it.precio_unitario_estimado}
                                                             onChange={(e) => handlePriceChange(idx, e.target.value)}
-                                                            style={{ width: '80px', padding: '4px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '12px', fontWeight: '700', color: '#1e293b' }}
+                                                            className="cot-campo-corto"
                                                         />
                                                     </div>
 
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '2px 6px' }}>
+                                                    <div className="cot-cantidad">
                                                         <button
                                                             type="button"
                                                             onClick={() => handleQuantityChange(idx, -1)}
-                                                            style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontWeight: '800', fontSize: '14px', color: '#64748b', padding: '0 4px' }}
+                                                            className="cot-cantidad-boton"
                                                         >-</button>
-                                                        <span style={{ fontSize: '13px', fontWeight: '800', minWidth: '20px', textAlign: 'center' }}>{it.cantidad}</span>
+                                                        <span className="cot-cantidad-valor">{it.cantidad}</span>
                                                         <button
                                                             type="button"
                                                             onClick={() => handleQuantityChange(idx, 1)}
-                                                            style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontWeight: '800', fontSize: '14px', color: '#8f0653', padding: '0 4px' }}
+                                                            className="cot-cantidad-boton"
                                                         >+</button>
                                                     </div>
 
-                                                    <div style={{ fontWeight: '800', fontSize: '14px', color: '#8f0653', minWidth: '75px', textAlign: 'right' }}>
+                                                    <div className="cot-precio cot-precio--alineado">
                                                         ${(it.cantidad * (it.precio_unitario_estimado || 0)).toLocaleString()}
                                                     </div>
 
                                                     <button
                                                         type="button"
                                                         onClick={() => handleRemoveItem(idx)}
-                                                        style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '6px', padding: '6px', color: '#ef4444', cursor: 'pointer' }}
+                                                        className="cot-boton-borrar"
                                                     >
                                                         <Trash2 size={14} />
                                                     </button>
@@ -743,10 +730,10 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                             </div>
                                         ))}
 
-                                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px', paddingTop: '12px', borderTop: '1px solid #e2e8f0' }}>
-                                            <div style={{ background: '#fdf2f8', border: '1.5px solid #fbcfe8', borderRadius: '12px', padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <span style={{ fontSize: '13px', fontWeight: '700', color: '#64748b' }}>TOTAL COTIZACIÓN:</span>
-                                                <span style={{ fontSize: '18px', fontWeight: '900', color: '#8f0653' }}>${totalCotizacion.toLocaleString()}</span>
+                                        <div className="cot-pie-total">
+                                            <div className="cot-entrega">
+                                                <span className="cot-dato-fuerte">TOTAL COTIZACIÓN:</span>
+                                                <span className="cot-total">${totalCotizacion.toLocaleString()}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -755,15 +742,15 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
 
                             {/* PASO 3: DESPACHO Y NOTAS */}
                             <div className="adm-tarjeta">
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '800', fontSize: '14px', color: '#1e293b', marginBottom: '14px' }}>
+                                <div className="cot-paso">
                                     <MapPin size={18} color="#8f0653" /> 3. Envío y Observaciones
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '12px' }}>
+                                <div className="cot-rejilla--estrecha">
                                     <div className="adm-ancho-total">
                                         <label className="adm-etiqueta">Tipo de entrega</label>
                                         <select
                                             value={modoEntrega} onChange={e => setModoEntrega(e.target.value)}
-                                            style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', fontWeight: '700' }}
+                                            className="adm-campo adm-campo--fuerte"
                                         >
                                             <option value="DESPACHO">DESPACHO — la prenda viaja con un transportista</option>
                                             <option value="RETIRO">RETIRO EN LOCAL — la clienta la viene a buscar</option>
@@ -844,7 +831,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                         <button
                             type="button"
                             onClick={onClose}
-                            style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '10px 18px', fontSize: '13px', fontWeight: '700', color: '#64748b', cursor: 'pointer' }}
+                            className="cot-boton-neutro"
                         >
                             Cancelar
                         </button>
