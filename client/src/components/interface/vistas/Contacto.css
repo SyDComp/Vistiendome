@@ -248,3 +248,5 @@
     padding-top: 2.5rem;
     flex-wrap: wrap;
 }
+
+/* El mismo aviso existe en el carrito: se declara una vez y lo usan los dos. */

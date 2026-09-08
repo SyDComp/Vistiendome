@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import useSrcSet from '../../hooks/useSrcSet.js';
+import '../shared/ProductCard/ProductCard.css';
 
 /**
  * @param srcSet   Versiones livianas que manda el servidor ("url 400w, url 800w, ...").
@@ -63,7 +64,7 @@ const PremiumImage = ({
                     color: 'var(--text-muted)'
                 }}
             >
-                <span style={{ fontSize: '0.8rem' }}>Sin Imagen</span>
+                <span className="img-nota">Sin Imagen</span>
             </div>
         );
     }

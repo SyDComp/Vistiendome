@@ -154,3 +154,9 @@
     font-size: 0.95rem;
     line-height: 1.5;
 }
+
+/* Un adorno que se coloca sobre la tarjeta sin empujar nada. */
+.tarjeta-flotante { position: absolute; }
+
+/* Texto de reemplazo cuando una imagen no carga. */
+.img-nota { font-size: 0.8rem; }

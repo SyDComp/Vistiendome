@@ -88,8 +88,7 @@ const ProductCard = ({
                     srcSet={srcSetPorUrl[currentImage] || (currentImage === image ? imageSrcSet : '')}
                     priority={priority}
                     alt={name}
-                    className="product-card__image product-card__image--current"
-                    style={{ position: 'absolute' }}
+                    className="product-card__image product-card__image--current tarjeta-flotante"
                     objectFit="contain"
                 />
                 {isTransitioning && (
@@ -97,8 +96,7 @@ const ProductCard = ({
                         src={nextImage}
                         srcSet={srcSetPorUrl[nextImage] || ''}
                         alt={name}
-                        className="product-card__image product-card__image--next"
-                        style={{ position: 'absolute' }}
+                        className="product-card__image product-card__image--next tarjeta-flotante"
                         objectFit="contain"
                     />
                 )}

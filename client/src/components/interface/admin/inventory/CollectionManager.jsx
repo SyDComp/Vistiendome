@@ -165,7 +165,7 @@ const CollectionManager = () => {
         const selectedSkus = allSkus.filter(s => formData.sku_ids.includes(s.id));
 
         return (
-            <div className="admin-inventory-form-container desktop" style={{ padding: '20px 20px 80px 20px' }}>
+            <div className="admin-inventory-form-container desktop esp-vista">
                 <div className="coll-manager-form-container">
                     <div className="coll-manager-form-header">
                         <div className="coll-manager-form-header-left">
@@ -178,7 +178,7 @@ const CollectionManager = () => {
                         </div>
                         <div className="coll-manager-form-header-right">
                             <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
-                            <Button variant="primary" onClick={handleSave} style={{ padding: '0 24px' }}>
+                            <Button variant="primary" onClick={handleSave} className="esp-cuerpo">
                                 <Save size={18} className="esp-separacion" /> Guardar Colección
                             </Button>
                         </div>

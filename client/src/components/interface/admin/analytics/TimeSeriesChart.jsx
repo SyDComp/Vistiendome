@@ -24,7 +24,7 @@ const TimeSeriesChart = ({ series = [], metric = 'views', color = '#8f0653', onS
     };
 
     return (
-        <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" style={{ display: 'block' }}>
+        <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" className="ana-bloque">
             {/* Grid + eje Y */}
             {yTicks.map((tv, i) => {
                 const y = padT + plotH - (tv / maxV) * plotH;
@@ -44,7 +44,7 @@ const TimeSeriesChart = ({ series = [], metric = 'views', color = '#8f0653', onS
                 const y = padT + plotH - h;
                 const isSel = selectedDate === d.date;
                 return (
-                    <g key={d.date} style={{ cursor: 'pointer' }} onClick={() => onSelectDay && onSelectDay(d)}>
+                    <g key={d.date} className="ana-pulsable" onClick={() => onSelectDay && onSelectDay(d)}>
                         {/* área clickeable invisible (toda la columna) */}
                         <rect x={padL + i * slot} y={padT} width={slot} height={plotH} fill="transparent" />
                         <rect

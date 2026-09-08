@@ -212,3 +212,6 @@
 .ana-fila--separada { display: flex; gap: 0.625rem; margin-bottom: 1.25rem; }
 .ana-apagado { color: #cbd5e1; font-size: 0.8125rem; }
 .ana-suave { color: var(--ana-gris, #94a3b8); font-size: 0.8125rem; }
+
+.ana-pulsable { cursor: pointer; }
+.ana-bloque { display: block; }

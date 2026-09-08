@@ -9,6 +9,7 @@ import { get, post } from '../../../lib/api/client';
 import { formatRUT } from '../../../utils/formatters';
 import { useSettings } from '../../../context/SettingsContext';
 import './CheckoutForm.css';
+import '../vistas/Contacto.css';
 
 const CheckoutForm = ({ onClose }) => {
     const { cart, total, descuentos, regalos, clearCart } = useCart();
@@ -336,7 +337,7 @@ const CheckoutForm = ({ onClose }) => {
 
                         {values.modo_entrega === 'RETIRO' ? (
                             <div className="input-group full">
-                                <p style={{ margin: 0, fontSize: '13px', color: '#0369a1', background: '#e0f2fe', padding: '12px 14px', borderRadius: '12px', border: '1px solid #bae6fd' }}>
+                                <p className="contacto-aviso contacto-aviso--info">
                                     📍 <strong>Retiro presencial en Tienda / Taller en San Carlos, Región de Ñuble.</strong> Te contactaremos por WhatsApp con la dirección exacta y horarios disponibles para la entrega.
                                 </p>
                             </div>
@@ -377,7 +378,7 @@ const CheckoutForm = ({ onClose }) => {
                                 </div>
                                 {values.tipo_despacho === 'SUCURSAL' ? (
                                     <div className="input-group full">
-                                        <p style={{ margin: 0, fontSize: '13px', color: '#64748b', background: '#f8fafc', padding: '12px 14px', borderRadius: '12px' }}>
+                                        <p className="contacto-aviso">
                                             Retiras en una sucursal de <strong>{values.transporte}</strong>. Coordinarás la sucursal exacta por WhatsApp según tu comuna.
                                         </p>
                                     </div>
