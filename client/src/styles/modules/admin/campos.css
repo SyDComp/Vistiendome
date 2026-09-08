@@ -98,3 +98,54 @@
 }
 
 .adm-ancho-total { grid-column: 1 / -1; }
+
+/* ── Bloques de una pantalla de ajustes ──────────────────────────────────────
+   La tarjeta blanca estaba escrita 8 veces en un mismo archivo, su título otras
+   8, y la cabecera 6. Van acá por lo mismo que lo de arriba: son piezas, no
+   decisiones sueltas de cada pantalla. */
+
+.adm-panel {
+    background: #fff;
+    padding: 1.875rem;
+    border-radius: 1.5rem;
+    border: 1px solid #e2e8f0;
+}
+/* Ocupa la fila entera de la grilla de ajustes. */
+.adm-panel--ancho { grid-column: 1 / -1; }
+
+.adm-panel-cabecera {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+.adm-panel-titulo {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: #1e1b4b;
+}
+
+/* Un icono que acompaña a un texto: no se encoge cuando el texto es largo. */
+.adm-icono-fijo { color: #64748b; flex-shrink: 0; }
+
+.adm-etiqueta-fuerte { font-size: 0.875rem; font-weight: 700; color: #334155; }
+
+/* La explicación bajo un control: qué hace y qué pasa si lo cambias. */
+.adm-ayuda { margin: 0; font-size: 0.75rem; color: #64748b; line-height: 1.5; }
+.adm-ayuda--pegada { margin-top: 0.375rem; }
+
+/* Un aviso dentro de una tarjeta, separado de lo de arriba. */
+.adm-nota {
+    margin-top: 1.5rem;
+    padding: 0.9375rem;
+    background: #f8fafc;
+    border-radius: 1rem;
+    display: flex;
+    gap: 0.75rem;
+}
+
+.adm-columna { display: flex; flex-direction: column; gap: 1.25rem; }
+
+/* Casilla de verificación grande: 1.25rem se acierta con el dedo, 13px no. */
+.adm-casilla { width: 1.25rem; height: 1.25rem; accent-color: #8f0653; }

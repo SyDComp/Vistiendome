@@ -251,15 +251,15 @@ const SettingsManager = () => {
                 overflowY: 'auto',
                 paddingBottom: '40px'
             }}>
-                <section style={{ background: '#fff', padding: '30px', borderRadius: '24px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                <section className="adm-panel">
+                    <div className="adm-panel-cabecera">
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fdf2f8', color: '#8f0653', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Globe size={20} />
                         </div>
-                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#1e1b4b' }}>Redes Sociales</h3>
+                        <h3 className="adm-panel-titulo">Redes Sociales</h3>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div className="adm-columna">
                         <div className="input-group">
                             <label style={labelStyle}><Globe size={14} /> Facebook (URL) · principal</label>
                             <input
@@ -310,15 +310,15 @@ const SettingsManager = () => {
                     </div>
                 </section>
 
-                <section style={{ background: '#fff', padding: '30px', borderRadius: '24px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                <section className="adm-panel">
+                    <div className="adm-panel-cabecera">
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#eff6ff', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Mail size={20} />
                         </div>
-                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#1e1b4b' }}>Información de Contacto</h3>
+                        <h3 className="adm-panel-titulo">Información de Contacto</h3>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div className="adm-columna">
                         <div className="input-group">
                             <label style={labelStyle}><Mail size={14} /> Correo Electrónico</label>
                             <input 
@@ -357,23 +357,23 @@ const SettingsManager = () => {
                         </p>
                     </div>
                     
-                    <div style={{ marginTop: '24px', padding: '15px', background: '#f8fafc', borderRadius: '16px', display: 'flex', gap: '12px' }}>
-                        <Info size={16} style={{ color: '#64748b', flexShrink: 0 }} />
-                        <p style={{ margin: 0, fontSize: '12px', color: '#64748b', lineHeight: '1.5' }}>
+                    <div className="adm-nota">
+                        <Info size={16} className="adm-icono-fijo" />
+                        <p className="adm-ayuda">
                             Los campos que dejes vacíos no se mostrarán en la web pública (Footer y Contacto).
                         </p>
                     </div>
                 </section>
 
-                <section style={{ background: '#fff', padding: '30px', borderRadius: '24px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                <section className="adm-panel">
+                    <div className="adm-panel-cabecera">
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Truck size={20} />
                         </div>
-                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#1e1b4b' }}>Métodos de Envío</h3>
+                        <h3 className="adm-panel-titulo">Métodos de Envío</h3>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div className="adm-columna">
                         <div style={{ display: 'flex', gap: '10px' }}>
                             <input 
                                 type="text" 
@@ -428,12 +428,12 @@ const SettingsManager = () => {
                     </div>
                 </section>
 
-                <section style={{ background: '#fff', padding: '30px', borderRadius: '24px', border: '1px solid #e2e8f0', gridColumn: '1 / -1' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                <section className="adm-panel adm-panel--ancho">
+                    <div className="adm-panel-cabecera">
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fdf2f8', color: '#8f0653', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Megaphone size={20} />
                         </div>
-                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#1e1b4b' }}>Modal de Bienvenida</h3>
+                        <h3 className="adm-panel-titulo">Modal de Bienvenida</h3>
                     </div>
 
                     <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', marginBottom: '24px' }}>
@@ -441,9 +441,9 @@ const SettingsManager = () => {
                             type="checkbox"
                             checked={welcomeModal.active}
                             onChange={(e) => setWelcomeModal(prev => ({ ...prev, active: e.target.checked }))}
-                            style={{ width: '20px', height: '20px', accentColor: '#8f0653' }}
+                            className="adm-casilla"
                         />
-                        <span style={{ fontSize: '14px', fontWeight: '700', color: '#334155' }}>
+                        <span className="adm-etiqueta-fuerte">
                             Mostrar el modal de bienvenida en la web
                         </span>
                     </label>
@@ -460,7 +460,7 @@ const SettingsManager = () => {
                                 <option value="day">Una vez por día</option>
                                 <option value="always">Siempre al entrar</option>
                             </select>
-                            <p style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', lineHeight: 1.5 }}>
+                            <p className="adm-ayuda adm-ayuda--pegada">
                                 {welcomeModal.frequency === 'session' && 'Se muestra una vez por visita; no reaparece hasta que el cliente cierre y vuelva a abrir el navegador.'}
                                 {welcomeModal.frequency === 'day' && 'Se muestra una vez al día por cliente, aunque siga navegando.'}
                                 {welcomeModal.frequency === 'always' && 'Se muestra cada vez que el cliente entra a la web (más intrusivo).'}
@@ -478,7 +478,7 @@ const SettingsManager = () => {
                             />
                         </div>
 
-                        <div className="input-group" style={{ gridColumn: '1 / -1' }}>
+                        <div className="input-group adm-ancho-total">
                             <label style={labelStyle}><Info size={14} /> Mensaje</label>
                             <textarea
                                 value={welcomeModal.body}
@@ -488,7 +488,7 @@ const SettingsManager = () => {
                             />
                         </div>
 
-                        <div className="input-group" style={{ gridColumn: '1 / -1' }}>
+                        <div className="input-group adm-ancho-total">
                             <MediaField
                                 label="Imagen (opcional)"
                                 value={{ asset_id: welcomeModal.image_asset_id, url: welcomeModal.image_url }}
@@ -581,20 +581,20 @@ const SettingsManager = () => {
                         </div>
                     </div>
 
-                    <div style={{ marginTop: '24px', padding: '15px', background: '#f8fafc', borderRadius: '16px', display: 'flex', gap: '12px' }}>
-                        <Info size={16} style={{ color: '#64748b', flexShrink: 0 }} />
-                        <p style={{ margin: 0, fontSize: '12px', color: '#64748b', lineHeight: '1.5' }}>
+                    <div className="adm-nota">
+                        <Info size={16} className="adm-icono-fijo" />
+                        <p className="adm-ayuda">
                             Si cambias el contenido, el modal volverá a mostrarse aunque el cliente ya lo haya visto. Deja el botón sin texto si no quieres llamado a la acción.
                         </p>
                     </div>
                 </section>
 
-                <section style={{ background: '#fff', padding: '30px', borderRadius: '24px', border: '1px solid #e2e8f0', gridColumn: '1 / -1' }}>
+                <section className="adm-panel adm-panel--ancho">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Tag size={20} />
                         </div>
-                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#1e1b4b' }}>Precios por cantidad (mayorista, iglesia)</h3>
+                        <h3 className="adm-panel-titulo">Precios por cantidad (mayorista, iglesia)</h3>
                     </div>
                     <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 20px', lineHeight: 1.6 }}>
                         El descuento se aplica solo si la clienta lleva el mínimo de unidades <strong>del mismo producto y color</strong>,
@@ -683,12 +683,12 @@ const SettingsManager = () => {
                     </button>
                 </section>
 
-                <section style={{ background: '#fff', padding: '30px', borderRadius: '24px', border: '1px solid #e2e8f0', gridColumn: '1 / -1' }}>
+                <section className="adm-panel adm-panel--ancho">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fce7f3', color: '#be185d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Gift size={20} />
                         </div>
-                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#1e1b4b' }}>Promociones</h3>
+                        <h3 className="adm-panel-titulo">Promociones</h3>
                     </div>
                     <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 20px', lineHeight: 1.6 }}>
                         <strong>Lleva X, paga Y:</strong> con descuento 100% la unidad va gratis (un 3x2 clásico);
@@ -826,12 +826,12 @@ const SettingsManager = () => {
                     </button>
                 </section>
 
-                <section style={{ background: '#fff', padding: '30px', borderRadius: '24px', border: '1px solid #e2e8f0', gridColumn: '1 / -1' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                <section className="adm-panel adm-panel--ancho">
+                    <div className="adm-panel-cabecera">
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Megaphone size={20} />
                         </div>
-                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#1e1b4b' }}>Barra de Anuncio (arriba del sitio)</h3>
+                        <h3 className="adm-panel-titulo">Barra de Anuncio (arriba del sitio)</h3>
                     </div>
 
                     <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', marginBottom: '24px' }}>
@@ -839,9 +839,9 @@ const SettingsManager = () => {
                             type="checkbox"
                             checked={topBanner.active}
                             onChange={(e) => setTopBanner(prev => ({ ...prev, active: e.target.checked }))}
-                            style={{ width: '20px', height: '20px', accentColor: '#8f0653' }}
+                            className="adm-casilla"
                         />
-                        <span style={{ fontSize: '14px', fontWeight: '700', color: '#334155' }}>
+                        <span className="adm-etiqueta-fuerte">
                             Mostrar la barra de anuncio en la parte superior
                         </span>
                     </label>
@@ -874,7 +874,7 @@ const SettingsManager = () => {
                                 placeholder="Ej: Click acá"
                                 style={inputStyle}
                             />
-                            <p style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', lineHeight: 1.5 }}>
+                            <p className="adm-ayuda adm-ayuda--pegada">
                                 Si lo dejas vacío, se muestra el enlace en crudo. Si es interno redirige; si es externo abre otra pestaña.
                             </p>
                         </div>
@@ -889,7 +889,7 @@ const SettingsManager = () => {
                                 <option value="day">Una vez por día</option>
                                 <option value="always">Siempre al entrar</option>
                             </select>
-                            <p style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', lineHeight: 1.5 }}>
+                            <p className="adm-ayuda adm-ayuda--pegada">
                                 {topBanner.frequency === 'session' && 'Si el cliente la cierra, no reaparece hasta cerrar y reabrir el navegador.'}
                                 {topBanner.frequency === 'day' && 'Reaparece una vez al día aunque la haya cerrado.'}
                                 {topBanner.frequency === 'always' && 'Aparece cada vez que entra (se puede cerrar por esa visita).'}
@@ -924,9 +924,9 @@ const SettingsManager = () => {
                                     type="checkbox"
                                     checked={topBanner.bold}
                                     onChange={(e) => setTopBanner(prev => ({ ...prev, bold: e.target.checked }))}
-                                    style={{ width: '20px', height: '20px', accentColor: '#8f0653' }}
+                                    className="adm-casilla"
                                 />
-                                <span style={{ fontSize: '14px', fontWeight: '700', color: '#334155' }}>
+                                <span className="adm-etiqueta-fuerte">
                                     Negrita
                                 </span>
                             </label>
@@ -938,9 +938,9 @@ const SettingsManager = () => {
                             type="checkbox"
                             checked={topBanner.animated}
                             onChange={(e) => setTopBanner(prev => ({ ...prev, animated: e.target.checked }))}
-                            style={{ width: '20px', height: '20px', accentColor: '#8f0653' }}
+                            className="adm-casilla"
                         />
-                        <span style={{ fontSize: '14px', fontWeight: '700', color: '#334155' }}>
+                        <span className="adm-etiqueta-fuerte">
                             Texto en movimiento (animación deslizante)
                         </span>
                     </label>
@@ -972,19 +972,19 @@ const SettingsManager = () => {
                                     <option value={7}>Muy rápida</option>
                                 </select>
                             </div>
-                            <div className="input-group" style={{ gridColumn: '1 / -1' }}>
+                            <div className="input-group adm-ancho-total">
                                 <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
                                     <input
                                         type="checkbox"
                                         checked={topBanner.repeat}
                                         onChange={(e) => setTopBanner(prev => ({ ...prev, repeat: e.target.checked }))}
-                                        style={{ width: '20px', height: '20px', accentColor: '#8f0653' }}
+                                        className="adm-casilla"
                                     />
-                                    <span style={{ fontSize: '14px', fontWeight: '700', color: '#334155' }}>
+                                    <span className="adm-etiqueta-fuerte">
                                         Repetir el texto para llenar la barra
                                     </span>
                                 </label>
-                                <p style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', lineHeight: 1.5 }}>
+                                <p className="adm-ayuda adm-ayuda--pegada">
                                     {topBanner.repeat
                                         ? 'Activado: el mensaje se repite formando un flujo continuo que llena toda la barra (tipo ticker).'
                                         : 'Desactivado: un solo mensaje cruza la barra, sale por un lado y vuelve a entrar por el otro (con espacio entre pasadas).'}
@@ -993,20 +993,20 @@ const SettingsManager = () => {
                         </div>
                     )}
 
-                    <div style={{ marginTop: '24px', padding: '15px', background: '#f8fafc', borderRadius: '16px', display: 'flex', gap: '12px' }}>
-                        <Info size={16} style={{ color: '#64748b', flexShrink: 0 }} />
-                        <p style={{ margin: 0, fontSize: '12px', color: '#64748b', lineHeight: '1.5' }}>
+                    <div className="adm-nota">
+                        <Info size={16} className="adm-icono-fijo" />
+                        <p className="adm-ayuda">
                             El cliente puede cerrarla; no reaparece en esa sesión. Si cambias el mensaje, vuelve a mostrarse. Con el texto en movimiento, la animación se pausa al pasar el mouse.
                         </p>
                     </div>
                 </section>
 
-                <section style={{ background: '#fff', padding: '30px', borderRadius: '24px', border: '1px solid #e2e8f0', gridColumn: '1 / -1' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                <section className="adm-panel adm-panel--ancho">
+                    <div className="adm-panel-cabecera">
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#eff6ff', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Info size={20} />
                         </div>
-                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#1e1b4b' }}>Página "Nosotros"</h3>
+                        <h3 className="adm-panel-titulo">Página "Nosotros"</h3>
                     </div>
 
                     <MediaField
@@ -1016,8 +1016,8 @@ const SettingsManager = () => {
                     />
 
                     <div style={{ marginTop: '20px', padding: '15px', background: '#f8fafc', borderRadius: '16px', display: 'flex', gap: '12px' }}>
-                        <Info size={16} style={{ color: '#64748b', flexShrink: 0 }} />
-                        <p style={{ margin: 0, fontSize: '12px', color: '#64748b', lineHeight: '1.5' }}>
+                        <Info size={16} className="adm-icono-fijo" />
+                        <p className="adm-ayuda">
                             Si no eliges una imagen, se mostrará la que viene por defecto en la página.
                         </p>
                     </div>
