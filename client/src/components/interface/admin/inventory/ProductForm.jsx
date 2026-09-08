@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { conservarDatosCargados } from '../../../../utils/conservarVariantes';
+import { caracteristicasDe } from '../../../../utils/caracteristicasDeVariantes';
 import { useForm } from '../../../../hooks/useForm';
 import Input from '../../../ui/Input';
 import Button from '../../../ui/Button';
@@ -32,7 +33,12 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
     const [isSaved, setIsSaved] = useState(!!initialData?.id);
 
     // Configuración para la generación de variantes
-    const [variantAttributes, setVariantAttributes] = useState([]);
+    // Al editar, arranca con las caracteristicas que el producto YA tiene,
+    // leidas de sus variantes. Antes empezaba vacio siempre, y eso hacia
+    // imposible agregarle una caracteristica a un producto hecho: habia que
+    // reescribir talla y color enteras de memoria, y si se escribia solo la
+    // nueva, el generador borraba el resto.
+    const [variantAttributes, setVariantAttributes] = useState(() => caracteristicasDe(initialData?.skus));
     const [generatedVariants, setGeneratedVariants] = useState(initialData?.skus || []);
     const [suggestedSpecs, setSuggestedSpecs] = useState([]);
     const [showVariantPicker, setShowVariantPicker] = useState(false);
