@@ -173,7 +173,7 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                         <div className="detalle-column-left">
                             <div className="sticky-gallery-container">
                                 {loading && !producto ? (
-                                    <div className="skeleton-box" style={{ height: '70vh', width: '100%', borderRadius: '16px' }}></div>
+                                    <div className="esqueleto esqueleto--bloque esqueleto--galeria" />
                                 ) : (
                                     <ProductPreviewCarousel
                                         skus={skusNormalizados}
@@ -200,7 +200,7 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                                 </div>
                                 <h1 className="product-title-elegant">
                                     {loading && !producto ? (
-                                        <div className="skeleton-box" style={{ height: '36px', width: '70%', borderRadius: '8px' }}></div>
+                                        <span className="esqueleto esqueleto--texto esqueleto--medio" />
                                     ) : (
                                         producto?.name
                                     )}
@@ -239,7 +239,7 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                                 )}
                                 <div className="price-tag-premium">
                                     {loading && !producto ? (
-                                        <div className="skeleton-box" style={{ height: '36px', width: '120px', borderRadius: '8px' }}></div>
+                                        <span className="esqueleto esqueleto--texto esqueleto--corto" />
                                     ) : (() => {
                                         const refSku = skuActual || producto?.skus?.[0];
                                         const onSale = refSku?.on_sale && refSku?.original_price > precioFinal;
@@ -271,10 +271,10 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
 
                             <div className="product-description-refined">
                                 {loading ? (
-                                    <div className="skeleton-container">
-                                        <div className="skeleton-box" style={{ height: '16px', width: '100%', marginBottom: '8px' }}></div>
-                                        <div className="skeleton-box" style={{ height: '16px', width: '90%', marginBottom: '8px' }}></div>
-                                        <div className="skeleton-box" style={{ height: '16px', width: '95%' }}></div>
+                                    <div className="esqueleto-parrafo">
+                                        <p className="esqueleto esqueleto--texto esqueleto--completo" />
+                                        <p className="esqueleto esqueleto--texto esqueleto--completo" />
+                                        <p className="esqueleto esqueleto--texto esqueleto--medio" />
                                     </div>
                                 ) : (
                                     <p>{producto?.description}</p>
@@ -286,9 +286,9 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                             {!isMobile && (
                                 <div className="selectors-container-premium">
                                     {loading ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                            <div className="skeleton-box" style={{ height: '80px', width: '100%', borderRadius: '12px' }}></div>
-                                            <div className="skeleton-box" style={{ height: '80px', width: '100%', borderRadius: '12px' }}></div>
+                                        <div className="esqueleto-selectores">
+                                            <div className="esqueleto esqueleto--selector" />
+                                            <div className="esqueleto esqueleto--selector" />
                                         </div>
                                     ) : (
                                         <VariantSelector
@@ -304,7 +304,7 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                             {isMobile && (
                                 <div className="mobile-selection-summary-container">
                                     {loading ? (
-                                        <div className="skeleton-box" style={{ height: '60px', width: '100%', borderRadius: '16px' }}></div>
+                                        <div className="esqueleto esqueleto--boton" />
                                     ) : (
                                         <button className="btn-open-selection-drawer" onClick={() => setIsDrawerOpen(true)}>
                                             <div className="summary-info">

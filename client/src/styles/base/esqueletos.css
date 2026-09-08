@@ -1,0 +1,133 @@
+/* ============================================================
+   ESQUELETOS DE CARGA — la forma sale del hueco, no de un número
+   ============================================================
+
+   COMO ESTABA
+   Cada bloque gris llevaba sus medidas escritas a mano:
+   `style={{ width: '150px', height: '16px', borderRadius: '4px' }}`, unas
+   cuarenta veces y ninguna igual a la otra. Eso tiene dos problemas y el
+   segundo es el que importa:
+
+     · son cuarenta números elegidos a ojo, y
+     · cuando cambie el diseño de una tarjeta, los esqueletos NO cambian con
+       ella. Quedan del tamaño de la tarjeta de antes, y el salto que se ve al
+       terminar de cargar es justo lo que un esqueleto existe para evitar.
+
+   COMO ES AHORA
+   El esqueleto usa las MISMAS clases que el elemento real al que reemplaza:
+   la tarjeta de producto, su imagen, su nombre, su precio. De ahí saca la
+   proporción, el espaciado y el tamaño de letra. `esqueleto` solo le pone el
+   gris que late encima.
+
+   El alto de una línea de texto se mide en `em`, o sea en el tamaño de letra
+   REAL de ese elemento: si mañana el título crece, su esqueleto crece con él,
+   sin tocar nada. El ancho se dice en proporción —"como media línea"—, que es
+   lo único que un esqueleto puede afirmar de un texto que todavía no llegó.
+   ============================================================ */
+
+.esqueleto {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: esqueletoLatido 1.5s infinite linear;
+    border-radius: 0.5rem;
+    /* Tapa el contenido real si el elemento lo tuviera, y evita que el texto
+       de dentro se dibuje encima del gris. */
+    color: transparent;
+    user-select: none;
+}
+
+/* POR QUE LOS SELECTORES LLEVAN LA CLASE DOS VECES
+   El esqueleto se pone SOBRE la clase del elemento real para heredar su letra y
+   su espaciado, y esa clase suele traer su propio `display` y su propio ancho
+   —el distintivo de la portada es `inline-flex`, por ejemplo—. Con una sola
+   clase las dos reglas empatan y gana la que se cargue despues, que es la del
+   componente: el esqueleto salia como una raya fina.
+   `.esqueleto.esqueleto--texto` pesa mas que una clase suelta, asi que la forma
+   del hueco manda sobre la del elemento vacio, que es lo que se busca. */
+
+/* Ocupa el hueco entero del elemento que reemplaza: si ese elemento declara
+   una proporción (la imagen de una tarjeta es 3/4), el esqueleto la hereda. */
+.esqueleto.esqueleto--bloque {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Una línea de texto: alta como la letra de ESE elemento, no como un número. */
+.esqueleto.esqueleto--texto {
+    display: block;
+    min-height: 1em;
+    border-radius: 0.25rem;
+    padding: 0;
+}
+
+/* Cuánto texto se está esperando. Es lo único que se puede afirmar de algo que
+   todavía no llegó, y por eso va en proporción y no en píxeles. */
+.esqueleto.esqueleto--completo { width: 100%; }
+.esqueleto.esqueleto--medio    { width: 60%; }
+.esqueleto.esqueleto--corto    { width: 40%; }
+.esqueleto.esqueleto--breve    { width: 25%; }
+
+/* EL CONTENEDOR NO PUEDE ENCOGERSE MIENTRAS ESPERA
+   Un contenedor cuyo ancho lo decide su contenido —centrado, `fit-content`, un
+   flex que ajusta al hijo— se colapsa a dos pixeles cuando sus hijos estan
+   vacios, y entonces un esqueleto al 60% mide 1px. Se le pone esta clase
+   mientras muestre esqueletos: ocupa el ancho que ocupara despues. */
+.esqueleto-zona {
+    width: 100%;
+    min-width: 100%;
+}
+
+/* Centrado, para los esqueletos que reemplazan texto centrado. */
+.esqueleto.esqueleto--centrado { margin-left: auto; margin-right: auto; }
+
+@keyframes esqueletoLatido {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Quien pidió menos animación en su sistema no tiene por qué ver esto latir. */
+@media (prefers-reduced-motion: reduce) {
+    .esqueleto { animation: none; }
+}
+
+/* ── Huecos con forma propia ─────────────────────────────────────────────────
+
+   La galería no necesita un alto inventado: una foto de prenda es 3/4, la misma
+   proporción que declara `.product-card__images`. Antes decía `height: 70vh`,
+   que en un teléfono acostado tapaba la pantalla entera.
+
+   Los dos de abajo sí llevan una medida, y es lo único que queda: el alto de un
+   selector de variantes y el del botón de opciones dependen de datos que
+   todavía no llegaron, así que hay que anticiparlos. La diferencia con antes es
+   que se deciden UNA vez y acá, no cuarenta veces repartidas por el JSX; y van
+   en `rem`, así que siguen al tamaño de letra del usuario. */
+
+.esqueleto.esqueleto--galeria {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    border-radius: 1rem;
+}
+
+.esqueleto-parrafo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.esqueleto-selectores {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+.esqueleto.esqueleto--selector {
+    width: 100%;
+    height: 5rem;
+    border-radius: 0.75rem;
+}
+
+.esqueleto.esqueleto--boton {
+    width: 100%;
+    height: 3.75rem;
+    border-radius: 1rem;
+}

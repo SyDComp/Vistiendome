@@ -142,29 +142,35 @@ const DetalleColeccion = () => {
     if (loading) return (
         <div className="collection-detail-view fade-in">
             <header className="collection-hero">
-                <div className="collection-detail-hero-content">
-                    <div className="skeleton-box" style={{ width: '120px', height: '24px', margin: '0 auto 16px', borderRadius: '12px' }} />
-                    <div className="skeleton-box" style={{ width: '60%', height: '48px', margin: '0 auto 24px', borderRadius: '12px' }} />
-                    <div className="skeleton-box" style={{ width: '40%', height: '24px', margin: '0 auto 32px', borderRadius: '8px' }} />
-                    <div className="skeleton-box" style={{ width: '200px', height: '20px', margin: '0 auto', borderRadius: '8px' }} />
+                <div className="collection-detail-hero-content esqueleto-zona">
+                    {/* Cada hueco lleva la clase del elemento REAL que reemplaza, asi
+                        que hereda su tamano de letra, su margen y su centrado. Si
+                        manana cambia el titulo, su esqueleto cambia con el. */}
+                    <div className="collection-detail-hero-badge esqueleto esqueleto--texto esqueleto--breve esqueleto--centrado" />
+                    <h1 className="collection-detail-hero-title esqueleto esqueleto--texto esqueleto--medio esqueleto--centrado" />
+                    <p className="collection-detail-hero-desc esqueleto esqueleto--texto esqueleto--corto esqueleto--centrado" />
+                    <div className="hero-stats esqueleto esqueleto--texto esqueleto--breve esqueleto--centrado" />
                 </div>
             </header>
             <main className="collection-products container">
                 <div className="grid-header">
-                    <div className="skeleton-box" style={{ width: '200px', height: '32px', borderRadius: '8px', marginBottom: '8px' }} />
-                    <div className="skeleton-box" style={{ width: '150px', height: '16px', borderRadius: '4px' }} />
+                    <h2 className="esqueleto esqueleto--texto esqueleto--corto" />
+                    <p className="esqueleto esqueleto--texto esqueleto--breve" />
                 </div>
                 <section className="product-group-section">
                     <div className="group-title-wrapper">
-                        <div className="skeleton-box" style={{ width: '150px', height: '24px', borderRadius: '8px' }} />
+                        <h3 className="esqueleto esqueleto--texto esqueleto--corto" />
                     </div>
                     <div className="products-grid">
+                        {/* La misma estructura de una tarjeta de verdad: la proporcion
+                            3/4 de la imagen y el espaciado salen de `.product-card__*`,
+                            no de medidas copiadas aca. */}
                         {[...Array(4)].map((_, i) => (
-                            <div key={i} className="product-card">
-                                <div className="skeleton-box" style={{ width: '100%', aspectRatio: '3/4', borderRadius: '4px', marginBottom: '16px' }} />
-                                <div className="product-info" style={{ padding: '0 12px 12px' }}>
-                                    <div className="skeleton-box" style={{ width: '80%', height: '18px', borderRadius: '4px', marginBottom: '8px' }} />
-                                    <div className="skeleton-box" style={{ width: '40%', height: '16px', borderRadius: '4px' }} />
+                            <div key={i} className="product-card product-card--vertical">
+                                <div className="product-card__images esqueleto esqueleto--bloque" />
+                                <div className="product-card__info">
+                                    <h3 className="product-card__name esqueleto esqueleto--texto esqueleto--medio" />
+                                    <div className="product-card__price-container esqueleto esqueleto--texto esqueleto--corto" />
                                 </div>
                             </div>
                         ))}
