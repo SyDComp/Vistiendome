@@ -154,3 +154,15 @@
     .cms-titulo-bloque--menor { font-size: 1.125rem; }
     .cms-titulo-bloque--rotulo { font-size: 1.125rem; }
 }
+
+/* Separacion entre bloques de la portada. Dentro del editor todo va mas junto
+   para que quepa la maqueta entera. */
+.cms-bloque { margin-bottom: 3.75rem; }
+.cms-bloque--menor { margin-bottom: 2.5rem; }
+.cms-bloque--centrado { width: 100%; display: flex; justify-content: center; }
+.cms-bloque.cms-previa { margin-bottom: 1.875rem; }
+.cms-bloque--menor.cms-previa { margin-bottom: 1.25rem; }
+
+@media (max-width: 48rem) {
+    .cms-bloque--menor { margin-bottom: 1.875rem; }
+}

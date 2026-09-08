@@ -138,7 +138,7 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                     >
                         Cancelar
                     </button>
-                    <Button onClick={handleSave} variant="primary" style={{ background: '#8f0653' }}>
+                    <Button onClick={handleSave} variant="primary" className="est-boton-barra--activo">
                         <Save size={18} /> Guardar Cambios
                     </Button>
                 </div>
@@ -153,11 +153,11 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                     <section className="est-grupo">
                         <h4 className="est-seccion">Acciones Rápidas</h4>
                         <div className="est-columna--holgada">
-                            <button onClick={() => addRow()} style={toolbarButtonStyle}><Plus size={16} /> Añadir Fila</button>
-                            <button onClick={() => removeRow(config.rows.length - 1)} style={{ ...toolbarButtonStyle, color: '#ef4444', borderColor: 'rgba(239,68,68,0.2)' }}><Trash2 size={16} /> Quitar Última Fila</button>
+                            <button onClick={() => addRow()} className="est-boton-barra"><Plus size={16} /> Añadir Fila</button>
+                            <button onClick={() => removeRow(config.rows.length - 1)} className="est-boton-barra est-boton-barra--peligro"><Trash2 size={16} /> Quitar Última Fila</button>
                             <div className="est-hueco" />
-                            <button onClick={() => addColumn()} style={toolbarButtonStyle}><Plus size={16} /> Añadir Columna</button>
-                            <button onClick={() => removeColumn(config.headers[config.headers.length - 1])} style={{ ...toolbarButtonStyle, color: '#ef4444', borderColor: 'rgba(239,68,68,0.2)' }}><Trash2 size={16} /> Quitar Última Columna</button>
+                            <button onClick={() => addColumn()} className="est-boton-barra"><Plus size={16} /> Añadir Columna</button>
+                            <button onClick={() => removeColumn(config.headers[config.headers.length - 1])} className="est-boton-barra est-boton-barra--peligro"><Trash2 size={16} /> Quitar Última Columna</button>
                         </div>
                     </section>
 
@@ -165,7 +165,7 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                         <h4 className="est-seccion">Propiedades de Celda</h4>
                         {activeCell ? (
                             <div className="est-columna--amplia">
-                                <div style={styleControlStyle}>
+                                <div className="est-control-estilo">
                                     <span>Negrita</span>
                                     <button 
                                         onClick={() => {
@@ -173,21 +173,21 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                                             const currentBold = typeof cell === 'object' ? cell.bold : false;
                                             updateCell(activeCell.rowIndex, activeCell.header, { bold: !currentBold });
                                         }}
-                                        style={{ ...toolbarButtonStyle, width: '44px', height: '44px', padding: 0, justifyContent: 'center', background: (typeof config.rows[activeCell.rowIndex][activeCell.header] === 'object' ? config.rows[activeCell.rowIndex][activeCell.header].bold : false) ? '#8f0653' : 'rgba(255,255,255,0.05)' }}
+                                        className={`est-boton-barra est-boton-barra--cuadrado${(typeof config.rows[activeCell.rowIndex][activeCell.header] === 'object' ? config.rows[activeCell.rowIndex][activeCell.header].bold : false) ? ' est-boton-barra--activo' : ''}`}
                                     >
                                         <Type size={18} />
                                     </button>
                                 </div>
-                                <div style={styleControlStyle}>
+                                <div className="est-control-estilo">
                                     <span>Color Texto</span>
                                     <input 
                                         type="color" 
                                         value={(typeof config.rows[activeCell.rowIndex][activeCell.header] === 'object' ? config.rows[activeCell.rowIndex][activeCell.header].color : null) || config.styles.cellColor} 
                                         onChange={e => updateCell(activeCell.rowIndex, activeCell.header, { color: e.target.value })} 
-                                        style={colorPickerStyle} 
+                                        className="est-selector-color" 
                                     />
                                 </div>
-                                <button onClick={() => updateCell(activeCell.rowIndex, activeCell.header, { bold: false, color: null })} style={{ ...toolbarButtonStyle, fontSize: '11px', padding: '8px' }}>Limpiar Formato</button>
+                                <button onClick={() => updateCell(activeCell.rowIndex, activeCell.header, { bold: false, color: null })} className="est-boton-barra est-boton-barra--menor">Limpiar Formato</button>
                             </div>
                         ) : (
                             <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', fontStyle: 'italic' }}>Selecciona una celda para editar su estilo...</p>
@@ -197,31 +197,31 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                     <section>
                         <h4 className="est-seccion">Estilos Generales</h4>
                         <div className="est-columna--amplia">
-                            <div style={styleControlStyle}>
+                            <div className="est-control-estilo">
                                 <span>Fondo Encabezado</span>
-                                <input type="color" value={config.styles.headerBg} onChange={e => setConfig({...config, styles: {...config.styles, headerBg: e.target.value}})} style={colorPickerStyle} />
+                                <input type="color" value={config.styles.headerBg} onChange={e => setConfig({...config, styles: {...config.styles, headerBg: e.target.value}})} className="est-selector-color" />
                             </div>
-                            <div style={styleControlStyle}>
+                            <div className="est-control-estilo">
                                 <span>Color Texto Encabezado</span>
-                                <input type="color" value={config.styles.headerColor} onChange={e => setConfig({...config, styles: {...config.styles, headerColor: e.target.value}})} style={colorPickerStyle} />
+                                <input type="color" value={config.styles.headerColor} onChange={e => setConfig({...config, styles: {...config.styles, headerColor: e.target.value}})} className="est-selector-color" />
                             </div>
-                            <div style={styleControlStyle}>
+                            <div className="est-control-estilo">
                                 <span>Fondo Celdas</span>
-                                <input type="color" value={config.styles.cellBg} onChange={e => setConfig({...config, styles: {...config.styles, cellBg: e.target.value}})} style={colorPickerStyle} />
+                                <input type="color" value={config.styles.cellBg} onChange={e => setConfig({...config, styles: {...config.styles, cellBg: e.target.value}})} className="est-selector-color" />
                             </div>
-                            <div style={styleControlStyle}>
+                            <div className="est-control-estilo">
                                 <span>Color Bordes</span>
-                                <input type="color" value={config.styles.borderColor} onChange={e => setConfig({...config, styles: {...config.styles, borderColor: e.target.value}})} style={colorPickerStyle} />
+                                <input type="color" value={config.styles.borderColor} onChange={e => setConfig({...config, styles: {...config.styles, borderColor: e.target.value}})} className="est-selector-color" />
                             </div>
-                            <div style={styleControlStyle}>
+                            <div className="est-control-estilo">
                                 <span>Redondeo Tabla</span>
                                 <input type="range" min="0" max="40" value={parseInt(config.styles.borderRadius)} onChange={e => setConfig({...config, styles: {...config.styles, borderRadius: `${e.target.value}px`}})} className="est-ancho-corto" />
                             </div>
-                            <div style={styleControlStyle}>
+                            <div className="est-control-estilo">
                                 <span>Líneas Verticales</span>
                                 <input type="checkbox" checked={config.styles.showVerticalLines} onChange={e => setConfig({...config, styles: {...config.styles, showVerticalLines: e.target.checked}})} />
                             </div>
-                            <div style={styleControlStyle}>
+                            <div className="est-control-estilo">
                                 <span>Líneas Horizontales</span>
                                 <input type="checkbox" checked={config.styles.showHorizontalLines !== false} onChange={e => setConfig({...config, styles: {...config.styles, showHorizontalLines: e.target.checked}})} />
                             </div>
@@ -248,11 +248,11 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                                              <input 
                                                  value={h}
                                                  onChange={e => updateHeader(i, e.target.value)}
-                                                 style={{ ...headerInputStyle, color: config.styles.headerColor }}
+                                                 className="est-cabecera-campo" style={{ color: config.styles.headerColor }}
                                              />
-                                             <div className="col-actions" style={colActionsStyle}>
-                                                 <button onClick={() => addColumn(i)} style={miniButtonStyle} title="Insertar columna a la derecha"><Plus size={10} /></button>
-                                                 <button onClick={() => removeColumn(h)} style={{ ...miniButtonStyle, color: '#ef4444' }} title="Eliminar esta columna"><Trash2 size={10} /></button>
+                                             <div className="col-actions est-acciones-columna">
+                                                 <button onClick={() => addColumn(i)} className="est-boton-mini" title="Insertar columna a la derecha"><Plus size={10} /></button>
+                                                 <button onClick={() => removeColumn(h)} className="est-boton-mini est-boton-mini--peligro" title="Eliminar esta columna"><Trash2 size={10} /></button>
                                              </div>
                                          </th>
                                      ))}
@@ -272,8 +272,8 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                                             <div className="row-actions">
                                                 <span className="est-rotulo-gris">{rowIndex + 1}</span>
                                                 <div className="est-fila--menuda">
-                                                    <button onClick={() => addRow(rowIndex)} style={miniButtonStyle} title="Insertar fila debajo"><Plus size={10} /></button>
-                                                    <button onClick={() => removeRow(rowIndex)} style={{ ...miniButtonStyle, color: '#ef4444' }} title="Eliminar esta fila"><Trash2 size={10} /></button>
+                                                    <button onClick={() => addRow(rowIndex)} className="est-boton-mini" title="Insertar fila debajo"><Plus size={10} /></button>
+                                                    <button onClick={() => removeRow(rowIndex)} className="est-boton-mini est-boton-mini--peligro" title="Eliminar esta fila"><Trash2 size={10} /></button>
                                                 </div>
                                             </div>
                                         </td>
@@ -350,51 +350,9 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
     );
 };
 
-const toolbarButtonStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    width: '100%',
-    padding: '14px 20px',
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: '16px',
-    color: '#fff',
-    fontSize: '14px',
-    fontWeight: '700',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
-};
 
-const styleControlStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    fontSize: '13px',
-    color: 'rgba(255,255,255,0.8)',
-    fontWeight: '600'
-};
 
-const colorPickerStyle = {
-    width: '32px',
-    height: '32px',
-    border: 'none',
-    borderRadius: '8px',
-    background: 'none',
-    cursor: 'pointer'
-};
 
-const headerInputStyle = {
-    width: '100%',
-    background: 'transparent',
-    border: 'none',
-    textAlign: 'center',
-    fontSize: '11px',
-    fontWeight: '900',
-    textTransform: 'uppercase',
-    letterSpacing: '1px',
-    outline: 'none'
-};
 
 const cellInputStyle = {
     width: '100%',
@@ -406,30 +364,6 @@ const cellInputStyle = {
     display: 'block'
 };
 
-const colActionsStyle = {
-    position: 'absolute',
-    top: '4px',
-    right: '4px',
-    display: 'flex',
-    gap: '2px',
-    background: '#fff',
-    padding: '2px',
-    borderRadius: '6px',
-    boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-    zIndex: 10
-};
 
-const miniButtonStyle = {
-    width: '24px',
-    height: '24px',
-    borderRadius: '6px',
-    border: 'none',
-    background: '#f1f5f9',
-    color: '#64748b',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer'
-};
 
 export default DataTableStudio;

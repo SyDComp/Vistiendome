@@ -155,7 +155,7 @@ export const UniversalBlock = ({ config, aspectRatio = '21/9', borderRadius = '4
     const desktopMaxW = desktopRatio === '1/1' ? '700px' : '1200px';
 
     return (
-        <div style={{ marginBottom: previewMode ? '20px' : '40px', width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <div className={`cms-bloque cms-bloque--menor cms-bloque--centrado${previewMode ? ' cms-previa' : ''}`}>
             <div style={{ 
                 width: '100%', 
                 maxWidth: previewMode ? '100%' : (isMobile ? '375px' : desktopMaxW),
@@ -206,7 +206,7 @@ export const SceneCarouselBlock = ({ config, previewMode = false, forceMobile = 
     const desktopMaxW = desktopRatio === '1/1' ? '700px' : '1200px';
 
     return (
-        <div style={{ marginBottom: previewMode ? '30px' : '60px', width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <div className={`cms-bloque cms-bloque--centrado${previewMode ? ' cms-previa' : ''}`}>
             <div
                 style={{ 
                     width: '100%', 
@@ -323,7 +323,7 @@ export const DataTableBlock = ({ config, title, previewMode = false, forceMobile
     if (!headers.length) return null;
 
     return (
-        <div style={{ marginBottom: previewMode ? '20px' : (isMobile ? '30px' : '40px') }}>
+        <div className={`cms-bloque cms-bloque--menor${previewMode ? ' cms-previa' : ''}`}>
             {title && <h3 className={`cms-titulo-bloque cms-titulo-bloque--menor${previewMode ? ' cms-previa' : ''}`}>{title}</h3>}
             <div style={{ overflowX: 'auto', borderRadius: styles.borderRadius || '20px', border: `1px solid ${styles.borderColor}` }}>
                 <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, textAlign: 'left', background: styles.cellBg }}>
@@ -580,7 +580,7 @@ export const RecentProductsBlock = ({ previewMode = false }) => {
     if (loading || !products.length) return null;
 
     return (
-        <div style={{ marginBottom: previewMode ? '30px' : '60px' }}>
+        <div className={`cms-bloque${previewMode ? ' cms-previa' : ''}`}>
             {!previewMode && (
                 <div className="cms-cabecera cms-cabecera--amplia">
                     <div>
