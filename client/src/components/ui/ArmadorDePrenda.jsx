@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Sliders } from 'lucide-react';
 
 /**
  * Armar una pieza que NO está en el catálogo, igual que se arma una variante.
@@ -41,6 +41,10 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
     // Características de la prenda que el cliente decidió NO precisar. Un
     // encargo especial puede ignorar el largo del modelo original.
     const [quitadas, setQuitadas] = useState([]);
+    // Búsqueda para sumar una característica. Un desplegable plano sirve con
+    // seis; con doscientas es inservible, y el catálogo crece.
+    const [buscando, setBuscando] = useState('');
+    const [abriendoSelector, setAbriendoSelector] = useState(false);
 
     const etiqueta = { display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', marginBottom: '4px' };
     const campo = { width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' };
@@ -111,9 +115,11 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
     // características tiene, no hay que preguntárselo a nadie.
     const atributosDeLaPrenda = useMemo(() => {
         if (!prenda) return {};
-        // Prenda que no existe en el catálogo: no hay de dónde derivarlas, así
-        // que se ofrecen todas y la clienta usa las que le sirvan.
-        if (prenda === OTRO) return atributos;
+        // Prenda que no existe en el catálogo: no hay de dónde derivarlas, y
+        // volcarlas TODAS de golpe es peor que no mostrar ninguna — obliga a
+        // recorrer una lista entera para encontrar las dos que interesan.
+        // Se empieza en blanco y se agregan las que hagan falta.
+        if (prenda === OTRO) return {};
 
         const producto = productos.find(x => x.name === prenda);
         if (!producto) return atributos;
@@ -153,6 +159,20 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
     const claves = Object.keys(visibles);
     // Las que existen en el sistema y todavía no están puestas.
     const disponiblesParaAgregar = Object.keys(atributos).filter(k => !claves.includes(k));
+    const deLaPrenda = Object.keys(atributosDeLaPrenda);
+    const totalCaracteristicas = Object.keys(atributos).length;
+    // Todas las del sistema, filtradas por lo que se escriba. El cliente marca
+    // y desmarca; lo que no puede es crear una que no exista.
+    const listaSelector = useMemo(() => {
+        const q = buscando.trim().toLowerCase();
+        const todas = Object.keys(atributos);
+        return q ? todas.filter(k => k.toLowerCase().includes(q)) : todas;
+    }, [buscando, atributos]);
+
+    const agregar_caracteristica = (k) => {
+        setQuitadas(q => q.filter(x => x !== k));
+        setAgregadas(a => (a.includes(k) ? a : [...a, k]));
+    };
     // Con una grosería sin corregir no se agrega nada.
     const hayBloqueo = Object.values(revisiones).some(r => r?.veredicto === 'ofensivo');
 
@@ -202,6 +222,7 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
                         setRevisiones({});
                         setAgregadas([]);
                         setQuitadas([]);
+                        setBuscando('');
                     }}>
                         <option value="">— elige la prenda —</option>
                         {productos.map(p => <option key={p.id ?? p.name} value={p.name}>{p.name}</option>)}
@@ -288,22 +309,61 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
                 })}
             </div>
 
-            {prenda && disponiblesParaAgregar.length > 0 && (
-                <div style={{ marginTop: '12px' }}>
-                    <label style={etiqueta}>¿Necesitas precisar algo más?</label>
-                    <select
-                        style={{ ...campo, maxWidth: '260px' }}
-                        value=""
-                        onChange={e => {
-                            const k = e.target.value;
-                            if (!k) return;
-                            setQuitadas(q => q.filter(x => x !== k));
-                            setAgregadas(a => (a.includes(k) ? a : [...a, k]));
-                        }}
-                    >
-                        <option value="">+ agregar característica</option>
-                        {disponiblesParaAgregar.map(k => <option key={k} value={k}>{k}</option>)}
-                    </select>
+            {prenda && (
+                <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px dashed #e9d5ff' }}>
+                    <button type="button" onClick={() => setAbriendoSelector(v => !v)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '7px', width: '100%',
+                                 justifyContent: 'center', padding: '10px', borderRadius: '10px',
+                                 border: '1.5px solid #c026d3', background: '#fff', color: '#86198f',
+                                 fontWeight: '800', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                        <Sliders size={15} />
+                        Seleccionar características
+                        <span style={{ fontWeight: 600, opacity: .75 }}>({claves.length} de {totalCaracteristicas})</span>
+                    </button>
+
+                    {abriendoSelector && (
+                        <div style={{ marginTop: '10px', border: '1px solid #e9d5ff', borderRadius: '10px', background: '#fff', padding: '10px' }}>
+                            {/* Buscador sólo cuando hay tantas que recorrerlas cansa.
+                                Con seis, estorba. */}
+                            {totalCaracteristicas > 8 && (
+                                <input
+                                    style={{ ...campo, marginBottom: '8px' }}
+                                    value={buscando}
+                                    onChange={e => setBuscando(e.target.value)}
+                                    placeholder="Buscar característica…"
+                                />
+                            )}
+
+                            <div style={{ maxHeight: '210px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                {listaSelector.map(k => {
+                                    const puesta = claves.includes(k);
+                                    return (
+                                        <label key={k} style={{ display: 'flex', alignItems: 'center', gap: '9px',
+                                                                padding: '7px 8px', borderRadius: '8px', cursor: 'pointer',
+                                                                background: puesta ? '#fdf4ff' : 'transparent', fontSize: '13px' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={puesta}
+                                                onChange={() => (puesta ? quitar(k) : agregar_caracteristica(k))}
+                                                style={{ accentColor: '#8f0653', width: '15px', height: '15px' }}
+                                            />
+                                            <span style={{ color: '#1e1b4b', fontWeight: puesta ? 700 : 500 }}>{k}</span>
+                                            {deLaPrenda.includes(k) && (
+                                                <span style={{ marginLeft: 'auto', fontSize: '10.5px', color: '#94a3b8' }}>
+                                                    de esta prenda
+                                                </span>
+                                            )}
+                                        </label>
+                                    );
+                                })}
+                                {!listaSelector.length && (
+                                    <span style={{ fontSize: '12px', color: '#94a3b8', padding: '6px' }}>
+                                        No hay ninguna con ese nombre.
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
