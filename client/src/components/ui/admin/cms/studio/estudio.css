@@ -537,3 +537,31 @@
     animation: studioSlideUp 0.3s ease;
     pointer-events: none;
 }
+
+/* Cabecera del estudio de texto. */
+.est-boton-marca { background: #8f0653; height: 2.5rem; padding: 0 1rem; border-radius: 0.75rem; }
+.est-boton-tenue {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.7;
+    padding: 0;
+    flex-shrink: 0;
+    font-family: inherit;
+}
+/* El titulo se edita donde se lee, sin marco de campo. */
+.est-titulo-editable {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.125rem;
+    font-weight: 900;
+    outline: none;
+    width: 100%;
+    text-overflow: ellipsis;
+    font-family: inherit;
+}

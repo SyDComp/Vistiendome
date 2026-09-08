@@ -1500,7 +1500,7 @@ const DetailDrawer = ({
                                                     
                                                     <div 
                                                         onClick={() => !isReorderMode && navigateTo(null, 'color_option', val, opt)}
-                                                        style={{ cursor: isReorderMode ? 'default' : 'pointer', width: '100%' }}
+                                                        className={`dd-fila-pulsable${isReorderMode ? ' dd-fila-pulsable--quieta' : ''}`}
                                                     >
                                                         {section.isColor ? (
                                                             <>
@@ -1588,7 +1588,7 @@ const DetailDrawer = ({
                                                 className="detail-drawer-collection-item"
                                             >
                                                 <div className="detail-drawer-collection-thumb-wrapper">
-                                                    {(sku.image || sku.image_url) ? <img src={`${sku.image || sku.image_url}`} className="dd-imagen-llena" /> : <Package size={18} color="#cbd5e1" style={{ margin: '13px' }} />}
+                                                    {(sku.image || sku.image_url) ? <img src={`${sku.image || sku.image_url}`} className="dd-imagen-llena" /> : <Package size={18} color="#cbd5e1" className="dd-espacio" />}
                                                 </div>
                                                 <div className="detail-drawer-flex-1-min-w-0">
                                                     <div className="detail-drawer-collection-sku">{sku.sku}</div>
@@ -1603,7 +1603,7 @@ const DetailDrawer = ({
                                 {section.type === 'form' && (
                                     <div className="detail-drawer-form-grid">
                                         {section.inputs.map((input, i) => (
-                                            <div key={i} style={{ gridColumn: (input.type === 'textarea') ? '1 / -1' : 'auto' }}>
+                                            <div key={i} className={input.type === 'textarea' ? 'dd-campo-ancho' : undefined}>
                                                 {input.type === 'textarea' ? (
                                                     <div className="detail-drawer-flex-col-8">
                                                         <label className="detail-drawer-input-label">{input.label}</label>

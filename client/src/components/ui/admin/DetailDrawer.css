@@ -133,3 +133,11 @@
 }
 .dd-respiro { margin-top: 0.25rem; }
 .dd-oculto { display: none; }
+
+/* Cola del cajon de detalle. */
+.dd-espacio { margin: 0.8125rem; }
+/* Una fila que solo se pulsa cuando no se esta reordenando. */
+.dd-fila-pulsable { cursor: pointer; width: 100%; }
+.dd-fila-pulsable--quieta { cursor: default; }
+/* Un campo de parrafo ocupa la fila entera de la rejilla. */
+.dd-campo-ancho { grid-column: 1 / -1; }

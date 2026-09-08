@@ -229,7 +229,7 @@ const CMSPageManager = ({
                     {hasChanges && (
                         <div className="cms-pg-fila">
                             <Button onClick={handleDiscard} variant="outline" disabled={isSaving}>Descartar</Button>
-                            <Button onClick={handleBulkSave} variant="primary" disabled={isSaving} style={{ background: '#059669' }}>
+                            <Button onClick={handleBulkSave} variant="primary" disabled={isSaving} className="cms-pg-verde">
                                 {isSaving ? 'Guardando...' : <><Save size={18} /> Guardar</>}
                             </Button>
                         </div>
@@ -280,7 +280,7 @@ const CMSPageManager = ({
                         <div className="cms-adm-vacio-grande">
                             <Layout size={48} color="#cbd5e1" className="adm-separacion" />
                             <h3 className="adm-titulo-simple">Sin bloques</h3>
-                            <p style={{ color: '#64748b', fontSize: '14px' }}>Empieza añadiendo contenido a esta página.</p>
+                            <p className="cms-pg-bajada">Empieza añadiendo contenido a esta página.</p>
                         </div>
                     ) : (
                         sections.map((section, index) => {
@@ -307,20 +307,20 @@ const CMSPageManager = ({
                                         boxShadow: isHovered ? '0 10px 25px rgba(143,6,83,0.15)' : 'none',
                                     }}
                                 >
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+                                    <div className="cms-pg-fila-media">
                                         {isReordering && (
                                             <div className="cms-pg-arrastre">
                                                 <button 
                                                     disabled={index === 0}
                                                     onClick={() => handleMove(index, -1)}
-                                                    style={{ border: 'none', background: 'none', cursor: index === 0 ? 'not-allowed' : 'pointer', color: index === 0 ? '#e2e8f0' : '#64748b', padding: 0 }}
+                                                    className="adm-mover" disabled={index === 0}
                                                 >
                                                     <ChevronUp size={20} />
                                                 </button>
                                                 <button 
                                                     disabled={index === sections.length - 1}
                                                     onClick={() => handleMove(index, 1)}
-                                                    style={{ border: 'none', background: 'none', cursor: index === sections.length - 1 ? 'not-allowed' : 'pointer', color: index === sections.length - 1 ? '#e2e8f0' : '#64748b', padding: 0 }}
+                                                    className="adm-mover" disabled={index === sections.length - 1}
                                                 >
                                                     <ChevronDown size={20} />
                                                 </button>
@@ -331,7 +331,7 @@ const CMSPageManager = ({
                                         </div>
                                         <div className="cms-pg-encogible">
                                             {editingTitleId === section.id ? (
-                                                <input autoFocus style={{ border: 'none', borderBottom: '2px solid #8f0653', outline: 'none', background: 'transparent', fontWeight: '800', width: '100%', fontSize: '13px' }} value={section.title} onChange={e => setSections(sections.map(s => s.id === section.id ? { ...s, title: e.target.value } : s))} onBlur={() => setEditingTitleId(null)} onKeyDown={e => e.key === 'Enter' && setEditingTitleId(null)} />
+                                                <input autoFocus className="cms-pg-editable" value={section.title} onChange={e => setSections(sections.map(s => s.id === section.id ? { ...s, title: e.target.value } : s))} onBlur={() => setEditingTitleId(null)} onKeyDown={e => e.key === 'Enter' && setEditingTitleId(null)} />
                                             ) : (
                                                 <h4 onClick={() => setEditingTitleId(section.id)} className="adm-titulo-fila">{section.title}</h4>
                                             )}
@@ -380,7 +380,7 @@ const CMSPageManager = ({
                             <h3 className="adm-titulo-seccion">
                                 <Monitor size={15} /> ESPEJO DEL SITIO (LIVE)
                             </h3>
-                            <div style={{ display: 'flex', background: '#fff', padding: '4px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                            <div className="cms-pg-grupo cms-pg-grupo--claro">
                                 <button 
                                     onClick={() => setPreviewDevice('desktop')}
                                     className={`cms-adm-dispositivo${previewDevice === 'desktop' ? ' cms-adm-dispositivo--activo' : ''}`}
@@ -464,8 +464,8 @@ const CMSPageManager = ({
                     animation: 'previewFadeIn 0.3s ease'
                 }}>
                     <div className="cms-adm-barra">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                            <div style={{ display: 'flex', background: '#f1f5f9', padding: '4px', borderRadius: '12px' }}>
+                        <div className="cms-pg-fila-ancha">
+                            <div className="cms-pg-grupo">
                                 <button 
                                     onClick={() => setPreviewDevice('desktop')}
                                     className={`cms-adm-dispositivo${previewDevice === 'desktop' ? ' cms-adm-dispositivo--activo' : ''}`}
@@ -485,7 +485,7 @@ const CMSPageManager = ({
                         </div>
                         <button 
                             onClick={() => setIsPreviewModalOpen(false)}
-                            style={{ background: '#f1f5f9', border: 'none', borderRadius: '10px', padding: '8px 16px', fontWeight: '800', fontSize: '12px', cursor: 'pointer', color: '#1e1b4b' }}
+                            className="cms-pg-boton-claro"
                         >
                             Cerrar
                         </button>

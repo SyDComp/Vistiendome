@@ -209,3 +209,34 @@
     .cms-pg-acciones-fila { justify-content: flex-end; }
     .cms-pg-buscador { flex: 1; }
 }
+
+/* Cola del gestor de paginas. */
+.cms-pg-boton-claro {
+    background: #f1f5f9;
+    border: none;
+    border-radius: 0.625rem;
+    padding: 0.5rem 1rem;
+    font-weight: 800;
+    font-size: 0.75rem;
+    cursor: pointer;
+    color: #1e1b4b;
+    font-family: inherit;
+    min-height: 2.25rem;
+}
+.cms-pg-verde { background: #059669; }
+/* Nombre editable en la propia fila: se escribe donde se lee. */
+.cms-pg-editable {
+    border: none;
+    border-bottom: 2px solid #8f0653;
+    outline: none;
+    background: transparent;
+    font-weight: 800;
+    width: 100%;
+    font-size: 0.8125rem;
+    font-family: inherit;
+}
+.cms-pg-bajada { color: #64748b; font-size: 0.875rem; }
+.cms-pg-fila-media { display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 0; }
+.cms-pg-fila-ancha { display: flex; align-items: center; gap: 1rem; }
+.cms-pg-grupo { display: flex; background: #f1f5f9; padding: 0.25rem; border-radius: 0.75rem; }
+.cms-pg-grupo--claro { background: #fff; border: 1px solid #e2e8f0; }

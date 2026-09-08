@@ -54,7 +54,7 @@ const TextStudio = ({ isOpen, onClose, data, onSave }) => {
             {/* HEADER */}
             <div className="est-barra">
                 <div className="est-fila--ancha">
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.7, padding: 0, flexShrink: 0 }}>
+                    <button onClick={onClose} className="est-boton-tenue">
                         <ArrowLeft size={20} /> <span className="hide-on-mobile est-nombre">Volver</span>
                     </button>
                     <div className="hide-on-mobile est-divisor" />
@@ -66,14 +66,14 @@ const TextStudio = ({ isOpen, onClose, data, onSave }) => {
                             <input 
                                 value={title}
                                 onChange={e => setTitle(e.target.value)}
-                                style={{ background: 'none', border: 'none', color: '#fff', fontSize: '18px', fontWeight: '900', outline: 'none', width: '100%', textOverflow: 'ellipsis' }}
+                                className="est-titulo-editable"
                             />
                             <p className="est-ruta">Editorial Studio Pro</p>
                         </div>
                     </div>
                 </div>
                 <div className="est-fila--fija">
-                    <Button onClick={handleSave} variant="primary" style={{ background: '#8f0653', height: '40px', padding: '0 16px', borderRadius: '12px' }}>
+                    <Button onClick={handleSave} variant="primary" className="est-boton-marca">
                         <Save size={18} /> <span className="hide-on-mobile">Guardar</span>
                     </Button>
                 </div>

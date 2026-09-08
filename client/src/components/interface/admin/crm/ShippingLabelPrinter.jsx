@@ -924,18 +924,18 @@ const ShippingLabelPrinter = () => {
                                                     Si se puede, se dice si de verdad está lista — no
                                                     conviene despachar algo que todavía no se cortó. */}
                                                 {!despachable ? (
-                                                    <div style={{ fontSize: '10.5px', color: '#b91c1c', marginTop: '3px', fontWeight: '700' }}>
+                                                    <div className="et-aviso et-aviso--alerta">
                                                         {c.estado === 'CANCELADA'
                                                             ? 'Cancelada — no se despacha'
                                                             : 'Sin confirmar — la clienta todavía no acepta'}
                                                     </div>
                                                 ) : c.modo_entrega === 'RETIRO' ? (
-                                                    <div style={{ fontSize: '10.5px', color: '#0369a1', marginTop: '3px', fontWeight: '700' }}>
+                                                    <div className="et-aviso et-aviso--info">
                                                         Retiro en el local — se marca al entregarla
                                                         {confeccion.texto ? ` · ${confeccion.texto}` : ''}
                                                     </div>
                                                 ) : confeccion.texto && (
-                                                    <div style={{ fontSize: '10.5px', color: TONOS[confeccion.tono].color, marginTop: '3px', fontWeight: '700' }}>
+                                                    <div className="et-aviso" style={{ color: TONOS[confeccion.tono].color }}>
                                                         {confeccion.texto}
                                                     </div>
                                                 )}
@@ -1143,7 +1143,7 @@ const ShippingLabelPrinter = () => {
 
                                                         {/* DESTINATARIO */}
                                                         <div className="et-rotulo">DESTINATARIO</div>
-                                                        <div style={{ fontSize: '16px', fontWeight: '900', color: '#000', lineHeight: '1.1', marginBottom: '8px' }}>
+                                                        <div className="et-destinatario">
                                                             {fullName.toUpperCase()}
                                                         </div>
 

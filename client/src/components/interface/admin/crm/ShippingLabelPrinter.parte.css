@@ -390,3 +390,15 @@
 @media (max-width: 48rem) {
     .et-vista { padding: 1rem 0.625rem; gap: 1.25rem; justify-content: flex-start; }
 }
+
+/* Avisos por confeccion en la etiqueta. El color viene del dato; el resto no. */
+.et-aviso { font-size: 0.65625rem; margin-top: 0.1875rem; font-weight: 700; }
+.et-aviso--info { color: #0369a1; }
+.et-aviso--alerta { color: #b91c1c; }
+.et-destinatario {
+    font-size: 1rem;
+    font-weight: 900;
+    color: #000;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+}
