@@ -289,7 +289,7 @@ export const TextBlock = ({ config, title, previewMode = false, forceMobile = nu
                 boxSizing: 'border-box',
                 textAlign: align
             }}>
-                {title && <h2 style={{ fontSize: previewMode ? '20px' : (isMobile ? '22px' : '28px'), fontWeight: '900', color: '#1e1b4b', marginBottom: '24px' }}>{title}</h2>}
+                {title && <h2 className={`cms-titulo-bloque${previewMode ? ' cms-previa' : ''}`}>{title}</h2>}
                 <div 
                     className="rich-text-content"
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(sanitizedContent) }}
@@ -324,7 +324,7 @@ export const DataTableBlock = ({ config, title, previewMode = false, forceMobile
 
     return (
         <div style={{ marginBottom: previewMode ? '20px' : (isMobile ? '30px' : '40px') }}>
-            {title && <h3 style={{ fontSize: previewMode ? '14px' : (isMobile ? '18px' : '20px'), fontWeight: '800', color: '#1e1b4b', marginBottom: '20px' }}>{title}</h3>}
+            {title && <h3 className={`cms-titulo-bloque cms-titulo-bloque--menor${previewMode ? ' cms-previa' : ''}`}>{title}</h3>}
             <div style={{ overflowX: 'auto', borderRadius: styles.borderRadius || '20px', border: `1px solid ${styles.borderColor}` }}>
                 <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, textAlign: 'left', background: styles.cellBg }}>
                     <thead>
@@ -494,7 +494,7 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
             >
                 <div className="cms-cabecera">
                     <div>
-                        <h2 style={{ fontSize: previewMode ? '16px' : (isMobile ? '18px' : '24px'), fontWeight: '900', color: '#1e1b4b', margin: 0, textTransform: 'uppercase', letterSpacing: '1.2px' }}>
+                        <h2 className={`cms-titulo-bloque cms-titulo-bloque--rotulo${previewMode ? ' cms-previa' : ''}`}>
                             {title || 'Nuestros Favoritos'}
                         </h2>
                     </div>
@@ -622,7 +622,7 @@ export const RecentProductsBlock = ({ previewMode = false }) => {
                                 alt={product.name}
                             />
                         </div>
-                        <h4 style={{ margin: '0 0 2px 0', fontSize: previewMode ? '13px' : '18px', fontWeight: '800', color: '#1e1b4b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.name}</h4>
+                        <h4 className={`cms-pieza-nombre${previewMode ? ' cms-previa' : ''}`}>{product.name}</h4>
                         <PrecioConOferta product={product} previewMode={previewMode} tamano={previewMode ? '12px' : '16px'} />
                     </div>
                 ))}

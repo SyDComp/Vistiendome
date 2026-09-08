@@ -114,3 +114,43 @@
     letter-spacing: 0.0625rem;
     padding-inline: 0;
 }
+
+/* ── Titulos de los bloques de la portada ───────────────────────────────────
+   El tamano se decidia en JavaScript con `previewMode` y `isMobile`. El movil
+   es una media query; la vista previa, un modificador — porque no depende del
+   ancho de la pantalla sino de estar viendose dentro del editor. */
+
+.cms-titulo-bloque {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: var(--cms-tinta, #1e1b4b);
+    margin-bottom: 1.5rem;
+}
+.cms-titulo-bloque--menor { font-size: 1.25rem; margin-bottom: 1.25rem; }
+.cms-titulo-bloque--rotulo {
+    font-size: 1.5rem;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.075rem;
+}
+.cms-pieza-nombre {
+    margin: 0 0 0.125rem 0;
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: var(--cms-tinta, #1e1b4b);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Dentro del editor todo se ve mas chico, para que quepa la maqueta entera. */
+.cms-titulo-bloque.cms-previa { font-size: 1.25rem; }
+.cms-titulo-bloque--menor.cms-previa { font-size: 0.875rem; }
+.cms-titulo-bloque--rotulo.cms-previa { font-size: 1rem; }
+.cms-pieza-nombre.cms-previa { font-size: 0.8125rem; }
+
+@media (max-width: 48rem) {
+    .cms-titulo-bloque { font-size: 1.375rem; }
+    .cms-titulo-bloque--menor { font-size: 1.125rem; }
+    .cms-titulo-bloque--rotulo { font-size: 1.125rem; }
+}
