@@ -80,7 +80,7 @@ const AdminProfile = () => {
         }
     };
 
-    if (loading) return <div style={{ padding: '40px', textAlign: 'center' }}>Cargando perfil...</div>;
+    if (loading) return <div className="adm-vacio-centrado">Cargando perfil...</div>;
 
     return (
         <div className="admin-module fade-in">
@@ -108,8 +108,8 @@ const AdminProfile = () => {
             >
                 <form onSubmit={handleSave}>
                     <AdminFormSection title="Datos Personales" description="Estos datos se reflejarán en tu perfil de la plataforma.">
-                        <div style={{ display: 'flex', gap: '24px' }}>
-                            <div style={{ flex: 1 }}>
+                        <div className="adm-fila-amplia">
+                            <div className="adm-flexible">
                                 <Input 
                                     label="Nombres"
                                     name="nombres"
@@ -119,7 +119,7 @@ const AdminProfile = () => {
                                     required
                                 />
                             </div>
-                            <div style={{ flex: 1 }}>
+                            <div className="adm-flexible">
                                 <Input 
                                     label="Apellidos"
                                     name="apellidos"
@@ -133,9 +133,9 @@ const AdminProfile = () => {
                     </AdminFormSection>
 
                     <AdminFormSection title="Credenciales de Acceso" description="Esta información te permitirá iniciar sesión de forma segura en la consola.">
-                        <div style={{ marginBottom: '24px' }}>
+                        <div className="adm-separacion--seccion">
                             <Input 
-                                label={<span><Mail size={14} style={{display:'inline', verticalAlign:'middle'}}/> Email Corporativo</span>}
+                                label={<span><Mail size={14} className="adm-en-linea"/> Email Corporativo</span>}
                                 type="email" 
                                 name="email_corporativo" 
                                 value={profile.email_corporativo} 
@@ -146,14 +146,14 @@ const AdminProfile = () => {
 
                         <div>
                             <Input 
-                                label={<span><User size={14} style={{display:'inline', verticalAlign:'middle'}}/> Apodo (Nombre de usuario)</span>}
+                                label={<span><User size={14} className="adm-en-linea"/> Apodo (Nombre de usuario)</span>}
                                 type="text" 
                                 name="apodo" 
                                 value={profile.apodo || ''} 
                                 onChange={handleChange} 
                                 placeholder="Ej: paola123"
                             />
-                            <span style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', display: 'block', fontWeight: '500' }}>
+                            <span className="adm-pie-ayuda">
                                 Puedes usar este apodo para iniciar sesión más rápido en lugar de tu correo.
                             </span>
                         </div>
@@ -164,7 +164,7 @@ const AdminProfile = () => {
                             variant="primary" 
                             type="submit" 
                             disabled={saving}
-                            style={{ padding: '0 60px', height: '56px', fontSize: '16px', borderRadius: '18px', fontWeight: '900', boxShadow: '0 10px 15px -3px rgba(143, 6, 83, 0.3)' }}
+                            className="adm-boton-ancho"
                         >
                             {saving ? 'GUARDANDO...' : 'GUARDAR CAMBIOS DEL PERFIL'}
                         </Button>

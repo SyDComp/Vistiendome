@@ -40,14 +40,14 @@ const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {
                 position: 'relative' 
             }}>
                 {isLoading ? (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px', flexDirection: 'column', gap: '12px' }}>
-                        <div style={{ width: '32px', height: '32px', border: '3px solid #e2e8f0', borderTopColor: '#8f0653', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                        <span style={{ color: '#94a3b8', fontSize: '14px' }}>Cargando datos...</span>
+                    <div className="adm-tabla-estado">
+                        <div className="adm-rueda" />
+                        <span className="adm-celda-apagada">Cargando datos...</span>
                     </div>
                 ) : data.length === 0 ? (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px', color: '#94a3b8', flexDirection: 'column', gap: '8px' }}>
-                        <span style={{ fontSize: '36px' }}>📭</span>
-                        <span style={{ fontSize: '14px' }}>{emptyMessage}</span>
+                    <div className="adm-tabla-estado adm-tabla-estado--vacio">
+                        <span className="adm-tabla-estado-icono">📭</span>
+                        <span className="adm-tabla-estado-texto">{emptyMessage}</span>
                     </div>
                 ) : (
                     <table style={{ 

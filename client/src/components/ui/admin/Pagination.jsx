@@ -39,12 +39,12 @@ const Pagination = ({ currentPage = 1, totalPages = 1, totalItems = 0, pageSize 
             gap: '12px'
         }}>
             {/* Info */}
-            <span style={{ fontSize: '13px', color: '#64748b' }}>
-                Mostrando <strong style={{ color: '#1e1b4b' }}>{from}–{to}</strong> de <strong style={{ color: '#1e1b4b' }}>{totalItems}</strong> registros
+            <span className="adm-pag-cuenta">
+                Mostrando <strong className="adm-pag-actual">{from}–{to}</strong> de <strong className="adm-pag-actual">{totalItems}</strong> registros
             </span>
 
             {/* Controles */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div className="adm-pag-fila">
                 <PageBtn
                     onClick={() => onPageChange?.(currentPage - 1)}
                     disabled={currentPage === 1}
@@ -54,7 +54,7 @@ const Pagination = ({ currentPage = 1, totalPages = 1, totalItems = 0, pageSize 
                 {currentPage > 3 && (
                     <>
                         <PageBtn label="1" onClick={() => onPageChange?.(1)} />
-                        <span style={{ padding: '0 4px', color: '#94a3b8' }}>…</span>
+                        <span className="adm-pag-salto">…</span>
                     </>
                 )}
 
@@ -69,7 +69,7 @@ const Pagination = ({ currentPage = 1, totalPages = 1, totalItems = 0, pageSize 
 
                 {currentPage < totalPages - 2 && (
                     <>
-                        <span style={{ padding: '0 4px', color: '#94a3b8' }}>…</span>
+                        <span className="adm-pag-salto">…</span>
                         <PageBtn label={totalPages} onClick={() => onPageChange?.(totalPages)} />
                     </>
                 )}

@@ -28,21 +28,21 @@ const MediaField = ({ value, onChange, label }) => {
 
     return (
         <div>
-            {label && <label style={{ display: 'block', fontSize: '13px', fontWeight: '800', color: '#475569', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</label>}
+            {label && <label className="adm-medios-rotulo">{label}</label>}
 
             {url ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px', padding: '8px', border: '1px solid #e2e8f0', borderRadius: '12px', background: '#f8fafc' }}>
-                    <Imagen url={url} alt="" style={{ width: '56px', height: '56px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} sizes="56px" />
-                    <span style={{ flex: 1, fontSize: '12px', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div className="adm-medios-fila">
+                    <Imagen url={url} alt="" className="adm-medios-miniatura" sizes="56px" />
+                    <span className="adm-medios-nombre">
                         {v.asset_id ? `Galería · ${url}` : url}
                     </span>
-                    <button type="button" onClick={() => onChange({ asset_id: null, url: '' })} title="Quitar" style={{ border: 'none', background: '#fff', borderRadius: '8px', width: '32px', height: '32px', cursor: 'pointer', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <button type="button" onClick={() => onChange({ asset_id: null, url: '' })} title="Quitar" className="adm-medios-quitar">
                         <X size={16} />
                     </button>
                 </div>
             ) : null}
 
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <div className="adm-medios-botones">
                 <button type="button" style={btn(false)} onClick={() => setShowGallery(true)}>
                     <ImageIcon size={14} /> Elegir de galería
                 </button>
@@ -57,13 +57,13 @@ const MediaField = ({ value, onChange, label }) => {
                     value={isExternal ? url : ''}
                     onChange={(e) => onChange({ asset_id: null, url: e.target.value })}
                     placeholder="https://..."
-                    style={{ width: '100%', height: '44px', padding: '0 14px', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '14px', marginTop: '10px', boxSizing: 'border-box' }}
+                    className="adm-medios-url"
                 />
             )}
 
             {showGallery && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 6000, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-                    <div style={{ width: '90%', height: '90%', background: '#fff', borderRadius: '24px', overflow: 'hidden' }}>
+                <div className="adm-visor">
+                    <div className="adm-visor-caja">
                         <MediaGallery
                             isOpen
                             onClose={() => setShowGallery(false)}

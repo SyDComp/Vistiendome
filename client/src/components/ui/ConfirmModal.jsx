@@ -113,7 +113,7 @@ const ConfirmModal = ({
                 </button>
 
                 {/* Header with Icon */}
-                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                <div className="adm-confirmar-texto">
                     <div style={{
                         width: '80px',
                         height: '80px',
@@ -149,7 +149,7 @@ const ConfirmModal = ({
                 </p>
 
                 {/* Actions */}
-                <div style={{ display: 'flex', gap: '12px' }}>
+                <div className="adm-confirmar-botones">
                     <Button 
                         onClick={onClose}
                         variant="outline"
