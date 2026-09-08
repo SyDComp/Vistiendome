@@ -4,6 +4,7 @@ import { BarChart3, Eye, MousePointerClick, Search, ShoppingCart, MessageCircle,
 import { get } from '../../../../lib/api/client';
 import { getImageUrl } from '../../../../lib/api/endpoints';
 import TimeSeriesChart from './TimeSeriesChart';
+import './AnalyticsModule.css';
 
 const CHART_METRICS = [
     { key: 'views', label: 'Vistas', color: '#3b82f6' },
@@ -60,15 +61,15 @@ const AnalyticsModule = () => {
     ];
 
     return (
-        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1000px', overflowY: 'auto', paddingBottom: '40px' }}>
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#fdf2f8', color: '#8f0653', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="ana">
+            <header className="ana-cabecera">
+                <div className="ana-cabecera-titulo">
+                    <div className="ana-emblema">
                         <BarChart3 size={22} />
                     </div>
                     <div>
-                        <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '900', color: '#1e1b4b' }}>Inteligencia de Negocio</h1>
-                        <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '14px' }}>Qué miran, qué buscan y qué dejan en el camino tus clientes.</p>
+                        <h1 >Inteligencia de Negocio</h1>
+                        <p >Qué miran, qué buscan y qué dejan en el camino tus clientes.</p>
                     </div>
                 </div>
                 <select value={days} onChange={(e) => setDays(parseInt(e.target.value))} style={selectStyle}>
@@ -79,29 +80,29 @@ const AnalyticsModule = () => {
             </header>
 
             {loading ? (
-                <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Cargando estadísticas...</div>
+                <div className="ana-aviso">Cargando estadísticas...</div>
             ) : !data ? (
-                <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>Aún no hay datos suficientes para mostrar.</div>
+                <div className="ana-aviso ana-aviso--vacio">Aún no hay datos suficientes para mostrar.</div>
             ) : (
                 <>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px' }}>
+                    <div className="ana-metricas">
                         {metrics.map(m => (
-                            <div key={m.key} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                                    <div style={{ width: '32px', height: '32px', borderRadius: '9px', background: m.bg, color: m.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div key={m.key} className="ana-metrica">
+                                <div className="ana-metrica-cabecera">
+                                    <div className="ana-metrica-icono" style={{ background: m.bg, color: m.color }}>
                                         {m.icon}
                                     </div>
-                                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.3px' }}>{m.label}</span>
+                                    <span className="ana-metrica-nombre">{m.label}</span>
                                 </div>
-                                <div style={{ fontSize: '28px', fontWeight: '900', color: '#1e1b4b' }}>{(m.value ?? 0).toLocaleString('es-CL')}</div>
+                                <div className="ana-metrica-valor">{(m.value ?? 0).toLocaleString('es-CL')}</div>
                             </div>
                         ))}
                     </div>
 
-                    <section style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '24px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
-                            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#1e1b4b' }}>Tendencia por día</h3>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    <section className="ana-panel">
+                        <div className="ana-panel-cabecera">
+                            <h3 className="ana-panel-titulo">Tendencia por día</h3>
+                            <div className="ana-selector-metrica">
                                 {CHART_METRICS.map(m => (
                                     <button
                                         key={m.key}
@@ -112,8 +113,7 @@ const AnalyticsModule = () => {
                                             color: chartMetric === m.key ? '#fff' : '#64748b',
                                             borderRadius: '8px', padding: '6px 12px', fontSize: '12px',
                                             fontWeight: '700', cursor: 'pointer',
-                                        }}
-                                    >
+                                        }}>
                                         {m.label}
                                     </button>
                                 ))}
@@ -129,27 +129,27 @@ const AnalyticsModule = () => {
                         />
 
                         {selectedDay ? (
-                            <div style={{ marginTop: '16px', padding: '16px', background: '#f8fafc', borderRadius: '14px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: '#1e1b4b', fontWeight: '800', fontSize: '14px' }}>
+                            <div className="ana-dia">
+                                <div className="ana-dia-titulo">
                                     <Calendar size={16} /> {fmtDate(selectedDay.date)}
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '10px' }}>
+                                <div className="ana-dia-numeros">
                                     {CHART_METRICS.map(m => (
-                                        <div key={m.key} style={{ textAlign: 'center', padding: '8px', background: '#fff', borderRadius: '10px', border: '1px solid #eef2f7' }}>
-                                            <div style={{ fontSize: '20px', fontWeight: '900', color: m.color }}>{selectedDay[m.key] ?? 0}</div>
-                                            <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>{m.label}</div>
+                                        <div key={m.key} className="ana-dia-numero">
+                                            <div className="ana-dia-numero-valor" style={{ color: m.color }}>{selectedDay[m.key] ?? 0}</div>
+                                            <div className="ana-dia-numero-nombre">{m.label}</div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         ) : (
-                            <p style={{ marginTop: '12px', fontSize: '12px', color: '#94a3b8' }}>
+                            <p className="ana-pista">
                                 Haz clic en un día del gráfico para ver el detalle exacto de esa jornada.
                             </p>
                         )}
                     </section>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+                    <div className="ana-listas">
                         <ListCard title="Productos más vistos" icon={<Eye size={18} />} empty="Sin vistas registradas todavía.">
                             {(data.top_viewed || []).map((p, i) => (
                                 <Row key={p.product_id} index={i + 1} name={p.name} value={`${p.views} vistas`}
@@ -204,14 +204,14 @@ const AnalyticsModule = () => {
 const ListCard = ({ title, icon, children, empty, hint }) => {
     const hasItems = React.Children.count(children) > 0;
     return (
-        <section style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', color: '#8f0653' }}>
+        <section className="ana-panel">
+            <div className="ana-panel-titulo-con-icono">
                 {icon}
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#1e1b4b' }}>{title}</h3>
+                <h3 className="ana-panel-titulo">{title}</h3>
             </div>
-            {hint && <p style={{ margin: '0 0 14px 0', fontSize: '12px', color: '#94a3b8', lineHeight: 1.5 }}>{hint}</p>}
-            {hasItems ? <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>{children}</div>
-                      : <p style={{ fontSize: '13px', color: '#94a3b8' }}>{empty}</p>}
+            {hint && <p className="ana-panel-ayuda">{hint}</p>}
+            {hasItems ? <div className="ana-lista">{children}</div>
+                      : <p className="ana-panel-vacio">{empty}</p>}
         </section>
     );
 };
@@ -225,13 +225,12 @@ const Row = ({ index, name, value, onClick }) => (
             cursor: onClick ? 'pointer' : 'default',
         }}
         onMouseEnter={onClick ? (e) => { e.currentTarget.style.background = '#faf5f8'; } : undefined}
-        onMouseLeave={onClick ? (e) => { e.currentTarget.style.background = 'transparent'; } : undefined}
-    >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-            <span style={{ fontSize: '12px', fontWeight: '800', color: '#cbd5e1', width: '18px', flexShrink: 0 }}>{index}</span>
-            <span title={name} style={{ fontSize: '14px', color: '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
+        onMouseLeave={onClick ? (e) => { e.currentTarget.style.background = 'transparent'; } : undefined}>
+        <div className="ana-fila-izquierda">
+            <span className="ana-fila-puesto">{index}</span>
+            <span title={name} className="ana-fila-nombre">{name}</span>
         </div>
-        <span style={{ fontSize: '13px', fontWeight: '700', color: '#8f0653', flexShrink: 0 }}>{value}</span>
+        <span className="ana-fila-valor">{value}</span>
     </div>
 );
 
@@ -304,7 +303,7 @@ const PreviewModal = ({ preview, onClose, navigate }) => {
                         {(preview.stats || []).map(([label, val]) => (
                             <div key={label} style={{ flex: 1, textAlign: 'center', padding: '10px', background: '#f8fafc', borderRadius: '12px' }}>
                                 <div style={{ fontSize: '22px', fontWeight: '900', color: '#1e1b4b' }}>{val}</div>
-                                <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>{label}</div>
+                                <div className="ana-dia-numero-nombre">{label}</div>
                             </div>
                         ))}
                     </div>
