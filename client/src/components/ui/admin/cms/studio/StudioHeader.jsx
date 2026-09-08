@@ -93,7 +93,7 @@ const StudioHeader = ({ blockTitle, viewport, viewMode, onViewportChange, onTogg
                 </button>
             </div>
 
-            {!isDeviceMobile && <div style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.08)' }} />}
+            {!isDeviceMobile && <div className="est-divisor-fino" />}
 
             <button style={iconBtn()} onClick={onTogglePreview}>
                 <Eye size={12} /> {viewMode === 'edit' ? 'PREVIA' : 'EDITAR'}

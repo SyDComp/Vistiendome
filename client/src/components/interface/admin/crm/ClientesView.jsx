@@ -222,12 +222,7 @@ const ClientesView = () => {
                             type="button"
                             onClick={() => { setTargetCliente(row); setShowCreateModal(true); }}
                             title="Armar Cotización para este Cliente"
-                            style={{
-                                background: '#fdf2f8', border: '1px solid #fbcfe8', borderRadius: '8px',
-                                padding: '6px 10px', color: '#8f0653', fontWeight: '800', fontSize: '11px',
-                                display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer',
-                                transition: 'all 0.15s ease'
-                            }}
+                            className="adm-etiqueta-marca"
                             onMouseOver={(e) => e.currentTarget.style.background = '#fce7f3'}
                             onMouseOut={(e) => e.currentTarget.style.background = '#fdf2f8'}
                         >

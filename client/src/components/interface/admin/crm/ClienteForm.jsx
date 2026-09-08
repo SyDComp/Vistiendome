@@ -86,7 +86,7 @@ const ClienteForm = ({ initialData, onSuccess, onCancel }) => {
                         variant="primary" 
                         type="submit" 
                         disabled={loading}
-                        style={{ padding: '0 60px', height: '56px', fontSize: '16px', borderRadius: '18px', fontWeight: '900', boxShadow: '0 10px 15px -3px rgba(143, 6, 83, 0.3)' }}
+                        className="adm-boton-ancho"
                     >
                         {loading ? 'GUARDANDO...' : 'CONFIRMAR Y GUARDAR REGISTRO'}
                     </Button>

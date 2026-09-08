@@ -36,11 +36,7 @@ const SectionHeader = ({ title, description, action }) => {
                     {title}
                 </h2>
                 {description && (
-                    <p style={{
-                        margin: '4px 0 0',
-                        color: '#64748b',
-                        fontSize: '13.5px'
-                    }}>
+                    <p className="adm-bajada-seccion">
                         {description}
                     </p>
                 )}

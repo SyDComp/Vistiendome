@@ -28,16 +28,7 @@ const Pagination = ({ currentPage = 1, totalPages = 1, totalItems = 0, pageSize 
     };
 
     return (
-        <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '14px 20px',
-            borderTop: '1px solid #f1f5f9',
-            flex: '0 0 auto',
-            flexWrap: 'wrap',
-            gap: '12px'
-        }}>
+        <div className="adm-pag-barra">
             {/* Info */}
             <span className="adm-pag-cuenta">
                 Mostrando <strong className="adm-pag-actual">{from}–{to}</strong> de <strong className="adm-pag-actual">{totalItems}</strong> registros

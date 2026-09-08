@@ -84,7 +84,7 @@ const VariantSelector = ({
                             if (isOpen) setOpenId(attr.id);
                             else if (openId === attr.id) setOpenId(null);
                         }}
-                        style={{ marginBottom: '12px' }}
+                        className="adm-margen-abajo"
                     >
                         <div className={`options-layout ${attr.type === 'visual' ? 'grid-visual' : 'grid-text'}`}>
                             {[...attr.opciones].sort((a, b) => {

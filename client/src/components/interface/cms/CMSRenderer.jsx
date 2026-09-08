@@ -52,8 +52,7 @@ const PrecioConOferta = ({ product, previewMode, tamano }) => {
                 $ {product.price.toLocaleString('es-CL')}
             </span>
             {enOferta && (
-                <span style={{ fontSize: '9.5px', fontWeight: '900', letterSpacing: '.4px',
-                               background: '#8f0653', color: '#fff', borderRadius: '4px', padding: '2px 5px' }}>
+                <span className="cms-insignia">
                     OFERTA
                 </span>
             )}
@@ -250,8 +249,8 @@ export const SceneCarouselBlock = ({ config, previewMode = false, forceMobile = 
 
                 {scenes.length > 1 && (
                     <>
-                        <button onClick={e => { e.stopPropagation(); go(-1); }} style={{ position:'absolute', left:'16px', top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.12)', backdropFilter:'blur(8px)', border:'none', color:'#fff', width:'44px', height:'44px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', zIndex:100 }}><ChevronLeft size={20} /></button>
-                        <button onClick={e => { e.stopPropagation(); go(1); }}  style={{ position:'absolute', right:'16px', top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.12)', backdropFilter:'blur(8px)', border:'none', color:'#fff', width:'44px', height:'44px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', zIndex:100 }}><ChevronRight size={20} /></button>
+                        <button onClick={e => { e.stopPropagation(); go(-1); }} className="cms-flecha cms-flecha--izquierda"><ChevronLeft size={20} /></button>
+                        <button onClick={e => { e.stopPropagation(); go(1); }}  className="cms-flecha cms-flecha--derecha"><ChevronRight size={20} /></button>
                     </>
                 )}
             </div>
@@ -390,15 +389,7 @@ const ProductCard = ({ product, previewMode }) => {
                 scrollSnapAlign: 'start'
             }}
         >
-            <div style={{ 
-                borderRadius: '8px', 
-                overflow: 'hidden', 
-                aspectRatio: '4/5', 
-                background: '#f8fafc',
-                marginBottom: '12px',
-                position: 'relative',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
-            }}>
+            <div className="cms-foto">
                 <img 
                     src={product.image ? getImageUrl(product.image) : (product.images?.[0]?.url ? getImageUrl(product.images[0].url) : '')} 
                     srcSet={getSrcSet(product.image_srcset) || undefined}

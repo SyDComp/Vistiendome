@@ -79,15 +79,7 @@ const FilterBar = ({
                     value={searchValue}
                     onChange={handleSearch}
                     placeholder={searchPlaceholder}
-                    style={{
-                        flex: 1,
-                        border: 'none',
-                        outline: 'none',
-                        backgroundColor: 'transparent',
-                        padding: '9px 0',
-                        fontSize: '13.5px',
-                        color: '#1e293b'
-                    }}
+                    className="adm-buscador-campo"
                 />
                 {searchValue && (
                     <button onClick={() => { setSearchValue(''); onSearchChange?.(''); }} className="adm-icono-plano">

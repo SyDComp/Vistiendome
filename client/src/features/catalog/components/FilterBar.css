@@ -78,3 +78,23 @@
     margin-top: 16px;
     align-items: center;
 }
+
+/* Filtros activos del catalogo. */
+.fb-etiqueta {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 1rem;
+    background: #fdf2f8;
+}
+.fb-limpiar {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    font-family: inherit;
+}

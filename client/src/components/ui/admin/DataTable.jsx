@@ -22,16 +22,7 @@ const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {
     }, []);
 
     return (
-        <div style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-            backgroundColor: '#fff',
-            borderRadius: '16px',
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 4px 24px rgba(30,27,75,0.05)'
-        }}>
+        <div className="adm-tabla-caja">
             {/* Zona de scroll independiente */}
             <div style={{ 
                 flex: 1, 
@@ -79,19 +70,7 @@ const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {
                                     </th>
                                 ))}
                                 {rowActions && (
-                                    <th style={{ 
-                                        padding: compacto ? '12px 11px' : '13px 18px', 
-                                        textAlign: 'right', 
-                                        fontSize: '11px', 
-                                        fontWeight: '700', 
-                                        color: '#94a3b8', 
-                                        textTransform: 'uppercase', 
-                                        letterSpacing: '0.8px',
-                                        position: 'sticky',
-                                        right: 0,
-                                        backgroundColor: '#f8fafc',
-                                        boxShadow: '-4px 0 8px rgba(0,0,0,0.02)'
-                                    }}>
+                                    <th className={`adm-tabla-cabecera-acciones${compacto ? ' adm-tabla-cabecera-acciones--compacta' : ''}`}>
                                         Acciones
                                     </th>
                                 )}

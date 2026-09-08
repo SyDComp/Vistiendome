@@ -136,13 +136,7 @@ const FilterBar = ({
                                     key={i}
                                     type="button"
                                     onClick={() => handleRemoveFilter(tag)}
-                                    style={{
-                                        display: 'flex', alignItems: 'center', gap: '4px',
-                                        padding: '6px 12px', borderRadius: '16px',
-                                        background: '#fdf2f8', border: '1px solid #fbcfe8',
-                                        color: '#8f0653', fontSize: '12px', fontWeight: '700',
-                                        cursor: 'pointer', transition: 'all 0.2s'
-                                    }}
+                                    className="fb-etiqueta"
                                 >
                                     {tag.label}
                                     <X size={14} />

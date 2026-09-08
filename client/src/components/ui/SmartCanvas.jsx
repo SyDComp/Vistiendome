@@ -74,14 +74,7 @@ const SmartCanvas = ({
 
             {/* Controles del Editor (Solo modo 'edit') */}
             {mode === 'edit' && src && (
-                <div style={{ 
-                    marginTop: '15px', 
-                    padding: '15px', 
-                    background: '#fff', 
-                    borderRadius: '8px', 
-                    border: '1px solid #ddd',
-                    fontSize: '11px' 
-                }}>
+                <div className="adm-nota-lienzo">
                     <div className="lienzo-pareja">
                         <div>
                             <label className="lienzo-rotulo">🔍 Zoom: {localConfig.zoom.toFixed(2)}x</label>

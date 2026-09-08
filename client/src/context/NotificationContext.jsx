@@ -78,7 +78,7 @@ export const NotificationProvider = ({ children }) => {
                     <div className="dialog-card">
                         <div className="dialog-header">
                             <HelpCircle size={24} />
-                            <span style={{ fontWeight: '800', fontSize: '18px' }}>Atención</span>
+                            <span className="adm-aviso-titulo">Atención</span>
                         </div>
                         <div className="dialog-body">
                             <p className="dialog-message">{dialog.message}</p>

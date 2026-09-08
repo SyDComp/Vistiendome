@@ -48,7 +48,7 @@ const AdminFormLayout = ({
 };
 
 export const AdminFormSection = ({ title, badge, description, children }) => (
-    <div style={{ marginTop: '32px' }}>
+    <div className="adm-separacion--alta">
         <div className="admin-form-section-title-wrapper">
             <label className="admin-form-section-title">{title}</label>
             {badge && <div className="admin-form-section-badge">{badge}</div>}

@@ -166,3 +166,30 @@
 @media (max-width: 48rem) {
     .cms-bloque--menor { margin-bottom: 1.875rem; }
 }
+
+/* Insignia sobre una foto de la portada, y las flechas del carrusel. */
+.cms-insignia {
+    font-size: 0.59375rem;
+    font-weight: 900;
+    letter-spacing: 0.025rem;
+    background: var(--cms-marca, #8f0653);
+    color: #fff;
+    border-radius: 0.25rem;
+}
+.cms-flecha {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(6px);
+}
+.cms-flecha--izquierda { left: 1rem; }
+.cms-flecha--derecha { right: 1rem; }
+.cms-foto {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    background: #f8fafc;
+    margin-bottom: 0.75rem;
+    position: relative;
+}

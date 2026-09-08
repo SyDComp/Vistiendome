@@ -124,21 +124,7 @@ const QuickPeek = ({ isOpen, onClose, data, type = 'product' }) => {
                     <div className="qp-acciones">
                         <button 
                             onClick={onClose}
-                            style={{ 
-                                flex: 1, 
-                                height: '48px', 
-                                borderRadius: '14px', 
-                                background: '#1e1b4b', 
-                                color: '#fff', 
-                                border: 'none', 
-                                fontWeight: '800', 
-                                fontSize: '14px', 
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '8px'
-                            }}
+                            className="adm-accion-oscura"
                         >
                             Listo
                         </button>

@@ -92,15 +92,7 @@ const ConfirmModal = ({
                     <Button 
                         onClick={onClose}
                         variant="outline"
-                        style={{ 
-                            flex: 1, 
-                            height: '54px', 
-                            borderRadius: '16px',
-                            borderColor: '#e2e8f0',
-                            color: '#64748b',
-                            fontSize: '15px',
-                            fontWeight: '800'
-                        }}
+                        className="adm-accion-clara"
                     >
                         {cancelText}
                     </Button>

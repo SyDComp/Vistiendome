@@ -244,13 +244,7 @@ const SettingsManager = () => {
                 </div>
             )}
 
-            <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', 
-                gap: '24px',
-                overflowY: 'auto',
-                paddingBottom: '40px'
-            }}>
+            <div className="adm-rejilla--doble">
                 <section className="adm-panel">
                     <div className="adm-panel-cabecera">
                         <div className="adm-emblema-color adm-emblema-color--marca">

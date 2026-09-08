@@ -6,12 +6,7 @@ import PremiumLoader from './PremiumLoader';
  * Muestra un loader premium mientras se cargan los chunks lazy.
  */
 const SuspenseFallback = () => (
-    <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-    }}>
+    <div className="adm-pantalla-centrada">
         <PremiumLoader text="Cargando..." />
     </div>
 );

@@ -43,14 +43,7 @@ const TextStudio = ({ isOpen, onClose, data, onSave }) => {
     };
 
     return (
-        <div style={{ 
-            position: 'fixed', inset: 0, zIndex: 6000, 
-            background: 'rgba(10,8,28,0.98)', 
-            backdropFilter: 'blur(20px)', 
-            display: 'flex', flexDirection: 'column', 
-            animation: 'studioFadeIn 0.3s ease',
-            fontFamily: 'Outfit, sans-serif'
-        }}>
+        <div className="est-ventana">
             {/* HEADER */}
             <div className="est-barra">
                 <div className="est-fila--ancha">
@@ -82,19 +75,7 @@ const TextStudio = ({ isOpen, onClose, data, onSave }) => {
             {/* CANVAS / EDITOR */}
             <div className="dt-studio-layout">
                 <div className="dt-studio-workspace">
-                    <div style={{ 
-                        width: '100%', 
-                        maxWidth: '900px', 
-                        background: '#fff', 
-                        borderRadius: '24px', 
-                        padding: '20px', 
-                        boxSizing: 'border-box',
-                        boxShadow: '0 40px 100px rgba(0,0,0,0.5)',
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        minHeight: 0
-                    }}>
+                    <div className="est-ventana-caja">
                         <ReactQuill 
                             theme="snow" 
                             value={content} 

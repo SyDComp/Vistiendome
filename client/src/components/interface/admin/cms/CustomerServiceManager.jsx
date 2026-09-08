@@ -187,12 +187,7 @@ const CustomerServiceManager = () => {
                                     </button>
                                     <button 
                                         onClick={() => { setSelectedSlug(section.slug); setSelectedTitle(section.title); }} 
-                                        style={{ 
-                                            padding: '0 16px', height: '36px', borderRadius: '10px', 
-                                            border: 'none', background: '#fdf2f8', color: '#8f0653', 
-                                            fontWeight: '800', fontSize: '12px', cursor: 'pointer',
-                                            display: 'flex', alignItems: 'center', gap: '6px'
-                                        }}
+                                        className="adm-boton-suave"
                                     >
                                         Gestionar Contenido <ChevronRight size={14} />
                                     </button>

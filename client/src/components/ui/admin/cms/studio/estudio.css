@@ -662,3 +662,34 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     z-index: 10;
 }
+
+.est-fila--amplia { display: flex; align-items: center; gap: 1.25rem; }
+.est-boton-velo {
+    background: var(--est-velo, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--est-velo-borde, rgba(255, 255, 255, 0.1));
+    color: rgba(255, 255, 255, 0.6);
+    font-family: inherit;
+    cursor: pointer;
+}
+.est-vacio-texto { color: rgba(255, 255, 255, 0.3); font-size: 0.75rem; font-style: italic; }
+.est-divisor-fino { width: 1px; height: 1.75rem; background: rgba(255, 255, 255, 0.08); }
+.est-ventana {
+    position: fixed;
+    inset: 0;
+    z-index: 6000;
+    background: rgba(10, 8, 28, 0.98);
+    backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.est-ventana-caja {
+    width: 100%;
+    max-width: 56.25rem;
+    max-height: 100dvh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 1.5rem;
+    padding: 1.25rem;
+    box-sizing: border-box;
+}

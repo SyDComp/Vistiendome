@@ -119,20 +119,7 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                 <div className="est-fila--holgada">
                     <button 
                         onClick={onClose} 
-                        style={{ 
-                            background: 'rgba(255,255,255,0.05)', 
-                            border: '1px solid rgba(255,255,255,0.1)', 
-                            color: 'rgba(255,255,255,0.6)', 
-                            padding: '0 24px', 
-                            borderRadius: '14px', 
-                            fontSize: '13px', 
-                            fontWeight: '800', 
-                            textTransform: 'uppercase', 
-                            letterSpacing: '1px', 
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            fontFamily: 'Outfit, sans-serif'
-                        }}
+                        className="est-boton-velo"
                         onMouseOver={e => { e.target.style.background = 'rgba(255,255,255,0.1)'; e.target.style.color = '#fff'; }}
                         onMouseOut={e => { e.target.style.background = 'rgba(255,255,255,0.05)'; e.target.style.color = 'rgba(255,255,255,0.6)'; }}
                     >

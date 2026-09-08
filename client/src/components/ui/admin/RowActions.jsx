@@ -15,7 +15,7 @@ import { Pencil, Trash2, Eye } from 'lucide-react';
  */
 const RowActions = ({ onEdit, onDelete, onView, editLabel = 'Editar', deleteLabel = 'Eliminar', viewLabel = 'Ver Detalle', extra }) => {
     return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+        <div className="adm-acciones-fila">
             {extra}
             {onView && (
                 <ActionButton
@@ -76,7 +76,7 @@ const ActionButton = ({ onClick, label, icon, color, hoverBg }) => (
         }}
     >
         {icon}
-        <span style={{ display: 'none' }}>{label}</span>
+        <span className="adm-oculto">{label}</span>
     </button>
 );
 

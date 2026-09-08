@@ -146,7 +146,7 @@ const TopBanner = () => {
                 <span className="top-banner__text">
                     {cfg.text}
                     {hasLink && (
-                        <span style={{ textDecoration: 'underline', fontWeight: 700, marginLeft: '8px' }}>
+                        <span className="adm-a-la-derecha">
                             {linkLabel}
                         </span>
                     )}
