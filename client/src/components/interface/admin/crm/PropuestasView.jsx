@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Check, X, Users } from 'lucide-react';
 import { useNotification } from '../../../../context/NotificationContext';
+import './PropuestasView.css';
 
 /**
  * Lo que los clientes pidieron y todavía no existe en el catálogo.
@@ -165,37 +166,6 @@ const PropuestasView = () => {
                 </ul>
             )}
 
-            <style>{`
-                .propuestas-view { padding: 4px; }
-                .prop-encabezado { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:18px; }
-                .prop-encabezado h1 { margin:0 0 4px; font-size:22px; font-weight:900; color:#1e1b4b; }
-                .prop-encabezado p { margin:0; font-size:13px; color:#64748b; max-width:520px; line-height:1.5; }
-                .prop-filtros { display:flex; gap:6px; flex-wrap:wrap; }
-                .prop-filtros button { border:1px solid #e2e8f0; background:#fff; color:#475569; border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit; }
-                .prop-filtros button.activo { background:#8f0653; border-color:#8f0653; color:#fff; }
-
-                .prop-vacio { color:#64748b; font-size:13.5px; background:#f8fafc; border:1px dashed #e2e8f0; border-radius:12px; padding:26px; text-align:center; }
-
-                .prop-lista { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
-                .prop-lista li { border:1px solid #e2e8f0; border-radius:12px; padding:14px 16px; background:#fff; }
-                .prop-fila { display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; }
-                .prop-datos { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-                .prop-carac { font-size:10.5px; font-weight:800; letter-spacing:.6px; color:#94a3b8; text-transform:uppercase; }
-                .prop-valor { font-size:15px; color:#1e1b4b; }
-                .prop-veces { display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:800; color:#8f0653; background:#fdf2f8; border-radius:999px; padding:3px 9px; }
-
-                .prop-acciones { display:flex; gap:8px; }
-                .prop-acciones button { display:flex; align-items:center; gap:6px; border-radius:8px; padding:8px 13px; font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit; border:1px solid transparent; }
-                .prop-si { background:#8f0653; color:#fff; }
-                .prop-no { background:#fff; color:#64748b; border-color:#e2e8f0; }
-
-                .prop-faltantes { display:flex; gap:12px; flex-wrap:wrap; margin-top:12px; padding-top:12px; border-top:1px dashed #e2e8f0; }
-                .prop-faltantes label { display:flex; flex-direction:column; gap:4px; font-size:11px; font-weight:700; color:#475569; }
-                .prop-faltantes input { border:1px solid #cbd5e1; border-radius:8px; padding:6px 9px; font-size:13px; min-width:150px; }
-                .prop-faltantes input[type=color] { padding:2px; height:34px; min-width:56px; }
-
-                .prop-quienes { margin-top:10px; font-size:11.5px; color:#94a3b8; }
-            `}</style>
         </div>
     );
 };

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Plus, X, Sliders } from 'lucide-react';
+import './ArmadorDePrenda.css';
 
 /**
  * Armar una pieza que NO está en el catálogo, igual que se arma una variante.
@@ -60,10 +61,6 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
     // seis; con doscientas es inservible, y el catálogo crece.
     const [buscando, setBuscando] = useState('');
     const [abriendoSelector, setAbriendoSelector] = useState(false);
-
-    const etiqueta = { display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', marginBottom: '4px' };
-    const campo = { width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' };
-    const campoNuevo = { ...campo, border: '1px solid #c026d3', background: '#fdf4ff', marginTop: '6px' };
 
     const nombreFinal = (prenda === OTRO ? prendaLibre : prenda).trim();
 
@@ -213,22 +210,22 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
     };
 
     return (
-        <div style={{ border: '1px solid #f0abfc', background: '#fdf4ff', borderRadius: '12px', padding: '14px', marginBottom: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <strong style={{ fontSize: '13px', color: '#86198f' }}>Pieza personalizada</strong>
-                <button type="button" onClick={onCancelar} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex' }}>
+        <div className="armador">
+            <div className="armador__cabecera">
+                <strong className="armador__titulo">Pieza personalizada</strong>
+                <button type="button" onClick={onCancelar} className="armador__cerrar">
                     <X size={16} />
                 </button>
             </div>
-            <p style={{ fontSize: '11.5px', color: '#86198f', margin: '0 0 12px', opacity: 0.85 }}>
+            <p className="armador__intro">
                 Se arma igual que una variante del catálogo. Si algo no está en la lista,
                 se puede proponer con Otro.
             </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px' }}>
-                <div style={{ gridColumn: '1 / -1' }}>
-                    <label style={etiqueta}>Prenda *</label>
-                    <select style={campo} value={prenda} onChange={e => {
+            <div className="armador__grilla">
+                <div className="armador__ancho-total">
+                    <label className="armador__etiqueta">Prenda *</label>
+                    <select className="armador__campo" value={prenda} onChange={e => {
                         // Lo elegido era de la prenda anterior: un largo de vestido no
                         // significa nada en un tapado.
                         setPrenda(e.target.value);
@@ -245,7 +242,8 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
                     </select>
                     {prenda === OTRO && (
                         <input
-                            style={campoNuevo} value={prendaLibre} onChange={e => setPrendaLibre(e.target.value)}
+                            className="armador__campo armador__campo--nuevo"
+                            value={prendaLibre} onChange={e => setPrendaLibre(e.target.value)}
                             placeholder="Ej: Vestido de novia a medida" autoFocus
                         />
                     )}
@@ -255,30 +253,29 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
                     campo no existe. */}
                 {mostrarPrecio && (
                     <div>
-                        <label style={etiqueta}>Precio unitario ($)</label>
-                        <input type="number" min="0" style={campo} value={precio}
+                        <label className="armador__etiqueta">Precio unitario ($)</label>
+                        <input type="number" min="0" className="armador__campo" value={precio}
                             onChange={e => setPrecio(e.target.value)} placeholder="25000" />
                     </div>
                 )}
 
                 {claves.map(clave => {
                     const enModoNuevo = clave in propuestos;
+                    const veredicto = revisiones[clave]?.veredicto;
                     return (
                         <div key={clave}>
-                            <label style={{ ...etiqueta, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <label className="armador__etiqueta armador__etiqueta--con-boton">
                                 <span>{clave}</span>
                                 {/* Se puede quitar: si el encargo no necesita precisar
                                     esta característica, no tiene por qué ocupar espacio
                                     ni obligar a elegir. Vuelve con «agregar». */}
                                 <button type="button" onClick={() => quitar(clave)}
-                                    title={`Quitar ${clave}`}
-                                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-                                             color: '#94a3b8', display: 'flex' }}>
+                                    title={`Quitar ${clave}`} className="armador__quitar">
                                     <X size={13} />
                                 </button>
                             </label>
                             <select
-                                style={campo}
+                                className="armador__campo"
                                 value={enModoNuevo ? OTRO : (config[clave] || '')}
                                 onChange={e => elegir(clave, e.target.value)}
                             >
@@ -289,10 +286,7 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
                             {enModoNuevo && (
                                 <>
                                     <input
-                                        style={{
-                                            ...campoNuevo,
-                                            borderColor: revisiones[clave]?.veredicto === 'ofensivo' ? '#dc2626' : campoNuevo.border,
-                                        }}
+                                        className={`armador__campo armador__campo--nuevo${veredicto === 'ofensivo' ? ' armador__campo--rechazado' : ''}`}
                                         value={propuestos[clave]}
                                         onChange={e => escribirPropuesto(clave, e.target.value)}
                                         onBlur={e => revisar(clave, e.target.value)}
@@ -300,19 +294,13 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
                                         autoFocus
                                     />
                                     {revisiones[clave] && (
-                                        <p style={{
-                                            margin: '5px 0 0', fontSize: '11.5px', lineHeight: 1.35,
-                                            color: revisiones[clave].veredicto === 'ofensivo' ? '#dc2626'
-                                                 : revisiones[clave].veredicto === 'ok' ? '#15803d' : '#a16207',
-                                        }}>
-                                            {TEXTOS_POR_PUBLICO[contexto]?.[revisiones[clave].veredicto]
+                                        <p className={`armador__aviso armador__aviso--${veredicto === 'ofensivo' ? 'ofensivo' : veredicto === 'ok' ? 'ok' : 'duda'}`}>
+                                            {TEXTOS_POR_PUBLICO[contexto]?.[veredicto]
                                                 || revisiones[clave].mensaje}
                                             {revisiones[clave].sugerencia && (
                                                 <button type="button"
                                                     onClick={() => aceptarSugerencia(clave, revisiones[clave].sugerencia)}
-                                                    style={{ marginLeft: '6px', background: 'none', border: 'none', padding: 0,
-                                                             color: '#8f0653', fontWeight: '700', fontSize: '11.5px',
-                                                             textDecoration: 'underline', cursor: 'pointer' }}>
+                                                    className="armador__usar-sugerencia">
                                                     usar «{revisiones[clave].sugerencia}»
                                                 </button>
                                             )}
@@ -326,56 +314,47 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
             </div>
 
             {prenda && (
-                <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px dashed #e9d5ff' }}>
+                <div className="armador__caracteristicas">
                     <button type="button" onClick={() => setAbriendoSelector(v => !v)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '7px', width: '100%',
-                                 justifyContent: 'center', padding: '10px', borderRadius: '10px',
-                                 border: '1.5px solid #c026d3', background: '#fff', color: '#86198f',
-                                 fontWeight: '800', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                        className="armador__boton-selector">
                         <Sliders size={15} />
                         Seleccionar características
-                        <span style={{ fontWeight: 600, opacity: .75 }}>({claves.length} de {totalCaracteristicas})</span>
+                        <span className="armador__cuenta">({claves.length} de {totalCaracteristicas})</span>
                     </button>
 
                     {abriendoSelector && (
-                        <div style={{ marginTop: '10px', border: '1px solid #e9d5ff', borderRadius: '10px', background: '#fff', padding: '10px' }}>
+                        <div className="armador__selector">
                             {/* Buscador sólo cuando hay tantas que recorrerlas cansa.
                                 Con seis, estorba. */}
                             {totalCaracteristicas > 8 && (
                                 <input
-                                    style={{ ...campo, marginBottom: '8px' }}
+                                    className="armador__campo armador__campo--buscador"
                                     value={buscando}
                                     onChange={e => setBuscando(e.target.value)}
                                     placeholder="Buscar característica…"
                                 />
                             )}
 
-                            <div style={{ maxHeight: '210px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <div className="armador__lista">
                                 {listaSelector.map(k => {
                                     const puesta = claves.includes(k);
                                     return (
-                                        <label key={k} style={{ display: 'flex', alignItems: 'center', gap: '9px',
-                                                                padding: '7px 8px', borderRadius: '8px', cursor: 'pointer',
-                                                                background: puesta ? '#fdf4ff' : 'transparent', fontSize: '13px' }}>
+                                        <label key={k} className={`armador__opcion${puesta ? ' armador__opcion--puesta' : ''}`}>
                                             <input
                                                 type="checkbox"
                                                 checked={puesta}
                                                 onChange={() => (puesta ? quitar(k) : agregar_caracteristica(k))}
-                                                style={{ accentColor: '#8f0653', width: '15px', height: '15px' }}
+                                                className="armador__casilla"
                                             />
-                                            <span style={{ color: '#1e1b4b', fontWeight: puesta ? 700 : 500 }}>{k}</span>
+                                            <span className="armador__opcion-nombre">{k}</span>
                                             {deLaPrenda.includes(k) && (
-                                                <span style={{ marginLeft: 'auto', fontSize: '10.5px', color: '#94a3b8' }}>
-                                                    de esta prenda
-                                                </span>
+                                                <span className="armador__origen">de esta prenda</span>
                                             )}
                                         </label>
                                     );
                                 })}
                                 {!listaSelector.length && (
-                                    <span style={{ fontSize: '12px', color: '#94a3b8', padding: '6px' }}>
-                                        No hay ninguna con ese nombre.
-                                    </span>
+                                    <span className="armador__vacio">No hay ninguna con ese nombre.</span>
                                 )}
                             </div>
                         </div>
@@ -384,23 +363,18 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
             )}
 
             {prenda && !claves.length && (
-                <p style={{ fontSize: '12px', color: '#a16207', margin: '10px 0 0' }}>
+                <p className="armador__sin-caracteristicas">
                     Esta prenda no tiene características cargadas. Se puede pedir igual,
                     pero llegará al taller sin talla ni color.
                 </p>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '14px' }}>
-                <button type="button" onClick={onCancelar}
-                    style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#fff', fontWeight: '700', fontSize: '13px', cursor: 'pointer', color: '#475569' }}>
+            <div className="armador__pie">
+                <button type="button" onClick={onCancelar} className="armador__cancelar">
                     Cancelar
                 </button>
                 <button type="button" onClick={agregar} disabled={!nombreFinal || hayBloqueo}
-                    style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', border: 'none',
-                             background: (nombreFinal && !hayBloqueo) ? '#8f0653' : '#e2e8f0',
-                             color: (nombreFinal && !hayBloqueo) ? '#fff' : '#94a3b8',
-                             fontWeight: '700', fontSize: '13px',
-                             cursor: (nombreFinal && !hayBloqueo) ? 'pointer' : 'not-allowed' }}>
+                    className="armador__agregar">
                     <Plus size={14} /> {textoBoton}
                 </button>
             </div>

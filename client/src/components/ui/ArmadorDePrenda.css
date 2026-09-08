@@ -1,0 +1,158 @@
+/*
+ * Cómo se ve el armador de prendas.
+ *
+ * Vive acá y no dentro del componente. Estaba escrito como objetos de estilo en
+ * medio del JSX —treinta y tantos `style={{…}}` mezclados con la lógica— y eso
+ * junta dos trabajos que no se parecen: decidir QUÉ se muestra y decidir CÓMO
+ * se ve. Para cambiar un borde había que leer la lógica del formulario, y para
+ * leer la lógica había que saltarse el CSS.
+ *
+ * Los colores se declaran UNA vez arriba y el resto los usa por nombre: antes
+ * el color de marca estaba escrito a mano en cada botón.
+ */
+
+.armador {
+    --arm-marca: #8f0653;
+    --arm-acento: #c026d3;
+    --arm-acento-suave: #f0abfc;
+    --arm-fondo: #fdf4ff;
+    --arm-borde-suave: #e9d5ff;
+    --arm-texto: #86198f;
+    --arm-tinta: #1e1b4b;
+    --arm-gris: #94a3b8;
+    --arm-gris-texto: #475569;
+    --arm-linea: #e2e8f0;
+    --arm-campo: #cbd5e1;
+    --arm-mal: #dc2626;
+    --arm-bien: #15803d;
+    --arm-duda: #a16207;
+
+    border: 1px solid var(--arm-acento-suave);
+    background: var(--arm-fondo);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+
+.armador__cabecera { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.armador__titulo { font-size: 13px; color: var(--arm-texto); }
+.armador__intro { font-size: 11.5px; color: var(--arm-texto); margin: 0 0 12px; opacity: .85; }
+
+.armador__cerrar,
+.armador__quitar {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--arm-gris);
+    display: flex;
+}
+
+.armador__grilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.armador__ancho-total { grid-column: 1 / -1; }
+
+.armador__etiqueta { display: block; font-size: 11px; font-weight: 700; color: var(--arm-gris-texto); margin-bottom: 4px; }
+.armador__etiqueta--con-boton { display: flex; align-items: center; justify-content: space-between; }
+
+.armador__campo {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--arm-campo);
+    font-size: 13px;
+    box-sizing: border-box;
+}
+.armador__campo--nuevo { border-color: var(--arm-acento); background: var(--arm-fondo); margin-top: 6px; }
+/* Lo que no se acepta se ve que no se acepta, sin tener que leer el aviso. */
+.armador__campo--rechazado { border-color: var(--arm-mal); }
+.armador__campo--buscador { margin-bottom: 8px; }
+
+.armador__aviso { margin: 5px 0 0; font-size: 11.5px; line-height: 1.35; }
+.armador__aviso--ofensivo { color: var(--arm-mal); }
+.armador__aviso--ok { color: var(--arm-bien); }
+.armador__aviso--duda { color: var(--arm-duda); }
+
+.armador__usar-sugerencia {
+    margin-left: 6px;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--arm-marca);
+    font-weight: 700;
+    font-size: 11.5px;
+    text-decoration: underline;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.armador__caracteristicas { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--arm-borde-suave); }
+
+.armador__boton-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1.5px solid var(--arm-acento);
+    background: #fff;
+    color: var(--arm-texto);
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+}
+.armador__cuenta { font-weight: 600; opacity: .75; }
+
+.armador__selector { margin-top: 10px; border: 1px solid var(--arm-borde-suave); border-radius: 10px; background: #fff; padding: 10px; }
+.armador__lista { max-height: 210px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+
+.armador__opcion {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    background: transparent;
+}
+.armador__opcion--puesta { background: var(--arm-fondo); }
+.armador__casilla { accent-color: var(--arm-marca); width: 15px; height: 15px; }
+.armador__opcion-nombre { color: var(--arm-tinta); font-weight: 500; }
+.armador__opcion--puesta .armador__opcion-nombre { font-weight: 700; }
+.armador__origen { margin-left: auto; font-size: 10.5px; color: var(--arm-gris); }
+.armador__vacio { font-size: 12px; color: var(--arm-gris); padding: 6px; }
+
+.armador__sin-caracteristicas { font-size: 12px; color: var(--arm-duda); margin: 10px 0 0; }
+
+.armador__pie { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+.armador__cancelar {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--arm-linea);
+    background: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--arm-gris-texto);
+    font-family: inherit;
+}
+.armador__agregar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    background: var(--arm-marca);
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+}
+/* Deshabilitado lo dice el navegador con `disabled`, no una copia del estado
+   en JavaScript decidiendo colores. */
+.armador__agregar:disabled { background: var(--arm-linea); color: var(--arm-gris); cursor: not-allowed; }
