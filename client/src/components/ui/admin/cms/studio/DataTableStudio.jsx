@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, Save, Palette, Type, Layout, Grid3X3, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Settings, Monitor } from 'lucide-react';
 import Button from '../../../Button';
 import './DataTableStudio.css';
+import './estudio.css';
 
 const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
     const [activeCell, setActiveCell] = useState(null); // { rowIndex, header }
@@ -102,12 +103,12 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
     };
 
     return (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 6000, background: 'rgba(10,8,28,0.98)', backdropFilter: 'blur(20px)', display: 'flex', flexDirection: 'column', animation: 'studioFadeIn 0.3s ease', overflow: 'hidden' }}>
+        <div className="est est-lienzo">
             
             {/* HEADER */}
-            <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+            <div className="est-barra">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#8f0653', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div className="est-emblema">
                         <Grid3X3 size={24} color="#fff" />
                     </div>
                     <div>
@@ -149,8 +150,8 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                 {(!isDeviceMobile || activeMobileTab === 'tools') && (
                     <div className="dt-studio-sidebar">
                     
-                    <section style={{ marginBottom: '40px' }}>
-                        <h4 style={{ color: '#fff', fontSize: '12px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '24px', opacity: 0.6 }}>Acciones Rápidas</h4>
+                    <section className="est-grupo">
+                        <h4 className="est-seccion">Acciones Rápidas</h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             <button onClick={() => addRow()} style={toolbarButtonStyle}><Plus size={16} /> Añadir Fila</button>
                             <button onClick={() => removeRow(config.rows.length - 1)} style={{ ...toolbarButtonStyle, color: '#ef4444', borderColor: 'rgba(239,68,68,0.2)' }}><Trash2 size={16} /> Quitar Última Fila</button>
@@ -160,10 +161,10 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                         </div>
                     </section>
 
-                    <section style={{ marginBottom: '40px' }}>
-                        <h4 style={{ color: '#fff', fontSize: '12px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '24px', opacity: 0.6 }}>Propiedades de Celda</h4>
+                    <section className="est-grupo">
+                        <h4 className="est-seccion">Propiedades de Celda</h4>
                         {activeCell ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            <div className="est-columna--amplia">
                                 <div style={styleControlStyle}>
                                     <span>Negrita</span>
                                     <button 
@@ -194,8 +195,8 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                     </section>
 
                     <section>
-                        <h4 style={{ color: '#fff', fontSize: '12px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '24px', opacity: 0.6 }}>Estilos Generales</h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <h4 className="est-seccion">Estilos Generales</h4>
+                        <div className="est-columna--amplia">
                             <div style={styleControlStyle}>
                                 <span>Fondo Encabezado</span>
                                 <input type="color" value={config.styles.headerBg} onChange={e => setConfig({...config, styles: {...config.styles, headerBg: e.target.value}})} style={colorPickerStyle} />
@@ -214,7 +215,7 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                             </div>
                             <div style={styleControlStyle}>
                                 <span>Redondeo Tabla</span>
-                                <input type="range" min="0" max="40" value={parseInt(config.styles.borderRadius)} onChange={e => setConfig({...config, styles: {...config.styles, borderRadius: `${e.target.value}px`}})} style={{ width: '80px' }} />
+                                <input type="range" min="0" max="40" value={parseInt(config.styles.borderRadius)} onChange={e => setConfig({...config, styles: {...config.styles, borderRadius: `${e.target.value}px`}})} className="est-ancho-corto" />
                             </div>
                             <div style={styleControlStyle}>
                                 <span>Líneas Verticales</span>
@@ -233,7 +234,7 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                 {(!isDeviceMobile || activeMobileTab === 'canvas') && (
                 <div className="dt-studio-workspace">
                     <div style={{ width: '100%', maxWidth: '1000px', background: config.styles.cellBg, borderRadius: config.styles.borderRadius, boxShadow: '0 40px 100px rgba(0,0,0,0.5)', border: `1px solid ${config.styles.borderColor}`, overflowX: 'auto', boxSizing: 'border-box' }}>
-                        <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, tableLayout: 'fixed' }}>
+                        <table className="est-tabla">
                             <thead>
                                  <tr style={{ background: config.styles.headerBg }}>
                                      <th style={{ width: '80px', background: 'rgba(0,0,0,0.05)', borderBottom: `2px solid ${config.styles.borderColor}`, borderRight: `1px solid ${config.styles.borderColor}` }}></th>

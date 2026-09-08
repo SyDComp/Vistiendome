@@ -152,3 +152,124 @@
     background: none;
     cursor: pointer;
 }
+
+/* ── Piezas compartidas por los tres estudios ──────────────────────────────
+   El de tablas, el de texto y el panel de capas repetían la misma cabecera, el
+   mismo emblema y los mismos velos oscuros. Están una vez. */
+
+/* Un estudio se abre sobre todo lo demás y ocupa la pantalla. */
+.est-lienzo {
+    position: fixed;
+    inset: 0;
+    z-index: 6000;
+    background: rgba(10, 8, 28, 0.98);
+    backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    animation: studioFadeIn 0.3s ease;
+    overflow: hidden;
+}
+
+.est-barra {
+    padding: 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.est-emblema {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 1rem;
+    background: var(--est-marca, #8f0653);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.est-emblema--degradado {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    background: linear-gradient(135deg, #8f0653, #530432);
+}
+
+.est-seccion {
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.0625rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.6;
+}
+.est-grupo { margin-bottom: 2.5rem; }
+.est-grupo--junto { margin-bottom: 0.5rem; }
+
+.est-nombre { font-size: 0.8125rem; font-weight: 800; text-transform: uppercase; }
+.est-ruta {
+    margin: 0;
+    font-size: 0.6875rem;
+    color: var(--est-apagado, rgba(255, 255, 255, 0.4));
+    text-transform: uppercase;
+    letter-spacing: 0.0625rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.est-menudo { font-size: 0.5625rem; margin: 0.25rem 0 0; opacity: 0.6; }
+.est-clave { font-size: 0.5625rem; font-weight: 900; letter-spacing: 0.05em; }
+.est-pista {
+    font-size: 0.5625rem;
+    color: rgba(255, 255, 255, 0.3);
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 0.625rem;
+}
+
+/* Separador vertical entre grupos de una barra. */
+.est-divisor { height: 1.875rem; width: 1px; background: rgba(255, 255, 255, 0.1); flex-shrink: 0; }
+
+.est-encogible { flex: 1; min-width: 0; }
+.est-pila { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.est-fila--fija { display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0; }
+.est-fila--ancha { display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0; }
+.est-fila--media { display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 0; }
+
+.est-relativo { position: relative; }
+.est-imagen-llena { width: 100%; height: 100%; object-fit: cover; }
+/* El campo de archivo o color va invisible ENCIMA de lo que se ve: se pulsa la
+   imagen, no un control gris del sistema. */
+.est-invisible {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+.est-panel-capas {
+    width: 18.75rem;
+    background: rgba(0, 0, 0, 0.4);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+.est-panel-pie {
+    padding: 0.875rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.2);
+}
+.est-panel-vacio { text-align: center; padding: 2rem 0; color: rgba(255, 255, 255, 0.12); }
+
+.est-tabla { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+.est-ancho-corto { width: 5rem; }
+
+@media (max-width: 48rem) {
+    .est-panel-capas { width: 100%; }
+}

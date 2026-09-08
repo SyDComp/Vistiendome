@@ -1,5 +1,6 @@
 import React from 'react';
 import { Layers, Type, Image as ImageIcon, Package, Trash2, Palette } from 'lucide-react';
+import './estudio.css';
 
 const row = (active) => ({
     padding: '8px 12px', borderRadius: '12px', cursor: 'pointer',
@@ -29,7 +30,7 @@ const StudioLayerPanel = ({
     onSelectLayer, onRemoveLayer, onBgColorChange,
     onAddText, onAddFromGallery, onAddFromCatalog, isDeviceMobile
 }) => (
-    <div style={{ width: isDeviceMobile ? '100%' : '300px', background: 'rgba(0,0,0,0.4)', borderRight: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+    <div className="est-panel-capas">
 
         {/* Lista */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '18px' }}>
@@ -42,20 +43,20 @@ const StudioLayerPanel = ({
             <div style={{ ...row(false), marginBottom: '6px' }}>
                 <div style={{ ...thumb, background: bgColor, border: '2px solid rgba(255,255,255,0.15)' }} />
                 <div style={{ flex: 1, fontSize: '11px', fontWeight: '900' }}>Fondo</div>
-                <div style={{ position: 'relative' }}>
+                <div className="est-relativo">
                     <Palette size={13} color="rgba(255,255,255,0.4)" />
                     <input type="color" value={bgColor} onChange={e => onBgColorChange(e.target.value)}
-                        style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }} />
+                        className="est-invisible" />
                 </div>
             </div>
 
             {/* Capas (orden Z desc) */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 {layers.length === 0 && (
-                    <div style={{ textAlign: 'center', padding: '32px 0', color: 'rgba(255,255,255,0.12)' }}>
-                        <Layers size={24} style={{ marginBottom: '8px' }} />
+                    <div className="est-panel-vacio">
+                        <Layers size={24} className="est-grupo--junto" />
                         <p style={{ fontSize: '10px', margin: 0 }}>Sin elementos</p>
-                        <p style={{ fontSize: '9px', margin: '4px 0 0', opacity: 0.6 }}>Añade texto o imágenes</p>
+                        <p className="est-menudo">Añade texto o imágenes</p>
                     </div>
                 )}
                 {[...layers].sort((a, b) => b.zIndex - a.zIndex).map(layer => {
@@ -66,9 +67,9 @@ const StudioLayerPanel = ({
                             <div style={thumb}>
                                 {layer.type === 'text'
                                     ? <Type size={12} color="#000" />
-                                    : <img src={`${layer.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />}
+                                    : <img src={`${layer.url}`} className="est-imagen-llena" alt="" />}
                             </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
+                            <div className="est-encogible">
                                 <div style={{ fontSize: '11px', fontWeight: '900', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                     {layer.type === 'text' ? (layer.content || 'Texto') : 'Imagen'}
                                 </div>
@@ -89,9 +90,9 @@ const StudioLayerPanel = ({
         </div>
 
         {/* Botones añadir */}
-        <div style={{ padding: '14px', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.2)' }}>
+        <div className="est-panel-pie">
             {viewport === 'mobile' && (
-                <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.3)', fontWeight: '700', textAlign: 'center', marginBottom: '10px' }}>
+                <p className="est-pista">
                     Editando capas MÓVIL
                 </p>
             )}
@@ -105,7 +106,7 @@ const StudioLayerPanel = ({
                         onMouseEnter={e => { e.currentTarget.style.background='rgba(255,255,255,0.08)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.12)'; }}
                         onMouseLeave={e => { e.currentTarget.style.background='rgba(255,255,255,0.03)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.05)'; }}>
                         {b.icon}
-                        <span style={{ fontSize: '9px', fontWeight: '900', letterSpacing: '0.05em' }}>{b.label}</span>
+                        <span className="est-clave">{b.label}</span>
                     </button>
                 ))}
             </div>
