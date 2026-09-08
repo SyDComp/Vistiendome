@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 from ...database import get_session
+from ...core import existencias as existencias_core
 from ...models.catalog import (
     Product, Category, SKU, MediaAsset, ProductMediaLink, SKUMediaLink,
     Characteristic, Specification, SpecificationCharacteristicLink, CategorySpecificationLink,
@@ -401,6 +402,16 @@ async def kardex_registrar_movimiento(data: MovimientoKardex, db: Session = Depe
 
     if data.quantity == 0:
         raise HTTPException(status_code=400, detail="La cantidad no puede ser cero")
+
+    # Un ajuste puede sumar lo que quiera —asi se corrige un stock que quedo
+    # negativo— pero no puede dejar debiendo. Restar mas de lo que hay no es un
+    # ajuste, es un error de registro.
+    baja_de_cero, hay = existencias_core.deja_negativo(db, data.sku_id, data.quantity)
+    if baja_de_cero:
+        raise HTTPException(
+            status_code=409,
+            detail=f"No se puede: hay {hay} y estas restando {abs(data.quantity)}. El stock quedaria en negativo.",
+        )
 
     movimiento = StockMovement(
         sku_id=data.sku_id,

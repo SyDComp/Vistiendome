@@ -8,9 +8,10 @@ from pydantic import BaseModel, Field, field_validator
 from app.database import get_session
 from app.models.crm import Cotizacion, CotizacionItem, EstadoCotizacion, OrigenCotizacion, TipoDespacho, ModoEntrega
 from app.models.iam import Persona, TipoPersona, Direccion, CuentaAcceso
-from app.models.catalog import StockMovement, MovementType
+from app.models.catalog import StockMovement, MovementType, SKU
 from app.models.taller import OrdenCorte, OrdenCorteItem, EstadoOrdenCorte
 from app.api.deps import get_current_user, RequirePermiso
+from app.core import existencias as existencias_core
 from app.core import propuestas as core_propuestas
 from app.models.propuestas import OpcionPropuesta
 
@@ -470,6 +471,48 @@ def _sincronizar_stock_venta(session: Session, cotizacion: Cotizacion, estado_an
 
     if not entra_a_despacho and not sale_de_despacho:
         return
+
+    # NO SE DESPACHA LO QUE NO HAY
+    # Antes esto restaba sin mirar: despachar una prenda sin existencia dejaba
+    # el stock en negativo y nadie se enteraba. En el catalogo aparecia
+    # "-1 und." como si fuera un dato mas, cuando en realidad significa que una
+    # prenda real salio sin registrarse.
+    #
+    # Se comprueba TODO el pedido antes de tocar nada, y se avisa de una vez de
+    # todo lo que falta: quien despacha no tiene por que descubrirlo de a uno.
+    if entra_a_despacho:
+        por_sacar = {}
+        for item in cotizacion.items:
+            if item.sku_id:
+                por_sacar[item.sku_id] = por_sacar.get(item.sku_id, 0) + item.cantidad
+
+        # Lo ya descontado por este mismo pedido no cuenta como faltante: si se
+        # revierte y se vuelve a despachar, esa salida ya esta registrada.
+        ya_descontado = session.exec(
+            select(StockMovement).where(
+                StockMovement.type == MovementType.SALE,
+                StockMovement.reference_id.in_([i.id for i in cotizacion.items if i.sku_id]),
+            )
+        ).all() if por_sacar else []
+        for m in ya_descontado:
+            if m.sku_id in por_sacar:
+                por_sacar[m.sku_id] += m.quantity  # quantity es negativo
+
+        problemas = existencias_core.faltantes(session, por_sacar)
+        if problemas:
+            detalle = []
+            for sku_id, hay, pide in problemas:
+                sku = session.get(SKU, sku_id)
+                nombre = sku.sku_code if sku and sku.sku_code else f"SKU {sku_id}"
+                detalle.append(f"{nombre}: hay {hay}, se necesitan {pide}")
+            raise HTTPException(
+                status_code=409,
+                detail=(
+                    "No se puede despachar: no hay existencia suficiente. "
+                    + " · ".join(detalle)
+                    + ". Registra la entrada (orden de corte o ajuste) y vuelve a intentarlo."
+                ),
+            )
 
     for item in cotizacion.items:
         if not item.sku_id:
