@@ -27,6 +27,39 @@ function useIsMobile(breakpoint = 1050, forcedValue = null) {
     return isMobile;
 }
 
+/**
+ * El precio de una tarjeta, con su oferta si la tiene.
+ *
+ * Existe porque la portada pintaba `product.price` a secas: una prenda
+ * rebajada se veía a precio normal, sin tachado ni etiqueta, mientras el
+ * catálogo y el buscador sí la mostraban. La misma prenda con dos caras según
+ * la pantalla.
+ */
+const PrecioConOferta = ({ product, previewMode, tamano }) => {
+    const enOferta = !!product.on_sale && product.original_price > product.price;
+    if (!product.price) {
+        return <span style={{ fontSize: tamano, fontWeight: '900', color: '#8f0653' }}>Consultar</span>;
+    }
+    return (
+        <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
+            {enOferta && (
+                <span style={{ fontSize: `calc(${tamano} * 0.8)`, color: '#94a3b8', textDecoration: 'line-through', fontWeight: 500 }}>
+                    $ {product.original_price.toLocaleString('es-CL')}
+                </span>
+            )}
+            <span style={{ fontSize: tamano, fontWeight: '900', color: '#8f0653' }}>
+                $ {product.price.toLocaleString('es-CL')}
+            </span>
+            {enOferta && (
+                <span style={{ fontSize: '9.5px', fontWeight: '900', letterSpacing: '.4px',
+                               background: '#8f0653', color: '#fff', borderRadius: '4px', padding: '2px 5px' }}>
+                    OFERTA
+                </span>
+            )}
+        </span>
+    );
+};
+
 // ── Renderizador de capas (universal) ─────────────────────────────────────────
 const LayerRenderer = ({ layers = [], navigate, isMobile }) => {
     return (
@@ -406,13 +439,7 @@ const ProductCard = ({ product, previewMode }) => {
                     textOverflow: 'ellipsis', 
                     whiteSpace: 'nowrap' 
                 }}>{product.name}</h4>
-                <span style={{ 
-                    fontSize: previewMode ? '13px' : '16px', 
-                    fontWeight: '900', 
-                    color: '#8f0653' 
-                }}>
-                    {product.price ? `$ ${product.price.toLocaleString('es-CL')}` : 'Consultar'}
-                </span>
+                <PrecioConOferta product={product} previewMode={previewMode} tamano={previewMode ? '13px' : '16px'} />
             </div>
         </div>
     );
@@ -634,7 +661,7 @@ export const RecentProductsBlock = ({ previewMode = false }) => {
                             />
                         </div>
                         <h4 style={{ margin: '0 0 2px 0', fontSize: previewMode ? '13px' : '18px', fontWeight: '800', color: '#1e1b4b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.name}</h4>
-                        <span style={{ fontSize: previewMode ? '12px' : '16px', fontWeight: '600', color: '#8f0653' }}>{product.price ? `$ ${product.price.toLocaleString('es-CL')}` : 'Consultar'}</span>
+                        <PrecioConOferta product={product} previewMode={previewMode} tamano={previewMode ? '12px' : '16px'} />
                     </div>
                 ))}
             </div>
