@@ -187,8 +187,40 @@
 }
 
 .type-visual.disabled {
-    opacity: 1; /* Sin transparencia para no perder los tonos de la fotografía */
+    /* El color NO se apaga —bajarle la opacidad arruina el tono de la foto, que
+       es justo lo que la clienta viene a mirar— pero tiene que verse que esa
+       opción no existe con lo que ya tiene elegido.
+
+       Antes esto era `opacity: 1` a secas, o sea: sin ninguna marca. Un color
+       no disponible se veía idéntico a uno disponible, se elegía, y la talla
+       cambiaba sola. Eso es lo que QA reportó como "se pierde la talla": la
+       talla se conserva siempre que la combinación exista, y el problema real
+       era que nada avisaba de que ésa no existía.
+
+       Una diagonal y un punto de gris: se lee "no disponible" sin perder el
+       color. */
+    position: relative;
+    filter: grayscale(0.4);
 }
+
+.type-visual.disabled::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to top right,
+        transparent calc(50% - 1.5px),
+        rgba(255, 255, 255, 0.85) calc(50% - 1.5px),
+        rgba(15, 23, 42, 0.55) 50%,
+        rgba(255, 255, 255, 0.85) calc(50% + 1.5px),
+        transparent calc(50% + 1.5px)
+    );
+    pointer-events: none;
+}
+
+/* Elegida gana sobre no disponible: si es la que está puesta, se ve limpia. */
+.type-visual.active.disabled { filter: none; }
+.type-visual.active.disabled::after { content: none; }
 
 @keyframes slideUp {
     from { opacity: 0; transform: translateY(10px); }
