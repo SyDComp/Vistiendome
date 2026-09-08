@@ -769,10 +769,10 @@ const BarcodePrinter = () => {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="barcode-printer-preview-area" style={{ background: 'transparent', border: 'none', height: 'auto', minHeight: '100%', padding: 0, overflow: 'visible' }}>
+                                <div className="barcode-printer-preview-area adm-sin-marco">
                                     {previewSlots.length === 0 ? (
                                         <div className="barcode-printer-preview-empty">
-                                            <BarChart2 size={48} style={{ opacity: 0.2, marginBottom: '12px' }} />
+                                            <BarChart2 size={48} className="adm-icono-tenue" />
                                             <p className="barcode-printer-preview-empty-title">Selecciona variantes para ver la vista previa</p>
                                         </div>
                                     ) : (() => {
@@ -844,18 +844,18 @@ const BarcodePrinter = () => {
                             )}
                         </div>
                         {expandedSection === 'copies' && (
-                            <div style={{ padding: '16px 24px', borderTop: '1px solid #e2e8f0', background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                            <div className="adm-pie-ventana">
                                 <button onClick={redistribute} className="barcode-printer-copies-btn-fill">
                                     <RefreshCw size={16} /> Rellenar páginas completas
                                 </button>
-                                <button onClick={() => setExpandedSection(null)} style={{ background: '#1e1b4b', color: '#fff', border: 'none', padding: '0 24px', height: '44px', borderRadius: '12px', fontSize: '14px', fontWeight: '800', cursor: 'pointer' }}>
+                                <button onClick={() => setExpandedSection(null)} className="adm-boton-oscuro-alto">
                                     Listo
                                 </button>
                             </div>
                         )}
                         {expandedSection === 'preview' && (
-                            <div style={{ padding: '16px 24px', borderTop: '1px solid #e2e8f0', background: '#fff', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                                <button onClick={() => { handlePrint(); setExpandedSection(null); }} className="barcode-printer-btn-print active" style={{ height: '44px', fontSize: '14px' }}>
+                            <div className="adm-pie-ventana adm-pie-ventana--derecha">
+                                <button onClick={() => { handlePrint(); setExpandedSection(null); }} className="barcode-printer-btn-print active adm-alto-control">
                                     <Printer size={16} /> Imprimir Ahora
                                 </button>
                             </div>

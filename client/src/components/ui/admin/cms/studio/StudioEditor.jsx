@@ -8,6 +8,7 @@ import StudioProperties from './StudioProperties';
 import MediaGallery from "../../../../interface/admin/media/MediaGallery";
 import LibraryPicker from "../../../../interface/admin/inventory/LibraryPicker";
 import './StudioEditor.css';
+import './estudio.css';
 
 /**
  * StudioEditor — Orquestador
@@ -85,7 +86,7 @@ const StudioEditor = ({ isOpen, onClose, data, onSave, mode = 'single' }) => {
     };
 
     return (
-        <div style={{ position: 'fixed', inset: 0, height: '100dvh', width: '100dvw', zIndex: 5000, background: 'rgba(10,8,28,0.98)', backdropFilter: 'blur(15px)', display: 'flex', flexDirection: 'column', color: '#fff', fontFamily: 'Inter, sans-serif', animation: 'studioFadeIn 0.25s ease' }}>
+        <div className="est est-pantalla">
 
             <StudioHeader
                 blockTitle={blockTitles[data?.type] || data?.title}
@@ -98,7 +99,7 @@ const StudioEditor = ({ isOpen, onClose, data, onSave, mode = 'single' }) => {
                 isDeviceMobile={isDeviceMobile}
             />
 
-            <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+            <div className="est-medio">
 
                 {(!isDeviceMobile || activeMobileTab === 'layers') && (
                     <StudioLayerPanel
@@ -176,7 +177,7 @@ const StudioEditor = ({ isOpen, onClose, data, onSave, mode = 'single' }) => {
 
             {/* Barra de Navegación Inferior Móvil */}
             {isDeviceMobile && (
-                <div style={{ display: 'flex', background: '#0a081c', borderTop: '1px solid rgba(255,255,255,0.05)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+                <div className="est-barra-pie">
                     {[
                         { id: 'layers', icon: <Layers size={20} />, label: 'Capas' },
                         { id: 'canvas', icon: <Monitor size={20} />, label: 'Lienzo' },
@@ -202,8 +203,8 @@ const StudioEditor = ({ isOpen, onClose, data, onSave, mode = 'single' }) => {
 
             {/* Galería */}
             {showGallery && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 6000, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ width: '90%', height: '90%', background: '#fff', borderRadius: '28px', overflow: 'hidden' }}>
+                <div className="est-visor">
+                    <div className="est-visor-caja">
                         <MediaGallery 
                             isOpen 
                             onClose={() => setShowGallery(false)} 
@@ -240,7 +241,7 @@ const StudioEditor = ({ isOpen, onClose, data, onSave, mode = 'single' }) => {
 
             {/* Toast de feedback */}
             {toastMsg && (
-                <div style={{ position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999, background: '#1cce8e', color: '#052b1d', padding: '12px 24px', borderRadius: '100px', fontSize: '11px', fontWeight: '900', boxShadow: '0 8px 30px rgba(28,206,142,0.3)', animation: 'studioSlideUp 0.3s ease', pointerEvents: 'none' }}>
+                <div className="est-aviso-guardado">
                     {toastMsg}
                 </div>
             )}

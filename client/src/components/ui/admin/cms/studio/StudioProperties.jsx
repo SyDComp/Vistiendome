@@ -29,7 +29,7 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
 
     if (activeLayer) {
         return (
-            <div style={{ width: isDeviceMobile ? '100%' : '290px', background: 'rgba(0,0,0,0.3)', borderLeft: '1px solid rgba(255,255,255,0.05)', padding: isDeviceMobile ? '16px' : '22px', overflowY: 'auto', flexShrink: 0 }}>
+            <div className="est-panel-lateral est-panel-lateral--angosto">
                 <div className="est-cabecera">
                     <span className="est-rotulo est-rotulo--pegado">PROPIEDADES DE CAPA</span>
                     <span className="est-insignia">
@@ -89,14 +89,14 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                                     value={activeLayer.fontFamily || 'Outfit'}
                                     onChange={e => onUpdateLayer({ fontFamily: e.target.value })}
                                 >
-                                    <option value="Outfit" style={{ background: '#1e1b4b', color: '#fff' }}>Outfit</option>
-                                    <option value="Inter" style={{ background: '#1e1b4b', color: '#fff' }}>Inter</option>
-                                    <option value="Playfair Display" style={{ background: '#1e1b4b', color: '#fff' }}>Playfair Display</option>
-                                    <option value="Montserrat" style={{ background: '#1e1b4b', color: '#fff' }}>Montserrat</option>
-                                    <option value="Cinzel" style={{ background: '#1e1b4b', color: '#fff' }}>Cinzel</option>
-                                    <option value="Arial" style={{ background: '#1e1b4b', color: '#fff' }}>Arial</option>
-                                    <option value="Times New Roman" style={{ background: '#1e1b4b', color: '#fff' }}>Times New Roman</option>
-                                    <option value="Courier New" style={{ background: '#1e1b4b', color: '#fff' }}>Courier New</option>
+                                    <option value="Outfit" className="est-oscuro">Outfit</option>
+                                    <option value="Inter" className="est-oscuro">Inter</option>
+                                    <option value="Playfair Display" className="est-oscuro">Playfair Display</option>
+                                    <option value="Montserrat" className="est-oscuro">Montserrat</option>
+                                    <option value="Cinzel" className="est-oscuro">Cinzel</option>
+                                    <option value="Arial" className="est-oscuro">Arial</option>
+                                    <option value="Times New Roman" className="est-oscuro">Times New Roman</option>
+                                    <option value="Courier New" className="est-oscuro">Courier New</option>
                                 </select>
                             </Prop>
                             <Prop label="ESTILO (NEGRITA / CURSIVA)">
@@ -174,22 +174,22 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
 
     // Propiedades del lienzo (ninguna capa seleccionada)
     return (
-        <div style={{ width: isDeviceMobile ? '100%' : '320px', background: 'rgba(0,0,0,0.4)', borderLeft: '1px solid rgba(255,255,255,0.05)', padding: isDeviceMobile ? '16px' : '22px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+        <div className="est-panel-lateral">
             {/* Header Sticky */}
             <span className="est-rotulo est-rotulo--suelto">PROPIEDADES DEL LIENZO</span>
             <div className="est-columna--amplia">
 
                 <Prop label="COLOR DE FONDO">
                     <div className="est-fila--suelta">
-                        <div style={{ position: 'relative', width: '42px', height: '42px', borderRadius: '10px', background: isMobile ? (scene.mobile_bg_color || scene.bg_color) : (scene.bg_color || '#1e1b4b'), border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', flexShrink: 0 }}>
-                            <input type="color" value={isMobile ? (scene.mobile_bg_color || scene.bg_color || '#1e1b4b') : (scene.bg_color || '#1e1b4b')} onChange={e => onUpdateScene({ bg_color: e.target.value })} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }} />
+                        <div className="est-muestra" style={{ background: isMobile ? (scene.mobile_bg_color || scene.bg_color) : (scene.bg_color || '#1e1b4b') }}>
+                            <input type="color" value={isMobile ? (scene.mobile_bg_color || scene.bg_color || '#1e1b4b') : (scene.bg_color || '#1e1b4b')} onChange={e => onUpdateScene({ bg_color: e.target.value })} className="est-invisible" />
                         </div>
                         <input type="text" className="est-campo est-campo--codigo" value={isMobile ? (scene.mobile_bg_color || scene.bg_color || '#1e1b4b') : (scene.bg_color || '#1e1b4b')} onChange={e => onUpdateScene({ bg_color: e.target.value })} />
                     </div>
                 </Prop>
 
                 <Prop label={isMobile ? "ESTILO DE BORDES (SÓLO MÓVIL)" : "ESTILO DE BORDES (ESCRITORIO)"}>
-                    <div style={{ display: 'flex', gap: '8px', padding: isMobile ? '4px' : '0', background: isMobile ? 'rgba(143,6,83,0.05)' : 'transparent', borderRadius: '10px' }}>
+                    <div className="est-grupo-botones">
                         {[
                             { id: 'none', lbl: 'RECTO' },
                             { id: 'soft', lbl: 'SUAVE' },
