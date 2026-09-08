@@ -112,11 +112,11 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                         <Grid3X3 size={24} color="#fff" />
                     </div>
                     <div>
-                        <h2 style={{ margin: 0, color: '#fff', fontSize: '20px', fontWeight: '900' }}>Studio de Tablas</h2>
-                        <p style={{ margin: 0, color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>{data?.title || 'Editando tabla informativa'}</p>
+                        <h2 className="est-titulo-grande">Studio de Tablas</h2>
+                        <p className="est-bajada">{data?.title || 'Editando tabla informativa'}</p>
                     </div>
                 </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
+                <div className="est-fila--holgada">
                     <button 
                         onClick={onClose} 
                         style={{ 
@@ -152,10 +152,10 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                     
                     <section className="est-grupo">
                         <h4 className="est-seccion">Acciones Rápidas</h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div className="est-columna--holgada">
                             <button onClick={() => addRow()} style={toolbarButtonStyle}><Plus size={16} /> Añadir Fila</button>
                             <button onClick={() => removeRow(config.rows.length - 1)} style={{ ...toolbarButtonStyle, color: '#ef4444', borderColor: 'rgba(239,68,68,0.2)' }}><Trash2 size={16} /> Quitar Última Fila</button>
-                            <div style={{ height: '12px' }} />
+                            <div className="est-hueco" />
                             <button onClick={() => addColumn()} style={toolbarButtonStyle}><Plus size={16} /> Añadir Columna</button>
                             <button onClick={() => removeColumn(config.headers[config.headers.length - 1])} style={{ ...toolbarButtonStyle, color: '#ef4444', borderColor: 'rgba(239,68,68,0.2)' }}><Trash2 size={16} /> Quitar Última Columna</button>
                         </div>
@@ -270,8 +270,8 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                                             padding: '10px' 
                                         }}>
                                             <div className="row-actions">
-                                                <span style={{ fontSize: '10px', fontWeight: '800', color: '#64748b' }}>{rowIndex + 1}</span>
-                                                <div style={{ display: 'flex', gap: '4px' }}>
+                                                <span className="est-rotulo-gris">{rowIndex + 1}</span>
+                                                <div className="est-fila--menuda">
                                                     <button onClick={() => addRow(rowIndex)} style={miniButtonStyle} title="Insertar fila debajo"><Plus size={10} /></button>
                                                     <button onClick={() => removeRow(rowIndex)} style={{ ...miniButtonStyle, color: '#ef4444' }} title="Eliminar esta fila"><Trash2 size={10} /></button>
                                                 </div>
@@ -314,7 +314,7 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                         </table>
                     </div>
                     
-                    <p style={{ marginTop: '32px', color: 'rgba(255,255,255,0.4)', fontSize: '13px', width: '100%', maxWidth: '400px', lineHeight: '1.5' }}>
+                    <p className="est-ayuda-larga">
                         💡 **Tip:** Haz clic en los nombres de columna para renombrarlas. Usa los botones flotantes para insertar o eliminar elementos.
                     </p>
                 </div>
@@ -323,7 +323,7 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
 
             {/* Barra de Navegación Inferior Móvil */}
             {isDeviceMobile && (
-                <div style={{ display: 'flex', background: '#0a081c', borderTop: '1px solid rgba(255,255,255,0.05)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+                <div className="est-barra-pie">
                     {[
                         { id: 'tools', icon: <Settings size={20} />, label: 'Herramientas' },
                         { id: 'canvas', icon: <Monitor size={20} />, label: 'Tabla' }

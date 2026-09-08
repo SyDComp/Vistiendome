@@ -1,5 +1,6 @@
 import React from 'react';
 import { Plus, X } from 'lucide-react';
+import './estudio.css';
 
 /**
  * StudioCanvas
@@ -37,24 +38,24 @@ const StudioCanvas = ({
 
     return (
         <div
-            style={{ flex: 1, background: '#080808', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', position: 'relative', overflow: 'hidden' }}
+            className="est-escena"
             onClick={onDeselectLayer}
         >
             {/* Grid guía */}
-            <div style={{ position: 'absolute', inset: 0, opacity: 0.022, pointerEvents: 'none', background: 'linear-gradient(rgba(255,255,255,0.1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.1) 1px,transparent 1px)', backgroundSize: '80px 80px' }} />
+            <div className="est-cuadricula" />
 
             {/* Tabs de escenas (multi) */}
             {mode === 'multi' && (
-                <div style={{ position: 'absolute', top: '16px', left: '50%', transform: 'translateX(-50%)', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', width: 'max-content', maxWidth: '90vw', gap: '6px', padding: '4px', background: 'rgba(255,255,255,0.03)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', zIndex: 10 }}>
+                <div className="est-escenas">
                     {scenes.map((_, i) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', background: activeSceneIdx === i ? '#8f0653' : 'transparent', borderRadius: '100px', transition: 'all 0.25s' }}>
+                        <div key={i} className={`est-escena-ficha${activeSceneIdx === i ? ' est-escena-ficha--activa' : ''}`}>
                             <button onClick={e => { e.stopPropagation(); onSelectScene(i); }}
-                                style={{ padding: '6px 16px', borderRadius: '100px', border: 'none', background: 'transparent', color: activeSceneIdx === i ? '#fff' : 'rgba(255,255,255,0.4)', fontSize: '10px', fontWeight: '900', cursor: 'pointer', paddingRight: (activeSceneIdx === i && scenes.length > 1) ? '6px' : '16px' }}>
+                                className="est-escena-boton">
                                 ESCENA {i + 1}
                             </button>
                             {scenes.length > 1 && activeSceneIdx === i && (
                                 <button onClick={e => { e.stopPropagation(); onRemoveScene(i); }}
-                                    style={{ background: 'transparent', border: 'none', color: '#ffb3b3', cursor: 'pointer', display: 'flex', padding: '4px', marginRight: '6px', borderRadius: '50%' }}
+                                    className="est-escena-quitar"
                                     title="Eliminar Escena"
                                     onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.2)'}
                                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
@@ -64,7 +65,7 @@ const StudioCanvas = ({
                         </div>
                     ))}
                     <button onClick={e => { e.stopPropagation(); onAddScene(); }}
-                        style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        className="est-redondo"
                         onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.12)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}>
                         <Plus size={14} />
@@ -116,7 +117,7 @@ const StudioCanvas = ({
                         >
                             {/* Tooltip posición */}
                             {isSel && (
-                                <div style={{ position: 'absolute', top: '-30px', left: '50%', transform: 'translateX(-50%)', background: '#8f0653', color: '#fff', fontSize: '9px', padding: '3px 8px', borderRadius: '5px', fontWeight: '900', whiteSpace: 'nowrap', pointerEvents: 'none' }}>
+                                <div className="est-etiqueta-flotante">
                                     {(isMobile ? (layer.mx ?? layer.x) : layer.x)}%, {(isMobile ? (layer.my ?? layer.y) : layer.y)}%
                                 </div>
                             )}
@@ -148,10 +149,10 @@ const StudioCanvas = ({
             </div>
 
             {/* Status bar */}
-            <div style={{ marginTop: '18px', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '12px', color: 'rgba(255,255,255,0.25)', fontSize: '9px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center' }}>
+            <div className="est-pie-ayuda">
                 <span>{isMobile ? `Móvil (${ratio})` : `Escritorio (${ratio})`}</span>
                 <span>{layers.length} capas</span>
-                <span style={{ color: '#8f0653' }}>● {viewMode === 'edit' ? 'Arrastra los elementos' : 'Vista Previa'}</span>
+                <span className="est-marca-color">● {viewMode === 'edit' ? 'Arrastra los elementos' : 'Vista Previa'}</span>
             </div>
         </div>
     );

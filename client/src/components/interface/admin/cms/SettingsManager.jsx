@@ -352,7 +352,7 @@ const SettingsManager = () => {
                                 className="adm-entrada adm-entrada--parrafo-fijo"
                             />
                         </div>
-                        <p style={{ fontSize: '12px', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                        <p className="adm-nota-parrafo">
                             Los íconos de Google Maps y Waze del sitio se calculan solos a partir de esta dirección — no hay que cargar un link aparte.
                         </p>
                     </div>
@@ -374,7 +374,7 @@ const SettingsManager = () => {
                     </div>
 
                     <div className="adm-columna">
-                        <div style={{ display: 'flex', gap: '10px' }}>
+                        <div className="adm-fila-junta">
                             <input 
                                 type="text" 
                                 value={newMethod} 
@@ -383,12 +383,12 @@ const SettingsManager = () => {
                                 className="adm-entrada"
                                 onKeyPress={(e) => e.key === 'Enter' && handleAddShippingMethod()}
                             />
-                            <Button onClick={handleAddShippingMethod} variant="secondary" style={{ flexShrink: 0, height: '48px', padding: '0 16px' }}>
+                            <Button onClick={handleAddShippingMethod} variant="secondary" className="adm-boton-fijo">
                                 <Plus size={18} />
                             </Button>
                         </div>
                         
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                        <div className="adm-fila-envuelta--junta">
                             {shippingMethods.length === 0 && <span className="adm-texto-suave">No hay métodos configurados.</span>}
                             {shippingMethods.map((method, idx) => {
                                 const currentColor = shippingColors[method] || getShippingColor(method, shippingColors);
@@ -400,7 +400,7 @@ const SettingsManager = () => {
                                         fontSize: '13px', fontWeight: '700', color: currentColor,
                                         boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
                                     }}>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }} title="Haz clic para modificar el color de este transporte">
+                                        <label className="adm-elegible--menuda" title="Haz clic para modificar el color de este transporte">
                                             <div style={{
                                                 width: '18px', height: '18px', borderRadius: '50%',
                                                 backgroundColor: currentColor, border: '2px solid #fff',
@@ -448,7 +448,7 @@ const SettingsManager = () => {
                         </span>
                     </label>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                    <div className="adm-rejilla--ancha">
                         <div className="input-group">
                             <label className="adm-rotulo"><Info size={14} /> Frecuencia</label>
                             <select
@@ -575,7 +575,7 @@ const SettingsManager = () => {
                                 <ColorField label="Fondo botón" value={welcomeModal.button_bg_color} onChange={(v) => setWelcomeModal(prev => ({ ...prev, button_bg_color: v }))} />
                                 <ColorField label="Texto botón" value={welcomeModal.button_text_color} onChange={(v) => setWelcomeModal(prev => ({ ...prev, button_text_color: v }))} />
                             </div>
-                            <p style={{ fontSize: '12px', color: '#64748b', marginTop: '10px' }}>
+                            <p className="adm-nota-suelta">
                                 La "X" para cerrar se ajusta automáticamente para contrastar con el fondo del modal.
                             </p>
                         </div>
@@ -857,7 +857,7 @@ const SettingsManager = () => {
                         />
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '20px' }}>
+                    <div className="adm-rejilla--holgada">
                         <div className="input-group">
                             <LinkField
                                 label="Enlace (opcional)"
@@ -1028,9 +1028,9 @@ const SettingsManager = () => {
 };
 
 const ColorField = ({ label, value, onChange }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <span style={{ fontSize: '12px', fontWeight: '700', color: '#64748b' }}>{label}</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <div className="adm-columna--menuda">
+        <span className="adm-nota-menor">{label}</span>
+        <div className="adm-fila-icono">
             <input
                 type="color"
                 value={value || '#000000'}

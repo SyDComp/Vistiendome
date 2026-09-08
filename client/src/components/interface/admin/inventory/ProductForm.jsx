@@ -520,11 +520,10 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                                 value={values.extras?.video_url || ''}
                                 onChange={(e) => setValues(prev => ({ ...prev, extras: { ...prev.extras, video_url: e.target.value } }))}
                                 placeholder="https://www.youtube.com/watch?v=..."
-                                className="product-carousel-speed-select"
-                                style={{ width: '100%', boxSizing: 'border-box' }}
+                                className="product-carousel-speed-select adm-ancho-caja"
                             />
                             {values.extras?.video_url && !getYoutubeEmbedUrl(values.extras.video_url) && (
-                                <p className="product-carousel-desc" style={{ color: '#dc2626', marginTop: '6px' }}>
+                                <p className="product-carousel-desc adm-error">
                                     No reconozco ese link como un video de YouTube válido — no se mostrará en el sitio.
                                 </p>
                             )}
@@ -545,7 +544,7 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                     <div className="product-batch-errors-list">
                         {batchErrors.map((err, idx) => (
                             <div key={idx} className="product-batch-error-item">
-                                <span style={{ fontWeight: '700' }}>{err.sku}</span>
+                                <span className="adm-negrita">{err.sku}</span>
                                 <span>{err.error}</span>
                             </div>
                         ))}
@@ -560,7 +559,7 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                 {/* Secciones del Formulario */}
                 <AdminFormRow balanced>
                     <Input label="Nombre del Producto" name="name" value={values.name} onChange={handleChange} error={errors.name} placeholder="Ej: Vestido Noemi Azul" />
-                    <Input label="Identificador URL (Automático)" name="slug" value={values.slug} readOnly style={{ backgroundColor: '#f1f5f9', color: '#64748b', cursor: 'not-allowed' }} />
+                    <Input label="Identificador URL (Automático)" name="slug" value={values.slug} readOnly className="adm-campo--bloqueado" />
                 </AdminFormRow>
 
                 <AdminFormSection 
@@ -610,7 +609,7 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                             badge="MARKETING"
                             description="Aplica a TODAS las versiones de este producto durante el periodo indicado. Elige 'Sin oferta' para desactivarla. (Puedes sobrescribir una versión puntual en su detalle.)"
                         >
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
+                            <div className="adm-rejilla--corta">
                                 <div>
                                     <label className="product-form-label">Tipo de oferta</label>
                                     <select
@@ -706,7 +705,7 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                                     <div className="product-hub-btn-add-icon">
                                         <Plus size={24} />
                                     </div>
-                                    <div style={{ textAlign: 'center' }}>
+                                    <div className="adm-centrado">
                                         <span className="product-hub-btn-title">Añadir Versión</span>
                                         <span className="product-hub-btn-desc">Mezcla opciones y sube fotos</span>
                                     </div>
@@ -721,7 +720,7 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                                     <div className="product-hub-btn-lib-icon">
                                         <Package size={24} />
                                     </div>
-                                    <div style={{ textAlign: 'center' }}>
+                                    <div className="adm-centrado">
                                         <span className="product-hub-btn-title">Ver Mi Galería de SKUs</span>
                                         <span className="product-hub-btn-lib-desc">
                                             {generatedVariants.length} versiones activas
@@ -783,7 +782,7 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                                 title={`Detalle de Versión: ${selectedVariant?.sku}`}
                                 data={selectedVariant}
                                 galleryPool={allImagesUniverse}
-                                style={{ zIndex: 9999 }}
+                                className="adm-encima"
                                 onUpdate={(newData) => {
                                     const updated = [...generatedVariants];
                                     updated[selectedVariant.index] = { 
@@ -852,7 +851,7 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                                 variant="primary" 
                                 type="submit" 
                                 disabled={isSubmitting}
-                                style={{ padding: '0 60px', height: '56px', fontSize: '16px', borderRadius: '18px', fontWeight: '900', boxShadow: '0 10px 15px -3px rgba(143, 6, 83, 0.3)' }}
+                                className="adm-boton-ancho"
                             >
                                 {isSubmitting ? 'Guardando...' : isSaved ? 'Guardar Cambios' : 'Confirmar y Guardar Producto Base'}
                             </Button>
