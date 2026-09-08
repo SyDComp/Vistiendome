@@ -280,10 +280,10 @@ const PreviewModal = ({ preview, onClose, navigate }) => {
                 width: '100%', maxWidth: '460px', background: '#fff', borderRadius: '20px',
                 overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
             }}>
-                <div style={{ position: 'relative', height: '220px', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {loading ? <span style={{ color: '#94a3b8', fontSize: '13px' }}>Cargando…</span>
-                        : img ? <img src={img} alt={preview.title} style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', objectFit: 'contain' }} />
-                              : <span style={{ color: '#cbd5e1', fontSize: '13px' }}>Sin imagen</span>}
+                <div className="ana-foto">
+                    {loading ? <span className="ana-suave">Cargando…</span>
+                        : img ? <img src={img} alt={preview.title}  />
+                              : <span className="ana-apagado">Sin imagen</span>}
                     <button onClick={onClose} aria-label="Cerrar" style={{
                         position: 'absolute', top: '12px', right: '12px', width: '34px', height: '34px',
                         border: 'none', borderRadius: '50%', background: 'rgba(255,255,255,0.9)', color: '#1e293b',
@@ -291,24 +291,24 @@ const PreviewModal = ({ preview, onClose, navigate }) => {
                     }}><X size={18} /></button>
                 </div>
 
-                <div style={{ padding: '22px 24px 24px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: '800', color: '#8f0653', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <div className="ana-cuerpo">
+                    <span className="ana-antetitulo">
                         {isVariant ? 'Variante' : 'Producto'}
                     </span>
-                    <h3 style={{ margin: '6px 0 14px', fontSize: '17px', fontWeight: '800', color: '#1e1b4b', lineHeight: 1.4 }}>
+                    <h3 className="ana-nombre-pieza">
                         {preview.title}
                     </h3>
 
-                    <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                    <div className="ana-fila--separada">
                         {(preview.stats || []).map(([label, val]) => (
-                            <div key={label} style={{ flex: 1, textAlign: 'center', padding: '10px', background: '#f8fafc', borderRadius: '12px' }}>
-                                <div style={{ fontSize: '22px', fontWeight: '900', color: '#1e1b4b' }}>{val}</div>
+                            <div key={label} className="ana-cifra-caja">
+                                <div className="ana-cifra">{val}</div>
                                 <div className="ana-dia-numero-nombre">{label}</div>
                             </div>
                         ))}
                     </div>
 
-                    <div style={{ display: 'flex', gap: '10px' }}>
+                    <div className="ana-fila">
                         <button onClick={goToStore} disabled={!detail?.slug} style={{
                             flex: 1, height: '46px', border: '1px solid #e2e8f0', borderRadius: '12px',
                             background: '#fff', color: '#334155', fontSize: '14px', fontWeight: '700',

@@ -210,11 +210,11 @@ const SettingsManager = () => {
     if (loading) return <div className="cms-adm-vacio">Cargando configuraciones...</div>;
 
     return (
-        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '900px' }}>
+        <div className="adm-vista">
             <header className="adm-seccion-cabecera">
                 <div>
-                    <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '900', color: '#1e1b4b' }}>Puntos de Contacto</h1>
-                    <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '14px' }}>Configura tus redes sociales y datos de contacto globales.</p>
+                    <h1 className="adm-titulo-grande">Puntos de Contacto</h1>
+                    <p className="cms-adm-bajada">Configura tus redes sociales y datos de contacto globales.</p>
                 </div>
                 <Button 
                     onClick={handleSave} 
@@ -389,7 +389,7 @@ const SettingsManager = () => {
                         </div>
                         
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                            {shippingMethods.length === 0 && <span style={{color: '#94a3b8', fontSize: '14px'}}>No hay métodos configurados.</span>}
+                            {shippingMethods.length === 0 && <span className="adm-texto-suave">No hay métodos configurados.</span>}
                             {shippingMethods.map((method, idx) => {
                                 const currentColor = shippingColors[method] || getShippingColor(method, shippingColors);
                                 return (
@@ -411,7 +411,7 @@ const SettingsManager = () => {
                                                     type="color" 
                                                     value={currentColor} 
                                                     onChange={(e) => setShippingColors(prev => ({ ...prev, [method]: e.target.value }))}
-                                                    style={{ opacity: 0, width: '20px', height: '20px', cursor: 'pointer', padding: 0, margin: 0, border: 'none' }}
+                                                    className="adm-archivo-oculto"
                                                 />
                                             </div>
                                             <span>{method}</span>
@@ -497,7 +497,7 @@ const SettingsManager = () => {
                         </div>
 
                         {(welcomeModal.image_url || welcomeModal.image_asset_id) && (
-                            <div style={{ gridColumn: '1 / -1', background: '#f8fafc', padding: '18px', borderRadius: '16px', border: '1px solid #cbd5e1', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            <div className="adm-bloque-ancho">
                                 <div className="adm-seccion-titulo">
                                     <Sliders size={16} style={{ color: '#8f0653' }} />
                                     Ajustes Visuales de la Imagen
@@ -566,9 +566,9 @@ const SettingsManager = () => {
                             />
                         </div>
 
-                        <div style={{ gridColumn: '1 / -1', borderTop: '1px dashed #e2e8f0', paddingTop: '20px' }}>
+                        <div className="adm-bloque-separado">
                             <label className="adm-rotulo">Colores</label>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px' }}>
+                            <div className="adm-fila-envuelta">
                                 <ColorField label="Título" value={welcomeModal.title_color} onChange={(v) => setWelcomeModal(prev => ({ ...prev, title_color: v }))} />
                                 <ColorField label="Mensaje" value={welcomeModal.body_color} onChange={(v) => setWelcomeModal(prev => ({ ...prev, body_color: v }))} />
                                 <ColorField label="Fondo modal" value={welcomeModal.bg_color} onChange={(v) => setWelcomeModal(prev => ({ ...prev, bg_color: v }))} />
@@ -590,7 +590,7 @@ const SettingsManager = () => {
                 </section>
 
                 <section className="adm-panel adm-panel--ancho">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                    <div className="adm-fila-titulo">
                         <div className="adm-emblema-color adm-emblema-color--verde">
                             <Tag size={20} />
                         </div>
@@ -684,7 +684,7 @@ const SettingsManager = () => {
                 </section>
 
                 <section className="adm-panel adm-panel--ancho">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                    <div className="adm-fila-titulo">
                         <div className="adm-emblema-color adm-emblema-color--rosa">
                             <Gift size={20} />
                         </div>
@@ -772,7 +772,7 @@ const SettingsManager = () => {
                                     </div>
                                 </div>
 
-                                <div className="input-group" style={{ marginTop: '14px' }}>
+                                <div className="input-group adm-separacion--arriba">
                                     <label className="adm-rotulo">Productos ({(p.productos || []).length === 0 ? 'todo el catálogo' : `${p.productos.length} elegidos`})</label>
                                     <div className="adm-etiquetas">
                                         {productosDisponibles.map(prod => {
@@ -805,7 +805,7 @@ const SettingsManager = () => {
                                     <input type="checkbox" checked={p.combinable === true}
                                         onChange={e => editar({ combinable: e.target.checked })}
                                         className="adm-casilla" />
-                                    <span style={{ fontSize: '13px', color: '#334155', fontWeight: 600 }}>
+                                    <span className="adm-texto-medio">
                                         Se puede combinar con los precios por cantidad (mayorista/iglesia)
                                     </span>
                                 </label>
@@ -846,7 +846,7 @@ const SettingsManager = () => {
                         </span>
                     </label>
 
-                    <div className="input-group" style={{ marginBottom: '20px' }}>
+                    <div className="input-group adm-separacion--amplia">
                         <label className="adm-rotulo"><Info size={14} /> Mensaje</label>
                         <input
                             type="text"
@@ -897,9 +897,9 @@ const SettingsManager = () => {
                         </div>
                     </div>
 
-                    <div style={{ marginBottom: '20px' }}>
+                    <div className="adm-separacion--amplia">
                         <label className="adm-rotulo">Colores</label>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px' }}>
+                        <div className="adm-fila-envuelta">
                             <ColorField label="Fondo" value={topBanner.bg_color} onChange={(v) => setTopBanner(prev => ({ ...prev, bg_color: v }))} />
                             <ColorField label="Texto" value={topBanner.text_color} onChange={(v) => setTopBanner(prev => ({ ...prev, text_color: v }))} />
                         </div>

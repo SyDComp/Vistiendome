@@ -278,3 +278,44 @@
     border: 1px solid #e2e8f0;
     border-radius: 0.625rem;
 }
+
+/* ── Cola de piezas sueltas del panel ───────────────────────────────────────
+   Lo que quedaba escrito entre la lógica en las últimas pantallas. */
+
+.adm-vista { height: 100%; display: flex; flex-direction: column; gap: 1.5rem; max-width: 56.25rem; }
+.adm-fila-envuelta { display: flex; flex-wrap: wrap; gap: 1.125rem; }
+.adm-fila-titulo { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+.adm-separacion--amplia { margin-bottom: 1.25rem; }
+.adm-separacion--arriba { margin-top: 0.875rem; }
+
+/* Bloque que ocupa la fila entera de una rejilla. */
+.adm-bloque-ancho {
+    grid-column: 1 / -1;
+    background: #f8fafc;
+    padding: 1.125rem;
+    border-radius: 1rem;
+    border: 1px solid #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.adm-bloque-separado {
+    grid-column: 1 / -1;
+    border-top: 1px dashed #e2e8f0;
+    padding-top: 1.25rem;
+}
+
+.adm-texto-suave { color: #94a3b8; font-size: 0.875rem; }
+.adm-texto-medio { font-size: 0.8125rem; color: #334155; font-weight: 600; }
+
+/* Un campo de archivo invisible sobre lo que se ve: se pulsa la imagen, no un
+   control gris del sistema. */
+.adm-archivo-oculto {
+    opacity: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    border: none;
+}
