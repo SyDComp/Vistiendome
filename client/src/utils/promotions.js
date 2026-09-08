@@ -2,10 +2,13 @@
  * Promociones configurables (lleva X paga Y, descuento en unidad repetida,
  * regalo por compra).
  *
- * "Lleva 3 paga 2" y "segunda unidad al 50%" son la MISMA regla: por cada
+ * "Lleva 3 paga 2" y "segunda unidad al 50%" son la MISMA regla: alcanzando
  * `lleva` unidades, las (`lleva` - `paga`) más baratas reciben `descuento`%.
  * Con descuento=100 la unidad va gratis (3x2 clásico); con 50, va a mitad de
  * precio. Por eso no hay dos tipos: hay uno, en las palabras que ella usa.
+ *
+ * Se aplica UNA VEZ por pedido. Llevar el doble no descuenta el doble: la
+ * promoción premia alcanzar el mínimo, no se multiplica agregando pares.
  *
  * El regalo sí es otro mecanismo — no descuenta lo que hay en el carrito,
  * agrega algo. Por eso es un tipo aparte.
@@ -95,8 +98,17 @@ export const evaluarPromociones = (cart, config, ahora = new Date()) => {
         });
         precios.sort((a, b) => a - b);
 
-        const grupos = Math.floor(precios.length / lleva);
-        const cuantas = Math.min(grupos * beneficiadas, precios.length);
+        // UNA VEZ POR PEDIDO, no una por cada grupo.
+        //
+        // Antes se contaba `Math.floor(unidades / lleva)` grupos y se
+        // descontaba en cada uno: con "lleva 2 paga 1" y 4 prendas en el
+        // carrito se regalaban DOS, y con 10 prendas, cinco. Reportado por QA:
+        // subtotal $77.960 y un descuento de $38.980.
+        //
+        // La regla del negocio es que la promocion premia alcanzar el minimo,
+        // no que se multiplique sola a medida que se agregan pares. Llegando a
+        // `lleva` unidades se descuenta `lleva - paga`, y de ahi no sube.
+        const cuantas = Math.min(beneficiadas, precios.length);
         let monto = 0;
         for (let k = 0; k < cuantas; k++) monto += Math.round(precios[k] * porcentaje / 100);
 
