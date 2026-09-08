@@ -98,3 +98,14 @@
     text-decoration: underline;
     font-family: inherit;
 }
+
+.fb-limpiar-enlace {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    font-family: inherit;
+}

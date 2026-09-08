@@ -1789,12 +1789,7 @@ const DetailDrawer = ({
                                     <button
                                         type="button"
                                         onClick={() => window.open(`/admin/print/pedido/${currData.id}?modo=cliente`, '_blank')}
-                                        style={{
-                                            flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                            background: '#fff', color: '#8f0653', border: '1.5px solid #8f0653',
-                                            padding: '12px 16px', borderRadius: '12px', cursor: 'pointer',
-                                            fontWeight: '800', fontSize: '13px'
-                                        }}
+                                        className="dd-accion-secundaria"
                                     >
                                         Comprobante (clienta)
                                     </button>

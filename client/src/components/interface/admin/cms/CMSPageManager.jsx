@@ -428,25 +428,7 @@ const CMSPageManager = ({
                         setPreviewDevice('mobile');
                         setIsPreviewModalOpen(true);
                     }}
-                    style={{
-                        position: 'fixed',
-                        bottom: '24px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        background: '#1e1b4b',
-                        color: '#fff',
-                        padding: '14px 28px',
-                        borderRadius: '100px',
-                        border: 'none',
-                        fontWeight: '900',
-                        fontSize: '14px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        boxShadow: '0 10px 30px rgba(30,27,75,0.4)',
-                        zIndex: 1000,
-                        cursor: 'pointer'
-                    }}
+                    className="cms-pg-aviso"
                 >
                     <Eye size={18} /> Ver Espejo (Live)
                 </button>
@@ -454,15 +436,7 @@ const CMSPageManager = ({
 
             {/* Modal de Previsualización Móvil */}
             {isPreviewModalOpen && (
-                <div style={{
-                    position: 'fixed',
-                    inset: 0,
-                    zIndex: 10000,
-                    background: '#f1f5f9',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    animation: 'previewFadeIn 0.3s ease'
-                }}>
+                <div className="cms-pg-previa">
                     <div className="cms-adm-barra">
                         <div className="cms-pg-fila-ancha">
                             <div className="cms-pg-grupo">

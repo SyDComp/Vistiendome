@@ -693,3 +693,6 @@
     padding: 1.25rem;
     box-sizing: border-box;
 }
+
+.est-fila--amplia { display: flex; align-items: center; gap: 1.25rem; }
+.est-texto-vacio { color: rgba(255, 255, 255, 0.3); font-size: 0.75rem; font-style: italic; }

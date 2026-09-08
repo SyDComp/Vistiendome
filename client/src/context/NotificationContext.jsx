@@ -64,7 +64,7 @@ export const NotificationProvider = ({ children }) => {
                         </div>
                         <button 
                             onClick={() => setToasts(prev => prev.filter(toast => toast.id !== t.id))}
-                            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+                            className="adm-cerrar-plano"
                         >
                             <X size={14} />
                         </button>

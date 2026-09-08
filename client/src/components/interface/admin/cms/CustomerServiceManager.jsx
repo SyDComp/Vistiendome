@@ -93,12 +93,7 @@ const CustomerServiceManager = () => {
             <div className="cms-adm--pegado">
                 <button 
                     onClick={() => setSelectedSlug(null)}
-                    style={{ 
-                        display: 'flex', alignItems: 'center', gap: '8px', 
-                        background: 'none', border: 'none', color: '#64748b', 
-                        fontWeight: '700', fontSize: '13px', cursor: 'pointer',
-                        marginBottom: '20px', width: 'fit-content', padding: '8px 0'
-                    }}
+                    className="adm-boton-plano-texto"
                 >
                     <ArrowLeft size={16} /> Volver a Secciones
                 </button>

@@ -852,3 +852,34 @@
     border: 1px solid #ddd;
     font-size: 0.6875rem;
 }
+
+/* ── Las ultimas ────────────────────────────────────────────────────────── */
+
+.adm-tabla-fila-cabecera {
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.adm-fila-apretada { display: flex; align-items: center; gap: 0.25rem; }
+.adm-boton-plano-texto {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    color: #64748b;
+    font-weight: 700;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+.adm-cerrar-plano { background: none; border: none; color: #94a3b8; cursor: pointer; font-family: inherit; }
+.adm-capa-completa {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}

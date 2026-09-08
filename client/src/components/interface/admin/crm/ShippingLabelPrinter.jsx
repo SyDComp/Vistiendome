@@ -691,7 +691,7 @@ const ShippingLabelPrinter = () => {
                         <h1 style={{ margin: 0, fontSize: isMobile ? '17px' : '20px', fontWeight: '900', color: '#1e1b4b', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                             <Printer className="text-pink-600" size={isMobile ? 18 : 22} /> Generador de Etiquetas de Envío
                         </h1>
-                        <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#64748b' }}>
+                        <p className="et-sub">
                             Optimiza el consumo de hojas y tinta seleccionando la disposición ideal para tu impresora.
                         </p>
                     </div>
@@ -716,7 +716,7 @@ const ShippingLabelPrinter = () => {
                             onChange={e => setMarcarDespachadas(e.target.checked)}
                         />
                         Marcar como despachadas
-                        <span style={{ fontWeight: 600, color: '#94a3b8' }}>(no aplica a retiros)</span>
+                        <span className="et-apagado">(no aplica a retiros)</span>
                     </label>
                     <Button
                         variant="primary"
@@ -735,11 +735,7 @@ const ShippingLabelPrinter = () => {
             </header>
 
             {ultimoDespacho && (
-                <div style={{
-                    display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
-                    padding: '9px 16px', background: '#f5f3ff', borderBottom: '1px solid #ddd6fe',
-                    fontSize: '12px', color: '#5b21b6', fontWeight: '700',
-                }}>
+                <div className="et-despacho">
                     <span>
                         {ultimoDespacho.length === 1
                             ? 'Se marcó 1 pedido como despachado y se descontó del stock.'
@@ -814,7 +810,7 @@ const ShippingLabelPrinter = () => {
                                 );
                             })}
                         </div>
-                        <p style={{ margin: '0 0 8px', fontSize: '11px', color: '#94a3b8', lineHeight: 1.35 }}>
+                        <p className="et-ayuda">
                             {VISTAS[vista].detalle}
                         </p>
 
@@ -886,7 +882,7 @@ const ShippingLabelPrinter = () => {
                                                     {/* El N de pedido, que es el que figura en la planilla y en
                                                         la etiqueta. Antes iba el final del ULID, que no coincide
                                                         con ningun numero que la clienta pueda ver o decir. */}
-                                                    <span style={{ fontWeight: '700', color: '#8f0653' }}>
+                                                    <span className="et-marca">
                                                         {c.numero != null ? `N° ${c.numero}` : `#${c.id.slice(-6)}`}
                                                     </span>
                                                     {(() => {
@@ -900,7 +896,7 @@ const ShippingLabelPrinter = () => {
                                                             return (
                                                                 <>
                                                                     <span>•</span>
-                                                                    <span style={{ fontWeight: '800', color: '#0369a1', background: '#0369a115', padding: '1px 5px', borderRadius: '4px', border: '1px solid #0369a140', textTransform: 'uppercase', fontSize: '10px' }}>
+                                                                    <span className="et-codigo-corto">
                                                                         Retiro en local
                                                                     </span>
                                                                 </>
@@ -1033,7 +1029,7 @@ const ShippingLabelPrinter = () => {
                                     <select
                                         value={barcodeSize}
                                         onChange={(e) => setBarcodeSize(e.target.value)}
-                                        style={{ height: '28px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 8px', fontSize: '11px', fontWeight: '700', color: '#8f0653', background: '#fdf2f8', cursor: 'pointer', outline: 'none' }}
+                                        className="et-campo-corto"
                                     >
                                         <option value="micro">📏 Súper Pequeño (Micro)</option>
                                         <option value="compact">📐 Pequeño / Compacto (Recomendado)</option>
@@ -1242,7 +1238,7 @@ const ShippingLabelPrinter = () => {
                                                         {fullName.toUpperCase()}
                                                     </div>
 
-                                                    <div style={{ marginBottom: '4mm' }}>
+                                                    <div className="et-separacion-impresion">
                                                         {cli?.rut && <div className="info-row"><strong>RUT:</strong> {cli.rut}</div>}
                                                         {cli?.telefono && <div className="info-row"><strong>TEL:</strong> {cli.telefono}</div>}
                                                         {cli?.email_personal && <div className="info-row">{cli.email_personal}</div>}

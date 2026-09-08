@@ -107,7 +107,7 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
             
             {/* HEADER */}
             <div className="est-barra">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <div className="est-fila--amplia">
                     <div className="est-emblema">
                         <Grid3X3 size={24} color="#fff" />
                     </div>

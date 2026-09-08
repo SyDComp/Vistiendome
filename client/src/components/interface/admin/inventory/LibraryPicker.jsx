@@ -227,7 +227,7 @@ const LibraryPicker = ({
                             ))}
                         </div>
                         <div className="library-picker-preview-variant-meta">
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <div className="adm-fila-apretada">
                                 <Tag size={12} color="#16a34a" />
                                 <span className="library-picker-preview-variant-price">${item.price?.toLocaleString()}</span>
                             </div>

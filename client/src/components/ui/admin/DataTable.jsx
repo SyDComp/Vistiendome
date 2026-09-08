@@ -47,13 +47,7 @@ const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {
                         textAlign: 'left',
                         minWidth: isMobile ? '700px' : 'auto' // Forzar ancho mínimo en móvil para evitar apretujamiento
                     }}>
-                        <thead style={{
-                            backgroundColor: '#f8fafc',
-                            borderBottom: '1px solid #e2e8f0',
-                            position: 'sticky',
-                            top: 0,
-                            zIndex: 10
-                        }}>
+                        <thead className="adm-tabla-fila-cabecera">
                             <tr>
                                 {columns.map(col => (
                                     <th key={col.key} style={{

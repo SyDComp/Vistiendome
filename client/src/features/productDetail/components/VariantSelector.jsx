@@ -123,7 +123,7 @@ const VariantSelector = ({
                                                         alignItems: 'center',
                                                         justifyContent: 'center'
                                                     }}>
-                                                        {!hex && <span style={{ fontSize: '20px', opacity: 0.2 }}>🎨</span>}
+                                                        {!hex && <span className="selector-icono-vacio">🎨</span>}
                                                     </div>
                                                 )}
                                                 {isActive && <div className="swatch-check">✓</div>}

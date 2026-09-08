@@ -145,9 +145,7 @@ const FilterBar = ({
                             <button
                                 type="button"
                                 onClick={handleClearAll}
-                                style={{
-                                    fontSize: '12px', fontWeight: '600', color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline'
-                                }}
+                                className="fb-limpiar-enlace"
                             >
                                 Limpiar todos
                             </button>

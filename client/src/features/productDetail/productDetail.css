@@ -561,3 +561,9 @@
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
 }
+
+/* Aparicion escalonada: cada bloque entra un instante despues del anterior. */
+.ficha-retraso-1 { animation-delay: 0.4s; }
+.ficha-retraso-2 { animation-delay: 0.45s; }
+/* Icono decorativo de un selector vacio. */
+.selector-icono-vacio { font-size: 1.25rem; opacity: 0.2; }

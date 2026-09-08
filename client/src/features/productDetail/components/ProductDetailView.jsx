@@ -338,7 +338,7 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                                 });
                                 if (validSpecs.length === 0) return null;
                                 return (
-                                    <div className="specs-section-premium" style={{ animationDelay: '0.4s' }}>
+                                    <div className="specs-section-premium ficha-retraso-1">
                                         <div className="section-title-wrapper">
                                             <div className="title-accent" />
                                             <h3 className="section-title-premium-text">Especificaciones</h3>
@@ -356,7 +356,7 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                             })()}
 
                             {producto?.extras?.video_url && (
-                                <div className="product-video-section" style={{ animationDelay: '0.45s' }}>
+                                <div className="product-video-section ficha-retraso-2">
                                     <div className="section-title-wrapper">
                                         <div className="title-accent" />
                                         <h3 className="section-title-premium-text">Video</h3>
