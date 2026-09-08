@@ -120,16 +120,16 @@ const CustomerServiceManager = () => {
                     <h1 className="cms-adm-titulo">Atención al Cliente</h1>
                     <p className="cms-adm-bajada">Gestiona las secciones del footer y su contenido dinámico.</p>
                 </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
+                <div className="adm-fila-holgada">
                     <Button 
                         variant={isReordering ? "primary" : "outline"} 
                         onClick={() => setIsReordering(!isReordering)}
-                        style={{ height: '48px', padding: '0 20px', borderRadius: '14px', gap: '8px', background: isReordering ? '#fdf2f8' : '#fff', color: isReordering ? '#8f0653' : '#64748b', borderColor: isReordering ? '#8f0653' : '#e2e8f0' }}
+                        className={`cms-pg-reordenar${isReordering ? ' cms-pg-reordenar--activo' : ''}`}
                     >
                         <ArrowUpDown size={18} /> {isReordering ? 'Hecho' : 'Mover'}
                     </Button>
                     {hasChanges && (
-                        <Button onClick={handleBulkSave} variant="primary" disabled={isSaving} style={{ background: '#059669', height: '48px' }}>
+                        <Button onClick={handleBulkSave} variant="primary" disabled={isSaving} className="adm-boton-verde">
                             {isSaving ? 'Guardando...' : <><Save size={18} /> Guardar Cambios</>}
                         </Button>
                     )}
@@ -140,7 +140,7 @@ const CustomerServiceManager = () => {
                 {loading ? (
                     <div className="cms-adm-vacio">Cargando secciones...</div>
                 ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '800px' }}>
+                    <div className="adm-pila-limitada">
                         {sections.map((section, index) => (
                             <div 
                                 key={section.id}
@@ -155,18 +155,18 @@ const CustomerServiceManager = () => {
                                 }}
                             >
                                 {isReordering && (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginLeft: '-10px', padding: '0 8px' }}>
+                                    <div className="cms-pg-arrastre">
                                         <button 
                                             disabled={index === 0}
                                             onClick={() => handleMove(index, -1)}
-                                            style={{ border: 'none', background: 'none', cursor: index === 0 ? 'not-allowed' : 'pointer', color: index === 0 ? '#e2e8f0' : '#64748b', padding: 0 }}
+                                            className="adm-mover" disabled={index === 0}
                                         >
                                             <ChevronUp size={20} />
                                         </button>
                                         <button 
                                             disabled={index === sections.length - 1}
                                             onClick={() => handleMove(index, 1)}
-                                            style={{ border: 'none', background: 'none', cursor: index === sections.length - 1 ? 'not-allowed' : 'pointer', color: index === sections.length - 1 ? '#e2e8f0' : '#64748b', padding: 0 }}
+                                            className="adm-mover" disabled={index === sections.length - 1}
                                         >
                                             <ChevronDown size={20} />
                                         </button>
@@ -181,7 +181,7 @@ const CustomerServiceManager = () => {
                                         {section.is_active ? 'Visible en el footer' : 'Oculto actualmente'}
                                     </p>
                                 </div>
-                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                <div className="adm-fila-etiquetas">
                                     <button onClick={() => handleToggleActive(section.id)} className={`cms-adm-accion${section.is_active ? ' cms-adm-accion--activa' : ''}`}>
                                         {section.is_active ? <Eye size={16} /> : <EyeOff size={16} />}
                                     </button>

@@ -179,7 +179,7 @@ const CollectionManager = () => {
                         <div className="coll-manager-form-header-right">
                             <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
                             <Button variant="primary" onClick={handleSave} style={{ padding: '0 24px' }}>
-                                <Save size={18} style={{ marginRight: '8px' }} /> Guardar Colección
+                                <Save size={18} className="esp-separacion" /> Guardar Colección
                             </Button>
                         </div>
                     </div>
@@ -240,7 +240,7 @@ const CollectionManager = () => {
 
                                 <div className="coll-manager-inputs-col">
                                     <div className="coll-manager-input-header">
-                                        <label className="coll-manager-label-upper" style={{ marginBottom: 0 }}>Nombre de la Colección</label>
+                                        <label className="coll-manager-label-upper adm-sin-margen">Nombre de la Colección</label>
                                         <div className="coll-manager-toggle-wrap" onClick={() => setFormData(p => ({ ...p, is_active: !p.is_active }))}>
                                             <span className="coll-manager-toggle-text" style={{ color: formData.is_active ? '#16a34a' : '#ef4444' }}>{formData.is_active ? 'COLECCIÓN ACTIVA' : 'COLECCIÓN INACTIVA'}</span>
                                             <div className="coll-manager-toggle-track" style={{ background: formData.is_active ? '#16a34a' : '#cbd5e1' }}>
@@ -279,7 +279,7 @@ const CollectionManager = () => {
                                             <div className="coll-manager-sku-img-box">
                                                 {sku.image_url ? (
                                                     <Imagen url={sku.image_url} className="coll-manager-cover-img" sizes="120px" alt="" />
-                                                ) : <Package size={24} color="#cbd5e1" style={{ margin: '12px' }} />}
+                                                ) : <Package size={24} color="#cbd5e1" className="adm-espacio" />}
                                             </div>
                                             <div className="coll-manager-sku-info">
                                                 <div className="coll-manager-sku-code">{sku.sku}</div>
@@ -380,7 +380,7 @@ const CollectionManager = () => {
                                             alt=""
                                         />
                                     ) : (
-                                        <ImageIcon size={22} style={{ margin: '13px', color: '#94a3b8' }} />
+                                        <ImageIcon size={22} className="adm-espacio-texto" />
                                     )}
                                 </div>
                                 <span className="coll-manager-dt-name">{v}</span>

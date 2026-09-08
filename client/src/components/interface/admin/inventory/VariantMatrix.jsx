@@ -79,7 +79,7 @@ const VariantMatrix = ({ variants, onUpdate, onDelete, productImages = [], baseP
                                     <label className="vmatrix-label">
                                         Precio ($)
                                     </label>
-                                    <div style={{ position: 'relative' }}>
+                                    <div className="adm-relativo">
                                         <input 
                                             type="number" 
                                             value={v.price} 
@@ -89,7 +89,7 @@ const VariantMatrix = ({ variants, onUpdate, onDelete, productImages = [], baseP
                                         {isPriceSuggested && (
                                             <div className="vmatrix-suggested-alert">
                                                 <AlertCircle size={12} />
-                                                <span style={{ fontSize: '10px', fontWeight: '700' }}>Precio sugerido: revisar o ajustar</span>
+                                                <span className="adm-menudo">Precio sugerido: revisar o ajustar</span>
                                             </div>
                                         )}
                                     </div>
@@ -112,11 +112,11 @@ const VariantMatrix = ({ variants, onUpdate, onDelete, productImages = [], baseP
                             <div className="vmatrix-photos-wrapper">
                                 {(v.media_assets || []).map((asset, iIndex) => (
                                     <div key={asset.id || iIndex} className="vmatrix-photo-thumb">
-                                        <Imagen url={asset.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} sizes="120px" alt="" />
+                                        <Imagen url={asset.url} className="adm-imagen-cubre" sizes="120px" alt="" />
                                     </div>
                                 ))}
                                 
-                                <div style={{ position: 'relative' }}>
+                                <div className="adm-relativo">
                                     <button 
                                         type="button"
                                         onClick={(e) => {
@@ -127,7 +127,7 @@ const VariantMatrix = ({ variants, onUpdate, onDelete, productImages = [], baseP
                                     >
                                         <Plus size={16} />
                                     </button>
-                                    <div className="vmatrix-photo-picker" style={{ display: 'none' }}>
+                                    <div className="vmatrix-photo-picker adm-oculto">
                                         {productImages.length === 0 && <span className="vmatrix-picker-empty">Sube fotos primero</span>}
                                         {productImages.map((img, iIdx) => {
                                             const assetId = img.media_asset_id || img.id;
@@ -139,7 +139,7 @@ const VariantMatrix = ({ variants, onUpdate, onDelete, productImages = [], baseP
                                                     onClick={() => handleToggleImageToVariant(idx, { id: assetId, url: img.url })}
                                                     className={`vmatrix-picker-thumb ${isSelected ? 'selected' : ''}`}
                                                 >
-                                                    <Imagen url={img.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} sizes="120px" alt="" />
+                                                    <Imagen url={img.url} className="adm-imagen-cubre" sizes="120px" alt="" />
                                                 </div>
                                             );
                                         })}

@@ -119,16 +119,16 @@ const CategoryForm = ({ editingCategory, categories, onSubmit, onCancel }) => {
                         name="is_filterable" 
                         checked={formData.is_filterable}
                         onChange={(e) => setFormData(p => ({ ...p, is_filterable: e.target.checked }))}
-                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                        className="adm-casilla-simple"
                     />
                     <label htmlFor="is_filterable" className="category-form-checkbox-label">
                         Mostrar como filtro en el catálogo público
                     </label>
                 </div>
 
-                <div style={{ marginBottom: '24px' }}>
+                <div className="adm-separacion--seccion">
                     <div className="category-spec-header">
-                        <label className="category-form-label" style={{ marginBottom: 0 }}>Especificaciones Sugeridas</label>
+                        <label className="category-form-label adm-sin-margen">Especificaciones Sugeridas</label>
                         <span className="category-spec-count">{formData.suggested_specification_ids.length} ACTIVAS</span>
                     </div>
                     
@@ -212,7 +212,7 @@ const CATEGORY_COLUMNS = [
         align: 'center',
         render: (v, row) => {
             const isSystem = row.is_joker || row.slug === 'sin_categoria';
-            if (isSystem) return <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '700' }}>—</span>;
+            if (isSystem) return <span className="adm-menudo-gris">—</span>;
             
             const levelClass = v === 1 ? 'l1' : v === 2 ? 'l2' : v === 3 ? 'l3' : 'other';
             const label = `Niv. ${v}`.toUpperCase();
@@ -229,7 +229,7 @@ const CATEGORY_COLUMNS = [
         label: 'Categoría Padre', 
         render: (v, row) => {
             const isSystem = row.is_joker || row.slug === 'sin_categoria';
-            if (isSystem) return <span style={{ color: '#cbd5e1', fontSize: '12px' }}>Protegido</span>;
+            if (isSystem) return <span className="adm-celda-tenue">Protegido</span>;
             return <ParentCategoryBadge name={v} />;
         }
     },
@@ -392,7 +392,7 @@ const CategoryManager = () => {
     const handleFilterChange = (filters) => { setActiveFilters(filters); setPage(1); };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+        <div className="adm-pila-alta">
             <SectionHeader
                 title="Gestión de Categorías"
                 description={`${totalItems} categorías definidas`}

@@ -155,9 +155,9 @@ const ColorManager = () => {
                         </div>
 
                         <div className="color-manager-actions">
-                            <Button variant="outline" onClick={() => setView('list')} style={{ flex: 1, height: '54px' }}>Cancelar</Button>
-                            <Button variant="primary" onClick={handleSave} style={{ flex: 2, height: '54px' }}>
-                                <Save size={20} style={{ marginRight: '8px' }} /> {editingColor ? "Guardar Cambios" : "Registrar Color"}
+                            <Button variant="outline" onClick={() => setView('list')} className="adm-alto-fijo--simple">Cancelar</Button>
+                            <Button variant="primary" onClick={handleSave} className="adm-alto-fijo--doble">
+                                <Save size={20} className="esp-separacion" /> {editingColor ? "Guardar Cambios" : "Registrar Color"}
                             </Button>
                         </div>
                     </div>
@@ -172,7 +172,7 @@ const ColorManager = () => {
                 <SectionHeader 
                     title="Maestra de Colores Oficiales"
                     description="Gestiona la biblioteca de tonos permitidos para el catálogo. Estos colores son los únicos que podrán asignarse a los productos."
-                    style={{ margin: 0, padding: 0 }}
+                    className="adm-sin-espacio"
                 />
                 <div className="color-manager-header-actions">
                     <Button 
@@ -181,7 +181,7 @@ const ColorManager = () => {
                         disabled={loading}
                         className="color-manager-sync-btn"
                     >
-                        <RotateCcw size={18} style={{ marginRight: '8px' }} className={loading ? 'animate-spin' : ''} /> 
+                        <RotateCcw size={18} className={`esp-separacion ${loading ? 'animate-spin' : ''}`} /> 
                         Sincronizar Catálogo
                     </Button>
                     <Button 

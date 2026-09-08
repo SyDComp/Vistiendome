@@ -555,3 +555,55 @@
 .adm-encima { z-index: 9999; }
 /* Un campo que no se puede tocar todavia se ve apagado, no igual que el resto. */
 .adm-campo--bloqueado { background-color: #f1f5f9; color: #64748b; cursor: not-allowed; }
+
+/* ── Cola de inventario y CMS ───────────────────────────────────────────── */
+
+.adm-pila-alta { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+.adm-pila-limitada { display: flex; flex-direction: column; gap: 0.75rem; max-width: 50rem; }
+.adm-fila-flexible { display: flex; align-items: center; gap: 0.75rem; flex: 1; }
+.adm-fila-media { flex: 1; display: flex; gap: 0.625rem; }
+.adm-fila-holgada { display: flex; gap: 0.75rem; }
+.adm-fila-etiquetas { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.adm-doble { flex: 2; }
+.adm-sin-margen { margin-bottom: 0; }
+.adm-sin-espacio { margin: 0; padding: 0; }
+.adm-espacio { margin: 0.75rem; }
+.adm-espacio-texto { margin: 0.8125rem; color: #94a3b8; }
+.adm-relativo { position: relative; }
+.adm-oculto { display: none; }
+.adm-imagen-cubre { width: 100%; height: 100%; object-fit: cover; }
+
+.adm-casilla-simple { width: 1.125rem; height: 1.125rem; cursor: pointer; }
+.adm-menudo { font-size: 0.625rem; font-weight: 700; }
+.adm-menudo-gris { font-size: 0.75rem; color: #94a3b8; font-weight: 700; }
+.adm-alto-fijo { height: 3.375rem; }
+.adm-alto-fijo--doble { flex: 2; height: 3.375rem; }
+.adm-alto-fijo--simple { flex: 1; height: 3.375rem; }
+
+/* La miniatura de una opcion con imagen. */
+.adm-miniatura-opcion {
+    width: 2.375rem;
+    height: 2.375rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Flechas de reordenar: la primera no puede subir y la ultima no puede bajar,
+   y eso se ve en el boton en vez de calcularse en JavaScript. */
+.adm-mover {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #64748b;
+    padding: 0;
+    font-family: inherit;
+}
+.adm-mover:disabled { cursor: not-allowed; color: #e2e8f0; }
+
+.adm-boton-verde { background: #059669; height: 3rem; }
