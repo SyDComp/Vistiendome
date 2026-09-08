@@ -207,11 +207,11 @@ const SettingsManager = () => {
         setShippingMethods(shippingMethods.filter(m => m !== methodToRemove));
     };
 
-    if (loading) return <div style={{ padding: '40px', textAlign: 'center' }}>Cargando configuraciones...</div>;
+    if (loading) return <div className="cms-adm-vacio">Cargando configuraciones...</div>;
 
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '900px' }}>
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <header className="adm-seccion-cabecera">
                 <div>
                     <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '900', color: '#1e1b4b' }}>Puntos de Contacto</h1>
                     <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '14px' }}>Configura tus redes sociales y datos de contacto globales.</p>
@@ -253,7 +253,7 @@ const SettingsManager = () => {
             }}>
                 <section className="adm-panel">
                     <div className="adm-panel-cabecera">
-                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fdf2f8', color: '#8f0653', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div className="adm-emblema-color adm-emblema-color--marca">
                             <Globe size={20} />
                         </div>
                         <h3 className="adm-panel-titulo">Redes Sociales</h3>
@@ -261,41 +261,41 @@ const SettingsManager = () => {
 
                     <div className="adm-columna">
                         <div className="input-group">
-                            <label style={labelStyle}><Globe size={14} /> Facebook (URL) · principal</label>
+                            <label className="adm-rotulo"><Globe size={14} /> Facebook (URL) · principal</label>
                             <input
                                 type="text"
                                 name="facebook"
                                 value={settings.facebook}
                                 onChange={handleChange}
                                 placeholder="https://facebook.com/tu_pagina"
-                                style={inputStyle}
+                                className="adm-entrada"
                             />
-                            <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>Es la red principal: se muestra primero en el sitio.</p>
+                            <p className="adm-pie-campo">Es la red principal: se muestra primero en el sitio.</p>
                         </div>
                         <div className="input-group">
-                            <label style={labelStyle}><Camera size={14} /> Instagram (URL)</label>
+                            <label className="adm-rotulo"><Camera size={14} /> Instagram (URL)</label>
                             <input
                                 type="text"
                                 name="instagram"
                                 value={settings.instagram}
                                 onChange={handleChange}
                                 placeholder="https://instagram.com/tu_cuenta"
-                                style={inputStyle}
+                                className="adm-entrada"
                             />
                         </div>
                         <div className="input-group">
-                            <label style={labelStyle}><Info size={14} /> TikTok (URL)</label>
+                            <label className="adm-rotulo"><Info size={14} /> TikTok (URL)</label>
                             <input 
                                 type="text" 
                                 name="tiktok" 
                                 value={settings.tiktok} 
                                 onChange={handleChange}
                                 placeholder="https://tiktok.com/@tu_usuario"
-                                style={inputStyle} 
+                                className="adm-entrada" 
                             />
                         </div>
                         <div className="input-group">
-                            <label style={labelStyle}><MessageCircle size={14} /> WhatsApp (Solo número)</label>
+                            <label className="adm-rotulo"><MessageCircle size={14} /> WhatsApp (Solo número)</label>
                             <input 
                                 type="text" 
                                 name="whatsapp" 
@@ -303,16 +303,16 @@ const SettingsManager = () => {
                                 onChange={handleChange}
                                 maxLength={15}
                                 placeholder="569XXXXXXXX"
-                                style={inputStyle} 
+                                className="adm-entrada" 
                             />
-                            <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>Sin el signo '+' ni espacios.</p>
+                            <p className="adm-pie-campo">Sin el signo '+' ni espacios.</p>
                         </div>
                     </div>
                 </section>
 
                 <section className="adm-panel">
                     <div className="adm-panel-cabecera">
-                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#eff6ff', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div className="adm-emblema-color adm-emblema-color--azul">
                             <Mail size={20} />
                         </div>
                         <h3 className="adm-panel-titulo">Información de Contacto</h3>
@@ -320,18 +320,18 @@ const SettingsManager = () => {
 
                     <div className="adm-columna">
                         <div className="input-group">
-                            <label style={labelStyle}><Mail size={14} /> Correo Electrónico</label>
+                            <label className="adm-rotulo"><Mail size={14} /> Correo Electrónico</label>
                             <input 
                                 type="email" 
                                 name="email" 
                                 value={settings.email} 
                                 onChange={handleChange}
                                 placeholder="contacto@vistiendome.cl"
-                                style={inputStyle} 
+                                className="adm-entrada" 
                             />
                         </div>
                         <div className="input-group">
-                            <label style={labelStyle}><Phone size={14} /> Teléfono Visible</label>
+                            <label className="adm-rotulo"><Phone size={14} /> Teléfono Visible</label>
                             <input 
                                 type="text" 
                                 name="phone_display" 
@@ -339,17 +339,17 @@ const SettingsManager = () => {
                                 onChange={handleChange}
                                 maxLength={25}
                                 placeholder="+56 9 1234 5678"
-                                style={inputStyle} 
+                                className="adm-entrada" 
                             />
                         </div>
                         <div className="input-group">
-                            <label style={labelStyle}><Globe size={14} /> Dirección / Taller</label>
+                            <label className="adm-rotulo"><Globe size={14} /> Dirección / Taller</label>
                             <textarea
                                 name="address"
                                 value={settings.address}
                                 onChange={handleChange}
                                 placeholder="San Carlos, Ñuble, Chile."
-                                style={{ ...inputStyle, height: '100px', resize: 'none', paddingTop: '12px' }}
+                                className="adm-entrada adm-entrada--parrafo-fijo"
                             />
                         </div>
                         <p style={{ fontSize: '12px', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
@@ -367,7 +367,7 @@ const SettingsManager = () => {
 
                 <section className="adm-panel">
                     <div className="adm-panel-cabecera">
-                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div className="adm-emblema-color adm-emblema-color--ambar">
                             <Truck size={20} />
                         </div>
                         <h3 className="adm-panel-titulo">Métodos de Envío</h3>
@@ -380,7 +380,7 @@ const SettingsManager = () => {
                                 value={newMethod} 
                                 onChange={(e) => setNewMethod(e.target.value)}
                                 placeholder="Ej: BLUEXPRESS"
-                                style={inputStyle}
+                                className="adm-entrada"
                                 onKeyPress={(e) => e.key === 'Enter' && handleAddShippingMethod()}
                             />
                             <Button onClick={handleAddShippingMethod} variant="secondary" style={{ flexShrink: 0, height: '48px', padding: '0 16px' }}>
@@ -430,13 +430,13 @@ const SettingsManager = () => {
 
                 <section className="adm-panel adm-panel--ancho">
                     <div className="adm-panel-cabecera">
-                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fdf2f8', color: '#8f0653', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div className="adm-emblema-color adm-emblema-color--marca">
                             <Megaphone size={20} />
                         </div>
                         <h3 className="adm-panel-titulo">Modal de Bienvenida</h3>
                     </div>
 
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', marginBottom: '24px' }}>
+                    <label className="adm-elegible adm-elegible--separada">
                         <input
                             type="checkbox"
                             checked={welcomeModal.active}
@@ -450,11 +450,11 @@ const SettingsManager = () => {
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
                         <div className="input-group">
-                            <label style={labelStyle}><Info size={14} /> Frecuencia</label>
+                            <label className="adm-rotulo"><Info size={14} /> Frecuencia</label>
                             <select
                                 value={welcomeModal.frequency}
                                 onChange={(e) => setWelcomeModal(prev => ({ ...prev, frequency: e.target.value }))}
-                                style={inputStyle}
+                                className="adm-entrada"
                             >
                                 <option value="session">Una vez por sesión</option>
                                 <option value="day">Una vez por día</option>
@@ -468,23 +468,23 @@ const SettingsManager = () => {
                         </div>
 
                         <div className="input-group">
-                            <label style={labelStyle}><Megaphone size={14} /> Título</label>
+                            <label className="adm-rotulo"><Megaphone size={14} /> Título</label>
                             <input
                                 type="text"
                                 value={welcomeModal.title}
                                 onChange={(e) => setWelcomeModal(prev => ({ ...prev, title: e.target.value }))}
                                 placeholder="Ej: ¡Bienvenida a Vistiendomé!"
-                                style={inputStyle}
+                                className="adm-entrada"
                             />
                         </div>
 
                         <div className="input-group adm-ancho-total">
-                            <label style={labelStyle}><Info size={14} /> Mensaje</label>
+                            <label className="adm-rotulo"><Info size={14} /> Mensaje</label>
                             <textarea
                                 value={welcomeModal.body}
                                 onChange={(e) => setWelcomeModal(prev => ({ ...prev, body: e.target.value }))}
                                 placeholder="Anuncio, novedad o promoción que quieras destacar..."
-                                style={{ ...inputStyle, height: '100px', resize: 'vertical', paddingTop: '12px' }}
+                                className="adm-entrada adm-entrada--parrafo"
                             />
                         </div>
 
@@ -498,17 +498,17 @@ const SettingsManager = () => {
 
                         {(welcomeModal.image_url || welcomeModal.image_asset_id) && (
                             <div style={{ gridColumn: '1 / -1', background: '#f8fafc', padding: '18px', borderRadius: '16px', border: '1px solid #cbd5e1', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1e1b4b', fontWeight: '800', fontSize: '14px' }}>
+                                <div className="adm-seccion-titulo">
                                     <Sliders size={16} style={{ color: '#8f0653' }} />
                                     Ajustes Visuales de la Imagen
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                                <div className="adm-rejilla--media">
                                     <div>
-                                        <label style={{ ...labelStyle, fontSize: '12px' }}>Modo de Ajuste</label>
+                                        <label className="adm-rotulo adm-rotulo--menor">Modo de Ajuste</label>
                                         <select
                                             value={welcomeModal.image_fit || 'cover'}
                                             onChange={(e) => setWelcomeModal(prev => ({ ...prev, image_fit: e.target.value }))}
-                                            style={{ ...inputStyle, height: '42px', fontSize: '13px' }}
+                                            className="adm-entrada adm-entrada--baja"
                                         >
                                             <option value="cover">Cover (Recortar llenando espacio)</option>
                                             <option value="contain">Contain (Ver imagen completa sin cortes)</option>
@@ -517,11 +517,11 @@ const SettingsManager = () => {
 
                                     {(welcomeModal.image_fit !== 'contain') && (
                                         <div>
-                                            <label style={{ ...labelStyle, fontSize: '12px' }}>Posición de Encuadre</label>
+                                            <label className="adm-rotulo adm-rotulo--menor">Posición de Encuadre</label>
                                             <select
                                                 value={welcomeModal.image_position || 'center'}
                                                 onChange={(e) => setWelcomeModal(prev => ({ ...prev, image_position: e.target.value }))}
-                                                style={{ ...inputStyle, height: '42px', fontSize: '13px' }}
+                                                className="adm-entrada adm-entrada--baja"
                                             >
                                                 <option value="top">Superior (Arriba / Rostro)</option>
                                                 <option value="center">Centro (Estándar)</option>
@@ -531,11 +531,11 @@ const SettingsManager = () => {
                                     )}
 
                                     <div>
-                                        <label style={{ ...labelStyle, fontSize: '12px' }}>Altura Máxima del Contenedor</label>
+                                        <label className="adm-rotulo adm-rotulo--menor">Altura Máxima del Contenedor</label>
                                         <select
                                             value={welcomeModal.image_max_height || '280px'}
                                             onChange={(e) => setWelcomeModal(prev => ({ ...prev, image_max_height: e.target.value }))}
-                                            style={{ ...inputStyle, height: '42px', fontSize: '13px' }}
+                                            className="adm-entrada adm-entrada--baja"
                                         >
                                             <option value="200px">Compacta (200px)</option>
                                             <option value="280px">Estándar (280px)</option>
@@ -548,13 +548,13 @@ const SettingsManager = () => {
                         )}
 
                         <div className="input-group">
-                            <label style={labelStyle}><Plus size={14} /> Texto del botón (opcional)</label>
+                            <label className="adm-rotulo"><Plus size={14} /> Texto del botón (opcional)</label>
                             <input
                                 type="text"
                                 value={welcomeModal.button_text}
                                 onChange={(e) => setWelcomeModal(prev => ({ ...prev, button_text: e.target.value }))}
                                 placeholder="Ej: Ver colección"
-                                style={inputStyle}
+                                className="adm-entrada"
                             />
                         </div>
 
@@ -567,7 +567,7 @@ const SettingsManager = () => {
                         </div>
 
                         <div style={{ gridColumn: '1 / -1', borderTop: '1px dashed #e2e8f0', paddingTop: '20px' }}>
-                            <label style={labelStyle}>Colores</label>
+                            <label className="adm-rotulo">Colores</label>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px' }}>
                                 <ColorField label="Título" value={welcomeModal.title_color} onChange={(v) => setWelcomeModal(prev => ({ ...prev, title_color: v }))} />
                                 <ColorField label="Mensaje" value={welcomeModal.body_color} onChange={(v) => setWelcomeModal(prev => ({ ...prev, body_color: v }))} />
@@ -591,12 +591,12 @@ const SettingsManager = () => {
 
                 <section className="adm-panel adm-panel--ancho">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div className="adm-emblema-color adm-emblema-color--verde">
                             <Tag size={20} />
                         </div>
                         <h3 className="adm-panel-titulo">Precios por cantidad (mayorista, iglesia)</h3>
                     </div>
-                    <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 20px', lineHeight: 1.6 }}>
+                    <p className="adm-descripcion">
                         El descuento se aplica solo si la clienta lleva el mínimo de unidades <strong>del mismo producto y color</strong>,
                         y <strong>todas las tallas caen dentro del rango</strong>. Puede mezclar tallas: 5 de la 12 y 1 de la 3XL cuenta como 6.
                         Si un pedido califica para dos tramos, se cobra el más barato.
@@ -608,40 +608,40 @@ const SettingsManager = () => {
                         // define un tramo por Material o por Idioma, funciona igual.
                         const valoresCaracteristica = t.characteristic ? (atributosDisponibles[t.characteristic] || []) : [];
                         return (
-                        <div key={i} style={{ border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px', marginBottom: '14px', background: '#f8fafc' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '14px' }}>
+                        <div key={i} className="adm-tarjeta-interna">
+                            <div className="adm-rejilla--estrecha">
                                 <div className="input-group">
-                                    <label style={labelStyle}>Nombre del tramo</label>
+                                    <label className="adm-rotulo">Nombre del tramo</label>
                                     <input type="text" value={t.name || ''} placeholder="Ej: Iglesia"
                                         onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, name: e.target.value } : x) }))}
-                                        style={inputStyle} />
+                                        className="adm-entrada" />
                                 </div>
                                 <div className="input-group">
-                                    <label style={labelStyle}>Característica</label>
-                                    <select value={t.characteristic || ''} style={inputStyle}
+                                    <label className="adm-rotulo">Característica</label>
+                                    <select value={t.characteristic || ''} className="adm-entrada"
                                         onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, characteristic: e.target.value, from: '', to: '' } : x) }))}>
                                         <option value="">—</option>
                                         {Object.keys(atributosDisponibles).map(nombre => <option key={nombre} value={nombre}>{nombre}</option>)}
                                     </select>
                                 </div>
                                 <div className="input-group">
-                                    <label style={labelStyle}>Desde</label>
-                                    <select value={t.from || ''} style={inputStyle} disabled={!t.characteristic}
+                                    <label className="adm-rotulo">Desde</label>
+                                    <select value={t.from || ''} className="adm-entrada" disabled={!t.characteristic}
                                         onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, from: e.target.value } : x) }))}>
                                         <option value="">—</option>
                                         {valoresCaracteristica.map(v => <option key={v} value={v}>{v}</option>)}
                                     </select>
                                 </div>
                                 <div className="input-group">
-                                    <label style={labelStyle}>Hasta</label>
-                                    <select value={t.to || ''} style={inputStyle} disabled={!t.characteristic}
+                                    <label className="adm-rotulo">Hasta</label>
+                                    <select value={t.to || ''} className="adm-entrada" disabled={!t.characteristic}
                                         onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, to: e.target.value } : x) }))}>
                                         <option value="">—</option>
                                         {valoresCaracteristica.map(v => <option key={v} value={v}>{v}</option>)}
                                     </select>
                                 </div>
                                 <div className="input-group">
-                                    <label style={labelStyle}>Mínimo de unidades</label>
+                                    <label className="adm-rotulo">Mínimo de unidades</label>
                                     {/* `|| ''` y no `?? 0`: con type="number", React compara el
                                         valor NUMERICAMENTE, asi que "03545" y 3545 le parecen iguales
                                         y no toca el DOM. El cero inicial se quedaba pegado adelante
@@ -649,11 +649,11 @@ const SettingsManager = () => {
                                         ademas es lo que significa: sin minimo. */}
                                     <input type="number" min="2" value={t.min_qty || ''}
                                         onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, min_qty: parseInt(e.target.value) || 0 } : x) }))}
-                                        style={inputStyle} />
+                                        className="adm-entrada" />
                                 </div>
                                 <div className="input-group">
-                                    <label style={labelStyle}>Tipo de descuento</label>
-                                    <select value={t.discount_type || 'percent'} style={inputStyle}
+                                    <label className="adm-rotulo">Tipo de descuento</label>
+                                    <select value={t.discount_type || 'percent'} className="adm-entrada"
                                         onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, discount_type: e.target.value } : x) }))}>
                                         <option value="percent">Porcentaje (%)</option>
                                         <option value="amount">Rebaja fija ($)</option>
@@ -661,15 +661,15 @@ const SettingsManager = () => {
                                     </select>
                                 </div>
                                 <div className="input-group">
-                                    <label style={labelStyle}>Valor</label>
+                                    <label className="adm-rotulo">Valor</label>
                                     <input type="number" min="0" value={t.discount_value ?? ''}
                                         onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, discount_value: parseFloat(e.target.value) || 0 } : x) }))}
-                                        style={inputStyle} />
+                                        className="adm-entrada" />
                                 </div>
                             </div>
                             <button type="button"
                                 onClick={() => setPriceTiers(p => ({ ...p, tiers: p.tiers.filter((_, k) => k !== i) }))}
-                                style={{ marginTop: '12px', background: 'transparent', border: 'none', color: '#dc2626', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}>
+                                className="adm-quitar">
                                 Eliminar este tramo
                             </button>
                         </div>
@@ -678,19 +678,19 @@ const SettingsManager = () => {
 
                     <button type="button"
                         onClick={() => setPriceTiers(p => ({ ...p, tiers: [...(p.tiers || []), { name: '', characteristic: '', from: '', to: '', min_qty: 6, discount_type: 'percent', discount_value: 10 }] }))}
-                        style={{ background: '#1e1b4b', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '12px', fontWeight: 800, fontSize: '13px', cursor: 'pointer' }}>
+                        className="adm-boton-oscuro">
                         + Agregar tramo
                     </button>
                 </section>
 
                 <section className="adm-panel adm-panel--ancho">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fce7f3', color: '#be185d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div className="adm-emblema-color adm-emblema-color--rosa">
                             <Gift size={20} />
                         </div>
                         <h3 className="adm-panel-titulo">Promociones</h3>
                     </div>
-                    <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 20px', lineHeight: 1.6 }}>
+                    <p className="adm-descripcion">
                         <strong>Lleva X, paga Y:</strong> con descuento 100% la unidad va gratis (un 3x2 clásico);
                         con 50% queda a mitad de precio (la típica "segunda unidad al 50%"). El descuento se aplica
                         siempre sobre las prendas <strong>más baratas</strong> del carrito.
@@ -704,16 +704,16 @@ const SettingsManager = () => {
                         }));
                         const esRegalo = p.type === 'regalo';
                         return (
-                            <div key={i} style={{ border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px', marginBottom: '14px', background: '#f8fafc' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '14px' }}>
+                            <div key={i} className="adm-tarjeta-interna">
+                                <div className="adm-rejilla--estrecha">
                                     <div className="input-group">
-                                        <label style={labelStyle}>Nombre</label>
+                                        <label className="adm-rotulo">Nombre</label>
                                         <input type="text" value={p.name || ''} placeholder="Ej: Lleva 3 paga 2"
-                                            onChange={e => editar({ name: e.target.value })} style={inputStyle} />
+                                            onChange={e => editar({ name: e.target.value })} className="adm-entrada" />
                                     </div>
                                     <div className="input-group">
-                                        <label style={labelStyle}>Tipo</label>
-                                        <select value={p.type || 'cantidad'} style={inputStyle}
+                                        <label className="adm-rotulo">Tipo</label>
+                                        <select value={p.type || 'cantidad'} className="adm-entrada"
                                             onChange={e => editar({ type: e.target.value })}>
                                             <option value="cantidad">Lleva X, paga Y</option>
                                             <option value="regalo">Regalo por compra</option>
@@ -723,19 +723,19 @@ const SettingsManager = () => {
                                     {!esRegalo && (
                                         <>
                                             <div className="input-group">
-                                                <label style={labelStyle}>Lleva</label>
+                                                <label className="adm-rotulo">Lleva</label>
                                                 <input type="number" min="2" value={p.lleva || ''}
-                                                    onChange={e => editar({ lleva: parseInt(e.target.value) || 0 })} style={inputStyle} />
+                                                    onChange={e => editar({ lleva: parseInt(e.target.value) || 0 })} className="adm-entrada" />
                                             </div>
                                             <div className="input-group">
-                                                <label style={labelStyle}>Paga</label>
+                                                <label className="adm-rotulo">Paga</label>
                                                 <input type="number" min="1" value={p.paga || ''}
-                                                    onChange={e => editar({ paga: parseInt(e.target.value) || 0 })} style={inputStyle} />
+                                                    onChange={e => editar({ paga: parseInt(e.target.value) || 0 })} className="adm-entrada" />
                                             </div>
                                             <div className="input-group">
-                                                <label style={labelStyle}>Descuento (%)</label>
+                                                <label className="adm-rotulo">Descuento (%)</label>
                                                 <input type="number" min="1" max="100" value={p.descuento || ''}
-                                                    onChange={e => editar({ descuento: parseInt(e.target.value) || 0 })} style={inputStyle} />
+                                                    onChange={e => editar({ descuento: parseInt(e.target.value) || 0 })} className="adm-entrada" />
                                             </div>
                                         </>
                                     )}
@@ -743,38 +743,38 @@ const SettingsManager = () => {
                                     {esRegalo && (
                                         <>
                                             <div className="input-group">
-                                                <label style={labelStyle}>Qué se regala</label>
+                                                <label className="adm-rotulo">Qué se regala</label>
                                                 <input type="text" value={p.regalo_texto || ''} placeholder="Ej: Un cuello de encaje"
-                                                    onChange={e => editar({ regalo_texto: e.target.value })} style={inputStyle} />
+                                                    onChange={e => editar({ regalo_texto: e.target.value })} className="adm-entrada" />
                                             </div>
                                             <div className="input-group">
-                                                <label style={labelStyle}>Mínimo de unidades</label>
+                                                <label className="adm-rotulo">Mínimo de unidades</label>
                                                 <input type="number" min="0" value={p.min_unidades || ''}
-                                                    onChange={e => editar({ min_unidades: parseInt(e.target.value) || 0 })} style={inputStyle} />
+                                                    onChange={e => editar({ min_unidades: parseInt(e.target.value) || 0 })} className="adm-entrada" />
                                             </div>
                                             <div className="input-group">
-                                                <label style={labelStyle}>O monto mínimo ($)</label>
+                                                <label className="adm-rotulo">O monto mínimo ($)</label>
                                                 <input type="number" min="0" value={p.min_monto || ''}
-                                                    onChange={e => editar({ min_monto: parseInt(e.target.value) || 0 })} style={inputStyle} />
+                                                    onChange={e => editar({ min_monto: parseInt(e.target.value) || 0 })} className="adm-entrada" />
                                             </div>
                                         </>
                                     )}
 
                                     <div className="input-group">
-                                        <label style={labelStyle}>Válida desde</label>
+                                        <label className="adm-rotulo">Válida desde</label>
                                         <input type="date" value={p.desde || ''}
-                                            onChange={e => editar({ desde: e.target.value })} style={inputStyle} />
+                                            onChange={e => editar({ desde: e.target.value })} className="adm-entrada" />
                                     </div>
                                     <div className="input-group">
-                                        <label style={labelStyle}>Válida hasta</label>
+                                        <label className="adm-rotulo">Válida hasta</label>
                                         <input type="date" value={p.hasta || ''}
-                                            onChange={e => editar({ hasta: e.target.value })} style={inputStyle} />
+                                            onChange={e => editar({ hasta: e.target.value })} className="adm-entrada" />
                                     </div>
                                 </div>
 
                                 <div className="input-group" style={{ marginTop: '14px' }}>
-                                    <label style={labelStyle}>Productos ({(p.productos || []).length === 0 ? 'todo el catálogo' : `${p.productos.length} elegidos`})</label>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', maxHeight: '120px', overflowY: 'auto', padding: '8px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px' }}>
+                                    <label className="adm-rotulo">Productos ({(p.productos || []).length === 0 ? 'todo el catálogo' : `${p.productos.length} elegidos`})</label>
+                                    <div className="adm-etiquetas">
                                         {productosDisponibles.map(prod => {
                                             const elegido = (p.productos || []).map(String).includes(String(prod.id));
                                             return (
@@ -804,7 +804,7 @@ const SettingsManager = () => {
                                 <label style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '14px', cursor: 'pointer' }}>
                                     <input type="checkbox" checked={p.combinable === true}
                                         onChange={e => editar({ combinable: e.target.checked })}
-                                        style={{ width: '18px', height: '18px', accentColor: '#be185d' }} />
+                                        className="adm-casilla" />
                                     <span style={{ fontSize: '13px', color: '#334155', fontWeight: 600 }}>
                                         Se puede combinar con los precios por cantidad (mayorista/iglesia)
                                     </span>
@@ -812,7 +812,7 @@ const SettingsManager = () => {
 
                                 <button type="button"
                                     onClick={() => setPromotions(prev => ({ ...prev, promos: prev.promos.filter((_, k) => k !== i) }))}
-                                    style={{ marginTop: '12px', background: 'transparent', border: 'none', color: '#dc2626', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}>
+                                    className="adm-quitar">
                                     Eliminar esta promoción
                                 </button>
                             </div>
@@ -821,20 +821,20 @@ const SettingsManager = () => {
 
                     <button type="button"
                         onClick={() => setPromotions(p => ({ ...p, promos: [...(p.promos || []), { name: '', type: 'cantidad', lleva: 3, paga: 2, descuento: 100, productos: [], combinable: false }] }))}
-                        style={{ background: '#be185d', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '12px', fontWeight: 800, fontSize: '13px', cursor: 'pointer' }}>
+                        className="adm-boton-oscuro adm-boton-rosa">
                         + Agregar promoción
                     </button>
                 </section>
 
                 <section className="adm-panel adm-panel--ancho">
                     <div className="adm-panel-cabecera">
-                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div className="adm-emblema-color adm-emblema-color--ambar">
                             <Megaphone size={20} />
                         </div>
                         <h3 className="adm-panel-titulo">Barra de Anuncio (arriba del sitio)</h3>
                     </div>
 
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', marginBottom: '24px' }}>
+                    <label className="adm-elegible adm-elegible--separada">
                         <input
                             type="checkbox"
                             checked={topBanner.active}
@@ -847,13 +847,13 @@ const SettingsManager = () => {
                     </label>
 
                     <div className="input-group" style={{ marginBottom: '20px' }}>
-                        <label style={labelStyle}><Info size={14} /> Mensaje</label>
+                        <label className="adm-rotulo"><Info size={14} /> Mensaje</label>
                         <input
                             type="text"
                             value={topBanner.text}
                             onChange={(e) => setTopBanner(prev => ({ ...prev, text: e.target.value }))}
                             placeholder="Ej: Envío gratis en compras sobre $50.000"
-                            style={inputStyle}
+                            className="adm-entrada"
                         />
                     </div>
 
@@ -866,24 +866,24 @@ const SettingsManager = () => {
                             />
                         </div>
                         <div className="input-group">
-                            <label style={labelStyle}><Info size={14} /> Texto del enlace (apodo, opcional)</label>
+                            <label className="adm-rotulo"><Info size={14} /> Texto del enlace (apodo, opcional)</label>
                             <input
                                 type="text"
                                 value={topBanner.link_label}
                                 onChange={(e) => setTopBanner(prev => ({ ...prev, link_label: e.target.value }))}
                                 placeholder="Ej: Click acá"
-                                style={inputStyle}
+                                className="adm-entrada"
                             />
                             <p className="adm-ayuda adm-ayuda--pegada">
                                 Si lo dejas vacío, se muestra el enlace en crudo. Si es interno redirige; si es externo abre otra pestaña.
                             </p>
                         </div>
                         <div className="input-group">
-                            <label style={labelStyle}><Info size={14} /> Frecuencia</label>
+                            <label className="adm-rotulo"><Info size={14} /> Frecuencia</label>
                             <select
                                 value={topBanner.frequency}
                                 onChange={(e) => setTopBanner(prev => ({ ...prev, frequency: e.target.value }))}
-                                style={inputStyle}
+                                className="adm-entrada"
                             >
                                 <option value="session">Una vez por sesión</option>
                                 <option value="day">Una vez por día</option>
@@ -898,20 +898,20 @@ const SettingsManager = () => {
                     </div>
 
                     <div style={{ marginBottom: '20px' }}>
-                        <label style={labelStyle}>Colores</label>
+                        <label className="adm-rotulo">Colores</label>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px' }}>
                             <ColorField label="Fondo" value={topBanner.bg_color} onChange={(v) => setTopBanner(prev => ({ ...prev, bg_color: v }))} />
                             <ColorField label="Texto" value={topBanner.text_color} onChange={(v) => setTopBanner(prev => ({ ...prev, text_color: v }))} />
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '20px' }}>
+                    <div className="adm-rejilla adm-rejilla--separada">
                         <div className="input-group">
-                            <label style={labelStyle}>Tamaño de letra</label>
+                            <label className="adm-rotulo">Tamaño de letra</label>
                             <select
                                 value={topBanner.font_size}
                                 onChange={(e) => setTopBanner(prev => ({ ...prev, font_size: e.target.value }))}
-                                style={inputStyle}
+                                className="adm-entrada"
                             >
                                 <option value="normal">Normal</option>
                                 <option value="large">Grande</option>
@@ -919,7 +919,7 @@ const SettingsManager = () => {
                             </select>
                         </div>
                         <div className="input-group">
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', marginTop: '28px' }}>
+                            <label className="adm-elegible adm-elegible--suelta">
                                 <input
                                     type="checkbox"
                                     checked={topBanner.bold}
@@ -933,7 +933,7 @@ const SettingsManager = () => {
                         </div>
                     </div>
 
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', marginBottom: '16px' }}>
+                    <label className="adm-elegible adm-elegible--junta">
                         <input
                             type="checkbox"
                             checked={topBanner.animated}
@@ -946,24 +946,24 @@ const SettingsManager = () => {
                     </label>
 
                     {topBanner.animated && (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
+                        <div className="adm-rejilla">
                             <div className="input-group">
-                                <label style={labelStyle}>Dirección</label>
+                                <label className="adm-rotulo">Dirección</label>
                                 <select
                                     value={topBanner.direction}
                                     onChange={(e) => setTopBanner(prev => ({ ...prev, direction: e.target.value }))}
-                                    style={inputStyle}
+                                    className="adm-entrada"
                                 >
                                     <option value="left">← Hacia la izquierda (clásico)</option>
                                     <option value="right">→ Hacia la derecha</option>
                                 </select>
                             </div>
                             <div className="input-group">
-                                <label style={labelStyle}>Velocidad</label>
+                                <label className="adm-rotulo">Velocidad</label>
                                 <select
                                     value={topBanner.speed}
                                     onChange={(e) => setTopBanner(prev => ({ ...prev, speed: parseInt(e.target.value) }))}
-                                    style={inputStyle}
+                                    className="adm-entrada"
                                 >
                                     <option value={40}>Muy lenta</option>
                                     <option value={28}>Lenta</option>
@@ -973,7 +973,7 @@ const SettingsManager = () => {
                                 </select>
                             </div>
                             <div className="input-group adm-ancho-total">
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                                <label className="adm-elegible">
                                     <input
                                         type="checkbox"
                                         checked={topBanner.repeat}
@@ -1003,7 +1003,7 @@ const SettingsManager = () => {
 
                 <section className="adm-panel adm-panel--ancho">
                     <div className="adm-panel-cabecera">
-                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#eff6ff', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div className="adm-emblema-color adm-emblema-color--azul">
                             <Info size={20} />
                         </div>
                         <h3 className="adm-panel-titulo">Página "Nosotros"</h3>
@@ -1015,7 +1015,7 @@ const SettingsManager = () => {
                         onChange={(v) => setNosotros(prev => ({ ...prev, image_asset_id: v.asset_id, image_url: v.url }))}
                     />
 
-                    <div style={{ marginTop: '20px', padding: '15px', background: '#f8fafc', borderRadius: '16px', display: 'flex', gap: '12px' }}>
+                    <div className="adm-nota">
                         <Info size={16} className="adm-icono-fijo" />
                         <p className="adm-ayuda">
                             Si no eliges una imagen, se mostrará la que viene por defecto en la página.
@@ -1035,42 +1035,18 @@ const ColorField = ({ label, value, onChange }) => (
                 type="color"
                 value={value || '#000000'}
                 onChange={(e) => onChange(e.target.value)}
-                style={{ width: '40px', height: '40px', border: '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer', background: 'none', padding: '2px' }}
+                className="adm-color"
             />
             <input
                 type="text"
                 value={value || ''}
                 onChange={(e) => onChange(e.target.value)}
-                style={{ width: '90px', height: '40px', padding: '0 10px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '13px', color: '#1e1b4b', outline: 'none' }}
+                className="adm-entrada adm-entrada--corta"
             />
         </div>
     </div>
 );
 
-const labelStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontSize: '13px',
-    fontWeight: '800',
-    color: '#475569',
-    marginBottom: '8px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px'
-};
 
-const inputStyle = {
-    width: '100%',
-    height: '48px',
-    padding: '0 16px',
-    borderRadius: '12px',
-    border: '1px solid #e2e8f0',
-    backgroundColor: '#f8fafc',
-    fontSize: '14px',
-    color: '#1e1b4b',
-    outline: 'none',
-    transition: 'all 0.2s',
-    boxSizing: 'border-box'
-};
 
 export default SettingsManager;

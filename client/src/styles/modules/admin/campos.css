@@ -149,3 +149,132 @@
 
 /* Casilla de verificación grande: 1.25rem se acierta con el dedo, 13px no. */
 .adm-casilla { width: 1.25rem; height: 1.25rem; accent-color: #8f0653; }
+
+/* ── Emblemas de color ──────────────────────────────────────────────────────
+   El mismo cuadrito de 36px repetido siete veces con solo dos colores
+   distintos cada vez. La forma va una vez; el color, en una variante. */
+
+.adm-emblema-color {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.625rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.adm-emblema-color--marca { background: #fdf2f8; color: #8f0653; }
+.adm-emblema-color--ambar { background: #fef3c7; color: #d97706; }
+.adm-emblema-color--azul  { background: #eff6ff; color: #3b82f6; }
+.adm-emblema-color--rosa  { background: #fce7f3; color: #be185d; }
+.adm-emblema-color--verde { background: #dcfce7; color: #16a34a; }
+
+/* ── Formularios de ajustes ─────────────────────────────────────────────── */
+
+.adm-rotulo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 800;
+    color: #475569;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03125rem;
+}
+.adm-rotulo--menor { font-size: 0.75rem; }
+
+.adm-entrada {
+    width: 100%;
+    height: 3rem;
+    padding: 0 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+    font-size: 0.875rem;
+    color: #1e1b4b;
+    outline: none;
+    transition: all 0.2s;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+.adm-entrada--baja { height: 2.625rem; font-size: 0.8125rem; }
+.adm-entrada--parrafo { height: 6.25rem; padding-top: 0.75rem; resize: vertical; }
+.adm-entrada--parrafo-fijo { height: 6.25rem; padding-top: 0.75rem; resize: none; }
+.adm-entrada--corta {
+    width: 5.625rem;
+    height: 2.5rem;
+    padding: 0 0.625rem;
+    border-radius: 0.5rem;
+}
+
+/* Selector de color nativo: se le quita el marco gris del sistema. */
+.adm-color {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    background: none;
+    padding: 0.125rem;
+}
+
+.adm-tarjeta-interna {
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    padding: 1.125rem;
+    margin-bottom: 0.875rem;
+    background: #f8fafc;
+}
+
+.adm-descripcion { font-size: 0.8125rem; color: #64748b; margin: 0 0 1.25rem; line-height: 1.6; }
+.adm-pie-campo { font-size: 0.6875rem; color: #94a3b8; margin-top: 0.25rem; }
+
+/* Rejillas que caen solas a menos columnas. */
+.adm-rejilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.75rem), 1fr)); gap: 1.25rem; }
+.adm-rejilla--separada { margin-bottom: 1.25rem; }
+.adm-rejilla--media { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12.5rem), 1fr)); gap: 1rem; }
+.adm-rejilla--estrecha { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.375rem), 1fr)); gap: 0.875rem; }
+
+/* Una opción que se pulsa entera, no solo su casilla. */
+.adm-elegible { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; min-height: 2.75rem; }
+.adm-elegible--separada { margin-bottom: 1.5rem; }
+.adm-elegible--junta { margin-bottom: 1rem; }
+.adm-elegible--suelta { margin-top: 1.75rem; }
+
+.adm-quitar {
+    margin-top: 0.75rem;
+    background: transparent;
+    border: none;
+    color: #dc2626;
+    font-weight: 700;
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+.adm-boton-oscuro {
+    background: #1e1b4b;
+    color: #fff;
+    border: none;
+    padding: 0.625rem 1.125rem;
+    border-radius: 0.75rem;
+    font-weight: 800;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    font-family: inherit;
+    min-height: 2.75rem;
+}
+.adm-boton-rosa { background: #be185d; }
+
+/* Lista de etiquetas que no crece sin fin. */
+.adm-etiquetas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    max-height: 7.5rem;
+    overflow-y: auto;
+    padding: 0.5rem;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.625rem;
+}
