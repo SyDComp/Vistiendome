@@ -5,6 +5,7 @@ from sqlalchemy.orm import selectinload
 from ...database import get_session
 from ...models.catalog import Collection, SKU, Product
 from ...core.looks import asset_de_variante
+from ...core.pricing import compute_effective_price, get_chile_time
 from ...core.imagenes import srcset_de, srcset_desde_url
 
 router = APIRouter()
@@ -39,8 +40,23 @@ def get_public_collection(slug: str, db: Session = Depends(get_session)):
     # Enriquecer SKUs para el frontend público
     res = collection.dict()
     skus_data = []
+    # El precio que se muestra es el VIGENTE, no el de la ficha del SKU.
+    #
+    # `sku.dict()` devuelve el modelo crudo: trae `price` (el precio base) y los
+    # campos de la oferta sin resolver (sale_type, sale_start, sale_end), pero
+    # NO trae `on_sale` ni `original_price`, que son calculados. Asi que esta
+    # pantalla mostraba el precio SIN la oferta aplicada y no tenia con que
+    # dibujar la etiqueta: un producto rebajado se veia a precio normal.
+    #
+    # Se usa el mismo compute_effective_price que el catalogo, para que las dos
+    # pantallas no puedan discrepar sobre cuanto vale una prenda.
+    now = get_chile_time()
     for sku in collection.skus:
         sku_dict = sku.dict()
+        precio_vigente, en_oferta, _ = compute_effective_price(sku, sku.product, now)
+        sku_dict["price"] = precio_vigente
+        sku_dict["original_price"] = sku.price or 0.0
+        sku_dict["on_sale"] = en_oferta
         sku_dict["product_name"] = sku.product.name
         sku_dict["name"] = sku.product.name
         sku_dict["product_slug"] = sku.product.slug

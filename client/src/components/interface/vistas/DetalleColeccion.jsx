@@ -264,7 +264,12 @@ const DetalleColeccion = () => {
                                             {variant.product_name} {variant.config?.color ? `- Color ${variant.config.color}` : ''}
                                         </h3>
                                         <div className="product-footer">
-                                            <span className="product-price">${variant.price?.toLocaleString('es-CL')}</span>
+                                            <span className="product-price">
+                                                {variant.on_sale && variant.original_price > variant.price && (
+                                                    <span className="product-price-antes">${variant.original_price?.toLocaleString('es-CL')}</span>
+                                                )}
+                                                ${variant.price?.toLocaleString('es-CL')}
+                                            </span>
                                             <div className="view-detail-icon">
                                                 <ArrowLeft size={16} className="rotated-180" />
                                             </div>
@@ -322,7 +327,12 @@ const DetalleColeccion = () => {
                                                 {variant.config?.color ? `Color ${variant.config.color}` : group.name}
                                             </h3>
                                             <div className="product-footer">
-                                                <span className="product-price">${variant.price?.toLocaleString('es-CL')}</span>
+                                                <span className="product-price">
+                                                {variant.on_sale && variant.original_price > variant.price && (
+                                                    <span className="product-price-antes">${variant.original_price?.toLocaleString('es-CL')}</span>
+                                                )}
+                                                ${variant.price?.toLocaleString('es-CL')}
+                                            </span>
                                                 <div className="view-detail-icon">
                                                     <ArrowLeft size={16} className="rotated-180" />
                                                 </div>
