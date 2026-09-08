@@ -1,0 +1,171 @@
+/*
+ * Cómo se ve la vista rápida de un producto o una variante.
+ *
+ * Lo que cambia con el estado —aparecer, desaparecer— sigue en el JSX, porque
+ * depende de si está abierta. Todo lo demás vive acá.
+ */
+
+.qp-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.qp-fondo {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
+    transition: opacity 0.4s ease;
+}
+
+.qp-tarjeta {
+    position: relative;
+    width: 100%;
+    max-width: 27.5rem;
+    /* No puede pasar del alto visible: con el teclado abierto o en una pantalla
+       baja, el pie de la tarjeta quedaba fuera. */
+    max-height: 100dvh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 2rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.qp-cerrar {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    border: none;
+    color: #1e293b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qp-imagen { position: relative; aspect-ratio: 1 / 1; background: #f8fafc; }
+.qp-imagen img,
+.qp-imagen .qp-foto { width: 100%; height: 100%; object-fit: cover; }
+.qp-sin-imagen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #cbd5e1;
+}
+
+/* Las flechas de la galería: 2.75rem para que se acierten con el dedo. */
+.qp-flecha {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: #fff;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.qp-flecha--atras { left: 0.75rem; }
+.qp-flecha--adelante { right: 0.75rem; }
+
+.qp-puntos {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.375rem;
+}
+.qp-punto {
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 0.1875rem;
+    background: rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+}
+.qp-punto--activo { width: 1.25rem; background: #fff; }
+
+.qp-datos { padding: 1.5rem; }
+.qp-encabezado { margin-bottom: 1rem; }
+.qp-tipo {
+    font-size: 0.6875rem;
+    font-weight: 800;
+    color: #8f0653;
+    text-transform: uppercase;
+    letter-spacing: 0.0625rem;
+}
+.qp-nombre { margin: 0.25rem 0 0 0; font-size: 1.25rem; font-weight: 900; color: #1e1b4b; }
+
+.qp-cifras {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.qp-cifra { background: #f8fafc; padding: 0.75rem; border-radius: 1rem; }
+.qp-cifra-nombre {
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+.qp-cifra-valor { font-size: 1.125rem; font-weight: 800; color: #1e1b4b; }
+.qp-cifra-valor--precio { color: #16a34a; }
+.qp-cifra-unidad { font-size: 0.75rem; font-weight: 600; color: #94a3b8; }
+
+.qp-config { margin-bottom: 1.5rem; }
+.qp-config-titulo {
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+.qp-config-lista { display: flex; gap: 0.375rem; flex-wrap: wrap; }
+.qp-config-item {
+    padding: 0.25rem 0.625rem;
+    background: #f1f5f9;
+    color: #475569;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* Los botones se envuelven en pantalla angosta en vez de desbordar. */
+.qp-acciones { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.qp-accion {
+    flex: 1 1 8rem;
+    min-height: 3rem;
+    border-radius: 0.875rem;
+    background: #1e1b4b;
+    color: #fff;
+    border: none;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
