@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Filter, Layers, ListTree, RefreshCcw, Search, Eye, EyeOff } from 'lucide-react';
 import { useNotification } from '../../../../context/NotificationContext';
+import './FilterManager.css';
 
 const API_BASE = window.location.origin.includes('localhost') ? '/api/v1/admin/catalog' : '/api/v1/admin/catalog';
 
@@ -89,43 +90,43 @@ const FilterManager = () => {
     );
 
     return (
-        <div className="inventory-module-container" style={{ padding: '16px', maxWidth: '1000px', margin: '0 auto', boxSizing: 'border-box', width: '100%' }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
-                <div style={{ flex: '1 1 auto' }}>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1e1b4b', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <Filter size={24} style={{ color: '#8f0653', flexShrink: 0 }} />
+        <div className="inventory-module-container fm">
+            <div className="fm-cabecera">
+                <div className="fm-cabecera-texto">
+                    <h2 className="fm-titulo">
+                        <Filter size={24} className="fm-titulo-icono" />
                         Gestor de Filtros
                     </h2>
-                    <p style={{ color: '#64748b', marginTop: '8px', maxWidth: '600px', fontSize: '0.875rem', lineHeight: '1.4' }}>
+                    <p className="fm-explicacion">
                         Controla qué Categorías y Características están disponibles para que los clientes filtren en la tienda pública.
                     </p>
                 </div>
                 <button 
                     onClick={fetchData} 
-                    style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', color: '#475569', fontWeight: '600', cursor: 'pointer', flexShrink: 0 }}
+                    className="fm-recargar"
                 >
                     <RefreshCcw size={16} /> Recargar
                 </button>
             </div>
 
-            <div style={{ marginBottom: '24px', position: 'relative' }}>
-                <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+            <div className="fm-buscador">
+                <Search size={18} className="fm-buscador-icono" />
                 <input 
                     type="text" 
                     placeholder="Buscar atributo o categoría..." 
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{ width: '100%', padding: '12px 12px 12px 40px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '15px', outline: 'none', boxSizing: 'border-box' }}
+                    
                 />
             </div>
 
             {/* Select de Navegación en lugar de Tabs */}
-            <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#64748b', marginBottom: '8px' }}>SELECCIONA QUÉ GESTIONAR</label>
+            <div className="fm-eleccion">
+                <label >SELECCIONA QUÉ GESTIONAR</label>
                 <select 
                     value={activeTab}
                     onChange={(e) => setActiveTab(e.target.value)}
-                    style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '16px', color: '#1e293b', backgroundColor: '#fff', outline: 'none', cursor: 'pointer', appearance: 'auto', boxSizing: 'border-box', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
+                    
                 >
                     <option value="categories">Categorías ({filteredCategories.length})</option>
                     <option value="attributes">Características y Atributos ({filteredAttributes.length})</option>
@@ -134,23 +135,23 @@ const FilterManager = () => {
             </div>
 
             {loading ? (
-                <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Cargando datos...</div>
+                <div className="fm-cargando">Cargando datos...</div>
             ) : (
-                <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden', minHeight: '400px', boxSizing: 'border-box' }}>
+                <div className="fm-lista">
                     
                     {/* Sección Categorías */}
                     {activeTab === 'categories' && (
-                        <div style={{ padding: '0', maxHeight: 'calc(100vh - 350px)', overflowY: 'auto' }}>
+                        <div className="fm-lista-scroll">
                             {filteredCategories.length === 0 ? (
-                                <div style={{ padding: '24px', textAlign: 'center', color: '#94a3b8' }}>No se encontraron categorías.</div>
+                                <div className="fm-vacio">No se encontraron categorías.</div>
                             ) : (
                                 <div>
                                     {filteredCategories.map(cat => (
-                                        <div key={cat.id} style={{ padding: '16px', borderBottom: '1px solid #f1f5f9', boxSizing: 'border-box' }}>
-                                            <div style={{ fontWeight: '600', color: '#334155', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat.name}</div>
-                                            <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Ruta: {cat.slug}</div>
+                                        <div key={cat.id} className="fm-fila">
+                                            <div className="fm-fila-nombre">{cat.name}</div>
+                                            <div className="fm-fila-detalle">Ruta: {cat.slug}</div>
                                             
-                                            <div style={{ marginTop: '12px' }}>
+                                            <div className="fm-fila-accion">
                                                 <button 
                                                     onClick={() => handleToggleCategory(cat.id, cat.is_filterable)}
                                                     style={{
@@ -175,19 +176,19 @@ const FilterManager = () => {
 
                     {/* Sección Características */}
                     {activeTab === 'attributes' && (
-                        <div style={{ padding: '0', maxHeight: 'calc(100vh - 350px)', overflowY: 'auto' }}>
+                        <div className="fm-lista-scroll">
                             {filteredAttributes.length === 0 ? (
-                                <div style={{ padding: '24px', textAlign: 'center', color: '#94a3b8' }}>No se encontraron características.</div>
+                                <div className="fm-vacio">No se encontraron características.</div>
                             ) : (
                                 <div>
                                     {filteredAttributes.map(attr => (
-                                        <div key={attr.id} style={{ padding: '16px', borderBottom: '1px solid #f1f5f9', boxSizing: 'border-box' }}>
-                                            <div style={{ fontWeight: '600', color: '#334155', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{attr.name}</div>
-                                            <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        <div key={attr.id} className="fm-fila">
+                                            <div className="fm-fila-nombre">{attr.name}</div>
+                                            <div className="fm-fila-detalle">
                                                 {attr.domain?.length || 0} opciones configuradas
                                             </div>
 
-                                            <div style={{ marginTop: '12px' }}>
+                                            <div className="fm-fila-accion">
                                                 <button 
                                                     onClick={() => handleToggleAttribute(attr.id, attr.is_filterable)}
                                                     style={{
@@ -212,12 +213,12 @@ const FilterManager = () => {
 
                     {/* Sección Precio Fixa */}
                     {activeTab === 'price' && (
-                        <div style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div className="fm-precio">
                             <div>
-                                <div style={{ fontWeight: '600', color: '#334155', fontSize: '15px' }}>Filtro de Precio</div>
-                                <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>El filtro de precio en el catálogo público está activado y siempre visible por defecto.</div>
+                                <div className="fm-precio-nombre">Filtro de Precio</div>
+                                <div className="fm-precio-detalle">El filtro de precio en el catálogo público está activado y siempre visible por defecto.</div>
                             </div>
-                            <div style={{ padding: '6px 12px', borderRadius: '20px', background: '#dcfce7', color: '#166534', fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div className="fm-precio-estado">
                                 <Eye size={16} /> Visible
                             </div>
                         </div>
