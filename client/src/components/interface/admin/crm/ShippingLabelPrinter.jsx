@@ -697,7 +697,7 @@ const ShippingLabelPrinter = () => {
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', width: isMobile ? '100%' : 'auto', flex: isMobile ? '1 1 100%' : '0 1 auto' }}>
+                <div className="et-acciones">
                     <Button
                         variant="outline"
                         onClick={fetchData}
@@ -722,9 +722,14 @@ const ShippingLabelPrinter = () => {
                         variant="primary"
                         onClick={handlePrint}
                         disabled={totalCopies === 0}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#8f0653', color: '#fff', padding: isMobile ? '10px 14px' : '10px 20px', borderRadius: '12px', fontWeight: '800', flex: isMobile ? 2 : 'none', height: isMobile ? '40px' : 'auto', whiteSpace: 'nowrap' }}
+                        className="et-imprimir"
                     >
-                        <Printer size={16} /> Imprimir {totalCopies} {totalCopies === 1 ? 'Etiqueta' : 'Etiquetas'}
+                        {/* Un boton que anuncia "Imprimir 0 Etiquetas" no dice nada:
+                            en vez de contar lo que no hay, dice que falta hacer. */}
+                        <Printer size={16} />
+                        {totalCopies === 0
+                            ? 'Marca pedidos para imprimir'
+                            : `Imprimir ${totalCopies} ${totalCopies === 1 ? 'Etiqueta' : 'Etiquetas'}`}
                     </Button>
                 </div>
             </header>
@@ -1059,13 +1064,24 @@ const ShippingLabelPrinter = () => {
                     </div>
 
                     {/* ÁREA DE VISTA PREVIA */}
-                    <div style={{ flex: 1, overflowY: isMobile ? 'visible' : 'auto', overflowX: 'auto', padding: isMobile ? '16px 10px' : '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: isMobile ? '20px' : '32px', width: '100%', boxSizing: 'border-box' }}>
+                    <div className="et-vista" style={{ overflowY: isMobile ? 'visible' : 'auto' }}>
                         {totalCopies === 0 ? (
-                            <div className="et-vacio-grande">
-                                <Package size={48} className="et-vacio-icono" />
-                                <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#334155', margin: '0 0 6px 0' }}>No has seleccionado ningún pedido</h3>
+                            /* El hueco de la vista previa es enorme y estaba ocupado por
+                               una cajita perdida en medio del gris. Ahora se dibuja la
+                               HOJA que se va a imprimir, con sus casillas: se ve de una
+                               cuantas etiquetas entran en el formato elegido, que es
+                               justo la decision que se esta tomando en esa pantalla. */
+                            <div className="et-hoja-vacia">
+                                <div className="et-hoja">
+                                    {Array.from({ length: 4 }).map((_, i) => (
+                                        <div key={i} className="et-hoja-celda">
+                                            <Package size={18} />
+                                        </div>
+                                    ))}
+                                </div>
+                                <h3 className="et-vacio-titulo">Todavía no hay nada que imprimir</h3>
                                 <p className="et-subtitulo">
-                                    Marca las casillas de la columna izquierda para ver la vista previa.
+                                    Marca los pedidos de la izquierda y aparecerán acá, tal como saldrán en la hoja.
                                 </p>
                             </div>
                         ) : (

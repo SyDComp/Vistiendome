@@ -49,3 +49,87 @@
 .detail-drawer-close-btn {
     flex-shrink: 0;
 }
+
+/* ── Piezas que estaban escritas como estilos sueltos en el JSX ─────────────
+   Lo que depende del estado —si el cajón está abierto, el color elegido, si se
+   está reordenando— sigue allá, que es su sitio. Acá lo que no cambia. */
+
+.dd-ancho-total { width: 100%; }
+.dd-flexible { flex: 1; }
+.dd-encogible { flex: 1 1 auto; min-width: 0; }
+.dd-encogible--separado { flex: 1 1 auto; min-width: 0; margin-right: 0.625rem; }
+
+.dd-imagen-llena { width: 100%; height: 100%; object-fit: cover; }
+
+/* El distintivo redondo del título del cajón. */
+.dd-emblema {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    background: #8f0653;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(143, 6, 83, 0.3);
+}
+.dd-titulo { margin: 0; font-size: 1rem; font-weight: 900; color: #8f0653; letter-spacing: -0.019rem; }
+.dd-subtitulo {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.8125rem;
+    color: #64748b;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.dd-rotulo {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 900;
+    color: #1e1b4b;
+    text-transform: uppercase;
+}
+.dd-rotulo--suave {
+    display: block;
+    font-size: 0.625rem;
+    font-weight: 800;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+}
+.dd-nota { font-size: 0.625rem; color: #94a3b8; letter-spacing: 0.05em; }
+
+/* Marca de "es del sistema": pequeña a propósito, es una aclaración. */
+.dd-marca-sistema {
+    background: #fdf2f8;
+    color: #8f0653;
+    font-size: 0.5rem;
+    font-weight: 900;
+    padding: 0.125rem 0.3125rem;
+    border-radius: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+}
+
+.dd-fila { display: flex; gap: 0.625rem; }
+.dd-fila--junta { display: flex; gap: 0.5rem; }
+.dd-fila--arriba { display: flex; align-items: flex-start; gap: 0.875rem; }
+.dd-fila-centrada { display: flex; align-items: center; gap: 0.375rem; justify-content: center; }
+.dd-fila-centrada--separada {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+/* Separación entre bloques de una ficha larga. */
+.dd-separador {
+    margin-top: 1.75rem;
+    border-top: 2px dashed #cbd5e1;
+    padding-top: 1.75rem;
+    width: 100%;
+}
+.dd-respiro { margin-top: 0.25rem; }
+.dd-oculto { display: none; }

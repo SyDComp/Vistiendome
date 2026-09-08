@@ -1081,7 +1081,7 @@ const DetailDrawer = ({
                                                         const newSlides = [...slides];
                                                         newSlides[activeSlideIndex].layers[activeLayerIndex].x = parseInt(e.target.value);
                                                         setEditData({...editData, config: {...editData.config, slides: newSlides}});
-                                                    }} style={{ width: '100%' }} />
+                                                    }} className="dd-ancho-total" />
                                                 </div>
                                                 <div>
                                                     <label className="detail-drawer-editor-label">POSICIÓN Y (%)</label>
@@ -1089,7 +1089,7 @@ const DetailDrawer = ({
                                                         const newSlides = [...slides];
                                                         newSlides[activeSlideIndex].layers[activeLayerIndex].y = parseInt(e.target.value);
                                                         setEditData({...editData, config: {...editData.config, slides: newSlides}});
-                                                    }} style={{ width: '100%' }} />
+                                                    }} className="dd-ancho-total" />
                                                 </div>
                                                 <div>
                                                     <label className="detail-drawer-editor-label">ROTACIÓN (°)</label>
@@ -1097,7 +1097,7 @@ const DetailDrawer = ({
                                                         const newSlides = [...slides];
                                                         newSlides[activeSlideIndex].layers[activeLayerIndex].rotation = parseInt(e.target.value);
                                                         setEditData({...editData, config: {...editData.config, slides: newSlides}});
-                                                    }} style={{ width: '100%' }} />
+                                                    }} className="dd-ancho-total" />
                                                 </div>
                                                 <div>
                                                     <label className="detail-drawer-editor-label">ESCALA</label>
@@ -1105,11 +1105,11 @@ const DetailDrawer = ({
                                                         const newSlides = [...slides];
                                                         newSlides[activeSlideIndex].layers[activeLayerIndex].scale = parseFloat(e.target.value);
                                                         setEditData({...editData, config: {...editData.config, slides: newSlides}});
-                                                    }} style={{ width: '100%' }} />
+                                                    }} className="dd-ancho-total" />
                                                 </div>
                                                 <div>
-                                                    <label style={{ display: 'block', fontSize: '10px', fontWeight: '800', color: '#94a3b8', marginBottom: '8px' }}>NIVEL (Z-INDEX)</label>
-                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                    <label className="dd-rotulo--suave">NIVEL (Z-INDEX)</label>
+                                                    <div className="dd-fila--junta">
                                                         <button 
                                                             onClick={() => {
                                                                 const newSlides = [...slides];
@@ -1222,7 +1222,7 @@ const DetailDrawer = ({
                 opacity: (isVisible && !showLibraryVarieties && !showLibraryOptions) ? 1 : 0
             }}>
                 <div className="detail-drawer-header">
-                    <div className="detail-drawer-flex-row-16" style={{ flex: '1 1 auto', minWidth: 0, marginRight: '10px' }}>
+                    <div className="detail-drawer-flex-row-16 dd-encogible--separado">
                         {history.length > 0 && (
                             <button 
                                 type="button"
@@ -1232,7 +1232,7 @@ const DetailDrawer = ({
                                 <ArrowLeft size={18} />
                             </button>
                         )}
-                        <div style={{ flex: '1 1 auto', minWidth: 0 }}>
+                        <div className="dd-encogible">
                             <h2 className="detail-drawer-title-h2">
                                 {loading ? 'Cargando...' : currTitle}
                             </h2>
@@ -1371,7 +1371,7 @@ const DetailDrawer = ({
                                                 return (
                                                     <div key={i}>
                                                         <span className="detail-drawer-item-label">{item.label}</span>
-                                                        <div style={{ marginTop: '4px' }}>
+                                                        <div className="dd-respiro">
                                                             <span style={{
                                                                 display: 'inline-flex', alignItems: 'center', gap: '6px',
                                                                 background: `${transColor}15`, color: transColor,
@@ -1512,15 +1512,15 @@ const DetailDrawer = ({
                                                                     margin: '0 auto'
                                                                 }}>
                                                                 </div>
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', marginTop: '8px' }}>
-                                                                    <span style={{ display: 'block', fontSize: '11px', fontWeight: '900', color: '#1e1b4b', textTransform: 'uppercase' }}>{val}</span>
+                                                                <div className="dd-fila-centrada--separada">
+                                                                    <span className="dd-rotulo">{val}</span>
                                                                     {opt.is_system && (
-                                                                        <div style={{ background: '#fdf2f8', color: '#8f0653', fontSize: '8px', fontWeight: '900', padding: '2px 5px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                                                                        <div className="dd-marca-sistema">
                                                                             <Lock size={8} /> vOS
                                                                         </div>
                                                                     )}
                                                                 </div>
-                                                                {hex && <code style={{ fontSize: '10px', color: '#94a3b8', letterSpacing: '0.05em' }}>{hex.toUpperCase()}</code>}
+                                                                {hex && <code className="dd-nota">{hex.toUpperCase()}</code>}
                                                             </>
                                                         ) : section.isPattern || (typeof opt === 'object' && opt !== null && opt.image_url !== undefined) ? (
                                                             <>
@@ -1533,23 +1533,23 @@ const DetailDrawer = ({
                                                                     margin: '0 auto'
                                                                 }}>
                                                                     {opt.image_url ? (
-                                                                        <Imagen url={opt.image_url} alt={val} style={{ width: '100%', height: '100%', objectFit: 'cover' }} sizes="40px" />
+                                                                        <Imagen url={opt.image_url} alt={val} className="dd-imagen-llena" sizes="40px" />
                                                                     ) : (
                                                                         <ImageIcon size={20} color="#94a3b8" />
                                                                     )}
                                                                 </div>
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', marginTop: '8px' }}>
-                                                                    <span style={{ display: 'block', fontSize: '11px', fontWeight: '900', color: '#1e1b4b', textTransform: 'uppercase' }}>{val}</span>
+                                                                <div className="dd-fila-centrada--separada">
+                                                                    <span className="dd-rotulo">{val}</span>
                                                                     {opt.is_system && (
-                                                                        <div style={{ background: '#fdf2f8', color: '#8f0653', fontSize: '8px', fontWeight: '900', padding: '2px 5px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                                                                        <div className="dd-marca-sistema">
                                                                             <Lock size={8} /> vOS
                                                                         </div>
                                                                     )}
                                                                 </div>
                                                             </>
                                                         ) : (
-                                                            <div style={{ width: '100%' }}>
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
+                                                            <div className="dd-ancho-total">
+                                                                <div className="dd-fila-centrada">
                                                                     <span style={{ 
                                                                         display: 'block', 
                                                                         fontSize: '18px', 
@@ -1588,7 +1588,7 @@ const DetailDrawer = ({
                                                 className="detail-drawer-collection-item"
                                             >
                                                 <div className="detail-drawer-collection-thumb-wrapper">
-                                                    {(sku.image || sku.image_url) ? <img src={`${sku.image || sku.image_url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Package size={18} color="#cbd5e1" style={{ margin: '13px' }} />}
+                                                    {(sku.image || sku.image_url) ? <img src={`${sku.image || sku.image_url}`} className="dd-imagen-llena" /> : <Package size={18} color="#cbd5e1" style={{ margin: '13px' }} />}
                                                 </div>
                                                 <div className="detail-drawer-flex-1-min-w-0">
                                                     <div className="detail-drawer-collection-sku">{sku.sku}</div>
@@ -1690,7 +1690,7 @@ const DetailDrawer = ({
                                                         border: isMain ? '2.5px solid #8f0653' : '1px solid #e2e8f0',
                                                         boxShadow: isMain ? '0 4px 12px rgba(143,6,83,0.15)' : 'none'
                                                     }}>
-                                                        <Imagen url={asset.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} sizes="120px" alt="" />
+                                                        <Imagen url={asset.url} className="dd-imagen-llena" sizes="120px" alt="" />
                                                         
                                                         {/* Botón Eliminar */}
                                                         <button 
@@ -1734,7 +1734,7 @@ const DetailDrawer = ({
 
                                             {/* Botón para Carga Directa */}
                                             <label className="detail-drawer-upload-img-btn">
-                                                <input type="file" onChange={handleFileUpload} accept="image/*" style={{ display: 'none' }} />
+                                                <input type="file" onChange={handleFileUpload} accept="image/*" className="dd-oculto" />
                                                 {uploading ? <Sparkles size={20} className="animate-spin" /> : <Upload size={20} />}
                                                 <span className="detail-drawer-add-img-text">SUBIR</span>
                                             </label>
@@ -1766,7 +1766,7 @@ const DetailDrawer = ({
                     )}
                     
                     {currType === 'cotizacion' && currData?.id && (
-                        <div style={{ marginTop: '28px', borderTop: '2px dashed #cbd5e1', paddingTop: '28px', width: '100%', boxSizing: 'border-box' }}>
+                        <div className="dd-separador">
                             <div style={{
                                 background: 'linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)',
                                 border: '1.5px solid #fbcfe8',
@@ -1777,15 +1777,15 @@ const DetailDrawer = ({
                                 gap: '16px',
                                 boxShadow: '0 10px 25px -5px rgba(143, 6, 83, 0.1)'
                             }}>
-                                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
-                                    <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#8f0653', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 10px rgba(143, 6, 83, 0.3)' }}>
+                                <div className="dd-fila--arriba">
+                                    <div className="dd-emblema">
                                         <Printer size={22} />
                                     </div>
                                     <div>
-                                        <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '900', color: '#8f0653', letterSpacing: '-0.3px' }}>
+                                        <h4 className="dd-titulo">
                                             Sistema de Etiquetas y Ahorro de Tinta
                                         </h4>
-                                        <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b', fontWeight: '600', lineHeight: 1.4 }}>
+                                        <p className="dd-subtitulo">
                                             Accede al módulo avanzado para generar y descargar esta etiqueta en formatos múltiples, configurar ahorro de tinta e incluir códigos de barra.
                                         </p>
                                     </div>
@@ -1816,7 +1816,7 @@ const DetailDrawer = ({
                                 >
                                     Ir al Sistema de Etiquetas (Ahorro y Formato) 🚀
                                 </button>
-                                <div style={{ display: 'flex', gap: '10px' }}>
+                                <div className="dd-fila">
                                     <button
                                         type="button"
                                         onClick={() => window.open(`/admin/print/pedido/${currData.id}`, '_blank')}
@@ -1869,7 +1869,7 @@ const DetailDrawer = ({
                                 Eliminar
                             </Button>
                         )}
-                        <div style={{ flex: 1 }} />
+                        <div className="dd-flexible" />
                         <Button variant="outline" type="button" onClick={onClose} className="detail-drawer-btn-outline">Cerrar</Button>
                         {['variant', 'color_option', 'homepage_section', 'cms_block', 'category'].includes(currType) && onUpdate && currData && !currData.is_system && (currType !== 'category' || editData.is_editing) && (
                             <Button 
