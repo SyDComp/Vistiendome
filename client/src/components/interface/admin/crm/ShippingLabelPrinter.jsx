@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { describirEntrega } from '../../../../utils/entrega';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import './ShippingLabelPrinter.css';
+import './ShippingLabelPrinter.parte.css';
 import {
     Printer, Search, CheckSquare, Square, Package, Settings2, RefreshCw,
     Maximize2, Info, FileText, LayoutGrid, Zap, Sparkles, User, Phone,
@@ -679,14 +680,14 @@ const ShippingLabelPrinter = () => {
             
             {/* TOP NAVBAR */}
             <header style={{ padding: isMobile ? '12px 14px' : '16px 24px', background: '#fff', borderBottom: '1px solid #e2e8f0', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px', boxSizing: 'border-box', width: '100%' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', flex: '1 1 360px', minWidth: 0 }}>
+                <div className="et-fila-ancha">
                     <button
                         onClick={() => navigate('/admin/dashboard/crm/cotizaciones')}
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', borderRadius: '10px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#475569', fontWeight: '700', fontSize: '13px', cursor: 'pointer', flexShrink: 0 }}
+                        className="et-boton-claro"
                     >
                         <ArrowLeft size={16} /> Volver a Cotizaciones
                     </button>
-                    <div style={{ flex: '1 1 220px', minWidth: 0 }}>
+                    <div className="et-bloque">
                         <h1 style={{ margin: 0, fontSize: isMobile ? '17px' : '20px', fontWeight: '900', color: '#1e1b4b', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                             <Printer className="text-pink-600" size={isMobile ? 18 : 22} /> Generador de Etiquetas de Envío
                         </h1>
@@ -707,7 +708,7 @@ const ShippingLabelPrinter = () => {
                     </Button>
                     <label
                         title="Al imprimir, los pedidos seleccionados pasan a DESPACHADA y se descuentan del stock"
-                        style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12px', fontWeight: '700', color: '#475569', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                        className="et-opcion--holgada"
                     >
                         <input
                             type="checkbox"
@@ -742,14 +743,14 @@ const ShippingLabelPrinter = () => {
                     <button
                         type="button"
                         onClick={deshacerDespacho}
-                        style={{ background: '#5b21b6', color: '#fff', border: 'none', borderRadius: '8px', padding: '5px 12px', fontSize: '12px', fontWeight: '800', cursor: 'pointer' }}
+                        className="et-boton-morado"
                     >
                         Deshacer
                     </button>
                     <button
                         type="button"
                         onClick={() => setUltimoDespacho(null)}
-                        style={{ background: 'none', border: 'none', color: '#7c3aed', fontSize: '12px', fontWeight: '700', cursor: 'pointer', marginLeft: 'auto' }}
+                        className="et-boton-morado-plano"
                     >
                         Entendido
                     </button>
@@ -761,29 +762,29 @@ const ShippingLabelPrinter = () => {
                 
                 {/* PANEL IZQUIERDO: SELECCIÓN DE PEDIDOS / COTIZACIONES */}
                 <div style={{ width: isStacked ? '100%' : '310px', minWidth: isStacked ? '100%' : '310px', maxWidth: isStacked ? '100%' : '310px', maxHeight: isStacked ? '42dvh' : 'none', flexShrink: 0, background: '#fff', borderRight: isStacked ? 'none' : '1px solid #e2e8f0', borderBottom: isStacked ? '2px solid #cbd5e1' : 'none', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
-                    <div style={{ padding: '12px 14px', borderBottom: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                            <h2 style={{ fontSize: '13px', fontWeight: '800', color: '#1e293b', margin: 0 }}>
+                    <div className="et-lista-fila">
+                        <div className="et-etiqueta-cabecera">
+                            <h2 className="et-titulo">
                                 Seleccionar ({Object.keys(selected).length})
                             </h2>
-                            <div style={{ display: 'flex', gap: '8px' }}>
+                            <div className="et-fila-botones">
                                 <button
                                     onClick={selectAllFiltered}
-                                    style={{ fontSize: '11px', fontWeight: '700', color: '#8f0653', background: 'none', border: 'none', cursor: 'pointer' }}
+                                    className="et-boton-enlace"
                                 >
                                     Todos
                                 </button>
-                                <span style={{ color: '#cbd5e1' }}>|</span>
+                                <span className="et-icono-apagado">|</span>
                                 <button
                                     onClick={clearSelection}
-                                    style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', background: 'none', border: 'none', cursor: 'pointer' }}
+                                    className="et-boton-enlace et-boton-enlace--gris"
                                 >
                                     Limpiar
                                 </button>
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '5px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                        <div className="et-etiquetas">
                             {Object.entries(VISTAS).map(([clave, v]) => {
                                 const activa = vista === clave;
                                 const n = v.estados
@@ -812,27 +813,27 @@ const ShippingLabelPrinter = () => {
                             {VISTAS[vista].detalle}
                         </p>
 
-                        <div style={{ position: 'relative', width: '100%', boxSizing: 'border-box' }}>
-                            <Search size={13} style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                        <div className="et-buscador">
+                            <Search size={13} className="et-buscador-icono" />
                             <input
                                 type="text"
                                 placeholder="Buscar cliente, RUT, ID..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                style={{ width: '100%', height: '30px', paddingLeft: '26px', paddingRight: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#f8fafc', fontSize: '11px', outline: 'none', boxSizing: 'border-box', color: '#1e293b' }}
+                                
                             />
                         </div>
                     </div>
 
                     {/* LISTA DE COTIZACIONES */}
-                    <div style={{ flex: 1, overflowY: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div className="et-lista">
                         {loading ? (
-                            <div style={{ textAlign: 'center', padding: '40px', color: '#64748b', fontSize: '13px' }}>
+                            <div className="et-vacio--oscuro">
                                 <RefreshCw size={24} className="animate-spin" />
                                 Cargando cotizaciones...
                             </div>
                         ) : filteredCotizaciones.length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', fontSize: '13px' }}>
+                            <div className="et-vacio">
                                 No se encontraron pedidos.
                             </div>
                         ) : (
@@ -866,17 +867,17 @@ const ShippingLabelPrinter = () => {
                                             boxShadow: isSel ? '0 4px 12px -2px rgba(143,6,83,0.1)' : 'none'
                                         }}
                                     >
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <div className="et-fila">
                                             <div style={{ color: isSel ? '#8f0653' : '#cbd5e1' }}>
                                                 {!despachable
-                                                    ? <span style={{ width: 18, display: 'inline-block' }} />
+                                                    ? <span className="et-espaciador" />
                                                     : isSel ? <CheckSquare size={18} /> : <Square size={18} />}
                                             </div>
                                             <div>
-                                                <div style={{ fontSize: '13px', fontWeight: '800', color: '#1e1b4b', marginBottom: '2px' }}>
+                                                <div className="et-nombre">
                                                     {fullName}
                                                 </div>
-                                                <div style={{ fontSize: '11px', color: '#64748b', display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+                                                <div className="et-meta">
                                                     {/* El N de pedido, que es el que figura en la planilla y en
                                                         la etiqueta. Antes iba el final del ULID, que no coincide
                                                         con ningun numero que la clienta pueda ver o decir. */}
@@ -940,17 +941,17 @@ const ShippingLabelPrinter = () => {
                                         {isSel && (
                                             <div
                                                 onClick={(e) => e.stopPropagation()}
-                                                style={{ display: 'flex', alignItems: 'center', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', overflow: 'hidden' }}
+                                                className="et-contador"
                                             >
                                                 <button
                                                     onClick={() => updateCopies(c.id, -1)}
-                                                    style={{ width: '26px', height: '26px', border: 'none', background: '#f8fafc', fontWeight: '800', cursor: 'pointer', color: '#475569' }}
+                                                    
                                                 >-
                                                 </button>
-                                                <span style={{ width: '28px', textAlign: 'center', fontSize: '12px', fontWeight: '800', color: '#1e1b4b' }}>{copies}</span>
+                                                <span className="et-contador-valor">{copies}</span>
                                                 <button
                                                     onClick={() => updateCopies(c.id, 1)}
-                                                    style={{ width: '26px', height: '26px', border: 'none', background: '#f8fafc', fontWeight: '800', cursor: 'pointer', color: '#475569' }}
+                                                    
                                                 >+
                                                 </button>
                                             </div>
@@ -969,30 +970,30 @@ const ShippingLabelPrinter = () => {
                     <div style={{ padding: isMobile ? '14px 12px' : '16px 24px', background: '#fff', borderBottom: '1px solid #e2e8f0', display: 'flex', flexWrap: 'wrap', gap: '20px', alignItems: 'flex-start', boxSizing: 'border-box', width: '100%' }}>
                         
                         {/* SELECTOR DE FORMATO DE PAPEL */}
-                        <div style={{ flex: '1 1 250px', minWidth: 0 }}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '800', color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
+                        <div className="et-bloque--ancho">
+                            <label className="et-rotulo--grande">
                                 <LayoutGrid size={14} /> Formato / Disposición de Hoja
                             </label>
                             <select
                                 value={formatKey}
                                 onChange={(e) => setFormatKey(e.target.value)}
-                                style={{ width: '100%', height: '38px', borderRadius: '10px', border: '1px solid #cbd5e1', padding: '0 12px', fontSize: '13px', fontWeight: '700', color: '#1e1b4b', background: '#fff', boxSizing: 'border-box' }}
+                                className="et-campo"
                             >
                                 {Object.entries(LABEL_FORMATS).map(([k, v]) => (
                                     <option key={k} value={k}>{v.name}</option>
                                 ))}
                             </select>
-                            <span style={{ display: 'block', fontSize: '11px', color: '#059669', fontWeight: '700', marginTop: '4px' }}>
+                            <span className="et-ok">
                                 ✨ {LABEL_FORMATS[formatKey]?.subtitle}
                             </span>
                         </div>
 
                         {/* SELECTOR DE MODO DE TINTA */}
-                        <div style={{ flex: '1 1 220px', minWidth: 0 }}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '800', color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
+                        <div className="et-bloque">
+                            <label className="et-rotulo--grande">
                                 <Zap size={14} /> Consumo de Tinta
                             </label>
-                            <div style={{ display: 'flex', gap: '8px' }}>
+                            <div className="et-fila-botones">
                                 <button
                                     onClick={() => setInkMode('eco')}
                                     style={{ flex: 1, height: '38px', borderRadius: '10px', border: `1.5px solid ${inkMode === 'eco' ? '#059669' : '#cbd5e1'}`, background: inkMode === 'eco' ? '#ecfdf5' : '#fff', color: inkMode === 'eco' ? '#065f46' : '#475569', fontWeight: '800', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
@@ -1009,17 +1010,17 @@ const ShippingLabelPrinter = () => {
                         </div>
 
                         {/* OPCIONES DE CÓDIGO DE BARRAS Y CORTE */}
-                        <div style={{ flex: '2 1 320px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '800', color: '#475569', textTransform: 'uppercase' }}>
+                        <div className="et-bloque--doble">
+                            <label className="et-rotulo--suelto">
                                 <Settings2 size={14} /> Elementos en Etiqueta
                             </label>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', marginTop: '4px' }}>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '700', color: '#334155', cursor: 'pointer' }}>
+                            <div className="et-fila-opciones">
+                                <label className="et-opcion">
                                     <input
                                         type="checkbox"
                                         checked={showBarcode}
                                         onChange={(e) => setShowBarcode(e.target.checked)}
-                                        style={{ width: '16px', height: '16px', accentColor: '#8f0653' }}
+                                        className="et-casilla"
                                     />
                                     Código de Barras
                                 </label>
@@ -1034,21 +1035,21 @@ const ShippingLabelPrinter = () => {
                                         <option value="standard">📏 Normal / Estándar</option>
                                     </select>
                                 )}
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '700', color: '#334155', cursor: 'pointer' }}>
+                                <label className="et-opcion">
                                     <input
                                         type="checkbox"
                                         checked={showCutLines}
                                         onChange={(e) => setShowCutLines(e.target.checked)}
-                                        style={{ width: '16px', height: '16px', accentColor: '#8f0653' }}
+                                        className="et-casilla"
                                     />
                                     Líneas de Corte
                                 </label>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '700', color: '#334155', cursor: 'pointer' }} title="Muestra el recuadro del transporte siempre con su color distintivo, independientemente de si eliges Eco B&N o Estándar">
+                                <label className="et-opcion" title="Muestra el recuadro del transporte siempre con su color distintivo, independientemente de si eliges Eco B&N o Estándar">
                                     <input
                                         type="checkbox"
                                         checked={showTransportColor}
                                         onChange={(e) => setShowTransportColor(e.target.checked)}
-                                        style={{ width: '16px', height: '16px', accentColor: '#8f0653' }}
+                                        className="et-casilla"
                                     />
                                     🎨 Destacar Transporte en Color
                                 </label>
@@ -1060,17 +1061,17 @@ const ShippingLabelPrinter = () => {
                     {/* ÁREA DE VISTA PREVIA */}
                     <div style={{ flex: 1, overflowY: isMobile ? 'visible' : 'auto', overflowX: 'auto', padding: isMobile ? '16px 10px' : '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: isMobile ? '20px' : '32px', width: '100%', boxSizing: 'border-box' }}>
                         {totalCopies === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '60px 20px', background: '#fff', borderRadius: '16px', border: '1px dashed #cbd5e1', maxWidth: '400px', margin: 'auto' }}>
-                                <Package size={48} style={{ color: '#cbd5e1', margin: '0 auto 16px auto' }} />
+                            <div className="et-vacio-grande">
+                                <Package size={48} className="et-vacio-icono" />
                                 <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#334155', margin: '0 0 6px 0' }}>No has seleccionado ningún pedido</h3>
-                                <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
+                                <p className="et-subtitulo">
                                     Marca las casillas de la columna izquierda para ver la vista previa.
                                 </p>
                             </div>
                         ) : (
                             pages.map((pageSlots, pageIdx) => (
                                 <div key={pageIdx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', width: '100%', maxWidth: formatKey.startsWith('a4_') ? '820px' : '440px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: '12px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>
+                                    <div className="et-etiqueta-pie">
                                         <span>Hoja {pageIdx + 1} de {pages.length}</span>
                                     </div>
 
@@ -1120,25 +1121,25 @@ const ShippingLabelPrinter = () => {
                                                     {/* ENCABEZADO MARCA */}
                                                     <div>
                                                         <div className="brand-box" style={{ borderBottom: inkMode === 'eco' ? '1.5px solid #000' : 'none', background: inkMode === 'standard' ? '#000' : 'transparent', color: inkMode === 'standard' ? '#fff' : '#000', padding: inkMode === 'standard' ? '8px' : '0 0 8px 0', marginBottom: '8px', textAlign: 'center', borderRadius: inkMode === 'standard' ? '4px' : '0' }}>
-                                                            <div style={{ fontSize: '14px', fontWeight: '900', letterSpacing: '0.5px' }}>VISTIENDOMÉ CHILE</div>
+                                                            <div className="et-etiqueta-titulo">VISTIENDOMÉ CHILE</div>
                                                             <div style={{ fontSize: '8px', fontWeight: '700', color: inkMode === 'standard' ? '#cbd5e1' : '#4a5568', letterSpacing: '1.5px' }}>TIENDA DE MODA CRISTIANA</div>
                                                         </div>
 
                                                         {/* DESTINATARIO */}
-                                                        <div style={{ fontSize: '8px', fontWeight: '800', color: '#64748b', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>DESTINATARIO</div>
+                                                        <div className="et-rotulo">DESTINATARIO</div>
                                                         <div style={{ fontSize: '16px', fontWeight: '900', color: '#000', lineHeight: '1.1', marginBottom: '8px' }}>
                                                             {fullName.toUpperCase()}
                                                         </div>
 
-                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '12px', fontSize: '11px', fontWeight: '600' }}>
+                                                        <div className="et-etiqueta-lineas">
                                                             {cli?.rut && <div><strong>RUT:</strong> {cli.rut}</div>}
                                                             {cli?.telefono && <div><strong>TEL:</strong> {cli.telefono}</div>}
-                                                            {cli?.email_personal && <div style={{ fontSize: '11px', color: '#475569' }}>{cli.email_personal}</div>}
+                                                            {cli?.email_personal && <div className="et-dato">{cli.email_personal}</div>}
                                                         </div>
 
                                                         {/* INFORMACIÓN DE DESPACHO */}
-                                                        <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '8px' }}>
-                                                            <div style={{ fontSize: '8px', fontWeight: '800', color: '#64748b', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>
+                                                        <div className="et-etiqueta-separador">
+                                                            <div className="et-rotulo">
                                                                 {entrega.titulo}
                                                             </div>
                                                             {entrega.transporte && (() => {
@@ -1150,18 +1151,18 @@ const ShippingLabelPrinter = () => {
                                                                 );
                                                             })()}
 
-                                                            <div style={{ fontSize: '8px', fontWeight: '800', color: '#64748b', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>{entrega.etiquetaDestino}</div>
-                                                            <div style={{ fontSize: '13px', fontWeight: '800', marginBottom: '8px', color: '#000' }}>
+                                                            <div className="et-rotulo">{entrega.etiquetaDestino}</div>
+                                                            <div className="et-etiqueta-seccion">
                                                                 {entrega.destino.toUpperCase()}
                                                             </div>
 
                                                             <div style={{ display: entrega.muestraComuna ? 'flex' : 'none', justifyContent: 'space-between', border: '1.5px solid #000', padding: '6px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '900', background: inkMode === 'standard' ? '#f8fafc' : '#fff', boxSizing: 'border-box', width: '100%', maxWidth: '100%' }}>
                                                                 <div>
-                                                                    <div style={{ fontSize: '7px', color: '#64748b' }}>COMUNA</div>
+                                                                    <div className="et-dato-menudo">COMUNA</div>
                                                                     <div>{(coti.comuna || '---').toUpperCase()}</div>
                                                                 </div>
-                                                                <div style={{ textAlign: 'right' }}>
-                                                                    <div style={{ fontSize: '7px', color: '#64748b' }}>REGIÓN</div>
+                                                                <div className="et-a-la-derecha">
+                                                                    <div className="et-dato-menudo">REGIÓN</div>
                                                                     <div>{(coti.region || '---').toUpperCase()}</div>
                                                                 </div>
                                                             </div>
@@ -1170,8 +1171,8 @@ const ShippingLabelPrinter = () => {
 
                                                     {/* CÓDIGO DE BARRAS INFERIOR */}
                                                     {showBarcode && (
-                                                        <div style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', overflow: 'hidden' }}>
-                                                            <div style={{ maxWidth: '85%', overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
+                                                        <div className="et-etiqueta-codigo">
+                                                            <div className="et-etiqueta-codigo-caja">
                                                                 <Barcode
                                                                     value={barcodeVal}
                                                                     format="CODE128"
@@ -1182,7 +1183,7 @@ const ShippingLabelPrinter = () => {
                                                                     lineColor="#000000"
                                                                 />
                                                             </div>
-                                                            <div style={{ fontFamily: 'monospace', fontSize: '9px', fontWeight: '700', color: '#4a5568', marginTop: '3px' }}>
+                                                            <div className="et-codigo">
                                                                 PEDIDO #{coti.id}
                                                             </div>
                                                         </div>
@@ -1197,7 +1198,7 @@ const ShippingLabelPrinter = () => {
                     </div>
 
                     {/* CONTENEDOR OCULTO PARA IMPRESIÓN PURA */}
-                    <div style={{ display: 'none' }}>
+                    <div className="et-oculto">
                         <div ref={printContainerRef}>
                             {pages.map((pageSlots, pIdx) => (
                                 <div key={pIdx} className={`print-page-wrapper ${formatCfg.pageClass}`}>
@@ -1262,7 +1263,7 @@ const ShippingLabelPrinter = () => {
 
                                                 {showBarcode && (
                                                     <div className="barcode-box">
-                                                        <div style={{ maxWidth: '85%', overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
+                                                        <div className="et-etiqueta-codigo-caja">
                                                             <Barcode
                                                                 value={barcodeVal}
                                                                 format="CODE128"
