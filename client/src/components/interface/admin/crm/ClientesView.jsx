@@ -100,8 +100,8 @@ const ClientesView = () => {
             key: 'nombres', 
             label: 'Cliente',
             render: (value, row) => (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <span style={{ fontWeight: '600', color: '#1e293b', fontSize: '14px' }}>
+                <div className="adm-celda">
+                    <span className="adm-celda-principal adm-celda-principal--nombre">
                         {value} {row.apellidos}
                     </span>
                     <TypeBadge type={row.tipo_persona} />
@@ -130,12 +130,12 @@ const ClientesView = () => {
             key: 'created_at', 
             label: 'Registro',
             render: (value) => {
-                if (!value) return <span style={{ color: '#94a3b8', fontSize: '13px' }}>--</span>;
+                if (!value) return <span className="adm-celda-apagada">--</span>;
                 const date = new Date(value);
                 return isNaN(date.getTime()) ? (
-                    <span style={{ color: '#94a3b8', fontSize: '13px' }}>--</span>
+                    <span className="adm-celda-apagada">--</span>
                 ) : (
-                    <span style={{ color: '#64748b', fontSize: '13px', fontWeight: '500' }}>
+                    <span className="adm-celda-secundaria">
                         {date.toLocaleDateString('es-CL')}
                     </span>
                 );
@@ -147,13 +147,13 @@ const ClientesView = () => {
             render: (_, row) => {
                 if (row.comuna_nombre && row.region_nombre) {
                     return (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                            <span style={{ fontSize: '13px', color: '#334155', fontWeight: '500' }}>{row.comuna_nombre}</span>
-                            <span style={{ fontSize: '11px', color: '#64748b' }}>{row.region_nombre}</span>
+                        <div className="adm-celda adm-celda--pegada">
+                            <span className="adm-celda-texto">{row.comuna_nombre}</span>
+                            <span className="adm-celda-menor">{row.region_nombre}</span>
                         </div>
                     );
                 }
-                return <span style={{ color: '#94a3b8', fontSize: '13px' }}>No registrada</span>;
+                return <span className="adm-celda-apagada">No registrada</span>;
             }
         }
     ];
@@ -167,7 +167,7 @@ const ClientesView = () => {
                 >
                     ← Volver al Listado
                 </button>
-                <div style={{ paddingBottom: '40px' }}>
+                <div className="adm-vista-fondo">
                     <ClienteForm 
                         initialData={editingCliente}
                         onSuccess={() => {
@@ -217,7 +217,7 @@ const ClientesView = () => {
                 loading={loading}
                 emptyMessage="No se encontraron clientes"
                 rowActions={(row) => (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className="adm-celda-con-icono">
                         <button
                             type="button"
                             onClick={() => { setTargetCliente(row); setShowCreateModal(true); }}

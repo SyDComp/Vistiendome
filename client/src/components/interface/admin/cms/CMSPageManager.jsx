@@ -222,8 +222,8 @@ const CMSPageManager = ({
         <div style={{ flex: 1, minHeight: 0, height: '100%', display: 'flex', flexDirection: 'column', gap: '24px', overflow: 'hidden', padding: isMobileScreen ? '10px 0' : '0', boxSizing: 'border-box', fontFamily: 'Inter, system-ui, sans-serif' }}>
             <div style={{ display: 'flex', flexDirection: isMobileScreen ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobileScreen ? 'center' : 'center', gap: '16px', padding: isMobileScreen ? '0 16px' : '0', textAlign: isMobileScreen ? 'center' : 'left' }}>
                 <div>
-                    <h1 style={{ margin: 0, fontSize: isMobileScreen ? '22px' : '28px', fontWeight: '900', color: '#1e1b4b', fontFamily: 'Inter, system-ui, sans-serif' }}>{title}</h1>
-                    <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '14px' }}>{subtitle}</p>
+                    <h1 className="adm-titulo-grande">{title}</h1>
+                    <p className="cms-adm-bajada">{subtitle}</p>
                 </div>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center', width: isMobileScreen ? '100%' : 'auto', justifyContent: isMobileScreen ? 'space-between' : 'flex-end' }}>
                     {hasChanges && (
@@ -278,8 +278,8 @@ const CMSPageManager = ({
                         <div className="cms-adm-cargando">Cargando...</div>
                     ) : sections.length === 0 ? (
                         <div className="cms-adm-vacio-grande">
-                            <Layout size={48} color="#cbd5e1" style={{ marginBottom: '16px' }} />
-                            <h3 style={{ margin: 0, color: '#1e1b4b', fontFamily: 'Inter, system-ui, sans-serif' }}>Sin bloques</h3>
+                            <Layout size={48} color="#cbd5e1" className="adm-separacion" />
+                            <h3 className="adm-titulo-simple">Sin bloques</h3>
                             <p style={{ color: '#64748b', fontSize: '14px' }}>Empieza añadiendo contenido a esta página.</p>
                         </div>
                     ) : (
@@ -333,7 +333,7 @@ const CMSPageManager = ({
                                             {editingTitleId === section.id ? (
                                                 <input autoFocus style={{ border: 'none', borderBottom: '2px solid #8f0653', outline: 'none', background: 'transparent', fontWeight: '800', width: '100%', fontSize: '13px' }} value={section.title} onChange={e => setSections(sections.map(s => s.id === section.id ? { ...s, title: e.target.value } : s))} onBlur={() => setEditingTitleId(null)} onKeyDown={e => e.key === 'Enter' && setEditingTitleId(null)} />
                                             ) : (
-                                                <h4 onClick={() => setEditingTitleId(section.id)} style={{ margin: 0, fontSize: '13px', fontWeight: '800', color: '#1e1b4b', cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'Inter, system-ui, sans-serif' }}>{section.title}</h4>
+                                                <h4 onClick={() => setEditingTitleId(section.id)} className="adm-titulo-fila">{section.title}</h4>
                                             )}
                                         </div>
                                     </div>
@@ -377,7 +377,7 @@ const CMSPageManager = ({
                         minHeight: 0
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h3 style={{ margin: 0, fontSize: '13px', fontWeight: '800', color: '#475569', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'Inter, system-ui, sans-serif' }}>
+                            <h3 className="adm-titulo-seccion">
                                 <Monitor size={15} /> ESPEJO DEL SITIO (LIVE)
                             </h3>
                             <div style={{ display: 'flex', background: '#fff', padding: '4px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>

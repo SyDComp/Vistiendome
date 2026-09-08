@@ -187,8 +187,8 @@ const CotizacionesView = () => {
             key: 'cliente',
             label: 'Pedido',
             render: (_, row) => (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
-                    <span style={{ fontWeight: '700', fontSize: '13px', color: '#1e293b', textTransform: 'capitalize' }}>
+                <div className="adm-celda adm-celda--pegada">
+                    <span className="adm-celda-principal adm-celda-principal--nombre">
                         {row.cliente?.nombres || 'Sin nombre'}
                     </span>
                     <span className="font-mono">
@@ -210,7 +210,7 @@ const CotizacionesView = () => {
             key: 'origen',
             label: 'Origen',
             render: (value) => (
-                <span style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', letterSpacing: '0.5px' }}>
+                <span className="adm-celda-secundaria">
                     {value}
                 </span>
             )
@@ -236,10 +236,10 @@ const CotizacionesView = () => {
             label: 'Confección',
             render: (_, row) => {
                 const { texto, tono, ordenes } = estadoDeProduccion(row);
-                if (!texto) return <span style={{ color: '#cbd5e1', fontSize: '12px' }}>—</span>;
+                if (!texto) return <span className="adm-celda-tenue">—</span>;
                 const estilo = TONOS[tono];
                 return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start' }}>
+                    <div className="adm-celda adm-celda--junta">
                         <span style={{
                             fontSize: '11px', fontWeight: '700', color: estilo.color,
                             background: estilo.bg, padding: '4px 9px', borderRadius: '20px',
@@ -276,8 +276,8 @@ const CotizacionesView = () => {
             render: (_, row) => {
                 const transColor = getShippingColor(row.transporte || 'STARKEN', shippingColors);
                 return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontSize: '13px' }}>
+                    <div className="adm-celda">
+                        <div className="adm-celda-con-icono--junta">
                             <MapPin size={14} /> 
                             <span>{row.comuna}, {row.region}</span>
                         </div>
@@ -294,13 +294,13 @@ const CotizacionesView = () => {
 
     return (
         <div className="admin-module fade-in">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
+            <div className="adm-vista-cabecera">
                 <SectionHeader 
                     title="Cotizaciones Recibidas" 
                     subtitle={`${cotizaciones.length} solicitudes de cotización`}
                     icon={FileText}
                 />
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', width: '100%', justifyContent: 'flex-start' }}>
+                <div className="adm-vista-filtros">
                     <button
                         onClick={() => setShowCreateModal(true)}
                         style={{
