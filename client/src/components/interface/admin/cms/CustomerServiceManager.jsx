@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import './cms-admin.css';
 import { 
     GripVertical, 
     ChevronRight, 
@@ -89,7 +90,7 @@ const CustomerServiceManager = () => {
 
     if (selectedSlug) {
         return (
-            <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <div className="cms-adm--pegado">
                 <button 
                     onClick={() => setSelectedSlug(null)}
                     style={{ 
@@ -101,7 +102,7 @@ const CustomerServiceManager = () => {
                 >
                     <ArrowLeft size={16} /> Volver a Secciones
                 </button>
-                <div style={{ flex: 1, minHeight: 0 }}>
+                <div className="cms-adm-flexible">
                     <CMSPageManager
                         page={selectedSlug} 
                         title={`Contenido: ${selectedTitle}`}
@@ -113,11 +114,11 @@ const CustomerServiceManager = () => {
     }
 
     return (
-        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+        <div className="cms-adm">
+            <div className="cms-adm-cabecera">
                 <div>
-                    <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '900', color: '#1e1b4b' }}>Atención al Cliente</h1>
-                    <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '14px' }}>Gestiona las secciones del footer y su contenido dinámico.</p>
+                    <h1 className="cms-adm-titulo">Atención al Cliente</h1>
+                    <p className="cms-adm-bajada">Gestiona las secciones del footer y su contenido dinámico.</p>
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
                     <Button 
@@ -135,9 +136,9 @@ const CustomerServiceManager = () => {
                 </div>
             </div>
 
-            <div style={{ flex: 1, overflowY: 'auto' }}>
+            <div className="cms-adm-lista">
                 {loading ? (
-                    <div style={{ padding: '40px', textAlign: 'center' }}>Cargando secciones...</div>
+                    <div className="cms-adm-vacio">Cargando secciones...</div>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '800px' }}>
                         {sections.map((section, index) => (
@@ -171,17 +172,17 @@ const CustomerServiceManager = () => {
                                         </button>
                                     </div>
                                 )}
-                                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#f8fafc', fontSize: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div className="cms-adm-emblema">
                                     {section.icon}
                                 </div>
-                                <div style={{ flex: '1 1 150px' }}>
-                                    <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#1e1b4b' }}>{section.title}</h4>
-                                    <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#94a3b8' }}>
+                                <div className="cms-adm-columna">
+                                    <h4 className="cms-adm-seccion-titulo">{section.title}</h4>
+                                    <p className="cms-adm-seccion-nota">
                                         {section.is_active ? 'Visible en el footer' : 'Oculto actualmente'}
                                     </p>
                                 </div>
                                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                    <button onClick={() => handleToggleActive(section.id)} style={{ width: '36px', height: '36px', borderRadius: '10px', border: 'none', background: section.is_active ? '#ecfdf5' : '#f8fafc', color: section.is_active ? '#059669' : '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <button onClick={() => handleToggleActive(section.id)} className={`cms-adm-accion${section.is_active ? ' cms-adm-accion--activa' : ''}`}>
                                         {section.is_active ? <Eye size={16} /> : <EyeOff size={16} />}
                                     </button>
                                     <button 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './CMSPageManager.css';
+import './cms-admin.css';
 import { 
     Plus, 
     GripVertical, 
@@ -274,9 +275,9 @@ const CMSPageManager = ({
                     minHeight: 0
                 }}>
                     {loading ? (
-                        <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Cargando...</div>
+                        <div className="cms-adm-cargando">Cargando...</div>
                     ) : sections.length === 0 ? (
-                        <div style={{ padding: '80px 40px', textAlign: 'center', background: '#fff', borderRadius: '24px', border: '2px dashed #e2e8f0' }}>
+                        <div className="cms-adm-vacio-grande">
                             <Layout size={48} color="#cbd5e1" style={{ marginBottom: '16px' }} />
                             <h3 style={{ margin: 0, color: '#1e1b4b', fontFamily: 'Inter, system-ui, sans-serif' }}>Sin bloques</h3>
                             <p style={{ color: '#64748b', fontSize: '14px' }}>Empieza añadiendo contenido a esta página.</p>
@@ -325,7 +326,7 @@ const CMSPageManager = ({
                                                 </button>
                                             </div>
                                         )}
-                                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fdf2f8', color: '#8f0653', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        <div className="cms-adm-emblema cms-adm-emblema--marca">
                                             {getIcon(section.type)}
                                         </div>
                                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -338,7 +339,7 @@ const CMSPageManager = ({
                                     </div>
 
                                     <div style={{ display: 'flex', gap: '6px', justifyContent: isMobileScreen ? 'flex-end' : 'flex-start' }}>
-                                        <button onClick={(e) => { e.stopPropagation(); handleToggleActive(section); }} title="Activar/Desactivar" style={{ width: '32px', height: '32px', borderRadius: '8px', border: 'none', background: section.is_active ? '#ecfdf5' : '#f8fafc', color: section.is_active ? '#059669' : '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{section.is_active ? <Eye size={14} /> : <EyeOff size={14} />}</button>
+                                        <button onClick={(e) => { e.stopPropagation(); handleToggleActive(section); }} title="Activar/Desactivar" className={`cms-adm-accion${section.is_active ? ' cms-adm-accion--activa' : ''}`}>{section.is_active ? <Eye size={14} /> : <EyeOff size={14} />}</button>
                                         <button onClick={(e) => { 
                                             e.stopPropagation();
                                             setSelectedSection(section); 
@@ -351,8 +352,8 @@ const CMSPageManager = ({
                                             } else {
                                                 setIsDrawerOpen(true);
                                             }
-                                        }} title="Editar Contenido" style={{ width: '32px', height: '32px', borderRadius: '8px', border: 'none', background: '#fdf2f8', color: '#8f0653', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Edit2 size={14} /></button>
-                                        <button onClick={(e) => { e.stopPropagation(); handleDelete(section.id); }} title="Eliminar" style={{ width: '32px', height: '32px', borderRadius: '8px', border: 'none', background: '#fff1f2', color: '#e11d48', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trash2 size={14} /></button>
+                                        }} title="Editar Contenido" className="cms-adm-accion cms-adm-accion--marca"><Edit2 size={14} /></button>
+                                        <button onClick={(e) => { e.stopPropagation(); handleDelete(section.id); }} title="Eliminar" className="cms-adm-accion cms-adm-accion--borrar"><Trash2 size={14} /></button>
                                     </div>
                                 </div>
                             );
@@ -382,13 +383,13 @@ const CMSPageManager = ({
                             <div style={{ display: 'flex', background: '#fff', padding: '4px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                                 <button 
                                     onClick={() => setPreviewDevice('desktop')}
-                                    style={{ padding: '6px 12px', border: 'none', background: previewDevice === 'desktop' ? '#1e1b4b' : 'transparent', color: previewDevice === 'desktop' ? '#fff' : '#64748b', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s' }}
+                                    className={`cms-adm-dispositivo${previewDevice === 'desktop' ? ' cms-adm-dispositivo--activo' : ''}`}
                                 >
                                     <Monitor size={14} />
                                 </button>
                                 <button 
                                     onClick={() => setPreviewDevice('mobile')}
-                                    style={{ padding: '6px 12px', border: 'none', background: previewDevice === 'mobile' ? '#1e1b4b' : 'transparent', color: previewDevice === 'mobile' ? '#fff' : '#64748b', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s' }}
+                                    className={`cms-adm-dispositivo${previewDevice === 'mobile' ? ' cms-adm-dispositivo--activo' : ''}`}
                                 >
                                     <Smartphone size={14} />
                                 </button>
@@ -413,7 +414,7 @@ const CMSPageManager = ({
                             />
                         </div>
 
-                        <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '11px', fontWeight: '600' }}>
+                        <div className="cms-adm-pie">
                             Los cambios aquí son instantáneos. Pulsa "Guardar" para publicarlos.
                         </div>
                     </div>
@@ -462,18 +463,18 @@ const CMSPageManager = ({
                     flexDirection: 'column',
                     animation: 'previewFadeIn 0.3s ease'
                 }}>
-                    <div style={{ padding: '16px 20px', background: '#fff', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className="cms-adm-barra">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                             <div style={{ display: 'flex', background: '#f1f5f9', padding: '4px', borderRadius: '12px' }}>
                                 <button 
                                     onClick={() => setPreviewDevice('desktop')}
-                                    style={{ padding: '6px 12px', border: 'none', background: previewDevice === 'desktop' ? '#1e1b4b' : 'transparent', color: previewDevice === 'desktop' ? '#fff' : '#64748b', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center' }}
+                                    className={`cms-adm-dispositivo${previewDevice === 'desktop' ? ' cms-adm-dispositivo--activo' : ''}`}
                                 >
                                     <Monitor size={16} />
                                 </button>
                                 <button 
                                     onClick={() => setPreviewDevice('mobile')}
-                                    style={{ padding: '6px 12px', border: 'none', background: previewDevice === 'mobile' ? '#1e1b4b' : 'transparent', color: previewDevice === 'mobile' ? '#fff' : '#64748b', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center' }}
+                                    className={`cms-adm-dispositivo${previewDevice === 'mobile' ? ' cms-adm-dispositivo--activo' : ''}`}
                                 >
                                     <Smartphone size={16} />
                                 </button>

@@ -1,0 +1,121 @@
+/*
+ * Piezas compartidas de las dos pantallas que arman el sitio: el gestor de
+ * páginas y el de atención al cliente. Las dos tienen la misma forma —una lista
+ * de secciones que se activan, se reordenan y se borran— y por eso repetían las
+ * mismas cajas escritas a mano en cada archivo.
+ *
+ * Un estado que se enciende y se apaga (una sección activa, el dispositivo de
+ * la vista previa) va como MODIFICADOR de clase, no como un color calculado en
+ * JavaScript: así el estado se lee en el marcado y el color vive en un solo
+ * sitio.
+ */
+
+.cms-adm {
+    --cms-marca: #8f0653;
+    --cms-marca-suave: #fdf2f8;
+    --cms-tinta: #1e1b4b;
+    --cms-texto: #64748b;
+    --cms-gris: #94a3b8;
+    --cms-linea: #e2e8f0;
+
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.cms-adm--pegado { height: 100%; display: flex; flex-direction: column; }
+
+.cms-adm-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.cms-adm-titulo { margin: 0; font-size: 1.75rem; font-weight: 900; color: var(--cms-tinta); }
+.cms-adm-bajada { margin: 0.25rem 0 0 0; color: var(--cms-texto); font-size: 0.875rem; }
+
+.cms-adm-seccion-titulo { margin: 0; font-size: 1rem; font-weight: 800; color: var(--cms-tinta); }
+.cms-adm-seccion-nota { margin: 0.125rem 0 0 0; font-size: 0.75rem; color: var(--cms-gris); }
+
+/* El cuadrito con el icono de una sección. */
+.cms-adm-emblema {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    background: #f8fafc;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.cms-adm-emblema--marca {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.625rem;
+    background: var(--cms-marca-suave);
+    color: var(--cms-marca);
+    font-size: inherit;
+}
+
+/* Botones cuadrados de acción sobre una sección. */
+.cms-adm-accion {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.625rem;
+    border: none;
+    background: #f8fafc;
+    color: var(--cms-gris);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+/* Encendida: el estado se ve en el marcado, no en un color calculado. */
+.cms-adm-accion--activa { background: #ecfdf5; color: #059669; }
+.cms-adm-accion--marca { background: var(--cms-marca-suave); color: var(--cms-marca); }
+.cms-adm-accion--borrar { background: #fff1f2; color: #e11d48; }
+
+.cms-adm-lista { flex: 1; overflow-y: auto; }
+.cms-adm-flexible { flex: 1; min-height: 0; }
+.cms-adm-columna { flex: 1 1 9.375rem; }
+
+.cms-adm-cargando { padding: 2.5rem; text-align: center; color: var(--cms-texto); }
+.cms-adm-vacio { padding: 2.5rem; text-align: center; }
+.cms-adm-vacio-grande {
+    padding: 5rem 2.5rem;
+    text-align: center;
+    background: #fff;
+    border-radius: 1.5rem;
+    border: 2px dashed var(--cms-linea);
+}
+.cms-adm-pie { text-align: center; color: var(--cms-gris); font-size: 0.6875rem; font-weight: 600; }
+
+/* Barra de la vista previa: escritorio / teléfono. */
+.cms-adm-barra {
+    padding: 1rem 1.25rem;
+    background: #fff;
+    border-bottom: 1px solid var(--cms-linea);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+.cms-adm-dispositivo {
+    padding: 0.375rem 0.75rem;
+    border: none;
+    background: transparent;
+    color: var(--cms-texto);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-family: inherit;
+    min-height: 2.25rem;
+}
+.cms-adm-dispositivo--activo { background: var(--cms-tinta); color: #fff; }
