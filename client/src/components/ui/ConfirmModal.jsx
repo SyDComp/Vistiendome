@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AlertCircle, X, Check, HelpCircle } from 'lucide-react';
 import Button from './Button';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import './ConfirmModal.css';
 
 /**
  * ConfirmModal: Un modal premium para confirmaciones críticas.
@@ -54,97 +55,35 @@ const ConfirmModal = ({
     const theme = colors[variant] || colors.danger;
 
     return (
-        <div style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 9999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px',
-            opacity: isVisible ? 1 : 0,
-            transition: 'opacity 0.3s ease',
-            pointerEvents: isVisible ? 'auto' : 'none'
-        }}>
+        <div className="confirmar-overlay" style={{ opacity: isVisible ? 1 : 0, pointerEvents: isVisible ? 'auto' : 'none' }}>
             {/* Backdrop */}
             <div 
                 onClick={onClose}
-                style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'rgba(15, 23, 42, 0.4)',
-                    backdropFilter: 'blur(8px)',
-                }} 
+                className="confirmar-fondo" 
             />
 
             {/* Modal Card */}
-            <div style={{
-                position: 'relative',
-                width: '100%',
-                maxWidth: '440px',
-                background: '#fff',
-                borderRadius: '32px',
-                padding: '40px',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-                transform: isVisible ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(20px)',
-                transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-            }}>
+            <div className="confirmar-tarjeta" style={{ transform: isVisible ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(20px)' }}>
                 {/* Close Button */}
                 <button 
                     onClick={onClose}
-                    style={{
-                        position: 'absolute',
-                        top: '24px',
-                        right: '24px',
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '12px',
-                        border: 'none',
-                        background: '#f8fafc',
-                        color: '#64748b',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.2s'
-                    }}
+                    className="confirmar-cerrar"
                 >
                     <X size={18} />
                 </button>
 
                 {/* Header with Icon */}
                 <div className="adm-confirmar-texto">
-                    <div style={{
-                        width: '80px',
-                        height: '80px',
-                        borderRadius: '24px',
-                        background: theme.bg,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        margin: '0 auto 20px',
-                    }}>
+                    <div className="confirmar-emblema" style={{ background: theme.bg }}>
                         {theme.icon}
                     </div>
-                    <h2 style={{ 
-                        margin: 0, 
-                        fontSize: '24px', 
-                        fontWeight: '900', 
-                        color: '#1e1b4b',
-                        letterSpacing: '-0.02em'
-                    }}>
+                    <h2 className="confirmar-titulo">
                         {title}
                     </h2>
                 </div>
 
                 {/* Message */}
-                <p style={{ 
-                    textAlign: 'center', 
-                    color: '#64748b', 
-                    fontSize: '16px', 
-                    lineHeight: '1.6',
-                    margin: '0 0 32px 0'
-                }}>
+                <p className="confirmar-mensaje">
                     {message}
                 </p>
 
