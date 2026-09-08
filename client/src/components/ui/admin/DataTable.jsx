@@ -6,9 +6,16 @@ import React, { useState, useEffect } from 'react';
  */
 const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {}, emptyMessage = 'No hay datos.' }) => {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+    // Con poco ancho el relleno de las celdas es lo primero que sobra: 18px por
+    // lado en 6 columnas son 216px que no se ven pero empujan la tabla fuera de
+    // la pantalla, y las ultimas columnas —PRECIO, STOCK— quedaban cortadas.
+    const [compacto, setCompacto] = useState(window.innerWidth < 1400);
 
     useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 640);
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 640);
+            setCompacto(window.innerWidth < 1400);
+        };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -58,7 +65,7 @@ const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {
                             <tr>
                                 {columns.map(col => (
                                     <th key={col.key} style={{
-                                        padding: isMobile ? '12px 14px' : '13px 18px',
+                                        padding: compacto ? '12px 11px' : '13px 18px',
                                         fontSize: '11px',
                                         fontWeight: '700',
                                         color: '#94a3b8',
@@ -72,7 +79,7 @@ const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {
                                 ))}
                                 {rowActions && (
                                     <th style={{ 
-                                        padding: isMobile ? '12px 14px' : '13px 18px', 
+                                        padding: compacto ? '12px 11px' : '13px 18px', 
                                         textAlign: 'right', 
                                         fontSize: '11px', 
                                         fontWeight: '700', 
@@ -102,7 +109,7 @@ const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {
                                 >
                                     {columns.map(col => (
                                         <td key={col.key} style={{
-                                            padding: isMobile ? '12px 14px' : '14px 18px',
+                                            padding: compacto ? '12px 11px' : '14px 18px',
                                             fontSize: '13.5px',
                                             color: '#1e293b',
                                             textAlign: col.align || 'left',
@@ -113,7 +120,7 @@ const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {
                                     ))}
                                     {rowActions && (
                                         <td style={{ 
-                                            padding: isMobile ? '12px 14px' : '14px 18px', 
+                                            padding: compacto ? '12px 11px' : '14px 18px', 
                                             textAlign: 'right', 
                                             verticalAlign: 'middle',
                                             position: 'sticky',

@@ -35,7 +35,17 @@ const DashboardLayout = () => {
     const location = useLocation();
     
     // States para colapso (escritorio) y apertura (móvil)
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    // Colapsado de entrada en pantallas medianas.
+    //
+    // El menu lateral expandido ocupa ~270px. En un portatil de 1280 o menos
+    // eso deja al contenido con menos ancho del que necesitan las tablas del
+    // panel, y columnas como PRECIO o STOCK quedaban cortadas: la tabla tiene
+    // scroll horizontal propio, asi que no se rompia nada, pero se veia
+    // partida y no habia forma de saber que faltaba algo a la derecha.
+    //
+    // Colapsado son ~200px mas para la tabla. Sigue siendo una preferencia:
+    // el boton lo expande y desde ahi manda el usuario.
+    const [isCollapsed, setIsCollapsed] = useState(() => window.innerWidth < 1280);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
