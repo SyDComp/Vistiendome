@@ -312,7 +312,7 @@ const VariantPicker = ({
                                                     <div className="variant-picker-option-color" style={{ background: hex }} />
                                                 )}
                                                 <span className="variant-picker-option-text">{val}</span>
-                                                {isSelected && <Check size={14} style={{ flexShrink: 0 }} />}
+                                                {isSelected && <Check size={14} className="esp-fijo" />}
                                             </button>
                                         );
                                     })}
@@ -505,7 +505,7 @@ const VariantPicker = ({
                 {/* 2. MAIN TABLE */}
                 <div className="variant-picker-table-container">
                     <table className="variant-picker-table">
-                        <thead className="variant-picker-th-container" style={{ position: 'sticky', top: 0, background: '#f8fafc', zIndex: 10, borderBottom: '2px solid #e2e8f0' }}>
+                        <thead className="variant-picker-th-container adm-cabecera-fija">
                             <tr>
                                 <th className="variant-picker-th checkbox">
                                     <input 
@@ -549,7 +549,7 @@ const VariantPicker = ({
                                         <div className="variant-picker-photos-wrap">
                                             {row.media_assets?.map((asset, iIdx) => (
                                                 <div key={asset.id || iIdx} className="variant-picker-photo-thumb">
-                                                    <Imagen url={asset.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} sizes="120px" alt="" />
+                                                    <Imagen url={asset.url} className="adm-imagen-cubre" sizes="120px" alt="" />
                                                 </div>
                                             ))}
                                             {(!row.media_assets || row.media_assets?.length === 0) && <div className="variant-picker-photo-empty" />}
@@ -583,7 +583,7 @@ const VariantPicker = ({
                                 <h3 className="variant-picker-gallery-title">Asignar Fotos a la Selección</h3>
                                 <button type="button" onClick={() => setShowGlobalGallery(false)} className="variant-picker-gallery-close">✕</button>
                             </div>
-                            <div style={{ flex: 1, overflowY: 'auto' }}>
+                            <div className="adm-scroll">
                                 <MediaGallery 
                                     selectionMode 
                                     allowMultiple={true}

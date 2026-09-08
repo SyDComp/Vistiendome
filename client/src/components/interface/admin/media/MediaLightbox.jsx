@@ -26,20 +26,20 @@ const MediaLightbox = ({
     return (
         <div className="media-gallery-lightbox-overlay">
             <div className="media-gallery-lightbox-header">
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="adm-encogible">
                     <span className="media-gallery-lightbox-title-label">Nombre amigable</span>
                     {onUpdateAlias ? (
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '4px' }}>
+                        <div className="adm-visor-fila">
                             <input
                                 value={aliasDraft}
                                 onChange={(e) => setAliasDraft(e.target.value)}
                                 placeholder="Ej: Vestido Noemi Azul"
-                                style={{ flex: 1, maxWidth: '360px', height: '38px', padding: '0 12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.1)', color: '#fff', fontSize: '14px' }}
+                                className="adm-visor-campo"
                             />
                             <button
                                 onClick={(e) => { e.stopPropagation(); onUpdateAlias(img.id, aliasDraft); }}
                                 title="Guardar nombre"
-                                style={{ height: '38px', padding: '0 14px', borderRadius: '10px', border: 'none', background: '#8f0653', color: '#fff', fontWeight: '700', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                className="adm-visor-boton"
                             >
                                 <Check size={16} /> Guardar
                             </button>

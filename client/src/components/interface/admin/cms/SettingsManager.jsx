@@ -220,7 +220,7 @@ const SettingsManager = () => {
                     onClick={handleSave} 
                     variant="primary" 
                     disabled={isSaving}
-                    style={{ background: '#8f0653', height: '48px', padding: '0 24px' }}
+                    className="adm-boton-marca-alto"
                 >
                     {isSaving ? 'Guardando...' : <><Save size={18} /> Guardar Cambios</>}
                 </Button>
@@ -418,7 +418,7 @@ const SettingsManager = () => {
                                         </label>
                                         <X 
                                             size={14} 
-                                            style={{ cursor: 'pointer', color: '#ef4444', marginLeft: '4px' }} 
+                                            className="adm-quitar-icono" 
                                             onClick={() => handleRemoveShippingMethod(method)}
                                         />
                                     </div>
@@ -499,7 +499,7 @@ const SettingsManager = () => {
                         {(welcomeModal.image_url || welcomeModal.image_asset_id) && (
                             <div className="adm-bloque-ancho">
                                 <div className="adm-seccion-titulo">
-                                    <Sliders size={16} style={{ color: '#8f0653' }} />
+                                    <Sliders size={16} className="adm-marca-texto" />
                                     Ajustes Visuales de la Imagen
                                 </div>
                                 <div className="adm-rejilla--media">
@@ -801,7 +801,7 @@ const SettingsManager = () => {
                                     </div>
                                 </div>
 
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '14px', cursor: 'pointer' }}>
+                                <label className="adm-elegible--arriba">
                                     <input type="checkbox" checked={p.combinable === true}
                                         onChange={e => editar({ combinable: e.target.checked })}
                                         className="adm-casilla" />

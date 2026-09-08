@@ -201,7 +201,7 @@ const CotizacionesView = () => {
             key: 'fecha', 
             label: 'Fecha',
             render: (_, row) => (
-                <span style={{ color: '#64748b', fontSize: '13px', fontWeight: '500' }}>
+                <span className="adm-celda-secundaria">
                     {new Date(row.created_at).toLocaleDateString()}
                 </span>
             )

@@ -115,7 +115,7 @@ const PRODUCT_COLUMNS = [
                 <span className="admin-product-price" style={faltanPrecios ? { display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#b45309' } : undefined}>
                     {faltanPrecios && <AlertTriangle size={14} />}
                     {min === max ? `$${min.toLocaleString()}` : `$${min.toLocaleString()} - $${max.toLocaleString()}`}
-                    {faltanPrecios && <em style={{ fontSize: '11px', fontStyle: 'normal', fontWeight: 700 }} title="Hay variantes en $0 — revísalas en Producción › Sin precio">sin precio</em>}
+                    {faltanPrecios && <em className="adm-aviso-alerta-texto" title="Hay variantes en $0 — revísalas en Producción › Sin precio">sin precio</em>}
                 </span>
             );
         }
@@ -172,7 +172,7 @@ const VARIANT_COLUMNS = [
         render: (v) => v ? (
             <span className="admin-product-price">${v.toLocaleString()}</span>
         ) : (
-            <span className="admin-product-price" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#b45309', fontWeight: 700 }} title="Sin precio cargado — no se puede comprar en el sitio">
+            <span className="admin-product-price adm-aviso-alerta" title="Sin precio cargado — no se puede comprar en el sitio">
                 <AlertTriangle size={13} /> $0
             </span>
         )
@@ -395,10 +395,10 @@ const InventoryModule = ({ view = 'products' }) => {
                 >
                     ← Volver al Listado
                 </button>
-                <div style={{ paddingBottom: '40px' }}>
+                <div className="adm-vista-fondo">
                     {detailLoading ? (
-                        <div style={{ padding: '100px 20px', textAlign: 'center', color: '#64748b' }}>
-                            <div style={{ width: '40px', height: '40px', border: '3px solid #e2e8f0', borderTopColor: '#8f0653', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 16px' }} />
+                        <div className="adm-cargando-vista">
+                            <div className="adm-rueda--grande" />
                             Cargando datos del producto...
                         </div>
                     ) : (
