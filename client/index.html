@@ -3,7 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!-- interactive-widget=resizes-content: sin esto el teclado del telefono NO
+         achica la pagina, se dibuja ENCIMA, y el boton de accion de cualquier
+         formulario queda tapado y sin forma de alcanzarlo. Con esto el alto
+         visible se reduce de verdad y `dvh` y `inset: 0` siguen al teclado.
+
+         Se quitaron `maximum-scale=1.0` y `user-scalable=no`: bloqueaban el
+         zoom con dos dedos. Quien no ve bien queda sin poder acercar la
+         pantalla, y no hay nada que ganar a cambio. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
     <title>Vistiendomé</title>
 
     <!-- La fuente del logo. Se carga acá y no con @import dentro del CSS

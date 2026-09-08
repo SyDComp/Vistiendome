@@ -2,4 +2,5 @@
 @import url('./theme/animations.css');
 @import url('./base/reset.css');
 @import url('./base/layout.css');
+@import url('./base/modales.css');
 @import url('./modules/modules.css');

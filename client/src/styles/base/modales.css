@@ -1,0 +1,57 @@
+/* ============================================================
+   MODALES — el piso que ninguno puede romper
+   ============================================================
+
+   EL PROBLEMA
+   Un modal se escribe pensando en la pantalla que uno tiene delante. Después
+   aparece un teléfono en horizontal, o alguien con letra grande, o —el caso que
+   lo destapó— el teclado del teléfono, que ocupa la mitad de la pantalla. La
+   tarjeta sigue midiendo lo que medía, se sale por abajo, y el botón de acción
+   queda en un lugar al que no se puede llegar: no está oculto, está fuera.
+
+   Se auditaron los modales del proyecto: 28 tarjetas no declaraban ningún alto
+   máximo. No es que 28 personas se equivocaran; es que no había ningún sitio
+   donde eso estuviera dicho una vez.
+
+   QUE HACE ESTA HOJA
+   Garantiza lo mínimo para todas: ninguna tarjeta pasa del alto visible, y lo
+   que no entra se alcanza con scroll. No impone diseño, no toca colores ni
+   tamaños, y no reemplaza hacer bien un modal concreto —el de WhatsApp reparte
+   cabecera, cuerpo y botón para que el botón NUNCA ceda—, pero asegura que
+   ningún control quede inalcanzable aunque nadie se acuerde de pensarlo.
+
+   POR QUE `dvh` Y NO `vh`
+   `vh` mide la pantalla completa e ignora la barra del navegador y el teclado:
+   es justamente la unidad que produce el problema. `dvh` mide lo que de verdad
+   se está viendo.
+
+   POR QUE `:where()`
+   Tiene especificidad cero: cualquier regla del componente le gana sin pelear
+   con `!important`. Es un piso, no una imposición.
+
+   AL AGREGAR UN MODAL NUEVO: sumar su clase acá. Es una línea, y es el único
+   lugar donde esto se decide.
+   ============================================================ */
+
+:where(
+    .wa-composer-card,
+    .help-modal-content,
+    .modal-content,
+    .cart-drawer-content,
+    .filter-drawer-content,
+    .variant-drawer-content,
+    .dialog-card,
+    .char-form-modal-box,
+    .logistics-modal-content,
+    .delivery-modal-content,
+    .upload-modal-content,
+    .barcode-printer-modal-content,
+    .split-view-modal-content,
+    .armador-caja
+) {
+    max-height: 100dvh;
+    overflow-y: auto;
+    /* Sin esto, una caja flex se niega a encogerse por debajo de su contenido
+       y el `max-height` de arriba no sirve de nada. */
+    min-height: 0;
+}
