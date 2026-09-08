@@ -20,7 +20,6 @@
     border-radius: 1.5rem;
     padding: 1.5rem;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    box-sizing: border-box;
     animation: waComposerSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
     /* EL BOTON NO PUEDE QUEDAR DEBAJO DEL TECLADO
@@ -87,7 +86,6 @@
     font-size: max(1rem, 0.875rem);
     font-family: inherit;
     resize: none;
-    box-sizing: border-box;
 }
 .wa-composer-textarea:focus-visible {
     outline: none;

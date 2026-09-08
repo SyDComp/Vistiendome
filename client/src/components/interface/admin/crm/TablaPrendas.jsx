@@ -1,5 +1,6 @@
 import React from 'react';
 import { agrupar, nombreDeProducto } from '../../../../utils/prendas';
+import './TablaPrendas.css';
 
 /**
  * Las prendas de un pedido, con UNA COLUMNA POR CARACTERÍSTICA.
@@ -110,60 +111,6 @@ const TablaPrendas = ({
                 </section>
             ))}
 
-            <style>{`
-                .tp-vacio { color: var(--color-text-light, #64748b); font-size: 13px; margin: 0; }
-                .tp-grupo + .tp-grupo { margin-top: 26px; }
-                /* El nombre del modelo tiene que dominar: quien lee esto está
-                   cosiendo y busca "cuál prenda", no una fila. La línea debajo
-                   separa un modelo del siguiente sin necesidad de leerlos. */
-                .tp-grupo-cab {
-                    display: flex; align-items: baseline; justify-content: space-between;
-                    gap: 12px; flex-wrap: wrap;
-                    border-bottom: 2px solid #1e1b4b; padding-bottom: 4px; margin-bottom: 0;
-                }
-                .tp-producto {
-                    margin: 0; font-size: 17px; font-weight: 900; color: #1e1b4b;
-                    text-transform: uppercase; letter-spacing: .4px;
-                }
-                .tp-unidades { font-size: 13px; font-weight: 800; color: #1e1b4b; }
-
-                /* El ancho lo puede pasar el número de características: que
-                   ruede la tabla, nunca la página. */
-                .tp-scroll { overflow-x: auto; }
-                .tp-tabla { width: 100%; border-collapse: collapse; font-size: 15px; }
-                .tp-tabla th {
-                    text-align: left; font-size: 11.5px; letter-spacing: .5px; text-transform: uppercase;
-                    color: var(--color-text-light, #64748b); border-bottom: 1px solid #cbd5e1;
-                    padding: 7px 8px; white-space: nowrap;
-                }
-                .tp-tabla td { padding: 10px 8px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
-                                .tp-num { text-align: right; }
-                /* La cantidad va centrada: es la columna que se busca de un
-                   vistazo y centrada se encuentra sin recorrer la fila. */
-                .tp-cant, th.tp-cant { text-align: center; font-weight: 800; }
-                .tp-sin-dato { color: #cbd5e1; }
-                .tp-casilla { width: 30px; }
-                .tp-cuadro { display: block; width: 14px; height: 14px; border: 1.5px solid #1e1b4b; border-radius: 3px; }
-                .tp-blanca td { height: 30px; }
-                /* Agrupado por clienta el producto es lo que distingue una fila
-                   de otra, así que se destaca. */
-                .tp-producto-col { font-weight: 700; white-space: normal; }
-                .tp-elegida { background: #f0fdf4; }
-
-                /* En pantalla la tabla puede rodar de lado. En papel no hay a
-                   donde rodar: lo que se sale del ancho simplemente no se
-                   imprime, y la hoja sale incompleta sin avisar. Al imprimir
-                   se suelta el scroll y se aprieta lo justo para que entre
-                   entera; si algun texto no cabe, preferimos que baje de
-                   linea antes que perder una columna. */
-                @media print {
-                    .tp-scroll { overflow: visible !important; }
-                    .tp-tabla { font-size: 12px; table-layout: auto; }
-                    .tp-tabla th { padding: 5px 5px; }
-                    .tp-tabla td { padding: 6px 5px; }
-                    .tp-tabla th, .tp-tabla td { white-space: normal; }
-                }
-            `}</style>
         </div>
     );
 };

@@ -3,6 +3,7 @@ import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { Save, Type, ArrowLeft } from 'lucide-react';
 import Button from '../../../Button';
+import './TextStudio.css';
 
 const TextStudio = ({ isOpen, onClose, data, onSave }) => {
     const [content, setContent] = useState('');
@@ -106,25 +107,6 @@ const TextStudio = ({ isOpen, onClose, data, onSave }) => {
             </div>
 
 
-            <style>{`
-                @keyframes studioFadeIn { from { opacity:0; transform: scale(1.05); } to { opacity:1; transform: scale(1); } }
-                .quill { border: none !important; font-family: 'Outfit', sans-serif !important; flex: 1; display: flex; flexDirection: column; min-height: 0; }
-                .ql-toolbar { border: none !important; border-bottom: 1px solid #f1f5f9 !important; padding: 10px 0 !important; margin-bottom: 20px !important; display: flex !important; flex-wrap: wrap !important; gap: 8px !important; flex-shrink: 0; }
-                .ql-formats { margin-right: 0 !important; display: flex !important; flex-wrap: wrap !important; gap: 4px !important; }
-                .ql-container { border: none !important; font-size: 18px !important; color: #1e1b4b !important; flex: 1; display: flex; flex-direction: column; min-height: 0; }
-                .ql-editor { padding: 0 !important; padding-right: 10px !important; flex: 1; overflow-y: auto !important; }
-                .ql-editor.ql-blank::before { color: #cbd5e1 !important; font-style: normal !important; left: 0 !important; }
-                
-                /* Estilizar scrollbar interno del editor */
-                .ql-editor::-webkit-scrollbar { width: 6px; }
-                .ql-editor::-webkit-scrollbar-track { background: transparent; }
-                .ql-editor::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
-
-                /* Utilidades Mobile */
-                @media (max-width: 600px) {
-                    .hide-on-mobile { display: none !important; }
-                }
-            `}</style>
         </div>
     );
 };

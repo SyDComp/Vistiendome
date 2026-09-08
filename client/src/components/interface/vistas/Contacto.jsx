@@ -390,7 +390,7 @@ const Contacto = () => {
 
                 {formData.transporte?.toUpperCase().includes('RETIRO') ? (
                     <div className="form-group">
-                        <p style={{ margin: 0, fontSize: '13px', color: '#0369a1', background: '#e0f2fe', padding: '12px 14px', borderRadius: '12px', border: '1px solid #bae6fd' }}>
+                        <p className="contacto-aviso contacto-aviso--info">
                             📍 <strong>Retiro presencial en Tienda / Taller en San Carlos, Región de Ñuble.</strong> Te contactaremos por WhatsApp con la dirección exacta y horarios disponibles para la entrega.
                         </p>
                     </div>
@@ -407,7 +407,7 @@ const Contacto = () => {
                             </select>
                         </div>
 
-                        <div className="form-row" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%'}}>
+                        <div className="form-row form-row--dos">
                             <div className="form-group">
                                 <label><MapPin size={16} /> Región</label>
                                 <select 
@@ -437,7 +437,7 @@ const Contacto = () => {
 
                         {formData.tipo_despacho === 'SUCURSAL' ? (
                             <div className="form-group">
-                                <p style={{ margin: 0, fontSize: '13px', color: '#64748b', background: '#f8fafc', padding: '12px 14px', borderRadius: '12px' }}>
+                                <p className="contacto-aviso">
                                     Retiras en una sucursal de <strong>{formData.transporte}</strong>. Coordinarás la sucursal exacta por WhatsApp según tu comuna.
                                 </p>
                             </div>
@@ -457,7 +457,7 @@ const Contacto = () => {
 
                 {tipoContacto === 'grupo' && (
                     <>
-                        <div className="form-row" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%'}}>
+                        <div className="form-row form-row--dos">
                             <div className="form-group">
                                 <label><Users size={16} /> Tipo de Grupo</label>
                                 <select 
@@ -542,7 +542,7 @@ const Contacto = () => {
                         </div>
                         
                         <div className="contact-form-footer">
-                            <Button type="submit" variant="primary" disabled={status === 'sending'} style={{width: '100%'}}>
+                            <Button type="submit" variant="primary" disabled={status === 'sending'} className="contacto-enviar">
                                 {status === 'sending' ? 'Enviando...' : 'Enviar Solicitud'}
                             </Button>
                             
@@ -593,15 +593,7 @@ const Contacto = () => {
                     </div>
                 </div>
 
-                <div className="contacto-social-links" style={{ 
-                    marginTop: '60px', 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    gap: '30px',
-                    borderTop: '1px solid #f1f5f9',
-                    paddingTop: '40px',
-                    flexWrap: 'wrap'
-                }}>
+                <div className="contacto-social-links">
                     {social.facebook && (
                         <a href={social.facebook} target="_blank" rel="noopener noreferrer" className="social-link-item">
                             <Globe size={24} /> <span>Facebook</span>

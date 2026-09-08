@@ -96,7 +96,6 @@
     padding: 0.5rem 0.625rem;
     border-radius: var(--arm-radio);
     border: 1px solid var(--arm-campo);
-    box-sizing: border-box;
     /* Debajo de 16px de texto, iOS hace zoom solo al enfocar el campo y deja la
        página torcida. 1rem son esos 16px salvo que el usuario pida otra cosa. */
     font-size: max(1rem, var(--arm-txt-md));

@@ -27,7 +27,6 @@
     animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     border: 1px solid rgba(255, 255, 255, 0.8);
     position: relative;
-    box-sizing: border-box;
     overflow: hidden;
 }
 
@@ -86,7 +85,6 @@
     font-size: 1rem;
     flex-grow: 1;
     width: 100%;
-    box-sizing: border-box;
 }
 
 .g-modal-footer {

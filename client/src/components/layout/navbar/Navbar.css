@@ -1,0 +1,17 @@
+/*
+ * Cómo se ve Navbar.
+ *
+ * Vive acá y no dentro del componente: un `<style>` en el JSX mezcla decidir
+ * QUÉ se muestra con decidir CÓMO se ve, se vuelve a insertar por cada
+ * instancia del componente en pantalla, y dentro de una plantilla de
+ * JavaScript una comilla invertida en un comentario rompe el archivo entero.
+ */
+
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+@media (max-width: 1024px) {
+    .navbar-actions { gap: 8px; }
+}

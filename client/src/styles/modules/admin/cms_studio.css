@@ -663,6 +663,6 @@ input[type=range].cms-studio-range::-webkit-slider-thumb {
 
 @media (max-width: 950px) {
     .dt-studio-layout { flex-direction: column; overflow: hidden; }
-    .dt-studio-sidebar { width: 100%; flex: 1; border-right: none; border-bottom: none; padding: 20px; box-sizing: border-box; }
-    .dt-studio-workspace { width: 100%; flex: 1; padding: 20px; box-sizing: border-box; }
+    .dt-studio-sidebar { width: 100%; flex: 1; border-right: none; border-bottom: none; padding: 20px;}
+    .dt-studio-workspace { width: 100%; flex: 1; padding: 20px;}
 }

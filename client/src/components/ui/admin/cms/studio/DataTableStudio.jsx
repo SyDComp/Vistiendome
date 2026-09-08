@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, Save, Palette, Type, Layout, Grid3X3, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Settings, Monitor } from 'lucide-react';
 import Button from '../../../Button';
+import './DataTableStudio.css';
 
 const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
     const [activeCell, setActiveCell] = useState(null); // { rowIndex, header }
@@ -344,14 +345,6 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                 </div>
             )}
 
-            <style>{`
-                @keyframes studioFadeIn { from { opacity:0; transform: scale(1.05); } to { opacity:1; transform: scale(1); } }
-                .col-actions { opacity: 0.3; transition: opacity 0.2s; }
-                th:hover .col-actions { opacity: 1; }
-                .row-actions { opacity: 0.3; transition: opacity 0.2s; }
-                tr:hover .row-actions { opacity: 1; }
-                textarea { resize: none; overflow: hidden; }
-            `}</style>
         </div>
     );
 };

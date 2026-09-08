@@ -1,0 +1,155 @@
+/*
+ * Cómo se ve CheckoutForm.
+ *
+ * Vive acá y no dentro del componente: un `<style>` en el JSX mezcla decidir
+ * QUÉ se muestra con decidir CÓMO se ve, se vuelve a insertar por cada
+ * instancia del componente en pantalla, y dentro de una plantilla de
+ * JavaScript una comilla invertida en un comentario rompe el archivo entero.
+ */
+
+.checkout-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 2100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.checkout-modal-card {
+    width: 100%;
+    max-width: 550px;
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.checkout-header {
+    padding: 24px;
+    background: #f8fafc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+    flex-shrink: 0;
+    width: 100%;
+}
+.checkout-header h2 { margin: 0; font-size: 1.25rem; font-weight: 800; color: #1e1b4b; }
+.btn-close-modal { background: none; border: none; cursor: pointer; color: #94a3b8; }
+
+.checkout-form-body { 
+    padding: 24px; 
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
+}
+.form-intro { font-size: 14px; color: #64748b; margin-bottom: 24px; line-height: 1.5; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%;}
+.input-group.full { grid-column: span 2; }
+.input-group { display: flex; flex-direction: column; gap: 8px; width: 100%;}
+.input-group label { font-size: 13px; font-weight: 700; color: #1e1b4b; display: flex; align-items: center; gap: 6px; }
+.input-group input {
+    height: 48px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+}
+.input-group input:focus, .styled-select:focus { outline: none; border-color: #1e1b4b; box-shadow: 0 0 0 3px rgba(30, 27, 75, 0.05); }
+.input-group input.input-error { border-color: #ef4444; background: #fffafb; }
+.error-text { font-size: 12px; color: #ef4444; font-weight: 600; }
+/* Dos opciones que se excluyen y hay que comparar de un
+   vistazo: botones, no un desplegable que las esconde. */
+.modo-entrega { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.modo-op {
+    display: flex; flex-direction: column; gap: 2px; align-items: flex-start;
+    padding: 12px 14px; border-radius: 12px; border: 1.5px solid #e2e8f0;
+    background: #fff; cursor: pointer; text-align: left; font: inherit;
+}
+.modo-op strong { font-size: 14px; color: #1e1b4b; }
+.modo-op span { font-size: 12px; color: #64748b; line-height: 1.3; }
+.modo-op.activa { border-color: #8f0653; background: #fdf2f8; }
+.modo-op.activa strong { color: #8f0653; }
+@media (max-width: 520px) { .modo-entrega { grid-template-columns: 1fr; } }
+
+.styled-select {
+    height: 48px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    font-size: 14px;
+    background-color: white;
+    color: #1e1b4b;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+}
+
+.checkout-footer-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+}
+.btn-cancel {
+    flex: 1;
+    height: 52px;
+    background: #f1f5f9;
+    color: #475569;
+    border: none;
+    border-radius: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.checkout-fallo {
+    display: flex; flex-direction: column; gap: 4px;
+    margin: 0 0 12px; padding: 12px 14px; border-radius: 12px;
+    background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
+    font-size: 13px; line-height: 1.4;
+}
+.checkout-fallo strong { font-size: 13px; }
+.checkout-fallo span { color: #b91c1c; }
+.btn-submit-whatsapp {
+    flex: 2;
+    height: 52px;
+    background: #1e1b4b;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(30, 27, 75, 0.2);
+}
+.btn-submit-whatsapp:hover { background: #2d2a6e; }
+
+@media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .input-group.full { grid-column: span 1; }
+}
+
+/* Safari en iOS hace zoom automático al enfocar un campo con
+   fuente menor a 16px: la página salta justo en el checkout y
+   la clienta queda sin saber cómo volver. Solo en pantallas
+   táctiles, para no alterar el diseño de escritorio. */
+@media (max-width: 768px) {
+    .input-group input,
+    .styled-select,
+    .checkout-form-body textarea {
+        font-size: 16px;
+    }
+}
+
+.slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

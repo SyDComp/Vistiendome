@@ -1,0 +1,12 @@
+/*
+ * Cómo se ve ShippingLabelPrinter.
+ *
+ * Vive acá y no dentro del componente: un `<style>` en el JSX mezcla decidir
+ * QUÉ se muestra con decidir CÓMO se ve, se vuelve a insertar por cada
+ * instancia del componente en pantalla, y dentro de una plantilla de
+ * JavaScript una comilla invertida en un comentario rompe el archivo entero.
+ */
+
+.shipping-label-generator-wrap, .shipping-label-generator-wrap * {
+    box-sizing: border-box !important;
+}

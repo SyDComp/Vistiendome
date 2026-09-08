@@ -7,6 +7,7 @@ import { cambiarEstadoOrden, repetirOrden } from '../../../../lib/api/endpoints'
 import TablaPrendas from './TablaPrendas';
 import { imprimirOrdenCorte } from './imprimirOrdenCorte';
 import useCaracteristicasCorte from '../../../../hooks/useCaracteristicasCorte';
+import './OrdenCorteDetalle.css';
 
 export const ESTADOS = [
     { value: 'PENDIENTE', label: 'Pendiente', color: '#64748b', bg: '#f1f5f9' },
@@ -159,28 +160,6 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
                 vacio="Esta orden no tiene piezas."
             />
 
-            <style>{`
-                .oc-top { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:16px; }
-                .oc-btn-volver { display:flex; align-items:center; gap:6px; background:#f1f5f9; border:none; padding:8px 14px; border-radius:10px; font-weight:700; font-size:13px; color:#475569; cursor:pointer; }
-                .oc-barra { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; margin-bottom:14px; }
-                .oc-agrupar { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
-                .oc-agrupar button { display:flex; flex-direction:column; align-items:flex-start; gap:2px; background:#fff; border:1.5px solid #e2e8f0; border-radius:10px; padding:8px 14px; cursor:pointer; font-size:13px; font-weight:800; color:#475569; text-align:left; }
-                .oc-agrupar button small { font-weight:600; font-size:11px; color:#94a3b8; }
-                .oc-agrupar button.activo { border-color:#1e1b4b; background:#1e1b4b; color:#fff; }
-                .oc-agrupar button.activo small { color:#c7d2fe; }
-                .oc-estado { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:5px 12px; border-radius:20px; }
-                .oc-select { height:36px; padding:0 10px; border:1px solid #e2e8f0; border-radius:8px; background:#fff; font-size:13px; }
-                .oc-btn { display:flex; align-items:center; gap:6px; background:#fff; border:1px solid #e2e8f0; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:700; color:#334155; cursor:pointer; }
-                .oc-btn:hover { background:#eef2ff; }
-                .oc-nota-rep { font-size:12px; color:#64748b; margin-left:auto; }
-                .oc-aviso { font-size:13px; color:#15803d; background:#f0fdf4; border:1px solid #bbf7d0; padding:10px 14px; border-radius:10px; margin:0 0 14px; }
-                .oc-notas-vista { font-size:13px; color:#475569; background:#f8fafc; padding:10px 14px; border-radius:10px; margin:0 0 14px; }
-                .oc-origen { font-size:11px; font-weight:700; padding:3px 9px; border-radius:6px; }
-                .oc-origen.stock { background:#eef2ff; color:#4338ca; }
-                .oc-enlace { border:none; font:inherit; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
-                .oc-enlace:disabled { cursor:default; text-decoration:none; opacity:.7; }
-                .oc-origen.pedido { background:#f1f5f9; color:#475569; }
-            `}</style>
         </div>
     );
 };

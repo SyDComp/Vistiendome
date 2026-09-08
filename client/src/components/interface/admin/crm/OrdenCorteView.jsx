@@ -6,6 +6,7 @@ import { useNotification } from '../../../../context/NotificationContext';
 import { getOrdenesCorte, eliminarOrden } from '../../../../lib/api/endpoints';
 import OrdenCorteForm from './OrdenCorteForm';
 import OrdenCorteDetalle, { ESTADOS, estiloEstado } from './OrdenCorteDetalle';
+import './OrdenCorteView.css';
 
 /**
  * Órdenes de corte: lista, alta y detalle.
@@ -154,26 +155,6 @@ const OrdenCorteView = () => {
                 </table>
             )}
 
-            <style>{`
-                .oc-encabezado { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:18px; }
-                .oc-acciones { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-                .oc-select { height:40px; padding:0 12px; border:1px solid #e2e8f0; border-radius:10px; background:#fff; font-size:13px; }
-                .oc-btn-nueva { display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#8f0653,#d946ef); color:#fff; border:none; padding:11px 18px; border-radius:10px; font-weight:800; font-size:13px; cursor:pointer; box-shadow:0 4px 12px rgba(143,6,83,.25); }
-                .oc-vacio { padding:56px 20px; text-align:center; color:#64748b; font-size:14px; }
-                .oc-vacio strong { display:block; color:#334155; font-size:16px; margin-bottom:8px; }
-                .oc-vacio p { max-width:520px; margin:0 auto 18px; line-height:1.6; font-size:13px; }
-                .oc-tabla { width:100%; border-collapse:collapse; font-size:13px; }
-                .oc-tabla th { text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:#64748b; border-bottom:2px solid #1e1b4b; padding:8px 6px; }
-                .oc-tabla td { padding:11px 6px; border-bottom:1px solid #e2e8f0; }
-                .oc-tabla .num { text-align:right; }
-                .oc-fila { cursor:pointer; }
-                .oc-fila:hover { background:#f8fafc; }
-                .oc-numero { font-weight:800; color:#1e1b4b; }
-                .oc-estado { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:4px 10px; border-radius:20px; }
-                .oc-notas { color:#64748b; font-size:12px; }
-                .oc-badge-rep { margin-left:8px; font-size:10px; font-weight:800; color:#4338ca; background:#eef2ff; padding:2px 7px; border-radius:6px; }
-                .oc-quitar { background:none; border:none; color:#dc2626; cursor:pointer; padding:4px; }
-            `}</style>
         </div>
     );
 };

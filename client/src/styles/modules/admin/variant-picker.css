@@ -188,7 +188,6 @@
     font-size: 15px;
     background: #f8fafc;
     transition: all 0.2s;
-    box-sizing: border-box;
 }
 
 .variant-picker-attr-header {

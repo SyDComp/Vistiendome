@@ -1,6 +1,7 @@
 import React from 'react';
 import TablaPrendas from './TablaPrendas';
 import { formatCurrency } from '../../../../utils/cartUtils';
+import './ItemsPedidoTable.css';
 
 /**
  * Las prendas de un pedido: planilla para el taller (con precios) o comprobante
@@ -46,14 +47,6 @@ const ItemsPedidoTable = ({ items = [], mostrarPrecios = true }) => {
                 </div>
             )}
 
-            <style>{`
-                .items-pedido-total {
-                    display: flex; justify-content: space-between; align-items: baseline;
-                    margin-top: 16px; padding-top: 12px; border-top: 2px solid #000;
-                    font-size: 14px; font-weight: 800;
-                }
-                .items-pedido-total strong { font-size: 16px; }
-            `}</style>
         </div>
     );
 };

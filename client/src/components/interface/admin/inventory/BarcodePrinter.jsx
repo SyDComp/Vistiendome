@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import DOMPurify from 'dompurify';
+import './BarcodePrinter.css';
 import {
     Printer, Search, ChevronDown, ChevronRight, CheckSquare, Square,
     Layers, Settings2, RefreshCw, Maximize2, X, Info, BarChart2,
@@ -863,12 +864,6 @@ const BarcodePrinter = () => {
                 </div>
             )}
 
-            <style>{`
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-            `}</style>
         </div>
     );
 };

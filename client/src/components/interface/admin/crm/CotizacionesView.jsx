@@ -11,6 +11,7 @@ import { getShippingColor } from '../../../../utils/shippingColors';
 import { estadoDeProduccion, TONOS } from '../../../../utils/produccion';
 import { FileText, Calendar, MessageCircle, MapPin, Printer, Plus } from 'lucide-react';
 import AdminCotizacionModal from './AdminCotizacionModal';
+import './CotizacionesView.css';
 
 /**
  * Los estados de un pedido, con su significado, en un solo lugar.
@@ -359,13 +360,6 @@ const CotizacionesView = () => {
                     </div>
                 ))}
             </div>
-            <style>{`
-                .cot-glosario { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px 20px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px 18px; margin-bottom:18px; }
-                .cot-glosario-item { display:flex; align-items:flex-start; gap:9px; }
-                .cot-glosario-punto { width:9px; height:9px; border-radius:50%; flex-shrink:0; margin-top:5px; }
-                .cot-glosario-nombre { display:block; font-size:11px; font-weight:800; letter-spacing:.4px; color:#1e293b; }
-                .cot-glosario-texto { display:block; font-size:12px; color:#64748b; line-height:1.4; margin-top:1px; }
-            `}</style>
 
             {/* Los nombres son los que FilterBar declara: `onSearchChange` y
                 `searchPlaceholder`. Estaban escritos como `onSearch` y

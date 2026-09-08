@@ -149,7 +149,6 @@
     background-color: #f8fafc;
     transition: all 0.2s;
     resize: vertical;
-    box-sizing: border-box;
 }
 
 .product-form-select-wrapper {
@@ -171,7 +170,6 @@
     background-color: #f8fafc;
     font-weight: 600;
     outline: none;
-    box-sizing: border-box;
 }
 
 .product-hub-wrapper {

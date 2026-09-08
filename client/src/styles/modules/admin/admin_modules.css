@@ -54,7 +54,6 @@
     background-color: #f8fafc;
     font-family: 'Inter', sans-serif;
     overflow: hidden;
-    box-sizing: border-box;
 }
 .admin-layout.mobile {
     flex-direction: column;
@@ -314,7 +313,6 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-sizing: border-box;
 }
 .admin-main.desktop {
     height: 100%;
@@ -329,7 +327,6 @@
     background-color: #f8fafc;
     display: flex;
     flex-direction: column;
-    box-sizing: border-box;
 }
 .admin-content-wrapper.desktop {
     padding: 30px 40px;
@@ -346,7 +343,6 @@
     max-width: 1400px;
     width: 100%;
     margin: 0 auto;
-    box-sizing: border-box;
 }
 
 /* ==========================================================================
@@ -578,7 +574,6 @@
     outline: none;
     transition: border-color 0.2s;
     background-color: #fff;
-    box-sizing: border-box;
 }
 .category-form-input:focus {
     border-color: #8f0653;
@@ -893,7 +888,6 @@
     background-color: #f8fafc;
     transition: all 0.2s;
     resize: vertical;
-    box-sizing: border-box;
 }
 
 .product-form-select-wrapper {
@@ -915,7 +909,6 @@
     background-color: #f8fafc;
     font-weight: 600;
     outline: none;
-    box-sizing: border-box;
 }
 
 .product-hub-wrapper {
@@ -1298,7 +1291,6 @@
     border-radius: 12px;
     border: 1px solid #cbd5e1;
     outline: none;
-    box-sizing: border-box;
 }
 .logistics-modal-textarea {
     width: 100%;
@@ -1308,7 +1300,6 @@
     outline: none;
     height: 80px;
     resize: none;
-    box-sizing: border-box;
 }
 
 .logistics-modal-actions {
@@ -2369,7 +2360,6 @@
     outline: none;
     transition: all 0.2s;
     background: var(--bg-surface);
-    box-sizing: border-box;
 }
 
 .library-picker-search-input:focus {
@@ -3004,7 +2994,6 @@
     font-size: 15px;
     background: #f8fafc;
     transition: all 0.2s;
-    box-sizing: border-box;
 }
 
 .variant-picker-attr-header {
@@ -3709,7 +3698,6 @@
     outline: none;
     background: #f8fafc;
     color: #1e293b;
-    box-sizing: border-box;
 }
 
 .barcode-printer-list {
@@ -4255,7 +4243,6 @@
     display: grid;
     gap: 0;
     flex-shrink: 0;
-    box-sizing: border-box;
 }
 
 .barcode-printer-label {
@@ -4263,7 +4250,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-sizing: border-box;
     overflow: hidden;
     padding: 1px;
 }
@@ -5486,8 +5472,8 @@
 /* ==========================================================================
    WORKSPACE MODULE
    ========================================================================== */
-.workspace-layout { height: 100%; display: flex; flex-direction: column; animation: fadeIn 0.5s ease; overflow-y: auto; overflow-x: hidden; padding: 20px; box-sizing: border-box; }
-.workspace-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+.workspace-layout { height: 100%; display: flex; flex-direction: column; animation: fadeIn 0.5s ease; overflow-y: auto; overflow-x: hidden; padding: 20px;}
+.workspace-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; max-width: 900px; margin: 0 auto; width: 100%;}
 .workspace-icon-wrapper { width: 72px; height: 72px; background: linear-gradient(135deg, #8f0653 0%, #4c052c 100%); border-radius: 24px; display: flex; align-items: center; justify-content: center; margin-bottom: 32px; color: #fff; box-shadow: 0 20px 40px rgba(143, 6, 83, 0.25); transform: rotate(-5deg); }
 .workspace-title { font-size: 40px; font-weight: 900; color: #1e1b4b; margin-bottom: 16px; text-align: center; letter-spacing: -0.5px; }
 .workspace-subtitle { color: #64748b; font-size: 20px; line-height: 1.6; text-align: center; margin-bottom: 48px; max-width: 600px; }

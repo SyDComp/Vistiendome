@@ -1,0 +1,15 @@
+/*
+ * Cómo se ve ItemsPedidoTable.
+ *
+ * Vive acá y no dentro del componente: un `<style>` en el JSX mezcla decidir
+ * QUÉ se muestra con decidir CÓMO se ve, se vuelve a insertar por cada
+ * instancia del componente en pantalla, y dentro de una plantilla de
+ * JavaScript una comilla invertida en un comentario rompe el archivo entero.
+ */
+
+.items-pedido-total {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-top: 16px; padding-top: 12px; border-top: 2px solid #000;
+    font-size: 14px; font-weight: 800;
+}
+.items-pedido-total strong { font-size: 16px; }

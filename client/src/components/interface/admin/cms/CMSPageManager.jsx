@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import './CMSPageManager.css';
 import { 
     Plus, 
     GripVertical, 
@@ -506,9 +507,6 @@ const CMSPageManager = ({
                             />
                         </div>
                     </div>
-                    <style>{`
-                        @keyframes previewFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-                    `}</style>
                 </div>
             )}
 
@@ -518,12 +516,6 @@ const CMSPageManager = ({
             {selectedSection && <TextStudio isOpen={isTextOpen} onClose={() => setIsTextOpen(false)} data={selectedSection} onSave={handleUpdate} />}
             <ConfirmModal isOpen={confirmModal.isOpen} onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })} onConfirm={confirmModal.onConfirm} title={confirmModal.title} message={confirmModal.message} variant={confirmModal.variant} confirmText={confirmModal.confirmText} />
 
-            <style>{`
-                .dropdown-content { display: none; position: absolute; right: 0; background: #fff; min-width: 200px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 16px; padding: 8px; z-index: 100; border: 1px solid #f1f5f9; }
-                .dropdown:hover .dropdown-content { display: block; }
-                .dropdown-content button { width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; font-size: 13px; font-weight: 700; color: #1e1b4b; cursor: pointer; display: flex; alignItems: center; gap: 10px; border-radius: 10px; }
-                .dropdown-content button:hover { background: #fdf2f8; color: #8f0653; }
-            `}</style>
         </div>
     );
 };

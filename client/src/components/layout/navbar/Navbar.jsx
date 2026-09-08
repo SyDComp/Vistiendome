@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import CartButton from '../../interface/cart/CartButton';
 import InstantSearch from './InstantSearch';
 import { useScrollLock } from '../../../hooks/useScrollLock';
+import './Navbar.css';
 
 const Navbar = ({ links = [], vistaActual }) => { // links are passed from Home
     const navigate = useNavigate();
@@ -111,16 +112,6 @@ const Navbar = ({ links = [], vistaActual }) => { // links are passed from Home
                 </nav>
             </header>
 
-            <style>{`
-                .navbar-actions {
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                }
-                @media (max-width: 1024px) {
-                    .navbar-actions { gap: 8px; }
-                }
-            `}</style>
 
             {/* Mobile Menu Drawer - MOVED OUTSIDE HEADER */}
             <div className={`nav-menu-mobile ${isMenuOpen ? 'open' : ''}`}>

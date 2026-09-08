@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { getYoutubeVideoId } from '../../utils/youtube';
+import './VideoYoutube.css';
 
 /**
  * Un video de YouTube que NO carga YouTube hasta que alguien lo quiere ver.
@@ -37,7 +38,6 @@ const VideoYoutube = ({ url, titulo = 'Video', className = '' }) => {
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                 />
-                <style>{ESTILOS}</style>
             </div>
         );
     }
@@ -63,23 +63,9 @@ const VideoYoutube = ({ url, titulo = 'Video', className = '' }) => {
                     </svg>
                 </span>
             </button>
-            <style>{ESTILOS}</style>
         </div>
     );
 };
 
-const ESTILOS = `
-    .yt-marco { position: relative; width: 100%; aspect-ratio: 16/9; border-radius: 14px; overflow: hidden; background: #000; }
-    .yt-marco iframe { width: 100%; height: 100%; border: 0; display: block; }
-    .yt-fachada { all: unset; display: block; width: 100%; height: 100%; cursor: pointer; position: relative; }
-    .yt-fachada img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .yt-play {
-        position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-        transition: opacity .2s;
-    }
-    .yt-play svg { filter: drop-shadow(0 2px 8px rgba(0,0,0,.4)); opacity: .92; }
-    .yt-fachada:hover .yt-play svg, .yt-fachada:focus-visible .yt-play svg { opacity: 1; transform: scale(1.06); transition: transform .15s; }
-    .yt-fachada:focus-visible { outline: 3px solid #8f0653; outline-offset: 2px; }
-`;
 
 export default VideoYoutube;

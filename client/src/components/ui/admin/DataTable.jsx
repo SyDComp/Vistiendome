@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './DataTable.css';
 
 /**
  * DataTable — Componente de tabla genérica y reutilizable.
@@ -155,15 +156,6 @@ const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {
                 </div>
             )}
 
-            <style>{`
-                @keyframes spin { to { transform: rotate(360deg); } }
-                .table-row-hover:hover {
-                    background-color: #fafafa !important;
-                }
-                .table-row-hover:hover .actions-cell {
-                    background-color: #fafafa !important;
-                }
-            `}</style>
         </div>
     );
 };

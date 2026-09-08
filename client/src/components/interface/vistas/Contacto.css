@@ -58,7 +58,6 @@
     max-height: 90vh;
     display: flex;
     flex-direction: column;
-    box-sizing: border-box;
 }
 
 .contact-modal-header {
@@ -69,7 +68,6 @@
     align-items: center;
     border-bottom: 1px solid #e2e8f0;
     flex-shrink: 0;
-    box-sizing: border-box;
     width: 100%;
 }
 .prendas-pedidas { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -114,7 +112,6 @@
     background: #fff;
     border-radius: 0.875rem;
     padding: 1rem;
-    box-sizing: border-box;
 }
 
 /* En un telefono no hay ancho que regalar: el modal ocupa la
@@ -141,14 +138,12 @@
     flex-direction: column;
     overflow: hidden;
     width: 100%;
-    box-sizing: border-box;
 }
 
 .contact-form-body {
     padding: 24px;
     overflow-y: auto;
     overflow-x: hidden;
-    box-sizing: border-box;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -160,7 +155,6 @@
     background: white;
     border-top: 1px solid #e2e8f0;
     flex-shrink: 0;
-    box-sizing: border-box;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -199,7 +193,6 @@
     border: 1px solid #e2e8f0;
     font-size: 14px;
     transition: border-color 0.2s, box-shadow 0.2s;
-    box-sizing: border-box;
     width: 100%;
     background: white;
 }
@@ -213,4 +206,45 @@
     outline: none;
     border-color: #1e1b4b;
     box-shadow: 0 0 0 3px rgba(30, 27, 75, 0.05);
+}
+
+/* Lo que estaba escrito como estilos sueltos dentro del JSX.
+   Las dos filas de dos columnas eran la misma declaración copiada; ahora es una
+   clase. Medidas en `rem` para que crezcan con la letra del usuario. */
+.contacto-aviso {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: #64748b;
+    background: #f8fafc;
+    padding: 0.75rem 0.875rem;
+    border-radius: 0.75rem;
+}
+.contacto-aviso--info {
+    color: #0369a1;
+    background: #e0f2fe;
+    border: 1px solid #bae6fd;
+}
+
+.form-row--dos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    width: 100%;
+}
+/* En un teléfono dos columnas dejan campos de menos de la mitad del ancho:
+   ilegibles y difíciles de tocar. Caen a una sola. */
+@media (max-width: 37.5rem) {
+    .form-row--dos { grid-template-columns: 1fr; }
+}
+
+.contacto-enviar { width: 100%; }
+
+.contacto-social-links {
+    margin-top: 3.75rem;
+    display: flex;
+    justify-content: center;
+    gap: 1.875rem;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 2.5rem;
+    flex-wrap: wrap;
 }

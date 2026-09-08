@@ -9,6 +9,7 @@ import Imagen from '../Imagen';
 import { useScrollLock } from '../../../hooks/useScrollLock';
 import { useSettings } from '../../../context/SettingsContext';
 import { getShippingColor } from '../../../utils/shippingColors';
+import './DetailDrawer.css';
 
 const API_BASE = '/api/v1/admin/catalog';
 
@@ -1204,21 +1205,6 @@ const DetailDrawer = ({
 
     return (
         <div className="detail-drawer-overlay" style={{ display: (isOpen || isVisible) ? 'flex' : 'none' }}>
-            <style>{`
-                .skeleton {
-                    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-                    background-size: 200% 100%;
-                    animation: skeleton-blink 1.5s infinite linear;
-                }
-                @keyframes skeleton-blink {
-                    0% { background-position: 200% 0; }
-                    100% { background-position: -200% 0; }
-                }
-                @keyframes slideUp {
-                    from { transform: translateY(20px); opacity: 0; }
-                    to { transform: translateY(0); opacity: 1; }
-                }
-            `}</style>
 
             <div 
                 onClick={onClose}
@@ -2019,13 +2005,6 @@ const DetailDrawer = ({
                 />
             )}
 
-            <style>{`
-                @keyframes fadeIn_drawer { from { opacity: 0; } to { opacity: 1; } }
-                @keyframes modalOpen_drawer { 
-                    from { transform: scale(0.95) translateY(20px); opacity: 0; } 
-                    to { transform: scale(1) translateY(0); opacity: 1; } 
-                }
-            `}</style>
         </div>
     );
 };

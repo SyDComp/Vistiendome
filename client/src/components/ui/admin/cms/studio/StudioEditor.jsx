@@ -7,6 +7,7 @@ import StudioCanvas from './StudioCanvas';
 import StudioProperties from './StudioProperties';
 import MediaGallery from "../../../../interface/admin/media/MediaGallery";
 import LibraryPicker from "../../../../interface/admin/inventory/LibraryPicker";
+import './StudioEditor.css';
 
 /**
  * StudioEditor — Orquestador
@@ -244,12 +245,6 @@ const StudioEditor = ({ isOpen, onClose, data, onSave, mode = 'single' }) => {
                 </div>
             )}
 
-            <style>{`
-                @keyframes studioFadeIn { from { opacity:0; } to { opacity:1; } }
-                @keyframes studioSlideUp { from { opacity:0; transform:translate(-50%, 20px); } to { opacity:1; transform:translate(-50%, 0); } }
-                input[type=range] { -webkit-appearance:none; background:rgba(255,255,255,0.1); height:3px; border-radius:2px; width:100%; cursor:pointer; }
-                input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; height:14px; width:14px; border-radius:50%; background:#8f0653; cursor:pointer; box-shadow:0 0 8px rgba(143,6,83,0.5); }
-            `}</style>
         </div>
     );
 };

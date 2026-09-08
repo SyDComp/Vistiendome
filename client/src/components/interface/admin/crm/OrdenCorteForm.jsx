@@ -6,6 +6,7 @@ import { getPiezasPendientes, crearOrdenCorte } from '../../../../lib/api/endpoi
 import SelectorVariantes from './SelectorVariantes';
 import TablaPrendas from './TablaPrendas';
 import useCaracteristicasCorte from '../../../../hooks/useCaracteristicasCorte';
+import './OrdenCorteForm.css';
 
 /**
  * Arma una orden de corte.
@@ -181,24 +182,6 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
                 </button>
             </div>
 
-            <style>{`
-                .oc-form-top { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
-                .oc-btn-volver { display:flex; align-items:center; gap:6px; background:#f1f5f9; border:none; padding:8px 14px; border-radius:10px; font-weight:700; font-size:13px; color:#475569; cursor:pointer; }
-                .oc-bloque { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:20px; margin-bottom:16px; }
-                .oc-bloque h3 { margin:0 0 4px; font-size:15px; font-weight:800; color:#1e1b4b; }
-                .oc-hint { margin:0 0 14px; font-size:13px; color:#64748b; line-height:1.5; }
-                .oc-vacio { padding:20px; text-align:center; color:#64748b; font-size:13px; background:#f8fafc; border-radius:10px; }
-                .oc-buscador { width:100%; height:42px; padding:0 14px; border:1px solid #e2e8f0; border-radius:10px; font-size:14px; margin-bottom:10px; }
-                .oc-resultados { display:flex; flex-direction:column; gap:4px; margin-bottom:12px; max-height:220px; overflow-y:auto; }
-                .oc-resultado { display:flex; align-items:center; gap:8px; text-align:left; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 10px; font-size:13px; cursor:pointer; color:#334155; }
-                .oc-resultado:hover { background:#eef2ff; }
-                .oc-cantidad { width:70px; height:34px; text-align:right; padding:0 8px; border:1px solid #e2e8f0; border-radius:8px; }
-                .oc-quitar { background:none; border:none; color:#dc2626; cursor:pointer; padding:4px; }
-                .oc-notas { width:100%; padding:10px 12px; border:1px solid #e2e8f0; border-radius:10px; font-size:13px; font-family:inherit; resize:vertical; }
-                .oc-form-acciones { display:flex; justify-content:flex-end; }
-                .oc-btn-primario { display:flex; align-items:center; gap:8px; background:#1e1b4b; color:#fff; border:none; padding:12px 22px; border-radius:12px; font-weight:800; font-size:14px; cursor:pointer; }
-                .oc-btn-primario:disabled { opacity:.5; cursor:not-allowed; }
-            `}</style>
         </div>
     );
 };

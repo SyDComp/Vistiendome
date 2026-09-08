@@ -1,0 +1,19 @@
+/*
+ * Cómo se ve VideoYoutube.
+ *
+ * Vive acá y no como una plantilla dentro del componente: el CSS no cambia con
+ * ningún dato, así que no tiene por qué pasar por JavaScript ni volver a
+ * insertarse cada vez que el componente se pinta.
+ */
+
+.yt-marco { position: relative; width: 100%; aspect-ratio: 16/9; border-radius: 14px; overflow: hidden; background: #000; }
+.yt-marco iframe { width: 100%; height: 100%; border: 0; display: block; }
+.yt-fachada { all: unset; display: block; width: 100%; height: 100%; cursor: pointer; position: relative; }
+.yt-fachada img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.yt-play {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    transition: opacity .2s;
+}
+.yt-play svg { filter: drop-shadow(0 2px 8px rgba(0,0,0,.4)); opacity: .92; }
+.yt-fachada:hover .yt-play svg, .yt-fachada:focus-visible .yt-play svg { opacity: 1; transform: scale(1.06); transition: transform .15s; }
+.yt-fachada:focus-visible { outline: 3px solid #8f0653; outline-offset: 2px; }

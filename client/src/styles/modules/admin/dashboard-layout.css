@@ -6,7 +6,6 @@
     background-color: #f8fafc;
     font-family: 'Inter', sans-serif;
     overflow: hidden;
-    box-sizing: border-box;
 }
 .admin-layout.mobile {
     flex-direction: column;
@@ -266,7 +265,6 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-sizing: border-box;
 }
 .admin-main.desktop {
     height: 100%;
@@ -292,7 +290,6 @@
     background-color: #f8fafc;
     display: flex;
     flex-direction: column;
-    box-sizing: border-box;
 }
 .admin-content-wrapper.desktop {
     padding: 30px 40px;
@@ -311,5 +308,4 @@
     max-width: 1400px;
     width: 100%;
     margin: 0 auto;
-    box-sizing: border-box;
 }

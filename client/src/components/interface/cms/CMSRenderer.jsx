@@ -6,6 +6,7 @@ import { useWebSocket } from '../../../context/WebSocketContext';
 import FeaturedCollections from '../colecciones/FeaturedCollections';
 import { getProducts, getImageUrl, getSrcSet } from '../../../lib/api/endpoints';
 import { ArrowRight, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
+import './CMSRenderer.css';
 
 // Ruta relativa: en dev pasa por el proxy de Vite (vite.config.js), en prod por nginx.
 const API_BASE = '/api/v1/homepage/';
@@ -299,24 +300,6 @@ export const TextBlock = ({ config, title, previewMode = false, forceMobile = nu
                     }}
                 />
             </div>
-            <style>{`
-                .rich-text-content {
-                    word-break: normal !important;
-                    overflow-wrap: break-word !important;
-                    hyphens: none !important;
-                }
-                .rich-text-content * {
-                    max-width: 100%;
-                }
-                .rich-text-content h1 { font-size: 2.2em; margin-bottom: 0.5em; color: #1e1b4b; line-height: 1.2; }
-                .rich-text-content h2 { font-size: 1.8em; margin-bottom: 0.5em; color: #1e1b4b; line-height: 1.3; }
-                .rich-text-content h3 { font-size: 1.4em; margin-bottom: 0.5em; color: #1e1b4b; line-height: 1.4; }
-                .rich-text-content p { margin-bottom: 1em; }
-                .rich-text-content ul, .rich-text-content ol { margin-bottom: 1em; padding-left: 20px; }
-                .rich-text-content li { margin-bottom: 0.5em; }
-                .rich-text-content strong { font-weight: 800; }
-                .rich-text-content img { height: auto; border-radius: 12px; }
-            `}</style>
         </div>
     );
 };
@@ -571,27 +554,6 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
                     </div>
                 </div>
 
-                <style>{`
-                    .product-carousel-scroll::-webkit-scrollbar { display: none; }
-                    .floating-nav-btn {
-                        position: absolute; top: 40%; transform: translateY(-50%);
-                        width: 44px; height: 44px; background: #fff; color: #1e1b4b;
-                        border: none; border-radius: 4px; display: flex; align-items: center; justify-content: center;
-                        cursor: pointer; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                        transition: all 0.2s ease;
-                    }
-                    .floating-nav-btn:hover { background: #1e1b4b; color: #fff; transform: translateY(-50%) scale(1.1); }
-                    .add-to-cart-banner {
-                        position: absolute; bottom: 0; left: 0; right: 0;
-                        background: rgba(255,255,255,0.95); padding: 12px;
-                        text-align: center; color: #1e1b4b; font-size: 11px; font-weight: 800;
-                        text-transform: uppercase; letter-spacing: 1px;
-                        transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-                    }
-                    .product-carousel-card:hover .add-to-cart-banner { transform: translateY(0); }
-                    .product-carousel-card:hover img { transform: scale(1.05); }
-                    .product-carousel-card img { transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-                `}</style>
             </div>
         </div>
     );
@@ -687,10 +649,6 @@ const VideoBlock = ({ config = {}, title }) => {
         <section className="cms-video-block">
             {encabezado && <h2 className="cms-video-titulo">{encabezado}</h2>}
             <VideoYoutube url={config.video_url} titulo={encabezado || 'Video'} />
-            <style>{`
-                .cms-video-block { max-width: 960px; margin: 0 auto; padding: 8px 16px 24px; }
-                .cms-video-titulo { font-size: 22px; font-weight: 800; color: #1e1b4b; margin: 0 0 14px; text-align: center; }
-            `}</style>
         </section>
     );
 };

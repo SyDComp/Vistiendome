@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { describirEntrega } from '../../../../utils/entrega';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import './ShippingLabelPrinter.css';
 import {
     Printer, Search, CheckSquare, Square, Package, Settings2, RefreshCw,
     Maximize2, Info, FileText, LayoutGrid, Zap, Sparkles, User, Phone,
@@ -675,11 +676,6 @@ const ShippingLabelPrinter = () => {
 
     return (
         <div className="shipping-label-generator-wrap" style={{ minHeight: 'calc(100dvh - 80px)', height: isMobile ? 'auto' : 'calc(100dvh - 80px)', display: 'flex', flexDirection: 'column', background: '#f8fafc', width: '100%', maxWidth: '100dvw', boxSizing: 'border-box', overflowX: 'hidden' }}>
-            <style>{`
-                .shipping-label-generator-wrap, .shipping-label-generator-wrap * {
-                    box-sizing: border-box !important;
-                }
-            `}</style>
             
             {/* TOP NAVBAR */}
             <header style={{ padding: isMobile ? '12px 14px' : '16px 24px', background: '#fff', borderBottom: '1px solid #e2e8f0', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px', boxSizing: 'border-box', width: '100%' }}>

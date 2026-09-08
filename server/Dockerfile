@@ -18,5 +18,9 @@ COPY . .
 # Exponer puerto de FastAPI
 EXPOSE 8000
 
-# Comando para correr la app con hot-reload
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Este CMD casi nunca se usa: el entrypoint arranca uvicorn el mismo, despues de
+# aplicar las migraciones. Queda como valor por defecto para quien corra la
+# imagen a mano, y por eso NO lleva --reload: eso es modo desarrollo (reinicia
+# el proceso ante cualquier cambio de archivo y duplica el uso de memoria), y
+# dejarlo escrito aca es dejar una trampa lista para que alguien la pise.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]

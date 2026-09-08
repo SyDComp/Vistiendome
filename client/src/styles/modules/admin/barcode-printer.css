@@ -9,7 +9,6 @@
     height: 100%;
     overflow: hidden;
     font-family: 'Inter', sans-serif;
-    box-sizing: border-box;
 }
 
 .barcode-printer-container.mobile {
@@ -91,7 +90,6 @@
     outline: none;
     background: #f8fafc;
     color: #1e293b;
-    box-sizing: border-box;
 }
 
 .barcode-printer-list {
@@ -644,7 +642,6 @@
     display: grid;
     gap: 0;
     flex-shrink: 0;
-    box-sizing: border-box;
 }
 
 .barcode-printer-label {
@@ -652,7 +649,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-sizing: border-box;
     overflow: hidden;
     padding: 1px;
 }
@@ -690,7 +686,6 @@
     flex-shrink: 0;
     width: 100%;
     overflow: hidden;
-    box-sizing: border-box;
     display: block;
 }
 

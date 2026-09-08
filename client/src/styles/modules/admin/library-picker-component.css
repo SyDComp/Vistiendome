@@ -154,7 +154,6 @@
     outline: none;
     transition: all 0.2s;
     background: var(--bg-surface);
-    box-sizing: border-box;
 }
 
 .library-picker-search-input:focus {

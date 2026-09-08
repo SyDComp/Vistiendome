@@ -322,7 +322,6 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     animation: fadeInSimple 0.2s ease-out;
     width: 100%;
-    box-sizing: border-box;
     max-width: 100%;
 }
 
