@@ -4,6 +4,25 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
 
+/* EL ANCHO INCLUYE EL PADDING, SIEMPRE
+   Sin esta regla, `width: 100%` mide solo el contenido y el padding se SUMA
+   por fuera: una caja al 100% con 16px de padding a cada lado mide 32px mas
+   que su padre y empuja la pagina hacia el costado. Asi aparecia el scroll
+   horizontal en la portada.
+
+   La regla existia... en `index.css`, que no lo importa nadie: la entrada real
+   es `styles/styles.css`. Nunca estuvo activa, y por eso hay 92 `box-sizing:
+   border-box` repetidos a mano en 32 archivos, cada componente tapando la
+   falta del reset por su cuenta. Puesta acá, esos dejan de ser necesarios.
+
+   `::before` y `::after` van incluidos: heredan el modelo de caja de su
+   elemento solo si se les dice. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html,
 body,
 #root {
