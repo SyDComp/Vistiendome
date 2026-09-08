@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import ItemPersonalizadoForm from './ItemPersonalizadoForm';
+import ArmadorDePrenda from '../../../ui/ArmadorDePrenda';
 import { describirEntrega } from '../../../../utils/entrega';
 import { X, Search, Plus, Trash2, Check, User, Package, MapPin, FileText, ShoppingBag, Send, AlertCircle, DollarSign } from 'lucide-react';
 import { getProducts } from '../../../../lib/api/endpoints/products.api';
@@ -210,7 +210,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
     // Antes esto eran dos prompt() —nombre y precio— y la pieza entraba al pedido
     // como un texto suelto, sin talla ni color: llegaba a la orden de corte sin
     // nada con que confeccionarla.
-    const handleAgregarPersonalizado = ({ nombre, precio, config }) => {
+    const handleAgregarPersonalizado = ({ nombre, precio, config, propuestos }) => {
         setItems(prev => [...prev, {
             sku_id: null,
             sku_name: nombre,
@@ -219,6 +219,10 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
             cantidad: 1,
             image: null,
             config_custom: config,
+            // Que valores no existen en el catalogo. Se guarda al momento del
+            // pedido: si manana se crea ese color, este pedido sigue diciendo
+            // que cuando se hizo no existia.
+            config_propuesta: propuestos,
         }]);
         setMostrandoFormLibre(false);
         toast.success(`Añadido: ${nombre}`);
@@ -297,6 +301,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                     // vacio, imposible de cortar.
                     nombre_custom: it.sku_id == null ? (it.sku_name || null) : null,
                     config_custom: it.sku_id == null ? (it.config_custom || null) : null,
+                    config_propuesta: it.sku_id == null ? (it.config_propuesta || null) : null,
                 }))
             };
 
@@ -596,7 +601,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                 </div>
 
                                 {mostrandoFormLibre && (
-                                    <ItemPersonalizadoForm
+                                    <ArmadorDePrenda
                                         atributos={atributosCatalogo}
                                         onAgregar={handleAgregarPersonalizado}
                                         onCancelar={() => setMostrandoFormLibre(false)}

@@ -146,6 +146,16 @@ class CotizacionItem(SQLModel, table=True):
     # planilla del taller las muestre en columnas sin distinguir el origen.
     config_custom: Optional[Dict[str, str]] = Field(default=None, sa_type=JSON)
 
+    # Cuales de esos valores los PROPUSO el cliente y no existen en el catalogo.
+    #
+    # Va aparte y explicito, no deducido comparando contra el catalogo cada vez:
+    # lo que importa es que en el momento del pedido ese color no existia. Si
+    # manana se crea, el pedido viejo sigue diciendo la verdad de lo que paso.
+    #
+    # Distinguirlos no es un detalle: un valor del catalogo se corta con tela
+    # que hay; uno propuesto hay que conseguirlo antes de prometer una fecha.
+    config_propuesta: Optional[Dict[str, str]] = Field(default=None, sa_type=JSON)
+
     # Vive en el ítem, no en la Cotizacion: una cotización puede tener piezas
     # ya cortadas y otras no. El estado de la Cotizacion (NUEVA/CONFIRMADA/...)
     # es el ciclo de la VENTA; esto es el ciclo de la CONFECCIÓN — ejes distintos.

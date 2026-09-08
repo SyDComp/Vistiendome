@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import ArmadorDePrenda from '../../ui/ArmadorDePrenda';
 import { useSettings } from '../../../context/SettingsContext';
-import { Camera, Globe, MessageCircle, Mail, Phone, MapPin, Clock, User, Users, Calendar, FileText, X, Map, Navigation } from 'lucide-react';
+import { Camera, Globe, MessageCircle, Mail, Phone, MapPin, Clock, User, Users, Calendar, FileText, X, Map, Navigation, Package } from 'lucide-react';
 import { formatRUT } from '../../../utils/formatters';
 import { buildWhatsAppMessage } from '../../../utils/cartUtils';
 import { buildMapLinks } from '../../../utils/mapLinks';
@@ -22,11 +23,33 @@ const Contacto = () => {
 
     const [tipoContacto, setTipoContacto] = useState('seleccion'); // 'seleccion', 'individual', 'grupo'
 
+    // Las prendas que la clienta arma para este pedido. El modal arma UNA: la
+    // lista vive acá porque una misma solicitud puede llevar varias.
+    const [prendas, setPrendas] = useState([]);
+    const [armando, setArmando] = useState(false);
+    const [atributos, setAtributos] = useState({});
+    const [catalogo, setCatalogo] = useState([]);
+
     // Con el formulario abierto, la rueda del mouse fuera de la tarjeta movía
     // la página de atrás: se perdía de vista el formulario que se estaba
     // llenando. Es el mismo candado que ya usan el carrito y los otros
     // modales; a éste no se le había puesto.
     useScrollLock(tipoContacto !== 'seleccion');
+
+    // Las características y las prendas salen del catálogo: la clienta elige,
+    // no inventa. Se piden la primera vez que abre el armador.
+    const abrirArmador = async () => {
+        setArmando(true);
+        if (Object.keys(atributos).length) return;
+        try {
+            const [meta, prods] = await Promise.all([
+                fetch('/api/v1/products/filters-metadata').then(r => r.json()),
+                fetch('/api/v1/products/').then(r => r.json()),
+            ]);
+            setAtributos(meta?.attributes || {});
+            setCatalogo(Array.isArray(prods) ? prods : []);
+        } catch { /* si falla, el armador lo dice y se puede pedir igual por el mensaje */ }
+    };
     const [formData, setFormData] = useState({
         rut: '',
         nombre: '',
@@ -202,7 +225,18 @@ const Contacto = () => {
                 comuna_id: esRetiro ? null : formData.comuna_id,
                 direccion: esRetiro ? null : formData.direccion,
                 mensaje: formData.mensaje,
-                origen: origen
+                origen: origen,
+                // Antes la prenda que quería la clienta viajaba dentro del
+                // mensaje, en un párrafo. Así no se podía cortar ni cotizar:
+                // ahora va estructurada, igual que un pedido del catálogo.
+                items: prendas.map(pr => ({
+                    sku_id: null,
+                    cantidad: pr.cantidad || 1,
+                    precio_unitario_estimado: 0,
+                    nombre_custom: pr.nombre,
+                    config_custom: pr.config || null,
+                    config_propuesta: pr.propuestos || null,
+                })),
             };
 
             if (tipoContacto === 'grupo') {
@@ -267,6 +301,26 @@ const Contacto = () => {
         
         return (
             <div className="contact-modal-overlay fade-in" onClick={() => setTipoContacto('seleccion')}>
+                {/* Encima del formulario, arma UNA prenda. Al confirmarla se suma
+                    a la lista de arriba y se cierra: si quiere otra, vuelve a
+                    abrirlo. */}
+                {armando && (
+                    <div className="armador-overlay" onClick={e => { e.stopPropagation(); setArmando(false); }}>
+                        <div className="armador-caja" onClick={e => e.stopPropagation()}>
+                            <ArmadorDePrenda
+                                atributos={atributos}
+                                productos={catalogo}
+                                mostrarPrecio={false}
+                                textoBoton="Agregar esta prenda"
+                                onAgregar={({ nombre, config, propuestos }) => {
+                                    setPrendas(p => [...p, { nombre, config, propuestos, cantidad: 1 }]);
+                                    setArmando(false);
+                                }}
+                                onCancelar={() => setArmando(false)}
+                            />
+                        </div>
+                    </div>
+                )}
                 <div className="contact-modal-card slide-up" onClick={e => e.stopPropagation()}>
                     <div className="contact-modal-header">
                         <h2>{tipoContacto === 'individual' ? 'Consulta Personal' : 'Presupuesto Grupal'}</h2>
@@ -437,6 +491,43 @@ const Contacto = () => {
                     </>
                 )}
 
+                {/* Las prendas que quiere, armadas con las características del
+                    catálogo. Antes esto se escribía en el mensaje y llegaba como
+                    un párrafo imposible de cortar o cotizar. */}
+                <div className="form-group">
+                    <label><Package size={16} /> Prendas que necesitas</label>
+
+                    {prendas.length > 0 && (
+                        <ul className="prendas-pedidas">
+                            {prendas.map((pr, i) => (
+                                <li key={i}>
+                                    <div>
+                                        <strong>{pr.nombre}</strong>
+                                        {Object.keys(pr.config || {}).length > 0 && (
+                                            <span className="prenda-detalle">
+                                                {Object.entries(pr.config).map(([k, v]) => `${k}: ${v}`).join(' · ')}
+                                            </span>
+                                        )}
+                                        {pr.propuestos && Object.keys(pr.propuestos).length > 0 && (
+                                            <span className="prenda-propuesta">
+                                                A confirmar con Paola: {Object.keys(pr.propuestos).join(', ').toLowerCase()}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <button type="button" onClick={() => setPrendas(p => p.filter((_, j) => j !== i))}
+                                        aria-label="Quitar">
+                                        <X size={15} />
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+
+                    <button type="button" className="btn-armar-prenda" onClick={abrirArmador}>
+                        + Pide tu prenda personalizada
+                    </button>
+                </div>
+
                 <div className="form-group">
                     <label><FileText size={16} /> Mensaje</label>
                     <textarea 
@@ -600,6 +691,28 @@ const Contacto = () => {
                     box-sizing: border-box;
                     width: 100%;
                 }
+                .prendas-pedidas { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+                .prendas-pedidas li {
+                    display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+                    background: #fdf4ff; border: 1px solid #f0abfc; border-radius: 10px; padding: 10px 12px;
+                }
+                .prendas-pedidas strong { display: block; font-size: 13.5px; color: #1e1b4b; }
+                .prenda-detalle { display: block; font-size: 11.5px; color: #64748b; margin-top: 2px; }
+                .prenda-propuesta { display: block; font-size: 11.5px; color: #a16207; margin-top: 2px; }
+                .prendas-pedidas button { background: none; border: none; cursor: pointer; color: #94a3b8; display: flex; padding: 2px; }
+                .btn-armar-prenda {
+                    width: 100%; padding: 11px; border-radius: 10px; cursor: pointer;
+                    border: 1.5px dashed #c026d3; background: #fdf4ff; color: #86198f;
+                    font-weight: 800; font-size: 13px; font-family: inherit;
+                }
+                .btn-armar-prenda:hover { background: #fae8ff; }
+
+                .armador-overlay {
+                    position: fixed; inset: 0; z-index: 1200; background: rgba(15,23,42,.45);
+                    display: flex; align-items: center; justify-content: center; padding: 16px;
+                }
+                .armador-caja { width: 100%; max-width: 620px; max-height: 88vh; overflow-y: auto; background: #fff; border-radius: 14px; padding: 6px; }
+
                 .contact-modal-header h2 { margin: 0; font-size: 1.25rem; font-weight: 800; color: #1e1b4b; }
                 
                 .btn-close-modal { background: none; border: none; cursor: pointer; color: #94a3b8; }

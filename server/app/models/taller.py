@@ -71,6 +71,9 @@ class OrdenCorteItem(SQLModel, table=True):
     # SKU.config. Viajan con ella para que la planilla del taller diga que hay
     # que cortar y no solo como se llama.
     config_custom: Optional[Dict[str, str]] = Field(default=None, sa_type=JSON)
+    # Cuales de esos valores los propuso el cliente. El taller necesita verlo:
+    # es la diferencia entre cortar con lo que hay y tener que conseguir tela.
+    config_propuesta: Optional[Dict[str, str]] = Field(default=None, sa_type=JSON)
     cantidad: int = Field(default=1)
 
     # De dónde salió esta línea. Con pedido: al finalizar se marca esa pieza

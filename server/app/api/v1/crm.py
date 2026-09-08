@@ -11,6 +11,8 @@ from app.models.iam import Persona, TipoPersona, Direccion, CuentaAcceso
 from app.models.catalog import StockMovement, MovementType
 from app.models.taller import OrdenCorte, OrdenCorteItem, EstadoOrdenCorte
 from app.api.deps import get_current_user, RequirePermiso
+from app.core import propuestas as core_propuestas
+from app.models.propuestas import OpcionPropuesta
 
 router = APIRouter()
 
@@ -70,6 +72,9 @@ class CotizacionItemRead(BaseModel):
     # planilla/orden de corte con columnas propias por característica.
     producto_nombre: Optional[str] = None
     config: dict = {}
+    # Que caracteristicas llevan un valor propuesto por el cliente. La pantalla
+    # las marca para que no se confundan con las del catalogo.
+    config_propuesta: dict = {}
     cortado: bool = False
 
 class OrdenDeCorteDelPedido(BaseModel):
@@ -120,6 +125,10 @@ class CotizacionRead(BaseModel):
 
 def _get_item_read(it: CotizacionItem) -> CotizacionItemRead:
     it_dict = it.dict()
+    # Siempre un dict: el modelo lo trae en None cuando la pieza viene del
+    # catalogo, y el schema espera un diccionario. Sin esto reventaba la
+    # lista COMPLETA de cotizaciones, no solo las personalizadas.
+    it_dict["config_propuesta"] = it.config_propuesta or {}
     if it.sku and it.sku.product:
         variant_str = ""
         if isinstance(it.sku.config, dict) and len(it.sku.config) > 0:
@@ -203,6 +212,8 @@ class CotizacionItemCreate(BaseModel):
     # Caracteristicas de una pieza que no esta en el catalogo, para que se
     # pueda cortar igual que las demas. Mismo formato que SKU.config.
     config_custom: Optional[dict] = None
+    # Cuales de esos valores no existen en el catalogo y los propuso el cliente.
+    config_propuesta: Optional[dict] = None
 
 def _modo_de(data) -> ModoEntrega:
     """
@@ -379,9 +390,24 @@ def crear_cotizacion(data: CotizacionCreate, session: Session = Depends(get_sess
             precio_unitario_estimado=item_data.precio_unitario_estimado,
             nombre_custom=item_data.nombre_custom,
             config_custom=item_data.config_custom or None,
+            config_propuesta=item_data.config_propuesta or None,
         )
         session.add(item)
-    
+
+        # Lo que el cliente propuso y no existe en el catalogo queda registrado
+        # como propuesta, con quien la pidio y de que pedido salio. El pedido no
+        # se cae si algo de esto falla: registrar es un efecto, no el objetivo.
+        if item_data.config_propuesta:
+            try:
+                core_propuestas.registrar(
+                    session,
+                    item_data.config_propuesta,
+                    persona_id=cotizacion.persona_id,
+                    cotizacion_id=cotizacion.id,
+                )
+            except Exception:
+                pass
+
     session.commit()
     session.refresh(cotizacion)
     
@@ -556,6 +582,17 @@ def eliminar_cotizacion(
                 status_code=409,
                 detail="Este pedido está en una orden de corte. Sácalo de la orden o cancela el pedido.",
             )
+
+    # Las opciones que se propusieron en este pedido NO se borran: se
+    # desvinculan. La propuesta es informacion del catalogo —alguien pidio ese
+    # color— y sigue siendo cierta aunque el pedido ya no exista. Sin esto, la
+    # clave foranea impide borrar el pedido y la pantalla devuelve un 500 sin
+    # explicar nada.
+    for prop in db.exec(
+        select(OpcionPropuesta).where(OpcionPropuesta.cotizacion_id == cot.id)
+    ).all():
+        prop.cotizacion_id = None
+        db.add(prop)
 
     for it in items:
         db.delete(it)

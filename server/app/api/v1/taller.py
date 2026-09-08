@@ -41,6 +41,7 @@ class ItemEntrada(BaseModel):
     # Caracteristicas de la pieza personalizada. Sin esto la costurera recibe
     # un nombre y nada mas.
     config_custom: Optional[Dict[str, str]] = None
+    config_propuesta: Optional[Dict[str, str]] = None
     cantidad: int = 1
     cotizacion_item_id: Optional[str] = None
 
@@ -60,6 +61,9 @@ class ItemSalida(BaseModel):
     sku: Optional[str] = None
     producto: Optional[str] = None
     config: Dict[str, Any] = {}
+    # Lo que el cliente propuso y no existe en el catalogo: hay que conseguirlo
+    # antes de cortar.
+    config_propuesta: Dict[str, Any] = {}
     cantidad: int
     cotizacion_item_id: Optional[str] = None
     # Para que la pantalla distinga de un vistazo el origen de cada línea
@@ -100,6 +104,7 @@ def _salida(orden: OrdenCorte, db: Session) -> OrdenSalida:
             # De la variante si la hay; si no, las que se cargaron a mano al
             # armar la pieza personalizada. La planilla no distingue.
             config=(sku.config if sku else None) or it.config_custom or {},
+            config_propuesta=it.config_propuesta or {},
             cantidad=it.cantidad,
             cotizacion_item_id=it.cotizacion_item_id,
             para_stock=it.cotizacion_item_id is None,
@@ -180,6 +185,7 @@ def piezas_pendientes(
             "nombre_custom": it.nombre_custom,
             "producto": (it.sku.product.name if it.sku and it.sku.product else None) or it.nombre_custom or "—",
             "config": (it.sku.config if it.sku else None) or it.config_custom or {},
+            "config_propuesta": it.config_propuesta or {},
             "cantidad": it.cantidad,
             "pedido_numero": cot.numero if cot else None,
             "cliente": f"{persona.nombres} {persona.apellidos}".strip() if persona else "—",
@@ -233,6 +239,7 @@ def crear(data: OrdenCrear, db: Session = Depends(get_session), admin: CuentaAcc
             sku_id=entrada.sku_id,
             nombre_custom=(entrada.nombre_custom or "").strip() or None,
             config_custom=entrada.config_custom or None,
+            config_propuesta=entrada.config_propuesta or None,
             cantidad=entrada.cantidad,
             cotizacion_item_id=entrada.cotizacion_item_id,
         ))
@@ -330,7 +337,8 @@ def repetir(orden_id: str, db: Session = Depends(get_session), admin: CuentaAcce
 
     for it in original.items:
         db.add(OrdenCorteItem(orden_id=nueva.id, sku_id=it.sku_id, nombre_custom=it.nombre_custom,
-                              config_custom=it.config_custom, cantidad=it.cantidad))
+                              config_custom=it.config_custom, config_propuesta=it.config_propuesta,
+                              cantidad=it.cantidad))
     db.commit()
     db.refresh(nueva)
     return _salida(nueva, db)
