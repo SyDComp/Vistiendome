@@ -460,9 +460,9 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                     ) : (
                         <>
                             {/* PASO 1: SELECCIÓN DE CLIENTE */}
-                            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '800', fontSize: '14px', color: '#1e293b' }}>
+                            <div className="adm-tarjeta">
+                                <div className="adm-seccion-cabecera">
+                                    <div className="adm-seccion-titulo">
                                         <User size={18} color="#8f0653" /> 1. Selección del Cliente
                                     </div>
                                     <div style={{ display: 'flex', background: '#e2e8f0', borderRadius: '8px', padding: '2px' }}>
@@ -517,13 +517,13 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                         ) : (
                                             <div>
                                                 <div style={{ position: 'relative', marginBottom: '10px' }}>
-                                                    <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                                                    <Search size={16} color="#94a3b8" className="adm-campo-icono" />
                                                     <input
                                                         type="text"
                                                         placeholder="Buscar por nombre, apellido, RUT, correo o teléfono..."
                                                         value={searchClienteTerm}
                                                         onChange={(e) => setSearchClienteTerm(e.target.value)}
-                                                        style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
+                                                        className="adm-campo adm-campo--con-icono"
                                                     />
                                                 </div>
                                                 <div style={{ maxHeight: '140px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '10px', background: '#ffffff' }}>
@@ -541,13 +541,13 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                                                     if (c.region_nombre) setRegion(c.region_nombre);
                                                                     if (c.comuna_nombre) setComuna(c.comuna_nombre);
                                                                 }}
-                                                                style={{ padding: '10px 14px', borderBottom: '1px solid #f1f5f9', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                                                                className="adm-opcion-fila"
                                                                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
                                                                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
                                                             >
                                                                 <div>
-                                                                    <div style={{ fontWeight: '700', fontSize: '13px', color: '#1e293b' }}>{c.nombres} {c.apellidos}</div>
-                                                                    <div style={{ fontSize: '11px', color: '#64748b' }}>{c.rut || 'Sin RUT'} • {c.telefono || c.email_personal || 'Sin contacto'}</div>
+                                                                    <div className="adm-dato">{c.nombres} {c.apellidos}</div>
+                                                                    <div className="adm-dato-secundario">{c.rut || 'Sin RUT'} • {c.telefono || c.email_personal || 'Sin contacto'}</div>
                                                                 </div>
                                                                 <span style={{ fontSize: '11px', fontWeight: '700', color: '#8f0653', background: '#fdf2f8', padding: '3px 8px', borderRadius: '6px' }}>Seleccionar</span>
                                                             </div>
@@ -560,43 +560,43 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                 ) : (
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
                                         <div>
-                                            <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>RUT (Opcional)</label>
+                                            <label className="adm-etiqueta">RUT (Opcional)</label>
                                             <input
                                                 type="text" placeholder="12.345.678-9"
                                                 value={newClienteData.rut} onChange={e => setNewClienteData({...newClienteData, rut: e.target.value})}
-                                                style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                                                className="adm-campo"
                                             />
                                         </div>
                                         <div>
-                                            <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Nombres *</label>
+                                            <label className="adm-etiqueta">Nombres *</label>
                                             <input
                                                 type="text" placeholder="María Paz"
                                                 value={newClienteData.nombres} onChange={e => setNewClienteData({...newClienteData, nombres: e.target.value})}
-                                                style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                                                className="adm-campo"
                                             />
                                         </div>
                                         <div>
-                                            <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Apellidos</label>
+                                            <label className="adm-etiqueta">Apellidos</label>
                                             <input
                                                 type="text" placeholder="Gómez"
                                                 value={newClienteData.apellidos} onChange={e => setNewClienteData({...newClienteData, apellidos: e.target.value})}
-                                                style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                                                className="adm-campo"
                                             />
                                         </div>
                                         <div>
-                                            <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Teléfono / WhatsApp *</label>
+                                            <label className="adm-etiqueta">Teléfono / WhatsApp *</label>
                                             <input
                                                 type="text" placeholder="+56 9 1234 5678"
                                                 value={newClienteData.telefono} onChange={e => setNewClienteData({...newClienteData, telefono: e.target.value})}
-                                                style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                                                className="adm-campo"
                                             />
                                         </div>
                                         <div>
-                                            <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Correo Electrónico</label>
+                                            <label className="adm-etiqueta">Correo Electrónico</label>
                                             <input
                                                 type="email" placeholder="maria@correo.cl"
                                                 value={newClienteData.email_personal} onChange={e => setNewClienteData({...newClienteData, email_personal: e.target.value})}
-                                                style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                                                className="adm-campo"
                                             />
                                         </div>
                                     </div>
@@ -605,8 +605,8 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
 
                             {/* PASO 2: PRODUCTOS Y CANTIDADES */}
                             <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '16px', padding: '18px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '800', fontSize: '14px', color: '#1e293b' }}>
+                                <div className="adm-seccion-cabecera">
+                                    <div className="adm-seccion-titulo">
                                         <Package size={18} color="#8f0653" /> 2. Productos o Confecciones ({items.length})
                                     </div>
                                     <button
@@ -630,7 +630,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
 
                                 {/* Buscador de Catálogo */}
                                 <div style={{ position: 'relative', marginBottom: '14px' }}>
-                                    <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                                    <Search size={16} color="#94a3b8" className="adm-campo-icono" />
                                     <input
                                         type="text"
                                         placeholder="Haz clic o escribe para buscar vestidos, tapados, variantes (XS, S, colores)..."
@@ -638,7 +638,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                         onFocus={() => setIsProductSearchFocused(true)}
                                         onBlur={() => setTimeout(() => setIsProductSearchFocused(false), 220)}
                                         onChange={(e) => setSearchProductTerm(e.target.value)}
-                                        style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
+                                        className="adm-campo adm-campo--con-icono"
                                     />
                                     {filteredVariants.length > 0 && (
                                         <div style={{
@@ -650,7 +650,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                                 <div
                                                     key={idx}
                                                     onClick={() => { handleAddItem(varItem); setSearchProductTerm(''); }}
-                                                    style={{ padding: '10px 14px', borderBottom: '1px solid #f1f5f9', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                                                    className="adm-opcion-fila"
                                                     onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#fdf2f8'}
                                                     onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
                                                 >
@@ -659,13 +659,13 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                                             <Imagen url={varItem.image} alt="" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} sizes="32px" />
                                                         )}
                                                         <div>
-                                                            <div style={{ fontWeight: '700', fontSize: '13px', color: '#1e293b' }}>
+                                                            <div className="adm-dato">
                                                                 {varItem.sku_name}
                                                                 {varItem.is_product_base && (
                                                                     <span style={{ fontSize: '10px', backgroundColor: '#e2e8f0', color: '#334155', padding: '2px 6px', borderRadius: '4px', marginLeft: '6px', fontWeight: '800' }}>GENERAL</span>
                                                                 )}
                                                             </div>
-                                                            <div style={{ fontSize: '11px', color: '#64748b' }}>SKU: {varItem.sku_code}</div>
+                                                            <div className="adm-dato-secundario">SKU: {varItem.sku_code}</div>
                                                         </div>
                                                     </div>
                                                     <span style={{ fontWeight: '800', color: '#8f0653', fontSize: '13px' }}>
@@ -698,8 +698,8 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                                         </div>
                                                     )}
                                                     <div>
-                                                        <div style={{ fontWeight: '700', fontSize: '13px', color: '#1e293b' }}>{it.sku_name}</div>
-                                                        <div style={{ fontSize: '11px', color: '#64748b' }}>{it.sku_code || 'Ítem especial'}</div>
+                                                        <div className="adm-dato">{it.sku_name}</div>
+                                                        <div className="adm-dato-secundario">{it.sku_code || 'Ítem especial'}</div>
                                                     </div>
                                                 </div>
 
@@ -754,13 +754,13 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                             </div>
 
                             {/* PASO 3: DESPACHO Y NOTAS */}
-                            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px' }}>
+                            <div className="adm-tarjeta">
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '800', fontSize: '14px', color: '#1e293b', marginBottom: '14px' }}>
                                     <MapPin size={18} color="#8f0653" /> 3. Envío y Observaciones
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '12px' }}>
-                                    <div style={{ gridColumn: '1 / -1' }}>
-                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Tipo de entrega</label>
+                                    <div className="adm-ancho-total">
+                                        <label className="adm-etiqueta">Tipo de entrega</label>
                                         <select
                                             value={modoEntrega} onChange={e => setModoEntrega(e.target.value)}
                                             style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', fontWeight: '700' }}
@@ -773,10 +773,10 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                         transportista, ni direccion, ni comuna de destino. */}
                                     {modoEntrega === 'DESPACHO' && (<>
 <div>
-                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Transporte</label>
+                                        <label className="adm-etiqueta">Transporte</label>
                                         <select
                                             value={transporte} onChange={e => setTransporte(e.target.value)}
-                                            style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', fontWeight: '600' }}
+                                            className="adm-campo adm-campo--fuerte"
                                         >
                                             <option value="STARKEN">STARKEN</option>
                                             <option value="CHILEXPRESS">CHILEXPRESS</option>
@@ -784,47 +784,47 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                         </select>
                                     </div>
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Tipo Despacho</label>
+                                        <label className="adm-etiqueta">Tipo Despacho</label>
                                         <select
                                             value={tipoDespacho} onChange={e => setTipoDespacho(e.target.value)}
-                                            style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', fontWeight: '600' }}
+                                            className="adm-campo adm-campo--fuerte"
                                         >
                                             <option value="DOMICILIO">A DOMICILIO</option>
                                             <option value="SUCURSAL">A SUCURSAL</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Región</label>
+                                        <label className="adm-etiqueta">Región</label>
                                         <input
                                             type="text" placeholder="Biobío, RM, etc."
                                             value={region} onChange={e => setRegion(e.target.value)}
-                                            style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                                            className="adm-campo"
                                         />
                                     </div>
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Comuna</label>
+                                        <label className="adm-etiqueta">Comuna</label>
                                         <input
                                             type="text" placeholder="Chillán, Concepción, etc."
                                             value={comuna} onChange={e => setComuna(e.target.value)}
-                                            style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                                            className="adm-campo"
                                         />
                                     </div>
-                                    <div style={{ gridColumn: '1 / -1' }}>
-                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Dirección exacta o Sucursal</label>
+                                    <div className="adm-ancho-total">
+                                        <label className="adm-etiqueta">Dirección exacta o Sucursal</label>
                                         <input
                                             type="text" placeholder="Calle Ejemplo #123, Depto 4B o Nombre de Sucursal Starken..."
                                             value={direccion} onChange={e => setDireccion(e.target.value)}
-                                            style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                                            className="adm-campo"
                                         />
                                     </div>
                                     </>)}
-                                    <div style={{ gridColumn: '1 / -1' }}>
-                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Nota u Observación Interna</label>
+                                    <div className="adm-ancho-total">
+                                        <label className="adm-etiqueta">Nota u Observación Interna</label>
                                         <textarea
                                             placeholder="Anotaciones especiales para el taller, fecha límite de entrega, requerimientos del cliente..."
                                             value={mensaje} onChange={e => setMensaje(e.target.value)}
                                             rows="2"
-                                            style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                                            className="adm-campo"
                                         />
                                     </div>
                                 </div>

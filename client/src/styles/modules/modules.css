@@ -8,6 +8,7 @@
 @import url('./auth/auth_modules.css');
 
 /* Admin modules (divididos por dominio) */
+@import url('./admin/campos.css');
 @import url('./admin/admin-login.css');
 @import url('./admin/dashboard-layout.css');
 @import url('./admin/inventory-module-badges.css');

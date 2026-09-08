@@ -1,0 +1,100 @@
+/* ============================================================
+   CAMPOS DEL PANEL — las piezas que todo formulario repite
+   ============================================================
+
+   POR QUE EXISTE
+   La misma etiqueta estaba escrita 12 veces dentro de un solo archivo, y el
+   mismo campo de texto 9 veces, carácter por carácter. No en 12 sitios
+   distintos por una razón: 12 copias del mismo párrafo. Cambiar el borde de
+   los campos del panel obligaba a buscarlo y editarlo uno por uno, y bastaba
+   olvidar uno para que una pantalla quedara distinta de las demás sin que
+   nadie se enterara.
+
+   Acá están una vez. Un formulario nuevo del panel usa estas clases y sale
+   igual que los que ya existen, sin copiar nada.
+
+   MEDIDAS EN `rem`
+   Para que crezcan cuando alguien sube el tamaño de letra del navegador. En
+   `px` el panel se queda chico aunque la persona haya pedido letra grande.
+
+   NO ES UN FRAMEWORK
+   Solo lo que ya se repetía. Lo que use una pantalla sola se queda en su hoja.
+   ============================================================ */
+
+.adm-etiqueta {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 0.25rem;
+}
+
+.adm-campo {
+    width: 100%;
+    padding: 0.5rem 0.625rem;
+    border-radius: 0.5rem;
+    border: 1px solid #cbd5e1;
+    font-family: inherit;
+    font-size: 0.8125rem;
+}
+/* Debajo de 1rem el navegador del teléfono hace zoom solo al enfocar el campo y
+   deja la pantalla torcida. Solo se fuerza en pantalla chica: en el escritorio
+   el problema no existe y subir el texto cambiaría el aspecto del panel sin
+   motivo. */
+@media (max-width: 37.5rem) {
+    .adm-campo { font-size: max(1rem, 0.8125rem); }
+}
+.adm-campo--fuerte { font-weight: 600; }
+
+/* Un campo con un icono metido a la izquierda: el texto arranca después del
+   icono en vez de debajo. */
+.adm-campo--con-icono { padding-left: 2.25rem; border-radius: 0.625rem; }
+.adm-campo-envoltura { position: relative; }
+.adm-campo-icono {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.adm-tarjeta {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    padding: 1.125rem;
+}
+
+/* Cabecera de sección: título a un lado, acciones al otro, y en pantalla
+   angosta se envuelve en vez de desbordar. */
+.adm-seccion-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.875rem;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+}
+.adm-seccion-titulo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 800;
+    font-size: 0.875rem;
+    color: #1e293b;
+}
+
+.adm-dato { font-weight: 700; font-size: 0.8125rem; color: #1e293b; }
+.adm-dato-secundario { font-size: 0.6875rem; color: #64748b; }
+
+/* Una fila de una lista donde se elige algo. */
+.adm-opcion-fila {
+    padding: 0.625rem 0.875rem;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.adm-ancho-total { grid-column: 1 / -1; }
