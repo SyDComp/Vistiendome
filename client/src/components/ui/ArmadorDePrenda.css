@@ -7,8 +7,17 @@
  * se ve. Para cambiar un borde había que leer la lógica del formulario, y para
  * leer la lógica había que saltarse el CSS.
  *
- * Los colores se declaran UNA vez arriba y el resto los usa por nombre: antes
- * el color de marca estaba escrito a mano en cada botón.
+ * POR QUE NO HAY PIXELES EN TEXTOS NI ESPACIOS
+ * Un tamaño en `px` no crece cuando la persona sube el tamaño de letra en su
+ * navegador o en su teléfono: quien no ve bien configura "letra grande" y esta
+ * pantalla se queda chica igual. En `rem` todo escala junto con esa preferencia
+ * y con el zoom, sin tocar una línea.
+ *
+ * Los espacios también van en `rem` para que crezcan con la letra: si la letra
+ * sube y el padding no, el texto termina pegado al borde.
+ *
+ * Lo único que sigue en `px` son los bordes de 1px. Un filo es un filo: en
+ * `rem` se vuelve un número quebrado que el navegador difumina, y se ve peor.
  */
 
 .armador {
@@ -27,29 +36,36 @@
     --arm-bien: #15803d;
     --arm-duda: #a16207;
 
+    /* Una sola escala para todo el componente. Cambiar el cuerpo de texto acá
+       mueve la pantalla entera, en vez de perseguir treinta valores sueltos. */
+    --arm-txt-xs: 0.66rem;
+    --arm-txt-sm: 0.72rem;
+    --arm-txt-md: 0.8125rem;
+    --arm-esp: 0.625rem;
+    --arm-radio: 0.5rem;
 }
 
 /* EL MARCO NO ES DEL ARMADOR
-   Antes esta clase pintaba su propia tarjeta —borde, fondo, redondeo, padding—
-   y como en la web ya vive dentro de un modal que pinta OTRA tarjeta, se veian
-   dos marcos, uno blanco y uno rosa, comiendose 36px de ancho por lado entre
-   los tres paddings. En un celular eso es casi un cuarto de la pantalla.
+   Antes la clase de arriba pintaba su propia tarjeta —borde, fondo, redondeo,
+   padding— y como en la web ya vive dentro de un modal que pinta OTRA tarjeta,
+   se veían dos marcos, uno blanco y uno rosa, comiéndose el ancho entre los
+   tres paddings sumados. En un teléfono eso es casi un quinto de la pantalla.
 
    Quien decide el marco es quien lo hospeda: dentro de un modal no hace falta
-   ninguno, y en medio de un formulario si, para que se distinga de lo demas.
+   ninguno, y en medio de un formulario sí, para que se distinga de lo demás.
    Por eso el marco es una variante que se pide, no algo que el armador trae
    puesto. */
 .armador--tarjeta {
     border: 1px solid var(--arm-acento-suave);
     background: var(--arm-fondo);
-    border-radius: 12px;
-    padding: 14px;
-    margin-bottom: 12px;
+    border-radius: 0.75rem;
+    padding: 0.875rem;
+    margin-bottom: 0.75rem;
 }
 
-.armador__cabecera { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-.armador__titulo { font-size: 13px; color: var(--arm-texto); }
-.armador__intro { font-size: 11.5px; color: var(--arm-texto); margin: 0 0 12px; opacity: .85; }
+.armador__cabecera { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.25rem; }
+.armador__titulo { font-size: var(--arm-txt-md); color: var(--arm-texto); }
+.armador__intro { font-size: var(--arm-txt-sm); color: var(--arm-texto); margin: 0 0 0.75rem; opacity: .85; }
 
 .armador__cerrar,
 .armador__quitar {
@@ -61,111 +77,122 @@
     display: flex;
 }
 
-.armador__grilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+/* `auto-fit` con un mínimo relativo: en un teléfono cae a una columna solo, sin
+   una media query que adivine el ancho del aparato. La columna mínima va en
+   `rem` para que con letra grande siga cayendo a una sola en vez de apretar dos
+   ilegibles. */
+.armador__grilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.375rem), 1fr));
+    gap: var(--arm-esp);
+}
 .armador__ancho-total { grid-column: 1 / -1; }
 
-.armador__etiqueta { display: block; font-size: 11px; font-weight: 700; color: var(--arm-gris-texto); margin-bottom: 4px; }
+.armador__etiqueta { display: block; font-size: var(--arm-txt-sm); font-weight: 700; color: var(--arm-gris-texto); margin-bottom: 0.25rem; }
 .armador__etiqueta--con-boton { display: flex; align-items: center; justify-content: space-between; }
 
 .armador__campo {
     width: 100%;
-    padding: 8px 10px;
-    border-radius: 8px;
+    padding: 0.5rem 0.625rem;
+    border-radius: var(--arm-radio);
     border: 1px solid var(--arm-campo);
-    font-size: 13px;
     box-sizing: border-box;
+    /* Debajo de 16px de texto, iOS hace zoom solo al enfocar el campo y deja la
+       página torcida. 1rem son esos 16px salvo que el usuario pida otra cosa. */
+    font-size: max(1rem, var(--arm-txt-md));
 }
-.armador__campo--nuevo { border-color: var(--arm-acento); background: var(--arm-fondo); margin-top: 6px; }
+.armador__campo--nuevo { border-color: var(--arm-acento); background: var(--arm-fondo); margin-top: 0.375rem; }
 /* Lo que no se acepta se ve que no se acepta, sin tener que leer el aviso. */
 .armador__campo--rechazado { border-color: var(--arm-mal); }
-.armador__campo--buscador { margin-bottom: 8px; }
+.armador__campo--buscador { margin-bottom: 0.5rem; }
 
-.armador__aviso { margin: 5px 0 0; font-size: 11.5px; line-height: 1.35; }
+.armador__aviso { margin: 0.3125rem 0 0; font-size: var(--arm-txt-sm); line-height: 1.35; }
 .armador__aviso--ofensivo { color: var(--arm-mal); }
 .armador__aviso--ok { color: var(--arm-bien); }
 .armador__aviso--duda { color: var(--arm-duda); }
 
 .armador__usar-sugerencia {
-    margin-left: 6px;
+    margin-left: 0.375rem;
     background: none;
     border: none;
     padding: 0;
     color: var(--arm-marca);
     font-weight: 700;
-    font-size: 11.5px;
+    font-size: var(--arm-txt-sm);
     text-decoration: underline;
     cursor: pointer;
     font-family: inherit;
 }
 
-.armador__caracteristicas { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--arm-borde-suave); }
+.armador__caracteristicas { margin-top: 0.875rem; padding-top: 0.75rem; border-top: 1px dashed var(--arm-borde-suave); }
 
 .armador__boton-selector {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
+    gap: 0.4375rem;
     width: 100%;
-    padding: 10px;
-    border-radius: 10px;
-    border: 1.5px solid var(--arm-acento);
+    /* 2.75rem = 44px con la letra por defecto: el mínimo que se pulsa cómodo
+       con el dedo. Crece si el usuario usa letra más grande. */
+    min-height: 2.75rem;
+    padding: 0.625rem;
+    border-radius: 0.625rem;
+    border: 1px solid var(--arm-acento);
     background: #fff;
     color: var(--arm-texto);
     font-weight: 800;
-    font-size: 13px;
+    font-size: var(--arm-txt-md);
     cursor: pointer;
     font-family: inherit;
 }
 .armador__cuenta { font-weight: 600; opacity: .75; }
 
-.armador__selector { margin-top: 10px; border: 1px solid var(--arm-borde-suave); border-radius: 10px; background: #fff; padding: 10px; }
-.armador__lista { max-height: 210px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.armador__selector { margin-top: 0.625rem; border: 1px solid var(--arm-borde-suave); border-radius: 0.625rem; background: #fff; padding: 0.625rem; }
+/* Alto máximo relativo a la ventana VISIBLE: con `vh` la lista se pasaba por
+   debajo de la barra del navegador en el teléfono. */
+.armador__lista { max-height: min(30dvh, 13rem); overflow-y: auto; display: flex; flex-direction: column; gap: 0.125rem; }
 
 .armador__opcion {
     display: flex;
     align-items: center;
-    gap: 9px;
-    padding: 7px 8px;
-    border-radius: 8px;
+    gap: 0.5625rem;
+    min-height: 2.75rem;
+    padding: 0.4375rem 0.5rem;
+    border-radius: var(--arm-radio);
     cursor: pointer;
-    font-size: 13px;
+    font-size: var(--arm-txt-md);
     background: transparent;
 }
 .armador__opcion--puesta { background: var(--arm-fondo); }
-.armador__casilla { accent-color: var(--arm-marca); width: 15px; height: 15px; }
+.armador__casilla { accent-color: var(--arm-marca); width: 1.125rem; height: 1.125rem; flex: none; }
 .armador__opcion-nombre { color: var(--arm-tinta); font-weight: 500; }
 .armador__opcion--puesta .armador__opcion-nombre { font-weight: 700; }
-.armador__origen { margin-left: auto; font-size: 10.5px; color: var(--arm-gris); }
-.armador__vacio { font-size: 12px; color: var(--arm-gris); padding: 6px; }
+.armador__origen { margin-left: auto; font-size: var(--arm-txt-xs); color: var(--arm-gris); }
+.armador__vacio { font-size: var(--arm-txt-sm); color: var(--arm-gris); padding: 0.375rem; }
 
-.armador__sin-caracteristicas { font-size: 12px; color: var(--arm-duda); margin: 10px 0 0; }
+.armador__sin-caracteristicas { font-size: var(--arm-txt-sm); color: var(--arm-duda); margin: 0.625rem 0 0; }
 
-.armador__pie { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
-.armador__cancelar {
-    padding: 8px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--arm-linea);
-    background: #fff;
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    color: var(--arm-gris-texto);
-    font-family: inherit;
-}
+/* Los botones se envuelven en vez de desbordar: con letra grande o pantalla
+   angosta, "Cancelar" y "Agregar" no caben en una línea. */
+.armador__pie { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.5rem; margin-top: 0.875rem; }
+
+.armador__cancelar,
 .armador__agregar {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: none;
-    background: var(--arm-marca);
-    color: #fff;
+    justify-content: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--arm-radio);
     font-weight: 700;
-    font-size: 13px;
+    font-size: var(--arm-txt-md);
     cursor: pointer;
     font-family: inherit;
+    flex: 1 1 8rem;
 }
+.armador__cancelar { border: 1px solid var(--arm-linea); background: #fff; color: var(--arm-gris-texto); }
+.armador__agregar { border: none; background: var(--arm-marca); color: #fff; }
 /* Deshabilitado lo dice el navegador con `disabled`, no una copia del estado
    en JavaScript decidiendo colores. */
 .armador__agregar:disabled { background: var(--arm-linea); color: var(--arm-gris); cursor: not-allowed; }
