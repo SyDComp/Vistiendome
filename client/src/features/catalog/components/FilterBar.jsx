@@ -130,7 +130,7 @@ const FilterBar = ({
 
                     {activeFilterTags.length > 0 && (
                         <div className="active-filters-container">
-                            <span style={{ fontSize: '13px', fontWeight: '600', color: '#64748b' }}>Filtros activos:</span>
+                            <span className="adm-celda-secundaria">Filtros activos:</span>
                             {activeFilterTags.map((tag, i) => (
                                 <button
                                     key={i}

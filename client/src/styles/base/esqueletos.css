@@ -131,3 +131,16 @@
     height: 3.75rem;
     border-radius: 1rem;
 }
+
+/* Esqueleto de una seccion del panel, con la misma forma que la seccion real. */
+.esqueleto-seccion { margin-bottom: 2.5rem; opacity: 0.6; }
+.esqueleto-seccion-titulo { display: flex; align-items: center; gap: 0.625rem; margin-bottom: 1rem; }
+.esqueleto-tarjeta {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+    gap: 1.25rem;
+}
+.esqueleto-separacion { margin-bottom: 0.5rem; }

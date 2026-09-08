@@ -80,9 +80,9 @@ const LinkField = ({ value, onChange, label }) => {
 
     return (
         <div>
-            {label && <label style={{ display: 'block', fontSize: '13px', fontWeight: '800', color: '#475569', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</label>}
+            {label && <label className="adm-medios-rotulo">{label}</label>}
 
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <div className="adm-fila-etiquetas">
                 <button type="button" style={btn(mode === 'internal')} onClick={() => setMode('internal')}>
                     <Home size={14} /> Interno
                 </button>
@@ -101,7 +101,7 @@ const LinkField = ({ value, onChange, label }) => {
                 />
             ) : (
                 <>
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '10px' }}>
+                    <div className="adm-etiquetas-arriba">
                         <button type="button" style={btn(kind === 'page')} onClick={() => setKind('page')}><Home size={13} /> Página</button>
                         <button type="button" style={btn(kind === 'product')} onClick={() => setKind('product')}><Package size={13} /> Producto</button>
                         <button type="button" style={btn(kind === 'collection')} onClick={() => setKind('collection')}><Layers size={13} /> Colección</button>

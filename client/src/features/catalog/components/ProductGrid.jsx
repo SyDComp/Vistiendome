@@ -7,10 +7,12 @@ const ProductGrid = ({ products, loading, onProductClick, isModalOpen, onClearAl
         return (
             <div className="catalog-grid">
                 {[...Array(6)].map((_, i) => (
-                    <div key={i} className="catalog-grid-item">
-                        <div className="skeleton-box" style={{ width: '100%', aspectRatio: '3/4', borderRadius: '4px', marginBottom: '16px' }}></div>
-                        <div className="skeleton-box" style={{ width: '80%', height: '18px', borderRadius: '4px', marginBottom: '8px' }}></div>
-                        <div className="skeleton-box" style={{ width: '40%', height: '16px', borderRadius: '4px' }}></div>
+                    <div key={i} className="catalog-grid-item product-card product-card--vertical">
+                        <div className="product-card__images esqueleto esqueleto--bloque" />
+                        <div className="product-card__info">
+                            <h3 className="product-card__name esqueleto esqueleto--texto esqueleto--medio" />
+                            <div className="product-card__price-container esqueleto esqueleto--texto esqueleto--corto" />
+                        </div>
                     </div>
                 ))}
             </div>

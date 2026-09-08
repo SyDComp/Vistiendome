@@ -90,7 +90,7 @@ const FilterBar = ({
                     }}
                 />
                 {searchValue && (
-                    <button onClick={() => { setSearchValue(''); onSearchChange?.(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
+                    <button onClick={() => { setSearchValue(''); onSearchChange?.(''); }} className="adm-icono-plano">
                         <X size={14} color="#94a3b8" />
                     </button>
                 )}
@@ -134,7 +134,7 @@ const FilterBar = ({
                                 <option key={opt.value} value={opt.value}>{opt.label}</option>
                             ))}
                         </select>
-                        <ChevronDown size={13} color={activeFilters[filter.key] ? '#8f0653' : '#94a3b8'} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                        <ChevronDown size={13} color={activeFilters[filter.key] ? '#8f0653' : '#94a3b8'} className="adm-icono-derecha" />
                     </div>
                 ))}
 
