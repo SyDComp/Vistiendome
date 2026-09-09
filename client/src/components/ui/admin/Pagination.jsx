@@ -79,23 +79,9 @@ const PageBtn = ({ label, icon, active, disabled, onClick }) => (
     <button
         onClick={onClick}
         disabled={disabled}
-        style={{
-            width: '34px',
-            height: '34px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '8px',
-            border: `1px solid ${active ? '#8f0653' : '#e2e8f0'}`,
-            backgroundColor: active ? '#8f0653' : (disabled ? '#f8fafc' : '#fff'),
-            color: active ? '#fff' : (disabled ? '#cbd5e1' : '#475569'),
-            fontSize: '13px',
-            fontWeight: active ? '700' : '500',
-            cursor: disabled ? 'not-allowed' : 'pointer',
-            transition: 'all 0.15s ease'
-        }}
-        onMouseEnter={e => { if (!active && !disabled) { e.currentTarget.style.borderColor = '#8f0653'; e.currentTarget.style.color = '#8f0653'; } }}
-        onMouseLeave={e => { if (!active && !disabled) { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#475569'; } }}
+        className={`adm-pagina ${
+            active ? 'adm-estado-activo' : disabled ? 'adm-estado-apagado' : 'adm-estado-neutro'
+        }`}
     >
         {icon || label}
     </button>

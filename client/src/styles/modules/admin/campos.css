@@ -1103,3 +1103,147 @@
     line-height: 1.4;
     color: var(--color-warning-deep);
 }
+
+/* ── EL ESTADO DE UN CONTROL, EN UN SOLO LUGAR ──────────────────────────────
+   Este trio estaba escrito a mano en cada control del panel: paginacion,
+   filtros, colecciones, selector de biblioteca, ajustes.
+
+       border: `1px solid ${activo ? '#8f0653' : '#e2e8f0'}`,
+       background: activo ? '#8f0653' : '#fff',
+       color: activo ? '#fff' : '#475569',
+
+   Tres colores por estado, por control. El dia que cambie el rosa de la marca
+   habria que encontrarlos uno por uno.
+
+   Estas clases dicen SOLO el estado -que color- y se combinan con la clase que
+   da la forma de cada control -que tamano, que redondeo-. Asi un boton de
+   paginacion y una etiqueta de filtro comparten el estado sin compartir la
+   forma, que es lo unico que de verdad tienen en comun. */
+
+.adm-estado-neutro {
+    border-color: var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-body);
+}
+
+/* Elegido, y se nota: el control pasa a ser del color de la marca. */
+.adm-estado-activo {
+    border-color: var(--color-brand);
+    background: var(--color-brand);
+    color: var(--color-surface);
+}
+
+/* Elegido con menos peso: para cuando hay varios marcados a la vez y pintarlos
+   todos fuertes convierte la pantalla en un semaforo. */
+.adm-estado-marcado {
+    border-color: var(--color-brand);
+    background: var(--color-brand-lighter);
+    color: var(--color-brand);
+}
+
+/* No se puede usar ahora. Se ve, no se toca. */
+.adm-estado-apagado {
+    border-color: var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text-disabled);
+    cursor: default;
+}
+
+/* Los botones de paginacion. El :hover estaba resuelto escribiendo en
+   `element.style` desde onMouseEnter y onMouseLeave, que gana sobre cualquier
+   regla y deja el color pegado al elemento. */
+.adm-pagina {
+    width: 2.125rem;
+    height: 2.125rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.adm-pagina.adm-estado-activo { font-weight: 700; }
+.adm-pagina.adm-estado-apagado { cursor: not-allowed; }
+/* Solo la que se puede pinchar y no es la actual responde al puntero. */
+.adm-pagina.adm-estado-neutro:hover {
+    border-color: var(--color-brand);
+    color: var(--color-brand);
+}
+
+/* Un boton que abre un panel y avisa si hay algo puesto dentro. */
+.adm-desplegador {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    border: 1px solid var(--color-border);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+/* Una opcion de filtro: se pincha para poner y quitar. Van varias en fila, y
+   por eso la elegida usa el estado fuerte: hay que distinguirla de un vistazo
+   entre diez iguales. */
+.adm-etiqueta-filtro {
+    padding: 0.3125rem 0.75rem;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: inherit;
+    border: 1px solid var(--color-border);
+    transition: all 0.2s ease;
+}
+
+/* ── SI / NO ────────────────────────────────────────────────────────────────
+   Otro par que estaba escrito a mano en cada pantalla: verde cuando algo esta
+   encendido, gris o rojo cuando no. Es distinto de "elegido": aqui el color
+   dice el estado de una cosa, no que el usuario la marco. */
+
+.adm-interruptor {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 1rem;
+    border-radius: 1.25rem;
+    border: none;
+    font-weight: 700;
+    font-size: 0.8125rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--color-bg-subtle);
+    color: var(--color-text-muted);
+}
+.adm-interruptor--si {
+    background: var(--color-success-border);
+    color: var(--color-success-darkest);
+}
+
+/* El rotulo de un si/no: verde si esta, rojo si no. Rojo y no gris porque una
+   coleccion inactiva no es un detalle, es que las clientas no la ven. */
+.adm-rotulo-si { color: var(--color-success-strong); }
+.adm-rotulo-no { color: var(--color-error); }
+
+.adm-riel-si { background: var(--color-success-strong); }
+.adm-riel-no { background: var(--color-text-disabled); }
+
+/* ── AVISO DE RESULTADO ─────────────────────────────────────────────────────
+   Lo que aparece despues de guardar: salio bien o no salio. */
+.adm-resultado {
+    padding: 1rem 1.5rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.adm-resultado--bien { background: var(--color-success-bg); color: var(--color-success-deep); }
+.adm-resultado--mal  { background: var(--color-error-bg);   color: var(--color-error-strong); }

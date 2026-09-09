@@ -313,14 +313,7 @@ const LibraryPicker = ({
                             <button
                                 type="button"
                                 onClick={() => setShowFacets(s => !s)}
-                                style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: '8px',
-                                    padding: '8px 14px', borderRadius: '12px', cursor: 'pointer',
-                                    border: '1px solid ' + (activeFacetCount > 0 ? '#8f0653' : '#e2e8f0'),
-                                    background: activeFacetCount > 0 ? '#fdf2f8' : '#fff',
-                                    color: activeFacetCount > 0 ? '#8f0653' : '#475569',
-                                    fontSize: '13px', fontWeight: '700',
-                                }}
+                                className={`adm-desplegador ${activeFacetCount > 0 ? 'adm-estado-marcado' : 'adm-estado-neutro'}`}
                             >
                                 <SlidersHorizontal size={15} />
                                 Filtros{activeFacetCount > 0 ? ` (${activeFacetCount})` : ''}
@@ -349,13 +342,7 @@ const LibraryPicker = ({
                                                             key={v}
                                                             type="button"
                                                             onClick={() => toggleFacet(fd.field, v)}
-                                                            style={{
-                                                                padding: '5px 12px', borderRadius: '999px', cursor: 'pointer',
-                                                                fontSize: '12px', fontWeight: '600',
-                                                                border: '1px solid ' + (on ? '#8f0653' : '#e2e8f0'),
-                                                                background: on ? '#8f0653' : '#fff',
-                                                                color: on ? '#fff' : '#475569',
-                                                            }}
+                                                            className={`adm-etiqueta-filtro ${on ? 'adm-estado-activo' : 'adm-estado-neutro'}`}
                                                         >
                                                             {v}
                                                         </button>

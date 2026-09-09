@@ -228,11 +228,7 @@ const SettingsManager = () => {
             </header>
 
             {message && (
-                <div style={{ 
-                    padding: '16px 24px', 
-                    borderRadius: '16px', 
-                    background: message.type === 'success' ? '#ecfdf5' : '#fef2f2',
-                    color: message.type === 'success' ? '#059669' : '#dc2626',
+                <div className={`adm-resultado ${message.type === 'success' ? 'adm-resultado--bien' : 'adm-resultado--mal'}`} style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px',
@@ -792,13 +788,7 @@ const SettingsManager = () => {
                                                                 : [...actuales, String(prod.id)]
                                                         });
                                                     }}
-                                                    style={{
-                                                        border: `1px solid ${elegido ? '#be185d' : '#e2e8f0'}`,
-                                                        background: elegido ? '#fce7f3' : '#fff',
-                                                        color: elegido ? '#be185d' : '#64748b',
-                                                        borderRadius: '8px', padding: '5px 10px', fontSize: '12px',
-                                                        fontWeight: 700, cursor: 'pointer'
-                                                    }}>
+                                                    className={`adm-etiqueta-filtro ${elegido ? 'adm-estado-marcado' : 'adm-estado-neutro'}`}>
                                                     {prod.name}
                                                 </button>
                                             );

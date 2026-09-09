@@ -18,6 +18,7 @@ import { estadoDeProduccion, TONOS } from '../../../../utils/produccion';
 import { imprimirDocumento } from '../../../../utils/impresion';
 import estilosImpresion from './ShippingLabelPrinter.impresion.css?raw';
 import { useHasta } from '../../../../hooks/useCorte';
+import { formatearTelefono } from '../../../../utils/telefono';
 
 /**
  * Qué pedidos se ven. Existe porque la pantalla traía TODOS —nuevos, en
@@ -512,13 +513,7 @@ const ShippingLabelPrinter = () => {
                                         type="button"
                                         onClick={() => setVista(clave)}
                                         title={v.detalle}
-                                        style={{
-                                            border: `1.5px solid ${activa ? '#8f0653' : '#e2e8f0'}`,
-                                            background: activa ? '#8f0653' : '#fff',
-                                            color: activa ? '#fff' : '#475569',
-                                            borderRadius: '20px', padding: '4px 11px', cursor: 'pointer',
-                                            fontSize: '11px', fontWeight: '800', whiteSpace: 'nowrap',
-                                        }}
+                                        className={`et-pildora${activa ? ' et-pildora--activa' : ''}`}
                                     >
                                         {v.etiqueta} ({n})
                                     </button>
@@ -569,22 +564,10 @@ const ShippingLabelPrinter = () => {
                                     <div
                                         key={c.id}
                                         onClick={() => despachable && toggleSelect(c)}
-                                        style={{
-                                            padding: '12px',
-                                            borderRadius: '12px',
-                                            border: `1.5px solid ${isSel ? '#8f0653' : '#e2e8f0'}`,
-                                            background: isSel ? '#fdf2f8' : '#fff',
-                                            cursor: despachable ? 'pointer' : 'default',
-                                            opacity: despachable ? 1 : 0.6,
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            transition: 'all 0.2s',
-                                            boxShadow: isSel ? '0 4px 12px -2px rgba(143,6,83,0.1)' : 'none'
-                                        }}
+                                        className={`et-pedido${isSel ? ' et-pedido--elegido' : ''}${despachable ? '' : ' et-pedido--bloqueado'}`}
                                     >
                                         <div className="et-fila">
-                                            <div style={{ color: isSel ? '#8f0653' : '#cbd5e1' }}>
+                                            <div className="et-marca">
                                                 {!despachable
                                                     ? <span className="et-espaciador" />
                                                     : isSel ? <CheckSquare size={18} /> : <Square size={18} />}
@@ -712,13 +695,13 @@ const ShippingLabelPrinter = () => {
                             <div className="et-fila-botones">
                                 <button
                                     onClick={() => setInkMode('eco')}
-                                    style={{ flex: 1, height: '38px', borderRadius: '10px', border: `1.5px solid ${inkMode === 'eco' ? '#059669' : '#cbd5e1'}`, background: inkMode === 'eco' ? '#ecfdf5' : '#fff', color: inkMode === 'eco' ? '#065f46' : '#475569', fontWeight: '800', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                                    className={`et-tinta et-tinta--eco${inkMode === 'eco' ? ' et-tinta--activa' : ''}`}
                                 >
                                     ⚡ Eco
                                 </button>
                                 <button
                                     onClick={() => setInkMode('standard')}
-                                    style={{ flex: 1, height: '38px', borderRadius: '10px', border: `1.5px solid ${inkMode === 'standard' ? '#8f0653' : '#cbd5e1'}`, background: inkMode === 'standard' ? '#fdf2f8' : '#fff', color: inkMode === 'standard' ? '#8f0653' : '#475569', fontWeight: '800', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                                    className={`et-tinta et-tinta--estandar${inkMode === 'standard' ? ' et-tinta--activa' : ''}`}
                                 >
                                     🎨 Estándar
                                 </button>
@@ -832,7 +815,7 @@ const ShippingLabelPrinter = () => {
 
                                                         <div className="et-etiqueta-lineas">
                                                             {cli?.rut && <div><strong>RUT:</strong> {cli.rut}</div>}
-                                                            {cli?.telefono && <div><strong>TEL:</strong> {cli.telefono}</div>}
+                                                            {cli?.telefono && <div><strong>TEL:</strong> {formatearTelefono(cli.telefono)}</div>}
                                                             {cli?.email_personal && <div className="et-dato">{cli.email_personal}</div>}
                                                         </div>
 
@@ -927,7 +910,7 @@ const ShippingLabelPrinter = () => {
 
                                                     <div className="et-separacion-impresion">
                                                         {cli?.rut && <div className="info-row"><strong>RUT:</strong> {cli.rut}</div>}
-                                                        {cli?.telefono && <div className="info-row"><strong>TEL:</strong> {cli.telefono}</div>}
+                                                        {cli?.telefono && <div className="info-row"><strong>TEL:</strong> {formatearTelefono(cli.telefono)}</div>}
                                                         {cli?.email_personal && <div className="info-row">{cli.email_personal}</div>}
                                                     </div>
 

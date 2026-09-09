@@ -242,8 +242,8 @@ const CollectionManager = () => {
                                     <div className="coll-manager-input-header">
                                         <label className="coll-manager-label-upper adm-sin-margen">Nombre de la Colección</label>
                                         <div className="coll-manager-toggle-wrap" onClick={() => setFormData(p => ({ ...p, is_active: !p.is_active }))}>
-                                            <span className="coll-manager-toggle-text" style={{ color: formData.is_active ? '#16a34a' : '#ef4444' }}>{formData.is_active ? 'COLECCIÓN ACTIVA' : 'COLECCIÓN INACTIVA'}</span>
-                                            <div className="coll-manager-toggle-track" style={{ background: formData.is_active ? '#16a34a' : '#cbd5e1' }}>
+                                            <span className={`coll-manager-toggle-text ${formData.is_active ? 'adm-rotulo-si' : 'adm-rotulo-no'}`}>{formData.is_active ? 'COLECCIÓN ACTIVA' : 'COLECCIÓN INACTIVA'}</span>
+                                            <div className={`coll-manager-toggle-track ${formData.is_active ? 'adm-riel-si' : 'adm-riel-no'}`}>
                                                 <div className="coll-manager-toggle-thumb" style={{ left: formData.is_active ? '18px' : '2px' }} />
                                             </div>
                                         </div>

@@ -154,14 +154,7 @@ const FilterManager = () => {
                                             <div className="fm-fila-accion">
                                                 <button
                                                     onClick={() => handleToggleCategory(cat.id, cat.is_filterable)}
-                                                    style={{
-                                                        display: 'inline-flex', alignItems: 'center', gap: '6px',
-                                                        padding: '8px 16px', borderRadius: '20px', border: 'none',
-                                                        background: cat.is_filterable ? '#dcfce7' : '#f1f5f9',
-                                                        color: cat.is_filterable ? '#166534' : '#64748b',
-                                                        fontWeight: '700', fontSize: '13px', cursor: 'pointer',
-                                                        transition: 'all 0.2s'
-                                                    }}
+                                                    className={`adm-interruptor${cat.is_filterable ? ' adm-interruptor--si' : ''}`}
                                                 >
                                                     {cat.is_filterable ? <Eye size={16} /> : <EyeOff size={16} />}
                                                     <span>{cat.is_filterable ? 'Filtro Visible' : 'Filtro Oculto'}</span>
