@@ -43,20 +43,45 @@ echo "    quedamos en: $(git log --oneline -1)"
 echo "[3/5] reconstruyendo..."
 $COMPOSE up -d --build
 
-# El proxy NO se reconstruye —usa la imagen oficial de nginx— asi que compose lo
-# deja corriendo tal cual, y su configuracion entra por un bind mount de UN
-# ARCHIVO: nginx/production.conf -> /etc/nginx/conf.d/default.conf.
+# EL PROXY SE RECARGA, NO SE DERRIBA
 #
-# Docker resuelve ese montaje al inodo, no a la ruta. `git pull` no edita el
-# archivo: lo reemplaza, con inodo nuevo. El contenedor se queda mirando el
-# viejo, que ya no existe en el arbol, y sigue sirviendo la configuracion
-# anterior. Ni recargar nginx lo arregla: recarga el archivo viejo.
+# Aca decia `up -d --force-recreate nginx`, y esa linea es la que dejaba la
+# tienda en blanco despues de cada despliegue.
 #
-# Resultado: TODO cambio a nginx que se subio hasta hoy nunca llego a
-# produccion, y el despliegue igual decia "Listo". Recrear el contenedor vuelve
-# a resolver el montaje contra el archivo actual.
-echo "    recreando el proxy para que tome nginx/production.conf..."
-$COMPOSE up -d --force-recreate nginx
+# Estaba por un motivo real: la configuracion entraba por un bind mount de UN
+# ARCHIVO, y Docker resuelve esos montajes al inodo, no a la ruta. `git pull`
+# no edita el archivo, lo reemplaza, con inodo nuevo; el contenedor se quedaba
+# mirando el viejo y servia la configuracion anterior. Recrearlo era la unica
+# forma de que tomara la nueva.
+#
+# El precio de recrearlo eran unos segundos con el puerto 80 cerrado. Y caian
+# justo en el peor momento: cada build renombra todos los archivos del frontend
+# -llevan un hash del contenido-, asi que en ese instante la cache de Cloudflare
+# no tiene ninguno y todo el mundo va al origen. El que pidiera ahi recibia un
+# 522, y Cloudflare GUARDA ese 522 pegado a la URL. Un archivo asi basta para
+# dejar la tienda en blanco, y no se cura sola: hay que purgar a mano.
+#
+# Ahora se monta el DIRECTORIO `nginx/conf.d` en vez del archivo. Un montaje de
+# directorio se resuelve por ruta en cada acceso, asi que el reemplazo que hace
+# git SI se ve desde adentro. Comprobado en el servidor: con el montaje de
+# archivo el contenedor seguia leyendo el contenido viejo; con el de directorio
+# lee el nuevo.
+#
+# Con eso, alcanza con recargar. `nginx -s reload` levanta procesos nuevos con
+# la configuracion nueva y retira los viejos cuando terminan lo que estaban
+# sirviendo: el puerto no se cierra en ningun momento y no se corta una sola
+# peticion.
+#
+# `nginx -t` primero: si la configuracion tiene un error de sintaxis, recargar
+# la rechaza y el proxy sigue con la anterior. Preferimos enterarnos aca.
+echo "    recargando el proxy con nginx/conf.d/production.conf..."
+if docker ps --format '{{.Names}}' | grep -qx vistiendome_proxy_prod; then
+    docker exec vistiendome_proxy_prod nginx -t
+    docker exec vistiendome_proxy_prod nginx -s reload
+else
+    # No estaba corriendo: no hay nada que recargar, hay que levantarlo.
+    $COMPOSE up -d nginx
+fi
 
 # 4. Que compile no significa que ande.
 echo "[4/5] comprobando que responda..."
@@ -107,9 +132,9 @@ api="$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/openapi.json 
 # ocurra, y si ya ocurrio, lo AVISA aca en vez de dejar que lo descubra una
 # clienta con la pantalla en blanco.
 echo "[5/5] calentando la cache del borde..."
-dominio="$(grep -m1 'server_name' nginx/production.conf | awk '{print $2}' | tr -d ';')"
+dominio="$(grep -m1 'server_name' nginx/conf.d/production.conf | awk '{print $2}' | tr -d ';')"
 if [ -z "$dominio" ]; then
-    echo "    no se pudo leer el dominio de nginx/production.conf; se salta"
+    echo "    no se pudo leer el dominio de nginx/conf.d/production.conf; se salta"
 else
     lista="$(mktemp)"; caidos="$(mktemp)"
     # `-4` A PROPOSITO

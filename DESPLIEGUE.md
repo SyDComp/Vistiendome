@@ -33,7 +33,7 @@ PermitRootLogin prohibit-password
 - `docker-compose-prod.yml` — base, backend, frontend y nginx como proxy.
 - `server/Dockerfile.prod` y `client/Dockerfile.prod` (build multi-etapa: el
   cliente se compila y sólo viaja el `dist`).
-- `nginx/production.conf` — dominio `vistiendomechile.com`, proxy a `/api`,
+- `nginx/conf.d/production.conf` — dominio `vistiendomechile.com`, proxy a `/api`,
   `/ws` y `/media`.
 - `client/nginx.conf` — SPA con `try_files`, assets cacheados un año y el
   `index.html` sin caché, que es la combinación correcta.
