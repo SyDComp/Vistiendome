@@ -91,13 +91,8 @@ const FilterDrawer = ({
 
         return (
             <div key={categoryKey} className="fd-columna">
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: `8px 0 8px ${depth * 16}px`,
-                    borderBottom: depth === 0 ? '1px solid #f8fafc' : 'none',
-                    marginTop: depth === 0 ? '8px' : '0'
-                }}>
+                <div className={`cat-rama${depth === 0 ? ' cat-rama--raiz' : ''}`}
+                style={{ '--nivel': depth }}>
                     <button
                         type="button"
                         onClick={(e) => {
@@ -108,18 +103,7 @@ const FilterDrawer = ({
                                 handleCategorySelect(cat.slug);
                             }
                         }}
-                        style={{
-                            flex: 1,
-                            background: 'none',
-                            border: 'none',
-                            color: isSelected && !hasChildren ? '#8f0653' : '#1e1b4b',
-                            fontWeight: isSelected && !hasChildren ? '800' : (depth === 0 ? '700' : '500'),
-                            fontSize: depth === 0 ? '14px' : '13px',
-                            cursor: 'pointer',
-                            textAlign: 'left',
-                            transition: 'color 0.2s',
-                            padding: '4px 0'
-                        }}
+                        className={`cat-rama-nombre${isSelected && !hasChildren ? ' cat-rama-nombre--elegida' : ''}`}
                     >
                         {cat.name}
                     </button>
@@ -131,17 +115,7 @@ const FilterDrawer = ({
                                 e.stopPropagation();
                                 toggleCategoryAccordion(categoryKey);
                             }}
-                            style={{
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                padding: '4px 8px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: isSelected ? '#8f0653' : '#1e1b4b',
-                                transition: 'color 0.2s'
-                            }}
+                            className={`cat-rama-flecha${isSelected ? ' cat-rama-flecha--elegida' : ''}`}
                         >
                             {expandedCategories[categoryKey] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                         </button>
@@ -160,19 +134,7 @@ const FilterDrawer = ({
                                     e.preventDefault();
                                     handleCategorySelect(cat.slug);
                                 }}
-                                style={{
-                                    flex: 1,
-                                    background: 'none',
-                                    border: 'none',
-                                    color: isSelected ? '#8f0653' : '#64748b',
-                                    fontWeight: isSelected ? '800' : '500',
-                                    fontSize: '13px',
-                                    cursor: 'pointer',
-                                    textAlign: 'left',
-                                    transition: 'color 0.2s',
-                                    padding: '4px 0',
-                                    fontStyle: 'italic'
-                                }}
+                                className={`cat-subrama${isSelected ? ' cat-subrama--elegida' : ''}`}
                             >
                                 Ver todo {cat.name}
                             </button>

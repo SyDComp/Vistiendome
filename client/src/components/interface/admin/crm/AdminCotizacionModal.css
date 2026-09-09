@@ -442,3 +442,45 @@
     gap: 0.75rem;
     background-color: var(--color-bg);
 }
+
+/* Las dos pestanas de arriba: cotizar a una clienta que ya esta, o a una
+   nueva. La elegida se levanta con fondo blanco sobre el riel gris. */
+.cot-pestana {
+    background: transparent;
+    color: var(--color-text-muted);
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.cot-pestana--elegida {
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+}
+/* La de "cliente nuevo" se marca con el color de la marca: es la que crea algo
+   que no existia, y conviene que se note cual de las dos esta puesta. */
+.cot-pestana--nueva.cot-pestana--elegida { color: var(--color-brand); }
+
+/* El boton que cierra la cotizacion. El degradado es el unico del panel: marca
+   que esta es la accion que termina el trabajo. */
+.cot-guardar {
+    background: linear-gradient(135deg, var(--color-brand) 0%, var(--marca-fucsia) 100%);
+    color: var(--color-surface);
+    border: none;
+    border-radius: 0.625rem;
+    padding: 0.625rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(143, 6, 83, 0.3);
+    opacity: 1;
+}
+.cot-guardar:disabled { cursor: not-allowed; opacity: 0.7; }

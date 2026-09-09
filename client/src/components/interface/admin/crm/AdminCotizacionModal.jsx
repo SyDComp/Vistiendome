@@ -476,22 +476,14 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                         <button
                                             type="button"
                                             onClick={() => setClientMode('select')}
-                                            style={{
-                                                background: clientMode === 'select' ? '#ffffff' : 'transparent',
-                                                color: clientMode === 'select' ? '#1e293b' : '#64748b',
-                                                border: 'none', borderRadius: '6px', padding: '6px 12px', fontSize: '12px', fontWeight: '700', cursor: 'pointer'
-                                            }}
+                                            className={`cot-pestana${clientMode === 'select' ? ' cot-pestana--elegida' : ''}`}
                                         >
                                             Cliente Existente
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => { setClientMode('new'); setSelectedCliente(null); }}
-                                            style={{
-                                                background: clientMode === 'new' ? '#ffffff' : 'transparent',
-                                                color: clientMode === 'new' ? '#8f0653' : '#64748b',
-                                                border: 'none', borderRadius: '6px', padding: '6px 12px', fontSize: '12px', fontWeight: '700', cursor: 'pointer'
-                                            }}
+                                            className={`cot-pestana cot-pestana--nueva${clientMode === 'new' ? ' cot-pestana--elegida' : ''}`}
                                         >
                                             + Nuevo Cliente
                                         </button>
@@ -867,14 +859,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                             type="button"
                             onClick={handleSubmit}
                             disabled={submitting}
-                            style={{
-                                background: 'linear-gradient(135deg, #8f0653 0%, #d946ef 100%)',
-                                color: '#ffffff', border: 'none', borderRadius: '10px', padding: '10px 24px',
-                                fontSize: '14px', fontWeight: '800', cursor: submitting ? 'not-allowed' : 'pointer',
-                                display: 'flex', alignItems: 'center', gap: '8px',
-                                boxShadow: '0 4px 12px rgba(143, 6, 83, 0.3)',
-                                opacity: submitting ? 0.7 : 1
-                            }}
+                            className="cot-guardar"
                         >
                             <Check size={18} strokeWidth={3} /> {submitting ? 'Guardando en el CRM...' : 'Crear y Guardar Cotización'}
                         </button>

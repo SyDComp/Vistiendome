@@ -1,160 +1,79 @@
-.filter-drawer-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
-    z-index: 2000;
-    animation: fadeIn 0.3s ease-out;
-}
+/* El arbol de filtros del catalogo: categorias, y dentro de cada una sus
+   subcategorias.
+   ==========================================================================
 
-.filter-drawer-container {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    max-width: 400px;
-    background: var(--color-surface);
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
-    z-index: 2001;
-    display: flex;
-    flex-direction: column;
-    animation: slideInRight 0.3s ease-out;
-    height: 100dvh;
-}
+   Todo esto vivia dentro del componente, con el color repetido en cada nivel:
+   `isSelected ? '#8f0653' : '#1e1b4b'` en el nombre, otro igual en la flecha,
+   otro en la subcategoria. El mismo estado escrito cuatro veces.
 
-.filter-drawer-header {
-    padding: 20px;
-    border-bottom: 1px solid var(--color-border-subtle);
+   La sangria SI depende de un dato -a que profundidad esta la rama- y por eso
+   llega como variable en vez de estar aqui: el arbol no sabe de antemano
+   cuantos niveles va a tener. */
+
+.cat-rama {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    /* 1rem por nivel: suficiente para que se vea la jerarquia sin dejar las
+       ramas hondas contra el borde derecho. */
+    padding: 0.5rem 0 0.5rem calc(var(--nivel, 0) * 1rem);
+    border-bottom: none;
+    margin-top: 0;
 }
 
-.filter-drawer-title {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 900;
+/* Solo las categorias de primer nivel se separan con una linea: si cada rama
+   llevara la suya, el panel se leeria como una reja. */
+.cat-rama--raiz {
+    border-bottom: 1px solid var(--color-bg);
+    margin-top: 0.5rem;
+}
+
+.cat-rama-nombre {
+    flex: 1;
+    background: none;
+    border: none;
     color: var(--color-admin-dark);
+    font-weight: 500;
+    font-size: 0.8125rem;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    transition: color 0.2s;
+    padding: 0.25rem 0;
 }
+.cat-rama--raiz > .cat-rama-nombre { font-weight: 700; font-size: 0.875rem; }
 
-.filter-drawer-close {
+/* Elegida: se pinta con el color de la marca y engorda. Solo las hojas del
+   arbol, porque en una rama con hijos el color diria "filtrando por esto"
+   cuando en realidad se acaba de abrir. */
+.cat-rama-nombre--elegida { color: var(--color-brand); font-weight: 800; }
+
+.cat-rama-flecha {
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--color-text-muted);
-    padding: 4px;
+    padding: 0.25rem 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.filter-drawer-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
-    -webkit-overflow-scrolling: touch;
-}
-
-.filter-section {
-    margin-bottom: 24px;
-}
-
-.filter-section-toggle {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 12px 0;
-    border: none;
-    background: none;
-    cursor: pointer;
-    border-bottom: 1px solid var(--color-bg);
-    touch-action: manipulation;
-}
-
-.filter-section-title {
-    font-weight: 800;
-    font-size: 14px;
     color: var(--color-admin-dark);
-    text-transform: uppercase;
+    transition: color 0.2s;
 }
+.cat-rama-flecha--elegida { color: var(--color-brand); }
 
-.filter-options-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 16px;
-}
-
-.filter-option-btn {
-    padding: 8px 16px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 700;
-    border: 1px solid var(--color-border);
-    background: var(--color-surface);
+/* Una subcategoria: en cursiva, para distinguirla de su categoria madre sin
+   necesidad de otra sangria. */
+.cat-subrama {
+    flex: 1;
+    background: none;
+    border: none;
     color: var(--color-text-muted);
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    touch-action: manipulation;
-}
-
-.filter-option-btn.active {
-    border-color: var(--color-brand);
-    background: var(--color-brand-lighter);
-    color: var(--color-brand);
-}
-
-.filter-option-btn.active-primary {
-    border-color: var(--color-brand);
-    background: var(--color-brand);
-    color: var(--color-surface);
-}
-
-.filter-price-range {
-    margin-top: 16px;
-    color: var(--color-text-muted);
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.filter-drawer-footer {
-    padding: 20px 20px calc(env(safe-area-inset-bottom, 20px) + 20px);
-    border-top: 1px solid var(--color-border-subtle);
-    display: flex;
-    gap: 12px;
-    background: var(--color-surface);
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideInRight {
-    from { transform: translateX(100%); }
-    to { transform: translateX(0); }
-}
-
-/* Lo que estaba escrito como estilos sueltos dentro del JSX. Los dos grupos de
-   filtros eran la misma declaración repetida, con la única diferencia de un
-   margen arriba: ahora es una clase y una variante. */
-.fd-columna { display: flex; flex-direction: column; width: 100%; }
-.fd-grupo { display: flex; flex-direction: column; gap: 0; margin-bottom: 1.5rem; }
-.fd-grupo--separado { margin-top: 1rem; }
-.fd-fila { display: flex; gap: 0.5rem; align-items: center; margin-top: 1rem; }
-.fd-campo {
-    width: 100%;
-    padding: 0.5rem;
-    border-radius: 0.5rem;
-    border: 1px solid var(--color-border);
-    outline: none;
+    font-weight: 500;
+    font-size: 0.8125rem;
     font-family: inherit;
-    /* Debajo de 1rem el teléfono hace zoom solo al enfocar el campo. */
-    font-size: max(1rem, 0.875rem);
+    cursor: pointer;
+    text-align: left;
+    transition: color 0.2s;
+    padding: 0.25rem 0;
+    font-style: italic;
 }
-.fd-flexible { flex: 1; gap: 0.5rem; }
-.fd-flexible-doble { flex: 2; }
+.cat-subrama--elegida { color: var(--color-brand); font-weight: 800; }

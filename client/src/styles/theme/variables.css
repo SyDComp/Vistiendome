@@ -54,6 +54,8 @@
   --marca-300: #c461a2;
   --marca-400: #be185d;
   --marca-500: #8f0653;
+  /* El extremo claro del degradado del boton que cierra una cotizacion. */
+  --marca-fucsia: #d946ef;
   --marca-700: #6d0440;
 
   /* Panel — el indigo del area de administracion. No es una variante del

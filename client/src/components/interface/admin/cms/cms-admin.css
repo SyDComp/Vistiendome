@@ -326,3 +326,60 @@
         gap: 0.75rem;
     }
 }
+
+/* La tarjeta de un bloque en la lista del gestor de portada.
+   El resaltado al pasar el raton era un estado de React -`hoveredSectionId`-
+   que redibujaba la lista ENTERA en cada movimiento, para hacer lo que `:hover`
+   hace sin costo. */
+.cms-pg-tarjeta {
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    padding: 1rem 1.25rem;
+    border-radius: 1.25rem;
+    transition: all 0.2s;
+    position: relative;
+    box-shadow: none;
+}
+/* Un bloque recien agregado que todavia no se guarda. */
+.cms-pg-tarjeta--nueva {
+    background: var(--color-bg);
+    border-color: var(--color-bg-subtle);
+}
+/* Un bloque oculto en la web: se ve en la lista, apagado. */
+.cms-pg-tarjeta--oculta { opacity: 0.6; }
+
+.cms-pg-tarjeta:hover {
+    border-color: var(--color-brand);
+    box-shadow: 0 10px 25px rgba(143, 6, 83, 0.15);
+}
+
+/* El espejo del sitio, y la hoja que va dentro. `--telefono` es el modo que
+   eligio la duena para mirar su portada, no el ancho de la ventana. */
+.cms-pg-espejo {
+    flex: 1;
+    background: var(--color-surface);
+    border-radius: 1.5rem;
+    overflow-y: auto;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin: 0;
+    width: 100%;
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 0.625rem;
+}
+.cms-pg-espejo--telefono {
+    border-radius: 0;
+    margin: 0 auto;
+    width: min(23.4375rem, 100%);
+}
+
+.cms-pg-hoja {
+    margin: 0 auto;
+    width: 75rem;
+    background: var(--color-surface);
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: top center;
+}
+.cms-pg-hoja--telefono { width: min(23.4375rem, 100%); border-radius: 0; }

@@ -107,13 +107,8 @@ const AnalyticsModule = () => {
                                     <button
                                         key={m.key}
                                         onClick={() => setChartMetric(m.key)}
-                                        style={{
-                                            border: '1px solid ' + (chartMetric === m.key ? m.color : '#e2e8f0'),
-                                            background: chartMetric === m.key ? m.color : '#fff',
-                                            color: chartMetric === m.key ? '#fff' : '#64748b',
-                                            borderRadius: '8px', padding: '6px 12px', fontSize: '12px',
-                                            fontWeight: '700', cursor: 'pointer',
-                                        }}>
+                                        className={`ana-selector-boton${chartMetric === m.key ? ' ana-selector-boton--activo' : ''}`}
+                                        style={{ '--metrica-color': m.color }}>
                                         {m.label}
                                     </button>
                                 ))}
@@ -219,11 +214,7 @@ const ListCard = ({ title, icon, children, empty, hint }) => {
 const Row = ({ index, name, value, onClick }) => (
     <div
         onClick={onClick}
-        style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
-            padding: '8px 6px', borderBottom: '1px solid #f1f5f9', borderRadius: '6px',
-            cursor: onClick ? 'pointer' : 'default',
-        }}
+        className={`ana-fila-ranking${onClick ? ' ana-fila-ranking--pulsable' : ''}`}
         onMouseEnter={onClick ? (e) => { e.currentTarget.style.background = '#faf5f8'; } : undefined}
         onMouseLeave={onClick ? (e) => { e.currentTarget.style.background = 'transparent'; } : undefined}>
         <div className="ana-fila-izquierda">

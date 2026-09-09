@@ -54,7 +54,6 @@ const CMSPageManager = ({
     const [dragOverIndex, setDragOverIndex] = useState(null);
     const [editingTitleId, setEditingTitleId] = useState(null);
     const [previewDevice, setPreviewDevice] = useState('desktop'); // 'desktop' o 'mobile'
-    const [hoveredSectionId, setHoveredSectionId] = useState(null);
     const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
     const [isReordering, setIsReordering] = useState(false);
 
@@ -267,24 +266,10 @@ const CMSPageManager = ({
                     ) : (
                         sections.map((section, index) => {
                             const isNew = typeof section.id === 'string' && section.id.startsWith('temp_');
-                            const isHovered = hoveredSectionId === section.id;
                             return (
                                 <div
                                     key={section.id}
-                                    className="cms-pg-fila"
-                                    onPointerEnter={() => setHoveredSectionId(section.id)}
-                                    onPointerLeave={() => setHoveredSectionId(null)}
-                                    style={{
-                                        background: isNew ? '#f8fafc' : '#fff',
-                                        border: '2px solid',
-                                        borderColor: isHovered ? '#8f0653' : (isNew ? '#f1f5f9' : '#e2e8f0'),
-                                        padding: '16px 20px',
-                                        borderRadius: '20px',
-                                        opacity: section.is_active ? 1 : 0.6,
-                                        transition: 'all 0.2s',
-                                        position: 'relative',
-                                        boxShadow: isHovered ? '0 10px 25px rgba(143,6,83,0.15)' : 'none',
-                                    }}
+                                    className={`cms-pg-fila cms-pg-tarjeta${isNew ? ' cms-pg-tarjeta--nueva' : ''}${section.is_active ? '' : ' cms-pg-tarjeta--oculta'}`}
                                 >
                                     <div className="cms-pg-fila-media">
                                         {isReordering && (
@@ -363,17 +348,7 @@ const CMSPageManager = ({
                             </div>
                         </div>
 
-                        <div style={{
-                            flex: 1,
-                            background: '#fff',
-                            borderRadius: previewDevice === 'mobile' ? '0px' : '24px',
-                            overflowY: 'auto',
-                            boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.05)',
-                            margin: previewDevice === 'mobile' ? '0 auto' : '0',
-                            width: previewDevice === 'mobile' ? 'min(375px, 100%)' : '100%',
-                            transition: 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                            padding: '10px'
-                        }}>
+                        <div className={`cms-pg-espejo${previewDevice === 'mobile' ? ' cms-pg-espejo--telefono' : ''}`}>
                             <CMSRenderer
                                 data={sections}
                                 previewMode={true}
@@ -432,16 +407,7 @@ const CMSPageManager = ({
                         </button>
                     </div>
                     <div className="cms-pg-lienzo">
-                        <div style={{
-                            margin: '0 auto',
-                            width: previewDevice === 'mobile' ? 'min(375px, 100%)' : '1200px',
-                            background: '#fff',
-                            borderRadius: previewDevice === 'mobile' ? '0px' : '24px',
-                            boxShadow: '0 20px 50px rgba(0,0,0,0.1)',
-                            overflow: 'hidden',
-                            transition: 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                            transformOrigin: 'top center'
-                        }}>
+                        <div className={`cms-pg-hoja${previewDevice === 'mobile' ? ' cms-pg-hoja--telefono' : ''}`}>
                             <CMSRenderer
                                 data={sections}
                                 previewMode={true}
