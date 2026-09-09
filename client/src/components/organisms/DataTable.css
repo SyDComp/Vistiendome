@@ -1,8 +1,8 @@
 .datatable-wrapper {
-    background: #ffffff;
+    background: var(--color-surface);
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     margin-bottom: 2rem;
     overflow: hidden;
     /* Contains the scroll container */
@@ -30,7 +30,7 @@
 .datatable td {
     padding: 1rem;
     text-align: left;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--color-border);
     white-space: nowrap;
     /* Prevent text wrapping from breaking layout */
 }
@@ -41,7 +41,7 @@
 }
 
 .datatable th {
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
     font-weight: 600;
     color: #4a5568;
     position: sticky;
@@ -50,7 +50,7 @@
 }
 
 .datatable tbody tr:hover {
-    background-color: #f8fafc;
+    background-color: var(--color-bg-elevated);
 }
 
 /* Pagination Styles */
@@ -59,8 +59,8 @@
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    background: #f8fafc;
-    border-top: 1px solid #e2e8f0;
+    background: var(--color-bg-elevated);
+    border-top: 1px solid var(--color-border);
     flex-wrap: wrap;
     gap: 1rem;
 }
@@ -95,7 +95,7 @@
 .btn-page:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background: #f1f5f9;
+    background: var(--color-bg-subtle);
 }
 
 .page-numbers {

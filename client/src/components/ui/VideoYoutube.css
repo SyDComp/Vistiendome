@@ -16,4 +16,4 @@
 }
 .yt-play svg { filter: drop-shadow(0 2px 8px rgba(0,0,0,.4)); opacity: .92; }
 .yt-fachada:hover .yt-play svg, .yt-fachada:focus-visible .yt-play svg { opacity: 1; transform: scale(1.06); transition: transform .15s; }
-.yt-fachada:focus-visible { outline: 3px solid #8f0653; outline-offset: 2px; }
+.yt-fachada:focus-visible { outline: 3px solid var(--color-brand); outline-offset: 2px; }

@@ -32,16 +32,16 @@
 
 .checkout-header {
     padding: 24px;
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--color-border);
     flex-shrink: 0;
     width: 100%;
 }
-.checkout-header h2 { margin: 0; font-size: 1.25rem; font-weight: 800; color: #1e1b4b; }
-.btn-close-modal { background: none; border: none; cursor: pointer; color: #94a3b8; }
+.checkout-header h2 { margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--color-admin-dark); }
+.btn-close-modal { background: none; border: none; cursor: pointer; color: var(--color-text-placeholder); }
 
 .checkout-form-body { 
     padding: 24px; 
@@ -49,46 +49,46 @@
     overflow-x: hidden;
     width: 100%;
 }
-.form-intro { font-size: 14px; color: #64748b; margin-bottom: 24px; line-height: 1.5; }
+.form-intro { font-size: 14px; color: var(--color-text-muted); margin-bottom: 24px; line-height: 1.5; }
 
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%;}
 .input-group.full { grid-column: span 2; }
 .input-group { display: flex; flex-direction: column; gap: 8px; width: 100%;}
-.input-group label { font-size: 13px; font-weight: 700; color: #1e1b4b; display: flex; align-items: center; gap: 6px; }
+.input-group label { font-size: 13px; font-weight: 700; color: var(--color-admin-dark); display: flex; align-items: center; gap: 6px; }
 .input-group input {
     height: 48px;
     padding: 0 16px;
     border-radius: 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     font-size: 14px;
     transition: border-color 0.2s, box-shadow 0.2s;
     width: 100%;
 }
-.input-group input:focus, .styled-select:focus { outline: none; border-color: #1e1b4b; box-shadow: 0 0 0 3px rgba(30, 27, 75, 0.05); }
-.input-group input.input-error { border-color: #ef4444; background: #fffafb; }
-.error-text { font-size: 12px; color: #ef4444; font-weight: 600; }
+.input-group input:focus, .styled-select:focus { outline: none; border-color: var(--color-admin-dark); box-shadow: 0 0 0 3px rgba(30, 27, 75, 0.05); }
+.input-group input.input-error { border-color: var(--color-error); background: #fffafb; }
+.error-text { font-size: 12px; color: var(--color-error); font-weight: 600; }
 /* Dos opciones que se excluyen y hay que comparar de un
    vistazo: botones, no un desplegable que las esconde. */
 .modo-entrega { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .modo-op {
     display: flex; flex-direction: column; gap: 2px; align-items: flex-start;
-    padding: 12px 14px; border-radius: 12px; border: 1.5px solid #e2e8f0;
-    background: #fff; cursor: pointer; text-align: left; font: inherit;
+    padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--color-border);
+    background: var(--color-surface); cursor: pointer; text-align: left; font: inherit;
 }
-.modo-op strong { font-size: 14px; color: #1e1b4b; }
-.modo-op span { font-size: 12px; color: #64748b; line-height: 1.3; }
-.modo-op.activa { border-color: #8f0653; background: #fdf2f8; }
-.modo-op.activa strong { color: #8f0653; }
+.modo-op strong { font-size: 14px; color: var(--color-admin-dark); }
+.modo-op span { font-size: 12px; color: var(--color-text-muted); line-height: 1.3; }
+.modo-op.activa { border-color: var(--color-brand); background: var(--color-brand-lighter); }
+.modo-op.activa strong { color: var(--color-brand); }
 @media (max-width: 520px) { .modo-entrega { grid-template-columns: 1fr; } }
 
 .styled-select {
     height: 48px;
     padding: 0 16px;
     border-radius: 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     font-size: 14px;
     background-color: white;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     cursor: pointer;
     transition: border-color 0.2s, box-shadow 0.2s;
     width: 100%;
@@ -102,7 +102,7 @@
 .btn-cancel {
     flex: 1;
     height: 52px;
-    background: #f1f5f9;
+    background: var(--color-bg-subtle);
     color: #475569;
     border: none;
     border-radius: 14px;
@@ -112,7 +112,7 @@
 .checkout-fallo {
     display: flex; flex-direction: column; gap: 4px;
     margin: 0 0 12px; padding: 12px 14px; border-radius: 12px;
-    background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
+    background: var(--color-error-bg); border: 1px solid #fecaca; color: #991b1b;
     font-size: 13px; line-height: 1.4;
 }
 .checkout-fallo strong { font-size: 13px; }
@@ -120,7 +120,7 @@
 .btn-submit-whatsapp {
     flex: 2;
     height: 52px;
-    background: #1e1b4b;
+    background: var(--color-admin-dark);
     color: white;
     border: none;
     border-radius: 14px;

@@ -13,10 +13,10 @@
 }
 
 .color-manager-edit-card {
-    background: #fff;
+    background: var(--color-surface);
     padding: 40px;
     border-radius: 32px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     box-shadow: 0 10px 30px rgba(0,0,0,0.03);
 }
 
@@ -30,7 +30,7 @@
     display: block;
     font-size: 12px;
     font-weight: 800;
-    color: #8f0653;
+    color: var(--color-brand);
     text-transform: uppercase;
     margin-bottom: 8px;
 }
@@ -44,14 +44,14 @@
     left: 16px;
     top: 50%;
     transform: translateY(-50%);
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
 }
 
 .color-manager-input-text {
     width: 100%;
     padding: 16px 16px 16px 48px;
     border-radius: 16px;
-    border: 2px solid #f1f5f9;
+    border: 2px solid var(--color-border-subtle);
     outline: none;
     font-weight: 700;
     font-size: 15px;
@@ -67,8 +67,8 @@
     width: 64px;
     height: 64px;
     border-radius: 16px;
-    border: 3px solid #fff;
-    box-shadow: 0 0 0 1px #e2e8f0;
+    border: 3px solid var(--color-surface);
+    box-shadow: 0 0 0 1px var(--color-border);
     position: relative;
     overflow: hidden;
 }
@@ -92,10 +92,10 @@
     width: 100%;
     padding: 16px 16px 16px 48px;
     border-radius: 16px;
-    border: 2px solid #f1f5f9;
+    border: 2px solid var(--color-border-subtle);
     outline: none;
     font-weight: 800;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     font-family: monospace;
 }
 
@@ -121,7 +121,7 @@
     height: 48px;
     padding: 0 20px;
     border-radius: 14px;
-    border-color: #e2e8f0;
+    border-color: var(--color-border);
 }
 
 .color-manager-create-btn {
@@ -142,27 +142,27 @@
     width: 32px;
     height: 32px;
     border-radius: 10px;
-    border: 2px solid #fff;
-    box-shadow: 0 0 0 1px #e2e8f0;
+    border: 2px solid var(--color-surface);
+    box-shadow: 0 0 0 1px var(--color-border);
 }
 
 .color-manager-dt-name {
     font-weight: 800;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     letter-spacing: -0.3px;
 }
 
 .color-manager-dt-hex {
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
     padding: 4px 10px;
     border-radius: 8px;
-    color: #64748b;
+    color: var(--color-text-muted);
     font-weight: 800;
     font-size: 13px;
 }
 
 .color-manager-dt-slug {
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
     font-size: 12px;
 }
 
@@ -170,16 +170,16 @@
 .color-manager-preview-card {
     margin-top: 32px;
     padding: 32px;
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
     border-radius: 24px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
 }
 
 .color-manager-preview-title {
     margin: 0 0 16px;
     font-size: 13px;
     font-weight: 900;
-    color: #8f0653;
+    color: var(--color-brand);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
@@ -191,10 +191,10 @@
 }
 
 .color-manager-preview-item {
-    background: #fff;
+    background: var(--color-surface);
     padding: 12px;
     border-radius: 16px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -206,14 +206,14 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    border: 2px solid #fff;
+    border: 2px solid var(--color-surface);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .color-manager-preview-name {
     font-size: 10px;
     font-weight: 800;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     text-transform: uppercase;
 }
 

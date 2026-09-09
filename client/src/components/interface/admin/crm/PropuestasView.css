@@ -9,30 +9,30 @@
 
 .propuestas-view { padding: 4px; }
 .prop-encabezado { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:18px; }
-.prop-encabezado h1 { margin:0 0 4px; font-size:22px; font-weight:900; color:#1e1b4b; }
-.prop-encabezado p { margin:0; font-size:13px; color:#64748b; max-width:520px; line-height:1.5; }
+.prop-encabezado h1 { margin:0 0 4px; font-size:22px; font-weight:900; color:var(--color-admin-dark); }
+.prop-encabezado p { margin:0; font-size:13px; color:var(--color-text-muted); max-width:520px; line-height:1.5; }
 .prop-filtros { display:flex; gap:6px; flex-wrap:wrap; }
-.prop-filtros button { border:1px solid #e2e8f0; background:#fff; color:#475569; border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit; }
-.prop-filtros button.activo { background:#8f0653; border-color:#8f0653; color:#fff; }
+.prop-filtros button { border:1px solid var(--color-border); background:var(--color-surface); color:#475569; border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit; }
+.prop-filtros button.activo { background:var(--color-brand); border-color:var(--color-brand); color:var(--color-surface); }
 
-.prop-vacio { color:#64748b; font-size:13.5px; background:#f8fafc; border:1px dashed #e2e8f0; border-radius:12px; padding:26px; text-align:center; }
+.prop-vacio { color:var(--color-text-muted); font-size:13.5px; background:var(--color-bg-elevated); border:1px dashed var(--color-border); border-radius:12px; padding:26px; text-align:center; }
 
 .prop-lista { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
-.prop-lista li { border:1px solid #e2e8f0; border-radius:12px; padding:14px 16px; background:#fff; }
+.prop-lista li { border:1px solid var(--color-border); border-radius:12px; padding:14px 16px; background:var(--color-surface); }
 .prop-fila { display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; }
 .prop-datos { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-.prop-carac { font-size:10.5px; font-weight:800; letter-spacing:.6px; color:#94a3b8; text-transform:uppercase; }
-.prop-valor { font-size:15px; color:#1e1b4b; }
-.prop-veces { display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:800; color:#8f0653; background:#fdf2f8; border-radius:999px; padding:3px 9px; }
+.prop-carac { font-size:10.5px; font-weight:800; letter-spacing:.6px; color:var(--color-text-placeholder); text-transform:uppercase; }
+.prop-valor { font-size:15px; color:var(--color-admin-dark); }
+.prop-veces { display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:800; color:var(--color-brand); background:var(--color-brand-lighter); border-radius:999px; padding:3px 9px; }
 
 .prop-acciones { display:flex; gap:8px; }
 .prop-acciones button { display:flex; align-items:center; gap:6px; border-radius:8px; padding:8px 13px; font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit; border:1px solid transparent; }
-.prop-si { background:#8f0653; color:#fff; }
-.prop-no { background:#fff; color:#64748b; border-color:#e2e8f0; }
+.prop-si { background:var(--color-brand); color:var(--color-surface); }
+.prop-no { background:var(--color-surface); color:var(--color-text-muted); border-color:var(--color-border); }
 
-.prop-faltantes { display:flex; gap:12px; flex-wrap:wrap; margin-top:12px; padding-top:12px; border-top:1px dashed #e2e8f0; }
+.prop-faltantes { display:flex; gap:12px; flex-wrap:wrap; margin-top:12px; padding-top:12px; border-top:1px dashed var(--color-border); }
 .prop-faltantes label { display:flex; flex-direction:column; gap:4px; font-size:11px; font-weight:700; color:#475569; }
-.prop-faltantes input { border:1px solid #cbd5e1; border-radius:8px; padding:6px 9px; font-size:13px; min-width:150px; }
+.prop-faltantes input { border:1px solid var(--color-text-disabled); border-radius:8px; padding:6px 9px; font-size:13px; min-width:150px; }
 .prop-faltantes input[type=color] { padding:2px; height:34px; min-width:56px; }
 
-.prop-quienes { margin-top:10px; font-size:11.5px; color:#94a3b8; }
+.prop-quienes { margin-top:10px; font-size:11.5px; color:var(--color-text-placeholder); }

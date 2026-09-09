@@ -16,8 +16,8 @@
        visita caía en una reserva distinta.
        Se cambia SÓLO acá: es el único lugar donde el logo nombra su tipografía. */
     --logo-fuente: 'Bevan', 'Cormorant Garamond', serif;
-    --logo-tinta: #1a1a1a;
-    --logo-papel: #ffffff;
+    --logo-tinta: var(--color-text-primary);
+    --logo-papel: var(--color-surface);
 
     display: inline-flex;
     align-items: center;
@@ -69,6 +69,6 @@
 /* Sobre fondo oscuro se invierten los DOS colores, no sólo el texto: si no, la
    caja negra desaparece contra el fondo. */
 .logo-vm--invertido {
-    --logo-tinta: #ffffff;
-    --logo-papel: #1a1a1a;
+    --logo-tinta: var(--color-surface);
+    --logo-papel: var(--color-text-primary);
 }

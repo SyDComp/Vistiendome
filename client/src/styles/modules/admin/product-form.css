@@ -14,9 +14,9 @@
 }
 
 .product-form-left-panel {
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 16px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     box-shadow: 0 4px 20px rgba(0,0,0,0.03);
     display: flex;
     flex-direction: column;
@@ -25,22 +25,22 @@
 
 .product-form-header {
     padding: 24px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--color-border-subtle);
     display: flex;
     align-items: center;
     gap: 12px;
 }
 .product-form-header-icon {
     padding: 10px;
-    background: #fdf2f8;
+    background: var(--color-brand-lighter);
     border-radius: 12px;
-    color: #8f0653;
+    color: var(--color-brand);
 }
 .product-form-header-title {
     margin: 0;
     font-size: 18px;
     font-weight: 800;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
 }
 
 .product-form-body {
@@ -87,7 +87,7 @@
 .product-batch-error-item {
     font-size: 12px;
     color: #c2410c;
-    background: #fff;
+    background: var(--color-surface);
     padding: 10px 14px;
     border-radius: 10px;
     display: flex;
@@ -123,19 +123,19 @@
 .product-form-section-title {
     font-size: 14px;
     font-weight: 800;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
 }
 .product-form-section-badge {
     padding: 2px 8px;
-    background: #f1f5f9;
+    background: var(--color-bg-subtle);
     border-radius: 4px;
     font-size: 10px;
-    color: #64748b;
+    color: var(--color-text-muted);
     font-weight: 700;
 }
 .product-form-section-desc {
     font-size: 12px;
-    color: #64748b;
+    color: var(--color-text-muted);
     margin-bottom: 16px;
 }
 .product-form-textarea {
@@ -143,10 +143,10 @@
     min-height: 100px;
     padding: 14px;
     border-radius: 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     font-size: 14.5px;
     outline: none;
-    background-color: #f8fafc;
+    background-color: var(--color-bg-elevated);
     transition: all 0.2s;
     resize: vertical;
 }
@@ -166,8 +166,8 @@
     width: 100%;
     padding: 12px;
     border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    background-color: #f8fafc;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-bg-elevated);
     font-weight: 600;
     outline: none;
 }
@@ -175,9 +175,9 @@
 .product-hub-wrapper {
     position: relative;
     margin-top: 40px;
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 32px;
-    border: 1px solid #fce7f3;
+    border: 1px solid var(--color-brand-soft);
     box-shadow: 0 20px 50px -12px rgba(143, 6, 83, 0.05);
 }
 .product-hub-wrapper.desktop { padding: 40px; }
@@ -203,24 +203,24 @@
 .product-hub-overlay-icon {
     width: 64px;
     height: 64px;
-    background: #fdf2f8;
+    background: var(--color-brand-lighter);
     border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 20px;
-    color: #8f0653;
+    color: var(--color-brand);
 }
 .product-hub-overlay-title {
     margin: 0;
     font-size: 18px;
     font-weight: 900;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
 }
 .product-hub-overlay-desc {
     margin: 12px 0 0;
     font-size: 14px;
-    color: #64748b;
+    color: var(--color-text-muted);
     line-height: 1.6;
 }
 
@@ -237,7 +237,7 @@
     margin: 0;
     font-size: 18px;
     font-weight: 900;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -245,7 +245,7 @@
 .product-hub-desc {
     margin: 4px 0 0 0;
     font-size: 13px;
-    color: #64748b;
+    color: var(--color-text-muted);
 }
 
 .product-hub-buttons {
@@ -257,9 +257,9 @@
 
 .product-hub-btn-add {
     padding: 32px;
-    background-color: #fff;
-    color: #1e1b4b;
-    border: 2px dashed #8f0653;
+    background-color: var(--color-surface);
+    color: var(--color-admin-dark);
+    border: 2px dashed var(--color-brand);
     border-radius: 24px;
     cursor: pointer;
     transition: all 0.2s;
@@ -273,20 +273,20 @@
 .product-hub-btn-add-icon {
     width: 48px;
     height: 48px;
-    background: #8f0653;
-    color: #fff;
+    background: var(--color-brand);
+    color: var(--color-surface);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 .product-hub-btn-title { display: block; font-weight: 900; font-size: 16px; }
-.product-hub-btn-desc { display: block; font-size: 12px; color: #94a3b8; font-weight: 500; margin-top: 4px; }
+.product-hub-btn-desc { display: block; font-size: 12px; color: var(--color-text-placeholder); font-weight: 500; margin-top: 4px; }
 
 .product-hub-btn-lib {
     padding: 32px;
-    background-color: #1e1b4b;
-    color: #fff;
+    background-color: var(--color-admin-dark);
+    color: var(--color-surface);
     border: none;
     border-radius: 24px;
     cursor: pointer;
@@ -302,7 +302,7 @@
     width: 48px;
     height: 48px;
     background: rgba(255,255,255,0.1);
-    color: #fff;
+    color: var(--color-surface);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -324,10 +324,10 @@
     gap: 24px;
 }
 .product-gallery-card {
-    background: #fff;
+    background: var(--color-surface);
     padding: 24px;
     border-radius: 16px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     box-shadow: 0 4px 20px rgba(0,0,0,0.03);
 }
 .product-gallery-header {
@@ -344,18 +344,18 @@
 .product-gallery-icon {
     width: 40px;
     height: 40px;
-    background: #fdf2f8;
+    background: var(--color-brand-lighter);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #8f0653;
+    color: var(--color-brand);
 }
-.product-gallery-title { margin: 0; font-size: 15px; font-weight: 900; color: #1e1b4b; }
-.product-gallery-subtitle { margin: 0; font-size: 11px; color: #64748b; font-weight: 500; }
+.product-gallery-title { margin: 0; font-size: 15px; font-weight: 900; color: var(--color-admin-dark); }
+.product-gallery-subtitle { margin: 0; font-size: 11px; color: var(--color-text-muted); font-weight: 500; }
 
 .product-carousel-wrapper {
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--color-border-subtle);
     padding-top: 20px;
 }
 .product-carousel-header {
@@ -374,9 +374,9 @@
     gap: 6px;
 }
 .product-carousel-btn {
-    background: #fffbeb;
-    color: #92400e;
-    border: 1px solid #c461a2;
+    background: var(--color-warning-bg);
+    color: var(--color-gold-accent);
+    border: 1px solid var(--color-gold-border);
     padding: 6px 12px;
     border-radius: 10px;
     font-size: 11px;
@@ -384,23 +384,23 @@
     cursor: pointer;
     transition: all 0.2s;
 }
-.product-carousel-btn:hover { background: #fef3c7; }
+.product-carousel-btn:hover { background: var(--color-warning-border); }
 .product-carousel-desc {
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
     margin-bottom: 16px;
     font-weight: 600;
 }
 .product-carousel-speed {
-    background: #fffbeb;
-    border: 1px solid #fef3c7;
+    background: var(--color-warning-bg);
+    border: 1px solid var(--color-warning-border);
     border-radius: 12px;
     padding: 16px;
 }
 .product-carousel-speed-label {
     font-size: 11px;
     font-weight: 800;
-    color: #92400e;
+    color: var(--color-gold-accent);
     display: block;
     margin-bottom: 8px;
 }
@@ -408,21 +408,21 @@
     width: 100%;
     padding: 8px;
     border-radius: 8px;
-    border: 1px solid #c461a2;
-    background: #fff;
+    border: 1px solid var(--color-gold-border);
+    background: var(--color-surface);
     font-weight: 700;
-    color: #92400e;
+    color: var(--color-gold-accent);
     outline: none;
 }
 .product-carousel-summary {
     margin-top: 16px;
     padding: 12px;
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
     border-radius: 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
 }
 .product-carousel-summary-text {
     font-size: 11px;
     font-weight: 700;
-    color: #64748b;
+    color: var(--color-text-muted);
 }

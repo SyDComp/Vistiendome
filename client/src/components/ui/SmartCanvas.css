@@ -7,7 +7,7 @@
  */
 
 .lienzo-rotulo { display: block; margin-bottom: 0.3125rem; }
-.lienzo-control { width: 100%; accent-color: #8f0653; }
+.lienzo-control { width: 100%; accent-color: var(--color-brand); }
 .lienzo-control--brillo { accent-color: #ffd700; }
 .lienzo-control--giro { accent-color: #333; }
 .lienzo-ancho { width: 100%; }

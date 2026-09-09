@@ -19,7 +19,7 @@
    clases. Se movieron acá tal cual: mismo valor, mismo efecto, pero
    ahora el estilo del componente vive en un solo sitio. */
 .table-row-hover {
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--color-border-subtle);
     transition: background 0.15s ease;
     cursor: default;
 }

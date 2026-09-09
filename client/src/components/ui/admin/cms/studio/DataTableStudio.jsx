@@ -177,7 +177,7 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
                                 <button onClick={() => updateCell(activeCell.rowIndex, activeCell.header, { bold: false, color: null })} className="est-boton-barra est-boton-barra--menor">Limpiar Formato</button>
                             </div>
                         ) : (
-                            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', fontStyle: 'italic' }}>Selecciona una celda para editar su estilo...</p>
+                            <p className="est-texto-vacio">Selecciona una celda para editar su estilo...</p>
                         )}
                     </section>
 

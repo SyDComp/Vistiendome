@@ -15,9 +15,9 @@
 .rich-text-content * {
     max-width: 100%;
 }
-.rich-text-content h1 { font-size: 2.2em; margin-bottom: 0.5em; color: #1e1b4b; line-height: 1.2; }
-.rich-text-content h2 { font-size: 1.8em; margin-bottom: 0.5em; color: #1e1b4b; line-height: 1.3; }
-.rich-text-content h3 { font-size: 1.4em; margin-bottom: 0.5em; color: #1e1b4b; line-height: 1.4; }
+.rich-text-content h1 { font-size: 2.2em; margin-bottom: 0.5em; color: var(--color-admin-dark); line-height: 1.2; }
+.rich-text-content h2 { font-size: 1.8em; margin-bottom: 0.5em; color: var(--color-admin-dark); line-height: 1.3; }
+.rich-text-content h3 { font-size: 1.4em; margin-bottom: 0.5em; color: var(--color-admin-dark); line-height: 1.4; }
 .rich-text-content p { margin-bottom: 1em; }
 .rich-text-content ul, .rich-text-content ol { margin-bottom: 1em; padding-left: 20px; }
 .rich-text-content li { margin-bottom: 0.5em; }
@@ -27,16 +27,16 @@
 .product-carousel-scroll::-webkit-scrollbar { display: none; }
 .floating-nav-btn {
     position: absolute; top: 40%; transform: translateY(-50%);
-    width: 44px; height: 44px; background: #fff; color: #1e1b4b;
+    width: 44px; height: 44px; background: var(--color-surface); color: var(--color-admin-dark);
     border: none; border-radius: 4px; display: flex; align-items: center; justify-content: center;
     cursor: pointer; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     transition: all 0.2s ease;
 }
-.floating-nav-btn:hover { background: #1e1b4b; color: #fff; transform: translateY(-50%) scale(1.1); }
+.floating-nav-btn:hover { background: var(--color-admin-dark); color: var(--color-surface); transform: translateY(-50%) scale(1.1); }
 .add-to-cart-banner {
     position: absolute; bottom: 0; left: 0; right: 0;
     background: rgba(255,255,255,0.95); padding: 12px;
-    text-align: center; color: #1e1b4b; font-size: 11px; font-weight: 800;
+    text-align: center; color: var(--color-admin-dark); font-size: 11px; font-weight: 800;
     text-transform: uppercase; letter-spacing: 1px;
     transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -45,15 +45,15 @@
 .product-carousel-card img { transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
 
 .cms-video-block { max-width: 960px; margin: 0 auto; padding: 8px 16px 24px; }
-.cms-video-titulo { font-size: 22px; font-weight: 800; color: #1e1b4b; margin: 0 0 14px; text-align: center; }
+.cms-video-titulo { font-size: 22px; font-weight: 800; color: var(--color-admin-dark); margin: 0 0 14px; text-align: center; }
 
 /* Lo que estaba escrito como estilos sueltos dentro del JSX. Los tamaños van en
    `rem` para que crezcan si la persona sube la letra de su navegador; los
    colores, en variables, para dejar de repetir el color de marca en cada sitio
    donde hacía falta. */
 .cms-portada {
-    --cms-marca: #8f0653;
-    --cms-tinta: #1e1b4b;
+    --cms-marca: var(--color-brand);
+    --cms-tinta: var(--color-admin-dark);
 }
 
 .cms-imagen-llena { width: 100%; height: 100%; object-fit: cover; }
@@ -65,14 +65,14 @@
 .cms-antetitulo {
     font-size: 0.75rem;
     font-weight: 800;
-    color: var(--cms-marca, #8f0653);
+    color: var(--cms-marca, var(--color-brand));
     text-transform: uppercase;
     letter-spacing: 0.125rem;
 }
 .cms-titulo {
     font-size: 2rem;
     font-weight: 900;
-    color: var(--cms-tinta, #1e1b4b);
+    color: var(--cms-tinta, var(--color-admin-dark));
     margin: 0.25rem 0 0 0;
 }
 
@@ -95,7 +95,7 @@
 .cms-enlace {
     background: none;
     border: none;
-    color: var(--cms-marca, #8f0653);
+    color: var(--cms-marca, var(--color-brand));
     font-weight: 800;
     font-size: 0.875rem;
     cursor: pointer;
@@ -106,7 +106,7 @@
     font-family: inherit;
 }
 .cms-enlace--discreto {
-    color: var(--cms-tinta, #1e1b4b);
+    color: var(--cms-tinta, var(--color-admin-dark));
     font-weight: 700;
     font-size: 0.6875rem;
     text-decoration: underline;
@@ -123,7 +123,7 @@
 .cms-titulo-bloque {
     font-size: 1.75rem;
     font-weight: 900;
-    color: var(--cms-tinta, #1e1b4b);
+    color: var(--cms-tinta, var(--color-admin-dark));
     margin-bottom: 1.5rem;
 }
 .cms-titulo-bloque--menor { font-size: 1.25rem; margin-bottom: 1.25rem; }
@@ -137,7 +137,7 @@
     margin: 0 0 0.125rem 0;
     font-size: 1.125rem;
     font-weight: 800;
-    color: var(--cms-tinta, #1e1b4b);
+    color: var(--cms-tinta, var(--color-admin-dark));
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -172,8 +172,8 @@
     font-size: 0.59375rem;
     font-weight: 900;
     letter-spacing: 0.025rem;
-    background: var(--cms-marca, #8f0653);
-    color: #fff;
+    background: var(--cms-marca, var(--color-brand));
+    color: var(--color-surface);
     border-radius: 0.25rem;
 }
 .cms-flecha {
@@ -189,7 +189,7 @@
     border-radius: 0.5rem;
     overflow: hidden;
     aspect-ratio: 4 / 5;
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
     margin-bottom: 0.75rem;
     position: relative;
 }

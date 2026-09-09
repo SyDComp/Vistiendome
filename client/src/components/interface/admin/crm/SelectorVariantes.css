@@ -7,33 +7,33 @@
  * JavaScript una comilla invertida en un comentario rompe el archivo entero.
  */
 
-.sv-buscador { display:flex; align-items:center; gap:8px; border:1px solid #e2e8f0; border-radius:10px; padding:0 12px; height:40px; margin-bottom:12px; background:#fff; color:#94a3b8; }
-.sv-buscador input { border:none; outline:none; flex:1; font-size:14px; color:#1e1b4b; background:transparent; }
+.sv-buscador { display:flex; align-items:center; gap:8px; border:1px solid var(--color-border); border-radius:10px; padding:0 12px; height:40px; margin-bottom:12px; background:var(--color-surface); color:var(--color-text-placeholder); }
+.sv-buscador input { border:none; outline:none; flex:1; font-size:14px; color:var(--color-admin-dark); background:transparent; }
 .sv-grilla { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; max-height:330px; overflow-y:auto; padding:2px; }
-.sv-tarjeta { display:flex; flex-direction:column; gap:8px; align-items:center; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:10px; cursor:pointer; text-align:center; }
-.sv-tarjeta:hover { border-color:#8f0653; box-shadow:0 4px 12px rgba(143,6,83,.1); }
-.sv-foto { width:100%; aspect-ratio:3/4; border-radius:8px; overflow:hidden; background:#f8fafc; display:flex; align-items:center; justify-content:center; color:#cbd5e1; }
+.sv-tarjeta { display:flex; flex-direction:column; gap:8px; align-items:center; background:var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:10px; cursor:pointer; text-align:center; }
+.sv-tarjeta:hover { border-color:var(--color-brand); box-shadow:0 4px 12px rgba(143,6,83,.1); }
+.sv-foto { width:100%; aspect-ratio:3/4; border-radius:8px; overflow:hidden; background:var(--color-bg-elevated); display:flex; align-items:center; justify-content:center; color:var(--color-text-disabled); }
 .sv-foto img { width:100%; height:100%; object-fit:cover; }
 .sv-nombre { font-size:12px; font-weight:700; color:#334155; line-height:1.3; }
 .sv-cabecera { display:flex; align-items:center; gap:12px; margin-bottom:10px; flex-wrap:wrap; }
-.sv-cabecera strong { font-size:14px; color:#1e1b4b; }
-.sv-cuenta { font-size:12px; color:#64748b; margin-left:auto; }
-.sv-volver { display:flex; align-items:center; gap:5px; background:#f1f5f9; border:none; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:700; color:#475569; cursor:pointer; }
+.sv-cabecera strong { font-size:14px; color:var(--color-admin-dark); }
+.sv-cuenta { font-size:12px; color:var(--color-text-muted); margin-left:auto; }
+.sv-volver { display:flex; align-items:center; gap:5px; background:var(--color-bg-subtle); border:none; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:700; color:#475569; cursor:pointer; }
 .sv-filtros { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
-.sv-filtros select { height:34px; padding:0 10px; border:1px solid #e2e8f0; border-radius:8px; font-size:12px; background:#fff; color:#334155; }
+.sv-filtros select { height:34px; padding:0 10px; border:1px solid var(--color-border); border-radius:8px; font-size:12px; background:var(--color-surface); color:#334155; }
 .sv-lista { display:flex; flex-direction:column; gap:5px; max-height:300px; overflow-y:auto; padding:2px; }
 /* El encabezado y las filas comparten la MISMA rejilla: si no, los
    valores no quedan bajo su etiqueta y volvemos al problema original. */
 .sv-cab-cols, .sv-variante { display:grid; grid-template-columns:34px repeat(var(--cols), minmax(0,1fr)) 60px; align-items:center; gap:10px; }
-.sv-cab-cols { padding:0 10px 5px; font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:#94a3b8; font-weight:800; }
-.sv-variante { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:7px 10px; cursor:pointer; text-align:left; }
+.sv-cab-cols { padding:0 10px 5px; font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:var(--color-text-placeholder); font-weight:800; }
+.sv-variante { background:var(--color-surface); border:1px solid var(--color-border); border-radius:10px; padding:7px 10px; cursor:pointer; text-align:left; }
 .sv-valor { font-size:13px; color:#334155; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.sv-sin { color:#cbd5e1; }
-.sv-variante:hover { background:#f8fafc; border-color:#8f0653; }
+.sv-sin { color:var(--color-text-disabled); }
+.sv-variante:hover { background:var(--color-bg-elevated); border-color:var(--color-brand); }
 .sv-variante.ya { opacity:.55; cursor:default; }
-.sv-mini { width:34px; height:42px; border-radius:6px; overflow:hidden; background:#f1f5f9; display:flex; align-items:center; justify-content:center; color:#cbd5e1; flex-shrink:0; }
+.sv-mini { width:34px; height:42px; border-radius:6px; overflow:hidden; background:var(--color-bg-subtle); display:flex; align-items:center; justify-content:center; color:var(--color-text-disabled); flex-shrink:0; }
 .sv-mini img { width:100%; height:100%; object-fit:cover; }
 .sv-etiqueta { flex:1; font-size:13px; color:#334155; }
-.sv-mas { font-size:18px; font-weight:800; color:#8f0653; }
+.sv-mas { font-size:18px; font-weight:800; color:var(--color-brand); }
 .sv-ya { display:flex; align-items:center; gap:4px; font-size:11px; font-weight:700; color:#15803d; }
-.sv-vacio { padding:26px; text-align:center; color:#64748b; font-size:13px; background:#f8fafc; border-radius:10px; }
+.sv-vacio { padding:26px; text-align:center; color:var(--color-text-muted); font-size:13px; background:var(--color-bg-elevated); border-radius:10px; }

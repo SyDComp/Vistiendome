@@ -4,7 +4,7 @@
     max-width: 400px;
     margin: 50px auto;
     padding: 30px;
-    background-color: #ffffff;
+    background-color: var(--color-surface);
     box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     border-radius: 12px;
 }
@@ -19,14 +19,14 @@
 
 .auth-form-title {
     margin: 0 0 10px 0;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
 }
 .auth-form-title.setup {
-    color: #8f0653;
+    color: var(--color-brand);
 }
 
 .auth-form-subtitle {
-    color: #64748b;
+    color: var(--color-text-muted);
     margin-bottom: 20px;
     font-size: 14px;
 }

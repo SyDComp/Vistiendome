@@ -204,20 +204,20 @@
 }
 
 .gallery-action-btn.btn-delete {
-    color: #ef4444;
+    color: var(--color-error);
 }
 
 .gallery-action-btn.btn-delete:hover {
-    background-color: #fee2e2;
+    background-color: var(--color-error-border);
     color: #dc2626;
 }
 
 .gallery-action-btn.btn-view {
-    color: #3b82f6;
+    color: var(--color-info);
 }
 
 .gallery-action-btn.btn-view:hover {
-    background-color: #dbeafe;
+    background-color: var(--color-info-border);
     color: #2563eb;
 }
 

@@ -5,11 +5,11 @@
     width: 100%;
 
     /* Minimalist / Gallery Palette */
-    --color-background: #ffffff;
+    --color-background: var(--color-surface);
     --color-surface: #f8f8f8;
     --color-text-primary: #121212;
-    --color-text-secondary: #555555;
-    --color-accent: #1a1a1a;
+    --color-text-secondary: var(--color-text-body);
+    --color-accent: var(--color-text-primary);
     --color-border: #e2e2e2;
 
     /* Override Global System Colors for Local Theme */
@@ -51,14 +51,14 @@ body {
 .login-btn {
     padding: 0.6rem 1.4rem;
     background: var(--color-text-primary);
-    color: #fff !important;
+    color: var(--color-surface) !important;
     border-radius: 0;
     font-size: 0.8rem !important;
 }
 
 .login-btn:hover {
     background: #333;
-    color: #fff !important;
+    color: var(--color-surface) !important;
 }
 
 .login-btn::after {
@@ -134,11 +134,11 @@ body {
 .hero-buttons .btn--primary {
     background: #121212 !important;
     border: 1px solid #121212 !important;
-    color: #fff !important;
+    color: var(--color-surface) !important;
 }
 
 .hero-buttons .btn--outline {
-    background: #fff !important;
+    background: var(--color-surface) !important;
     border: 2px solid #121212 !important;
     color: #121212 !important;
 }
@@ -147,7 +147,7 @@ body {
     transform: none;
     background: #333;
     border-color: #333;
-    color: #fff;
+    color: var(--color-surface);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -165,7 +165,7 @@ body {
 /* Categories - Grid Layout */
 .categories-section {
     padding: 6rem var(--spacing-container);
-    background: #fff;
+    background: var(--color-surface);
 }
 
 .section-header {
@@ -262,8 +262,8 @@ body {
 }
 
 .category-card:hover .category-link {
-    color: #555;
-    border-color: #555;
+    color: var(--color-text-body);
+    border-color: var(--color-text-body);
     letter-spacing: 1.5px;
 }
 
@@ -292,7 +292,7 @@ body {
 /* Footer - Minimal */
 .main-footer {
     padding: 4rem var(--spacing-container);
-    background: #fff;
+    background: var(--color-surface);
     border-top: 1px solid var(--color-border);
 }
 

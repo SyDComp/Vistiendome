@@ -33,7 +33,7 @@
     width: 100%;
     padding: 0.5rem 0.625rem;
     border-radius: 0.5rem;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--color-text-disabled);
     font-family: inherit;
     font-size: 0.8125rem;
 }
@@ -59,8 +59,8 @@
 }
 
 .adm-tarjeta {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
     border-radius: 1rem;
     padding: 1.125rem;
 }
@@ -85,12 +85,12 @@
 }
 
 .adm-dato { font-weight: 700; font-size: 0.8125rem; color: #1e293b; }
-.adm-dato-secundario { font-size: 0.6875rem; color: #64748b; }
+.adm-dato-secundario { font-size: 0.6875rem; color: var(--color-text-muted); }
 
 /* Una fila de una lista donde se elige algo. */
 .adm-opcion-fila {
     padding: 0.625rem 0.875rem;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--color-border-subtle);
     cursor: pointer;
     display: flex;
     justify-content: space-between;
@@ -105,10 +105,10 @@
    decisiones sueltas de cada pantalla. */
 
 .adm-panel {
-    background: #fff;
+    background: var(--color-surface);
     padding: 1.875rem;
     border-radius: 1.5rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
 }
 /* Ocupa la fila entera de la grilla de ajustes. */
 .adm-panel--ancho { grid-column: 1 / -1; }
@@ -123,23 +123,23 @@
     margin: 0;
     font-size: 1.125rem;
     font-weight: 800;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
 }
 
 /* Un icono que acompaña a un texto: no se encoge cuando el texto es largo. */
-.adm-icono-fijo { color: #64748b; flex-shrink: 0; }
+.adm-icono-fijo { color: var(--color-text-muted); flex-shrink: 0; }
 
 .adm-etiqueta-fuerte { font-size: 0.875rem; font-weight: 700; color: #334155; }
 
 /* La explicación bajo un control: qué hace y qué pasa si lo cambias. */
-.adm-ayuda { margin: 0; font-size: 0.75rem; color: #64748b; line-height: 1.5; }
+.adm-ayuda { margin: 0; font-size: 0.75rem; color: var(--color-text-muted); line-height: 1.5; }
 .adm-ayuda--pegada { margin-top: 0.375rem; }
 
 /* Un aviso dentro de una tarjeta, separado de lo de arriba. */
 .adm-nota {
     margin-top: 1.5rem;
     padding: 0.9375rem;
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
     border-radius: 1rem;
     display: flex;
     gap: 0.75rem;
@@ -148,7 +148,7 @@
 .adm-columna { display: flex; flex-direction: column; gap: 1.25rem; }
 
 /* Casilla de verificación grande: 1.25rem se acierta con el dedo, 13px no. */
-.adm-casilla { width: 1.25rem; height: 1.25rem; accent-color: #8f0653; }
+.adm-casilla { width: 1.25rem; height: 1.25rem; accent-color: var(--color-brand); }
 
 /* ── Emblemas de color ──────────────────────────────────────────────────────
    El mismo cuadrito de 36px repetido siete veces con solo dos colores
@@ -163,11 +163,11 @@
     justify-content: center;
     flex-shrink: 0;
 }
-.adm-emblema-color--marca { background: #fdf2f8; color: #8f0653; }
-.adm-emblema-color--ambar { background: #fef3c7; color: #d97706; }
-.adm-emblema-color--azul  { background: #eff6ff; color: #3b82f6; }
-.adm-emblema-color--rosa  { background: #fce7f3; color: #be185d; }
-.adm-emblema-color--verde { background: #dcfce7; color: #16a34a; }
+.adm-emblema-color--marca { background: var(--color-brand-lighter); color: var(--color-brand); }
+.adm-emblema-color--ambar { background: var(--color-warning-border); color: var(--color-warning); }
+.adm-emblema-color--azul  { background: var(--color-info-bg); color: var(--color-info); }
+.adm-emblema-color--rosa  { background: var(--color-brand-soft); color: #be185d; }
+.adm-emblema-color--verde { background: var(--color-success-border); color: var(--color-success); }
 
 /* ── Formularios de ajustes ─────────────────────────────────────────────── */
 
@@ -189,10 +189,10 @@
     height: 3rem;
     padding: 0 1rem;
     border-radius: 0.75rem;
-    border: 1px solid #e2e8f0;
-    background-color: #f8fafc;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-bg-elevated);
     font-size: 0.875rem;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     outline: none;
     transition: all 0.2s;
     box-sizing: border-box;
@@ -212,7 +212,7 @@
 .adm-color {
     width: 2.5rem;
     height: 2.5rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     border-radius: 0.5rem;
     cursor: pointer;
     background: none;
@@ -220,15 +220,15 @@
 }
 
 .adm-tarjeta-interna {
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     border-radius: 1rem;
     padding: 1.125rem;
     margin-bottom: 0.875rem;
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
 }
 
-.adm-descripcion { font-size: 0.8125rem; color: #64748b; margin: 0 0 1.25rem; line-height: 1.6; }
-.adm-pie-campo { font-size: 0.6875rem; color: #94a3b8; margin-top: 0.25rem; }
+.adm-descripcion { font-size: 0.8125rem; color: var(--color-text-muted); margin: 0 0 1.25rem; line-height: 1.6; }
+.adm-pie-campo { font-size: 0.6875rem; color: var(--color-text-placeholder); margin-top: 0.25rem; }
 
 /* Rejillas que caen solas a menos columnas. */
 .adm-rejilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.75rem), 1fr)); gap: 1.25rem; }
@@ -253,8 +253,8 @@
     font-family: inherit;
 }
 .adm-boton-oscuro {
-    background: #1e1b4b;
-    color: #fff;
+    background: var(--color-admin-dark);
+    color: var(--color-surface);
     border: none;
     padding: 0.625rem 1.125rem;
     border-radius: 0.75rem;
@@ -274,8 +274,8 @@
     max-height: 7.5rem;
     overflow-y: auto;
     padding: 0.5rem;
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 0.625rem;
 }
 
@@ -291,21 +291,21 @@
 /* Bloque que ocupa la fila entera de una rejilla. */
 .adm-bloque-ancho {
     grid-column: 1 / -1;
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
     padding: 1.125rem;
     border-radius: 1rem;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--color-text-disabled);
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 .adm-bloque-separado {
     grid-column: 1 / -1;
-    border-top: 1px dashed #e2e8f0;
+    border-top: 1px dashed var(--color-border);
     padding-top: 1.25rem;
 }
 
-.adm-texto-suave { color: #94a3b8; font-size: 0.875rem; }
+.adm-texto-suave { color: var(--color-text-placeholder); font-size: 0.875rem; }
 .adm-texto-medio { font-size: 0.8125rem; color: #334155; font-weight: 600; }
 
 /* Un campo de archivo invisible sobre lo que se ve: se pulsa la imagen, no un
@@ -332,20 +332,20 @@
 .adm-rotulo-menudo {
     font-size: 0.6875rem;
     font-weight: 800;
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
     text-transform: uppercase;
     letter-spacing: 0.03125rem;
     margin-bottom: 0.5rem;
 }
-.adm-pie-nota { margin: 0.5rem 0 0 0; font-size: 0.75rem; color: #94a3b8; }
+.adm-pie-nota { margin: 0.5rem 0 0 0; font-size: 0.75rem; color: var(--color-text-placeholder); }
 .adm-etiquetas-fila { display: flex; flex-wrap: wrap; gap: 0.375rem; }
 
 /* El panel de filtros que se despliega. */
 .adm-facetas {
     margin-top: 0.75rem;
     padding: 1rem;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
     border-radius: 0.875rem;
     max-height: 13.75rem;
     overflow-y: auto;
@@ -358,7 +358,7 @@
     margin-left: 0.625rem;
     border: none;
     background: none;
-    color: #ef4444;
+    color: var(--color-error);
     font-size: 0.75rem;
     font-weight: 700;
     cursor: pointer;
@@ -382,8 +382,8 @@
     width: 100%;
     padding: 0.75rem;
     border-radius: 0.75rem;
-    border: 1px solid #e2e8f0;
-    background-color: #f8fafc;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-bg-elevated);
     font-weight: 600;
     outline: none;
     font-family: inherit;
@@ -391,7 +391,7 @@
 }
 /* Un campo que todavia no se puede usar porque falta elegir algo antes. */
 .adm-campo-persona:disabled,
-.adm-campo-persona--espera { background-color: #f1f5f9; }
+.adm-campo-persona--espera { background-color: var(--color-bg-subtle); }
 
 /* ── Perfil, tabla, medios y paginacion ─────────────────────────────────── */
 
@@ -402,7 +402,7 @@
 .adm-separacion--seccion { margin-bottom: 1.5rem; }
 .adm-pie-ayuda {
     font-size: 0.75rem;
-    color: #64748b;
+    color: var(--color-text-muted);
     margin-top: 0.375rem;
     display: block;
     font-weight: 500;
@@ -426,7 +426,7 @@
     flex-direction: column;
     gap: 0.75rem;
 }
-.adm-tabla-estado--vacio { color: #94a3b8; gap: 0.5rem; }
+.adm-tabla-estado--vacio { color: var(--color-text-placeholder); gap: 0.5rem; }
 .adm-tabla-estado-icono { font-size: 2.25rem; }
 .adm-tabla-estado-texto { font-size: 0.875rem; }
 
@@ -434,17 +434,17 @@
 .adm-rueda {
     width: 2rem;
     height: 2rem;
-    border: 3px solid #e2e8f0;
-    border-top-color: #8f0653;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-brand);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
 
 /* Paginacion. */
 .adm-pag-fila { display: flex; align-items: center; gap: 0.25rem; }
-.adm-pag-salto { padding: 0 0.25rem; color: #94a3b8; }
-.adm-pag-actual { color: #1e1b4b; }
-.adm-pag-cuenta { font-size: 0.8125rem; color: #64748b; }
+.adm-pag-salto { padding: 0 0.25rem; color: var(--color-text-placeholder); }
+.adm-pag-actual { color: var(--color-admin-dark); }
+.adm-pag-cuenta { font-size: 0.8125rem; color: var(--color-text-muted); }
 
 /* Campo de medios: la lista de archivos elegidos y su visor. */
 .adm-medios-rotulo {
@@ -462,9 +462,9 @@
     gap: 0.75rem;
     margin-bottom: 0.625rem;
     padding: 0.5rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     border-radius: 0.75rem;
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
 }
 .adm-medios-miniatura {
     width: 3.5rem;
@@ -476,19 +476,19 @@
 .adm-medios-nombre {
     flex: 1;
     font-size: 0.75rem;
-    color: #64748b;
+    color: var(--color-text-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 .adm-medios-quitar {
     border: none;
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 0.5rem;
     width: 2.25rem;
     height: 2.25rem;
     cursor: pointer;
-    color: #ef4444;
+    color: var(--color-error);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -500,8 +500,8 @@
     height: 2.75rem;
     padding: 0 0.875rem;
     border-radius: 0.625rem;
-    border: 1px solid #e2e8f0;
-    background-color: #f8fafc;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-bg-elevated);
     font-size: 0.875rem;
     margin-top: 0.625rem;
     box-sizing: border-box;
@@ -521,7 +521,7 @@
 .adm-visor-caja {
     width: 90%;
     height: 90%;
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 1.5rem;
     overflow: hidden;
 }
@@ -538,9 +538,9 @@
 .adm-elegible--menuda { display: flex; align-items: center; gap: 0.375rem; cursor: pointer; }
 .adm-fila-icono { display: flex; align-items: center; gap: 0.5rem; }
 
-.adm-nota-menor { font-size: 0.75rem; font-weight: 700; color: #64748b; }
-.adm-nota-suelta { font-size: 0.75rem; color: #64748b; margin-top: 0.625rem; }
-.adm-nota-parrafo { font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.5; }
+.adm-nota-menor { font-size: 0.75rem; font-weight: 700; color: var(--color-text-muted); }
+.adm-nota-suelta { font-size: 0.75rem; color: var(--color-text-muted); margin-top: 0.625rem; }
+.adm-nota-parrafo { font-size: 0.75rem; color: var(--color-text-muted); margin: 0; line-height: 1.5; }
 
 .adm-boton-fijo { flex-shrink: 0; height: 3rem; padding: 0 1rem; }
 
@@ -554,7 +554,7 @@
 .adm-ancho-caja { width: 100%; box-sizing: border-box; }
 .adm-encima { z-index: 9999; }
 /* Un campo que no se puede tocar todavia se ve apagado, no igual que el resto. */
-.adm-campo--bloqueado { background-color: #f1f5f9; color: #64748b; cursor: not-allowed; }
+.adm-campo--bloqueado { background-color: var(--color-bg-subtle); color: var(--color-text-muted); cursor: not-allowed; }
 
 /* ── Cola de inventario y CMS ───────────────────────────────────────────── */
 
@@ -568,14 +568,14 @@
 .adm-sin-margen { margin-bottom: 0; }
 .adm-sin-espacio { margin: 0; padding: 0; }
 .adm-espacio { margin: 0.75rem; }
-.adm-espacio-texto { margin: 0.8125rem; color: #94a3b8; }
+.adm-espacio-texto { margin: 0.8125rem; color: var(--color-text-placeholder); }
 .adm-relativo { position: relative; }
 .adm-oculto { display: none; }
 .adm-imagen-cubre { width: 100%; height: 100%; object-fit: cover; }
 
 .adm-casilla-simple { width: 1.125rem; height: 1.125rem; cursor: pointer; }
 .adm-menudo { font-size: 0.625rem; font-weight: 700; }
-.adm-menudo-gris { font-size: 0.75rem; color: #94a3b8; font-weight: 700; }
+.adm-menudo-gris { font-size: 0.75rem; color: var(--color-text-placeholder); font-weight: 700; }
 .adm-alto-fijo { height: 3.375rem; }
 .adm-alto-fijo--doble { flex: 2; height: 3.375rem; }
 .adm-alto-fijo--simple { flex: 1; height: 3.375rem; }
@@ -586,8 +586,8 @@
     height: 2.375rem;
     border-radius: 0.5rem;
     overflow: hidden;
-    border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -600,19 +600,19 @@
     border: none;
     background: none;
     cursor: pointer;
-    color: #64748b;
+    color: var(--color-text-muted);
     padding: 0;
     font-family: inherit;
 }
-.adm-mover:disabled { cursor: not-allowed; color: #e2e8f0; }
+.adm-mover:disabled { cursor: not-allowed; color: var(--color-border); }
 
 .adm-boton-verde { background: #059669; height: 3rem; }
 
 /* Codigos de barras: pie de la ventana y boton de imprimir. */
 .adm-pie-ventana {
     padding: 1rem 1.5rem;
-    border-top: 1px solid #e2e8f0;
-    background: #fff;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -621,8 +621,8 @@
 }
 .adm-pie-ventana--derecha { justify-content: flex-end; }
 .adm-boton-oscuro-alto {
-    background: #1e1b4b;
-    color: #fff;
+    background: var(--color-admin-dark);
+    color: var(--color-surface);
     border: none;
     padding: 0 1.5rem;
     height: 2.75rem;
@@ -647,12 +647,12 @@
 }
 .adm-aviso-alerta-texto { font-size: 0.6875rem; font-style: normal; font-weight: 700; }
 
-.adm-cargando-vista { padding: 6.25rem 1.25rem; text-align: center; color: #64748b; }
+.adm-cargando-vista { padding: 6.25rem 1.25rem; text-align: center; color: var(--color-text-muted); }
 .adm-rueda--grande {
     width: 2.5rem;
     height: 2.5rem;
-    border: 3px solid #e2e8f0;
-    border-top-color: #8f0653;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-brand);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin: 0 auto 1rem;
@@ -663,9 +663,9 @@
 .adm-cabecera-fija {
     position: sticky;
     top: 0;
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
     z-index: 10;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid var(--color-border);
 }
 
 /* Visor de medios: el campo de nombre y su boton. */
@@ -678,7 +678,7 @@
     border-radius: 0.625rem;
     border: 1px solid rgba(255, 255, 255, 0.25);
     background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    color: var(--color-surface);
     font-size: 0.875rem;
     font-family: inherit;
 }
@@ -687,8 +687,8 @@
     padding: 0 0.875rem;
     border-radius: 0.625rem;
     border: none;
-    background: #8f0653;
-    color: #fff;
+    background: var(--color-brand);
+    color: var(--color-surface);
     font-weight: 700;
     font-size: 0.8125rem;
     cursor: pointer;
@@ -698,9 +698,9 @@
     font-family: inherit;
 }
 
-.adm-marca-texto { color: #8f0653; }
-.adm-boton-marca-alto { background: #8f0653; height: 3rem; padding: 0 1.5rem; }
-.adm-quitar-icono { cursor: pointer; color: #ef4444; margin-left: 0.25rem; }
+.adm-marca-texto { color: var(--color-brand); }
+.adm-boton-marca-alto { background: var(--color-brand); height: 3rem; padding: 0 1.5rem; }
+.adm-quitar-icono { cursor: pointer; color: var(--color-error); margin-left: 0.25rem; }
 .adm-elegible--arriba { display: flex; align-items: center; gap: 0.625rem; margin-top: 0.875rem; cursor: pointer; }
 
 /* Cola final del panel. */
@@ -729,9 +729,9 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background-color: #fff;
+    background-color: var(--color-surface);
     border-radius: 1rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     box-shadow: 0 4px 24px rgba(30, 27, 75, 0.05);
 }
 
@@ -742,30 +742,42 @@
     text-align: right;
     font-size: 0.6875rem;
     font-weight: 700;
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
     text-transform: uppercase;
     letter-spacing: 0.05rem;
     position: sticky;
     right: 0;
-    background-color: #f8fafc;
+    background-color: var(--color-bg-elevated);
     box-shadow: -4px 0 8px rgba(0, 0, 0, 0.02);
 }
 .adm-tabla-cabecera-acciones--compacta { padding: 0.75rem 0.6875rem; }
 /* La cabecera de la tabla se queda arriba mientras se recorre la lista. */
 .adm-tabla-cabecera {
-    background-color: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
+    background-color: var(--color-bg-elevated);
+    border-bottom: 1px solid var(--color-border);
     position: sticky;
     top: 0;
     z-index: 10;
 }
+/* La zona con desplazamiento propio de la tabla. Crece hasta llenar la caja y
+   se desplaza sola, para que la cabecera pegajosa tenga contra que pegarse.
+   El desplazamiento horizontal existe para el telefono, donde la tabla es mas
+   ancha que la pantalla. */
+.adm-tabla-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    position: relative;
+}
+
 .adm-tabla-pie {
     padding: 0.5rem;
     text-align: center;
     font-size: 0.625rem;
-    color: #94a3b8;
-    border-top: 1px solid #f1f5f9;
+    color: var(--color-text-placeholder);
+    border-top: 1px solid var(--color-border-subtle);
     font-style: italic;
+    background-color: var(--color-surface);
 }
 
 .adm-buscador-campo {
@@ -784,16 +796,16 @@
     flex-wrap: wrap;
     gap: 0.75rem;
     padding: 0.875rem 1.25rem;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--color-border-subtle);
 }
 .adm-acciones-fila { display: flex; align-items: center; justify-content: flex-end; gap: 0.25rem; }
 
 .adm-etiqueta-marca {
-    background: #fdf2f8;
+    background: var(--color-brand-lighter);
     border: 1px solid #fbcfe8;
     border-radius: 0.5rem;
     padding: 0.375rem 0.625rem;
-    color: #8f0653;
+    color: var(--color-brand);
     font-weight: 700;
 }
 .adm-boton-suave {
@@ -801,8 +813,8 @@
     height: 2.25rem;
     border-radius: 0.625rem;
     border: none;
-    background: #fdf2f8;
-    color: #8f0653;
+    background: var(--color-brand-lighter);
+    color: var(--color-brand);
     font-weight: 700;
     cursor: pointer;
     font-family: inherit;
@@ -813,19 +825,19 @@
     gap: 0.5rem;
     background: none;
     border: none;
-    color: #64748b;
+    color: var(--color-text-muted);
     cursor: pointer;
     font-family: inherit;
 }
-.adm-bajada-seccion { margin: 0.25rem 0 0; color: #64748b; font-size: 0.84375rem; }
+.adm-bajada-seccion { margin: 0.25rem 0 0; color: var(--color-text-muted); font-size: 0.84375rem; }
 .adm-separacion--alta { margin-top: 2rem; }
 .adm-rejilla--doble { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 25rem), 1fr)); gap: 1.5rem; overflow-y: auto; }
 .adm-accion-oscura {
     flex: 1;
     min-height: 3rem;
     border-radius: 0.875rem;
-    background: #1e1b4b;
-    color: #fff;
+    background: var(--color-admin-dark);
+    color: var(--color-surface);
     border: none;
     font-weight: 800;
     cursor: pointer;
@@ -835,19 +847,19 @@
     flex: 1;
     min-height: 3.375rem;
     border-radius: 1rem;
-    border: 1px solid #e2e8f0;
-    color: #64748b;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
     font-size: 0.9375rem;
     font-weight: 700;
 }
-.adm-cerrar-aviso { background: none; border: none; color: #94a3b8; cursor: pointer; font-family: inherit; }
+.adm-cerrar-aviso { background: none; border: none; color: var(--color-text-placeholder); cursor: pointer; font-family: inherit; }
 .adm-aviso-titulo { font-weight: 800; font-size: 1.125rem; }
 .adm-capa-llena { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
 .adm-pantalla-centrada { min-height: 100dvh; display: flex; align-items: center; justify-content: center; }
 .adm-nota-lienzo {
     margin-top: 0.9375rem;
     padding: 0.9375rem;
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 0.5rem;
     border: 1px solid #ddd;
     font-size: 0.6875rem;
@@ -856,8 +868,8 @@
 /* ── Las ultimas ────────────────────────────────────────────────────────── */
 
 .adm-tabla-fila-cabecera {
-    background-color: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
+    background-color: var(--color-bg-elevated);
+    border-bottom: 1px solid var(--color-border);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -869,13 +881,13 @@
     gap: 0.5rem;
     background: none;
     border: none;
-    color: #64748b;
+    color: var(--color-text-muted);
     font-weight: 700;
     font-size: 0.8125rem;
     cursor: pointer;
     font-family: inherit;
 }
-.adm-cerrar-plano { background: none; border: none; color: #94a3b8; cursor: pointer; font-family: inherit; }
+.adm-cerrar-plano { background: none; border: none; color: var(--color-text-placeholder); cursor: pointer; font-family: inherit; }
 .adm-capa-completa {
     position: absolute;
     inset: 0;

@@ -33,13 +33,13 @@
 /* ── Textos ────────────────────────────────────────────────────────────────── */
 
 .et-titulo { font-size: 0.8125rem; font-weight: 800; color: #1e293b; margin: 0; }
-.et-subtitulo { font-size: 0.8125rem; color: #64748b; margin: 0; }
-.et-nombre { font-size: 0.8125rem; font-weight: 800; color: #1e1b4b; margin-bottom: 0.125rem; }
+.et-subtitulo { font-size: 0.8125rem; color: var(--color-text-muted); margin: 0; }
+.et-nombre { font-size: 0.8125rem; font-weight: 800; color: var(--color-admin-dark); margin-bottom: 0.125rem; }
 .et-dato { font-size: 0.6875rem; color: #475569; }
-.et-dato-menudo { font-size: 0.4375rem; color: #64748b; }
+.et-dato-menudo { font-size: 0.4375rem; color: var(--color-text-muted); }
 .et-meta {
     font-size: 0.6875rem;
-    color: #64748b;
+    color: var(--color-text-muted);
     display: flex;
     flex-wrap: wrap;
     gap: 0.375rem;
@@ -58,7 +58,7 @@
 .et-rotulo {
     font-size: 0.5rem;
     font-weight: 800;
-    color: #64748b;
+    color: var(--color-text-muted);
     letter-spacing: 0.0625rem;
     text-transform: uppercase;
     margin-bottom: 0.25rem;
@@ -86,7 +86,7 @@
 /* ── Controles ─────────────────────────────────────────────────────────────── */
 
 /* Casilla de 1rem: la de 16px no crecía si alguien subía la letra. */
-.et-casilla { width: 1rem; height: 1rem; accent-color: #8f0653; flex-shrink: 0; }
+.et-casilla { width: 1rem; height: 1rem; accent-color: var(--color-brand); flex-shrink: 0; }
 
 .et-opcion {
     display: flex;
@@ -114,12 +114,12 @@
     width: 100%;
     height: 2.375rem;
     border-radius: 0.625rem;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--color-text-disabled);
     padding: 0 0.75rem;
     font-size: 0.8125rem;
     font-weight: 700;
-    color: #1e1b4b;
-    background: #fff;
+    color: var(--color-admin-dark);
+    background: var(--color-surface);
     font-family: inherit;
 }
 
@@ -129,7 +129,7 @@
     left: 0.5rem;
     top: 50%;
     transform: translateY(-50%);
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
     pointer-events: none;
 }
 .et-buscador input {
@@ -138,8 +138,8 @@
     padding-left: 1.625rem;
     padding-right: 0.5rem;
     border-radius: 0.375rem;
-    border: 1px solid #cbd5e1;
-    background: #f8fafc;
+    border: 1px solid var(--color-text-disabled);
+    background: var(--color-bg-elevated);
     font-size: 0.6875rem;
     outline: none;
     color: #1e293b;
@@ -150,8 +150,8 @@
 .et-contador {
     display: flex;
     align-items: center;
-    background: #fff;
-    border: 1px solid #cbd5e1;
+    background: var(--color-surface);
+    border: 1px solid var(--color-text-disabled);
     border-radius: 0.5rem;
     overflow: hidden;
 }
@@ -159,7 +159,7 @@
     width: 1.625rem;
     height: 1.625rem;
     border: none;
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
     font-weight: 800;
     cursor: pointer;
     color: #475569;
@@ -170,7 +170,7 @@
     text-align: center;
     font-size: 0.75rem;
     font-weight: 800;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
 }
 
 .et-boton-claro {
@@ -179,8 +179,8 @@
     gap: 0.375rem;
     padding: 0.5rem 0.75rem;
     border-radius: 0.625rem;
-    border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
     color: #475569;
     font-weight: 700;
     font-size: 0.8125rem;
@@ -192,16 +192,16 @@
 .et-boton-enlace {
     background: none;
     border: none;
-    color: #8f0653;
+    color: var(--color-brand);
     font-size: 0.6875rem;
     font-weight: 700;
     cursor: pointer;
     font-family: inherit;
 }
-.et-boton-enlace--gris { color: #64748b; }
+.et-boton-enlace--gris { color: var(--color-text-muted); }
 .et-boton-morado {
     background: #5b21b6;
-    color: #fff;
+    color: var(--color-surface);
     border: none;
     border-radius: 0.5rem;
     padding: 0.3125rem 0.75rem;
@@ -224,21 +224,21 @@
 /* ── Listas y vacíos ───────────────────────────────────────────────────────── */
 
 .et-lista { flex: 1; overflow-y: auto; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
-.et-lista-fila { padding: 0.75rem 0.875rem; border-bottom: 1px solid #e2e8f0; }
+.et-lista-fila { padding: 0.75rem 0.875rem; border-bottom: 1px solid var(--color-border); }
 
-.et-vacio { text-align: center; padding: 2.5rem; color: #94a3b8; font-size: 0.8125rem; }
-.et-vacio--oscuro { text-align: center; padding: 2.5rem; color: #64748b; font-size: 0.8125rem; }
+.et-vacio { text-align: center; padding: 2.5rem; color: var(--color-text-placeholder); font-size: 0.8125rem; }
+.et-vacio--oscuro { text-align: center; padding: 2.5rem; color: var(--color-text-muted); font-size: 0.8125rem; }
 .et-vacio-grande {
     text-align: center;
     padding: 3.75rem 1.25rem;
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 1rem;
-    border: 1px dashed #cbd5e1;
+    border: 1px dashed var(--color-text-disabled);
     max-width: 25rem;
     margin: auto;
 }
-.et-vacio-icono { color: #cbd5e1; margin: 0 auto 1rem auto; }
-.et-icono-apagado { color: #cbd5e1; }
+.et-vacio-icono { color: var(--color-text-disabled); margin: 0 auto 1rem auto; }
+.et-icono-apagado { color: var(--color-text-disabled); }
 
 /* ── La etiqueta en sí ─────────────────────────────────────────────────────── */
 
@@ -264,14 +264,14 @@
     width: 100%;
     font-size: 0.75rem;
     font-weight: 800;
-    color: #64748b;
+    color: var(--color-text-muted);
     text-transform: uppercase;
 }
-.et-etiqueta-separador { border-top: 1px dashed #cbd5e1; padding-top: 0.5rem; }
+.et-etiqueta-separador { border-top: 1px dashed var(--color-text-disabled); padding-top: 0.5rem; }
 .et-etiqueta-codigo {
     margin-top: 0.5rem;
     padding-top: 0.375rem;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--color-border);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -314,8 +314,8 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: #8f0653;
-    color: #fff;
+    background: var(--color-brand);
+    color: var(--color-surface);
     border: none;
     padding: 0.625rem 1.25rem;
     border-radius: 0.75rem;
@@ -324,8 +324,8 @@
     min-height: 2.75rem;
 }
 .et-imprimir:disabled {
-    background: #e2e8f0;
-    color: #94a3b8;
+    background: var(--color-border);
+    color: var(--color-text-placeholder);
     cursor: not-allowed;
 }
 
@@ -366,8 +366,8 @@
 .et-hoja {
     width: min(18rem, 60vw);
     aspect-ratio: 1 / 1.294;
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 0.5rem;
     box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
     display: grid;
@@ -377,12 +377,12 @@
     padding: 0.75rem;
 }
 .et-hoja-celda {
-    border: 1px dashed #cbd5e1;
+    border: 1px dashed var(--color-text-disabled);
     border-radius: 0.375rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #cbd5e1;
+    color: var(--color-text-disabled);
 }
 
 .et-vacio-titulo { font-size: 1rem; font-weight: 800; color: #334155; margin: 0; }
@@ -413,10 +413,10 @@
     background: #f5f3ff;
     border-bottom: 1px solid #ddd6fe;
 }
-.et-sub { margin: 0.125rem 0 0 0; font-size: 0.75rem; color: #64748b; }
-.et-apagado { font-weight: 600; color: #94a3b8; }
-.et-ayuda { margin: 0 0 0.5rem; font-size: 0.6875rem; color: #94a3b8; line-height: 1.35; }
-.et-marca { font-weight: 700; color: #8f0653; }
+.et-sub { margin: 0.125rem 0 0 0; font-size: 0.75rem; color: var(--color-text-muted); }
+.et-apagado { font-weight: 600; color: var(--color-text-placeholder); }
+.et-ayuda { margin: 0 0 0.5rem; font-size: 0.6875rem; color: var(--color-text-placeholder); line-height: 1.35; }
+.et-marca { font-weight: 700; color: var(--color-brand); }
 .et-codigo-corto {
     font-weight: 800;
     color: #0369a1;
@@ -429,11 +429,11 @@
 .et-campo-corto {
     height: 1.75rem;
     border-radius: 0.375rem;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--color-text-disabled);
     padding: 0 0.5rem;
     font-size: 0.6875rem;
     font-weight: 700;
-    color: #8f0653;
+    color: var(--color-brand);
     font-family: inherit;
 }
 /* En milimetros a proposito: esto se imprime en papel, no se ve en pantalla. */

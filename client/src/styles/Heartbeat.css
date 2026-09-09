@@ -52,11 +52,11 @@
 }
 
 .heartbeat-indicator.offline .heart-dot {
-    background: #ef4444; /* Red 500 */
+    background: var(--color-error); /* Red 500 */
 }
 
 .heartbeat-indicator.offline .heart-label {
-    color: #ef4444;
+    color: var(--color-error);
 }
 
 @keyframes pulse-out {

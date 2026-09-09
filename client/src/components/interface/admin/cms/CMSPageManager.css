@@ -9,7 +9,7 @@
 
 @keyframes previewFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-.dropdown-content { display: none; position: absolute; right: 0; background: #fff; min-width: 200px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 16px; padding: 8px; z-index: 100; border: 1px solid #f1f5f9; }
+.dropdown-content { display: none; position: absolute; right: 0; background: var(--color-surface); min-width: 200px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 16px; padding: 8px; z-index: 100; border: 1px solid var(--color-border-subtle); }
 .dropdown:hover .dropdown-content { display: block; }
-.dropdown-content button { width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; font-size: 13px; font-weight: 700; color: #1e1b4b; cursor: pointer; display: flex; alignItems: center; gap: 10px; border-radius: 10px; }
-.dropdown-content button:hover { background: #fdf2f8; color: #8f0653; }
+.dropdown-content button { width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; font-size: 13px; font-weight: 700; color: var(--color-admin-dark); cursor: pointer; display: flex; alignItems: center; gap: 10px; border-radius: 10px; }
+.dropdown-content button:hover { background: var(--color-brand-lighter); color: var(--color-brand); }

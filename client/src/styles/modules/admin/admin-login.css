@@ -13,7 +13,7 @@
 }
 
 .admin-login-brand {
-    color: #8f0653;
+    color: var(--color-brand);
 }
 
 .admin-login-status {

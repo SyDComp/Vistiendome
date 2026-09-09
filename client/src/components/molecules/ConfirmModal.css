@@ -30,7 +30,7 @@
 .confirm-modal-header h3 {
     margin: 0;
     font-size: 1.25rem;
-    color: #1a1a1a;
+    color: var(--color-text-primary);
     font-weight: 600;
 }
 

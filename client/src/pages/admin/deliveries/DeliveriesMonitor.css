@@ -33,7 +33,7 @@
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 2px;
-    color: #555555;
+    color: var(--color-text-body);
 }
 
 .back-link {
@@ -195,7 +195,7 @@
 
 .status-assigned {
     background: #f4f4f4;
-    color: #555555;
+    color: var(--color-text-body);
     border: 1px solid #e2e2e2;
 }
 
@@ -210,7 +210,7 @@
 }
 
 .status-available .status-dot {
-    background: #e0e0e0;
+    background: var(--color-border-medium);
 }
 
 /* Delivery Info */
@@ -350,7 +350,7 @@
     align-items: center;
     gap: 0.5rem;
     font-size: 0.85rem;
-    color: #555555;
+    color: var(--color-text-body);
 }
 
 .legend-item .marker {

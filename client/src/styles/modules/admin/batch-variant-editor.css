@@ -3,7 +3,7 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 32px;
     overflow: hidden;
     box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
@@ -12,7 +12,7 @@
 
 .batch-editor-header {
     padding: 24px 40px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--color-border-subtle);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -25,7 +25,7 @@
 }
 
 .batch-editor-btn-back {
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
     border: none;
     border-radius: 50%;
     width: 40px;
@@ -34,14 +34,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #64748b;
+    color: var(--color-text-muted);
 }
 
 .batch-editor-title {
     margin: 0;
     font-size: 20px;
     font-weight: 900;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
 }
 
 .batch-editor-header-actions {
@@ -59,8 +59,8 @@
 }
 
 .batch-editor-master-accordion {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
     border-radius: 24px;
     overflow: hidden !important; /* Esquinas de 24px perfectamente redondas en la cabecera */
 }
@@ -94,15 +94,15 @@
 }
 
 .batch-editor-quick-scroll-box::-webkit-scrollbar-track {
-    background: #f1f5f9 !important;
+    background: var(--color-bg-subtle) !important;
     border-radius: 10px !important;
-    border: 1px solid #cbd5e1 !important;
+    border: 1px solid var(--color-text-disabled) !important;
 }
 
 .batch-editor-quick-scroll-box::-webkit-scrollbar-thumb {
-    background: #8f0653 !important;
+    background: var(--color-brand) !important;
     border-radius: 10px !important;
-    border: 2px solid #f1f5f9 !important;
+    border: 2px solid var(--color-border-subtle) !important;
 }
 
 .batch-editor-quick-scroll-box::-webkit-scrollbar-thumb:hover {
@@ -111,7 +111,7 @@
 
 /* Acordeón interno y su scroll si hay miles de opciones (e.g. Tallas, Colores) */
 .batch-editor-inner-accordion {
-    border: 1px solid #e2e8f0 !important;
+    border: 1px solid var(--color-border) !important;
     box-shadow: none !important;
     border-radius: 14px !important;
     margin-bottom: 12px;
@@ -119,7 +119,7 @@
 }
 
 .batch-editor-no-options-msg {
-    color: #64748b;
+    color: var(--color-text-muted);
     font-size: 13px;
     font-style: italic;
     padding: 6px 4px;
@@ -137,22 +137,22 @@
 }
 
 .batch-editor-inner-accordion .accordion-content::-webkit-scrollbar-track {
-    background: #f8fafc !important;
+    background: var(--color-bg-elevated) !important;
     border-radius: 8px !important;
 }
 
 .batch-editor-inner-accordion .accordion-content::-webkit-scrollbar-thumb {
-    background: #cbd5e1 !important;
+    background: var(--color-text-disabled) !important;
     border-radius: 8px !important;
 }
 
 .batch-editor-inner-accordion .accordion-content::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8 !important;
+    background: var(--color-text-placeholder) !important;
 }
 
 /* Clases migradas de estilos inline en BatchVariantEditor.jsx */
 .batch-editor-save-btn {
-    background: #8f0653 !important;
+    background: var(--color-brand) !important;
     min-width: 160px;
 }
 
@@ -172,9 +172,9 @@
 .batch-editor-th-container {
     position: sticky;
     top: 0;
-    background: #fff;
+    background: var(--color-surface);
     z-index: 10;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid var(--color-border);
 }
 
 .batch-editor-photo-img {
@@ -196,8 +196,8 @@
 .batch-editor-accordion-btn {
     padding: 6px 12px;
     border-radius: 8px;
-    border: 1px solid #e2e8f0;
-    background: #fff;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
     font-size: 11px;
     font-weight: 700;
     cursor: pointer;
@@ -224,21 +224,21 @@
     scroll-snap-align: start;
 }
 .batch-editor-filter-btn.active {
-    background: #8f0653;
-    color: #fff;
-    border: 2px solid #8f0653;
+    background: var(--color-brand);
+    color: var(--color-surface);
+    border: 2px solid var(--color-brand);
     box-shadow: 0 4px 12px rgba(143, 6, 83, 0.2);
 }
 .batch-editor-filter-btn.inactive {
-    background: #fff;
-    color: #1e1b4b;
-    border: 2px solid #e2e8f0;
+    background: var(--color-surface);
+    color: var(--color-admin-dark);
+    border: 2px solid var(--color-border);
     box-shadow: none;
 }
 
 .batch-editor-floating-bar {
-    background: #1e1b4b;
-    color: #fff;
+    background: var(--color-admin-dark);
+    color: var(--color-surface);
     padding: 20px 32px;
     border-radius: 24px;
     display: flex;
@@ -256,7 +256,7 @@
 .batch-editor-count-number {
     font-size: 18px;
     font-weight: 900;
-    color: #8f0653;
+    color: var(--color-brand);
 }
 
 .batch-editor-count-label {
@@ -292,7 +292,7 @@
 .batch-editor-price-input {
     background: transparent;
     border: none;
-    color: #fff;
+    color: var(--color-surface);
     padding: 10px 0;
     font-size: 13px;
     width: 100px;
@@ -300,8 +300,8 @@
 }
 
 .batch-editor-btn-apply {
-    background: #8f0653;
-    color: #fff;
+    background: var(--color-brand);
+    color: var(--color-surface);
     border: none;
     padding: 8px 12px;
     border-radius: 10px;
@@ -312,8 +312,8 @@
 }
 
 .batch-editor-btn-photos {
-    background: #8f0653;
-    color: #fff;
+    background: var(--color-brand);
+    color: var(--color-surface);
     border: none;
     padding: 12px 24px;
     border-radius: 14px;
@@ -330,16 +330,16 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 24px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     overflow: hidden;
 }
 
 .batch-editor-table-header-controls {
     padding: 12px 24px;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
+    background: var(--color-bg-elevated);
+    border-bottom: 1px solid var(--color-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -354,16 +354,16 @@
 .batch-editor-table-title span {
     font-size: 11px;
     font-weight: 800;
-    color: #64748b;
+    color: var(--color-text-muted);
     text-transform: uppercase;
 }
 
 .batch-editor-view-filters {
     display: flex;
-    background: #fff;
+    background: var(--color-surface);
     padding: 2px;
     border-radius: 10px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
 }
 
 .batch-editor-view-btn {
@@ -376,12 +376,12 @@
     transition: all 0.2s;
 }
 .batch-editor-view-btn.active {
-    background: #1e1b4b;
-    color: #fff;
+    background: var(--color-admin-dark);
+    color: var(--color-surface);
 }
 .batch-editor-view-btn.inactive {
     background: transparent;
-    color: #64748b;
+    color: var(--color-text-muted);
 }
 
 .batch-editor-table-scroll {
@@ -399,24 +399,24 @@
 .batch-editor-th {
     position: sticky;
     top: 0;
-    background: #fff;
+    background: var(--color-surface);
     z-index: 10;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid var(--color-border);
     padding: 16px;
     text-align: left;
 }
 
 .batch-editor-th.checkbox { width: 40px; }
-.batch-editor-th.sku { font-weight: 900; color: #1e1b4b; }
-.batch-editor-th.attr { font-weight: 900; color: #64748b; }
+.batch-editor-th.sku { font-weight: 900; color: var(--color-admin-dark); }
+.batch-editor-th.attr { font-weight: 900; color: var(--color-text-muted); }
 .batch-editor-th.price { width: 140px; }
 
 .batch-editor-tr {
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--color-border-subtle);
     transition: all 0.1s;
 }
-.batch-editor-tr.selected { background: #fdf2f8; }
-.batch-editor-tr.unselected { background: #fff; }
+.batch-editor-tr.selected { background: var(--color-brand-lighter); }
+.batch-editor-tr.unselected { background: var(--color-surface); }
 
 .batch-editor-td {
     padding: 16px;
@@ -424,13 +424,13 @@
 
 .batch-editor-td.sku {
     font-weight: 800;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     font-family: monospace;
 }
 
 .batch-editor-attr-tag {
     padding: 4px 10px;
-    background: #f1f5f9;
+    background: var(--color-bg-subtle);
     border-radius: 8px;
     font-weight: 700;
     font-size: 11px;
@@ -453,34 +453,34 @@
     height: 36px;
     border-radius: 8px;
     overflow: hidden;
-    border: 1.5px solid #e2e8f0;
+    border: 1.5px solid var(--color-border);
     transition: transform 0.2s;
 }
 .batch-editor-photo-thumb:hover {
     transform: scale(1.1);
     z-index: 5;
-    border-color: #8f0653;
+    border-color: var(--color-brand);
 }
 
 .batch-editor-photo-empty {
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    border: 1.5px dashed #cbd5e1;
-    background: #f8fafc;
+    border: 1.5px dashed var(--color-text-disabled);
+    background: var(--color-bg-elevated);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #cbd5e1;
+    color: var(--color-text-disabled);
 }
 
 .batch-editor-price-input-table {
     width: 100%;
     padding: 8px;
     border-radius: 8px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     font-weight: 900;
-    color: #16a34a;
+    color: var(--color-success);
     outline: none;
 }
 
@@ -503,7 +503,7 @@
     width: 100%;
     max-width: 1000px;
     height: 80vh;
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 32px;
     padding: 32px;
     display: flex;
@@ -522,18 +522,18 @@
     margin: 0;
     font-size: 24px;
     font-weight: 900;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
 }
 
 .batch-editor-gallery-subtitle {
     margin: 4px 0 0 0;
     font-size: 14px;
-    color: #64748b;
+    color: var(--color-text-muted);
 }
 
 .batch-editor-gallery-close {
     border: none;
-    background: #f1f5f9;
+    background: var(--color-bg-subtle);
     border-radius: 50%;
     width: 44px;
     height: 44px;

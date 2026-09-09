@@ -16,7 +16,7 @@
 
 /* Modal Content */
 .modal-content {
-    background: #fff;
+    background: var(--color-surface);
     width: 90% !important;
     max-width: 1200px !important;
     /* Increased for better presence */
@@ -32,7 +32,7 @@
 }
 
 .modal-content-column {
-    background: #fff;
+    background: var(--color-surface);
     width: 90% !important;
     max-width: 1200px !important;
     height: 80vh !important;
@@ -50,7 +50,7 @@
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background: #fff;
+    background: var(--color-surface);
     border: none;
     width: 32px;
     height: 32px;
@@ -127,7 +127,7 @@
     height: 100%;
     overflow: hidden;
     /* Lock parent scroll */
-    background: #fff;
+    background: var(--color-surface);
 }
 
 .modal-fixed-header {
@@ -150,7 +150,7 @@
     font-size: 2.2rem;
     font-weight: 300;
     line-height: 1.2;
-    color: #1a1a1a;
+    color: var(--color-text-primary);
     margin: 0;
 }
 
@@ -214,7 +214,7 @@
 }
 
 .modal-description::-webkit-scrollbar-thumb {
-    background: #e0e0e0;
+    background: var(--color-border-medium);
     border-radius: 10px;
 }
 
@@ -227,7 +227,7 @@
     border-top: 1px solid #f0f0f0;
     padding-top: 1.25rem;
     padding-bottom: 0.5rem;
-    background: #fff;
+    background: var(--color-surface);
     z-index: 5;
     flex-shrink: 0;
 }
@@ -296,7 +296,7 @@
 
 .btn-primary {
     background: #121212;
-    color: #fff;
+    color: var(--color-surface);
 }
 
 .btn-primary:hover {
@@ -364,7 +364,7 @@
     }
 
     .modal-content-column {
-        background: #fff;
+        background: var(--color-surface);
         width: 90% !important;
         max-width: 1200px !important;
         /* Increased for better presence */
@@ -414,7 +414,7 @@
         overflow-x: hidden;
         display: flex;
         flex-direction: column;
-        background: #fff;
+        background: var(--color-surface);
         /* Necesario para que sticky bottom del modal-actions funcione */
         position: relative;
     }
@@ -481,7 +481,7 @@
         padding: 1rem 0 0;
         margin: 0;
         width: 100%;
-        background: #fff;
+        background: var(--color-surface);
         border-top: 1px solid #f0f0f0;
         display: flex !important;
         flex-direction: row !important;
@@ -518,7 +518,7 @@
 
     .btn-primary.full-width {
         background: #121212;
-        color: #fff;
+        color: var(--color-surface);
         border: none;
     }
 
@@ -595,7 +595,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: #fff;
+        background: var(--color-surface);
         z-index: 3500; /* Higher than modal-close (3100) to avoid overlap */
         display: flex;
         flex-direction: column;

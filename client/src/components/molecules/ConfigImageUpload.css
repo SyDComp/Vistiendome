@@ -19,7 +19,7 @@
 .image-preview-container {
     width: 100%;
     min-height: 200px;
-    background-color: #f8fafc;
+    background-color: var(--color-bg-elevated);
     cursor: pointer;
     position: relative;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -92,7 +92,7 @@
 }
 
 .btn-select-file {
-    background: #fff;
+    background: var(--color-surface);
     border: 1px solid #ccc;
     padding: 0.5rem 1rem;
     border-radius: 4px;

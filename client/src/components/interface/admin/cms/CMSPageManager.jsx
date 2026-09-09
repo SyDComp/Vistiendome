@@ -363,19 +363,7 @@ const CMSPageManager = ({
 
                 {/* Lado Derecho: Espejo del Sitio (Solo visible en Desktop) */}
                 {!isMobileScreen && (
-                    <div style={{ 
-                        background: '#f1f5f9', 
-                        borderRadius: '32px', 
-                        padding: '24px', 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        gap: '16px', 
-                        position: 'relative', 
-                        border: '1px solid #e2e8f0',
-                        overflow: 'hidden',
-                        height: '100%',
-                        minHeight: 0
-                    }}>
+                    <div className="cms-pg-bloque cms-pg-bloque--espejo">
                         <div className="cms-pg-fila--repartida">
                             <h3 className="adm-titulo-seccion">
                                 <Monitor size={15} /> ESPEJO DEL SITIO (LIVE)

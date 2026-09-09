@@ -21,8 +21,8 @@
     position: relative;
     display: flex;
     align-items: center;
-    background: #ffffff;
-    border: 1px solid #e0e0e0;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-medium);
     border-radius: 4px;
     /* Slightly sharper corners for gallery style */
     transition: all 0.2s ease;

@@ -25,15 +25,15 @@
 .fm-titulo {
     font-size: 1.25rem;
     font-weight: 800;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     display: flex;
     align-items: center;
     gap: 0.5rem;
     flex-wrap: wrap;
 }
-.fm-titulo-icono { color: #8f0653; flex-shrink: 0; }
+.fm-titulo-icono { color: var(--color-brand); flex-shrink: 0; }
 .fm-explicacion {
-    color: #64748b;
+    color: var(--color-text-muted);
     margin-top: 0.5rem;
     max-width: 37.5rem;
     font-size: 0.875rem;
@@ -45,8 +45,8 @@
     align-items: center;
     gap: 0.375rem;
     padding: 0.5rem 1rem;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
     border-radius: 0.5rem;
     color: #475569;
     font-weight: 600;
@@ -62,14 +62,14 @@
     left: 0.75rem;
     top: 50%;
     transform: translateY(-50%);
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
     pointer-events: none;
 }
 .fm-buscador input {
     width: 100%;
     padding: 0.75rem 0.75rem 0.75rem 2.5rem;
     border-radius: 0.75rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     font-size: max(1rem, 0.9375rem);
     outline: none;
     font-family: inherit;
@@ -80,17 +80,17 @@
     display: block;
     font-size: 0.8125rem;
     font-weight: 700;
-    color: #64748b;
+    color: var(--color-text-muted);
     margin-bottom: 0.5rem;
 }
 .fm-eleccion select {
     width: 100%;
     padding: 0.875rem 1rem;
     border-radius: 0.75rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     font-size: 1rem;
     color: #1e293b;
-    background-color: #fff;
+    background-color: var(--color-surface);
     outline: none;
     cursor: pointer;
     appearance: auto;
@@ -98,11 +98,11 @@
     font-family: inherit;
 }
 
-.fm-cargando { padding: 2.5rem; text-align: center; color: #64748b; }
+.fm-cargando { padding: 2.5rem; text-align: center; color: var(--color-text-muted); }
 
 .fm-lista {
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 1rem;
     overflow: hidden;
     min-height: 25rem;
@@ -114,9 +114,9 @@
     max-height: calc(100dvh - 21.875rem);
     overflow-y: auto;
 }
-.fm-vacio { padding: 1.5rem; text-align: center; color: #94a3b8; }
+.fm-vacio { padding: 1.5rem; text-align: center; color: var(--color-text-placeholder); }
 
-.fm-fila { padding: 1rem; border-bottom: 1px solid #f1f5f9; }
+.fm-fila { padding: 1rem; border-bottom: 1px solid var(--color-border-subtle); }
 /* Un nombre largo se recorta en vez de romper la fila. */
 .fm-fila-nombre {
     font-weight: 600;
@@ -128,7 +128,7 @@
 }
 .fm-fila-detalle {
     font-size: 0.75rem;
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
     margin-top: 0.125rem;
     white-space: nowrap;
     overflow: hidden;
@@ -145,11 +145,11 @@
     flex-wrap: wrap;
 }
 .fm-precio-nombre { font-weight: 600; color: #334155; font-size: 0.9375rem; }
-.fm-precio-detalle { font-size: 0.75rem; color: #94a3b8; margin-top: 0.125rem; }
+.fm-precio-detalle { font-size: 0.75rem; color: var(--color-text-placeholder); margin-top: 0.125rem; }
 .fm-precio-estado {
     padding: 0.375rem 0.75rem;
     border-radius: 1.25rem;
-    background: #dcfce7;
+    background: var(--color-success-border);
     color: #166534;
     font-weight: 700;
     font-size: 0.8125rem;

@@ -31,7 +31,7 @@
        fuera y no se podía confirmar ni cancelar. */
     max-height: 100dvh;
     overflow-y: auto;
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 2rem;
     padding: 2.5rem;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -46,8 +46,8 @@
     height: 2.75rem;
     border-radius: 0.75rem;
     border: none;
-    background: #f8fafc;
-    color: #64748b;
+    background: var(--color-bg-elevated);
+    color: var(--color-text-muted);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -71,12 +71,12 @@
     margin: 0;
     font-size: 1.5rem;
     font-weight: 900;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     letter-spacing: -0.02em;
 }
 .confirmar-mensaje {
     text-align: center;
-    color: #64748b;
+    color: var(--color-text-muted);
     font-size: 1rem;
     line-height: 1.6;
     margin: 0 0 2rem 0;

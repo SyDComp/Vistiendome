@@ -23,19 +23,19 @@
 .ui-input {
     width: 100%;
     padding: 12px 14px;
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--color-border-medium);
     border-radius: 2px;
     font-size: 14px;
-    background-color: #ffffff;
+    background-color: var(--color-surface);
     transition: all 0.3s ease;
-    color: #2c2c2c;
+    color: var(--color-text-secondary);
     font-family: 'Montserrat', sans-serif;
 }
 
 .ui-input:focus {
     outline: none;
-    border-color: #8f0653;
-    background-color: #ffffff;
+    border-color: var(--color-brand);
+    background-color: var(--color-surface);
     box-shadow: 0 0 0 1px rgba(200, 162, 162, 0.2);
 }
 
@@ -91,8 +91,8 @@
 
 /* Variantes visuales */
 .ui-btn-primary {
-    background-color: #8f0653;
-    color: #ffffff;
+    background-color: var(--color-brand);
+    color: var(--color-surface);
 }
 
 .ui-btn-primary:hover:not(:disabled) {
@@ -103,13 +103,13 @@
 
 .ui-btn-secondary {
     background-color: transparent;
-    border-color: #e0e0e0;
-    color: #2c2c2c;
+    border-color: var(--color-border-medium);
+    color: var(--color-text-secondary);
 }
 
 .ui-btn-secondary:hover:not(:disabled) {
-    background-color: #fcfbfa;
-    border-color: #8f0653;
+    background-color: var(--color-bg);
+    border-color: var(--color-brand);
 }
 
 .ui-btn-danger {
@@ -132,7 +132,7 @@
     height: 20px;
     border: 3px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
-    border-top-color: #fff;
+    border-top-color: var(--color-surface);
     animation: spin 1s ease-in-out infinite;
 }
 

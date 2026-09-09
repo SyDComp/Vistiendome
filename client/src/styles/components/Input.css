@@ -20,12 +20,12 @@
     width: 100%;
     padding: 12px 16px;
     border-radius: 12px;
-    border: 2px solid #c461a2;
+    border: 2px solid var(--color-gold-border);
     font-size: 14px;
     font-weight: 800;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     outline: none;
-    background: #fff;
+    background: var(--color-surface);
     transition: all 0.3s ease;
 }
 
@@ -35,7 +35,7 @@
 }
 
 .premium-input::placeholder {
-    color: #cbd5e1;
+    color: var(--color-text-disabled);
 }
 
 /* Color Type Specifics */
@@ -50,7 +50,7 @@
     width: 46px;
     height: 46px;
     border-radius: 12px;
-    border: 2px solid #c461a2;
+    border: 2px solid var(--color-gold-border);
     position: relative;
     overflow: hidden;
     cursor: pointer;

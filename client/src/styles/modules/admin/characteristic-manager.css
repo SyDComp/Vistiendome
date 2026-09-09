@@ -17,7 +17,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #8f0653;
+    color: var(--color-brand);
     flex-shrink: 0;
 }
 
@@ -25,7 +25,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #cbd5e1;
+    background: var(--color-text-disabled);
     flex-shrink: 0;
 }
 
@@ -37,7 +37,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.char-manager-name-text.system { color: #8f0653; }
+.char-manager-name-text.system { color: var(--color-brand); }
 .char-manager-name-text.normal { color: #334155; }
 
 .char-manager-badge-system {

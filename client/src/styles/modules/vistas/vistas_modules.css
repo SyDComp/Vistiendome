@@ -26,13 +26,13 @@
 .search-subtitle-line-right {
     width: 40px;
     height: 1px;
-    background: linear-gradient(to right, transparent, #8f0653);
+    background: linear-gradient(to right, transparent, var(--color-brand));
 }
 
 .search-subtitle-line-left {
     width: 40px;
     height: 1px;
-    background: linear-gradient(to left, transparent, #8f0653);
+    background: linear-gradient(to left, transparent, var(--color-brand));
 }
 
 .search-subtitle-text {
@@ -40,24 +40,24 @@
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.2em;
-    color: #8f0653;
+    color: var(--color-brand);
 }
 
 .search-title {
     font-size: 42px;
     font-weight: 900;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     margin: 0 0 10px 0;
     letter-spacing: -0.02em;
 }
 
 .search-query-highlight {
-    color: #8f0653;
+    color: var(--color-brand);
     font-style: italic;
 }
 
 .search-results-count {
-    color: #64748b;
+    color: var(--color-text-muted);
     font-size: 16px;
     max-width: 600px;
     margin: 0 auto;
@@ -76,9 +76,9 @@
     gap: 8px;
     padding: 10px 20px;
     border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    background: #fff;
-    color: #1e1b4b;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-admin-dark);
     font-weight: 700;
     font-size: 13px;
     cursor: pointer;
@@ -86,7 +86,7 @@
 }
 
 .search-btn-share:hover {
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
 }
 
 .search-link-catalog {
@@ -95,8 +95,8 @@
     gap: 8px;
     padding: 10px 20px;
     border-radius: 12px;
-    background: #1e1b4b;
-    color: #fff;
+    background: var(--color-admin-dark);
+    color: var(--color-surface);
     font-weight: 700;
     font-size: 13px;
     text-decoration: none;
@@ -120,9 +120,9 @@
 .search-empty-state {
     text-align: center;
     padding: 100px 20px;
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
     border-radius: 32px;
-    border: 2px dashed #e2e8f0;
+    border: 2px dashed var(--color-border);
 }
 
 .search-empty-icon {
@@ -133,17 +133,17 @@
 .search-empty-title {
     font-size: 24px;
     font-weight: 800;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     margin-bottom: 10px;
 }
 
 .search-empty-desc {
-    color: #64748b;
+    color: var(--color-text-muted);
     margin-bottom: 30px;
 }
 
 .search-empty-link {
-    color: #8f0653;
+    color: var(--color-brand);
     font-weight: 800;
     text-decoration: none;
     display: flex;
@@ -161,8 +161,8 @@
     bottom: 40px;
     left: 50%;
     transform: translateX(-50%);
-    background: #1e1b4b;
-    color: #fff;
+    background: var(--color-admin-dark);
+    color: var(--color-surface);
     padding: 12px 24px;
     border-radius: 12px;
     box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
@@ -177,7 +177,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #16a34a;
+    background: var(--color-success);
 }
 
 @keyframes slideUp {

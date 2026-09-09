@@ -22,10 +22,10 @@
     min-width: 320px;
     display: flex;
     flex-direction: column;
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 16px;
     box-shadow: 0 1px 8px rgba(0,0,0,0.07);
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     overflow: hidden;
 }
 .barcode-printer-container.mobile .barcode-printer-left-panel {
@@ -36,7 +36,7 @@
 
 .barcode-printer-left-header {
     padding: 20px 20px 16px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .barcode-printer-left-header-title-row {
@@ -50,7 +50,7 @@
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: linear-gradient(135deg, #1e1b4b, #8f0653);
+    background: linear-gradient(135deg, var(--color-admin-dark), var(--color-brand));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -60,13 +60,13 @@
     margin: 0;
     font-size: 15px;
     font-weight: 700;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
 }
 
 .barcode-printer-left-header-desc {
     margin: 0;
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
 }
 
 .barcode-printer-search-wrap {
@@ -78,17 +78,17 @@
     left: 10px;
     top: 50%;
     transform: translateY(-50%);
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
 }
 
 .barcode-printer-search-input {
     width: 100%;
     padding: 9px 12px 9px 32px;
     border-radius: 10px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     font-size: 13px;
     outline: none;
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
     color: #1e293b;
 }
 
@@ -101,7 +101,7 @@
 .barcode-printer-empty {
     padding: 40px;
     text-align: center;
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
     font-size: 13px;
 }
 
@@ -129,26 +129,26 @@
 }
 
 .barcode-printer-product-btn.all {
-    color: #8f0653;
+    color: var(--color-brand);
 }
 .barcode-printer-product-btn.some {
     color: #c084fc;
 }
 .barcode-printer-product-btn.none {
-    color: #cbd5e1;
+    color: var(--color-text-disabled);
 }
 
 .barcode-printer-product-name {
     flex: 1;
     font-size: 13px;
     font-weight: 600;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
 }
 
 .barcode-printer-product-count {
     font-size: 11px;
-    color: #94a3b8;
-    background: #f1f5f9;
+    color: var(--color-text-placeholder);
+    background: var(--color-bg-subtle);
     padding: 2px 6px;
     border-radius: 6px;
 }
@@ -177,10 +177,10 @@
     display: flex;
 }
 .barcode-printer-variant-icon.selected {
-    color: #8f0653;
+    color: var(--color-brand);
 }
 .barcode-printer-variant-icon.unselected {
-    color: #cbd5e1;
+    color: var(--color-text-disabled);
 }
 
 .barcode-printer-variant-info {
@@ -191,7 +191,7 @@
 .barcode-printer-variant-name {
     font-size: 11px;
     font-weight: 700;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -199,13 +199,13 @@
 
 .barcode-printer-variant-bc {
     font-size: 10px;
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
     font-family: monospace;
 }
 
 .barcode-printer-left-footer {
     padding: 12px 16px;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--color-border-subtle);
     background: #fafafa;
     display: flex;
     gap: 8px;
@@ -217,8 +217,8 @@
     flex: 1 1 150px;
     padding: 8px 12px;
     border-radius: 8px;
-    background: #1e1b4b;
-    color: #fff;
+    background: var(--color-admin-dark);
+    color: var(--color-surface);
     border: none;
     cursor: pointer;
     font-size: 12px;
@@ -234,8 +234,8 @@
     flex: 1 1 80px;
     padding: 8px 12px;
     border-radius: 8px;
-    background: #fef2f2;
-    color: #ef4444;
+    background: var(--color-error-bg);
+    color: var(--color-error);
     border: 1px solid #fecaca;
     cursor: pointer;
     font-size: 12px;
@@ -259,11 +259,11 @@
 }
 
 .barcode-printer-config {
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 16px;
     padding: 20px;
     box-shadow: 0 1px 8px rgba(0,0,0,0.07);
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
 }
 
 .barcode-printer-config-header {
@@ -277,7 +277,7 @@
     margin: 0;
     font-size: 14px;
     font-weight: 700;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
 }
 
 .barcode-printer-config-info {
@@ -285,19 +285,19 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
     border-radius: 8px;
     padding: 4px 10px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
 }
 
 .barcode-printer-config-info-text {
     font-size: 12px;
-    color: #64748b;
+    color: var(--color-text-muted);
 }
 
 .barcode-printer-config-info-highlight {
-    color: #8f0653;
+    color: var(--color-brand);
     font-weight: bold;
 }
 
@@ -319,7 +319,7 @@
 .barcode-printer-config-label {
     font-size: 12px;
     font-weight: 600;
-    color: #64748b;
+    color: var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     display: block;
@@ -346,21 +346,21 @@
     text-align: center;
 }
 .barcode-printer-config-option.primary {
-    border-color: #8f0653;
+    border-color: var(--color-brand);
     background: rgba(143,6,83,0.06);
-    color: #8f0653;
+    color: var(--color-brand);
     font-weight: 700;
 }
 .barcode-printer-config-option.secondary {
-    border-color: #1e1b4b;
+    border-color: var(--color-admin-dark);
     background: rgba(30,27,75,0.06);
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     font-weight: 700;
 }
 .barcode-printer-config-option.inactive {
-    border-color: #e2e8f0;
-    background: #fff;
-    color: #64748b;
+    border-color: var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
     font-weight: 400;
 }
 
@@ -384,7 +384,7 @@
     gap: 16px;
     flex-wrap: wrap;
     padding-top: 16px;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--color-border-subtle);
     margin-top: 4px;
     width: 100%;
 }
@@ -396,7 +396,7 @@
 
 .barcode-printer-config-compat-box {
     padding: 10px 14px;
-    background: #f0fdf4;
+    background: var(--color-success-bg);
     border-radius: 10px;
     border: 1px solid #bbf7d0;
     font-size: 11px;
@@ -413,11 +413,11 @@
 }
 
 .barcode-printer-copies {
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 16px;
     padding: 16px 20px;
     box-shadow: 0 1px 8px rgba(0,0,0,0.07);
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
 }
 
 .barcode-printer-copies-header {
@@ -436,20 +436,20 @@
 .barcode-printer-copies-title {
     font-size: 13px;
     font-weight: 700;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
 }
 
 .barcode-printer-copies-info {
     font-size: 11px;
-    color: #94a3b8;
-    background: #f1f5f9;
+    color: var(--color-text-placeholder);
+    background: var(--color-bg-subtle);
     padding: 2px 6px;
     border-radius: 6px;
 }
 
 .barcode-printer-copies-btn-fill {
     font-size: 11px;
-    color: #8f0653;
+    color: var(--color-brand);
     background: none;
     border: none;
     cursor: pointer;
@@ -472,10 +472,10 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
     border-radius: 10px;
     padding: 8px 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     min-width: 200px;
     flex: 1;
 }
@@ -488,7 +488,7 @@
 .barcode-printer-copy-name {
     font-size: 11px;
     font-weight: 700;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -496,7 +496,7 @@
 
 .barcode-printer-copy-sku {
     font-size: 10px;
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
     font-family: monospace;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -513,33 +513,33 @@
     width: 24px;
     height: 24px;
     border-radius: 6px;
-    border: 1px solid #e2e8f0;
-    background: #fff;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #64748b;
+    color: var(--color-text-muted);
 }
 
 .barcode-printer-copy-input {
     width: 40px;
     text-align: center;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     border-radius: 6px;
     padding: 4px;
     font-size: 12px;
     font-weight: 700;
-    color: #8f0653;
+    color: var(--color-brand);
 }
 
 .barcode-printer-preview {
     flex: 1;
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 16px;
     padding: 16px 20px;
     box-shadow: 0 1px 8px rgba(0,0,0,0.07);
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -564,13 +564,13 @@
 .barcode-printer-preview-title {
     font-size: 13px;
     font-weight: 700;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
 }
 
 .barcode-printer-preview-info {
     font-size: 11px;
-    color: #94a3b8;
-    background: #f1f5f9;
+    color: var(--color-text-placeholder);
+    background: var(--color-bg-subtle);
     padding: 2px 8px;
     border-radius: 6px;
 }
@@ -587,14 +587,14 @@
     transition: all 0.2s;
 }
 .barcode-printer-btn-print.active {
-    background: linear-gradient(135deg, #8f0653, #1e1b4b);
-    color: #fff;
+    background: linear-gradient(135deg, var(--color-brand), var(--color-admin-dark));
+    color: var(--color-surface);
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(143,6,83,0.35);
 }
 .barcode-printer-btn-print.inactive {
-    background: #e2e8f0;
-    color: #94a3b8;
+    background: var(--color-border);
+    color: var(--color-text-placeholder);
     cursor: not-allowed;
     box-shadow: none;
 }
@@ -606,14 +606,14 @@
     align-items: flex-start;
     justify-content: center;
     padding: 12px 0;
-    background: #f1f5f9;
+    background: var(--color-bg-subtle);
     border-radius: 8px;
     margin: 0 -4px;
 }
 
 .barcode-printer-preview-empty {
     text-align: center;
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
     padding-top: 60px;
 }
 
@@ -635,8 +635,8 @@
 }
 
 .barcode-printer-page {
-    background: #fff;
-    border: 1px solid #94a3b8;
+    background: var(--color-surface);
+    border: 1px solid var(--color-text-placeholder);
     border-radius: 3px;
     box-shadow: 3px 4px 18px rgba(0,0,0,0.15);
     display: grid;
@@ -674,7 +674,7 @@
 
 .barcode-printer-label-loading {
     font-size: 10px;
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
 }
 
 .barcode-printer-label-text {

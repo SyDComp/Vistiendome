@@ -39,11 +39,11 @@
 
 .g-modal-header {
     padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--color-border-subtle);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #ffffff;
+    background: var(--color-surface);
     flex-shrink: 0;
 }
 
@@ -89,11 +89,11 @@
 
 .g-modal-footer {
     padding: 1.25rem 1.5rem;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--color-border-subtle);
     display: flex;
     justify-content: space-between;
     gap: 1rem;
-    background-color: #f8fafc;
+    background-color: var(--color-bg-elevated);
     flex-shrink: 0;
 }
 

@@ -15,7 +15,7 @@
     position: relative;
     width: 100%;
     max-width: 440px;
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 18px;
     overflow: hidden;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -40,14 +40,14 @@
     transition: background 0.2s;
 }
 .welcome-modal__close:hover {
-    background: #fff;
+    background: var(--color-surface);
 }
 
 .welcome-modal__image {
     width: 100%;
     max-height: 280px;
     overflow: hidden;
-    background: #f1f5f9;
+    background: var(--color-bg-subtle);
 }
 .welcome-modal__image img {
     width: 100%;
@@ -82,8 +82,8 @@
     display: inline-block;
     border: none;
     cursor: pointer;
-    background: #8f0653;
-    color: #fff;
+    background: var(--color-brand);
+    color: var(--color-surface);
     font-family: 'Outfit', sans-serif;
     font-weight: 600;
     font-size: 0.95rem;

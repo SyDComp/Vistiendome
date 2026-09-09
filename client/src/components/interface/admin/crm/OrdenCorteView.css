@@ -16,11 +16,11 @@
 
 .oc-lista .oc-acciones { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
 
-.oc-lista .oc-select { height:40px; padding:0 12px; border:1px solid #e2e8f0; border-radius:10px; background:#fff; font-size:13px; }
+.oc-lista .oc-select { height:40px; padding:0 12px; border:1px solid var(--color-border); border-radius:10px; background:var(--color-surface); font-size:13px; }
 
-.oc-lista .oc-btn-nueva { display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#8f0653,#d946ef); color:#fff; border:none; padding:11px 18px; border-radius:10px; font-weight:800; font-size:13px; cursor:pointer; box-shadow:0 4px 12px rgba(143,6,83,.25); }
+.oc-lista .oc-btn-nueva { display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,var(--color-brand),#d946ef); color:var(--color-surface); border:none; padding:11px 18px; border-radius:10px; font-weight:800; font-size:13px; cursor:pointer; box-shadow:0 4px 12px rgba(143,6,83,.25); }
 
-.oc-lista .oc-vacio { padding:56px 20px; text-align:center; color:#64748b; font-size:14px; }
+.oc-lista .oc-vacio { padding:56px 20px; text-align:center; color:var(--color-text-muted); font-size:14px; }
 
 .oc-lista .oc-vacio strong { display:block; color:#334155; font-size:16px; margin-bottom:8px; }
 
@@ -28,21 +28,21 @@
 
 .oc-lista .oc-tabla { width:100%; border-collapse:collapse; font-size:13px; }
 
-.oc-lista .oc-tabla th { text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:#64748b; border-bottom:2px solid #1e1b4b; padding:8px 6px; }
+.oc-lista .oc-tabla th { text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:var(--color-text-muted); border-bottom:2px solid var(--color-admin-dark); padding:8px 6px; }
 
-.oc-lista .oc-tabla td { padding:11px 6px; border-bottom:1px solid #e2e8f0; }
+.oc-lista .oc-tabla td { padding:11px 6px; border-bottom:1px solid var(--color-border); }
 
 .oc-lista .oc-tabla .num { text-align:right; }
 
 .oc-lista .oc-fila { cursor:pointer; }
 
-.oc-lista .oc-fila:hover { background:#f8fafc; }
+.oc-lista .oc-fila:hover { background:var(--color-bg-elevated); }
 
-.oc-lista .oc-numero { font-weight:800; color:#1e1b4b; }
+.oc-lista .oc-numero { font-weight:800; color:var(--color-admin-dark); }
 
 .oc-lista .oc-estado { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:4px 10px; border-radius:20px; }
 
-.oc-lista .oc-notas { color:#64748b; font-size:12px; }
+.oc-lista .oc-notas { color:var(--color-text-muted); font-size:12px; }
 
 .oc-lista .oc-badge-rep { margin-left:8px; font-size:10px; font-weight:800; color:#4338ca; background:#eef2ff; padding:2px 7px; border-radius:6px; }
 

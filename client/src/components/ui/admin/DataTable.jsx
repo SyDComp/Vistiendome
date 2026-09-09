@@ -23,13 +23,7 @@ const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {
 
     return (
         <div className="adm-tabla-caja">
-            {/* Zona de scroll independiente */}
-            <div style={{ 
-                flex: 1, 
-                overflowY: 'auto', 
-                overflowX: 'auto', // Permite scroll horizontal en móviles
-                position: 'relative' 
-            }}>
+            <div className="adm-tabla-scroll">
                 {isLoading ? (
                     <div className="adm-tabla-estado">
                         <div className="adm-rueda" />
@@ -111,15 +105,7 @@ const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {
             
             {/* Indicador de scroll para móvil */}
             {isMobile && !isLoading && data.length > 0 && (
-                <div style={{ 
-                    padding: '8px', 
-                    textAlign: 'center', 
-                    fontSize: '10px', 
-                    color: '#94a3b8', 
-                    borderTop: '1px solid #f1f5f9',
-                    fontStyle: 'italic',
-                    backgroundColor: '#fff' 
-                }}>
+                <div className="adm-tabla-pie">
                     ⬅️ Desliza para ver más acciones ➡️
                 </div>
             )}

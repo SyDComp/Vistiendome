@@ -12,7 +12,7 @@
     border: none;
     padding: 8px;
     cursor: pointer;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     position: relative;
     transition: transform 0.2s ease;
 }
@@ -25,7 +25,7 @@
     position: absolute;
     top: -6px;
     right: -6px;
-    background: #8f0653;
+    background: var(--color-brand);
     color: white;
     font-size: 10px;
     font-weight: 900;

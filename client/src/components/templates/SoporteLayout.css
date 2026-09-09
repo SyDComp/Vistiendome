@@ -1,11 +1,11 @@
 /* Modern Light SoporteLayout.css */
 
 :root {
-    --support-bg: #f8fafc;
-    --support-surface: #ffffff;
+    --support-bg: var(--color-bg-elevated);
+    --support-surface: var(--color-surface);
     --support-text-main: #1e293b;
-    --support-text-muted: #64748b;
-    --support-border: #e2e8f0;
+    --support-text-muted: var(--color-text-muted);
+    --support-border: var(--color-border);
     --support-primary: #8b5cf6;
     --support-primary-dark: #7c3aed;
     --support-secondary: #0ea5e9;
@@ -59,7 +59,7 @@
 }
 
 .readonly-badge {
-    background: #f1f5f9;
+    background: var(--color-bg-subtle);
     color: var(--support-text-muted);
     padding: 0.25rem 0.75rem;
     border-radius: 12px;
@@ -104,7 +104,7 @@
 }
 
 .soporte-layout .sidebar-header .collapse-btn:hover {
-    background: #f1f5f9;
+    background: var(--color-bg-subtle);
     color: var(--support-text-main);
 }
 
@@ -143,7 +143,7 @@
 }
 
 .nav-item:hover {
-    background-color: #f8fafc;
+    background-color: var(--color-bg-elevated);
     color: var(--support-text-main);
 }
 
@@ -241,8 +241,8 @@
 }
 
 .logout-btn:hover {
-    background: #fee2e2;
-    color: #ef4444;
+    background: var(--color-error-border);
+    color: var(--color-error);
     border-color: #fca5a5;
 }
 

@@ -11,7 +11,7 @@
 }
 .sku-cell-text {
     font-weight: 800;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     font-family: monospace;
 }
 .sku-barcode-btn {
@@ -26,26 +26,26 @@
 }
 .sku-barcode-btn.active {
     background: rgba(143,6,83,0.1);
-    color: #8f0653;
+    color: var(--color-brand);
 }
 .sku-barcode-btn.inactive {
     background: transparent;
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
 }
 .sku-barcode-container {
-    background: #fff;
+    background: var(--color-surface);
     text-align: center;
     padding: 8px;
     border-radius: 8px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     display: inline-block;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .category-badge {
     padding: 3px 10px;
-    background: #eff6ff;
-    color: #3b82f6;
+    background: var(--color-info-bg);
+    color: var(--color-info);
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
@@ -58,9 +58,9 @@
     font-size: 12px;
     font-weight: 600;
 }
-.type-badge.prenda { background: #f0fdf4; color: #16a34a; }
+.type-badge.prenda { background: var(--color-success-bg); color: var(--color-success); }
 .type-badge.accesorio { background: #fdf4ff; color: #9333ea; }
-.type-badge.default { background: #f1f5f9; color: #64748b; }
+.type-badge.default { background: var(--color-bg-subtle); color: var(--color-text-muted); }
 
 /* UNA PILDORA NO PARTE SU TEXTO
    Era un `span` en linea sin `white-space`, asi que en cuanto la columna
@@ -74,20 +74,20 @@
     font-size: 0.75rem;
     font-weight: 700;
 }
-.stock-badge.empty { background: #fef2f2; color: #ef4444; }
-.stock-badge.low { background: #fffbeb; color: #d97706; }
-.stock-badge.normal { background: #f0fdf4; color: #15803d; }
+.stock-badge.empty { background: var(--color-error-bg); color: var(--color-error); }
+.stock-badge.low { background: var(--color-warning-bg); color: var(--color-warning); }
+.stock-badge.normal { background: var(--color-success-bg); color: #15803d; }
 
 .admin-product-thumb {
     width: 48px;
     height: 48px;
     border-radius: 12px;
     overflow: hidden;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     cursor: zoom-in;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
 }
 .admin-product-thumb:hover {
     transform: scale(1.1);
@@ -105,12 +105,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #cbd5e1;
+    color: var(--color-text-disabled);
 }
 
-.admin-product-name { font-weight: 700; color: #1e1b4b; }
-.admin-product-name.parent { font-weight: 600; color: #64748b; }
-.admin-product-price { font-weight: 800; color: #16a34a; }
+.admin-product-name { font-weight: 700; color: var(--color-admin-dark); }
+.admin-product-name.parent { font-weight: 600; color: var(--color-text-muted); }
+.admin-product-price { font-weight: 800; color: var(--color-success); }
 
 /* Misma razon que `.stock-badge`: "2399 und." se partia en dos lineas. */
 .admin-stock-val {
@@ -121,8 +121,8 @@
     border-radius: 0.5rem;
     font-size: 0.75rem;
 }
-.admin-stock-val.positive { color: #1e1b4b; background: #f1f5f9; }
-.admin-stock-val.negative { color: #ef4444; background: #fef2f2; }
+.admin-stock-val.positive { color: var(--color-admin-dark); background: var(--color-bg-subtle); }
+.admin-stock-val.negative { color: var(--color-error); background: var(--color-error-bg); }
 
 .admin-variant-config-wrapper {
     display: flex;
@@ -131,8 +131,8 @@
 }
 .admin-variant-config {
     padding: 2px 8px;
-    background: #fdf2f8;
-    color: #8f0653;
+    background: var(--color-brand-lighter);
+    color: var(--color-brand);
     border-radius: 6px;
     font-size: 10px;
     font-weight: 800;
@@ -153,7 +153,7 @@
     gap: 8px;
     background: none;
     border: none;
-    color: #8f0653;
+    color: var(--color-brand);
     cursor: pointer;
     font-weight: 700;
     margin-bottom: 24px;

@@ -7,7 +7,7 @@
 
 .external-sale-form .input-field:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: var(--color-info);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -25,16 +25,16 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: #fff;
+    background-color: var(--color-surface);
     padding: 0.75rem 1rem;
     border-radius: 8px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     transition: transform 0.1s, box-shadow 0.1s;
 }
 
 .product-item-row:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    background-color: #f8fafc !important;
+    background-color: var(--color-bg-elevated) !important;
 }
 
 /* Responsive adjustments */
@@ -84,14 +84,14 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-top: 1px dashed #e2e8f0;
+        border-top: 1px dashed var(--color-border);
         padding-top: 0.75rem;
     }
 
     .external-sale-actions {
         flex-direction: column-reverse;
         padding: 1rem !important;
-        background: #fff;
+        background: var(--color-surface);
         box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
         gap: 0.75rem !important;
     }

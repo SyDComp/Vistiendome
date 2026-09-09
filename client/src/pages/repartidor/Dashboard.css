@@ -1,12 +1,12 @@
 :root {
     --courier-primary: #1e293b;
-    --courier-accent: #3b82f6;
+    --courier-accent: var(--color-info);
     --courier-success: #10b981;
-    --courier-bg: #f8fafc;
-    --courier-card: #ffffff;
+    --courier-bg: var(--color-bg-elevated);
+    --courier-card: var(--color-surface);
     --courier-text: #334155;
-    --courier-text-light: #94a3b8;
-    --courier-border: #e2e8f0;
+    --courier-text-light: var(--color-text-placeholder);
+    --courier-border: var(--color-border);
 }
 
 body {
@@ -117,8 +117,8 @@ body {
 }
 
 .logout-button:hover {
-    background: #fee2e2;
-    color: #ef4444;
+    background: var(--color-error-border);
+    color: var(--color-error);
 }
 
 /* Main Layout */
@@ -305,7 +305,7 @@ body {
 }
 
 .btn-gmaps {
-    background-color: #fce7f3;
+    background-color: var(--color-brand-soft);
     color: #db2777;
     border-color: #fbcfe8;
 }
@@ -342,12 +342,12 @@ body {
     width: 100%;
     border-top: 1px solid var(--courier-border);
     border-bottom: 1px solid var(--courier-border);
-    background: #e2e8f0;
+    background: var(--color-border);
 }
 
 .action-panel {
     padding: 1.5rem;
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
 }
 
 .btn-complete-delivery {
@@ -434,14 +434,14 @@ body {
 }
 
 .task-card:hover {
-    border-color: #cbd5e1;
+    border-color: var(--color-text-disabled);
     transform: translateX(4px);
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
 }
 
 .task-card.is-active {
     border-color: var(--courier-accent);
-    background: #eff6ff;
+    background: var(--color-info-bg);
 }
 
 .task-indicator {
@@ -614,7 +614,7 @@ body {
 
 .upload-dropzone:hover {
     border-color: var(--courier-accent);
-    background: #eff6ff;
+    background: var(--color-info-bg);
     color: var(--courier-accent);
 }
 
@@ -693,7 +693,7 @@ body {
     height: 16px;
     border: 2px solid rgba(255,255,255,0.3);
     border-radius: 50%;
-    border-top-color: #fff;
+    border-top-color: var(--color-surface);
     animation: spin 1s ease-in-out infinite;
     margin-right: 0.5rem;
 }

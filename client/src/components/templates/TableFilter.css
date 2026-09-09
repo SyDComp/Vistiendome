@@ -97,7 +97,7 @@
 .filter-group label {
     font-size: 0.75rem;
     font-weight: 500;
-    color: #555;
+    color: var(--color-text-body);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }

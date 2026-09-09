@@ -36,7 +36,7 @@
 .badge-low-stock,
 .badge-mercadolibre {
     position: static !important; /* Managed by flex container */
-    background: #fff;
+    background: var(--color-surface);
     color: #121212;
     padding: 0.4rem 0.8rem;
     font-size: 0.7rem;
@@ -49,7 +49,7 @@
 
 .badge-out-of-stock {
     background: #121212;
-    color: #fff;
+    color: var(--color-surface);
 }
 
 .badge-mercadolibre {
@@ -82,7 +82,7 @@
 }
 
 .btn-quick-view {
-    background: #fff;
+    background: var(--color-surface);
     color: #121212;
     border: none;
     padding: 0.7rem 1.5rem;
@@ -101,7 +101,7 @@
 
 .btn-quick-view:hover {
     background: #121212;
-    color: #fff;
+    color: var(--color-surface);
 }
 
 /* Info Section - Rigid Standardization */
@@ -127,7 +127,7 @@
     font-size: 0.9rem;
     font-weight: 500;
     line-height: 1.4;
-    color: #1a1a1a;
+    color: var(--color-text-primary);
     margin: 0;
     /* Multiline Clamp */
     display: -webkit-box;

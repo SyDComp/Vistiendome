@@ -21,8 +21,8 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #fdf2f8;
-    color: #8f0653;
+    background: var(--color-brand-lighter);
+    color: var(--color-brand);
     padding: 6px 16px;
     border-radius: 100px;
     font-size: 11px;
@@ -34,13 +34,13 @@
 .section-title {
     font-size: 38px;
     font-weight: 900;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     margin: 0 0 12px 0;
     letter-spacing: -0.02em;
 }
 
 .section-subtitle {
-    color: #64748b;
+    color: var(--color-text-muted);
     font-size: 16px;
     max-width: 600px;
     margin: 0 auto;
@@ -75,7 +75,7 @@
     right: 0;
     bottom: 0;
     z-index: 1;
-    background: #1e1b4b; /* Fondo oscuro de respaldo */
+    background: var(--color-admin-dark); /* Fondo oscuro de respaldo */
 }
 
 .card-image-blur {
@@ -105,7 +105,7 @@
 .card-image-placeholder {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    background: linear-gradient(135deg, var(--color-bg-elevated) 0%, var(--color-border) 100%);
 }
 
 .card-overlay {
@@ -148,7 +148,7 @@
 
 .view-collection-btn {
     background: white;
-    color: #1e1b4b;
+    color: var(--color-admin-dark);
     border: none;
     padding: 12px 24px;
     border-radius: 100px;
@@ -162,7 +162,7 @@
 }
 
 .collection-card:hover .view-collection-btn {
-    background: #8f0653;
+    background: var(--color-brand);
     color: white;
 }
 

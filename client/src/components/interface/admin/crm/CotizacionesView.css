@@ -7,18 +7,18 @@
  * JavaScript una comilla invertida en un comentario rompe el archivo entero.
  */
 
-.cot-glosario { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px 20px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px 18px; margin-bottom:18px; }
+.cot-glosario { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px 20px; background:var(--color-bg-elevated); border:1px solid var(--color-border); border-radius:10px; padding:14px 18px; margin-bottom:18px; }
 .cot-glosario-item { display:flex; align-items:flex-start; gap:9px; }
 .cot-glosario-punto { width:9px; height:9px; border-radius:50%; flex-shrink:0; margin-top:5px; }
 .cot-glosario-nombre { display:block; font-size:11px; font-weight:800; letter-spacing:.4px; color:#1e293b; }
-.cot-glosario-texto { display:block; font-size:12px; color:#64748b; line-height:1.4; margin-top:1px; }
+.cot-glosario-texto { display:block; font-size:12px; color:var(--color-text-muted); line-height:1.4; margin-top:1px; }
 
 /* Declaraciones que estaban incrustadas en el JSX sobre estas mismas
    clases. Se movieron acá tal cual: mismo valor, mismo efecto, pero
    ahora el estilo del componente vive en un solo sitio. */
 .font-mono {
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
 }
 
 /* Acciones de la vista de cotizaciones. */
@@ -28,14 +28,14 @@
     padding: 0;
     cursor: pointer;
     font-size: 0.6875rem;
-    color: #64748b;
+    color: var(--color-text-muted);
     text-decoration: underline;
     text-underline-offset: 0.125rem;
     font-weight: 600;
     font-family: inherit;
 }
 .cotv-accion {
-    background: linear-gradient(135deg, #8f0653 0%, #d946ef 100%);
+    background: linear-gradient(135deg, var(--color-brand) 0%, #d946ef 100%);
     border: none;
     border-radius: 0.625rem;
     padding: 0.625rem 1.125rem;
@@ -43,7 +43,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    color: #ffffff;
+    color: var(--color-surface);
     cursor: pointer;
     font-size: 0.8125rem;
     font-weight: 800;
@@ -53,9 +53,9 @@
     min-height: 2.75rem;
 }
 .cotv-accion--suave {
-    background: #fdf2f8;
+    background: var(--color-brand-lighter);
     border: 1px solid #fbcfe8;
-    color: #8f0653;
+    color: var(--color-brand);
     padding: 0.625rem 1rem;
     box-shadow: 0 2px 6px rgba(143, 6, 83, 0.1);
     flex: 1 1 15rem;
@@ -64,7 +64,7 @@
     background: transparent;
     border: 1px solid transparent;
     box-shadow: none;
-    color: #8f0653;
+    color: var(--color-brand);
     font-size: 0.75rem;
     font-weight: 600;
     padding: 0.375rem 0.625rem;

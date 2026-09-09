@@ -21,17 +21,17 @@
  */
 
 .armador {
-    --arm-marca: #8f0653;
+    --arm-marca: var(--color-brand);
     --arm-acento: #c026d3;
     --arm-acento-suave: #f0abfc;
     --arm-fondo: #fdf4ff;
     --arm-borde-suave: #e9d5ff;
     --arm-texto: #86198f;
-    --arm-tinta: #1e1b4b;
-    --arm-gris: #94a3b8;
+    --arm-tinta: var(--color-admin-dark);
+    --arm-gris: var(--color-text-placeholder);
     --arm-gris-texto: #475569;
-    --arm-linea: #e2e8f0;
-    --arm-campo: #cbd5e1;
+    --arm-linea: var(--color-border);
+    --arm-campo: var(--color-text-disabled);
     --arm-mal: #dc2626;
     --arm-bien: #15803d;
     --arm-duda: #a16207;
@@ -137,7 +137,7 @@
     padding: 0.625rem;
     border-radius: 0.625rem;
     border: 1px solid var(--arm-acento);
-    background: #fff;
+    background: var(--color-surface);
     color: var(--arm-texto);
     font-weight: 800;
     font-size: var(--arm-txt-md);
@@ -146,7 +146,7 @@
 }
 .armador__cuenta { font-weight: 600; opacity: .75; }
 
-.armador__selector { margin-top: 0.625rem; border: 1px solid var(--arm-borde-suave); border-radius: 0.625rem; background: #fff; padding: 0.625rem; }
+.armador__selector { margin-top: 0.625rem; border: 1px solid var(--arm-borde-suave); border-radius: 0.625rem; background: var(--color-surface); padding: 0.625rem; }
 /* Alto máximo relativo a la ventana VISIBLE: con `vh` la lista se pasaba por
    debajo de la barra del navegador en el teléfono. */
 .armador__lista { max-height: min(30dvh, 13rem); overflow-y: auto; display: flex; flex-direction: column; gap: 0.125rem; }
@@ -190,8 +190,8 @@
     font-family: inherit;
     flex: 1 1 8rem;
 }
-.armador__cancelar { border: 1px solid var(--arm-linea); background: #fff; color: var(--arm-gris-texto); }
-.armador__agregar { border: none; background: var(--arm-marca); color: #fff; }
+.armador__cancelar { border: 1px solid var(--arm-linea); background: var(--color-surface); color: var(--arm-gris-texto); }
+.armador__agregar { border: none; background: var(--arm-marca); color: var(--color-surface); }
 /* Deshabilitado lo dice el navegador con `disabled`, no una copia del estado
    en JavaScript decidiendo colores. */
 .armador__agregar:disabled { background: var(--arm-linea); color: var(--arm-gris); cursor: not-allowed; }

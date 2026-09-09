@@ -16,7 +16,7 @@
     backdrop-filter: blur(15px);
     display: flex;
     flex-direction: column;
-    color: #fff;
+    color: var(--color-surface);
     font-family: 'Inter', sans-serif;
     animation: fadeIn 0.3s ease;
 }
@@ -37,7 +37,7 @@
 }
 
 .cms-studio-header-icon {
-    background: linear-gradient(135deg, #8f0653, #50032e);
+    background: linear-gradient(135deg, var(--color-brand), #50032e);
     padding: 12px;
     border-radius: 14px;
     box-shadow: 0 8px 16px rgba(143,6,83,0.3);
@@ -48,7 +48,7 @@
     font-size: 18px;
     font-weight: 900;
     letter-spacing: -0.02em;
-    background: linear-gradient(to right, #fff, rgba(255,255,255,0.7));
+    background: linear-gradient(to right, var(--color-surface), rgba(255,255,255,0.7));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -62,7 +62,7 @@
 
 .cms-studio-header-tag {
     font-size: 9px;
-    color: #8f0653;
+    color: var(--color-brand);
     background: rgba(143,6,83,0.1);
     padding: 1px 6px;
     border-radius: 4px;
@@ -89,7 +89,7 @@
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.1);
     background: rgba(255,255,255,0.05);
-    color: #fff;
+    color: var(--color-surface);
     font-weight: 800;
     font-size: 12px;
     cursor: pointer;
@@ -100,15 +100,15 @@
 }
 
 .cms-studio-btn-outline.preview-mode {
-    background: #fff;
+    background: var(--color-surface);
     color: #000;
 }
 
 .cms-studio-btn-primary {
     padding: 10px 24px;
     border-radius: 12px;
-    background: #8f0653;
-    color: #fff;
+    background: var(--color-brand);
+    color: var(--color-surface);
     border: none;
     font-weight: 900;
     font-size: 12px;
@@ -127,7 +127,7 @@
 .cms-studio-btn-close {
     background: rgba(255,255,255,0.05);
     border: none;
-    color: #fff;
+    color: var(--color-surface);
     width: 44px;
     height: 44px;
     border-radius: 12px;
@@ -229,7 +229,7 @@
 }
 
 .cms-studio-layer-item.active {
-    border-color: #8f0653;
+    border-color: var(--color-brand);
     background: rgba(143,6,83,0.15);
     transform: translateX(4px);
 }
@@ -238,7 +238,7 @@
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: #fff;
+    background: var(--color-surface);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -298,7 +298,7 @@
     padding: 14px;
     border-radius: 16px;
     background: rgba(255,255,255,0.03);
-    color: #fff;
+    color: var(--color-surface);
     border: 1px solid rgba(255,255,255,0.05);
     cursor: pointer;
     display: flex;
@@ -379,8 +379,8 @@
 }
 
 .cms-studio-tab-btn.active {
-    background: #8f0653;
-    color: #fff;
+    background: var(--color-brand);
+    color: var(--color-surface);
 }
 
 .cms-studio-tab-add {
@@ -388,7 +388,7 @@
     height: 32px;
     border-radius: 50%;
     background: rgba(255,255,255,0.05);
-    color: #fff;
+    color: var(--color-surface);
     border: none;
     cursor: pointer;
     display: flex;
@@ -437,7 +437,7 @@
 }
 
 .cms-studio-canvas-layer.active {
-    border: 2px solid #8f0653;
+    border: 2px solid var(--color-brand);
     padding: 8px;
     box-shadow: 0 0 40px rgba(143,6,83,0.3);
 }
@@ -447,8 +447,8 @@
     top: -40px;
     left: 50%;
     transform: translateX(-50%);
-    background: #8f0653;
-    color: #fff;
+    background: var(--color-brand);
+    color: var(--color-surface);
     font-size: 9px;
     padding: 4px 12px;
     border-radius: 6px;
@@ -545,7 +545,7 @@
     border: 1px solid rgba(255,255,255,0.1);
     padding: 12px;
     border-radius: 12px;
-    color: #fff;
+    color: var(--color-surface);
     font-size: 14px;
 }
 
@@ -564,14 +564,14 @@
     padding: 10px;
     background: rgba(255,255,255,0.05);
     border: none;
-    color: #fff;
+    color: var(--color-surface);
     border-radius: 8px;
     cursor: pointer;
 }
 
 .cms-studio-zindex-display {
     width: 40px;
-    background: #8f0653;
+    background: var(--color-brand);
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -620,7 +620,7 @@
 .cms-studio-info-text {
     font-size: 11px;
     margin: 0;
-    color: #fdf2f8;
+    color: var(--color-brand-lighter);
     line-height: 1.5;
 }
 
@@ -649,7 +649,7 @@ input[type=range].cms-studio-range::-webkit-slider-thumb {
     height: 14px;
     width: 14px;
     border-radius: 50%;
-    background: #8f0653;
+    background: var(--color-brand);
     cursor: pointer;
     box-shadow: 0 0 10px rgba(143,6,83,0.5);
 }

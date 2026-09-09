@@ -20,7 +20,7 @@
 }
 
 .image-adjuster-container {
-    background: #fff;
+    background: var(--color-surface);
     width: 100%;
     max-width: 650px;
     max-height: 95vh;
@@ -39,8 +39,8 @@
 
 .image-adjuster-header {
     padding: 1rem 1.25rem;
-    background: #ffffff;
-    border-bottom: 1px solid #e2e8f0;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -59,7 +59,7 @@
 
 .btn-save-header {
     display: none; /* Hidden by default (Desktop) */
-    background: #3b82f6;
+    background: var(--color-info);
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -73,7 +73,7 @@
     background: none;
     border: none;
     font-size: 1.75rem;
-    color: #94a3b8;
+    color: var(--color-text-placeholder);
     cursor: pointer;
     line-height: 1;
     padding: 0;
@@ -93,7 +93,7 @@
     padding: 1.5rem;
     overflow-y: auto;
     flex: 1;
-    background: #fff;
+    background: var(--color-surface);
     -webkit-overflow-scrolling: touch;
 }
 
@@ -104,8 +104,8 @@
 
 .image-adjuster-footer {
     padding: 1.25rem 1.5rem;
-    background: #f8fafc;
-    border-top: 1px solid #e2e8f0;
+    background: var(--color-bg-elevated);
+    border-top: 1px solid var(--color-border);
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
@@ -113,7 +113,7 @@
 
 .btn-cancel {
     padding: 0.6rem 1.2rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border);
     background: white;
     color: #475569;
     border-radius: 8px;
@@ -123,12 +123,12 @@
 }
 
 .btn-cancel:hover {
-    background: #f1f5f9;
+    background: var(--color-bg-subtle);
 }
 
 .btn-save {
     padding: 0.6rem 1.5rem;
-    background: #3b82f6;
+    background: var(--color-info);
     color: white;
     border: none;
     border-radius: 8px;
@@ -171,7 +171,7 @@
     .mobile-cancel {
         display: block;
         font-size: 2rem !important;
-        color: #64748b !important;
+        color: var(--color-text-muted) !important;
     }
 
     .desktop-close {
@@ -218,7 +218,7 @@
 
 .confirm-discard-modal p {
     font-size: 0.9rem;
-    color: #64748b;
+    color: var(--color-text-muted);
     margin-bottom: 1.5rem;
 }
 
@@ -239,7 +239,7 @@
 }
 
 .btn-discard {
-    background: #fee2e2;
+    background: var(--color-error-border);
     color: #b91c1c;
 }
 
@@ -248,16 +248,16 @@
 }
 
 .btn-stay {
-    background: #f1f5f9;
+    background: var(--color-bg-subtle);
     color: #475569;
 }
 
 .btn-stay:hover {
-    background: #e2e8f0;
+    background: var(--color-border);
 }
 
 .btn-save-confirm {
-    background: #3b82f6;
+    background: var(--color-info);
     color: white;
 }
 

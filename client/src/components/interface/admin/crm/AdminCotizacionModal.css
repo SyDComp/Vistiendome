@@ -8,14 +8,14 @@
  */
 
 .cot {
-    --cot-marca: #8f0653;
-    --cot-marca-suave: #fdf2f8;
+    --cot-marca: var(--color-brand);
+    --cot-marca-suave: var(--color-brand-lighter);
     --cot-marca-borde: #fbcfe8;
     --cot-tinta: #1e293b;
-    --cot-texto: #64748b;
-    --cot-gris: #94a3b8;
-    --cot-linea: #e2e8f0;
-    --cot-campo: #cbd5e1;
+    --cot-texto: var(--color-text-muted);
+    --cot-gris: var(--color-text-placeholder);
+    --cot-linea: var(--color-border);
+    --cot-campo: var(--color-text-disabled);
 }
 
 .cot-cuerpo {
@@ -33,7 +33,7 @@
     height: 2.625rem;
     border-radius: 0.75rem;
     background: var(--cot-marca);
-    color: #fff;
+    color: var(--color-surface);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -57,7 +57,7 @@
 
 /* Bloque con borde de una sección */
 .cot-caja {
-    background: #ffffff;
+    background: var(--color-surface);
     border: 1px solid var(--cot-campo);
     border-radius: 1rem;
     padding: 1.125rem;
@@ -72,7 +72,7 @@
     overflow-y: auto;
     border: 1px solid var(--cot-linea);
     border-radius: 0.625rem;
-    background: #ffffff;
+    background: var(--color-surface);
 }
 .cot-resultados-vacio { padding: 1rem; text-align: center; font-size: 0.8125rem; color: var(--cot-gris); }
 .cot-resultados-cargando { padding: 1rem; text-align: center; font-size: 0.8125rem; color: var(--cot-texto); }
@@ -165,14 +165,14 @@
     margin-left: 0.375rem;
     font-weight: 800;
 }
-.cot-aviso-ok { font-size: 0.6875rem; color: #16a34a; margin-left: 0.375rem; }
+.cot-aviso-ok { font-size: 0.6875rem; color: var(--color-success); margin-left: 0.375rem; }
 
 /* Cantidad: menos, número, más */
 .cot-cantidad {
     display: flex;
     align-items: center;
     gap: 0.375rem;
-    background: #ffffff;
+    background: var(--color-surface);
     border: 1px solid var(--cot-campo);
     border-radius: 0.5rem;
     padding: 0.125rem 0.375rem;
@@ -207,7 +207,7 @@
     min-height: 2.25rem;
 }
 .cot-boton-claro {
-    background: #ffffff;
+    background: var(--color-surface);
     border: 1px solid var(--cot-marca-borde);
     border-radius: 0.5rem;
     padding: 0.375rem 0.625rem;
@@ -219,7 +219,7 @@
     min-height: 2.25rem;
 }
 .cot-boton-neutro {
-    background: #ffffff;
+    background: var(--color-surface);
     border: 1px solid var(--cot-campo);
     border-radius: 0.625rem;
     padding: 0.625rem 1.125rem;
@@ -231,7 +231,7 @@
     min-height: 2.75rem;
 }
 .cot-boton-cancelar {
-    background: #f1f5f9;
+    background: var(--color-bg-subtle);
     color: #475569;
     border: 1px solid var(--cot-campo);
     border-radius: 0.75rem;
@@ -243,7 +243,7 @@
     min-height: 2.75rem;
 }
 .cot-boton-icono {
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
     border: 1px solid var(--cot-linea);
     border-radius: 0.625rem;
     width: 2.75rem;
@@ -255,11 +255,11 @@
     cursor: pointer;
 }
 .cot-boton-borrar {
-    background: #fef2f2;
+    background: var(--color-error-bg);
     border: 1px solid #fca5a5;
     border-radius: 0.375rem;
     padding: 0.375rem;
-    color: #ef4444;
+    color: var(--color-error);
     cursor: pointer;
     min-height: 2.25rem;
     min-width: 2.25rem;
@@ -291,8 +291,8 @@
     width: 4rem;
     height: 4rem;
     border-radius: 50%;
-    background: #dcfce7;
-    color: #16a34a;
+    background: var(--color-success-border);
+    color: var(--color-success);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -300,7 +300,7 @@
 }
 .cot-exito-titulo { margin: 0; font-size: 1.125rem; font-weight: 800; color: var(--cot-tinta); }
 .cot-exito-resumen {
-    background: #f8fafc;
+    background: var(--color-bg-elevated);
     border: 1px solid var(--cot-linea);
     border-radius: 0.75rem;
     padding: 1rem;
@@ -344,7 +344,7 @@
    una clase que ningun elemento lleva, cada `var(--cot-…)` se queda sin valor y
    los colores desaparecen. Pasó: el emblema del titulo salio descolorido. */
 .cot-tarjeta {
-    background-color: #ffffff;
+    background-color: var(--color-surface);
     border-radius: 1.25rem;
     width: 100%;
     max-width: 53.125rem;
@@ -360,12 +360,12 @@
 
 .cot-cabecera {
     padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--color-border-subtle);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    background: linear-gradient(135deg, var(--cot-marca-suave) 0%, #ffffff 100%);
+    background: linear-gradient(135deg, var(--cot-marca-suave) 0%, var(--color-surface) 100%);
 }
 
 /* Ultimas piezas del modal de cotizacion. */
@@ -382,7 +382,7 @@
 }
 .cot-whatsapp {
     background: #25d366;
-    color: #fff;
+    color: var(--color-surface);
     border: none;
     border-radius: 0.75rem;
     padding: 0.75rem 1.5rem;
@@ -397,7 +397,7 @@
     min-height: 2.75rem;
 }
 .cot-franja {
-    background: var(--cot-marca-suave, #fdf2f8);
+    background: var(--cot-marca-suave, var(--color-brand-lighter));
     border: 1px solid var(--cot-marca-borde, #fbcfe8);
     border-radius: 0.75rem;
     padding: 0.75rem 1rem;
@@ -414,8 +414,8 @@
     left: 0;
     right: 0;
     z-index: 50;
-    background: #ffffff;
-    border: 1px solid var(--cot-campo, #cbd5e1);
+    background: var(--color-surface);
+    border: 1px solid var(--cot-campo, var(--color-text-disabled));
     border-radius: 0.625rem;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     margin-top: 0.25rem;
@@ -427,18 +427,18 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.625rem 0.875rem;
-    background: #f8fafc;
-    border: 1px solid var(--cot-linea, #e2e8f0);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--cot-linea, var(--color-border));
     border-radius: 0.625rem;
     flex-wrap: wrap;
     gap: 0.625rem;
 }
 .cot-pie {
     padding: 1rem 1.5rem;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--color-border-subtle);
     display: flex;
     justify-content: flex-end;
     flex-wrap: wrap;
     gap: 0.75rem;
-    background-color: #f8fafc;
+    background-color: var(--color-bg-elevated);
 }
