@@ -20,6 +20,7 @@ import { useNotification } from '../../../../context/NotificationContext';
 import { useLocation } from 'react-router-dom';
 import { Package, Eye, Barcode as BarcodeIcon, AlertTriangle } from 'lucide-react';
 import ReactBarcode from 'react-barcode';
+import { useHasta } from '../../../../hooks/useCorte';
 
 const API_BASE = `/api/v1/admin/catalog`;
 const PAGE_SIZE = 20;
@@ -260,13 +261,8 @@ const InventoryModule = ({ view = 'products' }) => {
         }
     }, [page, search, activeFilters, view]);
 
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+    const isMobile = useHasta('md');
 
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 640);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     // POLÍTICA DE MESA LIMPIA: Cerrar todo al cambiar de sección/vista
     useEffect(() => {

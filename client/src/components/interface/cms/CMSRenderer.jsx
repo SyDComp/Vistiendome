@@ -6,26 +6,23 @@ import { useWebSocket } from '../../../context/WebSocketContext';
 import FeaturedCollections from '../colecciones/FeaturedCollections';
 import { getProducts, getImageUrl, getSrcSet } from '../../../lib/api/endpoints';
 import { ArrowRight, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
+import { useHasta } from '../../../hooks/useCorte';
 import './CMSRenderer.css';
 
 // Ruta relativa: en dev pasa por el proxy de Vite (vite.config.js), en prod por nginx.
 const API_BASE = '/api/v1/homepage/';
 
-// ── Hook de viewport ─────────────────────────────────────────────────────────
-function useIsMobile(breakpoint = 1050, forcedValue = null) {
-    const [isMobile, setIsMobile] = useState(() => forcedValue !== null ? forcedValue : window.innerWidth < 1050);
-    
-    useEffect(() => {
-        if (forcedValue !== null) {
-            setIsMobile(forcedValue);
-            return;
-        }
-        const handler = () => setIsMobile(window.innerWidth < 1050);
-        window.addEventListener('resize', handler);
-        return () => window.removeEventListener('resize', handler);
-    }, [forcedValue]);
-    
-    return isMobile;
+// ── Ancho de pantalla ────────────────────────────────────────────────────────
+// `forcedValue` existe para la vista previa del gestor de portada: ahi la duena
+// mira como queda su pagina "en telefono" sin achicar la ventana, asi que el
+// modo se impone en vez de medirse.
+//
+// El parametro `breakpoint` que habia se elimino: se declaraba con valor 1050 y
+// adentro la funcion usaba 1050 escrito a mano, asi que pasarle otro numero no
+// hacia nada. El corte ahora sale del CSS.
+function useIsMobile(forcedValue = null) {
+    const detectado = useHasta('xl');
+    return forcedValue !== null ? forcedValue : detectado;
 }
 
 /**
@@ -125,7 +122,7 @@ const LayerRenderer = ({ layers = [], navigate, isMobile }) => {
 
 export const UniversalBlock = ({ config, aspectRatio = '21/9', borderRadius = '40px', previewMode = false, forceMobile = null }) => {
     const navigate = useNavigate();
-    const isMobile = useIsMobile(1050, forceMobile);
+    const isMobile = useIsMobile(forceMobile);
 
     let bgColor = config.bg_color || '#1e1b4b';
     let layers = [];
@@ -175,7 +172,7 @@ export const UniversalBlock = ({ config, aspectRatio = '21/9', borderRadius = '4
 
 export const SceneCarouselBlock = ({ config, previewMode = false, forceMobile = null }) => {
     const navigate = useNavigate();
-    const isMobile = useIsMobile(1050, forceMobile);
+    const isMobile = useIsMobile(forceMobile);
     const [activeIdx, setActiveIdx] = useState(0);
     const [dragStart, setDragStart] = useState(null);
 
@@ -259,7 +256,7 @@ export const SceneCarouselBlock = ({ config, previewMode = false, forceMobile = 
 };
 
 export const TextBlock = ({ config, title, previewMode = false, forceMobile = null }) => {
-    const isMobile = useIsMobile(1050, forceMobile);
+    const isMobile = useIsMobile(forceMobile);
     const { 
         content = '', 
         align = 'left'
@@ -304,7 +301,7 @@ export const TextBlock = ({ config, title, previewMode = false, forceMobile = nu
 };
 
 export const DataTableBlock = ({ config, title, previewMode = false, forceMobile = null }) => {
-    const isMobile = useIsMobile(1050, forceMobile);
+    const isMobile = useIsMobile(forceMobile);
     const headers = config.headers || [];
     const rows = config.rows || [];
     const styles = config.styles || {
@@ -420,7 +417,7 @@ const ProductCard = ({ product, previewMode }) => {
 };
 
 export const ProductCarouselBlock = ({ config, title, previewMode = false, forceMobile = null }) => {
-    const isMobile = useIsMobile(1050, forceMobile);
+    const isMobile = useIsMobile(forceMobile);
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -645,7 +642,7 @@ const VideoBlock = ({ config = {}, title }) => {
 };
 
 const CMSRenderer = ({ page = 'homepage', data = null, previewMode = false, activeId = null, forceMobile = null }) => {
-    const isMobile = useIsMobile(1050, forceMobile);
+    const isMobile = useIsMobile(forceMobile);
     const [sections, setSections] = useState([]);
     const [loading, setLoading] = useState(true);
     const { lastMessage } = useWebSocket();

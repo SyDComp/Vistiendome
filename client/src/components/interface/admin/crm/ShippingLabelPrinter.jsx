@@ -17,6 +17,7 @@ import { useNotification } from '../../../../context/NotificationContext';
 import { estadoDeProduccion, TONOS } from '../../../../utils/produccion';
 import { imprimirDocumento } from '../../../../utils/impresion';
 import estilosImpresion from './ShippingLabelPrinter.impresion.css?raw';
+import { useHasta } from '../../../../hooks/useCorte';
 
 /**
  * Qué pedidos se ven. Existe porque la pantalla traía TODOS —nuevos, en
@@ -162,15 +163,10 @@ const ShippingLabelPrinter = () => {
     const [barcodeSize, setBarcodeSize] = useState('compact'); // 'micro' | 'compact' | 'standard'
     const [showCutLines, setShowCutLines] = useState(true);
     const [showTransportColor, setShowTransportColor] = useState(true);
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    const isMobile = windowWidth <= 768;
-    const isStacked = windowWidth <= 1160;
-
-    useEffect(() => {
-        const handleResize = () => setWindowWidth(window.innerWidth);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    const isMobile = useHasta('lg');
+    // Los controles y la hoja de etiquetas dejan de caber lado a lado antes de
+    // llegar al telefono, y por eso este corte es aparte.
+    const isStacked = useHasta('2xl');
 
     const printContainerRef = useRef(null);
 

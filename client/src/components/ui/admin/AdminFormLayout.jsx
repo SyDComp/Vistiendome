@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { useHasta } from '../../../hooks/useCorte';
 import './AdminFormLayout.css';
 
 const AdminFormLayout = ({ 
@@ -10,13 +11,8 @@ const AdminFormLayout = ({
     rightPanel = null, 
     children 
 }) => {
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+    const isMobile = useHasta('xl');
 
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 1024);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     const layoutMode = splitLayout ? 'split-layout' : 'single-layout';
     const deviceMode = isMobile ? 'mobile' : 'desktop';
@@ -61,12 +57,7 @@ export const AdminFormSection = ({ title, badge, description, children }) => (
 );
 
 export const AdminFormRow = ({ children, balanced = false }) => {
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 1024);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    const isMobile = useHasta('xl');
 
     const classNames = ['admin-form-row', isMobile ? 'mobile' : 'desktop'];
     if (balanced) classNames.push('balanced');

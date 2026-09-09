@@ -5,6 +5,7 @@ import { useWebSocket } from '../../../context/WebSocketContext';
 import PremiumLoader from '../../ui/PremiumLoader';
 import { useScrollLock } from '../../../hooks/useScrollLock';
 import { ChevronRight, X, ArrowLeft } from 'lucide-react';
+import { useHasta } from '../../../hooks/useCorte';
 import './AtencionCliente.css';
 
 const HELP_API = '/api/v1/homepage/help/sections';
@@ -14,18 +15,13 @@ const AtencionCliente = ({ initialSection = 'tallas' }) => {
     const [sections, setSections] = useState([]);
     const [activeSection, setActiveSection] = useState(initialSection);
     const [loading, setLoading] = useState(true);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+    const isMobile = useHasta('xl');
     // Modal para móvil
     const [modalSection, setModalSection] = useState(null); // { slug, title, icon }
     const { lastMessage } = useWebSocket();
 
     useScrollLock(!!modalSection);
 
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 1024);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     const fetchSections = useCallback(async () => {
         try {

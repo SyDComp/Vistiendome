@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, Save, Palette, Type, Layout, Grid3X3, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Settings, Monitor } from 'lucide-react';
 import Button from '../../../Button';
+import { useHasta } from '../../../../../hooks/useCorte';
 import './DataTableStudio.css';
 import './estudio.css';
 
 const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
     const [activeCell, setActiveCell] = useState(null); // { rowIndex, header }
-    const [isDeviceMobile, setIsDeviceMobile] = useState(window.innerWidth < 950);
+    const isDeviceMobile = useHasta('xl');
     const [activeMobileTab, setActiveMobileTab] = useState('canvas'); // 'tools' | 'canvas'
     const [config, setConfig] = useState({
         headers: ['Columna 1'],
@@ -31,11 +32,6 @@ const DataTableStudio = ({ isOpen, onClose, data, onSave }) => {
             });
         }
     }, [data]);
-    useEffect(() => {
-        const handleResize = () => setIsDeviceMobile(window.innerWidth < 950);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     if (!isOpen) return null;
 

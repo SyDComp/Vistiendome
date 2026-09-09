@@ -16,6 +16,7 @@ import { Search, Image as ImageIcon, Box, Layout, Layers, Settings, Save, ArrowL
 import { formatChar, formatOpt } from '../../../../utils/formatters';
 import { getYoutubeEmbedUrl } from '../../../../utils/youtube';
 import AdminFormLayout, { AdminFormRow, AdminFormSection, AdminFormSubmit } from '../../../ui/admin/AdminFormLayout';
+import { useHasta } from '../../../../hooks/useCorte';
 
 const API_BASE = `/api/v1/admin/catalog`;
 
@@ -29,7 +30,7 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
     const [productImages, setProductImages] = useState(initialData?.images || []);
     const [showGallery, setShowGallery] = useState(false);
     const [allAttributes, setAllAttributes] = useState([]);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+    const isMobile = useHasta('xl');
     const [isSaved, setIsSaved] = useState(!!initialData?.id);
 
     // Configuración para la generación de variantes
@@ -69,10 +70,9 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
         return err;
     });
 
+    // Este efecto mezclaba dos cosas sin relacion: escuchar el ancho de la
+    // ventana y traer los catalogos del servidor. Lo del ancho se fue al hook.
     useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 1024);
-        window.addEventListener('resize', handleResize);
-        
         // Cargar Categorías
         fetch(`${API_BASE}/categories?page_size=200`)
             .then(res => res.json())
@@ -87,8 +87,6 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
         fetch(`${API_BASE}/specifications?page_size=200`)
             .then(res => res.json())
             .then(data => setAllSpecifications(data || []));
-
-        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     // Cargar Atributos Dinámicos y Sugerencias al cambiar de categoría

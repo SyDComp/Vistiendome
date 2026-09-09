@@ -1,5 +1,6 @@
 import LogoVistiendome from '../../ui/LogoVistiendome';
 import SuspenseFallback from '../../ui/SuspenseFallback';
+import { useHasta, CORTES } from '../../../hooks/useCorte';
 import React, { useState, useEffect, Suspense } from 'react';
 import { Routes, Route, useNavigate, Navigate, Link, useLocation } from 'react-router-dom';
 import { 
@@ -58,19 +59,19 @@ const DashboardLayout = () => {
     //
     // Colapsado son ~200px mas para la tabla. Sigue siendo una preferencia:
     // el boton lo expande y desde ahi manda el usuario.
-    const [isCollapsed, setIsCollapsed] = useState(() => window.innerWidth < 1280);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    // `isCollapsed` NO sigue al ancho, y por eso no usa el hook: es solo el
+    // estado con el que ARRANCA la barra. Desde ahi manda el usuario con el
+    // boton, y si esto reaccionara al ancho, la barra que el abrio a mano se
+    // volveria a cerrar sola al mover la ventana.
+    const [isCollapsed, setIsCollapsed] = useState(() => window.innerWidth < CORTES['2xl']);
+    const isMobile = useHasta('lg');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+    // Al pasar de telefono a pantalla ancha, el menu desplegable sobra: la barra
+    // lateral ya esta visible y el menu quedaria encima de ella.
     useEffect(() => {
-        const handleResize = () => {
-            const mobile = window.innerWidth < 768;
-            setIsMobile(mobile);
-            if (!mobile) setIsSidebarOpen(false); // Cerrar menú móvil si se escala a desktop
-        };
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+        if (!isMobile) setIsSidebarOpen(false);
+    }, [isMobile]);
 
     useEffect(() => {
         const token = localStorage.getItem('admin_token');

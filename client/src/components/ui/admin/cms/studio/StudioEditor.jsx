@@ -5,6 +5,7 @@ import StudioHeader from './StudioHeader';
 import StudioLayerPanel from './StudioLayerPanel';
 import StudioCanvas from './StudioCanvas';
 import StudioProperties from './StudioProperties';
+import { useHasta } from '../../../../../hooks/useCorte';
 import MediaGallery from "../../../../interface/admin/media/MediaGallery";
 import LibraryPicker from "../../../../interface/admin/inventory/LibraryPicker";
 import './StudioEditor.css';
@@ -26,14 +27,9 @@ const StudioEditor = ({ isOpen, onClose, data, onSave, mode = 'single' }) => {
     const [allVariants, setAllVariants] = useState([]);
     const [loadingLibrary, setLoadingLibrary] = useState(false);
     const [toastMsg, setToastMsg] = useState('');
-    const [isDeviceMobile, setIsDeviceMobile] = useState(window.innerWidth < 950);
+    const isDeviceMobile = useHasta('xl');
     const [activeMobileTab, setActiveMobileTab] = useState('canvas'); // 'layers' | 'canvas' | 'props'
 
-    useEffect(() => {
-        const handleResize = () => setIsDeviceMobile(window.innerWidth < 950);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     const showToast = (msg) => {
         setToastMsg(msg);

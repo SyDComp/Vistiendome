@@ -28,6 +28,7 @@ import Button from '../../../ui/Button';
 import ConfirmModal from '../../../ui/ConfirmModal';
 import CMSRenderer from '../../cms/CMSRenderer';
 import { Smartphone, Monitor } from 'lucide-react';
+import { useHasta } from '../../../../hooks/useCorte';
 
 const API_BASE = '/api/v1/homepage/admin';
 
@@ -36,14 +37,9 @@ const CMSPageManager = ({
     title = 'Gestor de Contenido', 
     subtitle = 'Configura el orden y contenido de esta sección.' 
 }) => {
-    // Detectar pantalla pequeña para apilar los paneles
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    useEffect(() => {
-        const handleResize = () => setWindowWidth(window.innerWidth);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-    const isMobileScreen = windowWidth < 1050;
+    // Con poco ancho los dos paneles -la lista de bloques y el espejo del sitio-
+    // se apilan en vez de ponerse lado a lado.
+    const isMobileScreen = useHasta('xl');
 
     const [sections, setSections] = useState([]);
     const [originalSections, setOriginalSections] = useState([]);

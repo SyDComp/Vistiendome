@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Search, ChevronDown, X } from 'lucide-react';
+import { useHasta } from '../../../hooks/useCorte';
 
 /**
  * FilterBar — Barra de búsqueda y filtros desplegables.
@@ -14,17 +15,12 @@ const FilterBar = ({
     initialSearchValue = ''
 }) => {
     const [searchValue, setSearchValue] = useState(initialSearchValue);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+    const isMobile = useHasta('md');
 
     useEffect(() => {
         setSearchValue(initialSearchValue);
     }, [initialSearchValue]);
 
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 640);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     const handleSearch = useCallback((e) => {
         const val = e.target.value;

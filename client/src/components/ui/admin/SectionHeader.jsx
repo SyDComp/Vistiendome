@@ -1,16 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useHasta } from '../../../hooks/useCorte';
 
 /**
  * SectionHeader — Cabecera estándar de cada sección del Admin.
  */
 const SectionHeader = ({ title, description, action }) => {
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+    const isMobile = useHasta('md');
 
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 640);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     return (
         <div 

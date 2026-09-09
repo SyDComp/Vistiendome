@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useHasta } from '../../../hooks/useCorte';
 import './DataTable.css';
 
 /**
@@ -6,20 +7,11 @@ import './DataTable.css';
  * Optimizado para ser responsivo con scroll horizontal controlado.
  */
 const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {}, emptyMessage = 'No hay datos.' }) => {
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+    const isMobile = useHasta('md');
     // Con poco ancho el relleno de las celdas es lo primero que sobra: 18px por
     // lado en 6 columnas son 216px que no se ven pero empujan la tabla fuera de
     // la pantalla, y las ultimas columnas —PRECIO, STOCK— quedaban cortadas.
-    const [compacto, setCompacto] = useState(window.innerWidth < 1400);
-
-    useEffect(() => {
-        const handleResize = () => {
-            setIsMobile(window.innerWidth < 640);
-            setCompacto(window.innerWidth < 1400);
-        };
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    const compacto = useHasta('3xl');
 
     return (
         <div className="adm-tabla-caja">
