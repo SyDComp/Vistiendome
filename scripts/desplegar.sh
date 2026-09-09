@@ -15,7 +15,37 @@
 set -euo pipefail
 
 RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
+ESTE="${ORIGINAL:-$(cd "$(dirname "$0")" && pwd)/$(basename "$0")}"
 cd "$RAIZ"
+
+# ESTE ARCHIVO SE REEMPLAZA A SI MISMO A MITAD DE CAMINO
+#
+# El paso 2 hace `git pull`, y ese pull puede traer una version nueva de este
+# mismo archivo. Bash no lo lee entero al arrancar: lo va leyendo mientras lo
+# ejecuta, y se acuerda de por donde iba con una posicion en bytes. Si el
+# archivo cambia debajo, sigue leyendo en esa misma posicion pero del archivo
+# NUEVO: se salta pasos, repite otros, o parte una linea al medio.
+#
+# No es hipotetico. El 9 de septiembre este script anuncio "recreando el proxy"
+# y "[4/4]", texto que ya no existia en la version recien traida: corrio mitad
+# de una version y mitad de la otra, el arreglo que venia en el pull no se
+# aplico, y termino diciendo "Listo" igual.
+#
+# Comparar el archivo despues del pull no alcanza como defensa: para cuando la
+# comparacion llega a ejecutarse, bash ya se desalineo y puede no llegar nunca.
+# Probado: la comparacion no corrio, salto a otra linea y murio con un error de
+# sintaxis.
+#
+# La unica defensa que aguanta es no ejecutar el archivo que se va a reemplazar.
+# Se copia a un temporal y se corre desde ahi. El pull puede hacer lo que
+# quiera con el original: la copia en ejecucion no la toca nadie.
+if [ "${DESDE_COPIA:-0}" != "1" ]; then
+    copia_viva="$(mktemp)"
+    cat "$ESTE" > "$copia_viva"
+    DESDE_COPIA=1 ORIGINAL="$ESTE" exec bash "$copia_viva" "$@"
+fi
+# Ya corriendo desde la copia: se borra sola al terminar, salga como salga.
+trap 'rm -f "$0"' EXIT
 COMPOSE="docker compose -f docker-compose-prod.yml"
 
 echo "=== Despliegue $(date '+%Y-%m-%d %H:%M:%S') ==="
@@ -37,6 +67,18 @@ fi
 echo "[2/5] trayendo el codigo..."
 git pull --ff-only
 echo "    quedamos en: $(git log --oneline -1)"
+
+# Si el pull trajo una version nueva de este script, la que hay que correr es
+# esa y no la que arranco. Aca la comparacion SI es confiable, porque estamos
+# ejecutando la copia y no el archivo que acaba de cambiar.
+#
+# El respaldo ya se hizo, no se repite. RELANZADO corta el ciclo para que esto
+# no pueda encadenarse dos veces por mas raro que sea lo que traiga el pull.
+if [ "${RELANZADO:-0}" != "1" ] && ! cmp -s "$ORIGINAL" "$0"; then
+    echo "    el despliegue venia actualizado: se relanza la version nueva"
+    rm -f "$0"
+    RELANZADO=1 SIN_RESPALDO=1 DESDE_COPIA=0 exec bash "$ORIGINAL" "$@"
+fi
 
 # 3. Reconstruir. El arranque del backend aplica las migraciones solo; si
 #    fallan, el contenedor no levanta, a proposito.
