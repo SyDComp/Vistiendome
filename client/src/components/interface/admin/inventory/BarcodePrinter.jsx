@@ -9,6 +9,8 @@ import {
 import Barcode from 'react-barcode';
 import { generateEAN13 } from '../../../../features/productDetail/utils/skuUtils';
 import { formatCurrency } from '../../../../utils/cartUtils';
+import { imprimirDocumento } from '../../../../utils/impresion';
+import estilosImpresion from './BarcodePrinter.impresion.css?raw';
 
 // ─── Configuración de tamaños ─────────────────────────────────────────────────
 const PAPER_SIZES = {
@@ -116,7 +118,7 @@ const buildPrintHTML = (slots, paperCfg, labelCfg, grid, options = {}) => {
                 ? `<div style="font-size:${fontSize}px;color:${textColor};text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;"><b>${formatCurrency(price)}</b> · Vistiendomé</div>`
                 : '';
 
-            return `<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2mm;overflow:hidden;page-break-inside:avoid;box-sizing:border-box;${bgStyle}">${svgContent}${nameLine}${priceBrandLine}</div>`;
+            return `<div class="etiqueta" style="${bgStyle}">${svgContent}${nameLine}${priceBrandLine}</div>`;
         }).join('');
         return `<div class="page"><div class="grid">${labelItems}</div></div>`;
     }).join('');
@@ -124,28 +126,18 @@ const buildPrintHTML = (slots, paperCfg, labelCfg, grid, options = {}) => {
     const wPx = orientation === 'landscape' ? paperCfg.heightPx : paperCfg.widthPx;
     const hPx = orientation === 'landscape' ? paperCfg.widthPx : paperCfg.heightPx;
 
-    return `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Códigos de Barras – Vistiendomé</title>
-<style>
+    // Lo unico que no puede vivir en el .css: depende del papel y de la
+    // cuadricula que eligio quien imprime, y `@page { size }` no acepta una
+    // variable de CSS.
+    const medidas = `
   @page { size: ${wPx} ${hPx}; margin: 0; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { width: 100%; height: 100%; margin: 0; padding: 0; background: #fff; }
-  body { font-family: 'Courier New', monospace; }
-  .page { width: 100vw; height: 100vh; overflow: hidden; padding: ${mmToPx(MARGIN_MM)}; box-sizing: border-box; page-break-after: always; display: flex; flex-direction: column; }
-  .page:last-child { page-break-after: auto; }
-  .grid { flex: 1; display: grid; grid-template-columns: repeat(${cols}, minmax(0, 1fr)); grid-template-rows: repeat(${rows}, minmax(0, 1fr)); justify-items: stretch; align-items: stretch; gap: 2mm; height: 100%; overflow: hidden; }
-  svg { max-width: 100%; max-height: 100%; width: auto; height: auto; display: block; margin: 0 auto; object-fit: contain; }
-  @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
-</style>
-</head>
-<body>
-${pagesHTML}
-<script>setTimeout(function(){window.print();},300);<\\/script>
-</body>
-</html>`;
+  .page { padding: ${mmToPx(MARGIN_MM)}; }
+  .grid {
+      grid-template-columns: repeat(${cols}, minmax(0, 1fr));
+      grid-template-rows: repeat(${rows}, minmax(0, 1fr));
+  }`;
+
+    return { cuerpo: pagesHTML, medidas };
 };
 
 // ─── Componente principal ────────────────────────────────────────────────────
@@ -314,10 +306,15 @@ const BarcodePrinter = () => {
         const slots = buildSlots();
         const colorMap = buildColorMap(selectedList);
         
-        const html = buildPrintHTML(slots, paperCfg, labelCfg, grid, { labelStyle, showSkuText, colorMap, svgMap, orientation });
-        const win = window.open('', '_blank', 'width=900,height=700');
-        win.document.write(html);
-        win.document.close();
+        const { cuerpo, medidas } = buildPrintHTML(slots, paperCfg, labelCfg, grid, { labelStyle, showSkuText, colorMap, svgMap, orientation });
+        imprimirDocumento({
+            titulo: 'Códigos de Barras – Vistiendomé',
+            cuerpo,
+            estilos: [estilosImpresion, medidas],
+            // La hoja de codigos se revisa antes de mandarla al papel: si la
+            // ventana se cerrara sola no habria como comprobar la cuadricula.
+            cerrarAlTerminar: false,
+        });
     };
 
     // Filtro de búsqueda avanzado

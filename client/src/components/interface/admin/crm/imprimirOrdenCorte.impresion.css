@@ -1,0 +1,105 @@
+/* El papel que se lleva a la mesa de corte.
+   ==========================================================================
+
+   Esta hoja NO usa los tokens de `variables.css`, y es a proposito: aquellos
+   son colores de pantalla. Aca el texto es tinta negra sobre papel blanco, y
+   las lineas son grises de imprenta. Si alguien "corrige" esto para que use el
+   sistema de color, la hoja sale gris azulada y menos legible en papel.
+
+   TAMANO CARTA. Son 215,9 mm, y con `@page margin: 12mm` quedan 191,9 mm
+   utiles. Antes se apilaba el margen de pagina CON un padding del body de
+   12 mm y la hoja usaba 171,9: se tiraba el 20% del ancho, que es justo lo que
+   hace falta cuando se agrega la columna Producto. */
+
+* { box-sizing: border-box; }
+
+/* El margen lo pone @page; un padding aca se SUMA al margen y recorta la hoja
+   sin que se note. */
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #000;
+}
+
+.cab { border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 16px; }
+.cab h1 { font-size: 21px; margin: 0 0 3px; letter-spacing: 0.3px; }
+.cab .meta { font-size: 12px; color: #444; }
+
+.notas { font-size: 12px; border: 1px solid #000; padding: 8px 10px; margin-bottom: 16px; }
+.notas b {
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 3px;
+}
+
+/* Un modelo no se parte entre dos hojas: en la mesa de corte se trabaja un
+   modelo a la vez y media tabla en la hoja siguiente se pierde. */
+.modelo { margin-bottom: 20px; page-break-inside: avoid; }
+.modelo-cab {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1.5px solid #000;
+    padding-bottom: 3px;
+    margin-bottom: 0;
+}
+.modelo-cab h2 {
+    font-size: 16px;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.modelo-cab span { font-size: 13px; font-weight: 700; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+
+/* Las caracteristicas se ajustan a su contenido y "Para" se come el resto.
+   Sin esto la tabla reparte el ancho por igual y TALLA ocupa lo mismo que
+   MATERIAL, con huecos en medio que cuesta seguir con la vista. */
+th, td { white-space: nowrap; }
+th.ancha, td.origen { width: 99%; white-space: normal; }
+th {
+    text-align: left;
+    padding: 5px 6px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #000;
+    color: #333;
+}
+td { padding: 8px 6px; border-bottom: 1px solid #ccc; }
+
+.num { text-align: right; }
+/* La cantidad centrada: es lo que se busca de un vistazo en la mesa. */
+.cant, th.cant { text-align: center; font-weight: 800; }
+.fuerte { font-weight: 800; }
+.origen { font-size: 12px; color: #444; }
+.producto { font-weight: 700; white-space: normal; }
+.check { width: 26px; }
+td.check::after {
+    content: '';
+    display: block;
+    width: 13px;
+    height: 13px;
+    border: 1.5px solid #000;
+}
+.blanca td { height: 26px; }
+
+.total {
+    margin-top: 8px;
+    border-top: 2px solid #000;
+    padding-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+@page { size: letter; margin: 12mm; }
+
+/* En pantalla (la ventana que se abre antes de imprimir) el margen de @page no
+   aplica, asi que se le da uno propio. */
+@media screen { body { padding: 14mm 12mm; } }

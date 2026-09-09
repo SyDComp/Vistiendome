@@ -1,0 +1,271 @@
+/* La etiqueta de envio que se pega al paquete.
+   ==========================================================================
+
+   Como toda hoja de impresion, esta NO usa los tokens de `variables.css`: son
+   colores pensados para una pantalla. En papel manda el contraste, porque esta
+   etiqueta la lee un repartidor a la carrera, muchas veces bajo lluvia.
+
+   Estas 250 lineas vivian dentro de una cadena de JavaScript, en el mismo
+   archivo que la logica de despacho. Ahi ningun editor las entendia, no habia
+   forma de revisarlas, y una comilla invertida en un comentario rompia la
+   compilacion del proyecto entero. */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: #fff;
+    color: #000;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+@page {
+    margin: 0;
+    size: auto;
+}
+
+.print-page-wrapper {
+    page-break-after: always;
+    width: 100%;
+    min-height: 100vh;
+    padding: 8mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.print-page-wrapper:last-child {
+    page-break-after: avoid;
+}
+
+.format-a4-grid {
+    display: grid;
+    width: 100%;
+    flex: 1;
+    gap: 4mm;
+}
+
+.format-a4-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.format-a4-grid.cols-1 { grid-template-columns: 1fr; }
+/* Las filas se fijan por formato, NO por cuantas etiquetas haya.
+   Sin grid-template-rows, el grid crea una fila implicita por
+   cada etiqueta y —como .format-a4-grid tiene flex:1 dentro de
+   una hoja de 100vh— esa unica fila se estira a la pagina
+   entera: una sola etiqueta salia impresa del alto de la hoja
+   en vez de su cuarto A6.
+   Los formatos de 2 filas declaraban rows:2 en su config pero
+   su pageClass no incluia la clase, y la regla .rows-2 ni
+   siquiera existia. El de 2x3 sí la tenia, y por eso era el
+   unico que salia bien. */
+.format-a4-grid.rows-2 { grid-template-rows: 1fr 1fr; }
+.format-a4-grid.rows-3 { grid-template-rows: 1fr 1fr 1fr; }
+
+.format-thermal-100x150 {
+    width: 100mm;
+    height: 150mm;
+    padding: 3mm;
+    page-break-after: always;
+}
+.format-thermal-100x150:last-child { page-break-after: avoid; }
+
+.format-thermal-80mm {
+    width: 80mm;
+    padding: 3mm;
+    page-break-after: always;
+}
+.format-thermal-80mm:last-child { page-break-after: avoid; }
+
+.format-a4-full {
+    width: 100%;
+    min-height: 100vh;
+    padding: 10mm;
+    page-break-after: always;
+}
+.format-a4-full:last-child { page-break-after: avoid; }
+
+.label-item {
+    border: 1px solid #000;
+    border-radius: 4px;
+    padding: 4mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+}
+
+.cut-border {
+    border: 1px dashed #718096 !important;
+}
+
+/* MODO ECO BLANCO Y NEGRO */
+.mode-eco .brand-box {
+    border-bottom: 1.5px solid #000;
+    padding-bottom: 2mm;
+    margin-bottom: 2mm;
+    text-align: center;
+}
+.mode-eco .brand-title { font-size: 14px; font-weight: 900; letter-spacing: 0.5px; }
+.mode-eco .brand-sub { font-size: 8px; font-weight: 700; color: #4a5568; letter-spacing: 1.5px; }
+
+.mode-eco .sec-title {
+    font-size: 8px;
+    font-weight: 800;
+    color: #4a5568;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 1mm;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.mode-eco .recipient-name {
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 2mm;
+}
+
+.mode-eco .info-row {
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 1mm;
+}
+
+.mode-eco .address-box {
+    margin-top: 2mm;
+    border-top: 1px dashed #cbd5e1;
+    padding-top: 2mm;
+}
+
+.mode-eco .main-address {
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 1.5mm;
+}
+
+.mode-eco .city-box {
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid #000;
+    padding: 1.5mm 2.5mm;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.mode-eco .transport-tag {
+    font-size: 11px;
+    font-weight: 900;
+    border: 1px solid #000;
+    padding: 1mm 2mm;
+    border-radius: 3px;
+    display: inline-block;
+    margin-bottom: 2mm;
+}
+
+/* MODO ESTÁNDAR CON RECUADROS */
+.mode-standard .brand-box {
+    background: #000;
+    color: #fff;
+    padding: 2mm;
+    text-align: center;
+    margin: -4mm -4mm 3mm -4mm;
+}
+.mode-standard .brand-title { font-size: 14px; font-weight: 900; letter-spacing: 1px; }
+.mode-standard .brand-sub { font-size: 8px; font-weight: 700; color: #cbd5e1; letter-spacing: 2px; }
+
+.mode-standard .sec-title {
+    font-size: 8px;
+    font-weight: 800;
+    color: #4a5568;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 1mm;
+}
+
+.mode-standard .recipient-name {
+    font-size: 17px;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 2mm;
+}
+
+.mode-standard .info-row {
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 1mm;
+}
+
+.mode-standard .transport-tag {
+    background: #f1f5f9;
+    border: 1.5px solid #000;
+    padding: 1.5mm 2.5mm;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 900;
+    margin: 2mm 0;
+}
+
+.mode-standard .main-address {
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 2mm;
+}
+
+.mode-standard .city-box {
+    display: flex;
+    background: #f8fafc;
+    border: 1.5px solid #000;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.mode-standard .city-col {
+    flex: 1;
+    padding: 1.5mm 2mm;
+}
+.mode-standard .city-col:first-child { border-right: 1.5px solid #000; }
+.mode-standard .city-label { font-size: 7px; font-weight: 800; color: #64748b; }
+.mode-standard .city-val { font-size: 12px; font-weight: 900; }
+
+/* CÓDIGO DE BARRAS INFERIOR */
+.barcode-box {
+    margin-top: 2mm;
+    padding-top: 1.5mm;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    overflow: hidden;
+    text-align: center;
+}
+
+.barcode-box svg, .barcode-box canvas {
+    max-width: 80% !important;
+    height: auto !important;
+    margin: 0 auto;
+    display: block;
+}
+
+.coti-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    color: #4a5568;
+    margin-top: 1mm;
+}
+
+.scale-compact .recipient-name { font-size: 13px !important; }
+.scale-compact .main-address { font-size: 11px !important; }
+.scale-compact .info-row { font-size: 9.5px !important; }
+.scale-compact .city-box { font-size: 10px !important; }
+
+.scale-large .recipient-name { font-size: 24px !important; }
+.scale-large .main-address { font-size: 18px !important; }
+.scale-large .info-row { font-size: 14px !important; }
+.scale-large .city-val { font-size: 16px !important; }
