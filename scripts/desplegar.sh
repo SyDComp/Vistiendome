@@ -14,8 +14,11 @@
 #   SIN_RESPALDO=1 ./scripts/desplegar.sh   # solo si YA respaldaste recien
 set -euo pipefail
 
-RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
+# Este archivo, en el arbol del proyecto. Cuando el script corre desde una
+# copia -ver mas abajo por que-, `$0` es esa copia y no sirve para ubicar el
+# proyecto: la ruta buena viaja en ORIGINAL.
 ESTE="${ORIGINAL:-$(cd "$(dirname "$0")" && pwd)/$(basename "$0")}"
+RAIZ="$(cd "$(dirname "$ESTE")/.." && pwd)"
 cd "$RAIZ"
 
 # ESTE ARCHIVO SE REEMPLAZA A SI MISMO A MITAD DE CAMINO
