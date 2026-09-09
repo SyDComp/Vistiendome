@@ -3,7 +3,7 @@ import CMSRenderer from './CMSRenderer';
 
 const HomeRenderer = () => {
     return (
-        <div className="home-dynamic-renderer">
+        <div>
             <CMSRenderer page="homepage" />
         </div>
     );

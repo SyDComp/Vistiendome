@@ -39,7 +39,7 @@ const PremiumImage = ({
     useEffect(() => {
         setIsLoaded(false);
         setHasError(false);
-        
+
         // Si la imagen ya está en caché del navegador, complete será true instantáneamente
         if (imgRef.current && imgRef.current.complete) {
             setIsLoaded(true);
@@ -51,11 +51,11 @@ const PremiumImage = ({
     // Si no hay src o hubo un error al cargar
     if (!src || hasError) {
         return (
-            <div 
-                className={`no-image fallback ${className}`}
-                style={{ 
-                    aspectRatio, 
-                    width: '100%', 
+            <div
+                className={` ${className}`}
+                style={{
+                    aspectRatio,
+                    width: '100%',
                     height: '100%',
                     display: 'flex',
                     alignItems: 'center',
@@ -70,10 +70,10 @@ const PremiumImage = ({
     }
 
     return (
-        <div 
-            className={`premium-image-container ${className}`} 
-            style={{ 
-                position: 'relative', 
+        <div
+            className={` ${className}`}
+            style={{
+                position: 'relative',
                 overflow: 'hidden',
                 aspectRatio,
                 width: '100%',
@@ -86,7 +86,7 @@ const PremiumImage = ({
             {!isLoaded && (
                 <div className={`skeleton-box adm-capa-completa ${skeletonClassName}`} />
             )}
-            
+
             {/* Imagen Real (Oculta hasta cargar, fade-in suave) */}
             {listo && <img
                 ref={imgRef}
@@ -111,7 +111,7 @@ const PremiumImage = ({
                     display: 'block'
                 }}
                 {...props}
-            />}
+ />}
         </div>
     );
 };

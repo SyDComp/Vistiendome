@@ -76,7 +76,7 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
     const finalizada = orden.estado === 'FINALIZADA';
 
     return (
-        <div className="admin-module fade-in oc-detalle">
+        <div className="fade-in oc-detalle">
             <div className="oc-top">
                 <button className="oc-btn-volver" onClick={onVolver}><ArrowLeft size={16} /> Volver</button>
                 <SectionHeader
@@ -153,7 +153,7 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
                             title={i.cotizacion_id ? 'Ver este pedido' : undefined}
                             onClick={() => i.cotizacion_id
                                 && navigate(`/admin/dashboard/crm/cotizaciones?pedido=${i.cotizacion_id}`)}
-                          >
+                            >
                             Pedido N° {i.pedido_numero ?? '—'}{i.cliente ? ` · ${i.cliente}` : ''}
                           </button>),
                 }]}

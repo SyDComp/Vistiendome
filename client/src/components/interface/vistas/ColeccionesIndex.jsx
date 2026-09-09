@@ -76,7 +76,7 @@ const ColeccionesIndex = () => {
                             {collections.map(c => (
                                 <div
                                     key={c.id}
-                                    className="collection-card user-card"
+                                    className="collection-card"
                                     onClick={() => navigate(`/coleccion/${c.slug}`)}
                                 >
                                     <div className="card-image-box">
@@ -110,8 +110,8 @@ const ColeccionesIndex = () => {
                     </div>
                     <div className="collections-grid">
                         {SMART_COLLECTIONS.map(sc => (
-                            <div 
-                                key={sc.slug} 
+                            <div
+                                key={sc.slug}
                                 className="collection-card smart-card"
                                 onClick={() => navigate(`/coleccion/${sc.slug}`)}
                                 style={{ background: sc.background }}

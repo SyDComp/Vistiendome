@@ -392,7 +392,7 @@ const ShippingLabelPrinter = () => {
 
     return (
         <div className="shipping-label-generator-wrap et-marco">
-            
+
             {/* TOP NAVBAR */}
             <header className="et-cabecera">
                 <div className="et-fila-ancha">
@@ -404,7 +404,7 @@ const ShippingLabelPrinter = () => {
                     </button>
                     <div className="et-bloque">
                         <h1 className="et-titulo">
-                            <Printer className="text-pink-600" size={isMobile ? 18 : 22} /> Generador de Etiquetas de Envío
+                            <Printer  size={isMobile ? 18 : 22} /> Generador de Etiquetas de Envío
                         </h1>
                         <p className="et-sub">
                             Optimiza el consumo de hojas y tinta seleccionando la disposición ideal para tu impresora.
@@ -475,7 +475,7 @@ const ShippingLabelPrinter = () => {
 
             {/* SPLIT PANEL CONTENT */}
             <div className="et-cuerpo">
-                
+
                 {/* PANEL IZQUIERDO: SELECCIÓN DE PEDIDOS / COTIZACIONES */}
                 <div className="et-panel-lista">
                     <div className="et-lista-fila">
@@ -536,7 +536,7 @@ const ShippingLabelPrinter = () => {
                                 placeholder="Buscar cliente, RUT, ID..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                
+
                             />
                         </div>
                     </div>
@@ -661,14 +661,14 @@ const ShippingLabelPrinter = () => {
                                             >
                                                 <button
                                                     onClick={() => updateCopies(c.id, -1)}
-                                                    
-                                                >-
+
+ >-
                                                 </button>
                                                 <span className="et-contador-valor">{copies}</span>
                                                 <button
                                                     onClick={() => updateCopies(c.id, 1)}
-                                                    
-                                                >+
+
+ >+
                                                 </button>
                                             </div>
                                         )}
@@ -681,10 +681,10 @@ const ShippingLabelPrinter = () => {
 
                 {/* PANEL DERECHO: CONFIGURACIÓN DE HOJA / TINTA + VISTA PREVIA */}
                 <div className="et-panel-vista">
-                    
+
                     {/* BARRA DE HERRAMIENTAS DE AHORRO */}
                     <div className="et-barra-opciones">
-                        
+
                         {/* SELECTOR DE FORMATO DE PAPEL */}
                         <div className="et-bloque--ancho">
                             <label className="et-rotulo--grande">

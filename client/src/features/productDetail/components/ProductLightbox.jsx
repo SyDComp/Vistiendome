@@ -62,22 +62,22 @@ const ProductLightbox = ({ images = [], currentIndex = 0, isOpen, onClose, onPre
 
             <div className="lightbox-content">
                 {images.length > 1 && (
-                    <button className="lightbox-nav prev" onClick={onPrev}>
+                    <button className="lightbox-nav" onClick={onPrev}>
                         <ChevronLeft size={48} />
                     </button>
                 )}
 
                 <div className="lightbox-image-wrapper">
-                    <img 
-                        src={images[currentIndex]} 
-                        alt={`Vista ampliada ${currentIndex + 1}`} 
+                    <img
+                        src={images[currentIndex]}
+                        alt={`Vista ampliada ${currentIndex + 1}`}
                         className="lightbox-image"
                         draggable={false}
                     />
                 </div>
 
                 {images.length > 1 && (
-                    <button className="lightbox-nav next" onClick={onNext}>
+                    <button className="lightbox-nav" onClick={onNext}>
                         <ChevronRight size={48} />
                     </button>
                 )}

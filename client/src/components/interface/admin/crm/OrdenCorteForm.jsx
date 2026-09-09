@@ -93,7 +93,7 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
     };
 
     return (
-        <div className="admin-module fade-in oc-form">
+        <div className="fade-in oc-form">
             <div className="oc-form-top">
                 <button className="oc-btn-volver" onClick={onVolver}><ArrowLeft size={16} /> Volver</button>
                 <SectionHeader title="Nueva Orden de Corte" subtitle={`${totalUnidades} unidades en total`} icon={Scissors} />

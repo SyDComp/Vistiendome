@@ -168,9 +168,9 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
             </button>
 
             <div className={`detalle-producto-container fade-in ${isModal ? 'is-modal-view' : ''}`}>
-                <main className="container main-content-wrapper">
+                <main className="container">
                     <div className="detalle-grid-premium">
-                        <div className="detalle-column-left">
+                        <div>
                             <div className="sticky-gallery-container">
                                 {loading && !producto ? (
                                     <div className="esqueleto esqueleto--bloque esqueleto--galeria" />
@@ -193,8 +193,8 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                             </div>
                         </div>
 
-                        <div className="detalle-column-right">
-                            <header className="product-header-premium">
+                        <div>
+                            <header>
                                 <div className="detalle-producto-header-top">
                                     <span className="product-category-tag">{producto?.category?.name}</span>
                                 </div>
@@ -284,7 +284,7 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                             <div className="divider-premium-elegant" />
 
                             {!isMobile && (
-                                <div className="selectors-container-premium">
+                                <div>
                                     {loading ? (
                                         <div className="esqueleto-selectores">
                                             <div className="esqueleto esqueleto--selector" />
@@ -338,7 +338,7 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                                 });
                                 if (validSpecs.length === 0) return null;
                                 return (
-                                    <div className="specs-section-premium ficha-retraso-1">
+                                    <div className="ficha-retraso-1">
                                         <div className="section-title-wrapper">
                                             <div className="title-accent" />
                                             <h3 className="section-title-premium-text">Especificaciones</h3>
@@ -405,7 +405,7 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
                                 </div>
                             </div>
 
-                            
+
                         </div>
                     </div>
                 </main>

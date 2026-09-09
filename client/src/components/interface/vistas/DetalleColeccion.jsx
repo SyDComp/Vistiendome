@@ -22,7 +22,7 @@ const DetalleColeccion = () => {
                 let data = [];
                 let title = 'Colección';
                 let desc = '';
-                
+
                 if (slug === 'smart_latest') {
                     title = 'Recién Llegados (Novedades)';
                     desc = 'Las últimas tendencias y piezas añadidas a nuestro catálogo.';
@@ -39,7 +39,7 @@ const DetalleColeccion = () => {
                     const all = await getProducts();
                     data = [...all].sort(() => Math.random() - 0.5);
                 }
-                
+
                 const fakeSkus = [];
                 data.forEach(p => {
                     let selectedVariant = null;
@@ -63,7 +63,7 @@ const DetalleColeccion = () => {
                         config: selectedVariant ? selectedVariant.config : {}
                     });
                 });
-                
+
                 setCollection({
                     name: title,
                     description: desc,
@@ -102,12 +102,12 @@ const DetalleColeccion = () => {
 
         if (lastMessage.type === 'invalidate_cache' && lastMessage.resource === 'collections') {
             const { action, slug: msgSlug, old_slug: msgOldSlug } = lastMessage;
-            
+
             console.log(`🔄 Señal de invalidación detectada [${action}]. Evaluando relevancia para "${slug}"...`);
-            
+
             // Caso 1: Esta misma colección fue modificada o renombrada
             const isRelevant = msgSlug === slug || msgOldSlug === slug;
-            
+
             if (isRelevant) {
                 if (action === 'delete') {
                     console.warn('⚠️ Esta colección ha sido eliminada por un administrador.');
@@ -140,7 +140,7 @@ const DetalleColeccion = () => {
     }, [collection]);
 
     if (loading) return (
-        <div className="collection-detail-view fade-in">
+        <div className="fade-in">
             <header className="collection-hero">
                 <div className="collection-detail-hero-content esqueleto-zona">
                     {/* Cada hueco lleva la clase del elemento REAL que reemplaza, asi
@@ -152,7 +152,7 @@ const DetalleColeccion = () => {
                     <div className="hero-stats esqueleto esqueleto--texto esqueleto--breve esqueleto--centrado" />
                 </div>
             </header>
-            <main className="collection-products container">
+            <main className="container">
                 <div className="grid-header">
                     <h2 className="esqueleto esqueleto--texto esqueleto--corto" />
                     <p className="esqueleto esqueleto--texto esqueleto--breve" />
@@ -188,11 +188,11 @@ const DetalleColeccion = () => {
     );
 
     return (
-        <div className="collection-detail-view fade-in">
+        <div className="fade-in">
             {/* Botón Volver Premium (Adaptativo) */}
-            <button 
-                onClick={() => navigate('/colecciones')} 
-                className={`back-btn-premium ${scrolled ? 'is-scrolled' : ''}`} 
+            <button
+                onClick={() => navigate('/colecciones')}
+                className={`back-btn-premium ${scrolled ? 'is-scrolled' : ''}`}
                 title="Volver"
             >
                 <ArrowLeft size={24} />
@@ -218,7 +218,7 @@ const DetalleColeccion = () => {
             </header>
 
             {/* Products Grid Sections */}
-            <main className="collection-products container">
+            <main className="container">
                 <div className="grid-header">
                     <h2>Selección de Piezas</h2>
                     <span>{collection.skus?.length || 0} variantes en {groupedProducts.length} modelos</span>
@@ -228,8 +228,8 @@ const DetalleColeccion = () => {
                     <section className="product-group-section">
                         <div className="products-grid">
                             {collection.skus?.map(variant => (
-                                <div 
-                                    key={variant.sku} 
+                                <div
+                                    key={variant.sku}
                                     className="product-card"
                                     onClick={() => navigate(`/coleccion/${slug}/producto/${variant.product_slug}/${variant.sku}`, {
                                         state: {
@@ -245,31 +245,31 @@ const DetalleColeccion = () => {
                                 >
                                     <div className="product-image-box">
                                         {variant.image ? (
-                                            <PremiumImage 
-                                                src={getImageUrl(variant.image)} 
+                                            <PremiumImage
+                                                src={getImageUrl(variant.image)}
                                                 srcSet={variant.image_srcset}
                                                 sizes="(max-width: 768px) 50vw, 400px"
-                                                alt={variant.sku} 
+                                                alt={variant.sku}
                                                 objectFit="contain"
                                             />
                                         ) : (
-                                            <div className="no-image" />
+                                            <div/>
                                         )}
                                         {/* `compare_at_price` no existe en esta API: es un nombre de otra
                                             plataforma que quedo copiado. La condicion daba siempre falso, asi
                                             que el descuento no se mostraba NUNCA en las colecciones. Los campos
                                             reales son `on_sale` y `original_price`, los que ya usa el catalogo. */}
                                         {variant.on_sale && variant.original_price > variant.price && (
-                                            <div className="sku-tag discount-tag">
+                                            <div className="discount-tag">
                                                 -{Math.round((1 - variant.price / variant.original_price) * 100)}%
                                             </div>
                                         )}
                                     </div>
-                                    <div className="product-info">
-                                        <h3 className="product-name">
+                                    <div>
+                                        <h3>
                                             {variant.product_name} {variant.config?.color ? `- Color ${variant.config.color}` : ''}
                                         </h3>
-                                        <div className="product-footer">
+                                        <div>
                                             <span className="product-price">
                                                 {variant.on_sale && variant.original_price > variant.price && (
                                                     <span className="product-price-antes">${variant.original_price?.toLocaleString('es-CL')}</span>
@@ -292,11 +292,11 @@ const DetalleColeccion = () => {
                                 <h3 className="group-title">{group.name}</h3>
                                 <div className="group-title-line" />
                             </div>
-                            
+
                             <div className="products-grid">
                                 {group.variants.map(variant => (
-                                    <div 
-                                        key={variant.sku} 
+                                    <div
+                                        key={variant.sku}
                                         className="product-card"
                                         onClick={() => navigate(`/coleccion/${slug}/producto/${group.slug}/${variant.sku}`, {
                                             state: {
@@ -312,27 +312,27 @@ const DetalleColeccion = () => {
                                     >
                                         <div className="product-image-box">
                                             {variant.image ? (
-                                                <PremiumImage 
-                                                    src={getImageUrl(variant.image)} 
+                                                <PremiumImage
+                                                    src={getImageUrl(variant.image)}
                                                     srcSet={variant.image_srcset}
                                                     sizes="(max-width: 768px) 50vw, 400px"
-                                                    alt={variant.sku} 
+                                                    alt={variant.sku}
                                                     objectFit="contain"
                                                 />
                                             ) : (
-                                                <div className="no-image" />
+                                                <div/>
                                             )}
                                             {variant.on_sale && variant.original_price > variant.price && (
-                                                <div className="sku-tag discount-tag">
+                                                <div className="discount-tag">
                                                     -{Math.round((1 - variant.price / variant.original_price) * 100)}%
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="product-info">
-                                            <h3 className="product-name">
+                                        <div>
+                                            <h3>
                                                 {variant.config?.color ? `Color ${variant.config.color}` : group.name}
                                             </h3>
-                                            <div className="product-footer">
+                                            <div>
                                                 <span className="product-price">
                                                 {variant.on_sale && variant.original_price > variant.price && (
                                                     <span className="product-price-antes">${variant.original_price?.toLocaleString('es-CL')}</span>

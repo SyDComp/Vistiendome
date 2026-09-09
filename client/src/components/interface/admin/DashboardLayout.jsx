@@ -276,7 +276,7 @@ const DashboardLayout = () => {
                             entero: al cambiar de modulo se recarga el area de
                             contenido, mientras la barra lateral se queda
                             quieta. */}
-                        <Suspense fallback={<SuspenseFallback />}>
+                        <Suspense fallback={<SuspenseFallback/>}>
                         <Routes>
                             <Route path="/" element={<Navigate to="/admin/dashboard/inventory/products" />} />
                             <Route path="/inventory" element={<Navigate to="/admin/dashboard/inventory/products" />} />
@@ -289,19 +289,19 @@ const DashboardLayout = () => {
                             <Route path="/inventory/attributes" element={<InventoryModule view="characteristics" />} />
                             <Route path="/inventory/filters" element={<InventoryModule view="filters" />} />
                             <Route path="/inventory/specifications" element={<InventoryModule view="specifications" />} />
-                            <Route path="/inventory/barcodes" element={<BarcodePrinter />} />
-                            <Route path="/workspace" element={<WorkspaceModule />} />
+                            <Route path="/inventory/barcodes" element={<BarcodePrinter/>} />
+                            <Route path="/workspace" element={<WorkspaceModule/>} />
                             <Route path="/media" element={<MediaGallery asModal={false} />} />
-                            <Route path="/cms/homepage" element={<HomepageManager />} />
-                            <Route path="/cms/help" element={<CustomerServiceManager />} />
-                            <Route path="/cms/settings" element={<SettingsManager />} />
-                            <Route path="/analytics" element={<AnalyticsModule />} />
-                            <Route path="/crm/clientes" element={<ClientesView />} />
-                            <Route path="/crm/cotizaciones" element={<CotizacionesView />} />
-                            <Route path="/crm/orden-corte" element={<OrdenCorteView />} />
-                            <Route path="/crm/shipping-labels" element={<ShippingLabelPrinter />} />
-                            <Route path="/crm/propuestas" element={<PropuestasView />} />
-                            <Route path="/profile" element={<AdminProfile />} />
+                            <Route path="/cms/homepage" element={<HomepageManager/>} />
+                            <Route path="/cms/help" element={<CustomerServiceManager/>} />
+                            <Route path="/cms/settings" element={<SettingsManager/>} />
+                            <Route path="/analytics" element={<AnalyticsModule/>} />
+                            <Route path="/crm/clientes" element={<ClientesView/>} />
+                            <Route path="/crm/cotizaciones" element={<CotizacionesView/>} />
+                            <Route path="/crm/orden-corte" element={<OrdenCorteView/>} />
+                            <Route path="/crm/shipping-labels" element={<ShippingLabelPrinter/>} />
+                            <Route path="/crm/propuestas" element={<PropuestasView/>} />
+                            <Route path="/profile" element={<AdminProfile/>} />
                             <Route path="*" element={<Navigate to="/admin/dashboard/inventory/products" />} />
                         </Routes>
                         </Suspense>

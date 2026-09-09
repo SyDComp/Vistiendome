@@ -8,12 +8,12 @@ import './VariantSelectionDrawer.css';
 /**
  * VariantSelectionDrawer - Panel inferior para selección de variantes en móvil
  */
-const VariantSelectionDrawer = ({ 
-    isOpen, 
-    onClose, 
-    attributes, 
-    selections, 
-    onChange, 
+const VariantSelectionDrawer = ({
+    isOpen,
+    onClose,
+    attributes,
+    selections,
+    onChange,
     checkOptionReachability,
     productName,
     onConfirm
@@ -31,8 +31,8 @@ const VariantSelectionDrawer = ({
 
     return createPortal(
         <div className={`variant-drawer-overlay ${isOpen ? 'active' : ''}`} onClick={onClose}>
-            <div 
-                className={`variant-drawer-content ${isOpen ? 'active' : ''}`} 
+            <div
+                className={`variant-drawer-content ${isOpen ? 'active' : ''}`}
                 onClick={e => e.stopPropagation()}
                 ref={drawerRef}
             >
@@ -40,7 +40,7 @@ const VariantSelectionDrawer = ({
                 <div className="drawer-handle" />
 
                 <header className="drawer-header">
-                    <div className="header-info">
+                    <div>
                         <span className="drawer-subtitle">Personaliza tu prenda</span>
                         <h3 className="drawer-title">{productName}</h3>
                     </div>
@@ -50,13 +50,13 @@ const VariantSelectionDrawer = ({
                 </header>
 
                 <div className="drawer-body-scroll">
-                    <VariantSelector 
+                    <VariantSelector
                         attributes={attributes}
                         selections={selections}
                         onChange={onChange}
                         checkOptionReachability={checkOptionReachability}
                     />
-                    
+
                     <div className="drawer-bottom-spacer" />
                 </div>
 

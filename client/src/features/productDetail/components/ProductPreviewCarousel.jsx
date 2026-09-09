@@ -9,10 +9,10 @@ import { getImageUrl, getSrcSet} from '../../../lib/api/endpoints/index.js';
  * Implementa ordenamiento dinámico por packs de variantes y UX optimizada
  * para facilitar el uso a personas mayores (Scroll horizontal intuitivo).
  */
-const ProductPreviewCarousel = ({ 
-    skus = [], 
-    coverImage = '', 
-    skuActual = null, 
+const ProductPreviewCarousel = ({
+    skus = [],
+    coverImage = '',
+    skuActual = null,
     onJumpToVariant,
     imgIndex,
     onImageSelected
@@ -43,7 +43,7 @@ const ProductPreviewCarousel = ({
             if (!url) return;
             const normalizedUrl = url.split(/[?#]/)[0].toLowerCase();
             if (seenUrls.has(normalizedUrl)) return;
-            
+
             seenUrls.add(normalizedUrl);
             allUniqueImages.push({
                 url,
@@ -75,7 +75,7 @@ const ProductPreviewCarousel = ({
             // Insertamos la portada primero
             collectImage(coverImage, coverSku);
         }
-        
+
         // Ahora recolectamos el resto en orden
         sortedSkus.forEach(s => {
             s.image_urls?.forEach(url => collectImage(url, s));
@@ -177,14 +177,14 @@ const ProductPreviewCarousel = ({
         } else {
             newIndex = (currentIndex - 1 + finalImages.length) % finalImages.length;
         }
-        
+
         const nextImage = finalImages[newIndex];
-        
-        // Al cambiar de imagen con las flechas, saltamos a su variante 
+
+        // Al cambiar de imagen con las flechas, saltamos a su variante
         if (!nextImage.isFromActiveSku && onJumpToVariant && nextImage.skuConfig) {
             onJumpToVariant(nextImage.skuConfig);
         }
-        
+
         setSelectedImageUrl(nextImage.url);
         // Ya no enviamos 0, enviamos el índice real porque el orden es estable
         if (onImageSelected) onImageSelected(newIndex);
@@ -213,7 +213,7 @@ const ProductPreviewCarousel = ({
         if (!imgObj.isFromActiveSku && onJumpToVariant && imgObj.skuConfig) {
             onJumpToVariant(imgObj.skuConfig);
         }
-        
+
         setSelectedImageUrl(imgObj.url);
         if (onImageSelected) {
             const idx = finalImages.findIndex(i => i.url === imgObj.url);
@@ -261,11 +261,11 @@ const ProductPreviewCarousel = ({
                          srcSet={getSrcSet(srcsetDe(displayUrl)) || undefined}
                          sizes="200px" decoding="async" />
                 )}
-                <img 
-                    src={getImageUrl(displayUrl)} 
+                <img
+                    src={getImageUrl(displayUrl)}
                     srcSet={getSrcSet(srcsetDe(displayUrl)) || undefined}
                     sizes="(max-width: 1023px) 100vw, 640px"
-                    alt="Vista del producto" 
+                    alt="Vista del producto"
                     className="main-large-image"
                     onError={(e) => {
                         e.target.src = getImageUrl(coverImage);
@@ -277,45 +277,45 @@ const ProductPreviewCarousel = ({
             </div>
 
             <div className="carousel-controls-wrapper">
-                <button className="scroll-btn left" onClick={() => navigateImage('left')} title="Imagen anterior">
+                <button className="scroll-btn" onClick={() => navigateImage('left')} title="Imagen anterior">
                     <ChevronLeft size={24} />
                 </button>
 
                 <div className="thumbnails-scroll-container" ref={thumbnailScrollRef}>
                     <div className="thumbnails-track">
                         {finalImages.map((img, idx) => (
-                            <div 
+                            <div
                                 key={img.url}
                                 className={`carousel-thumb-item ${selectedImageUrl === img.url ? 'active' : ''} ${!img.isFromActiveSku ? 'secondary-pack' : ''}`}
                                 onClick={() => handleThumbnailClick(img)}
                             >
-                                <img 
-                                    src={getImageUrl(img.url)} 
+                                <img
+                                    src={getImageUrl(img.url)}
                                     srcSet={getSrcSet(img.srcset) || undefined}
                                     sizes="90px"
                                     loading="lazy"
-                                    alt={`Previsualización ${idx + 1}`} 
+                                    alt={`Previsualización ${idx + 1}`}
                                     onError={(e) => {
                                         e.target.onerror = null; // Prevenir loop infinito
                                         e.target.src = getImageUrl(coverImage);
                                     }}
                                 />
                                 {!img.isFromActiveSku && (
-                                    <div className="pack-indicator" title="Ver esta variante">✨</div>
+                                    <div  title="Ver esta variante">✨</div>
                                 )}
                             </div>
                         ))}
                     </div>
                 </div>
 
-                <button className="scroll-btn right" onClick={() => navigateImage('right')} title="Siguiente imagen">
+                <button className="scroll-btn" onClick={() => navigateImage('right')} title="Siguiente imagen">
                     <ChevronRight size={24} />
                 </button>
 
                 <div className="carousel-fade-edge"></div>
             </div>
 
-            <ProductLightbox 
+            <ProductLightbox
                 images={finalImages.map(i => getImageUrl(i.url))}
                 currentIndex={lightboxIndex}
                 isOpen={isLightboxOpen}

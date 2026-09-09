@@ -54,7 +54,7 @@ const PersonaFields = ({ formData, handleChange, isLead = false }) => {
                     onBlur={(e) => handleChange({ target: { name: 'rut', value: formatRUT(e.target.value) } })}
                     placeholder="Ej. 12.345.678-9"
                 />
-                <div /> {/* Spacer */}
+                <div/> {/* Spacer */}
             </AdminFormRow>
 
             <AdminFormSection 

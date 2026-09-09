@@ -13,14 +13,14 @@ import Imagen from '../../../ui/Imagen';
 
 const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false }) => {
     const { prompt } = useNotification();
-    
+
     const [localData, setLocalData] = useState({
         name: initialData?.name || '',
         description: initialData?.description || '',
         is_system: initialData?.is_system || false,
         system_id: initialData?.system_id || null,
-        value_structure: initialData?.value_structure?.length 
-            ? initialData.value_structure 
+        value_structure: initialData?.value_structure?.length
+            ? initialData.value_structure
             : [{ label: 'Valor', key: 'value', type: 'text' }],
         is_filterable: initialData?.is_filterable === false ? false : true,
         afecta_apariencia: initialData?.afecta_apariencia === true,
@@ -29,7 +29,7 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
         en_orden_corte: initialData?.en_orden_corte === false ? false : true,
         domain: initialData?.domain || []
     });
-    
+
     const [pickingImageIndex, setPickingImageIndex] = useState(null);
 
     // Sólo Color y Estampado tienen fija su propiedad visual. Todo lo demás
@@ -132,7 +132,7 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                         Identificador (Biblioteca)
                     </label>
                     <div className="char-form-input-wrap">
-                        <input 
+                        <input
                             value={localData.name}
                             onChange={e => setLocalData(p => ({ ...p, name: e.target.value.toUpperCase() }))}
                             placeholder="Ej: Tallas, Colores..."
@@ -146,7 +146,7 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                             </div>
                         )}
                     </div>
-                    <input 
+                    <input
                         value={localData.description}
                         onChange={e => setLocalData(p => ({ ...p, description: e.target.value }))}
                         placeholder="Descripción breve (opcional)..."
@@ -169,10 +169,10 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                         />
                         <label htmlFor="char_afecta_apariencia" className="char-form-filter-label">
                             Cambia cómo se ve la prenda
-                            {visualBloqueada && <span className="char-form-lock"> · fijo del sistema</span>}
+                            {visualBloqueada && <span> · fijo del sistema</span>}
                         </label>
                     </div>
-                    <p className="char-form-hint">
+                    <p>
                         {visualBloqueada
                             ? 'Es una característica del sistema y define cómo se ve la prenda, así que no se puede desmarcar: el Explorador la usa para mostrar una tarjeta por cada valor. Sí puedes marcar esta opción en cualquier característica que crees tú.'
                             : 'Márcalo en Color o Estampado: el Explorador mostrará una foto por cada valor. No lo marques en Talla — cambia la prenda, pero no cómo se ve.'}
@@ -188,7 +188,7 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                             Sale en la orden de corte
                         </label>
                     </div>
-                    <p className="char-form-hint">
+                    <p>
                         La hoja que va a la mesa de corte lleva una columna por
                         característica. Deja marcadas sólo las que la costurera
                         necesita ver: una columna de más es ruido en el taller.
@@ -209,7 +209,7 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                                 <div className="char-form-row-icon">
                                     {row.is_system ? <Lock size={16} /> : <GripVertical size={16} />}
                                 </div>
-                                
+
                                 {isColorType ? (
                                     <div className="char-form-row-content">
                                         <div className={`char-form-color-circle ${row.is_system ? 'system' : 'normal'}`} style={{ background: row.hex_code || '#000' }}>
@@ -224,22 +224,22 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                                             )}
                                         </div>
                                         <div className="char-form-inputs-col">
-                                            <input 
-                                                value={row.value || ''} 
-                                                onChange={e => updateValue(rIdx, 'value', e.target.value)} 
+                                            <input
+                                                value={row.value || ''}
+                                                onChange={e => updateValue(rIdx, 'value', e.target.value)}
                                                 onBlur={e => updateValue(rIdx, 'value', formatOpt(e.target.value))}
-                                                placeholder="Nombre del color" 
-                                                onKeyDown={e => e.key === 'Enter' && addOption()} 
-                                                autoFocus={!row.is_system && rIdx === localData.domain.length - 1} 
+                                                placeholder="Nombre del color"
+                                                onKeyDown={e => e.key === 'Enter' && addOption()}
+                                                autoFocus={!row.is_system && rIdx === localData.domain.length - 1}
                                                 disabled={row.is_system}
                                                 className={`char-form-input-val ${row.is_system ? 'system' : 'normal'}`}
                                             />
-                                            <input 
-                                                id={`hex-input-${rIdx}`} 
-                                                value={row.hex_code || ''} 
-                                                onChange={e => updateValue(rIdx, 'hex_code', e.target.value)} 
-                                                placeholder="#000000" 
-                                                onKeyDown={e => e.key === 'Enter' && addOption()} 
+                                            <input
+                                                id={`hex-input-${rIdx}`}
+                                                value={row.hex_code || ''}
+                                                onChange={e => updateValue(rIdx, 'hex_code', e.target.value)}
+                                                placeholder="#000000"
+                                                onKeyDown={e => e.key === 'Enter' && addOption()}
                                                 disabled={row.is_system}
                                                 className={`char-form-input-hex ${row.is_system ? 'system' : 'normal'}`}
                                             />
@@ -256,17 +256,17 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                                             )}
                                         </div>
                                         <div className="char-form-inputs-col adm-fila-media">
-                                            <input 
-                                                value={row.value || ''} 
-                                                onChange={e => updateValue(rIdx, 'value', e.target.value)} 
+                                            <input
+                                                value={row.value || ''}
+                                                onChange={e => updateValue(rIdx, 'value', e.target.value)}
                                                 onBlur={e => updateValue(rIdx, 'value', formatOpt(e.target.value))}
-                                                placeholder="Nombre del estampado (ej: Floral Primavera)" 
-                                                onKeyDown={e => e.key === 'Enter' && addOption()} 
-                                                autoFocus={!row.is_system && rIdx === localData.domain.length - 1} 
+                                                placeholder="Nombre del estampado (ej: Floral Primavera)"
+                                                onKeyDown={e => e.key === 'Enter' && addOption()}
+                                                autoFocus={!row.is_system && rIdx === localData.domain.length - 1}
                                                 disabled={row.is_system}
                                                 className={`char-form-input-val adm-doble ${row.is_system ? 'system' : 'normal'}`}
                                             />
-                                            <button 
+                                            <button
                                                 type="button"
                                                 disabled={row.is_system}
                                                 onClick={() => setPickingImageIndex(rIdx)}
@@ -295,12 +295,12 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                                     <div className="char-form-row-content">
                                         {localData.value_structure.map(col => (
                                             <div key={col.key} style={{ flex: col.key === 'value' ? 2 : 1 }}>
-                                                <input 
-                                                    value={row[col.key] || ''} 
-                                                    onChange={e => updateValue(rIdx, col.key, e.target.value)} 
+                                                <input
+                                                    value={row[col.key] || ''}
+                                                    onChange={e => updateValue(rIdx, col.key, e.target.value)}
                                                     onBlur={e => col.key === 'value' && updateValue(rIdx, col.key, formatOpt(e.target.value))}
-                                                    placeholder={col.label} 
-                                                    onKeyDown={e => e.key === 'Enter' && addOption()} 
+                                                    placeholder={col.label}
+                                                    onKeyDown={e => e.key === 'Enter' && addOption()}
                                                     disabled={row.is_system}
                                                     className={`char-form-input-generic ${row.is_system ? 'system' : 'normal'}`}
                                                 />
@@ -336,16 +336,16 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
 
             {/* Modal para Selección de Imagen desde la Biblioteca de Medios */}
             {pickingImageIndex !== null && (
-                <MediaGallery 
-                    isOpen={true} 
-                    onClose={() => setPickingImageIndex(null)} 
+                <MediaGallery
+                    isOpen={true}
+                    onClose={() => setPickingImageIndex(null)}
                     onSelect={(assets) => {
                         const a = Array.isArray(assets) ? assets[0] : assets;
                         if (a && a.url) {
                             updateValue(pickingImageIndex, 'image_url', a.url);
                         }
                         setPickingImageIndex(null);
-                    }} 
+                    }}
                 />
             )}
 

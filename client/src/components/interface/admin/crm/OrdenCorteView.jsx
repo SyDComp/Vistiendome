@@ -88,7 +88,7 @@ const OrdenCorteView = () => {
     }
 
     return (
-        <div className="admin-module fade-in oc-lista">
+        <div className="fade-in oc-lista">
             <div className="oc-encabezado">
                 <SectionHeader
                     title="Órdenes de Corte"

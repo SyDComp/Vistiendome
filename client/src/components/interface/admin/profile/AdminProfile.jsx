@@ -12,7 +12,7 @@ const AdminProfile = () => {
         apellidos: '',
         estado: ''
     });
-    
+
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState(null);
@@ -49,11 +49,11 @@ const AdminProfile = () => {
         e.preventDefault();
         setSaving(true);
         setMessage(null);
-        
+
         try {
             const res = await fetch('/api/v1/auth/me', {
                 method: 'PUT',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
                 },
@@ -64,9 +64,9 @@ const AdminProfile = () => {
                     apodo: profile.apodo || null
                 })
             });
-            
+
             const data = await res.json();
-            
+
             if (res.ok) {
                 setMessage({ type: 'success', text: data.msg || 'Perfil actualizado correctamente.' });
                 setTimeout(() => setMessage(null), 3000);
@@ -83,11 +83,11 @@ const AdminProfile = () => {
     if (loading) return <div className="adm-vacio-centrado">Cargando perfil...</div>;
 
     return (
-        <div className="admin-module fade-in">
+        <div className="fade-in">
             {message && (
-                <div style={{ 
-                    padding: '16px 24px', 
-                    borderRadius: '16px', 
+                <div style={{
+                    padding: '16px 24px',
+                    borderRadius: '16px',
                     background: message.type === 'success' ? '#ecfdf5' : '#fef2f2',
                     color: message.type === 'success' ? '#059669' : '#dc2626',
                     display: 'flex',
@@ -101,7 +101,7 @@ const AdminProfile = () => {
                     {message.text}
                 </div>
             )}
-            
+
             <AdminFormLayout
                 title="Configuración de Credenciales de Acceso"
                 icon={User}
@@ -110,21 +110,21 @@ const AdminProfile = () => {
                     <AdminFormSection title="Datos Personales" description="Estos datos se reflejarán en tu perfil de la plataforma.">
                         <div className="adm-fila-amplia">
                             <div className="adm-flexible">
-                                <Input 
+                                <Input
                                     label="Nombres"
                                     name="nombres"
-                                    type="text" 
-                                    value={profile.nombres} 
+                                    type="text"
+                                    value={profile.nombres}
                                     onChange={handleChange}
                                     required
                                 />
                             </div>
                             <div className="adm-flexible">
-                                <Input 
+                                <Input
                                     label="Apellidos"
                                     name="apellidos"
-                                    type="text" 
-                                    value={profile.apellidos} 
+                                    type="text"
+                                    value={profile.apellidos}
                                     onChange={handleChange}
                                     required
                                 />
@@ -134,23 +134,23 @@ const AdminProfile = () => {
 
                     <AdminFormSection title="Credenciales de Acceso" description="Esta información te permitirá iniciar sesión de forma segura en la consola.">
                         <div className="adm-separacion--seccion">
-                            <Input 
+                            <Input
                                 label={<span><Mail size={14} className="adm-en-linea"/> Email Corporativo</span>}
-                                type="email" 
-                                name="email_corporativo" 
-                                value={profile.email_corporativo} 
-                                onChange={handleChange} 
+                                type="email"
+                                name="email_corporativo"
+                                value={profile.email_corporativo}
+                                onChange={handleChange}
                                 required
                             />
                         </div>
 
                         <div>
-                            <Input 
+                            <Input
                                 label={<span><User size={14} className="adm-en-linea"/> Apodo (Nombre de usuario)</span>}
-                                type="text" 
-                                name="apodo" 
-                                value={profile.apodo || ''} 
-                                onChange={handleChange} 
+                                type="text"
+                                name="apodo"
+                                value={profile.apodo || ''}
+                                onChange={handleChange}
                                 placeholder="Ej: paola123"
                             />
                             <span className="adm-pie-ayuda">
@@ -160,9 +160,9 @@ const AdminProfile = () => {
                     </AdminFormSection>
 
                     <AdminFormSubmit>
-                        <Button 
-                            variant="primary" 
-                            type="submit" 
+                        <Button
+                            variant="primary"
+                            type="submit"
                             disabled={saving}
                             className="adm-boton-ancho"
                         >

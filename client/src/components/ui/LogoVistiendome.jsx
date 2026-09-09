@@ -14,7 +14,7 @@ import './LogoVistiendome.css';
  * y cambiar el tamaño desarmaba la proporción. Los estilos están en
  * LogoVistiendome.css, no acá dentro.
  *
- *   <LogoVistiendome />                        el del sitio
+ *   <LogoVistiendome/>                        el del sitio
  *   <LogoVistiendome tamano="1.4rem" />        más chico, todo se ajusta solo
  *   <LogoVistiendome invertido />              sobre fondo oscuro
  *

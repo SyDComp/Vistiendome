@@ -3,13 +3,13 @@ import { ArrowLeft } from 'lucide-react';
 import { useHasta } from '../../../hooks/useCorte';
 import './AdminFormLayout.css';
 
-const AdminFormLayout = ({ 
-    icon: Icon, 
-    title, 
-    onBack, 
-    splitLayout = false, 
-    rightPanel = null, 
-    children 
+const AdminFormLayout = ({
+    icon: Icon,
+    title,
+    onBack,
+    splitLayout = false,
+    rightPanel = null,
+    children
 }) => {
     const isMobile = useHasta('xl');
 
@@ -35,7 +35,7 @@ const AdminFormLayout = ({
             </div>
 
             {splitLayout && rightPanel && (
-                <div className="admin-form-right-panel">
+                <div>
                     {rightPanel}
                 </div>
             )}

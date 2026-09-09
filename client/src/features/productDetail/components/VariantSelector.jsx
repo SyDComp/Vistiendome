@@ -16,11 +16,11 @@ const sortSizes = (a, b) => {
     return normalize(a).localeCompare(normalize(b));
 };
 
-const VariantSelector = ({ 
-    attributes = [], 
-    selections = {}, 
-    onChange, 
-    checkOptionReachability = () => true 
+const VariantSelector = ({
+    attributes = [],
+    selections = {},
+    onChange,
+    checkOptionReachability = () => true
 }) => {
     // Estado para controlar qué acordeón está abierto (Single Accordion Behavior)
     const [openId, setOpenId] = useState(attributes.length > 0 ? attributes[0].id : null);
@@ -28,12 +28,12 @@ const VariantSelector = ({
     // Ayudante para asignar iconos basados en el nombre del atributo
     const getAttributeIcon = (label) => {
         const l = label.toLowerCase();
-        if (l.includes('color')) return <Palette />;
-        if (l.includes('talla') || l.includes('medida')) return <Ruler />;
-        if (l.includes('tela') || l.includes('material')) return <Layers />;
-        if (l.includes('tipo') || l.includes('estilo')) return <Shirt />;
-        if (l.includes('colección')) return <Target />;
-        return <Sparkles />;
+        if (l.includes('color')) return <Palette/>;
+        if (l.includes('talla') || l.includes('medida')) return <Ruler/>;
+        if (l.includes('tela') || l.includes('material')) return <Layers/>;
+        if (l.includes('tipo') || l.includes('estilo')) return <Shirt/>;
+        if (l.includes('colección')) return <Target/>;
+        return <Sparkles/>;
     };
 
     /**
@@ -46,13 +46,13 @@ const VariantSelector = ({
     };
 
     return (
-        <div className="variant-selectors-container-accordion">
+        <div>
             {attributes.map((attr, index) => {
                 const icon = getAttributeIcon(attr.etiqueta);
                 const rawValue = selections[attr.id];
                 const currentSelection = rawValue === "No aplica" ? null : (formatValue(rawValue) || 'Pendiente');
                 const isSingleOption = attr.opciones.length === 1;
-                
+
                 if (isSingleOption) {
                     return (
                         <div key={attr.id} className="single-option-row">
@@ -115,9 +115,9 @@ const VariantSelector = ({
                                                          srcSet={opcObj.thumbSrcSet || undefined}
                                                          sizes="48px" loading="lazy" decoding="async" />
                                                 ) : (
-                                                    <div style={{ 
-                                                        width: '100%', 
-                                                        height: '100%', 
+                                                    <div style={{
+                                                        width: '100%',
+                                                        height: '100%',
                                                         background: hex || '#cbd5e1',
                                                         display: 'flex',
                                                         alignItems: 'center',
@@ -130,7 +130,7 @@ const VariantSelector = ({
                                                 <span className="swatch-label">{formatValue(opc)}</span>
                                             </div>
                                         ) : (
-                                            <span className="btn-text">{formatValue(opc)}</span>
+                                            <span>{formatValue(opc)}</span>
                                         )}
                                     </button>
                                 );

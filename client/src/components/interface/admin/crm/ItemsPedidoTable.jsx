@@ -29,7 +29,7 @@ const ItemsPedidoTable = ({ items = [], mostrarPrecios = true }) => {
     ] : [];
 
     return (
-        <div className="items-pedido">
+        <div>
             <TablaPrendas
                 items={items}
                 columnasExtra={columnasExtra}

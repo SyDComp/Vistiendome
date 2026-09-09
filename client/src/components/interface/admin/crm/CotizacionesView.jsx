@@ -77,7 +77,7 @@ const StateSelector = ({ cotizacion, onUpdate }) => {
     };
 
     return (
-        <select 
+        <select
             value={cotizacion.estado}
             onChange={handleChange}
             disabled={loading}
@@ -197,8 +197,8 @@ const CotizacionesView = () => {
                 </div>
             )
         },
-        { 
-            key: 'fecha', 
+        {
+            key: 'fecha',
             label: 'Fecha',
             render: (_, row) => (
                 <span className="adm-celda-secundaria">
@@ -219,12 +219,12 @@ const CotizacionesView = () => {
             key: 'estado',
             label: 'Estado',
             render: (value, row) => (
-                <StateSelector 
-                    cotizacion={row} 
+                <StateSelector
+                    cotizacion={row}
                     onUpdate={(updatedCotizacion) => {
                         setCotizaciones(prev => prev.map(c => c.id === updatedCotizacion.id ? updatedCotizacion : c));
                         if (detailData?.id === updatedCotizacion.id) setDetailData(updatedCotizacion);
-                    }} 
+                    }}
                 />
             )
         },
@@ -274,7 +274,7 @@ const CotizacionesView = () => {
                 return (
                     <div className="adm-celda">
                         <div className="adm-celda-con-icono--junta">
-                            <MapPin size={14} /> 
+                            <MapPin size={14} />
                             <span>{row.comuna}, {row.region}</span>
                         </div>
                         {row.transporte && (
@@ -289,10 +289,10 @@ const CotizacionesView = () => {
     ];
 
     return (
-        <div className="admin-module fade-in">
+        <div className="fade-in">
             <div className="adm-vista-cabecera">
-                <SectionHeader 
-                    title="Cotizaciones Recibidas" 
+                <SectionHeader
+                    title="Cotizaciones Recibidas"
                     subtitle={`${cotizaciones.length} solicitudes de cotización`}
                     icon={FileText}
                 />
@@ -340,7 +340,7 @@ const CotizacionesView = () => {
                 searchPlaceholder="Buscar por nombre, N° de pedido o estado..."
             />
 
-            <DataTable 
+            <DataTable
                 columns={columns}
                 data={filteredCotizaciones}
                 loading={loading}
@@ -387,7 +387,7 @@ const CotizacionesView = () => {
                 )}
             />
 
-            <DetailDrawer 
+            <DetailDrawer
                 isOpen={showDetail}
                 onClose={() => setShowDetail(false)}
                 data={detailData}

@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './CMSPageManager.css';
 import './cms-admin.css';
-import { 
-    Plus, 
-    GripVertical, 
-    Edit2, 
-    Trash2, 
-    Eye, 
-    EyeOff, 
-    Sparkles, 
-    Layout, 
-    Type, 
-    Image as ImageIcon, 
+import {
+    Plus,
+    GripVertical,
+    Edit2,
+    Trash2,
+    Eye,
+    EyeOff,
+    Sparkles,
+    Layout,
+    Type,
+    Image as ImageIcon,
     Layers,
     Save,
     RefreshCw,
@@ -32,10 +32,10 @@ import { useHasta } from '../../../../hooks/useCorte';
 
 const API_BASE = '/api/v1/homepage/admin';
 
-const CMSPageManager = ({ 
-    page = 'homepage', 
-    title = 'Gestor de Contenido', 
-    subtitle = 'Configura el orden y contenido de esta sección.' 
+const CMSPageManager = ({
+    page = 'homepage',
+    title = 'Gestor de Contenido',
+    subtitle = 'Configura el orden y contenido de esta sección.'
 }) => {
     // Con poco ancho los dos paneles -la lista de bloques y el espejo del sitio-
     // se apilan en vez de ponerse lado a lado.
@@ -82,7 +82,7 @@ const CMSPageManager = ({
     }, [fetchSections]);
 
     const handleToggleActive = (section) => {
-        setSections(sections.map(s => 
+        setSections(sections.map(s =>
             s.id === section.id ? { ...s, is_active: !s.is_active } : s
         ));
     };
@@ -146,7 +146,7 @@ const CMSPageManager = ({
             // 1. Identificar eliminaciones
             const currentIds = sections.filter(s => typeof s.id === 'number').map(s => s.id);
             const deletedIds = originalSections.filter(s => !currentIds.includes(s.id)).map(s => s.id);
-            
+
             for (const id of deletedIds) {
                 await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
             }
@@ -192,17 +192,17 @@ const CMSPageManager = ({
         const newSections = [...sections];
         const targetIndex = index + direction;
         if (targetIndex < 0 || targetIndex >= newSections.length) return;
-        
+
         const temp = newSections[index];
         newSections[index] = newSections[targetIndex];
         newSections[targetIndex] = temp;
-        
+
         setSections(newSections);
     };
 
     const getIcon = (type) => {
         switch(type) {
-            case 'hero': 
+            case 'hero':
             case 'banner': return <Sparkles size={18} />;
             case 'composition_carousel': return <Layers size={18} />;
             case 'text_post': return <Type size={18} />;
@@ -230,8 +230,8 @@ const CMSPageManager = ({
                             </Button>
                         </div>
                     )}
-                    <Button 
-                        variant={isReordering ? "primary" : "outline"} 
+                    <Button
+                        variant={isReordering ? "primary" : "outline"}
                         onClick={() => setIsReordering(!isReordering)}
                         className={`cms-pg-reordenar${isReordering ? ' cms-pg-reordenar--activo' : ''}`}
                     >
@@ -269,16 +269,16 @@ const CMSPageManager = ({
                             const isNew = typeof section.id === 'string' && section.id.startsWith('temp_');
                             const isHovered = hoveredSectionId === section.id;
                             return (
-                                <div 
+                                <div
                                     key={section.id}
                                     className="cms-pg-fila"
                                     onPointerEnter={() => setHoveredSectionId(section.id)}
                                     onPointerLeave={() => setHoveredSectionId(null)}
-                                    style={{ 
-                                        background: isNew ? '#f8fafc' : '#fff', 
+                                    style={{
+                                        background: isNew ? '#f8fafc' : '#fff',
                                         border: '2px solid',
                                         borderColor: isHovered ? '#8f0653' : (isNew ? '#f1f5f9' : '#e2e8f0'),
-                                        padding: '16px 20px', 
+                                        padding: '16px 20px',
                                         borderRadius: '20px',
                                         opacity: section.is_active ? 1 : 0.6,
                                         transition: 'all 0.2s',
@@ -289,14 +289,14 @@ const CMSPageManager = ({
                                     <div className="cms-pg-fila-media">
                                         {isReordering && (
                                             <div className="cms-pg-arrastre">
-                                                <button 
+                                                <button
                                                     disabled={index === 0}
                                                     onClick={() => handleMove(index, -1)}
                                                     className="adm-mover"
                                                 >
                                                     <ChevronUp size={20} />
                                                 </button>
-                                                <button 
+                                                <button
                                                     disabled={index === sections.length - 1}
                                                     onClick={() => handleMove(index, 1)}
                                                     className="adm-mover"
@@ -319,9 +319,9 @@ const CMSPageManager = ({
 
                                     <div className="cms-pg-acciones-fila">
                                         <button onClick={(e) => { e.stopPropagation(); handleToggleActive(section); }} title="Activar/Desactivar" className={`cms-adm-accion${section.is_active ? ' cms-adm-accion--activa' : ''}`}>{section.is_active ? <Eye size={14} /> : <EyeOff size={14} />}</button>
-                                        <button onClick={(e) => { 
+                                        <button onClick={(e) => {
                                             e.stopPropagation();
-                                            setSelectedSection(section); 
+                                            setSelectedSection(section);
                                             if (['hero', 'banner', 'composition_carousel'].includes(section.type)) {
                                                 setIsStudioOpen(true);
                                             } else if (section.type === 'data_table') {
@@ -344,17 +344,17 @@ const CMSPageManager = ({
                 {!isMobileScreen && (
                     <div className="cms-pg-bloque cms-pg-bloque--espejo">
                         <div className="cms-pg-fila--repartida">
-                            <h3 className="adm-titulo-seccion">
+                            <h3>
                                 <Monitor size={15} /> ESPEJO DEL SITIO (LIVE)
                             </h3>
                             <div className="cms-pg-grupo cms-pg-grupo--claro">
-                                <button 
+                                <button
                                     onClick={() => setPreviewDevice('desktop')}
                                     className={`cms-adm-dispositivo${previewDevice === 'desktop' ? ' cms-adm-dispositivo--activo' : ''}`}
                                 >
                                     <Monitor size={14} />
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setPreviewDevice('mobile')}
                                     className={`cms-adm-dispositivo${previewDevice === 'mobile' ? ' cms-adm-dispositivo--activo' : ''}`}
                                 >
@@ -362,21 +362,21 @@ const CMSPageManager = ({
                                 </button>
                             </div>
                         </div>
-                        
-                        <div style={{ 
-                            flex: 1, 
-                            background: '#fff', 
-                            borderRadius: previewDevice === 'mobile' ? '0px' : '24px', 
-                            overflowY: 'auto', 
+
+                        <div style={{
+                            flex: 1,
+                            background: '#fff',
+                            borderRadius: previewDevice === 'mobile' ? '0px' : '24px',
+                            overflowY: 'auto',
                             boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.05)',
                             margin: previewDevice === 'mobile' ? '0 auto' : '0',
                             width: previewDevice === 'mobile' ? 'min(375px, 100%)' : '100%',
                             transition: 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                             padding: '10px'
                         }}>
-                            <CMSRenderer 
-                                data={sections} 
-                                previewMode={true} 
+                            <CMSRenderer
+                                data={sections}
+                                previewMode={true}
                                 forceMobile={previewDevice === 'mobile'}
                             />
                         </div>
@@ -390,7 +390,7 @@ const CMSPageManager = ({
 
             {/* Botón Flotante para Móvil */}
             {isMobileScreen && (
-                <button 
+                <button
                     onClick={() => {
                         setPreviewDevice('mobile');
                         setIsPreviewModalOpen(true);
@@ -407,13 +407,13 @@ const CMSPageManager = ({
                     <div className="cms-adm-barra">
                         <div className="cms-pg-fila-ancha">
                             <div className="cms-pg-grupo">
-                                <button 
+                                <button
                                     onClick={() => setPreviewDevice('desktop')}
                                     className={`cms-adm-dispositivo${previewDevice === 'desktop' ? ' cms-adm-dispositivo--activo' : ''}`}
                                 >
                                     <Monitor size={16} />
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setPreviewDevice('mobile')}
                                     className={`cms-adm-dispositivo${previewDevice === 'mobile' ? ' cms-adm-dispositivo--activo' : ''}`}
                                 >
@@ -424,7 +424,7 @@ const CMSPageManager = ({
                                 Previa: {previewDevice === 'mobile' ? 'Móvil' : 'Escritorio'}
                             </span>
                         </div>
-                        <button 
+                        <button
                             onClick={() => setIsPreviewModalOpen(false)}
                             className="cms-pg-boton-claro"
                         >
@@ -432,19 +432,19 @@ const CMSPageManager = ({
                         </button>
                     </div>
                     <div className="cms-pg-lienzo">
-                        <div style={{ 
-                            margin: '0 auto', 
-                            width: previewDevice === 'mobile' ? 'min(375px, 100%)' : '1200px', 
-                            background: '#fff', 
-                            borderRadius: previewDevice === 'mobile' ? '0px' : '24px', 
-                            boxShadow: '0 20px 50px rgba(0,0,0,0.1)', 
+                        <div style={{
+                            margin: '0 auto',
+                            width: previewDevice === 'mobile' ? 'min(375px, 100%)' : '1200px',
+                            background: '#fff',
+                            borderRadius: previewDevice === 'mobile' ? '0px' : '24px',
+                            boxShadow: '0 20px 50px rgba(0,0,0,0.1)',
                             overflow: 'hidden',
                             transition: 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                             transformOrigin: 'top center'
                         }}>
-                            <CMSRenderer 
-                                data={sections} 
-                                previewMode={true} 
+                            <CMSRenderer
+                                data={sections}
+                                previewMode={true}
                                 forceMobile={previewDevice === 'mobile'}
                             />
                         </div>

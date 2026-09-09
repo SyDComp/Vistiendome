@@ -33,7 +33,7 @@ const ExplorerView = () => {
                 targetSku = currentImgObj.sku;
             }
         }
-        
+
         // Si la clienta filtró por talla, el detalle debe abrirse en esa talla y
         // no en la que le tocó representar al look. Se manda el primer valor
         // elegido de cada filtro; el detalle lo usa como selección inicial.
@@ -76,7 +76,7 @@ const ExplorerView = () => {
                     setFilters={setAppliedFilters}
                 />
 
-                <main className="catalog-main">
+                <main>
                     <ProductGrid
                         products={filteredLooks}
                         loading={loading}

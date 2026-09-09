@@ -70,13 +70,13 @@ const Navbar = ({ links = [], vistaActual }) => { // links are passed from Home
                 <nav className="navbar container">
                     {/* Logo Section */}
                     <div className="navbar-logo" onClick={() => { navigate('/'); setIsMenuOpen(false); }}>
-                        <LogoVistiendome />
-                        {/* <Heartbeat /> */}
+                        <LogoVistiendome/>
+                        {/* <Heartbeat/> */}
                     </div>
 
                     {/* Desktop Search */}
                     <div className="navbar-search-desktop">
-                        <InstantSearch />
+                        <InstantSearch/>
                     </div>
 
                     {/* Desktop Links */}
@@ -95,7 +95,7 @@ const Navbar = ({ links = [], vistaActual }) => { // links are passed from Home
 
                     {/* Desktop/Mobile Right Actions */}
                     <div className="navbar-actions">
-                        <CartButton />
+                        <CartButton/>
                         
                         {/* Hamburger Button (Mobile) */}
                         <button 

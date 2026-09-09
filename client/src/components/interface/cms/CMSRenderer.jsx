@@ -87,15 +87,15 @@ const LayerRenderer = ({ layers = [], navigate, isMobile }) => {
                         }}
                     >
                         {layer.type === 'text' ? (
-                            <div style={{ 
-                                color: layer.color || '#fff', 
+                            <div style={{
+                                color: layer.color || '#fff',
                                 fontSize: `calc(100cqw * ${fontSize / 1000} * ${scale})`,
-                                fontWeight: '900', 
-                                whiteSpace: 'nowrap', 
-                                letterSpacing: '-0.03em', 
-                                lineHeight: '1', 
-                                textShadow: '0 4px 20px rgba(0,0,0,0.35)', 
-                                userSelect: 'none' 
+                                fontWeight: '900',
+                                whiteSpace: 'nowrap',
+                                letterSpacing: '-0.03em',
+                                lineHeight: '1',
+                                textShadow: '0 4px 20px rgba(0,0,0,0.35)',
+                                userSelect: 'none'
                             }}>
                                 {layer.content}
                             </div>
@@ -140,7 +140,7 @@ export const UniversalBlock = ({ config, aspectRatio = '21/9', borderRadius = '4
         if (t === 'none') currentRadius = '0px';
         else if (t === 'soft') currentRadius = isMobile ? '32px' : '40px';
         else if (t === 'deep') currentRadius = isMobile ? '60px' : '100px';
-        
+
         if (previewMode && t !== 'none') currentRadius = '24px';
     } else {
         layers = config?.layers || [];
@@ -152,14 +152,14 @@ export const UniversalBlock = ({ config, aspectRatio = '21/9', borderRadius = '4
 
     return (
         <div className={`cms-bloque cms-bloque--menor cms-bloque--centrado${previewMode ? ' cms-previa' : ''}`}>
-            <div style={{ 
-                width: '100%', 
+            <div style={{
+                width: '100%',
                 maxWidth: previewMode ? '100%' : (isMobile ? '375px' : desktopMaxW),
-                aspectRatio: currentRatio, 
-                borderRadius: currentRadius, 
-                overflow: 'hidden', 
-                position: 'relative', 
-                background: bgColor || 'transparent', 
+                aspectRatio: currentRatio,
+                borderRadius: currentRadius,
+                overflow: 'hidden',
+                position: 'relative',
+                background: bgColor || 'transparent',
                 boxShadow: previewMode ? '0 10px 30px rgba(0,0,0,0.1)' : '0 30px 60px -12px rgba(0,0,0,0.15)',
                 transition: 'all 0.5s ease',
                 containerType: 'inline-size'
@@ -194,7 +194,7 @@ export const SceneCarouselBlock = ({ config, previewMode = false, forceMobile = 
     let containerRadius = '0px';
     if (borderT === 'soft') containerRadius = isMobile ? '32px' : '40px';
     else if (borderT === 'deep') containerRadius = isMobile ? '60px' : '100px';
-    
+
     if (previewMode && borderT !== 'none') containerRadius = '24px';
 
     const desktopRatio = config?.desktop_ratio || '21/9';
@@ -204,16 +204,16 @@ export const SceneCarouselBlock = ({ config, previewMode = false, forceMobile = 
     return (
         <div className={`cms-bloque cms-bloque--centrado${previewMode ? ' cms-previa' : ''}`}>
             <div
-                style={{ 
-                    width: '100%', 
+                style={{
+                    width: '100%',
                     maxWidth: previewMode ? '100%' : (isMobile ? '375px' : desktopMaxW),
-                    aspectRatio: currentRatio, 
-                    position: 'relative', 
-                    overflow: 'hidden', 
-                    background: 'transparent', 
+                    aspectRatio: currentRatio,
+                    position: 'relative',
+                    overflow: 'hidden',
+                    background: 'transparent',
                     borderRadius: containerRadius,
                     boxShadow: previewMode ? '0 10px 30px rgba(0,0,0,0.1)' : '0 30px 60px -12px rgba(0,0,0,0.15)',
-                    cursor: dragStart ? 'grabbing' : 'grab', 
+                    cursor: dragStart ? 'grabbing' : 'grab',
                     touchAction: 'pan-y',
                     containerType: 'inline-size'
                 }}
@@ -227,14 +227,14 @@ export const SceneCarouselBlock = ({ config, previewMode = false, forceMobile = 
                         if (!l.display || l.display === 'both') return true;
                         return l.display === (isMobile ? 'mobile' : 'desktop');
                     });
-                    
+
                     let sceneRadius = '0px';
                     const t = isMobile ? (scene.mobile_border_type || scene.border_type || 'soft') : (scene.border_type || 'soft');
-                    
+
                     if (t === 'none') sceneRadius = '0px';
                     else if (t === 'soft') sceneRadius = isMobile ? '32px' : '40px';
                     else if (t === 'deep') sceneRadius = isMobile ? '60px' : '100px';
-                    
+
                     if (previewMode && t !== 'none') sceneRadius = '24px'; // Unificado en preview para orden visual, pero respetando 'none'
 
                     return (
@@ -257,15 +257,15 @@ export const SceneCarouselBlock = ({ config, previewMode = false, forceMobile = 
 
 export const TextBlock = ({ config, title, previewMode = false, forceMobile = null }) => {
     const isMobile = useIsMobile(forceMobile);
-    const { 
-        content = '', 
+    const {
+        content = '',
         align = 'left'
     } = config || {};
 
-    // Reemplazar espacios duros (non-breaking spaces) por espacios normales. 
+    // Reemplazar espacios duros (non-breaking spaces) por espacios normales.
     // Esto previene que el navegador trate toda la oración como una sola palabra gigante.
-    const sanitizedContent = typeof content === 'string' 
-        ? content.replace(/&nbsp;|\u00A0/g, ' ') 
+    const sanitizedContent = typeof content === 'string'
+        ? content.replace(/&nbsp;|\u00A0/g, ' ')
         : content;
 
     return (
@@ -286,12 +286,12 @@ export const TextBlock = ({ config, title, previewMode = false, forceMobile = nu
                 textAlign: align
             }}>
                 {title && <h2 className={`cms-titulo-bloque${previewMode ? ' cms-previa' : ''}`}>{title}</h2>}
-                <div 
+                <div
                     className="rich-text-content"
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(sanitizedContent) }}
-                    style={{ 
-                        fontSize: previewMode ? '14px' : (isMobile ? '15px' : '17px'), 
-                        lineHeight: isMobile ? '1.6' : '1.8', 
+                    style={{
+                        fontSize: previewMode ? '14px' : (isMobile ? '15px' : '17px'),
+                        lineHeight: isMobile ? '1.6' : '1.8',
                         color: '#475569'
                     }}
                 />
@@ -326,13 +326,13 @@ export const DataTableBlock = ({ config, title, previewMode = false, forceMobile
                     <thead>
                         <tr style={{ background: styles.headerBg }}>
                             {headers.map((h, i) => (
-                                <th key={i} style={{ 
-                                    padding: previewMode ? '10px 12px' : (isMobile ? '12px 14px' : '16px 20px'), 
-                                    fontSize: previewMode ? '10px' : (isMobile ? '11px' : '12px'), 
-                                    fontWeight: '800', 
-                                    color: styles.headerColor, 
-                                    textTransform: 'uppercase', 
-                                    letterSpacing: '1px', 
+                                <th key={i} style={{
+                                    padding: previewMode ? '10px 12px' : (isMobile ? '12px 14px' : '16px 20px'),
+                                    fontSize: previewMode ? '10px' : (isMobile ? '11px' : '12px'),
+                                    fontWeight: '800',
+                                    color: styles.headerColor,
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '1px',
                                     borderBottom: (styles.showHorizontalLines !== false) ? `2px solid ${styles.borderColor}` : 'none',
                                     borderRight: (styles.showVerticalLines && i < headers.length - 1) ? `1px solid ${styles.borderColor}` : 'none'
                                 }}>{h}</th>
@@ -349,10 +349,10 @@ export const DataTableBlock = ({ config, title, previewMode = false, forceMobile
                                     const cellColor = typeof cell === 'object' ? cell.color : null;
 
                                     return (
-                                        <td key={j} style={{ 
-                                            padding: previewMode ? '10px 12px' : (isMobile ? '12px 14px' : '16px 20px'), 
-                                            fontSize: previewMode ? '11px' : (isMobile ? '13px' : (styles.fontSize || '14px')), 
-                                            fontWeight: isBold ? '800' : (j === 0 ? '700' : '500'), 
+                                        <td key={j} style={{
+                                            padding: previewMode ? '10px 12px' : (isMobile ? '12px 14px' : '16px 20px'),
+                                            fontSize: previewMode ? '11px' : (isMobile ? '13px' : (styles.fontSize || '14px')),
+                                            fontWeight: isBold ? '800' : (j === 0 ? '700' : '500'),
                                             color: cellColor || (j === 0 ? '#1e1b4b' : styles.cellColor),
                                             borderBottom: (styles.showHorizontalLines !== false && i < rows.length - 1) ? `1px solid ${styles.borderColor}` : 'none',
                                             borderRight: (styles.showVerticalLines && j < headers.length - 1) ? `1px solid ${styles.borderColor}` : 'none'
@@ -373,10 +373,10 @@ export const DataTableBlock = ({ config, title, previewMode = false, forceMobile
 const ProductCard = ({ product, previewMode }) => {
     const navigate = useNavigate();
     return (
-        <div 
+        <div
             className="product-carousel-card"
             onClick={() => !previewMode && navigate(product.sku ? `/catalogo/producto/${product.slug}/${product.sku}` : `/catalogo/producto/${product.slug}`)}
-            style={{ 
+            style={{
                 flex: '0 0 auto',
                 width: previewMode ? '160px' : '280px',
                 minWidth: previewMode ? '160px' : '280px',
@@ -387,8 +387,8 @@ const ProductCard = ({ product, previewMode }) => {
             }}
         >
             <div className="cms-foto">
-                <img 
-                    src={product.image ? getImageUrl(product.image) : (product.images?.[0]?.url ? getImageUrl(product.images[0].url) : '')} 
+                <img
+                    src={product.image ? getImageUrl(product.image) : (product.images?.[0]?.url ? getImageUrl(product.images[0].url) : '')}
                     srcSet={getSrcSet(product.image_srcset) || undefined}
                     sizes="(max-width: 768px) 50vw, 300px"
                     loading="lazy"
@@ -401,14 +401,14 @@ const ProductCard = ({ product, previewMode }) => {
                 </div>
             </div>
             <div className="cms-respiro">
-                <h4 style={{ 
-                    margin: '0 0 4px 0', 
-                    fontSize: previewMode ? '12px' : '15px', 
-                    fontWeight: '700', 
-                    color: '#1e1b4b', 
-                    overflow: 'hidden', 
-                    textOverflow: 'ellipsis', 
-                    whiteSpace: 'nowrap' 
+                <h4 style={{
+                    margin: '0 0 4px 0',
+                    fontSize: previewMode ? '12px' : '15px',
+                    fontWeight: '700',
+                    color: '#1e1b4b',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
                 }}>{product.name}</h4>
                 <PrecioConOferta product={product} previewMode={previewMode} tamano={previewMode ? '13px' : '16px'} />
             </div>
@@ -428,7 +428,7 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
             try {
                 const collectionId = config?.collection_id;
                 let data = [];
-                
+
                 if (collectionId === 'smart_latest' || !collectionId) {
                     // Últimos productos subidos
                     data = await getProducts();
@@ -447,7 +447,7 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
                     const resData = await res.json();
                     data = resData.skus || [];
                 }
-                
+
                 setProducts(data.slice(0, 12));
             } catch (err) {
                 console.error("Error loading carousel products:", err);
@@ -469,11 +469,11 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
 
     return (
         <div style={{ marginBottom: previewMode ? '40px' : '80px', width: '100%', display: 'flex', justifyContent: 'center' }}>
-            <div 
-                style={{ 
-                    width: '100%', 
+            <div
+                style={{
+                    width: '100%',
                     maxWidth: previewMode ? '100%' : '1200px',
-                    position: 'relative', 
+                    position: 'relative',
                     marginTop: previewMode ? '20px' : '0px',
                     padding: previewMode ? '0 10px' : (isMobile ? '0 16px' : '0 20px')
                 }}
@@ -486,7 +486,7 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
                             {title || 'Nuestros Favoritos'}
                         </h2>
                     </div>
-                    <button 
+                    <button
                         onClick={() => !previewMode && navigate(`/coleccion/${config?.collection_id || 'smart_latest'}`)}
                         className="cms-enlace cms-enlace--discreto"
                     >
@@ -498,10 +498,10 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
                     {/* Flechas Flotantes Estilo Lounge */}
                     {(isMobile || (showArrows && products.length > 4)) && (
                         <>
-                            <button 
-                                onClick={(e) => { e.stopPropagation(); scroll('left'); }} 
-                                className="floating-nav-btn left tap-44"
-                                style={{ 
+                            <button
+                                onClick={(e) => { e.stopPropagation(); scroll('left'); }}
+                                className="floating-nav-btn tap-44"
+                                style={{
                                     left: isMobile ? '4px' : '-22px',
                                     width: isMobile ? '36px' : '44px',
                                     height: isMobile ? '36px' : '44px',
@@ -509,10 +509,10 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
                             >
                                 <ChevronLeft size={isMobile ? 18 : 24} />
                             </button>
-                            <button 
-                                onClick={(e) => { e.stopPropagation(); scroll('right'); }} 
-                                className="floating-nav-btn right tap-44"
-                                style={{ 
+                            <button
+                                onClick={(e) => { e.stopPropagation(); scroll('right'); }}
+                                className="floating-nav-btn tap-44"
+                                style={{
                                     right: isMobile ? '4px' : '-22px',
                                     width: isMobile ? '36px' : '44px',
                                     height: isMobile ? '36px' : '44px',
@@ -523,13 +523,13 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
                         </>
                     )}
 
-                    <div 
+                    <div
                         ref={scrollRef}
                         className="product-carousel-scroll"
-                        style={{ 
-                            display: 'flex', 
-                            gap: isMobile ? '12px' : '20px', 
-                            overflowX: 'auto', 
+                        style={{
+                            display: 'flex',
+                            gap: isMobile ? '12px' : '20px',
+                            overflowX: 'auto',
                             padding: isMobile ? '10px 4px 20px' : '10px 4px 40px',
                             scrollSnapType: 'x mandatory',
                             scrollbarWidth: 'none',
@@ -575,7 +575,7 @@ export const RecentProductsBlock = ({ previewMode = false }) => {
                         <span className="cms-antetitulo">Novedades</span>
                         <h2 className="cms-titulo">Últimos Lanzamientos</h2>
                     </div>
-                    <button 
+                    <button
                         onClick={() => window.location.href = `/coleccion/${config?.collection_id || 'smart_latest'}`}
                         className="cms-enlace"
                     >
@@ -583,25 +583,25 @@ export const RecentProductsBlock = ({ previewMode = false }) => {
                     </button>
                 </div>
             )}
-            
-            <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: previewMode ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(280px, 1fr))', 
+
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: previewMode ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(280px, 1fr))',
                 gap: previewMode ? '16px' : '32px',
                 padding: previewMode ? '0' : '0 20px'
             }}>
                 {products.map(product => (
                     <div key={product.id} className="cms-relativo">
-                        <div style={{ 
-                            borderRadius: previewMode ? '20px' : '32px', 
-                            overflow: 'hidden', 
-                            aspectRatio: '3/4', 
+                        <div style={{
+                            borderRadius: previewMode ? '20px' : '32px',
+                            overflow: 'hidden',
+                            aspectRatio: '3/4',
                             background: '#f8fafc',
                             marginBottom: '12px',
                             boxShadow: '0 10px 30px -5px rgba(0,0,0,0.05)'
                         }}>
-                            <img 
-                                src={product.image ? getImageUrl(product.image) : (product.images?.[0]?.url ? getImageUrl(product.images[0].url) : '')} 
+                            <img
+                                src={product.image ? getImageUrl(product.image) : (product.images?.[0]?.url ? getImageUrl(product.images[0].url) : '')}
                                 srcSet={getSrcSet(product.image_srcset) || undefined}
                                 sizes="(max-width: 768px) 50vw, 300px"
                                 loading="lazy"
@@ -677,7 +677,7 @@ const CMSRenderer = ({ page = 'homepage', data = null, previewMode = false, acti
     if (loading) {
         return (
             <div className="cms-vacio">
-                <div className="loading-spinner"></div>
+                <div></div>
             </div>
         );
     }
@@ -685,13 +685,13 @@ const CMSRenderer = ({ page = 'homepage', data = null, previewMode = false, acti
     if (sections.length === 0) return null;
 
     return (
-        <div 
-            className={`cms-dynamic-renderer fade-in ${previewMode ? 'preview-mode' : ''}`}
+        <div
+            className={`fade-in ${previewMode ? 'preview-mode' : ''}`}
             style={{ paddingTop: previewMode ? '0' : '30px' }}
         >
             {sections.map((section) => {
                 if (!section || (!section.is_active && !previewMode)) return null;
-                
+
                 const isActiveInPreview = activeId === section.id;
 
                 const renderBlock = () => {
@@ -718,10 +718,10 @@ const CMSRenderer = ({ page = 'homepage', data = null, previewMode = false, acti
                 };
 
                 return (
-                    <div 
-                        key={section.id} 
+                    <div
+                        key={section.id}
                         id={`preview-section-${section.id}`}
-                        style={{ 
+                        style={{
                             border: previewMode && isActiveInPreview ? '3px solid #8f0653' : 'none',
                             borderRadius: '0px',
                             transition: 'all 0.3s ease',

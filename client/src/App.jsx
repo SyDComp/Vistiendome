@@ -50,35 +50,35 @@ function App() {
       <NotificationProvider>
         <SettingsProvider>
           <CartProvider>
-            <Suspense fallback={<SuspenseFallback />}>
+            <Suspense fallback={<SuspenseFallback/>}>
               {/* Rutas Principales */}
               <Routes location={state?.backgroundLocation || location}>
-                <Route path="/" element={<Home />}>
-                   <Route index element={<Inicio />} />
-                   <Route path="catalogo" element={<CatalogView />} />
-                   <Route path="explorador" element={<ExplorerView />} />
-                   <Route path="colecciones" element={<ColeccionesIndex />} />
-                   <Route path="nosotros" element={<Nosotros />} />
-                   <Route path="contacto" element={<Contacto />} />
-                   <Route path="ayuda" element={<AtencionCliente />} />
-                   <Route path="search" element={<Search />} />
-                   <Route path="producto/:slug/:sku?/:imgIndex?" element={<ProductDetailView />} />
-                   <Route path="catalogo/producto/:slug/:sku?/:imgIndex?" element={<ProductDetailView />} />
-                   <Route path="explorador/producto/:slug/:sku?/:imgIndex?" element={<ProductDetailView />} />
-                   <Route path="coleccion/:slug" element={<DetalleColeccion />} />
-                   <Route path="coleccion/:collectionSlug/producto/:slug/:sku?/:imgIndex?" element={<ProductDetailView />} />
+                <Route path="/" element={<Home/>}>
+                   <Route index element={<Inicio/>} />
+                   <Route path="catalogo" element={<CatalogView/>} />
+                   <Route path="explorador" element={<ExplorerView/>} />
+                   <Route path="colecciones" element={<ColeccionesIndex/>} />
+                   <Route path="nosotros" element={<Nosotros/>} />
+                   <Route path="contacto" element={<Contacto/>} />
+                   <Route path="ayuda" element={<AtencionCliente/>} />
+                   <Route path="search" element={<Search/>} />
+                   <Route path="producto/:slug/:sku?/:imgIndex?" element={<ProductDetailView/>} />
+                   <Route path="catalogo/producto/:slug/:sku?/:imgIndex?" element={<ProductDetailView/>} />
+                   <Route path="explorador/producto/:slug/:sku?/:imgIndex?" element={<ProductDetailView/>} />
+                   <Route path="coleccion/:slug" element={<DetalleColeccion/>} />
+                   <Route path="coleccion/:collectionSlug/producto/:slug/:sku?/:imgIndex?" element={<ProductDetailView/>} />
                    {/* Cualquier direccion que no coincida. Va ultimo y dentro del
                        layout, asi conserva el menu y el pie. Sin esto la pantalla
                        quedaba en blanco. */}
-                   <Route path="*" element={<NoEncontrada />} />
+                   <Route path="*" element={<NoEncontrada/>} />
                 </Route>
                 
                 {/* Escribir /admin a secas es lo que hace todo el mundo. */}
                 <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
-                <Route path="/admin/bootstrap" element={<SuperSetup />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin/dashboard/*" element={<DashboardLayout />} />
-                <Route path="/admin/print/pedido/:id" element={<PedidoDetalle />} />
+                <Route path="/admin/bootstrap" element={<SuperSetup/>} />
+                <Route path="/admin/login" element={<AdminLogin/>} />
+                <Route path="/admin/dashboard/*" element={<DashboardLayout/>} />
+                <Route path="/admin/print/pedido/:id" element={<PedidoDetalle/>} />
               </Routes>
 
               {/* Ruta para el Modal (Capa Superior) */}

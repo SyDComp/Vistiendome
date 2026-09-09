@@ -11,7 +11,7 @@ const Search = () => {
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') || '';
     const location = useLocation();
-    
+
     const [allProducts, setAllProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showShareToast, setShowShareToast] = useState(false);
@@ -55,14 +55,14 @@ const Search = () => {
     }
 
     return (
-        <div className="search-view-premium container search-view-container">
+        <div className="container search-view-container">
             <header className="search-header">
                 <div className="search-subtitle-container">
                     <div className="search-subtitle-line-right" />
                     <span className="search-subtitle-text">Exploración Latente</span>
                     <div className="search-subtitle-line-left" />
                 </div>
-                
+
                 <h1 className="search-title">
                     Resultados para <span className="search-query-highlight">"{query}"</span>
                 </h1>
@@ -84,8 +84,8 @@ const Search = () => {
                 {results.length > 0 ? (
                     <div className="elementosColeccion-premium search-grid">
                         {results.map(item => (
-                            <Link 
-                                key={item.id} 
+                            <Link
+                                key={item.id}
                                 to={item.sku ? `/catalogo/producto/${item.slug}/${item.sku}?from_search=${encodeURIComponent(query)}` : `/catalogo/producto/${item.slug}?from_search=${encodeURIComponent(query)}`}
                                 state={{ backgroundLocation: location }}
                                 className="search-link-item"

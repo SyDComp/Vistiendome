@@ -35,15 +35,15 @@ const Nosotros = () => {
                     <span className="subtitle">Nuestra Historia</span>
                     <h1>Diseñando identidad con modestia</h1>
                     <p className="hero-text">
-                        En el corazón de San Carlos, en el sector de San Camilo, nace Vistiendomé. 
-                        Más que una marca de ropa, somos un taller de confección propio dedicado 
+                        En el corazón de San Carlos, en el sector de San Camilo, nace Vistiendomé.
+                        Más que una marca de ropa, somos un taller de confección propio dedicado
                         a vestir a la mujer cristiana con honor y elegancia.
                     </p>
                 </div>
             </section>
 
             {/* Misión y Taller */}
-            <section className="nosotros-historia">
+            <section>
                 <div className="container grid-2">
                     <div className="historia-img">
                         <img src={tallerImg} alt="Taller de confección" />
@@ -52,13 +52,13 @@ const Nosotros = () => {
                     <div className="historia-content">
                         <h2>El arte de la confección propia</h2>
                         <p>
-                            Nuestra misión es sencilla pero profunda: <strong>Vestir a la mujer con diseños que respeten su fe 
-                            y realcen su elegancia natural.</strong> A diferencia de la moda fragmentada actual, en Vistiendomé 
+                            Nuestra misión es sencilla pero profunda: <strong>Vestir a la mujer con diseños que respeten su fe
+                            y realcen su elegancia natural.</strong> A diferencia de la moda fragmentada actual, en Vistiendomé
                             controlamos cada etapa del proceso.
                         </p>
                         <p>
-                            Desde nuestro taller local, seleccionamos telas que acarician la piel y resisten el tiempo. 
-                            Especialistas en trabajos para grupos como <strong>Coristas y Dorcas</strong>, entendemos 
+                            Desde nuestro taller local, seleccionamos telas que acarician la piel y resisten el tiempo.
+                            Especialistas en trabajos para grupos como <strong>Coristas y Dorcas</strong>, entendemos
                             la importancia de la uniformidad sin perder la exclusividad de un diseño único.
                         </p>
                     </div>
@@ -66,7 +66,7 @@ const Nosotros = () => {
             </section>
 
             {/* Pilares */}
-            <section className="nosotros-pilares">
+            <section>
                 <div className="container">
                     <div className="pillares-grid">
                         {pilares.map((pilar, index) => (
@@ -87,12 +87,12 @@ const Nosotros = () => {
                         <div className="inclusividad-text">
                             <h2>Inclusividad sin excepciones</h2>
                             <p>
-                                Creemos que todas las mujeres merecen vestir con dignidad y estilo. 
-                                Por ello, nos especializamos en un tallaje inclusivo real, 
+                                Creemos que todas las mujeres merecen vestir con dignidad y estilo.
+                                Por ello, nos especializamos en un tallaje inclusivo real,
                                 que abarca desde la <strong>talla 12 hasta la 7XL</strong>.
                             </p>
                             <p>
-                                No solo ajustamos medidas; diseñamos patrones específicos 
+                                No solo ajustamos medidas; diseñamos patrones específicos
                                 para que cada talla se sienta cómoda, segura y hermosa.
                             </p>
                         </div>

@@ -17,8 +17,8 @@ const Contacto = () => {
     const social = settings.social_links || {};
     const { googleMapsUrl, wazeUrl } = buildMapLinks();
 
-    const rawShippingMethods = settings?.shipping_methods !== undefined 
-        ? settings.shipping_methods 
+    const rawShippingMethods = settings?.shipping_methods !== undefined
+        ? settings.shipping_methods
         : ['STARKEN', 'CORREOS DE CHILE', 'RETIRO EN LOCAL', 'OTRO'];
     const shippingMethods = rawShippingMethods.filter(m => !m.toUpperCase().includes('CHILEXPRESS'));
     const finalShippingMethods = shippingMethods.length > 0 ? shippingMethods : ['STARKEN', 'CORREOS DE CHILE', 'RETIRO EN LOCAL', 'OTRO'];
@@ -105,7 +105,7 @@ const Contacto = () => {
             if (!formData.region) setComunas([]);
             return;
         }
-        const regionObj = regiones.find(r => 
+        const regionObj = regiones.find(r =>
             r.nombre.trim().toLowerCase() === String(formData.region).trim().toLowerCase() ||
             String(r.id) === String(formData.region)
         );
@@ -115,7 +115,7 @@ const Contacto = () => {
                     const loadedComunas = Array.isArray(data) ? data : [];
                     setComunas(loadedComunas);
                     setFormData(prev => {
-                        const match = loadedComunas.find(c => 
+                        const match = loadedComunas.find(c =>
                             c.nombre.trim().toLowerCase() === String(prev.comuna || '').trim().toLowerCase() ||
                             String(c.id) === String(prev.comuna_id || '')
                         );
@@ -133,19 +133,19 @@ const Contacto = () => {
 
     const handleRegionChange = (e) => {
         const selectedRegionNombre = e.target.value;
-        setFormData(prev => ({ 
-            ...prev, 
+        setFormData(prev => ({
+            ...prev,
             region: selectedRegionNombre,
-            comuna: '', 
-            comuna_id: '' 
+            comuna: '',
+            comuna_id: ''
         }));
     };
 
     const handleComunaChange = (e) => {
         const selectedComunaNombre = e.target.value;
         const comunaObj = comunas.find(c => c.nombre === selectedComunaNombre);
-        setFormData(prev => ({ 
-            ...prev, 
+        setFormData(prev => ({
+            ...prev,
             comuna: selectedComunaNombre,
             comuna_id: comunaObj ? comunaObj.id : ''
         }));
@@ -192,7 +192,7 @@ const Contacto = () => {
                 mensaje: formData.mensaje,
             });
             const whatsappUrl = `https://wa.me/${numeroTaller}?text=${encodeURIComponent(mensajeWA)}`;
-            const isIOSOrIPad = /iPad|iPhone|iPod/i.test(navigator.userAgent) || 
+            const isIOSOrIPad = /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
                                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
                                 /Android/i.test(navigator.userAgent);
             let popup = null;
@@ -205,7 +205,7 @@ const Contacto = () => {
         }
 
         setStatus('sending');
-        
+
         try {
             const partesNombre = formData.nombre.trim().split(' ');
             const nombres = partesNombre[0] || '';
@@ -300,7 +300,7 @@ const Contacto = () => {
 
     const renderFormModal = () => {
         if (tipoContacto === 'seleccion') return null;
-        
+
         return (
             <div className="contact-modal-overlay fade-in" onClick={() => setTipoContacto('seleccion')}>
                 {/* Encima del formulario, arma UNA prenda. Al confirmarla se suma
@@ -336,10 +336,10 @@ const Contacto = () => {
                             <p className="form-intro">Déjanos tus datos y te contactaremos a la brevedad.</p>
                 <div className="form-group">
                     <label><User size={16} /> RUT *</label>
-                    <input 
-                        type="text" 
-                        placeholder="Ej: 12.345.678-9" 
-                        required 
+                    <input
+                        type="text"
+                        placeholder="Ej: 12.345.678-9"
+                        required
                         value={formData.rut}
                         onChange={(e) => setFormData({...formData, rut: e.target.value})}
                         onBlur={(e) => setFormData({...formData, rut: formatRUT(e.target.value)})}
@@ -347,29 +347,29 @@ const Contacto = () => {
                 </div>
                 <div className="form-group">
                     <label><User size={16} /> Nombre Completo *</label>
-                    <input 
-                        type="text" 
-                        placeholder="Ej: María González" 
-                        required 
+                    <input
+                        type="text"
+                        placeholder="Ej: María González"
+                        required
                         value={formData.nombre}
                         onChange={(e) => setFormData({...formData, nombre: e.target.value})}
                     />
                 </div>
                 <div className="form-group">
                     <label><Mail size={16} /> Email</label>
-                    <input 
-                        type="email" 
-                        placeholder="tu@email.com" 
+                    <input
+                        type="email"
+                        placeholder="tu@email.com"
                         value={formData.email}
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
                     />
                 </div>
                 <div className="form-group">
                     <label><Phone size={16} /> WhatsApp (Chile) *</label>
-                    <input 
-                        type="tel" 
-                        placeholder="+569 1234 5678" 
-                        required 
+                    <input
+                        type="tel"
+                        placeholder="+569 1234 5678"
+                        required
                         value={formData.whatsapp}
                         onChange={handleWhatsAppChange}
                         className={status === 'error-whatsapp' ? 'input-error' : ''}
@@ -379,7 +379,7 @@ const Contacto = () => {
 
                 <div className="form-group">
                     <label><MapPin size={16} /> Método de Envío *</label>
-                    <select 
+                    <select
                         value={formData.transporte}
                         onChange={(e) => setFormData({...formData, transporte: e.target.value})}
                     >
@@ -399,7 +399,7 @@ const Contacto = () => {
                     <>
                         <div className="form-group">
                             <label><MapPin size={16} /> Tipo de Entrega *</label>
-                            <select 
+                            <select
                                 value={formData.tipo_despacho}
                                 onChange={(e) => setFormData({...formData, tipo_despacho: e.target.value})}
                             >
@@ -408,11 +408,11 @@ const Contacto = () => {
                             </select>
                         </div>
 
-                        <div className="form-row form-row--dos">
+                        <div className="form-row--dos">
                             <div className="form-group">
                                 <label><MapPin size={16} /> Región</label>
-                                <select 
-                                    value={formData.region} 
+                                <select
+                                    value={formData.region}
                                     onChange={handleRegionChange}
                                 >
                                     <option value="">Selecciona una región</option>
@@ -423,8 +423,8 @@ const Contacto = () => {
                             </div>
                             <div className="form-group">
                                 <label><MapPin size={16} /> Comuna</label>
-                                <select 
-                                    value={formData.comuna || ''} 
+                                <select
+                                    value={formData.comuna || ''}
                                     onChange={handleComunaChange}
                                     disabled={!formData.region}
                                 >
@@ -458,10 +458,10 @@ const Contacto = () => {
 
                 {tipoContacto === 'grupo' && (
                     <>
-                        <div className="form-row form-row--dos">
+                        <div className="form-row--dos">
                             <div className="form-group">
                                 <label><Users size={16} /> Tipo de Grupo</label>
-                                <select 
+                                <select
                                     value={formData.tipoGrupo}
                                     onChange={(e) => setFormData({...formData, tipoGrupo: e.target.value})}
                                 >
@@ -472,9 +472,9 @@ const Contacto = () => {
                             </div>
                             <div className="form-group">
                                 <label><Users size={16} /> Cantidad Aprox.</label>
-                                <input 
-                                    type="number" 
-                                    placeholder="Ej: 20" 
+                                <input
+                                    type="number"
+                                    placeholder="Ej: 20"
                                     required
                                     value={formData.cantidad}
                                     onChange={(e) => setFormData({...formData, cantidad: e.target.value})}
@@ -483,8 +483,8 @@ const Contacto = () => {
                         </div>
                         <div className="form-group">
                             <label><Calendar size={16} /> Fecha de Evento (Opcional)</label>
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 placeholder="Ej: Aniversario en Noviembre"
                                 value={formData.evento}
                                 onChange={(e) => setFormData({...formData, evento: e.target.value})}
@@ -532,21 +532,21 @@ const Contacto = () => {
 
                 <div className="form-group">
                     <label><FileText size={16} /> Mensaje</label>
-                    <textarea 
-                        rows="4" 
+                    <textarea
+                        rows="4"
                         placeholder="Cuéntanos más para asesorarte mejor..."
                         value={formData.mensaje}
                         onChange={(e) => setFormData({...formData, mensaje: e.target.value})}
-                    ></textarea>
+ ></textarea>
                 </div>
-                
+
                         </div>
-                        
+
                         <div className="contact-form-footer">
                             <Button type="submit" variant="primary" disabled={status === 'sending'} className="contacto-enviar">
                                 {status === 'sending' ? 'Enviando...' : 'Enviar Solicitud'}
                             </Button>
-                            
+
                             {status === 'success' && (
                                 <div className="success-banner">¡Listo! Te abrimos WhatsApp para enviar tu solicitud. Si no se abrió, revisa que tu navegador permita ventanas emergentes.</div>
                             )}
@@ -567,7 +567,7 @@ const Contacto = () => {
                     <p className="hero-text">Estamos en San Carlos, Ñuble, listos para vestir tu fe con elegancia.</p>
                 </div>
 
-                <div className="contacto-main-container">
+                <div>
                     {renderSelection()}
                 </div>
 

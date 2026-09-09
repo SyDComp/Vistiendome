@@ -4,17 +4,17 @@ import './SmartCanvas.css';
 /**
  * SmartCanvas: Controlador Universal de Imagen con Enfoque Visual.
  * Permite calibrar Zoom, Posición X y Posición Y de forma persistente.
- * 
+ *
  * @param {string} src - URL de la imagen.
  * @param {object} config - Objeto { zoom: 1, x: 0, y: 0 }.
  * @param {string} mode - 'edit' o 'view'.
  * @param {function} onChange - Callback (config) ejecutado al mover controles en modo 'edit'.
  */
-const SmartCanvas = ({ 
-    src, 
-    config = { zoom: 1, x: 0, y: 0, rotate: 0, brightness: 100 }, 
-    mode = 'view', 
-    onChange 
+const SmartCanvas = ({
+    src,
+    config = { zoom: 1, x: 0, y: 0, rotate: 0, brightness: 100 },
+    mode = 'view',
+    onChange
 }) => {
     // Estado local para los parámetros visuales
     const [localConfig, setLocalConfig] = useState(config);
@@ -22,12 +22,12 @@ const SmartCanvas = ({
 
     // Sincronizar con props externas
     useEffect(() => {
-        setLocalConfig({ 
-            zoom: config.zoom || 1, 
-            x: config.x || 0, 
-            y: config.y || 0, 
-            rotate: config.rotate || 0, 
-            brightness: config.brightness || 100 
+        setLocalConfig({
+            zoom: config.zoom || 1,
+            x: config.x || 0,
+            y: config.y || 0,
+            rotate: config.rotate || 0,
+            brightness: config.brightness || 100
         });
     }, [config]);
 
@@ -60,9 +60,9 @@ const SmartCanvas = ({
     };
 
     return (
-        <div className="smart-canvas-container lienzo-ancho">
+        <div className="lienzo-ancho">
             {/* El Lienzo de Renderizado */}
-            <div className="canvas-frame" style={canvasStyle} ref={canvasRef}>
+            <div  style={canvasStyle} ref={canvasRef}>
                 {src ? (
                     <img src={src} alt="Canvas Element" style={imageStyle} draggable={false} />
                 ) : (
@@ -78,40 +78,40 @@ const SmartCanvas = ({
                     <div className="lienzo-pareja">
                         <div>
                             <label className="lienzo-rotulo">🔍 Zoom: {localConfig.zoom.toFixed(2)}x</label>
-                            <input 
-                                type="range" min="1" max="5" step="0.01" 
-                                value={localConfig.zoom} 
-                                onChange={(e) => handleParamChange('zoom', e.target.value)} 
+                            <input
+                                type="range" min="1" max="5" step="0.01"
+                                value={localConfig.zoom}
+                                onChange={(e) => handleParamChange('zoom', e.target.value)}
                                 className="lienzo-control"
                             />
                         </div>
                         <div>
                             <label className="lienzo-rotulo">🔄 Rotar: {localConfig.rotate || 0}°</label>
-                            <input 
-                                type="range" min="-180" max="180" step="1" 
-                                value={localConfig.rotate || 0} 
-                                onChange={(e) => handleParamChange('rotate', e.target.value)} 
+                            <input
+                                type="range" min="-180" max="180" step="1"
+                                value={localConfig.rotate || 0}
+                                onChange={(e) => handleParamChange('rotate', e.target.value)}
                                 className="lienzo-control lienzo-control--giro"
                             />
                         </div>
                     </div>
-                    
+
                     <div className="lienzo-pareja--junta">
                         <div>
                             <label className="lienzo-rotulo">↔️ Pos X: {(localConfig.x || 0).toFixed(0)}%</label>
-                            <input 
-                                type="range" min="-100" max="100" step="1" 
-                                value={localConfig.x || 0} 
-                                onChange={(e) => handleParamChange('x', e.target.value)} 
+                            <input
+                                type="range" min="-100" max="100" step="1"
+                                value={localConfig.x || 0}
+                                onChange={(e) => handleParamChange('x', e.target.value)}
                                 className="lienzo-control"
                             />
                         </div>
                         <div>
                             <label className="lienzo-rotulo">↕️ Pos Y: {(localConfig.y || 0).toFixed(0)}%</label>
-                            <input 
-                                type="range" min="-100" max="100" step="1" 
-                                value={localConfig.y || 0} 
-                                onChange={(e) => handleParamChange('y', e.target.value)} 
+                            <input
+                                type="range" min="-100" max="100" step="1"
+                                value={localConfig.y || 0}
+                                onChange={(e) => handleParamChange('y', e.target.value)}
                                 className="lienzo-control"
                             />
                         </div>
@@ -119,15 +119,15 @@ const SmartCanvas = ({
 
                     <div className="lienzo-separado">
                         <label className="lienzo-rotulo">💡 Brillo: {localConfig.brightness}%</label>
-                        <input 
-                            type="range" min="50" max="200" step="1" 
-                            value={localConfig.brightness} 
-                            onChange={(e) => handleParamChange('brightness', e.target.value)} 
+                        <input
+                            type="range" min="50" max="200" step="1"
+                            value={localConfig.brightness}
+                            onChange={(e) => handleParamChange('brightness', e.target.value)}
                             className="lienzo-control lienzo-control--brillo"
                         />
                     </div>
 
-                    <button 
+                    <button
                         onClick={() => setLocalConfig({ zoom: 1, x: 0, y: 0, rotate: 0, brightness: 100 })}
                         className="lienzo-restablecer"
                     >

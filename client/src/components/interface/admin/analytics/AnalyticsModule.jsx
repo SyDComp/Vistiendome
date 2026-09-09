@@ -68,8 +68,8 @@ const AnalyticsModule = () => {
                         <BarChart3 size={22} />
                     </div>
                     <div>
-                        <h1 >Inteligencia de Negocio</h1>
-                        <p >Qué miran, qué buscan y qué dejan en el camino tus clientes.</p>
+                        <h1>Inteligencia de Negocio</h1>
+                        <p>Qué miran, qué buscan y qué dejan en el camino tus clientes.</p>
                     </div>
                 </div>
                 <select value={days} onChange={(e) => setDays(parseInt(e.target.value))} style={selectStyle}>

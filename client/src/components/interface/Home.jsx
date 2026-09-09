@@ -25,7 +25,7 @@ const Home = ({ isModalView = false }) => {
         } else {
             document.body.classList.remove('has-fixed-navbar');
         }
-        
+
         return () => {
             document.body.classList.remove('has-fixed-navbar');
         };
@@ -38,7 +38,7 @@ const Home = ({ isModalView = false }) => {
 
     return (
         <>
-            <TopBanner />
+            <TopBanner/>
             {!hideNavbar && (
                 <Navbar
                     links={navLinks}
@@ -46,17 +46,17 @@ const Home = ({ isModalView = false }) => {
                 />
             )}
 
-            <div className="home-layout">
-                <main className="content">
+            <div>
+                <main>
                     {/* El Outlet renderiza el componente según la URL (Inicio, Catalogo, etc.) */}
-                    <div className="views-container">
-                        <Outlet />
+                    <div>
+                        <Outlet/>
                     </div>
                 </main>
-                
+
                 <Footer onNavigate={(destino, seccion) => {
                     const path = destino === 'inicio' ? '/' : `/${destino}`;
-                    
+
                     // Si ya estamos en la misma ruta, forzamos scroll arriba
                     if (location.pathname === path) {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -64,18 +64,18 @@ const Home = ({ isModalView = false }) => {
 
                     // Navegamos pasando la sección elegida en el estado
                     // El timestamp 't' asegura que el estado sea "nuevo" para React incluso si repetimos sección
-                    navigate(path, { 
-                        state: { 
+                    navigate(path, {
+                        state: {
                             section: seccion,
-                            t: Date.now() 
-                        } 
+                            t: Date.now()
+                        }
                     });
                 }} />
             </div>
 
-            <CartDrawer />
-            <WelcomeModal />
-            <WhatsAppFAB />
+            <CartDrawer/>
+            <WelcomeModal/>
+            <WhatsAppFAB/>
         </>
     );
 };

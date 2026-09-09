@@ -32,7 +32,7 @@ const WhatsAppFAB = () => {
                 aria-label="Escríbenos por WhatsApp"
                 title="Escríbenos por WhatsApp"
             >
-                <WhatsAppIcon />
+                <WhatsAppIcon/>
             </button>
             {open && <WhatsAppComposerModal phone={phone} onClose={() => setOpen(false)} />}
         </>

@@ -59,7 +59,7 @@ const CatalogView = () => {
                     hideSpecs={true}
                 />
 
-                <main className="catalog-main">
+                <main>
                     <ProductGrid
                         products={filteredProducts}
                         loading={loading}

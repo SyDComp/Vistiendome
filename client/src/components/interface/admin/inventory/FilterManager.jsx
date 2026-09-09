@@ -19,10 +19,10 @@ const FilterManager = () => {
                 fetch(`${API_BASE}/categories?page_size=500`),
                 fetch(`${API_BASE}/attributes`)
             ]);
-            
+
             const catData = await catRes.json();
             const attrData = await attrRes.json();
-            
+
             setCategories(catData.items || catData || []);
             setAttributes(attrData || []);
         } catch (error) {
@@ -41,7 +41,7 @@ const FilterManager = () => {
         const newValue = !currentValue;
         // Optimistic update
         setCategories(prev => prev.map(c => c.id === catId ? { ...c, is_filterable: newValue } : c));
-        
+
         try {
             const res = await fetch(`${API_BASE}/categories/${catId}`, {
                 method: 'PUT',
@@ -62,7 +62,7 @@ const FilterManager = () => {
         const newValue = !currentValue;
         // Optimistic update
         setAttributes(prev => prev.map(a => a.id === attrId ? { ...a, is_filterable: newValue } : a));
-        
+
         try {
             const res = await fetch(`${API_BASE}/attributes/${attrId}`, {
                 method: 'PUT',
@@ -81,16 +81,16 @@ const FilterManager = () => {
 
     const [activeTab, setActiveTab] = useState('categories');
 
-    const filteredCategories = categories.filter(c => 
+    const filteredCategories = categories.filter(c =>
         c.slug !== 'sin_categoria' && c.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const filteredAttributes = attributes.filter(a => 
+    const filteredAttributes = attributes.filter(a =>
         a.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
-        <div className="inventory-module-container fm">
+        <div className="fm">
             <div className="fm-cabecera">
                 <div className="fm-cabecera-texto">
                     <h2 className="fm-titulo">
@@ -101,8 +101,8 @@ const FilterManager = () => {
                         Controla qué Categorías y Características están disponibles para que los clientes filtren en la tienda pública.
                     </p>
                 </div>
-                <button 
-                    onClick={fetchData} 
+                <button
+                    onClick={fetchData}
                     className="fm-recargar"
                 >
                     <RefreshCcw size={16} /> Recargar
@@ -111,22 +111,22 @@ const FilterManager = () => {
 
             <div className="fm-buscador">
                 <Search size={18} className="fm-buscador-icono" />
-                <input 
-                    type="text" 
-                    placeholder="Buscar atributo o categoría..." 
+                <input
+                    type="text"
+                    placeholder="Buscar atributo o categoría..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    
+
                 />
             </div>
 
             {/* Select de Navegación en lugar de Tabs */}
             <div className="fm-eleccion">
-                <label >SELECCIONA QUÉ GESTIONAR</label>
-                <select 
+                <label>SELECCIONA QUÉ GESTIONAR</label>
+                <select
                     value={activeTab}
                     onChange={(e) => setActiveTab(e.target.value)}
-                    
+
                 >
                     <option value="categories">Categorías ({filteredCategories.length})</option>
                     <option value="attributes">Características y Atributos ({filteredAttributes.length})</option>
@@ -138,7 +138,7 @@ const FilterManager = () => {
                 <div className="fm-cargando">Cargando datos...</div>
             ) : (
                 <div className="fm-lista">
-                    
+
                     {/* Sección Categorías */}
                     {activeTab === 'categories' && (
                         <div className="fm-lista-scroll">
@@ -150,9 +150,9 @@ const FilterManager = () => {
                                         <div key={cat.id} className="fm-fila">
                                             <div className="fm-fila-nombre">{cat.name}</div>
                                             <div className="fm-fila-detalle">Ruta: {cat.slug}</div>
-                                            
+
                                             <div className="fm-fila-accion">
-                                                <button 
+                                                <button
                                                     onClick={() => handleToggleCategory(cat.id, cat.is_filterable)}
                                                     style={{
                                                         display: 'inline-flex', alignItems: 'center', gap: '6px',
@@ -189,7 +189,7 @@ const FilterManager = () => {
                                             </div>
 
                                             <div className="fm-fila-accion">
-                                                <button 
+                                                <button
                                                     onClick={() => handleToggleAttribute(attr.id, attr.is_filterable)}
                                                     style={{
                                                         display: 'inline-flex', alignItems: 'center', gap: '6px',

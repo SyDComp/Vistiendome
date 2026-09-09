@@ -419,19 +419,19 @@ const InventoryModule = ({ view = 'products' }) => {
         <div className="admin-inventory-module">
 
             {view === 'categories' ? (
-                <CategoryManager />
+                <CategoryManager/>
             ) : view === 'filters' ? (
-                <FilterManager />
+                <FilterManager/>
             ) : view === 'characteristics' || view === 'attributes' ? (
-                <CharacteristicManager />
+                <CharacteristicManager/>
             ) : view === 'specifications' ? (
-                <SpecificationManager />
+                <SpecificationManager/>
             ) : view === 'logistics' || view === 'bodega' ? (
-                <LogisticsManager />
+                <LogisticsManager/>
             ) : view === 'colors' ? (
-                <ColorManager />
+                <ColorManager/>
             ) : view === 'collections' ? (
-                <CollectionManager />
+                <CollectionManager/>
             ) : (
                 <>
                     {/* Cabecera de sección de Productos / Variantes */}

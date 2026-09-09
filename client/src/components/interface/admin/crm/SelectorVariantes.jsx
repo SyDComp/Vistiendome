@@ -93,7 +93,7 @@ const SelectorVariantes = ({ onElegir, yaElegidas = new Set() }) => {
     // --- Nivel 1: productos ---
     if (!producto) {
         return (
-            <div className="sv">
+            <div>
                 <div className="sv-buscador">
                     <Search size={15} />
                     <input placeholder="Buscar producto..." value={busqueda} onChange={e => setBusqueda(e.target.value)} />
@@ -121,7 +121,7 @@ const SelectorVariantes = ({ onElegir, yaElegidas = new Set() }) => {
 
     // --- Nivel 2: variantes del producto ---
     return (
-        <div className="sv">
+        <div>
             <div className="sv-cabecera">
                 <button type="button" className="sv-volver" onClick={() => { setProducto(null); setBusqueda(''); }}>
                     <ArrowLeft size={14} /> Productos
@@ -155,9 +155,9 @@ const SelectorVariantes = ({ onElegir, yaElegidas = new Set() }) => {
                 <>
                     {columnas.length > 0 && (
                         <div className="sv-cab-cols" style={{ '--cols': columnas.length }} aria-hidden="true">
-                            <span />
+                            <span/>
                             {columnas.map(c => <span key={c}>{c}</span>)}
-                            <span />
+                            <span/>
                         </div>
                     )}
                     <div className="sv-lista">

@@ -20,8 +20,8 @@ const Inicio = () => {
     }, [location]);
 
     return (
-        <div className="inicio-view fade-in">
-            <HomeRenderer />
+        <div className="fade-in">
+            <HomeRenderer/>
         </div>
     );
 }

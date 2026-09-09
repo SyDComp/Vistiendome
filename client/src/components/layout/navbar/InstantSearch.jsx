@@ -67,11 +67,11 @@ const InstantSearch = ({ isMobile = false, onResultClick }) => {
 
     return (
         <div className={`instant-search-container ${isMobile ? 'is-mobile' : ''}`} ref={searchRef}>
-            <form className="search-form" onSubmit={handleSearchSubmit}>
+            <form  onSubmit={handleSearchSubmit}>
                 <div className="search-input-field">
                     <Search className="search-icon-left" size={18} />
-                    <input 
-                        type="text" 
+                    <input
+                        type="text"
                         placeholder={isMobile ? "Buscar..." : "Busca piezas únicas..."}
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
@@ -89,7 +89,7 @@ const InstantSearch = ({ isMobile = false, onResultClick }) => {
             {isOpen && (results.length > 0 || !isLoading) && query.length > 1 && (
                 <div className="search-results-dropdown fade-in">
                     {results.length > 0 ? (
-                        <div className="results-list">
+                        <div>
                             <div className="results-header">Resultados Sugeridos</div>
                             {results.map(result => (
                                 <div
@@ -106,7 +106,7 @@ const InstantSearch = ({ isMobile = false, onResultClick }) => {
                                     </div>
                                 </div>
                             ))}
-                            <button 
+                            <button
                                 className="view-all-results"
                                 onClick={handleSearchSubmit}
                             >

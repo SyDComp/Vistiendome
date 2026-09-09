@@ -6,24 +6,24 @@ import { AlertTriangle, Trash2, X } from 'lucide-react';
  * Muestra las referencias activas de las imágenes seleccionadas para borrar
  * e interactúa con confirmación / eliminación forzada.
  */
-export default function MediaDeleteWarningModal({ 
-    isOpen, 
-    onClose, 
-    onConfirmForceDelete, 
-    referencesData 
+export default function MediaDeleteWarningModal({
+    isOpen,
+    onClose,
+    onConfirmForceDelete,
+    referencesData
 }) {
     if (!isOpen) return null;
 
     return (
         <div className="media-gallery-overlay as-modal active" onClick={onClose}>
-            <div 
-                className="media-gallery-container media-delete-warning-modal-container" 
+            <div
+                className="media-gallery-container media-delete-warning-modal-container"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Cabecera del Modal de Alerta */}
                 <div className="media-delete-warning-header">
                     <div className="media-delete-warning-badge">
-                        <AlertTriangle size={24} className="media-delete-warning-icon" />
+                        <AlertTriangle size={24} />
                     </div>
                     <div className="media-delete-warning-title-group">
                         <h4>Eliminación de Riesgo de Medios</h4>
@@ -73,14 +73,14 @@ export default function MediaDeleteWarningModal({
 
                 {/* Acciones del Modal */}
                 <div className="media-delete-warning-actions">
-                    <button 
-                        className="media-delete-warning-btn-cancel" 
+                    <button
+                        className="media-delete-warning-btn-cancel"
                         onClick={onClose}
                     >
                         Cancelar
                     </button>
-                    <button 
-                        className="media-delete-warning-btn-danger" 
+                    <button
+                        className="media-delete-warning-btn-danger"
                         onClick={onConfirmForceDelete}
                     >
                         <Trash2 size={16} />

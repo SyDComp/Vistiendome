@@ -26,11 +26,11 @@ const computeSelectionFromFilters = (filters, preview) => {
 /**
  * VariantPicker — Asistente procedural para crear una nueva versión específica.
  */
-const VariantPicker = ({ 
-    isOpen, 
-    onClose, 
-    onConfirm, 
-    suggestedSpecs = [], 
+const VariantPicker = ({
+    isOpen,
+    onClose,
+    onConfirm,
+    suggestedSpecs = [],
     allSpecs = [],
     allAttributes = [],
     baseSlug = ''
@@ -43,14 +43,14 @@ const VariantPicker = ({
     const [searchTerm, setSearchTerm] = useState('');
     const [showSpecLibrary, setShowSpecLibrary] = useState(false);
     const [showGlobalGallery, setShowGlobalGallery] = useState(false);
-    
+
     // Estado para la librería de opciones por atributo
     const [showOptionsPicker, setShowOptionsPicker] = useState(false);
     const [activeAttrIndex, setActiveAttrIndex] = useState(null);
 
     // NUEVO: Filtros inteligentes para el Workspace (Paso 3)
     const [activeFilters, setActiveFilters] = useState({}); // { attrName: Set(values) }
-    
+
     const [commercialData, setCommercialData] = useState({
         price: 0,
         stock: 0,
@@ -104,29 +104,29 @@ const VariantPicker = ({
     const applySpec = (spec) => {
         const specAttrs = spec.characteristics || [];
         const newAttrs = [...selectedAttrs];
-        
+
         specAttrs.forEach(sa => {
-            const alreadyExists = newAttrs.find(a => 
-                (a.id && sa.id && a.id === sa.id) || 
+            const alreadyExists = newAttrs.find(a =>
+                (a.id && sa.id && a.id === sa.id) ||
                 (a.name.toLowerCase() === sa.name.toLowerCase())
             );
 
             if (!alreadyExists) {
-                newAttrs.push({ 
-                    ...sa, 
-                    values: sa.allowed_values || [], 
-                    allowed_values: sa.allowed_values || [] 
+                newAttrs.push({
+                    ...sa,
+                    values: sa.allowed_values || [],
+                    allowed_values: sa.allowed_values || []
                 });
             } else {
                 const idx = newAttrs.indexOf(alreadyExists);
-                newAttrs[idx] = { 
-                    ...alreadyExists, 
+                newAttrs[idx] = {
+                    ...alreadyExists,
                     values: sa.allowed_values || alreadyExists.values || [],
-                    allowed_values: sa.allowed_values || alreadyExists.allowed_values || [] 
+                    allowed_values: sa.allowed_values || alreadyExists.allowed_values || []
                 };
             }
         });
-        
+
         setSelectedAttrs(newAttrs);
         setShowSpecLibrary(false);
     };
@@ -134,7 +134,7 @@ const VariantPicker = ({
     const toggleValueInAttr = (attrIdx, val) => {
         const next = [...selectedAttrs];
         const currentValues = next[attrIdx].values || [];
-        
+
         if (currentValues.includes(val)) {
             next[attrIdx].values = currentValues.filter(v => v !== val);
         } else {
@@ -146,12 +146,12 @@ const VariantPicker = ({
     // --- RENDERIZADO DE PASOS ---
 
     const renderStep1 = () => {
-        const filteredAll = allAttributes.filter(a => 
+        const filteredAll = allAttributes.filter(a =>
             a.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
         const renderCard = (item, isSelected, onClick) => (
-            <div 
+            <div
                 key={item.id}
                 onClick={onClick}
                 className={`variant-picker-attr-card ${isSelected ? 'selected' : 'unselected'}`}
@@ -177,7 +177,7 @@ const VariantPicker = ({
 
         return (
             <div className="variant-picker-step1-container">
-                <button 
+                <button
                     type="button"
                     onClick={() => setShowSpecLibrary(true)}
                     className="variant-picker-spec-btn"
@@ -205,8 +205,8 @@ const VariantPicker = ({
 
                 <div className="variant-picker-search-container">
                     <Search className="variant-picker-search-icon" size={18} />
-                    <input 
-                        type="text" 
+                    <input
+                        type="text"
                         placeholder="Buscar característica específica..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -226,7 +226,7 @@ const VariantPicker = ({
                     </div>
                 </div>
 
-                <LibraryPicker 
+                <LibraryPicker
                     isOpen={showSpecLibrary}
                     onClose={() => setShowSpecLibrary(false)}
                     onSelect={(selected) => {
@@ -263,9 +263,9 @@ const VariantPicker = ({
                         const isColor = attr.name.toLowerCase().includes('color');
                         const domain = attr.domain || [];
                         const currentValues = attr.values || [];
-                        
+
                         return (
-                                <Accordion 
+                                <Accordion
                                 key={idx}
                                 title={attr.name}
                                 icon={<Hash size={16} />}
@@ -281,7 +281,7 @@ const VariantPicker = ({
                                         <Sparkles size={14} color="#8f0653" />
                                         <span>Selecciona Opciones Disponibles</span>
                                     </div>
-                                    
+
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -300,12 +300,12 @@ const VariantPicker = ({
                                         const val = typeof opt === 'string' ? opt : (opt.value || opt.name || '---');
                                         const isSelected = currentValues.includes(val);
                                         const hex = typeof opt === 'string' ? null : opt.hex_code;
-                                        
+
                                         return (
-                                            <button 
-                                                key={oIdx} 
-                                                type="button" 
-                                                onClick={() => toggleValueInAttr(idx, val)} 
+                                            <button
+                                                key={oIdx}
+                                                type="button"
+                                                onClick={() => toggleValueInAttr(idx, val)}
                                                 className={`variant-picker-option-btn ${isSelected ? 'selected' : 'unselected'}`}
                                             >
                                                 {isColor && hex && (
@@ -334,7 +334,7 @@ const VariantPicker = ({
         const next = new Set(selection);
         if (next.has(idx)) next.delete(idx);
         else next.add(idx);
-        
+
         // Si el usuario toca manualmente, limpiamos filtros visuales para evitar inconsistencias
         if (Object.keys(activeFilters).length > 0) {
             setActiveFilters({});
@@ -423,7 +423,7 @@ const VariantPicker = ({
 
     const renderStep3 = () => {
         const selectionCount = selection.size;
-        
+
         return (
             <div className="variant-picker-step3-container">
                 {/* 1. SELECTION HELPERS */}
@@ -433,14 +433,14 @@ const VariantPicker = ({
                         <span>Acciones Rápidas de Selección</span>
                     </div>
                     <div className="variant-picker-helpers-actions">
-                        <button 
+                        <button
                             type="button"
                             onClick={() => setSelection(new Set(generatedPreview.map((_, i) => i)))}
                             className="variant-picker-helpers-btn"
                         >
                             Seleccionar Todo
                         </button>
-                        <button 
+                        <button
                             type="button"
                             onClick={() => {
                                 setSelection(new Set());
@@ -450,14 +450,14 @@ const VariantPicker = ({
                         >
                             Limpiar Selección
                         </button>
-                        
+
                         {selectedAttrs.map(attr => (
                             <div key={attr.id} className="variant-picker-helpers-attr-group">
                                 <span className="variant-picker-helpers-attr-name">{attr.name}:</span>
                                 {attr.values.map(val => {
                                     const isActive = activeFilters[attr.name]?.has(val);
                                     return (
-                                        <button 
+                                        <button
                                             key={val}
                                             type="button"
                                             onClick={() => toggleQuickFilter(attr.name, val)}
@@ -479,19 +479,19 @@ const VariantPicker = ({
                             <span className="variant-picker-bulk-number">{selectionCount}</span>
                             <span className="variant-picker-bulk-label">SELECCIONADOS</span>
                         </div>
-                        
+
                         <div className="variant-picker-bulk-actions">
                             <div className="variant-picker-bulk-price-wrap">
                                 <Tag size={16} color="rgba(255,255,255,0.4)" />
-                                <input 
-                                    type="number" 
+                                <input
+                                    type="number"
                                     placeholder="Precio lote"
                                     onBlur={(e) => { if(e.target.value) applyBulk('price', parseFloat(e.target.value)); }}
-                                    className="variant-picker-bulk-price-input" 
+                                    className="variant-picker-bulk-price-input"
                                 />
                             </div>
                             {/* Stock oculto pero mantenido internamente */}
-                            <button 
+                            <button
                                 type="button"
                                 onClick={() => setShowGlobalGallery(true)}
                                 className="variant-picker-bulk-btn-photos"
@@ -505,11 +505,11 @@ const VariantPicker = ({
                 {/* 2. MAIN TABLE */}
                 <div className="variant-picker-table-container">
                     <table className="variant-picker-table">
-                        <thead className="variant-picker-th-container adm-cabecera-fija">
+                        <thead className="adm-cabecera-fija">
                             <tr>
                                 <th className="variant-picker-th checkbox">
-                                    <input 
-                                        type="checkbox" 
+                                    <input
+                                        type="checkbox"
                                         checked={selection.size === generatedPreview.length && generatedPreview.length > 0}
                                         onChange={(e) => {
                                             if (e.target.checked) setSelection(new Set(generatedPreview.map((_, i) => i)));
@@ -530,8 +530,8 @@ const VariantPicker = ({
                             {generatedPreview.map((row, idx) => (
                                 <tr key={idx} className={`variant-picker-tr ${selection.has(idx) ? 'selected' : 'unselected'}`}>
                                     <td className="variant-picker-td">
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             checked={selection.has(idx)}
                                             onChange={() => toggleSelect(idx)}
                                         />
@@ -556,8 +556,8 @@ const VariantPicker = ({
                                         </div>
                                     </td>
                                     <td className="variant-picker-td">
-                                        <input 
-                                            type="number" 
+                                        <input
+                                            type="number"
                                             value={row.price}
                                             onChange={(e) => {
                                                 const next = [...generatedPreview];
@@ -584,15 +584,15 @@ const VariantPicker = ({
                                 <button type="button" onClick={() => setShowGlobalGallery(false)} className="variant-picker-gallery-close">✕</button>
                             </div>
                             <div className="adm-scroll">
-                                <MediaGallery 
-                                    selectionMode 
+                                <MediaGallery
+                                    selectionMode
                                     allowMultiple={true}
                                     onSelect={(selectedAssets) => {
                                         if (!selectedAssets) return;
                                         const assets = Array.isArray(selectedAssets) ? selectedAssets : [selectedAssets];
                                         const newIds = assets.map(a => a.id);
                                         const next = [...generatedPreview];
-                                        
+
                                         selection.forEach(idx => {
                                             const currentIds = next[idx].media_ids || [];
                                             const currentAssets = next[idx].media_assets || [];
@@ -606,10 +606,10 @@ const VariantPicker = ({
                                             next[idx].media_ids = combinedIds;
                                             next[idx].media_assets = combinedAssets;
                                         });
-                                        
+
                                         setGeneratedPreview(next);
                                         setShowGlobalGallery(false);
-                                    }} 
+                                    }}
                                 />
                             </div>
                         </div>
@@ -660,8 +660,8 @@ const VariantPicker = ({
                             </div>
                             <div className="variant-picker-footer-actions">
                                 <button type="button" onClick={onClose} className="variant-picker-footer-btn-back">Cancelar</button>
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     onClick={() => {
                                         if (selectedAttrs.length === 0) return alert("Selecciona al menos una característica.");
                                         setStep(2);
@@ -674,7 +674,7 @@ const VariantPicker = ({
                             </div>
                         </div>
                     )}
-                    
+
                     {step === 2 && (
                         <div className="variant-picker-footer-step1">
                             <div className="variant-picker-footer-info">
@@ -690,8 +690,8 @@ const VariantPicker = ({
                             </div>
                             <div className="variant-picker-footer-actions">
                                 <button type="button" onClick={() => setStep(1)} className="variant-picker-footer-btn-back">Atrás</button>
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     onClick={() => {
                                         const missing = selectedAttrs.find(a => a.values.length === 0);
                                         if (missing) return alert(`Selecciona opciones para ${missing.name}`);
@@ -721,8 +721,8 @@ const VariantPicker = ({
                             </div>
                             <div className="variant-picker-footer-actions">
                                 <button type="button" onClick={() => setStep(2)} className="variant-picker-footer-btn-back">Revisar Rangos</button>
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     onClick={() => {
                                         onConfirm(generatedPreview);
                                         onClose();
@@ -736,7 +736,7 @@ const VariantPicker = ({
                     )}
                 </div>
 
-                <LibraryPicker 
+                <LibraryPicker
                     isOpen={showOptionsPicker}
                     onClose={() => setShowOptionsPicker(false)}
                     title={`Biblioteca de Opciones: ${activeAttrIndex !== null ? selectedAttrs[activeAttrIndex].name : ''}`}
@@ -749,7 +749,7 @@ const VariantPicker = ({
                     onSelect={(selected) => {
                         const next = [...selectedAttrs];
                         // Normalizamos a valores simples (strings) que es lo que espera VariantPicker
-                        next[activeAttrIndex].values = selected.map(item => 
+                        next[activeAttrIndex].values = selected.map(item =>
                             typeof item === 'string' ? item : (item.value || item.name)
                         );
                         setSelectedAttrs(next);

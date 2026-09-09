@@ -1256,9 +1256,9 @@ const DetailDrawer = ({
                 <div className="detail-drawer-body-container" style={{ padding: showGlobalGallery ? '0' : undefined }}>
                     {loading ? (
                         <>
-                            <SectionSkeleton />
-                            <SectionSkeleton />
-                            <SectionSkeleton />
+                            <SectionSkeleton/>
+                            <SectionSkeleton/>
+                            <SectionSkeleton/>
                         </>
                     ) : showGlobalGallery ? (
                         <div className="detail-drawer-gallery-wrapper">

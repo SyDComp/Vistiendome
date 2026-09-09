@@ -16,7 +16,7 @@ const FeaturedCollections = () => {
             console.log("🔍 FeaturedCollections: Solicitando colecciones...");
             const data = await getCollections();
             console.log("📦 FeaturedCollections: Colecciones recibidas:", data);
-            
+
             if (!Array.isArray(data)) {
                 console.error("❌ Error: La API de colecciones no devolvió un array.");
                 return;
@@ -42,7 +42,7 @@ const FeaturedCollections = () => {
         }
     }, [lastMessage]);
 
-    if (loading) return <div className="loading-state">Cargando colecciones...</div>;
+    if (loading) return <div>Cargando colecciones...</div>;
     if (collections.length === 0) return null; // Dejamos el null por ahora pero los logs nos dirán si llega aquí
 
     return (
@@ -58,8 +58,8 @@ const FeaturedCollections = () => {
 
             <div className="collections-grid">
                 {collections.map((coll, idx) => (
-                    <div 
-                        key={coll.id} 
+                    <div
+                        key={coll.id}
                         id={`collection-${coll.slug}`}
                         className={`collection-card card-variant-${idx % 3}`}
                         onClick={() => navigate(`/coleccion/${coll.slug}`)}
@@ -79,7 +79,7 @@ const FeaturedCollections = () => {
                             )}
                             <div className="card-overlay" />
                         </div>
-                        
+
                         <div className="card-content">
                             <h3 className="collection-name">{coll.name}</h3>
                             <p className="collection-desc">{coll.description || 'Explora nuestra nueva selección curada.'}</p>

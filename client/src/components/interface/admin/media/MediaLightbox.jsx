@@ -26,7 +26,7 @@ const MediaLightbox = ({
     return (
         <div className="media-gallery-lightbox-overlay">
             <div className="media-gallery-lightbox-header">
-                <div className="adm-encogible">
+                <div>
                     <span className="media-gallery-lightbox-title-label">Nombre amigable</span>
                     {onUpdateAlias ? (
                         <div className="adm-visor-fila">
@@ -50,7 +50,7 @@ const MediaLightbox = ({
                 </div>
                 <div className="media-gallery-lightbox-actions">
                     {onSetMain && img.id !== mainId && (
-                        <button 
+                        <button
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onSetMain(img);

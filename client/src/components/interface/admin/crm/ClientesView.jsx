@@ -92,13 +92,13 @@ const ClientesView = () => {
     });
 
     const columns = [
-        { 
-            key: 'rut', 
+        {
+            key: 'rut',
             label: 'RUT',
             render: (value) => value || 'Sin RUT'
         },
-        { 
-            key: 'nombres', 
+        {
+            key: 'nombres',
             label: 'Cliente',
             render: (value, row) => (
                 <div className="adm-celda">
@@ -130,8 +130,8 @@ const ClientesView = () => {
                 </div>
             ) : <span className="adm-celda-apagada">--</span>
         },
-        { 
-            key: 'created_at', 
+        {
+            key: 'created_at',
             label: 'Registro',
             render: (value) => {
                 if (!value) return <span className="adm-celda-apagada">--</span>;
@@ -165,14 +165,14 @@ const ClientesView = () => {
     if (showForm) {
         return (
             <div className="admin-inventory-form-container desktop">
-                <button 
+                <button
                     onClick={() => { setShowForm(false); setEditingCliente(null); }}
                     className="admin-back-btn desktop"
                 >
                     ← Volver al Listado
                 </button>
                 <div className="adm-vista-fondo">
-                    <ClienteForm 
+                    <ClienteForm
                         initialData={editingCliente}
                         onSuccess={() => {
                             setShowForm(false);
@@ -187,9 +187,9 @@ const ClientesView = () => {
     }
 
     return (
-        <div className="admin-module fade-in">
-            <SectionHeader 
-                title="Directorio de Clientes" 
+        <div className="fade-in">
+            <SectionHeader
+                title="Directorio de Clientes"
                 subtitle={`${clientes.length} prospectos y clientes registrados`}
                 icon={Users}
                 action={[
@@ -197,8 +197,8 @@ const ClientesView = () => {
                     { label: '＋ Nuevo Cliente', onClick: () => setShowForm(true), variant: 'primary' }
                 ]}
             />
-            
-            <FilterBar 
+
+            <FilterBar
                 searchPlaceholder="Buscar por RUT, nombre o email..."
                 onSearchChange={setSearchTerm}
                 activeFilters={activeFilters}
@@ -215,7 +215,7 @@ const ClientesView = () => {
                 ]}
             />
 
-            <DataTable 
+            <DataTable
                 columns={columns}
                 data={filteredClientes}
                 loading={loading}
@@ -241,7 +241,7 @@ const ClientesView = () => {
                 )}
             />
 
-            <DetailDrawer 
+            <DetailDrawer
                 isOpen={showDetail}
                 onClose={() => setShowDetail(false)}
                 data={detailData}

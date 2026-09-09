@@ -47,7 +47,7 @@ const TablaPrendas = ({
     if (!grupos.length) return <p className="tp-vacio">{vacio}</p>;
 
     return (
-        <div className="tabla-prendas">
+        <div>
             {grupos.map(({ titulo, columnas, filas, unidades, conColumnaProducto }) => (
                 <section key={titulo} className="tp-grupo">
                     <header className="tp-grupo-cab">
@@ -99,9 +99,9 @@ const TablaPrendas = ({
                                 {Array.from({ length: filasEnBlanco }, (_, i) => (
                                     <tr key={`blanco-${i}`} className="tp-blanca">
                                         {hayCasilla && <td className="tp-casilla"><span className="tp-cuadro" /></td>}
-                                        {conColumnaProducto && <td />}
+                                        {conColumnaProducto && <td/>}
                                         {columnas.map(c => <td key={c}>&nbsp;</td>)}
-                                        <td />
+                                        <td/>
                                         {columnasExtra.map(c => <td key={c.clave} />)}
                                     </tr>
                                 ))}

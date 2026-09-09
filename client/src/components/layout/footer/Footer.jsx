@@ -1,7 +1,7 @@
 import LogoVistiendome from '../../ui/LogoVistiendome';
 import React from 'react';
 import './Footer.css';
-import { 
+import {
     Camera,
     Globe,
     MessageCircle,
@@ -41,22 +41,22 @@ const Footer = ({ onNavigate }) => {
                 <div className="footer-col brand-col">
                     <LogoVistiendome tamano="32px" />
                     <p className="footer-bio">
-                        Diseño y confección propia de moda modesta y elegante en San Carlos, Chile. 
+                        Diseño y confección propia de moda modesta y elegante en San Carlos, Chile.
                         Especialistas en tallaje inclusivo (12 a 7XL) y uniformes congregacionales.
                     </p>
                     <div className="footer-social-section">
                         <span className="social-label">CONECTA CON NOSOTROS</span>
                         <div className="social-links-row">
                             {socialItems.map((red) => (
-                                <a 
-                                    key={red.id} 
-                                    href={red.url} 
-                                    target="_blank" 
+                                <a
+                                    key={red.id}
+                                    href={red.url}
+                                    target="_blank"
                                     rel="noopener noreferrer"
                                     className="social-btn"
                                 >
                                     {red.icon}
-                                    <span className="social-name">{red.name}</span>
+                                    <span>{red.name}</span>
                                 </a>
                             ))}
                         </div>
@@ -92,7 +92,7 @@ const Footer = ({ onNavigate }) => {
                 </div>
 
                 {/* Columna 4: Contacto y Ubicación */}
-                <div className="footer-col contact-col">
+                <div className="footer-col">
                     <h4 className="footer-title">VISÍTANOS</h4>
                     <div className="contact-info-list">
                         <div className="contact-info-item">
