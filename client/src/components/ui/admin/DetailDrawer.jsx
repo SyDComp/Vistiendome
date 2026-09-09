@@ -1504,10 +1504,8 @@ const DetailDrawer = ({
                                                     >
                                                         {section.isColor ? (
                                                             <>
-                                                                <div style={{ 
-                                                                    width: '44px', height: '44px', borderRadius: '50%', 
-                                                                    background: hex || '#000000', 
-                                                                    border: '3px solid #fff', boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                                                <div className="adm-muestra-color" style={{
+                                                                    background: hex || '#000000',
                                                                     display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#64748b',
                                                                     margin: '0 auto'
                                                                 }}>

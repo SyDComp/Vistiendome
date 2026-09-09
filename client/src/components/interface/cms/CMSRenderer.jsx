@@ -36,16 +36,16 @@ function useIsMobile(forcedValue = null) {
 const PrecioConOferta = ({ product, previewMode, tamano }) => {
     const enOferta = !!product.on_sale && product.original_price > product.price;
     if (!product.price) {
-        return <span style={{ fontSize: tamano, fontWeight: '900', color: '#8f0653' }}>Consultar</span>;
+        return <span className="cms-precio" style={{ fontSize: tamano }}>Consultar</span>;
     }
     return (
         <span className="cms-precio-linea">
             {enOferta && (
-                <span style={{ fontSize: `calc(${tamano} * 0.8)`, color: '#94a3b8', textDecoration: 'line-through', fontWeight: 500 }}>
+                <span className="cms-precio-antes" style={{ fontSize: `calc(${tamano} * 0.8)` }}>
                     $ {product.original_price.toLocaleString('es-CL')}
                 </span>
             )}
-            <span style={{ fontSize: tamano, fontWeight: '900', color: '#8f0653' }}>
+            <span className="cms-precio" style={{ fontSize: tamano }}>
                 $ {product.price.toLocaleString('es-CL')}
             </span>
             {enOferta && (
@@ -401,15 +401,7 @@ const ProductCard = ({ product, previewMode }) => {
                 </div>
             </div>
             <div className="cms-respiro">
-                <h4 style={{
-                    margin: '0 0 4px 0',
-                    fontSize: previewMode ? '12px' : '15px',
-                    fontWeight: '700',
-                    color: '#1e1b4b',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                }}>{product.name}</h4>
+                <h4 className={`cms-nombre-producto${previewMode ? ' cms-nombre-producto--previa' : ''}`}>{product.name}</h4>
                 <PrecioConOferta product={product} previewMode={previewMode} tamano={previewMode ? '13px' : '16px'} />
             </div>
         </div>
@@ -592,14 +584,7 @@ export const RecentProductsBlock = ({ previewMode = false }) => {
             }}>
                 {products.map(product => (
                     <div key={product.id} className="cms-relativo">
-                        <div style={{
-                            borderRadius: previewMode ? '20px' : '32px',
-                            overflow: 'hidden',
-                            aspectRatio: '3/4',
-                            background: '#f8fafc',
-                            marginBottom: '12px',
-                            boxShadow: '0 10px 30px -5px rgba(0,0,0,0.05)'
-                        }}>
+                        <div className={`cms-foto-producto${previewMode ? ' cms-foto-producto--previa' : ''}`}>
                             <img
                                 src={product.image ? getImageUrl(product.image) : (product.images?.[0]?.url ? getImageUrl(product.images[0].url) : '')}
                                 srcSet={getSrcSet(product.image_srcset) || undefined}

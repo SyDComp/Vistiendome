@@ -270,11 +270,8 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                                                 type="button"
                                                 disabled={row.is_system}
                                                 onClick={() => setPickingImageIndex(rIdx)}
+                                                className="adm-boton-secundario adm-boton-secundario--bajo"
                                                 style={{
-                                                    padding: '0 14px',
-                                                    height: '38px',
-                                                    borderRadius: '8px',
-                                                    border: '1px solid #cbd5e1',
                                                     background: '#fff',
                                                     color: '#334155',
                                                     fontSize: '13px',

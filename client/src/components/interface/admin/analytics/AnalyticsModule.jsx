@@ -299,10 +299,7 @@ const PreviewModal = ({ preview, onClose, navigate }) => {
                     </div>
 
                     <div className="ana-fila">
-                        <button onClick={goToStore} disabled={!detail?.slug} style={{
-                            flex: 1, height: '46px', border: '1px solid #e2e8f0', borderRadius: '12px',
-                            background: '#fff', color: '#334155', fontSize: '14px', fontWeight: '700',
-                            cursor: detail?.slug ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                        <button onClick={goToStore} disabled={!detail?.slug} className="adm-boton-secundario adm-boton-secundario--crece" style={{
                         }}><ExternalLink size={16} /> Ver en la tienda</button>
                         <button onClick={goToAdmin} className="ana-accion"><Pencil size={16} /> {isVariant ? 'Editar variante' : 'Editar producto'}</button>
                     </div>

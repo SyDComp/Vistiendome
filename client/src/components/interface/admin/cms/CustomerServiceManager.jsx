@@ -139,11 +139,8 @@ const CustomerServiceManager = () => {
                         {sections.map((section, index) => (
                             <div 
                                 key={section.id}
-                                style={{ 
-                                    background: '#fff', border: '1px solid',
-                                    borderColor: '#e2e8f0',
-                                    padding: '16px 20px', borderRadius: '20px',
-                                    display: 'flex', alignItems: 'center', gap: '12px',
+                                className="adm-tarjeta-fila"
+                                style={{
                                     flexWrap: 'wrap',
                                     opacity: section.is_active ? 1 : 0.6,
                                     transition: 'all 0.2s', position: 'relative'

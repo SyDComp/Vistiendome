@@ -193,3 +193,41 @@
     margin-bottom: 0.75rem;
     position: relative;
 }
+
+/* ── Precio, nombre y foto de una pieza en la portada ────────────────────────
+   El color estaba escrito suelto en cada uno. El tamano si depende de un dato:
+   la duena lo elige al armar el bloque, y por eso sigue llegando por estilo.
+
+   `--previa` es como se ve dentro del espejo del gestor de portada, donde todo
+   entra reducido. Es un modo de la pantalla, no un tamano de ventana. */
+
+.cms-precio { font-weight: 900; color: var(--color-brand); }
+
+/* El precio de antes, tachado: mas chico y apagado para que el que manda sea
+   el de al lado. */
+.cms-precio-antes {
+    color: var(--color-text-placeholder);
+    text-decoration: line-through;
+    font-weight: 500;
+}
+
+.cms-nombre-producto {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--color-admin-dark);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.cms-nombre-producto--previa { font-size: 0.75rem; }
+
+.cms-foto-producto {
+    border-radius: 2rem;
+    overflow: hidden;
+    aspect-ratio: 3 / 4;
+    background: var(--color-bg);
+    margin-bottom: 0.75rem;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+}
+.cms-foto-producto--previa { border-radius: 1.25rem; }
