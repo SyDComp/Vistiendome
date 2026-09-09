@@ -154,14 +154,14 @@ const CustomerServiceManager = () => {
                                         <button 
                                             disabled={index === 0}
                                             onClick={() => handleMove(index, -1)}
-                                            className="adm-mover" disabled={index === 0}
+                                            className="adm-mover"
                                         >
                                             <ChevronUp size={20} />
                                         </button>
                                         <button 
                                             disabled={index === sections.length - 1}
                                             onClick={() => handleMove(index, 1)}
-                                            className="adm-mover" disabled={index === sections.length - 1}
+                                            className="adm-mover"
                                         >
                                             <ChevronDown size={20} />
                                         </button>

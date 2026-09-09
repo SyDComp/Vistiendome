@@ -84,10 +84,7 @@ const PremiumImage = ({
         >
             {/* Esqueleto de Carga */}
             {!isLoaded && (
-                <div 
-                    className={`skeleton-box ${skeletonClassName}`} 
-                    className="adm-capa-completa" 
-                />
+                <div className={`skeleton-box adm-capa-completa ${skeletonClassName}`} />
             )}
             
             {/* Imagen Real (Oculta hasta cargar, fade-in suave) */}

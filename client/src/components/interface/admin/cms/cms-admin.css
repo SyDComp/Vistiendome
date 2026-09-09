@@ -278,3 +278,51 @@
     color: var(--color-surface);
     padding: 0.875rem 1.75rem;
 }
+
+/* ── El gestor de portada: dos paneles ──────────────────────────────────────
+   La lista de bloques a la izquierda y el espejo del sitio a la derecha. Esta
+   disposicion la decidia JavaScript midiendo la ventana. */
+
+.cms-pg-doble {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 26.25rem 1fr;
+    gap: 2rem;
+    overflow: hidden;
+    /* Sin esto un hijo con desplazamiento propio no se encoge: crece y desborda
+       la rejilla en vez de mostrar su barra. */
+    min-height: 0;
+}
+
+.cms-pg-lista {
+    overflow-y: auto;
+    padding: 0 0.625rem 0.625rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-height: 0;
+}
+
+.cms-pg-fila {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Sin ancho para los dos paneles, el espejo se esconde y la lista ocupa todo.
+   El relleno de abajo deja sitio para la barra de acciones flotante. */
+@media (max-width: 1023.98px) {
+    .cms-pg-doble {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .cms-pg-lista { padding: 0 1rem 6.25rem 1rem; }
+
+    .cms-pg-fila {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+}

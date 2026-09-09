@@ -391,10 +391,10 @@ const ShippingLabelPrinter = () => {
     };
 
     return (
-        <div className="shipping-label-generator-wrap" style={{ minHeight: 'calc(100dvh - 80px)', height: isMobile ? 'auto' : 'calc(100dvh - 80px)', display: 'flex', flexDirection: 'column', background: '#f8fafc', width: '100%', maxWidth: '100dvw', boxSizing: 'border-box', overflowX: 'hidden' }}>
+        <div className="shipping-label-generator-wrap et-marco">
             
             {/* TOP NAVBAR */}
-            <header style={{ padding: isMobile ? '12px 14px' : '16px 24px', background: '#fff', borderBottom: '1px solid #e2e8f0', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px', boxSizing: 'border-box', width: '100%' }}>
+            <header className="et-cabecera">
                 <div className="et-fila-ancha">
                     <button
                         onClick={() => navigate('/admin/dashboard/crm/cotizaciones')}
@@ -403,7 +403,7 @@ const ShippingLabelPrinter = () => {
                         <ArrowLeft size={16} /> Volver a Cotizaciones
                     </button>
                     <div className="et-bloque">
-                        <h1 style={{ margin: 0, fontSize: isMobile ? '17px' : '20px', fontWeight: '900', color: '#1e1b4b', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <h1 className="et-titulo">
                             <Printer className="text-pink-600" size={isMobile ? 18 : 22} /> Generador de Etiquetas de Envío
                         </h1>
                         <p className="et-sub">
@@ -417,7 +417,7 @@ const ShippingLabelPrinter = () => {
                         variant="outline"
                         onClick={fetchData}
                         disabled={loading}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', flex: isMobile ? 1 : 'none', height: isMobile ? '40px' : 'auto', whiteSpace: 'nowrap' }}
+                        className="et-boton-imprimir"
                     >
                         <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Actualizar
                     </Button>
@@ -474,10 +474,10 @@ const ShippingLabelPrinter = () => {
             )}
 
             {/* SPLIT PANEL CONTENT */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: isStacked ? 'column' : 'row', overflow: isStacked ? 'auto' : 'hidden', width: '100%', boxSizing: 'border-box' }}>
+            <div className="et-cuerpo">
                 
                 {/* PANEL IZQUIERDO: SELECCIÓN DE PEDIDOS / COTIZACIONES */}
-                <div style={{ width: isStacked ? '100%' : '310px', minWidth: isStacked ? '100%' : '310px', maxWidth: isStacked ? '100%' : '310px', maxHeight: isStacked ? '42dvh' : 'none', flexShrink: 0, background: '#fff', borderRight: isStacked ? 'none' : '1px solid #e2e8f0', borderBottom: isStacked ? '2px solid #cbd5e1' : 'none', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
+                <div className="et-panel-lista">
                     <div className="et-lista-fila">
                         <div className="et-etiqueta-cabecera">
                             <h2 className="et-titulo">
@@ -680,10 +680,10 @@ const ShippingLabelPrinter = () => {
                 </div>
 
                 {/* PANEL DERECHO: CONFIGURACIÓN DE HOJA / TINTA + VISTA PREVIA */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: isStacked ? 'visible' : 'hidden', background: '#f1f5f9', width: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+                <div className="et-panel-vista">
                     
                     {/* BARRA DE HERRAMIENTAS DE AHORRO */}
-                    <div style={{ padding: isMobile ? '14px 12px' : '16px 24px', background: '#fff', borderBottom: '1px solid #e2e8f0', display: 'flex', flexWrap: 'wrap', gap: '20px', alignItems: 'flex-start', boxSizing: 'border-box', width: '100%' }}>
+                    <div className="et-barra-opciones">
                         
                         {/* SELECTOR DE FORMATO DE PAPEL */}
                         <div className="et-bloque--ancho">
@@ -775,7 +775,7 @@ const ShippingLabelPrinter = () => {
                     </div>
 
                     {/* ÁREA DE VISTA PREVIA */}
-                    <div className="et-vista" style={{ overflowY: isMobile ? 'visible' : 'auto' }}>
+                    <div className="et-vista">
                         {totalCopies === 0 ? (
                             /* El hueco de la vista previa es enorme y estaba ocupado por
                                una cajita perdida en medio del gris. Ahora se dibuja la
@@ -797,28 +797,13 @@ const ShippingLabelPrinter = () => {
                             </div>
                         ) : (
                             pages.map((pageSlots, pageIdx) => (
-                                <div key={pageIdx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', width: '100%', maxWidth: formatKey.startsWith('a4_') ? '820px' : '440px' }}>
+                                <div key={pageIdx} className="et-hoja-marco" style={{ '--hoja-max': formatKey.startsWith('a4_') ? '51.25rem' : '27.5rem' }}>
                                     <div className="et-etiqueta-pie">
                                         <span>Hoja {pageIdx + 1} de {pages.length}</span>
                                     </div>
 
                                     {/* HOJA SIMULADA EN PANTALLA */}
-                                    <div
-                                        style={{
-                                            width: '100%',
-                                            maxWidth: '100%',
-                                            background: '#fff',
-                                            borderRadius: '12px',
-                                            boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)',
-                                            padding: isMobile ? '14px' : '24px',
-                                            border: '1px solid #cbd5e1',
-                                            display: 'grid',
-                                            gridTemplateColumns: (isMobile && formatCfg.cols > 1) ? '1fr' : (formatCfg.cols === 2 ? '1fr 1fr' : '1fr'),
-                                            gap: isMobile ? '12px' : '16px',
-                                            boxSizing: 'border-box',
-                                            overflow: 'hidden'
-                                        }}
-                                    >
+                                    <div className="et-hoja" style={{ '--columnas': formatCfg.cols }}>
                                         {pageSlots.map((slot, sIdx) => {
                                             const coti = slot.coti;
                                             const cli = slot.cliente;
@@ -830,20 +815,7 @@ const ShippingLabelPrinter = () => {
                                             return (
                                                 <div
                                                     key={`${coti.id}-${slot.index}-${sIdx}`}
-                                                    className={`mode-${inkMode} ${scaleClass}`}
-                                                    style={{
-                                                        border: showCutLines ? '1.5px dashed #94a3b8' : '1.5px solid #000',
-                                                        borderRadius: '8px',
-                                                        padding: isMobile ? '12px' : '16px',
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        justifyContent: 'space-between',
-                                                        background: '#fff',
-                                                        position: 'relative',
-                                                        width: '100%',
-                                                        maxWidth: '100%',
-                                                        overflow: 'hidden'
-                                                    }}
+                                                    className={`et-etiqueta${showCutLines ? ' et-etiqueta--con-corte' : ''} mode-${inkMode} ${scaleClass}`}
                                                 >
                                                     {/* ENCABEZADO MARCA */}
                                                     <div>

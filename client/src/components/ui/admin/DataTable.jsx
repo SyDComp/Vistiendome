@@ -1,5 +1,4 @@
 import React from 'react';
-import { useHasta } from '../../../hooks/useCorte';
 import './DataTable.css';
 
 /**
@@ -7,11 +6,6 @@ import './DataTable.css';
  * Optimizado para ser responsivo con scroll horizontal controlado.
  */
 const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {}, emptyMessage = 'No hay datos.' }) => {
-    const isMobile = useHasta('md');
-    // Con poco ancho el relleno de las celdas es lo primero que sobra: 18px por
-    // lado en 6 columnas son 216px que no se ven pero empujan la tabla fuera de
-    // la pantalla, y las ultimas columnas —PRECIO, STOCK— quedaban cortadas.
-    const compacto = useHasta('3xl');
 
     return (
         <div className="adm-tabla-caja">
@@ -27,22 +21,11 @@ const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {
                         <span className="adm-tabla-estado-texto">{emptyMessage}</span>
                     </div>
                 ) : (
-                    <table style={{ 
-                        width: '100%', 
-                        borderCollapse: 'collapse', 
-                        textAlign: 'left',
-                        minWidth: isMobile ? '700px' : 'auto' // Forzar ancho mínimo en móvil para evitar apretujamiento
-                    }}>
+                    <table className="adm-tabla">
                         <thead className="adm-tabla-fila-cabecera">
                             <tr>
                                 {columns.map(col => (
                                     <th key={col.key} style={{
-                                        padding: compacto ? '12px 11px' : '13px 18px',
-                                        fontSize: '11px',
-                                        fontWeight: '700',
-                                        color: '#94a3b8',
-                                        textTransform: 'uppercase',
-                                        letterSpacing: '0.8px',
                                         width: col.width || 'auto',
                                         textAlign: col.align || 'left'
                                     }}>
@@ -50,7 +33,7 @@ const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {
                                     </th>
                                 ))}
                                 {rowActions && (
-                                    <th className={`adm-tabla-cabecera-acciones${compacto ? ' adm-tabla-cabecera-acciones--compacta' : ''}`}>
+                                    <th className="adm-tabla-cabecera-acciones">
                                         Acciones
                                     </th>
                                 )}
@@ -63,28 +46,12 @@ const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {
                                     className="table-row-hover"
                                 >
                                     {columns.map(col => (
-                                        <td key={col.key} style={{
-                                            padding: compacto ? '12px 11px' : '14px 18px',
-                                            fontSize: '13.5px',
-                                            color: '#1e293b',
-                                            textAlign: col.align || 'left',
-                                            verticalAlign: 'middle'
-                                        }}>
+                                        <td key={col.key} style={{ textAlign: col.align || 'left' }}>
                                             {col.render ? col.render(row[col.key], row, context) : row[col.key]}
                                         </td>
                                     ))}
                                     {rowActions && (
-                                        <td style={{ 
-                                            padding: compacto ? '12px 11px' : '14px 18px', 
-                                            textAlign: 'right', 
-                                            verticalAlign: 'middle',
-                                            position: 'sticky',
-                                            right: 0,
-                                            backgroundColor: '#fff',
-                                            boxShadow: '-4px 0 8px rgba(0,0,0,0.02)'
-                                        }}
-                                            className="actions-cell"
-                                        >
+                                        <td className="adm-tabla-acciones actions-cell">
                                             {rowActions(row)}
                                         </td>
                                     )}
@@ -95,8 +62,8 @@ const DataTable = ({ columns = [], data = [], rowActions, isLoading, context = {
                 )}
             </div>
             
-            {/* Indicador de scroll para móvil */}
-            {isMobile && !isLoading && data.length > 0 && (
+            {/* El aviso de desplazamiento; la hoja decide donde se ve. */}
+            {!isLoading && data.length > 0 && (
                 <div className="adm-tabla-pie">
                     ⬅️ Desliza para ver más acciones ➡️
                 </div>

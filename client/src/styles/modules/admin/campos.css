@@ -750,7 +750,6 @@
     background-color: var(--color-bg);
     box-shadow: -4px 0 8px rgba(0, 0, 0, 0.02);
 }
-.adm-tabla-cabecera-acciones--compacta { padding: 0.75rem 0.6875rem; }
 /* La cabecera de la tabla se queda arriba mientras se recorre la lista. */
 .adm-tabla-cabecera {
     background-color: var(--color-bg);
@@ -768,6 +767,15 @@
     overflow-y: auto;
     overflow-x: auto;
     position: relative;
+}
+
+/* El aviso de "desliza para ver mas": se dibuja siempre y solo se muestra donde
+   la tabla no cabe entera. Antes React decidia si renderizarlo preguntandole el
+   ancho a JavaScript. */
+.adm-tabla-pie { display: none; }
+
+@media (max-width: 639.98px) {
+    .adm-tabla-pie { display: block; }
 }
 
 .adm-tabla-pie {
@@ -894,4 +902,59 @@
     width: 100%;
     height: 100%;
     z-index: 1;
+}
+
+/* ── La tabla del panel ─────────────────────────────────────────────────────
+   Estas medidas se decidian en el JSX con `compacto ? esto : lo otro`, y
+   `compacto` salia de medir la ventana en JavaScript. */
+
+.adm-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.adm-tabla th {
+    padding: 0.8125rem 1.125rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--color-text-placeholder);
+    text-transform: uppercase;
+    letter-spacing: 0.05rem;
+}
+
+.adm-tabla td {
+    padding: 0.875rem 1.125rem;
+    font-size: 0.84375rem;
+    color: var(--color-text-secondary);
+    vertical-align: middle;
+}
+
+/* La columna de acciones se queda pegada al borde derecho mientras la tabla se
+   desplaza: si no, en una tabla ancha hay que arrastrar hasta el final para
+   poder editar una fila. */
+.adm-tabla-acciones {
+    text-align: right;
+    vertical-align: middle;
+    position: sticky;
+    right: 0;
+    background-color: var(--color-surface);
+    box-shadow: -4px 0 8px rgba(0, 0, 0, 0.02);
+}
+
+/* SIN ANCHO DE SOBRA, EL RELLENO ES LO PRIMERO QUE SE VA
+   18px por lado en seis columnas son 216px que no se ven pero empujan la tabla
+   fuera de la pantalla, y las ultimas columnas -PRECIO, STOCK- quedaban
+   cortadas. */
+@media (max-width: 1399.98px) {
+    .adm-tabla th,
+    .adm-tabla-cabecera-acciones { padding: 0.75rem 0.6875rem; }
+    .adm-tabla td,
+    .adm-tabla .adm-tabla-acciones { padding: 0.75rem 0.6875rem; }
+}
+
+/* En telefono la tabla no se aprieta: se desplaza. Apretarla hace ilegibles las
+   columnas de datos, que es justamente a lo que se viene. */
+@media (max-width: 639.98px) {
+    .adm-tabla { min-width: 43.75rem; }
 }

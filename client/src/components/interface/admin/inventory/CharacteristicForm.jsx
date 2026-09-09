@@ -264,8 +264,7 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                                                 onKeyDown={e => e.key === 'Enter' && addOption()} 
                                                 autoFocus={!row.is_system && rIdx === localData.domain.length - 1} 
                                                 disabled={row.is_system}
-                                                className={`char-form-input-val ${row.is_system ? 'system' : 'normal'}`}
-                                                className="adm-doble"
+                                                className={`char-form-input-val adm-doble ${row.is_system ? 'system' : 'normal'}`}
                                             />
                                             <button 
                                                 type="button"

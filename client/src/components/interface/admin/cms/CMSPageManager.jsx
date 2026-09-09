@@ -253,23 +253,9 @@ const CMSPageManager = ({
                 </div>
             </div>
 
-            <div style={{ 
-                flex: 1, 
-                display: 'grid', 
-                gridTemplateColumns: isMobileScreen ? '1fr' : '420px 1fr', 
-                gap: isMobileScreen ? '0' : '32px', 
-                overflow: 'hidden',
-                minHeight: 0 // Importante para que el scroll interno funcione en flex/grid
-            }}>
+            <div className="cms-pg-doble">
                 {/* Lado Izquierdo: Lista de Bloques */}
-                <div style={{ 
-                    overflowY: 'auto', 
-                    padding: isMobileScreen ? '0 16px 100px 16px' : '0 10px 10px 0', 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    gap: '12px',
-                    minHeight: 0
-                }}>
+                <div className="cms-pg-lista">
                     {loading ? (
                         <div className="cms-adm-cargando">Cargando...</div>
                     ) : sections.length === 0 ? (
@@ -285,6 +271,7 @@ const CMSPageManager = ({
                             return (
                                 <div 
                                     key={section.id}
+                                    className="cms-pg-fila"
                                     onPointerEnter={() => setHoveredSectionId(section.id)}
                                     onPointerLeave={() => setHoveredSectionId(null)}
                                     style={{ 
@@ -293,10 +280,6 @@ const CMSPageManager = ({
                                         borderColor: isHovered ? '#8f0653' : (isNew ? '#f1f5f9' : '#e2e8f0'),
                                         padding: '16px 20px', 
                                         borderRadius: '20px',
-                                        display: 'flex',
-                                        flexDirection: isMobileScreen ? 'column' : 'row',
-                                        alignItems: isMobileScreen ? 'stretch' : 'center',
-                                        gap: isMobileScreen ? '12px' : '16px',
                                         opacity: section.is_active ? 1 : 0.6,
                                         transition: 'all 0.2s',
                                         position: 'relative',
@@ -309,14 +292,14 @@ const CMSPageManager = ({
                                                 <button 
                                                     disabled={index === 0}
                                                     onClick={() => handleMove(index, -1)}
-                                                    className="adm-mover" disabled={index === 0}
+                                                    className="adm-mover"
                                                 >
                                                     <ChevronUp size={20} />
                                                 </button>
                                                 <button 
                                                     disabled={index === sections.length - 1}
                                                     onClick={() => handleMove(index, 1)}
-                                                    className="adm-mover" disabled={index === sections.length - 1}
+                                                    className="adm-mover"
                                                 >
                                                     <ChevronDown size={20} />
                                                 </button>
