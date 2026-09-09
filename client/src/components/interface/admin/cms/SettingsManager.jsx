@@ -402,12 +402,8 @@ const SettingsManager = () => {
                                         boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
                                     }}>
                                         <label className="adm-elegible--menuda" title="Haz clic para modificar el color de este transporte">
-                                            <div style={{
-                                                width: '18px', height: '18px', borderRadius: '50%',
-                                                backgroundColor: currentColor, border: '2px solid #fff',
-                                                boxShadow: '0 0 0 1px #cbd5e1', display: 'flex',
-                                                alignItems: 'center', justifyContent: 'center', overflow: 'hidden'
-                                            }}>
+                                            <div className="adm-muestra-color--chica adm-centrado-recortado"
+                                            style={{ backgroundColor: currentColor }}>
                                                 <input 
                                                     type="color" 
                                                     value={currentColor} 

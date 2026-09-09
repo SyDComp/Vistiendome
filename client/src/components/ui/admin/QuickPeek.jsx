@@ -104,7 +104,7 @@ const QuickPeek = ({ isOpen, onClose, data, type = 'product' }) => {
                         </div>
                         <div className="qp-cifra">
                             <div className="qp-cifra-nombre">{type === 'variant' ? 'Stock Disponible' : 'Stock Total'}</div>
-                            <div className="qp-cifra-valor" style={{ color: stock === 0 ? '#ef4444' : undefined }}>{stock} <span className="qp-cifra-unidad">und.</span></div>
+                            <div className={`qp-cifra-valor${stock === 0 ? ' adm-cifra-en-cero' : ''}`}>{stock} <span className="qp-cifra-unidad">und.</span></div>
                         </div>
                     </div>
 

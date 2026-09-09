@@ -706,15 +706,7 @@ const CMSRenderer = ({ page = 'homepage', data = null, previewMode = false, acti
                     <div
                         key={section.id}
                         id={`preview-section-${section.id}`}
-                        style={{
-                            border: previewMode && isActiveInPreview ? '3px solid #8f0653' : 'none',
-                            borderRadius: '0px',
-                            transition: 'all 0.3s ease',
-                            opacity: !section.is_active && previewMode ? 0.4 : 1,
-                            transform: previewMode && isActiveInPreview ? 'scale(1.02)' : 'none',
-                            boxShadow: previewMode && isActiveInPreview ? '0 20px 40px rgba(143,6,83,0.15)' : 'none',
-                            marginBottom: '0px'
-                        }}
+                        className={`cms-bloque-espejo${previewMode && isActiveInPreview ? ' cms-bloque-espejo--editando' : ''}${!section.is_active && previewMode ? ' cms-bloque-espejo--oculto' : ''}`}
                     >
                         {renderBlock()}
                     </div>

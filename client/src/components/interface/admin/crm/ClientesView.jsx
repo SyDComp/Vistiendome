@@ -13,12 +13,7 @@ import { formatearTelefono } from '../../../../utils/telefono';
 const TypeBadge = ({ type }) => {
     const isLead = type === 'LEAD';
     return (
-        <span style={{
-            display: 'inline-flex', alignItems: 'center', padding: '4px 10px',
-            borderRadius: '12px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase',
-            backgroundColor: isLead ? '#eff6ff' : '#ecfdf5',
-            color: isLead ? '#3b82f6' : '#10b981'
-        }}>
+        <span className={`adm-tipo-persona${isLead ? '' : ' adm-tipo-persona--clienta'}`}>
             {isLead ? 'Lead (Prospecto)' : 'Cliente'}
         </span>
     );

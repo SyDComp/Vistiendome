@@ -184,14 +184,7 @@ const FilterManager = () => {
                                             <div className="fm-fila-accion">
                                                 <button
                                                     onClick={() => handleToggleAttribute(attr.id, attr.is_filterable)}
-                                                    style={{
-                                                        display: 'inline-flex', alignItems: 'center', gap: '6px',
-                                                        padding: '8px 16px', borderRadius: '20px', border: 'none',
-                                                        background: attr.is_filterable ? '#dcfce7' : '#f1f5f9',
-                                                        color: attr.is_filterable ? '#166534' : '#64748b',
-                                                        fontWeight: '700', fontSize: '13px', cursor: 'pointer',
-                                                        transition: 'all 0.2s'
-                                                    }}
+                                                    className={`adm-interruptor${attr.is_filterable ? ' adm-interruptor--si' : ''}`}
                                                 >
                                                     {attr.is_filterable ? <Eye size={16} /> : <EyeOff size={16} />}
                                                     <span>{attr.is_filterable ? 'Filtro Visible' : 'Filtro Oculto'}</span>

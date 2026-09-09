@@ -182,13 +182,7 @@ const StudioEditor = ({ isOpen, onClose, data, onSave, mode = 'single' }) => {
                         <button
                             key={tab.id}
                             onClick={() => setActiveMobileTab(tab.id)}
-                            style={{
-                                flex: 1, padding: '16px 0', background: 'none', border: 'none',
-                                color: activeMobileTab === tab.id ? '#8f0653' : 'rgba(255,255,255,0.4)',
-                                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
-                                fontSize: '10px', fontWeight: '800', textTransform: 'uppercase',
-                                cursor: 'pointer', transition: 'all 0.2s'
-                            }}
+                            className={`est-pestana-movil${activeMobileTab === tab.id ? ' est-pestana-movil--activa' : ''}`}
                         >
                             {tab.icon}
                             {tab.label}

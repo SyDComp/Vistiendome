@@ -1291,3 +1291,73 @@
     border: 3px solid var(--color-surface);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
+/* Lead o clienta: quien todavia esta preguntando y quien ya compro. Azul el
+   primero, verde el segundo; el color hace la distincion antes de leer. */
+.adm-tipo-persona {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.625rem;
+    border-radius: 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background-color: var(--color-info-bg);
+    color: var(--color-info);
+}
+.adm-tipo-persona--clienta {
+    background-color: var(--color-success-bg);
+    color: var(--exito-500);
+}
+
+/* Una cifra que llego a cero y hay que ver: sin existencia no se puede
+   despachar. */
+.adm-cifra-en-cero { color: var(--color-error); }
+
+/* La muestra de color chica de un selector. El aro blanco la separa del fondo
+   y el gris de afuera la separa cuando el color ES blanco. */
+.adm-muestra-color--chica {
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: 50%;
+    border: 2px solid var(--color-surface);
+    box-shadow: 0 0 0 1px var(--color-text-disabled);
+}
+
+/* Una imagen que se puede elegir, y la elegida. */
+.adm-elegible-imagen { border: 1px solid var(--color-border); opacity: 0.7; }
+.adm-elegible-imagen--elegida { border: 2px solid var(--color-brand); opacity: 1; }
+
+/* Una tarjeta en modo reordenar: el borde punteado dice que se puede arrastrar. */
+.adm-reordenable { border: 2px dashed var(--color-brand); }
+
+/* La foto principal de un producto, entre todas sus fotos. */
+.adm-foto-principal {
+    border: 2.5px solid var(--color-brand);
+    box-shadow: 0 4px 12px rgba(143, 6, 83, 0.15);
+}
+
+/* Centrar lo que va dentro y recortar lo que sobre. */
+.adm-centrado-recortado {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* El aviso de resultado lleva su propio espacio abajo. */
+.adm-resultado { font-weight: 700; font-size: 0.875rem; margin-bottom: 1.25rem; }
+
+/* Un boton plano que solo lleva su texto y su icono. */
+.adm-boton-plano {
+    background: var(--color-surface);
+    color: var(--color-text-tertiary);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    cursor: pointer;
+}
+.adm-boton-plano:disabled { cursor: not-allowed; }

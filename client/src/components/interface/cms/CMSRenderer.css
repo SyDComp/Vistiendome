@@ -231,3 +231,23 @@
     box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
 }
 .cms-foto-producto--previa { border-radius: 1.25rem; }
+
+/* Un bloque de la portada dentro del espejo del gestor. El que se esta
+   editando se levanta y se enmarca, para saber cual es sin contarlos. */
+.cms-bloque-espejo {
+    border: none;
+    border-radius: 0;
+    transition: all 0.3s ease;
+    opacity: 1;
+    transform: none;
+    box-shadow: none;
+    margin-bottom: 0;
+}
+.cms-bloque-espejo--editando {
+    border: 3px solid var(--color-brand);
+    transform: scale(1.02);
+    box-shadow: 0 20px 40px rgba(143, 6, 83, 0.15);
+}
+/* Un bloque apagado en la web: en el espejo se ve, atenuado, para que la duena
+   sepa que existe y que hoy no sale. */
+.cms-bloque-espejo--oculto { opacity: 0.4; }

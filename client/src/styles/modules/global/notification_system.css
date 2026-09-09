@@ -167,3 +167,9 @@
 .btn-confirm.secondary:hover {
     background: var(--color-bg);
 }
+
+/* El icono toma el color del tipo de aviso. Estaba escrito en el JSX con un
+   ternario de tres ramas, cuando la tarjeta ya lleva su tipo como clase. */
+.toast-card.success .toast-icono { color: var(--exito-500); }
+.toast-card.error   .toast-icono { color: var(--color-error); }
+.toast-card.info    .toast-icono { color: var(--color-info); }

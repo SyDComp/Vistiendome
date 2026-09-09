@@ -81,3 +81,20 @@
     line-height: 1.6;
     margin: 0 0 2rem 0;
 }
+
+/* El boton que confirma. El tono lo trae el tipo de aviso -borrar es rojo,
+   preguntar es ambar- y por eso llega como variable: es lo unico que cambia
+   entre un caso y otro. */
+.cm-boton-confirmar {
+    flex: 1;
+    height: 3.375rem;
+    border-radius: 1rem;
+    border: none;
+    background: var(--tono);
+    color: var(--color-surface);
+    font-size: 0.9375rem;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 10px 15px -3px var(--sombra);
+}

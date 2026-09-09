@@ -53,7 +53,7 @@ export const NotificationProvider = ({ children }) => {
             <div className="toast-container">
                 {toasts.map(t => (
                     <div key={t.id} className={`toast-card ${t.type}`}>
-                        <div style={{ color: t.type === 'success' ? '#10b981' : t.type === 'error' ? '#ef4444' : '#3b82f6' }}>
+                        <div className="toast-icono">
                             {t.type === 'success' && <CheckCircle2 size={20} />}
                             {t.type === 'error' && <AlertCircle size={20} />}
                             {t.type === 'info' && <Info size={20} />}

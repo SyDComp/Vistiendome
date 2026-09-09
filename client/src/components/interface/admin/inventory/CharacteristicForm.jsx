@@ -271,16 +271,7 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                                                 disabled={row.is_system}
                                                 onClick={() => setPickingImageIndex(rIdx)}
                                                 className="adm-boton-secundario adm-boton-secundario--bajo"
-                                                style={{
-                                                    background: '#fff',
-                                                    color: '#334155',
-                                                    fontSize: '13px',
-                                                    fontWeight: 500,
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '6px',
-                                                    cursor: row.is_system ? 'not-allowed' : 'pointer'
-                                                }}
+                                                className="adm-boton-plano"
                                             >
                                                 <Image size={16} />
                                                 {row.image_url ? 'Cambiar Imagen' : 'Seleccionar Imagen'}

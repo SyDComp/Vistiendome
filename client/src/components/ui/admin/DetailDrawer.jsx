@@ -1464,9 +1464,7 @@ const DetailDrawer = ({
                                             const hex = typeof opt === 'string' ? null : opt.hex_code;
                                             
                                             return (
-                                                <div key={`${val}-${i}`} className="detail-drawer-library-grid-item" style={{ 
-                                                    border: isReorderMode ? '2px dashed #8f0653' : '1px solid #e2e8f0'
-                                                }}>
+                                                <div key={`${val}-${i}`} className="detail-drawer-library-grid-item" className={isReorderMode ? 'adm-reordenable' : 'adm-elegible-imagen'}>
                                                     {isReorderMode && (
                                                         <div className="detail-drawer-reorder-actions">
                                                             {i > 0 && (
@@ -1671,10 +1669,7 @@ const DetailDrawer = ({
                                             {(section.currentAssets || []).map((asset, i) => {
                                                 const isMain = i === 0;
                                                 return (
-                                                    <div key={asset.id || i} className="detail-drawer-img-wrapper" style={{
-                                                        border: isMain ? '2.5px solid #8f0653' : '1px solid #e2e8f0',
-                                                        boxShadow: isMain ? '0 4px 12px rgba(143,6,83,0.15)' : 'none'
-                                                    }}>
+                                                    <div key={asset.id || i} className="detail-drawer-img-wrapper" className={isMain ? 'adm-foto-principal' : 'adm-elegible-imagen'}>
                                                         <Imagen url={asset.url} className="dd-imagen-llena" sizes="120px" alt="" />
                                                         
                                                         {/* Botón Eliminar */}

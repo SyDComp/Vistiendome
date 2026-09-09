@@ -101,16 +101,8 @@ const ConfirmModal = ({
                             onConfirm();
                             onClose();
                         }}
-                        style={{ 
-                            flex: 1, 
-                            height: '54px', 
-                            borderRadius: '16px',
-                            background: theme.button,
-                            color: '#fff',
-                            fontSize: '15px',
-                            fontWeight: '800',
-                            boxShadow: `0 10px 15px -3px ${theme.shadow}`
-                        }}
+                        className="cm-boton-confirmar"
+                        style={{ '--tono': theme.button, '--sombra': theme.shadow }}
                     >
                         {confirmText}
                     </Button>

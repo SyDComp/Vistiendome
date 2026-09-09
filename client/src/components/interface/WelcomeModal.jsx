@@ -131,13 +131,8 @@ const WelcomeModal = () => {
                 {imageSrc && !imagenFallo && (
                     <div 
                         className="welcome-modal__image"
-                        style={{
-                            maxHeight: imageMaxHeight,
-                            background: imageFit === 'contain' ? bg : '#f1f5f9',
-                            display: imageFit === 'contain' ? 'flex' : 'block',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}
+                        className={`wm-imagen${imageFit === 'contain' ? ' wm-imagen--entera' : ''}`}
+                        style={{ maxHeight: imageMaxHeight, '--fondo': bg }}
                     >
                         <img 
                             src={imageSrc} 

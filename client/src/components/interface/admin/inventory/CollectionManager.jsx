@@ -227,7 +227,7 @@ const CollectionManager = () => {
                                                             key={i}
                                                             onClick={() => setFormData(p => ({ ...p, image_url: sku.image || sku.image_url }))}
                                                             className="coll-manager-rec-btn"
-                                                            style={{ border: formData.image_url === (sku.image || sku.image_url) ? '2px solid #8f0653' : '1px solid #e2e8f0', opacity: formData.image_url === (sku.image || sku.image_url) ? 1 : 0.7 }}
+                                                            className={`adm-elegible-imagen${formData.image_url === (sku.image || sku.image_url) ? ' adm-elegible-imagen--elegida' : ''}`}
                                                         >
                                                             <Imagen url={sku.image || sku.image_url} className="coll-manager-cover-img" sizes="120px" alt="" />
                                                         </button>

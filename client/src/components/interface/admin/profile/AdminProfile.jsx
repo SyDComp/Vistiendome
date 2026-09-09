@@ -85,18 +85,7 @@ const AdminProfile = () => {
     return (
         <div className="fade-in">
             {message && (
-                <div style={{
-                    padding: '16px 24px',
-                    borderRadius: '16px',
-                    background: message.type === 'success' ? '#ecfdf5' : '#fef2f2',
-                    color: message.type === 'success' ? '#059669' : '#dc2626',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    fontWeight: '700',
-                    fontSize: '14px',
-                    marginBottom: '20px'
-                }}>
+                <div className={`adm-resultado ${message.type === 'success' ? 'adm-resultado--bien' : 'adm-resultado--mal'}`}>
                     <AlertCircle size={20} />
                     {message.text}
                 </div>
