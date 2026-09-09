@@ -11,6 +11,8 @@ import { generateEAN13 } from '../../../../features/productDetail/utils/skuUtils
 import { formatCurrency } from '../../../../utils/cartUtils';
 import { imprimirDocumento } from '../../../../utils/impresion';
 import estilosImpresion from './BarcodePrinter.impresion.css?raw';
+import HojaDeEtiquetas from './HojaDeEtiquetas';
+import { useHasta } from '../../../../hooks/useCorte';
 
 // ─── Configuración de tamaños ─────────────────────────────────────────────────
 const PAPER_SIZES = {
@@ -339,13 +341,7 @@ const BarcodePrinter = () => {
     // Slots para vista previa
     const previewSlots = buildSlots();
 
-    const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
-    useEffect(() => {
-        const handleResize = () => setWindowWidth(window.innerWidth);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-    const isMobile = windowWidth <= 768;
+    const isMobile = useHasta('lg');
 
     // ─── Render ────────────────────────────────────────────────────────────────
     return (
@@ -628,72 +624,17 @@ const BarcodePrinter = () => {
                                 <p className="barcode-printer-preview-empty-title">Selecciona variantes para ver la vista previa</p>
                                 <p className="barcode-printer-preview-empty-desc">La página se llenará automáticamente con las etiquetas configuradas</p>
                             </div>
-                        ) : (() => {
-                            const colorMap = buildColorMap(selectedList);
-                            const SHEET_W = isMobile ? Math.max(250, Math.min(500, windowWidth - 48)) : 500;
-                            const SHEET_H = Math.round(SHEET_W * (grid.paperH / grid.paperW));
-                            const PAD = 14;
-                            const cellW = Math.floor((SHEET_W - PAD * 2) / grid.cols);
-                            const cellH = Math.floor((SHEET_H - PAD * 2) / grid.rows);
-
-                            const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
-                            const previewPages = chunkArray(previewSlots, grid.total);
-
-                            const txtFs = Math.max(7, Math.min(10, cellH * 0.18));
-
-                            return (
-                                <div className="barcode-printer-pages">
-                                    {previewPages.map((pageSlots, pageIndex) => (
-                                        <div key={pageIndex} className="barcode-printer-page" style={{
-                                            width: `${SHEET_W}px`,
-                                            height: `${SHEET_H}px`,
-                                            padding: `${PAD}px`,
-                                            gridTemplateColumns: `repeat(${grid.cols}, ${cellW}px)`,
-                                            gridTemplateRows: `repeat(${grid.rows}, ${cellH}px)`,
-                                        }}>
-                                            {pageSlots.map((slot, i) => {
-                                                const color = colorMap[slot.sku] || PALETTE[0];
-                                                const configText = Object.values(slot.config || {}).join(' / ');
-                                                const label = configText ? `${slot.productName} – ${configText}` : slot.productName || slot.sku;
-                                                const isClassic = labelStyle === 'classic';
-                                                return (
-                                                    <div key={i} title={`${slot.productName}\n${slot.sku}`} className="barcode-printer-label" style={{
-                                                        width: `${cellW}px`, height: `${cellH}px`,
-                                                        background: isClassic ? '#fff' : color.bg,
-                                                        border: isClassic ? '0.5px solid #e2e8f0' : `1px solid ${color.border}`,
-                                                    }}>
-                                                        <div className="barcode-printer-label-svg">
-                                                            {svgMap[slot.barcode] ? (
-                                                                <div className="barcode-printer-label-svg-inner"
-                                                                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(svgMap[slot.barcode], { ADD_TAGS: ['svg', 'g', 'rect', 'text', 'path'] }) }} />
-                                                            ) : (
-                                                                <span className="barcode-printer-label-loading">Generando...</span>
-                                                            )}
-                                                        </div>
-                                                        {showSkuText && (
-                                                            <span className="barcode-printer-label-text" style={{
-                                                                fontSize: `${txtFs}px`,
-                                                                color: isClassic ? '#444' : color.text,
-                                                            }}>
-                                                                {label}
-                                                            </span>
-                                                        )}
-                                                        {slot.price != null && (
-                                                            <span className="barcode-printer-label-text" style={{
-                                                                fontSize: `${txtFs}px`,
-                                                                color: isClassic ? '#444' : color.text,
-                                                            }}>
-                                                                <strong>{formatCurrency(slot.price)}</strong> · Vistiendomé
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    ))}
-                                </div>
-                            );
-                        })()}
+                        ) : (
+                            <HojaDeEtiquetas
+                                etiquetas={previewSlots}
+                                grid={grid}
+                                colorMap={buildColorMap(selectedList)}
+                                svgMap={svgMap}
+                                paleta={PALETTE}
+                                estilo={labelStyle}
+                                mostrarTexto={showSkuText}
+                            />
+                        )}
                     </div>
 
                     {/* Contenedor oculto para pre-renderizar SVGs de impresión */}
@@ -719,7 +660,7 @@ const BarcodePrinter = () => {
 
             {/* Overlay Modal Expandido */}
             {expandedSection && (
-                <div className={`barcode-printer-modal-overlay ${window.innerWidth <= 768 ? 'is-mobile' : 'is-desktop'}`}>
+                <div className={`barcode-printer-modal-overlay ${isMobile ? 'is-mobile' : 'is-desktop'}`}>
                     <div className={`barcode-printer-modal-content ${expandedSection === 'preview' ? 'preview-size' : 'copies-size'}`}>
                         <div className="barcode-printer-modal-header">
                             <div className="barcode-printer-modal-header-info">
@@ -772,71 +713,18 @@ const BarcodePrinter = () => {
                                             <BarChart2 size={48} className="adm-icono-tenue" />
                                             <p className="barcode-printer-preview-empty-title">Selecciona variantes para ver la vista previa</p>
                                         </div>
-                                    ) : (() => {
-                                        const colorMap = buildColorMap(selectedList);
-                                        const SHEET_W = isMobile ? Math.max(250, windowWidth - 32) : Math.min(800, windowWidth - 80);
-                                        const SHEET_H = Math.round(SHEET_W * (grid.paperH / grid.paperW));
-                                        const PAD = 14;
-                                        const cellW = Math.floor((SHEET_W - PAD * 2) / grid.cols);
-                                        const cellH = Math.floor((SHEET_H - PAD * 2) / grid.rows);
-
-                                        const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
-                                        const previewPages = chunkArray(previewSlots, grid.total);
-                                        const txtFs = Math.max(7, Math.min(10, cellH * 0.18));
-
-                                        return (
-                                            <div className="barcode-printer-pages">
-                                                {previewPages.map((pageSlots, pageIndex) => (
-                                                    <div key={pageIndex} className="barcode-printer-page" style={{
-                                                        width: `${SHEET_W}px`,
-                                                        height: `${SHEET_H}px`,
-                                                        padding: `${PAD}px`,
-                                                        gridTemplateColumns: `repeat(${grid.cols}, ${cellW}px)`,
-                                                        gridTemplateRows: `repeat(${grid.rows}, ${cellH}px)`,
-                                                    }}>
-                                                        {pageSlots.map((slot, i) => {
-                                                            const color = colorMap[slot.sku] || PALETTE[0];
-                                                            const configText = Object.values(slot.config || {}).join(' / ');
-                                                            const label = configText ? `${slot.productName} – ${configText}` : slot.productName || slot.sku;
-                                                            const isClassic = labelStyle === 'classic';
-                                                            return (
-                                                                <div key={i} title={`${slot.productName}\n${slot.sku}`} className="barcode-printer-label" style={{
-                                                                    width: `${cellW}px`, height: `${cellH}px`,
-                                                                    background: isClassic ? '#fff' : color.bg,
-                                                                    border: isClassic ? '0.5px solid #e2e8f0' : `1px solid ${color.border}`,
-                                                                }}>
-                                                                    <div className="barcode-printer-label-svg">
-                                                                        {svgMap[slot.barcode] ? (
-                                                                            <div className="barcode-printer-label-svg-inner"
-                                                                                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(svgMap[slot.barcode], { ADD_TAGS: ['svg', 'g', 'rect', 'text', 'path'] }) }} />
-                                                                        ) : (
-                                                                            <span className="barcode-printer-label-loading">Generando...</span>
-                                                                        )}
-                                                                    </div>
-                                                                    {showSkuText && (
-                                                                        <span className="barcode-printer-label-text" style={{
-                                                                            fontSize: `${txtFs}px`,
-                                                                            color: isClassic ? '#444' : color.text,
-                                                                        }}>
-                                                                            {label}
-                                                                        </span>
-                                                                    )}
-                                                                    {slot.price != null && (
-                                                                        <span className="barcode-printer-label-text" style={{
-                                                                            fontSize: `${txtFs}px`,
-                                                                            color: isClassic ? '#444' : color.text,
-                                                                        }}>
-                                                                            <strong>{formatCurrency(slot.price)}</strong> · Vistiendomé
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        );
-                                    })()}
+                                    ) : (
+                                        <HojaDeEtiquetas
+                                            etiquetas={previewSlots}
+                                            grid={grid}
+                                            colorMap={buildColorMap(selectedList)}
+                                            svgMap={svgMap}
+                                            paleta={PALETTE}
+                                            estilo={labelStyle}
+                                            mostrarTexto={showSkuText}
+                                            amplia
+                                        />
+                                    )}
                                 </div>
                             )}
                         </div>

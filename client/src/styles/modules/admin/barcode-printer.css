@@ -634,23 +634,61 @@
     padding: 12px;
 }
 
+/* LA HOJA SE MIDE SOLA
+   Estas medidas las calculaba JavaScript: leia `window.innerWidth`, le restaba
+   los margenes, sacaba el alto por regla de tres y repartia el resto entre las
+   columnas para dar a cada etiqueta su ancho en pixeles. Eso obligaba a
+   escuchar el `resize` de la ventana y a redibujar la hoja entera en cada pixel
+   que se arrastraba el borde.
+
+   `clamp` hace lo mismo sin medir nada: no baja de 15.625rem, no pasa de
+   31.25rem, y entremedio ocupa el ancho que haya menos los margenes. */
 .barcode-printer-page {
+    width: clamp(15.625rem, 100vw - 3rem, 31.25rem);
+    /* La proporcion del papel de verdad, no una altura calculada: si se elige
+       otro formato, la hoja cambia de forma sola. */
+    aspect-ratio: var(--papel-ancho) / var(--papel-alto);
+    padding: 0.875rem;
+
     background: var(--color-surface);
     border: 1px solid var(--color-text-placeholder);
     border-radius: 3px;
     box-shadow: 3px 4px 18px rgba(0,0,0,0.15);
+
     display: grid;
+    /* `1fr` reparte: cada etiqueta ocupa su parte del alto y del ancho que
+       quedan, sin que nadie tenga que dividir a mano. */
+    grid-template-columns: repeat(var(--columnas), 1fr);
+    grid-template-rows: repeat(var(--filas), 1fr);
     gap: 0;
     flex-shrink: 0;
 }
 
+/* La vista previa ampliada: la misma hoja, con mas espacio para mirarla. */
+.barcode-printer-page--amplia {
+    width: clamp(15.625rem, 100vw - 5rem, 50rem);
+}
+
 .barcode-printer-label {
+    /* Con esto la etiqueta pasa a ser la referencia de tamano de lo que lleva
+       dentro, y su texto puede pedirle una fraccion de SU altura. */
+    container-type: size;
+
+    background: var(--etiqueta-fondo);
+    border: 1px solid var(--etiqueta-borde);
+
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     padding: 1px;
+}
+
+/* La etiqueta sobria: sin el color de la variante. */
+.barcode-printer-label--clasica {
+    background: var(--color-surface);
+    border: 0.5px solid var(--color-border);
 }
 
 .barcode-printer-label-svg {
@@ -672,12 +710,22 @@
     justify-content: center;
 }
 
+.barcode-printer-label--clasica .barcode-printer-label-text {
+    color: var(--color-text-body);
+}
+
 .barcode-printer-label-loading {
     font-size: 10px;
     color: var(--color-text-placeholder);
 }
 
 .barcode-printer-label-text {
+    /* 18cqh es el 18% de la altura de la etiqueta, que es exactamente lo que
+       calculaba JavaScript. `clamp` le pone piso y techo: por chica que quede
+       la etiqueta el texto sigue siendo legible, y por grande que sea no se
+       come el codigo de barras. */
+    font-size: clamp(0.4375rem, 18cqh, 0.625rem);
+    color: var(--etiqueta-texto);
     font-weight: 700;
     text-align: center;
     text-overflow: ellipsis;
