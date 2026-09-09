@@ -23,6 +23,7 @@ import { getSiteSettings, updateSiteSetting } from '../../../../lib/api/endpoint
 import { getFiltersMetadata, getCatalogo } from '../../../../lib/api/endpoints/products.api';
 import { useSettings } from '../../../../context/SettingsContext';
 import { getShippingColor } from '../../../../utils/shippingColors';
+import { esTelefonoValido } from '../../../../utils/telefono';
 
 const SettingsManager = () => {
     const [settings, setSettings] = useState({
@@ -335,6 +336,16 @@ const SettingsManager = () => {
                                 placeholder="+56 9 1234 5678"
                                 className="adm-entrada" 
                             />
+                            {/* Este numero se imprime en el pie de la web y en
+                                la pagina de contacto: si esta mal, la clienta
+                                marca un numero que no existe. Hoy hay uno de
+                                doce digitos guardado ahi. */}
+                            {settings.phone_display && !esTelefonoValido(settings.phone_display) && (
+                                <p className="adm-aviso-campo">
+                                    Revisa este número: un teléfono chileno tiene 9 dígitos
+                                    (ej: 9 1234 5678). Así como está se mostrará en la web.
+                                </p>
+                            )}
                         </div>
                         <div className="input-group">
                             <label className="adm-rotulo"><Globe size={14} /> Dirección / Taller</label>

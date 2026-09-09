@@ -16,6 +16,7 @@ import {
 import { navLinks, soporteLinks } from '../../../constants/navegacion';
 import { useSettings } from '../../../context/SettingsContext';
 import { buildMapLinks } from '../../../utils/mapLinks';
+import { formatearTelefono } from '../../../utils/telefono';
 
 const Footer = ({ onNavigate }) => {
     const { settings } = useSettings();
@@ -122,7 +123,7 @@ const Footer = ({ onNavigate }) => {
                                 <Phone size={16} className="contact-icon" />
                                 <div>
                                     <span className="info-label">Teléfono Directo</span>
-                                    <p>{contact.phone_display}</p>
+                                    <p>{formatearTelefono(contact.phone_display)}</p>
                                 </div>
                             </div>
                         )}

@@ -9,6 +9,7 @@ import { buildMapLinks } from '../../../utils/mapLinks';
 import Button from '../../ui/Button';
 import { get, post } from '../../../lib/api/client';
 import { useScrollLock } from '../../../hooks/useScrollLock';
+import { formatearTelefono } from '../../../utils/telefono';
 
 const Contacto = () => {
     const { settings } = useSettings();
@@ -584,7 +585,7 @@ const Contacto = () => {
                     {contact.phone_display && (
                         <div className="info-block">
                             <h4><Phone size={18} /> Teléfono Directo</h4>
-                            <p>{contact.phone_display}</p>
+                            <p>{formatearTelefono(contact.phone_display)}</p>
                         </div>
                     )}
                     <div className="info-block">
