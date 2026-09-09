@@ -34,5 +34,12 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        # EL .env TIENE MAS COSAS QUE ESTA CLASE, Y ESTA BIEN
+        # Ahi viven tambien POSTGRES_USER, POSTGRES_DB y lo que necesite
+        # docker-compose. Sin esto, pydantic tomaba cada clave que no fuera un
+        # campo de aqui como un error y la aplicacion no arrancaba: pasaba al
+        # correr el servidor desde la raiz del proyecto, donde SI hay .env.
+        # En el contenedor no se notaba porque adentro no hay .env que leer.
+        extra = "ignore"
 
 settings = Settings()
