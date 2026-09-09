@@ -1,7 +1,9 @@
 import LogoVistiendome from '../../ui/LogoVistiendome';
-import React, { useState, useEffect } from 'react';
+import SuspenseFallback from '../../ui/SuspenseFallback';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Routes, Route, useNavigate, Navigate, Link, useLocation } from 'react-router-dom';
 import { 
+
     Package, 
     Image as ImageIcon, 
     Users, 
@@ -16,20 +18,30 @@ import {
     User,
     BarChart3
 } from 'lucide-react';
-import InventoryModule from './inventory/InventoryModule';
-import WorkspaceModule from './inventory/WorkspaceModule';
-import BarcodePrinter from './inventory/BarcodePrinter';
-import MediaGallery from './media/MediaGallery';
-import HomepageManager from './cms/HomepageManager';
-import CustomerServiceManager from './cms/CustomerServiceManager';
-import SettingsManager from './cms/SettingsManager';
-import ClientesView from './crm/ClientesView';
-import CotizacionesView from './crm/CotizacionesView';
-import OrdenCorteView from './crm/OrdenCorteView';
-import PropuestasView from './crm/PropuestasView';
-import ShippingLabelPrinter from './crm/ShippingLabelPrinter';
-import AnalyticsModule from './analytics/AnalyticsModule';
-import AdminProfile from './profile/AdminProfile';
+
+
+// CADA MODULO SE DESCARGA CUANDO SE ENTRA A EL, NO ANTES
+// Estos catorce se importaban de golpe, y el navegador tenia que bajar 684 KB
+// -el panel entero: inventario, CRM, portada, analitica, el estudio- antes de
+// dibujar la primera pantalla. Quien entraba solo a ver una cotizacion pagaba
+// igual la espera del resto.
+//
+// Las rutas ya estaban separadas una por una aqui abajo; lo unico que faltaba
+// era que el import tambien lo estuviera.
+const InventoryModule = React.lazy(() => import('./inventory/InventoryModule'));
+const WorkspaceModule = React.lazy(() => import('./inventory/WorkspaceModule'));
+const BarcodePrinter = React.lazy(() => import('./inventory/BarcodePrinter'));
+const MediaGallery = React.lazy(() => import('./media/MediaGallery'));
+const HomepageManager = React.lazy(() => import('./cms/HomepageManager'));
+const CustomerServiceManager = React.lazy(() => import('./cms/CustomerServiceManager'));
+const SettingsManager = React.lazy(() => import('./cms/SettingsManager'));
+const ClientesView = React.lazy(() => import('./crm/ClientesView'));
+const CotizacionesView = React.lazy(() => import('./crm/CotizacionesView'));
+const OrdenCorteView = React.lazy(() => import('./crm/OrdenCorteView'));
+const PropuestasView = React.lazy(() => import('./crm/PropuestasView'));
+const ShippingLabelPrinter = React.lazy(() => import('./crm/ShippingLabelPrinter'));
+const AnalyticsModule = React.lazy(() => import('./analytics/AnalyticsModule'));
+const AdminProfile = React.lazy(() => import('./profile/AdminProfile'));
 
 const DashboardLayout = () => {
     const navigate = useNavigate();
@@ -259,6 +271,11 @@ const DashboardLayout = () => {
             <main className={`admin-main ${isMobile ? 'mobile' : 'desktop'}`}>
                 <div className={`admin-content-wrapper ${isMobile ? 'mobile' : 'desktop'}`}>
                     <div className="admin-content-inner">
+                        {/* El indicador va AQUI DENTRO y no envolviendo el panel
+                            entero: al cambiar de modulo se recarga el area de
+                            contenido, mientras la barra lateral se queda
+                            quieta. */}
+                        <Suspense fallback={<SuspenseFallback />}>
                         <Routes>
                             <Route path="/" element={<Navigate to="/admin/dashboard/inventory/products" />} />
                             <Route path="/inventory" element={<Navigate to="/admin/dashboard/inventory/products" />} />
@@ -286,6 +303,7 @@ const DashboardLayout = () => {
                             <Route path="/profile" element={<AdminProfile />} />
                             <Route path="*" element={<Navigate to="/admin/dashboard/inventory/products" />} />
                         </Routes>
+                        </Suspense>
                     </div>
                 </div>
             </main>
