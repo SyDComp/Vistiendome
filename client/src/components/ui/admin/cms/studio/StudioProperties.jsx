@@ -49,18 +49,7 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                                 <button
                                     key={t.id}
                                     onClick={() => onUpdateLayer({ display: t.id })}
-                                    style={{
-                                        flex: 1,
-                                        padding: '8px 4px',
-                                        borderRadius: '8px',
-                                        border: '1px solid',
-                                        borderColor: (activeLayer.display || 'both') === t.id ? '#8f0653' : 'rgba(255,255,255,0.1)',
-                                        background: (activeLayer.display || 'both') === t.id ? 'rgba(143,6,83,0.2)' : 'rgba(255,255,255,0.05)',
-                                        color: (activeLayer.display || 'both') === t.id ? '#fff' : 'rgba(255,255,255,0.4)',
-                                        fontSize: '9px',
-                                        fontWeight: '900',
-                                        cursor: 'pointer'
-                                    }}
+                                    className={`est-opcion ${(activeLayer.display || 'both') === t.id ? 'est-opcion--activa' : ''}`}
                                 >
                                     {t.lbl}
                                 </button>
@@ -109,26 +98,15 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                                         <button 
                                             key={w.id}
                                             onClick={() => onUpdateLayer({ fontWeight: w.weight })}
-                                            style={{
-                                                flex: 1, padding: '8px', borderRadius: '8px', border: '1px solid',
-                                                borderColor: (activeLayer.fontWeight || '900') === w.weight ? '#8f0653' : 'rgba(255,255,255,0.1)',
-                                                background: (activeLayer.fontWeight || '900') === w.weight ? 'rgba(143,6,83,0.2)' : 'rgba(255,255,255,0.05)',
-                                                color: (activeLayer.fontWeight || '900') === w.weight ? '#fff' : 'rgba(255,255,255,0.4)',
-                                                fontWeight: w.weight, fontSize: '11px', cursor: 'pointer'
-                                            }}
+                                            className={`est-opcion est-opcion--texto ${(activeLayer.fontWeight || '900') === w.weight ? 'est-opcion--activa' : ''}`}
+                                            style={{ fontWeight: w.weight }}
                                         >
                                             {w.lbl}
                                         </button>
                                     ))}
                                     <button 
                                         onClick={() => onUpdateLayer({ fontStyle: activeLayer.fontStyle === 'italic' ? 'normal' : 'italic' })}
-                                        style={{
-                                            flex: 1, padding: '8px', borderRadius: '8px', border: '1px solid',
-                                            borderColor: activeLayer.fontStyle === 'italic' ? '#8f0653' : 'rgba(255,255,255,0.1)',
-                                            background: activeLayer.fontStyle === 'italic' ? 'rgba(143,6,83,0.2)' : 'rgba(255,255,255,0.05)',
-                                            color: activeLayer.fontStyle === 'italic' ? '#fff' : 'rgba(255,255,255,0.4)',
-                                            fontStyle: 'italic', fontWeight: 'bold', fontSize: '11px', cursor: 'pointer'
-                                        }}
+                                        className={`est-opcion est-opcion--texto est-opcion--cursiva ${activeLayer.fontStyle === 'italic' ? 'est-opcion--activa' : ''}`}
                                     >
                                         I
                                     </button>
@@ -201,20 +179,7 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                                 <button
                                     key={t.id}
                                     onClick={() => onUpdateScene({ border_type: t.id })}
-                                    style={{
-                                        flex: 1,
-                                        padding: '8px 4px',
-                                        borderRadius: '8px',
-                                        border: '1px solid',
-                                        borderColor: active ? (isCustom ? '#ff4d94' : '#8f0653') : 'rgba(255,255,255,0.1)',
-                                        background: active ? (isCustom ? 'rgba(143,6,83,0.4)' : 'rgba(143,6,83,0.2)') : 'rgba(255,255,255,0.05)',
-                                        color: active ? '#fff' : 'rgba(255,255,255,0.4)',
-                                        fontSize: '9px',
-                                        fontWeight: '900',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s',
-                                        boxShadow: isCustom ? '0 0 10px rgba(143,6,83,0.3)' : 'none'
-                                    }}
+                                    className={`est-opcion ${active ? (isCustom ? 'est-opcion--propia-movil' : 'est-opcion--activa') : ''}`}
                                 >
                                     {t.lbl}
                                 </button>
@@ -243,19 +208,7 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                                 <button
                                     key={t.id}
                                     onClick={() => isMobile ? setMobileRatio(t.id) : setDesktopRatio(t.id)}
-                                    style={{
-                                        flex: 1,
-                                        padding: '8px 4px',
-                                        borderRadius: '8px',
-                                        border: '1px solid',
-                                        borderColor: active ? '#8f0653' : 'transparent',
-                                        background: active ? 'rgba(143,6,83,0.2)' : 'transparent',
-                                        color: active ? '#fff' : 'rgba(255,255,255,0.4)',
-                                        fontSize: '9px',
-                                        fontWeight: '900',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s'
-                                    }}
+                                    className={`est-opcion est-opcion--sin-fondo ${active ? 'est-opcion--activa' : ''}`}
                                 >
                                     {t.lbl}
                                 </button>
@@ -284,8 +237,6 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                                 <button 
                                     onClick={onDuplicateDesignToAllScenes}
                                     className="est-pestana est-pestana--activa"
-                                    onMouseEnter={e => e.currentTarget.style.background = '#a60862'}
-                                    onMouseLeave={e => e.currentTarget.style.background = '#8f0653'}
                                 >
                                     {isDeviceMobile ? 'Duplicar diseño a todo' : 'Duplicar diseño a todas las escenas'}
                                 </button>

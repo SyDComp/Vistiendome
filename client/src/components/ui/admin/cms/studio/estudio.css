@@ -696,3 +696,61 @@
 
 .est-fila--amplia { display: flex; align-items: center; gap: 1.25rem; }
 .est-texto-vacio { color: rgba(255, 255, 255, 0.3); font-size: 0.75rem; font-style: italic; }
+
+/* ── Los botones de opcion del estudio ──────────────────────────────────────
+   El estudio va sobre fondo oscuro, asi que su "elegido" no puede ser el mismo
+   del resto del panel: aqui el activo se pinta con el rosa DILUIDO sobre el
+   velo, porque el rosa entero sobre negro deslumbra y tapa lo que hay al lado.
+
+   Este bloque estaba escrito seis veces en `StudioProperties`, una por cada
+   grupo de opciones: donde se muestra la capa, su grosor, su inclinacion, el
+   borde de la escena. Las mismas tres lineas cada vez. */
+
+.est-opcion {
+    flex: 1;
+    font-weight: 900;
+    padding: 0.5rem 0.25rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--est-velo-borde);
+    background: var(--est-velo);
+    color: var(--est-apagado);
+    font-size: 0.5625rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.est-opcion--activa {
+    border-color: var(--est-marca);
+    background: color-mix(in srgb, var(--est-marca) 20%, transparent);
+    color: var(--color-surface);
+}
+
+/* Una opcion que la duena cambio SOLO para telefono. Se marca distinto del
+   resto para que se vea que ahi la version movil dejo de seguir a la de
+   escritorio. */
+.est-opcion--propia-movil {
+    border-color: var(--color-brand-vivid);
+    background: color-mix(in srgb, var(--color-brand-vivid) 20%, transparent);
+    color: var(--color-surface);
+}
+
+/* Antes esto se hacia escribiendo en `element.style` desde onMouseEnter y
+   onMouseLeave: el color quedaba pegado al boton y la hoja ya no podia
+   cambiarlo. */
+.est-pestana--activa:hover { background: var(--color-brand-vivid); }
+
+/* Variantes de la misma opcion: el boton de grosor y el de cursiva muestran su
+   efecto en su propio texto, asi que necesitan la letra mas grande. */
+.est-opcion--texto { padding: 0.5rem; font-size: 0.6875rem; }
+.est-opcion--cursiva { font-style: italic; font-weight: bold; }
+
+/* Dentro de un panel que ya tiene fondo, la opcion sin elegir no pinta nada:
+   dos fondos superpuestos ensucian. */
+.est-opcion--sin-fondo { background: transparent; border-color: transparent; }
+
+/* Antes esto se hacia escribiendo en `element.style` desde onMouseEnter y
+   onMouseLeave: el color quedaba pegado al boton y la hoja ya no podia
+   cambiarlo. */
+.est-pestana--activa:hover { background: var(--color-brand-vivid); }
