@@ -14,7 +14,7 @@
 
 .oc-form .oc-form-top { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
 
-.oc-form .oc-btn-volver { display:flex; align-items:center; gap:6px; background:var(--color-bg-subtle); border:none; padding:8px 14px; border-radius:10px; font-weight:700; font-size:13px; color:#475569; cursor:pointer; }
+.oc-form .oc-btn-volver { display:flex; align-items:center; gap:6px; background:var(--color-bg-subtle); border:none; padding:8px 14px; border-radius:10px; font-weight:700; font-size:13px; color:var(--color-text-body); cursor:pointer; }
 
 .oc-form .oc-bloque { background:var(--color-surface); border:1px solid var(--color-border); border-radius:16px; padding:20px; margin-bottom:16px; }
 
@@ -22,19 +22,19 @@
 
 .oc-form .oc-hint { margin:0 0 14px; font-size:13px; color:var(--color-text-muted); line-height:1.5; }
 
-.oc-form .oc-vacio { padding:20px; text-align:center; color:var(--color-text-muted); font-size:13px; background:var(--color-bg-elevated); border-radius:10px; }
+.oc-form .oc-vacio { padding:20px; text-align:center; color:var(--color-text-muted); font-size:13px; background:var(--color-bg); border-radius:10px; }
 
 .oc-form .oc-buscador { width:100%; height:42px; padding:0 14px; border:1px solid var(--color-border); border-radius:10px; font-size:14px; margin-bottom:10px; }
 
 .oc-form .oc-resultados { display:flex; flex-direction:column; gap:4px; margin-bottom:12px; max-height:220px; overflow-y:auto; }
 
-.oc-form .oc-resultado { display:flex; align-items:center; gap:8px; text-align:left; background:var(--color-bg-elevated); border:1px solid var(--color-border); border-radius:8px; padding:8px 10px; font-size:13px; cursor:pointer; color:#334155; }
+.oc-form .oc-resultado { display:flex; align-items:center; gap:8px; text-align:left; background:var(--color-bg); border:1px solid var(--color-border); border-radius:8px; padding:8px 10px; font-size:13px; cursor:pointer; color:var(--color-text-tertiary); }
 
-.oc-form .oc-resultado:hover { background:#eef2ff; }
+.oc-form .oc-resultado:hover { background:var(--color-info-bg); }
 
 .oc-form .oc-cantidad { width:70px; height:34px; text-align:right; padding:0 8px; border:1px solid var(--color-border); border-radius:8px; }
 
-.oc-form .oc-quitar { background:none; border:none; color:#dc2626; cursor:pointer; padding:4px; }
+.oc-form .oc-quitar { background:none; border:none; color:var(--color-error-strong); cursor:pointer; padding:4px; }
 
 .oc-form .oc-notas { width:100%; padding:10px 12px; border:1px solid var(--color-border); border-radius:10px; font-size:13px; font-family:inherit; resize:vertical; }
 

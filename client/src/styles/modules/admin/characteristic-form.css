@@ -58,7 +58,7 @@
 .char-form-section-1 {
     padding: 32px;
     border-bottom: 1px solid var(--color-border-subtle);
-    background: #fcfcfc;
+    background: var(--color-surface);
 }
 
 .char-form-label {
@@ -181,12 +181,12 @@
     border-radius: 16px;
 }
 .char-form-row.system {
-    background: #fcfcfc;
+    background: var(--color-surface);
     border: 1px dashed var(--color-border);
     opacity: 0.9;
 }
 .char-form-row.normal {
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     border: 1px solid var(--color-border);
     opacity: 1;
 }
@@ -265,7 +265,7 @@
 .char-form-badge-linked {
     font-size: 10px;
     background: var(--color-brand-lighter);
-    color: #db2777;
+    color: var(--color-brand-vivid);
     padding: 4px 8px;
     border-radius: 8px;
     font-weight: 800;
@@ -279,7 +279,7 @@
     width: 100%;
 }
 .char-form-input-generic.system { color: var(--color-text-placeholder); cursor: not-allowed; }
-.char-form-input-generic.normal { color: #1e293b; cursor: text; }
+.char-form-input-generic.normal { color: var(--color-text-secondary); cursor: text; }
 
 .char-form-del-btn {
     border: none;
@@ -319,7 +319,7 @@
     border-radius: 18px;
     border: none;
     color: var(--color-surface);
-    background: linear-gradient(135deg, var(--color-brand) 0%, #db2777 100%);
+    background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-vivid) 100%);
     font-size: 15px;
     font-weight: 900;
     cursor: pointer;
@@ -333,7 +333,7 @@
 
 .char-form-section-4 {
     padding: 20px;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     border-top: 1px solid var(--color-border-subtle);
     display: flex;
     justify-content: center;

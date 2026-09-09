@@ -31,7 +31,7 @@
 }
 
 .accordion-header.is-open {
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
 }
 
 .accordion-header-left {

@@ -9,10 +9,10 @@
 
 @keyframes spin { to { transform: rotate(360deg); } }
 .table-row-hover:hover {
-    background-color: #fafafa !important;
+    background-color: var(--color-bg) !important;
 }
 .table-row-hover:hover .actions-cell {
-    background-color: #fafafa !important;
+    background-color: var(--color-bg) !important;
 }
 
 /* Declaraciones que estaban incrustadas en el JSX sobre estas mismas

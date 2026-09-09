@@ -7,10 +7,10 @@
  * JavaScript una comilla invertida en un comentario rompe el archivo entero.
  */
 
-.cot-glosario { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px 20px; background:var(--color-bg-elevated); border:1px solid var(--color-border); border-radius:10px; padding:14px 18px; margin-bottom:18px; }
+.cot-glosario { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px 20px; background:var(--color-bg); border:1px solid var(--color-border); border-radius:10px; padding:14px 18px; margin-bottom:18px; }
 .cot-glosario-item { display:flex; align-items:flex-start; gap:9px; }
 .cot-glosario-punto { width:9px; height:9px; border-radius:50%; flex-shrink:0; margin-top:5px; }
-.cot-glosario-nombre { display:block; font-size:11px; font-weight:800; letter-spacing:.4px; color:#1e293b; }
+.cot-glosario-nombre { display:block; font-size:11px; font-weight:800; letter-spacing:.4px; color:var(--color-text-secondary); }
 .cot-glosario-texto { display:block; font-size:12px; color:var(--color-text-muted); line-height:1.4; margin-top:1px; }
 
 /* Declaraciones que estaban incrustadas en el JSX sobre estas mismas
@@ -35,7 +35,7 @@
     font-family: inherit;
 }
 .cotv-accion {
-    background: linear-gradient(135deg, var(--color-brand) 0%, #d946ef 100%);
+    background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-info-deep) 100%);
     border: none;
     border-radius: 0.625rem;
     padding: 0.625rem 1.125rem;
@@ -54,7 +54,7 @@
 }
 .cotv-accion--suave {
     background: var(--color-brand-lighter);
-    border: 1px solid #fbcfe8;
+    border: 1px solid var(--color-brand-border);
     color: var(--color-brand);
     padding: 0.625rem 1rem;
     box-shadow: 0 2px 6px rgba(143, 6, 83, 0.1);

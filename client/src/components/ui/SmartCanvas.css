@@ -8,8 +8,8 @@
 
 .lienzo-rotulo { display: block; margin-bottom: 0.3125rem; }
 .lienzo-control { width: 100%; accent-color: var(--color-brand); }
-.lienzo-control--brillo { accent-color: #ffd700; }
-.lienzo-control--giro { accent-color: #333; }
+.lienzo-control--brillo { accent-color: var(--color-warning); }
+.lienzo-control--giro { accent-color: var(--color-text-secondary); }
 .lienzo-ancho { width: 100%; }
 .lienzo-separado { margin-top: 0.625rem; }
 
@@ -20,8 +20,8 @@
     margin-top: 0.9375rem;
     width: 100%;
     padding: 0.3125rem;
-    background: #f5f5f5;
-    border: 1px solid #ddd;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
     border-radius: 0.25rem;
     cursor: pointer;
     font-family: inherit;
@@ -33,5 +33,5 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: #999;
+    color: var(--color-text-placeholder);
 }

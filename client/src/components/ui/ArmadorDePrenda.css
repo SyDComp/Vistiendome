@@ -22,19 +22,19 @@
 
 .armador {
     --arm-marca: var(--color-brand);
-    --arm-acento: #c026d3;
-    --arm-acento-suave: #f0abfc;
-    --arm-fondo: #fdf4ff;
-    --arm-borde-suave: #e9d5ff;
-    --arm-texto: #86198f;
+    --arm-acento: var(--color-info-deep);
+    --arm-acento-suave: var(--color-brand-border);
+    --arm-fondo: var(--color-brand-lighter);
+    --arm-borde-suave: var(--color-brand-border);
+    --arm-texto: var(--color-brand);
     --arm-tinta: var(--color-admin-dark);
     --arm-gris: var(--color-text-placeholder);
-    --arm-gris-texto: #475569;
+    --arm-gris-texto: var(--color-text-body);
     --arm-linea: var(--color-border);
     --arm-campo: var(--color-text-disabled);
-    --arm-mal: #dc2626;
-    --arm-bien: #15803d;
-    --arm-duda: #a16207;
+    --arm-mal: var(--color-error-strong);
+    --arm-bien: var(--color-success-deep);
+    --arm-duda: var(--color-warning-deep);
 
     /* Una sola escala para todo el componente. Cambiar el cuerpo de texto acá
        mueve la pantalla entera, en vez de perseguir treinta valores sueltos. */

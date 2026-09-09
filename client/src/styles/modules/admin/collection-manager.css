@@ -101,7 +101,7 @@
     border: 2px dashed var(--color-border);
     overflow: hidden;
     position: relative;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -277,7 +277,7 @@
     padding: 12px;
     border-radius: 16px;
     border: 1px solid var(--color-border-subtle);
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
 }
 
 .coll-manager-sku-img-box {
@@ -360,7 +360,7 @@
     height: 48px;
     border-radius: 12px;
     overflow: hidden;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     border: 1px solid var(--color-border);
     cursor: zoom-in;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -386,7 +386,7 @@
 .coll-manager-dt-slug {
     font-family: monospace;
     font-size: 12px;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     padding: 2px 8px;
     border-radius: 6px;
     color: var(--color-text-muted);

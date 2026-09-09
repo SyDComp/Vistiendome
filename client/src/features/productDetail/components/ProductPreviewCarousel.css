@@ -93,13 +93,13 @@
     padding: 4px 0 10px;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    scrollbar-color: #d1a3d4 transparent;
+    scrollbar-color: var(--color-brand-border) transparent;
     touch-action: pan-x; /* Optimización para swipe fluido en móviles */
 }
 
 .thumbnails-scroll-container::-webkit-scrollbar { height: 6px !important; }
-.thumbnails-scroll-container::-webkit-scrollbar-thumb { background: #d1a3d4 !important; border-radius: 10px !important; }
-.thumbnails-scroll-container::-webkit-scrollbar-thumb:hover { background: #c592c8 !important; }
+.thumbnails-scroll-container::-webkit-scrollbar-thumb { background: var(--color-brand-border) !important; border-radius: 10px !important; }
+.thumbnails-scroll-container::-webkit-scrollbar-thumb:hover { background: var(--color-brand-border) !important; }
 .thumbnails-scroll-container::-webkit-scrollbar-track { background: transparent !important; }
 
 .thumbnails-track {
@@ -136,7 +136,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #475569;
+    color: var(--color-text-body);
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     flex-shrink: 0;

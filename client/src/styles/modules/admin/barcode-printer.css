@@ -88,8 +88,8 @@
     border: 1px solid var(--color-border);
     font-size: 13px;
     outline: none;
-    background: var(--color-bg-elevated);
-    color: #1e293b;
+    background: var(--color-bg);
+    color: var(--color-text-secondary);
 }
 
 .barcode-printer-list {
@@ -132,7 +132,7 @@
     color: var(--color-brand);
 }
 .barcode-printer-product-btn.some {
-    color: #c084fc;
+    color: var(--color-info);
 }
 .barcode-printer-product-btn.none {
     color: var(--color-text-disabled);
@@ -206,7 +206,7 @@
 .barcode-printer-left-footer {
     padding: 12px 16px;
     border-top: 1px solid var(--color-border-subtle);
-    background: #fafafa;
+    background: var(--color-bg);
     display: flex;
     gap: 8px;
     align-items: center;
@@ -236,7 +236,7 @@
     border-radius: 8px;
     background: var(--color-error-bg);
     color: var(--color-error);
-    border: 1px solid #fecaca;
+    border: 1px solid var(--color-error-border-strong);
     cursor: pointer;
     font-size: 12px;
     font-weight: 600;
@@ -285,7 +285,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     border-radius: 8px;
     padding: 4px 10px;
     border: 1px solid var(--color-border);
@@ -398,9 +398,9 @@
     padding: 10px 14px;
     background: var(--color-success-bg);
     border-radius: 10px;
-    border: 1px solid #bbf7d0;
+    border: 1px solid var(--color-success-border-strong);
     font-size: 11px;
-    color: #166534;
+    color: var(--color-success-darkest);
 }
 
 .barcode-printer-config-compat-title {
@@ -472,7 +472,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     border-radius: 10px;
     padding: 8px 12px;
     border: 1px solid var(--color-border);

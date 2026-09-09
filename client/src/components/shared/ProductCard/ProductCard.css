@@ -74,7 +74,7 @@
 }
 
 .product-card__name {
-    color: #1e293b;
+    color: var(--color-text-secondary);
     margin: 0;
     font-family: 'Outfit', sans-serif;
     font-size: 1rem;
@@ -116,7 +116,7 @@
 
 /* Precio rebajado resaltado */
 .product-card__price--sale {
-    color: #b91c1c;
+    color: var(--color-error-deep);
 }
 
 /* Badge "Oferta" sobre la imagen */
@@ -125,7 +125,7 @@
     top: 10px;
     left: 10px;
     z-index: 3;
-    background-color: #b91c1c;
+    background-color: var(--color-error-deep);
     color: var(--color-surface);
     font-family: 'Outfit', sans-serif;
     font-weight: 600;

@@ -11,7 +11,7 @@
     display: block;
     font-size: 11px;
     font-weight: 800;
-    color: var(--color-gold-accent);
+    color: var(--color-warning-darkest);
     text-transform: uppercase;
     margin-bottom: 8px;
 }
@@ -20,7 +20,7 @@
     width: 100%;
     padding: 12px 16px;
     border-radius: 12px;
-    border: 2px solid var(--color-gold-border);
+    border: 2px solid var(--color-brand-accent);
     font-size: 14px;
     font-weight: 800;
     color: var(--color-admin-dark);
@@ -30,7 +30,7 @@
 }
 
 .premium-input:focus {
-    border-color: #fbbf24;
+    border-color: var(--color-warning);
     box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
 }
 
@@ -50,7 +50,7 @@
     width: 46px;
     height: 46px;
     border-radius: 12px;
-    border: 2px solid var(--color-gold-border);
+    border: 2px solid var(--color-brand-accent);
     position: relative;
     overflow: hidden;
     cursor: pointer;
@@ -74,7 +74,7 @@
 
 /* Error text (migrated from ui.css) */
 .ui-error-text {
-    color: #d89b9b;
+    color: var(--color-error-soft);
     font-size: 12px;
     margin-top: 6px;
     animation: fadeIn 0.3s ease;
@@ -86,6 +86,6 @@
 }
 
 .ui-required-mark {
-    color: #e74c3c;
+    color: var(--color-error);
     margin-left: 3px;
 }

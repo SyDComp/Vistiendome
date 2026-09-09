@@ -25,7 +25,7 @@
     display: block;
     font-size: 0.6875rem;
     font-weight: 700;
-    color: #475569;
+    color: var(--color-text-body);
     margin-bottom: 0.25rem;
 }
 
@@ -59,7 +59,7 @@
 }
 
 .adm-tarjeta {
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     border: 1px solid var(--color-border);
     border-radius: 1rem;
     padding: 1.125rem;
@@ -81,10 +81,10 @@
     gap: 0.5rem;
     font-weight: 800;
     font-size: 0.875rem;
-    color: #1e293b;
+    color: var(--color-text-secondary);
 }
 
-.adm-dato { font-weight: 700; font-size: 0.8125rem; color: #1e293b; }
+.adm-dato { font-weight: 700; font-size: 0.8125rem; color: var(--color-text-secondary); }
 .adm-dato-secundario { font-size: 0.6875rem; color: var(--color-text-muted); }
 
 /* Una fila de una lista donde se elige algo. */
@@ -129,7 +129,7 @@
 /* Un icono que acompaña a un texto: no se encoge cuando el texto es largo. */
 .adm-icono-fijo { color: var(--color-text-muted); flex-shrink: 0; }
 
-.adm-etiqueta-fuerte { font-size: 0.875rem; font-weight: 700; color: #334155; }
+.adm-etiqueta-fuerte { font-size: 0.875rem; font-weight: 700; color: var(--color-text-tertiary); }
 
 /* La explicación bajo un control: qué hace y qué pasa si lo cambias. */
 .adm-ayuda { margin: 0; font-size: 0.75rem; color: var(--color-text-muted); line-height: 1.5; }
@@ -139,7 +139,7 @@
 .adm-nota {
     margin-top: 1.5rem;
     padding: 0.9375rem;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     border-radius: 1rem;
     display: flex;
     gap: 0.75rem;
@@ -166,7 +166,7 @@
 .adm-emblema-color--marca { background: var(--color-brand-lighter); color: var(--color-brand); }
 .adm-emblema-color--ambar { background: var(--color-warning-border); color: var(--color-warning); }
 .adm-emblema-color--azul  { background: var(--color-info-bg); color: var(--color-info); }
-.adm-emblema-color--rosa  { background: var(--color-brand-soft); color: #be185d; }
+.adm-emblema-color--rosa  { background: var(--color-brand-soft); color: var(--color-brand-vivid); }
 .adm-emblema-color--verde { background: var(--color-success-border); color: var(--color-success); }
 
 /* ── Formularios de ajustes ─────────────────────────────────────────────── */
@@ -177,7 +177,7 @@
     gap: 0.5rem;
     font-size: 0.8125rem;
     font-weight: 800;
-    color: #475569;
+    color: var(--color-text-body);
     margin-bottom: 0.5rem;
     text-transform: uppercase;
     letter-spacing: 0.03125rem;
@@ -190,7 +190,7 @@
     padding: 0 1rem;
     border-radius: 0.75rem;
     border: 1px solid var(--color-border);
-    background-color: var(--color-bg-elevated);
+    background-color: var(--color-bg);
     font-size: 0.875rem;
     color: var(--color-admin-dark);
     outline: none;
@@ -224,7 +224,7 @@
     border-radius: 1rem;
     padding: 1.125rem;
     margin-bottom: 0.875rem;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
 }
 
 .adm-descripcion { font-size: 0.8125rem; color: var(--color-text-muted); margin: 0 0 1.25rem; line-height: 1.6; }
@@ -246,7 +246,7 @@
     margin-top: 0.75rem;
     background: transparent;
     border: none;
-    color: #dc2626;
+    color: var(--color-error-strong);
     font-weight: 700;
     font-size: 0.75rem;
     cursor: pointer;
@@ -264,7 +264,7 @@
     font-family: inherit;
     min-height: 2.75rem;
 }
-.adm-boton-rosa { background: #be185d; }
+.adm-boton-rosa { background: var(--color-brand-vivid); }
 
 /* Lista de etiquetas que no crece sin fin. */
 .adm-etiquetas {
@@ -291,7 +291,7 @@
 /* Bloque que ocupa la fila entera de una rejilla. */
 .adm-bloque-ancho {
     grid-column: 1 / -1;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     padding: 1.125rem;
     border-radius: 1rem;
     border: 1px solid var(--color-text-disabled);
@@ -306,7 +306,7 @@
 }
 
 .adm-texto-suave { color: var(--color-text-placeholder); font-size: 0.875rem; }
-.adm-texto-medio { font-size: 0.8125rem; color: #334155; font-weight: 600; }
+.adm-texto-medio { font-size: 0.8125rem; color: var(--color-text-tertiary); font-weight: 600; }
 
 /* Un campo de archivo invisible sobre lo que se ve: se pulsa la imagen, no un
    control gris del sistema. */
@@ -344,7 +344,7 @@
 .adm-facetas {
     margin-top: 0.75rem;
     padding: 1rem;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     border: 1px solid var(--color-border);
     border-radius: 0.875rem;
     max-height: 13.75rem;
@@ -374,7 +374,7 @@
 .adm-etiqueta-persona {
     font-size: 0.84375rem;
     font-weight: 700;
-    color: #334155;
+    color: var(--color-text-tertiary);
     display: block;
     margin-bottom: 0.5rem;
 }
@@ -383,7 +383,7 @@
     padding: 0.75rem;
     border-radius: 0.75rem;
     border: 1px solid var(--color-border);
-    background-color: var(--color-bg-elevated);
+    background-color: var(--color-bg);
     font-weight: 600;
     outline: none;
     font-family: inherit;
@@ -451,7 +451,7 @@
     display: block;
     font-size: 0.8125rem;
     font-weight: 800;
-    color: #475569;
+    color: var(--color-text-body);
     margin-bottom: 0.5rem;
     text-transform: uppercase;
     letter-spacing: 0.03125rem;
@@ -464,7 +464,7 @@
     padding: 0.5rem;
     border: 1px solid var(--color-border);
     border-radius: 0.75rem;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
 }
 .adm-medios-miniatura {
     width: 3.5rem;
@@ -501,7 +501,7 @@
     padding: 0 0.875rem;
     border-radius: 0.625rem;
     border: 1px solid var(--color-border);
-    background-color: var(--color-bg-elevated);
+    background-color: var(--color-bg);
     font-size: 0.875rem;
     margin-top: 0.625rem;
     box-sizing: border-box;
@@ -550,7 +550,7 @@
 
 .adm-centrado { text-align: center; }
 .adm-negrita { font-weight: 700; }
-.adm-error { color: #dc2626; margin-top: 0.375rem; }
+.adm-error { color: var(--color-error-strong); margin-top: 0.375rem; }
 .adm-ancho-caja { width: 100%; box-sizing: border-box; }
 .adm-encima { z-index: 9999; }
 /* Un campo que no se puede tocar todavia se ve apagado, no igual que el resto. */
@@ -587,7 +587,7 @@
     border-radius: 0.5rem;
     overflow: hidden;
     border: 1px solid var(--color-border);
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -606,7 +606,7 @@
 }
 .adm-mover:disabled { cursor: not-allowed; color: var(--color-border); }
 
-.adm-boton-verde { background: #059669; height: 3rem; }
+.adm-boton-verde { background: var(--color-success-deep); height: 3rem; }
 
 /* Codigos de barras: pie de la ventana y boton de imprimir. */
 .adm-pie-ventana {
@@ -642,7 +642,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.3125rem;
-    color: #b45309;
+    color: var(--color-warning-deep);
     font-weight: 700;
 }
 .adm-aviso-alerta-texto { font-size: 0.6875rem; font-style: normal; font-weight: 700; }
@@ -663,7 +663,7 @@
 .adm-cabecera-fija {
     position: sticky;
     top: 0;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     z-index: 10;
     border-bottom: 2px solid var(--color-border);
 }
@@ -747,13 +747,13 @@
     letter-spacing: 0.05rem;
     position: sticky;
     right: 0;
-    background-color: var(--color-bg-elevated);
+    background-color: var(--color-bg);
     box-shadow: -4px 0 8px rgba(0, 0, 0, 0.02);
 }
 .adm-tabla-cabecera-acciones--compacta { padding: 0.75rem 0.6875rem; }
 /* La cabecera de la tabla se queda arriba mientras se recorre la lista. */
 .adm-tabla-cabecera {
-    background-color: var(--color-bg-elevated);
+    background-color: var(--color-bg);
     border-bottom: 1px solid var(--color-border);
     position: sticky;
     top: 0;
@@ -802,7 +802,7 @@
 
 .adm-etiqueta-marca {
     background: var(--color-brand-lighter);
-    border: 1px solid #fbcfe8;
+    border: 1px solid var(--color-brand-border);
     border-radius: 0.5rem;
     padding: 0.375rem 0.625rem;
     color: var(--color-brand);
@@ -861,14 +861,14 @@
     padding: 0.9375rem;
     background: var(--color-surface);
     border-radius: 0.5rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-border);
     font-size: 0.6875rem;
 }
 
 /* ── Las ultimas ────────────────────────────────────────────────────────── */
 
 .adm-tabla-fila-cabecera {
-    background-color: var(--color-bg-elevated);
+    background-color: var(--color-bg);
     border-bottom: 1px solid var(--color-border);
     position: sticky;
     top: 0;

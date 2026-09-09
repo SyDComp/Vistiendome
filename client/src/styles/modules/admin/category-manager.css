@@ -1,7 +1,7 @@
 
 .category-parent-badge {
     padding: 3px 10px;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     color: var(--color-text-muted);
     border-radius: 20px;
     font-size: 12px;
@@ -15,7 +15,7 @@
 }
 
 .category-form-wrapper {
-    background-color: var(--color-bg-elevated);
+    background-color: var(--color-bg);
     border: 1px solid var(--color-border);
     border-radius: 14px;
     padding: 24px;
@@ -53,7 +53,7 @@
     border-radius: 10px;
     border: 1px solid var(--color-border);
     font-size: 14px;
-    color: #1e293b;
+    color: var(--color-text-secondary);
     outline: none;
     transition: border-color 0.2s;
     background-color: var(--color-surface);
@@ -74,7 +74,7 @@
 .category-form-checkbox-label {
     font-size: 14px;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--color-text-secondary);
     cursor: pointer;
 }
 .category-spec-header {
@@ -98,7 +98,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     color: var(--color-text-muted);
     padding: 6px 12px;
     border-radius: 10px;
@@ -189,10 +189,10 @@
     white-space: nowrap;
     line-height: 1;
 }
-.cat-table-level-badge.l1 { background: var(--color-brand-lighter); border: 1px solid #fbcfe8; color: var(--color-brand); }
-.cat-table-level-badge.l2 { background: var(--color-info-bg); border: 1px solid var(--color-info-border); color: #1e40af; }
-.cat-table-level-badge.l3 { background: var(--color-success-bg); border: 1px solid var(--color-success-border); color: #166534; }
-.cat-table-level-badge.other { background: var(--color-bg-elevated); border: 1px solid var(--color-border); color: var(--color-text-muted); }
+.cat-table-level-badge.l1 { background: var(--color-brand-lighter); border: 1px solid var(--color-brand-border); color: var(--color-brand); }
+.cat-table-level-badge.l2 { background: var(--color-info-bg); border: 1px solid var(--color-info-border); color: var(--color-info-deep); }
+.cat-table-level-badge.l3 { background: var(--color-success-bg); border: 1px solid var(--color-success-border); color: var(--color-success-darkest); }
+.cat-table-level-badge.other { background: var(--color-bg); border: 1px solid var(--color-border); color: var(--color-text-muted); }
 
 .cat-table-slug {
     font-size: 12px;
@@ -205,7 +205,7 @@
     font-weight: 700;
     font-size: 14px;
 }
-.cat-table-count.positive { color: #059669; }
+.cat-table-count.positive { color: var(--color-success-deep); }
 .cat-table-count.zero { color: var(--color-text-placeholder); }
 
 .cat-table-filter-badge {
@@ -214,5 +214,5 @@
     font-size: 10px;
     font-weight: 800;
 }
-.cat-table-filter-badge.active { background: var(--color-success-bg); color: #166534; border: 1px solid var(--color-success-border); }
-.cat-table-filter-badge.inactive { background: var(--color-error-bg); color: #991b1b; border: 1px solid var(--color-error-border); }
+.cat-table-filter-badge.active { background: var(--color-success-bg); color: var(--color-success-darkest); border: 1px solid var(--color-success-border); }
+.cat-table-filter-badge.inactive { background: var(--color-error-bg); color: var(--color-error-darkest); border: 1px solid var(--color-error-border); }

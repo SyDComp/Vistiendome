@@ -37,7 +37,7 @@
 }
 
 .cms-studio-header-icon {
-    background: linear-gradient(135deg, var(--color-brand), #50032e);
+    background: linear-gradient(135deg, var(--color-brand), var(--color-brand-dark));
     padding: 12px;
     border-radius: 14px;
     box-shadow: 0 8px 16px rgba(143,6,83,0.3);
@@ -101,7 +101,7 @@
 
 .cms-studio-btn-outline.preview-mode {
     background: var(--color-surface);
-    color: #000;
+    color: var(--color-ink);
 }
 
 .cms-studio-btn-primary {
@@ -279,7 +279,7 @@
 }
 
 .cms-studio-layer-trash:hover {
-    color: #ff4d4d;
+    color: var(--color-error);
 }
 
 .cms-studio-toolbar {
@@ -332,7 +332,7 @@
 
 .cms-studio-canvas-container {
     flex: 1;
-    background: #080808;
+    background: var(--color-ink);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -628,8 +628,8 @@
     margin-top: auto;
     padding: 12px;
     border-radius: 12px;
-    border: 1px solid #ff4d4d;
-    color: #ff4d4d;
+    border: 1px solid var(--color-error);
+    color: var(--color-error);
     background: transparent;
     font-weight: 800;
     font-size: 11px;

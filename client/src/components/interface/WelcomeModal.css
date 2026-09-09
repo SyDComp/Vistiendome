@@ -32,7 +32,7 @@
     border: none;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.85);
-    color: #1e293b;
+    color: var(--color-text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -66,7 +66,7 @@
     font-family: 'Outfit', sans-serif;
     font-size: 1.6rem;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--color-text-secondary);
 }
 
 .welcome-modal__text {
@@ -74,7 +74,7 @@
     font-family: 'Outfit', sans-serif;
     font-size: 1rem;
     line-height: 1.55;
-    color: #475569;
+    color: var(--color-text-body);
     white-space: pre-line;
 }
 

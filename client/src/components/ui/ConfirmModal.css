@@ -46,7 +46,7 @@
     height: 2.75rem;
     border-radius: 0.75rem;
     border: none;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     color: var(--color-text-muted);
     cursor: pointer;
     display: flex;

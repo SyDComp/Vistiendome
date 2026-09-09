@@ -59,7 +59,7 @@
     font-weight: 600;
 }
 .type-badge.prenda { background: var(--color-success-bg); color: var(--color-success); }
-.type-badge.accesorio { background: #fdf4ff; color: #9333ea; }
+.type-badge.accesorio { background: var(--color-brand-lighter); color: var(--color-info-deep); }
 .type-badge.default { background: var(--color-bg-subtle); color: var(--color-text-muted); }
 
 /* UNA PILDORA NO PARTE SU TEXTO
@@ -76,7 +76,7 @@
 }
 .stock-badge.empty { background: var(--color-error-bg); color: var(--color-error); }
 .stock-badge.low { background: var(--color-warning-bg); color: var(--color-warning); }
-.stock-badge.normal { background: var(--color-success-bg); color: #15803d; }
+.stock-badge.normal { background: var(--color-success-bg); color: var(--color-success-deep); }
 
 .admin-product-thumb {
     width: 48px;
@@ -87,7 +87,7 @@
     cursor: zoom-in;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
 }
 .admin-product-thumb:hover {
     transform: scale(1.1);

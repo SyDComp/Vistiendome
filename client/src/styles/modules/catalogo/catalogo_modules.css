@@ -9,7 +9,7 @@
 }
 
 .collections-hero {
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     padding: 80px 20px;
     text-align: center;
     border-bottom: 1px solid var(--color-border-subtle);
@@ -122,7 +122,7 @@
 
 .card-desc {
     font-size: 14px;
-    color: #475569;
+    color: var(--color-text-body);
     line-height: 1.5;
     margin: 0 0 24px 0;
     flex: 1;
@@ -154,7 +154,7 @@
     position: relative;
     height: 240px;
     width: 100%;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     overflow: hidden;
 }
 

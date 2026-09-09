@@ -98,7 +98,7 @@
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    color: #475569;
+    color: var(--color-text-body);
 }
 .btn-close-detail:hover { transform: scale(1.1); color: var(--color-brand); border-color: var(--color-brand); }
 
@@ -118,7 +118,7 @@
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     transition: all 0.2s ease;
-    color: #475569;
+    color: var(--color-text-body);
 }
 .btn-share-fixed:hover { transform: scale(1.1); color: var(--color-brand); border-color: var(--color-brand); }
 
@@ -160,7 +160,7 @@
 .product-title-elegant {
     font-size: 2.2rem;
     font-weight: 900;
-    color: #0f172a;
+    color: var(--color-text-primary);
     line-height: 1.1;
     margin-bottom: 12px;
 }
@@ -175,11 +175,11 @@
     margin-bottom: 20px;
 }
 .sku-label { font-size: 10px; font-weight: 900; color: var(--color-text-placeholder); letter-spacing: 1px; }
-.sku-val { font-size: 12px; font-weight: 700; color: #475569; }
+.sku-val { font-size: 12px; font-weight: 700; color: var(--color-text-body); }
 
-.price-tag-premium .currency { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 400; color: #475569; }
-.price-tag-premium .val { font-family: 'Outfit', sans-serif; font-size: 2.2rem; font-weight: 300; letter-spacing: 0px; color: #1e293b; }
-.price-tag-premium .val--sale { color: #b91c1c; }
+.price-tag-premium .currency { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 400; color: var(--color-text-body); }
+.price-tag-premium .val { font-family: 'Outfit', sans-serif; font-size: 2.2rem; font-weight: 300; letter-spacing: 0px; color: var(--color-text-secondary); }
+.price-tag-premium .val--sale { color: var(--color-error-deep); }
 .price-tag-premium .price-original {
     font-family: 'Outfit', sans-serif;
     font-size: 1.2rem;
@@ -190,7 +190,7 @@
 }
 .price-tag-premium .price-sale-badge {
     display: inline-block;
-    background-color: #b91c1c;
+    background-color: var(--color-error-deep);
     color: var(--color-surface);
     font-family: 'Outfit', sans-serif;
     font-weight: 600;
@@ -222,7 +222,7 @@
 .product-description-refined {
     font-size: 1.05rem;
     line-height: 1.7;
-    color: #475569;
+    color: var(--color-text-body);
     margin: 24px 0;
 }
 
@@ -239,7 +239,7 @@
     margin-bottom: 20px;
 }
 .title-accent { width: 4px; height: 18px; background: var(--color-brand); border-radius: 4px; }
-.section-title-premium-text { font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #0f172a; margin: 0; }
+.section-title-premium-text { font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--color-text-primary); margin: 0; }
 
 .specs-grid-refined {
     display: grid;
@@ -251,8 +251,8 @@
     border: 1px solid var(--color-brand-soft);
 }
 .spec-item-refined { display: flex; flex-direction: column; gap: 4px; }
-.spec-label-refined { font-size: 10px; font-weight: 700; color: #9d174d; text-transform: uppercase; letter-spacing: 0.5px; }
-.spec-value-refined { font-size: 14px; font-weight: 600; color: #1e293b; }
+.spec-label-refined { font-size: 10px; font-weight: 700; color: var(--color-brand); text-transform: uppercase; letter-spacing: 0.5px; }
+.spec-value-refined { font-size: 14px; font-weight: 600; color: var(--color-text-secondary); }
 
 /* SKU al pie: dato interno de la tienda. Sin recuadro, sin título y en gris —
    tiene que estar disponible, no llamar la atención. */
@@ -316,7 +316,7 @@
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 0 4px 10px rgba(209, 163, 212, 0.3);
 }
-.btn-primary-premium:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(143, 6, 83, 0.35); background: #6d0440; }
+.btn-primary-premium:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(143, 6, 83, 0.35); background: var(--color-brand-dark); }
 
 .btn-secondary-premium {
     background: var(--color-surface);
@@ -332,7 +332,7 @@
     cursor: pointer;
     transition: all 0.2s;
 }
-.btn-secondary-premium:hover { border-color: var(--color-brand); color: var(--color-brand); background: #fff5f9; }
+.btn-secondary-premium:hover { border-color: var(--color-brand); color: var(--color-brand); background: var(--color-brand-lighter); }
 
 .trust-badges-refined {
     display: none;
@@ -384,9 +384,9 @@
 }
 
 .btn-mobile-whatsapp-full {
-    background: #ecfdf5;
-    color: #065f46;
-    border: 1px solid #a7f3d0;
+    background: var(--color-success-bg);
+    color: var(--color-success-darkest);
+    border: 1px solid var(--color-success-border-strong);
     flex: 1;
     height: 52px;
     border-radius: 18px;
@@ -414,7 +414,7 @@
 .btn-open-selection-drawer {
     width: 100%;
     background: var(--color-brand-lighter);
-    border: 1px solid #fbcfe8;
+    border: 1px solid var(--color-brand-border);
     border-radius: 16px;
     padding: 16px 20px;
     display: flex;
@@ -433,7 +433,7 @@
     display: block;
     font-size: 10px;
     font-weight: 900;
-    color: #9d174d;
+    color: var(--color-brand);
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 6px;
@@ -454,7 +454,7 @@
     white-space: nowrap;
 }
 .summary-bullet {
-    color: #f472b6;
+    color: var(--color-brand-vivid);
     margin-left: 6px;
     font-size: 18px;
     line-height: 0;

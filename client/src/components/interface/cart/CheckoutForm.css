@@ -32,7 +32,7 @@
 
 .checkout-header {
     padding: 24px;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -65,7 +65,7 @@
     width: 100%;
 }
 .input-group input:focus, .styled-select:focus { outline: none; border-color: var(--color-admin-dark); box-shadow: 0 0 0 3px rgba(30, 27, 75, 0.05); }
-.input-group input.input-error { border-color: var(--color-error); background: #fffafb; }
+.input-group input.input-error { border-color: var(--color-error); background: var(--color-surface); }
 .error-text { font-size: 12px; color: var(--color-error); font-weight: 600; }
 /* Dos opciones que se excluyen y hay que comparar de un
    vistazo: botones, no un desplegable que las esconde. */
@@ -103,7 +103,7 @@
     flex: 1;
     height: 52px;
     background: var(--color-bg-subtle);
-    color: #475569;
+    color: var(--color-text-body);
     border: none;
     border-radius: 14px;
     font-weight: 700;
@@ -112,11 +112,11 @@
 .checkout-fallo {
     display: flex; flex-direction: column; gap: 4px;
     margin: 0 0 12px; padding: 12px 14px; border-radius: 12px;
-    background: var(--color-error-bg); border: 1px solid #fecaca; color: #991b1b;
+    background: var(--color-error-bg); border: 1px solid var(--color-error-border-strong); color: var(--color-error-darkest);
     font-size: 13px; line-height: 1.4;
 }
 .checkout-fallo strong { font-size: 13px; }
-.checkout-fallo span { color: #b91c1c; }
+.checkout-fallo span { color: var(--color-error-deep); }
 .btn-submit-whatsapp {
     flex: 2;
     height: 52px;
@@ -132,7 +132,7 @@
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(30, 27, 75, 0.2);
 }
-.btn-submit-whatsapp:hover { background: #2d2a6e; }
+.btn-submit-whatsapp:hover { background: var(--color-info-darkest); }
 
 @media (max-width: 600px) {
     .form-grid { grid-template-columns: 1fr; }

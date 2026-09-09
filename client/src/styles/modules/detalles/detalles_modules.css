@@ -113,7 +113,7 @@
 }
 
 .back-btn-premium.is-scrolled:hover {
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     color: var(--color-brand);
     border-color: var(--color-brand);
 }
@@ -165,7 +165,7 @@
     aspect-ratio: 3/4;
     border-radius: 24px;
     overflow: hidden;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     margin-bottom: 20px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.03);
     position: relative;
@@ -212,7 +212,7 @@
     position: absolute;
     top: 15px;
     left: 15px;
-    background: #dc2626;
+    background: var(--color-error-strong);
     color: white;
     padding: 5px 12px;
     border-radius: 10px;
@@ -240,7 +240,7 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     display: flex;
     align-items: center;
     justify-content: center;

@@ -75,19 +75,19 @@ img {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-brand-light);
+  background: var(--color-brand);
   border-radius: var(--radius-sm);
   transition: background 0.3s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #b38b8b;
+  background: var(--color-error-soft);
 }
 
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-border-medium) transparent;
+  scrollbar-color: var(--color-border) transparent;
 }
 
 /* Selección de texto acorde a la marca (en vez del azul por defecto del navegador) */

@@ -58,7 +58,7 @@
     cursor: pointer;
     transition: all 0.2s;
     background-color: var(--color-surface);
-    color: #475569;
+    color: var(--color-text-body);
     touch-action: manipulation;
 }
 

@@ -38,7 +38,7 @@
     text-overflow: ellipsis;
 }
 .char-manager-name-text.system { color: var(--color-brand); }
-.char-manager-name-text.normal { color: #334155; }
+.char-manager-name-text.normal { color: var(--color-text-tertiary); }
 
 .char-manager-badge-system {
     padding: 2px 6px;

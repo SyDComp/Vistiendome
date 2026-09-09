@@ -14,41 +14,41 @@
 
 .oc-detalle .oc-top { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:16px; }
 
-.oc-detalle .oc-btn-volver { display:flex; align-items:center; gap:6px; background:var(--color-bg-subtle); border:none; padding:8px 14px; border-radius:10px; font-weight:700; font-size:13px; color:#475569; cursor:pointer; }
+.oc-detalle .oc-btn-volver { display:flex; align-items:center; gap:6px; background:var(--color-bg-subtle); border:none; padding:8px 14px; border-radius:10px; font-weight:700; font-size:13px; color:var(--color-text-body); cursor:pointer; }
 
-.oc-detalle .oc-barra { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 16px; background:var(--color-bg-elevated); border:1px solid var(--color-border); border-radius:12px; margin-bottom:14px; }
+.oc-detalle .oc-barra { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 16px; background:var(--color-bg); border:1px solid var(--color-border); border-radius:12px; margin-bottom:14px; }
 
 .oc-detalle .oc-agrupar { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
 
-.oc-detalle .oc-agrupar button { display:flex; flex-direction:column; align-items:flex-start; gap:2px; background:var(--color-surface); border:1.5px solid var(--color-border); border-radius:10px; padding:8px 14px; cursor:pointer; font-size:13px; font-weight:800; color:#475569; text-align:left; }
+.oc-detalle .oc-agrupar button { display:flex; flex-direction:column; align-items:flex-start; gap:2px; background:var(--color-surface); border:1.5px solid var(--color-border); border-radius:10px; padding:8px 14px; cursor:pointer; font-size:13px; font-weight:800; color:var(--color-text-body); text-align:left; }
 
 .oc-detalle .oc-agrupar button small { font-weight:600; font-size:11px; color:var(--color-text-placeholder); }
 
 .oc-detalle .oc-agrupar button.activo { border-color:var(--color-admin-dark); background:var(--color-admin-dark); color:var(--color-surface); }
 
-.oc-detalle .oc-agrupar button.activo small { color:#c7d2fe; }
+.oc-detalle .oc-agrupar button.activo small { color:var(--color-info-border); }
 
 .oc-detalle .oc-estado { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:5px 12px; border-radius:20px; }
 
 .oc-detalle .oc-select { height:36px; padding:0 10px; border:1px solid var(--color-border); border-radius:8px; background:var(--color-surface); font-size:13px; }
 
-.oc-detalle .oc-btn { display:flex; align-items:center; gap:6px; background:var(--color-surface); border:1px solid var(--color-border); padding:8px 14px; border-radius:8px; font-size:13px; font-weight:700; color:#334155; cursor:pointer; }
+.oc-detalle .oc-btn { display:flex; align-items:center; gap:6px; background:var(--color-surface); border:1px solid var(--color-border); padding:8px 14px; border-radius:8px; font-size:13px; font-weight:700; color:var(--color-text-tertiary); cursor:pointer; }
 
-.oc-detalle .oc-btn:hover { background:#eef2ff; }
+.oc-detalle .oc-btn:hover { background:var(--color-info-bg); }
 
 .oc-detalle .oc-nota-rep { font-size:12px; color:var(--color-text-muted); margin-left:auto; }
 
-.oc-detalle .oc-aviso { font-size:13px; color:#15803d; background:var(--color-success-bg); border:1px solid #bbf7d0; padding:10px 14px; border-radius:10px; margin:0 0 14px; }
+.oc-detalle .oc-aviso { font-size:13px; color:var(--color-success-deep); background:var(--color-success-bg); border:1px solid var(--color-success-border-strong); padding:10px 14px; border-radius:10px; margin:0 0 14px; }
 
-.oc-detalle .oc-notas-vista { font-size:13px; color:#475569; background:var(--color-bg-elevated); padding:10px 14px; border-radius:10px; margin:0 0 14px; }
+.oc-detalle .oc-notas-vista { font-size:13px; color:var(--color-text-body); background:var(--color-bg); padding:10px 14px; border-radius:10px; margin:0 0 14px; }
 
 .oc-detalle .oc-origen { font-size:11px; font-weight:700; padding:3px 9px; border-radius:6px; }
 
-.oc-detalle .oc-origen.stock { background:#eef2ff; color:#4338ca; }
+.oc-detalle .oc-origen.stock { background:var(--color-info-bg); color:var(--color-info-deep); }
 
 .oc-detalle .oc-enlace { border:none; font:inherit; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
 
 .oc-detalle .oc-enlace:disabled { cursor:default; text-decoration:none; opacity:.7; }
 
-.oc-detalle .oc-origen.pedido { background:var(--color-bg-subtle); color:#475569; }
+.oc-detalle .oc-origen.pedido { background:var(--color-bg-subtle); color:var(--color-text-body); }
 

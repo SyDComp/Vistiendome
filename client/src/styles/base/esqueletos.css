@@ -136,7 +136,7 @@
 .esqueleto-seccion { margin-bottom: 2.5rem; opacity: 0.6; }
 .esqueleto-seccion-titulo { display: flex; align-items: center; gap: 0.625rem; margin-bottom: 1rem; }
 .esqueleto-tarjeta {
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     padding: 1.5rem;
     border-radius: 1.25rem;
     display: grid;

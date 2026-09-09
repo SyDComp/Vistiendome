@@ -49,7 +49,7 @@
 }
 
 .toast-card.error { border-left-color: var(--color-error); }
-.toast-card.success { border-left-color: #10b981; }
+.toast-card.success { border-left-color: var(--color-success-strong); }
 .toast-card.info { border-left-color: var(--color-info); }
 
 .toast-content {
@@ -133,7 +133,7 @@
 
 .dialog-footer {
     padding: 24px;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     display: flex;
     justify-content: flex-end;
     gap: 12px;
@@ -155,7 +155,7 @@
 }
 
 .btn-confirm.primary:hover {
-    background: #700541;
+    background: var(--color-brand-dark);
 }
 
 .btn-confirm.secondary {
@@ -165,5 +165,5 @@
 }
 
 .btn-confirm.secondary:hover {
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
 }

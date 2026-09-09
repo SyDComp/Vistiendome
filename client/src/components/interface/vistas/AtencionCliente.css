@@ -11,7 +11,7 @@
 .ayuda-hero {
     padding: 2.5rem 0 2rem;
     text-align: center;
-    background-color: var(--color-bg-warm);
+    background-color: var(--color-bg);
     margin-bottom: 1.5rem;
 }
 .ayuda-hero h1 {
@@ -33,7 +33,7 @@
     align-items: center;
     gap: 14px;
     background: white;
-    border: 1px solid #e8e8e8;
+    border: 1px solid var(--color-border);
     border-radius: 16px;
     padding: 18px 20px;
     cursor: pointer;
@@ -45,7 +45,7 @@
 .ayuda-card-item:active {
     transform: scale(0.98);
     background: var(--color-brand-lighter);
-    border-color: #d1a3d4;
+    border-color: var(--color-brand-border);
 }
 
 .ayuda-card-icon {
@@ -99,7 +99,7 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: #475569;
+    color: var(--color-text-body);
     padding: 4px;
     display: flex;
     align-items: center;
@@ -139,7 +139,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: #475569;
+    color: var(--color-text-body);
     flex-shrink: 0;
 }
 

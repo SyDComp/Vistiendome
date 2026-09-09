@@ -43,7 +43,7 @@
     width: 2.75rem;
     height: 2.75rem;
     border-radius: 0.75rem;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     font-size: 1.25rem;
     display: flex;
     align-items: center;
@@ -65,7 +65,7 @@
     height: 2.25rem;
     border-radius: 0.625rem;
     border: none;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     color: var(--cms-gris);
     cursor: pointer;
     display: flex;
@@ -74,9 +74,9 @@
     flex-shrink: 0;
 }
 /* Encendida: el estado se ve en el marcado, no en un color calculado. */
-.cms-adm-accion--activa { background: #ecfdf5; color: #059669; }
+.cms-adm-accion--activa { background: var(--color-success-bg); color: var(--color-success-deep); }
 .cms-adm-accion--marca { background: var(--cms-marca-suave); color: var(--cms-marca); }
-.cms-adm-accion--borrar { background: #fff1f2; color: #e11d48; }
+.cms-adm-accion--borrar { background: var(--color-error-bg); color: var(--color-error); }
 
 .cms-adm-lista { flex: 1; overflow-y: auto; }
 .cms-adm-flexible { flex: 1; min-height: 0; }
@@ -159,7 +159,7 @@
 .cms-pg-acciones-fila { display: flex; gap: 0.375rem; justify-content: flex-start; }
 
 .cms-pg-buscador { position: relative; flex: none; }
-.cms-pg-lienzo { flex: 1; overflow: auto; padding: 1.25rem 0.625rem; background: var(--color-bg-elevated); }
+.cms-pg-lienzo { flex: 1; overflow: auto; padding: 1.25rem 0.625rem; background: var(--color-bg); }
 .cms-pg-encogible { flex: 1; min-width: 0; }
 .cms-pg-fila { display: flex; gap: 0.5rem; }
 .cms-pg-fila--repartida { display: flex; justify-content: space-between; align-items: center; }
@@ -223,7 +223,7 @@
     font-family: inherit;
     min-height: 2.25rem;
 }
-.cms-pg-verde { background: #059669; }
+.cms-pg-verde { background: var(--color-success-deep); }
 /* Nombre editable en la propia fila: se escribe donde se lee. */
 .cms-pg-editable {
     border: none;

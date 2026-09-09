@@ -64,7 +64,7 @@
     width: 100%;
     max-width: 1440px;
     height: 90vh;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     border-radius: 32px;
     display: flex;
     flex-direction: column;
@@ -78,7 +78,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     position: relative;
     border-radius: 24px;
     overflow: hidden;
@@ -145,7 +145,7 @@
     background: var(--color-brand-lighter);
     padding: 2px 10px;
     border-radius: 6px;
-    border: 1px solid #fbcfe8;
+    border: 1px solid var(--color-brand-border);
 }
 
 .media-gallery-badge-context-text {
@@ -259,14 +259,14 @@
 
 .media-gallery-status-bar.is-error {
     background: var(--color-error-bg);
-    color: #991b1b;
-    border: 1px solid #991b1b;
+    color: var(--color-error-darkest);
+    border: 1px solid var(--color-error-darkest);
 }
 
 .media-gallery-status-bar.is-success {
     background: var(--color-success-bg);
-    color: #166534;
-    border: 1px solid #166534;
+    color: var(--color-success-darkest);
+    border: 1px solid var(--color-success-darkest);
 }
 
 /* 5. Responsive Image Grid */
@@ -279,7 +279,7 @@
     grid-auto-rows: min-content;
     gap: 30px;
     align-content: start;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
 }
 
 /* 6. Media Cards */
@@ -394,7 +394,7 @@
 .media-gallery-card-filename {
     font-size: 11px;
     font-weight: 800;
-    color: #1e293b;
+    color: var(--color-text-secondary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -448,7 +448,7 @@
     position: fixed;
     inset: 0;
     z-index: 10000;
-    background: #0a0a0f;
+    background: var(--color-ink);
     display: flex;
     flex-direction: column;
     animation: fadeIn 0.3s ease;
@@ -754,7 +754,7 @@
     height: 48px;
     background: var(--color-error-border);
     border-radius: 14px;
-    color: #dc2626;
+    color: var(--color-error-strong);
     flex-shrink: 0;
 }
 
@@ -766,7 +766,7 @@
     margin: 0 0 4px 0;
     font-size: 18px;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--color-text-primary);
 }
 
 .media-delete-warning-title-group p {
@@ -790,7 +790,7 @@
 
 .media-delete-warning-close-btn:hover {
     background: var(--color-bg-subtle);
-    color: #475569;
+    color: var(--color-text-body);
 }
 
 .media-delete-warning-body {
@@ -803,7 +803,7 @@
     margin: 0 0 20px 0;
     font-size: 14px;
     line-height: 1.6;
-    color: #475569;
+    color: var(--color-text-body);
 }
 
 .media-delete-warning-list {
@@ -815,7 +815,7 @@
 .media-delete-warning-item {
     border: 1px solid var(--color-border);
     border-radius: 16px;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     overflow: hidden;
 }
 
@@ -831,7 +831,7 @@
 .media-delete-warning-filename {
     font-size: 14px;
     font-weight: 600;
-    color: #334155;
+    color: var(--color-text-tertiary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -840,7 +840,7 @@
 
 .media-delete-warning-count-badge {
     background: var(--color-error-border);
-    color: #dc2626;
+    color: var(--color-error-strong);
     font-size: 11px;
     font-weight: 700;
     padding: 4px 10px;
@@ -872,23 +872,23 @@
 }
 
 .media-delete-assoc-badge.type-product {
-    background: #e0f2fe;
-    color: #0369a1;
+    background: var(--color-info-bg);
+    color: var(--color-info-darkest);
 }
 
 .media-delete-assoc-badge.type-sku {
-    background: #f3e8ff;
-    color: #6b21a8;
+    background: var(--color-brand-soft);
+    color: var(--color-info-deep);
 }
 
 .media-delete-assoc-badge.type-homepage {
     background: var(--color-warning-border);
-    color: #b45309;
+    color: var(--color-warning-deep);
 }
 
 .media-delete-assoc-name {
     font-size: 13px;
-    color: #475569;
+    color: var(--color-text-body);
     font-weight: 500;
 }
 
@@ -897,7 +897,7 @@
     justify-content: flex-end;
     align-items: center;
     padding: 20px 28px;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     border-top: 1px solid var(--color-border);
     gap: 12px;
 }
@@ -905,7 +905,7 @@
 .media-delete-warning-btn-cancel {
     background: var(--color-surface);
     border: 1px solid var(--color-text-disabled);
-    color: #475569;
+    color: var(--color-text-body);
     padding: 12px 24px;
     font-size: 14px;
     font-weight: 600;
@@ -915,13 +915,13 @@
 }
 
 .media-delete-warning-btn-cancel:hover {
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     border-color: var(--color-text-placeholder);
-    color: #0f172a;
+    color: var(--color-text-primary);
 }
 
 .media-delete-warning-btn-danger {
-    background: #dc2626;
+    background: var(--color-error-strong);
     border: none;
     color: var(--color-surface);
     padding: 12px 24px;
@@ -937,7 +937,7 @@
 }
 
 .media-delete-warning-btn-danger:hover {
-    background: #b91c1c;
+    background: var(--color-error-deep);
     box-shadow: 0 6px 16px rgba(220, 38, 38, 0.3);
     transform: translateY(-1px);
 }
@@ -1005,8 +1005,8 @@
 
 .media-gallery-header-delete-btn {
     background: var(--color-error-border) !important;
-    border: 1px solid #fecaca !important;
-    color: #dc2626 !important;
+    border: 1px solid var(--color-error-border-strong) !important;
+    color: var(--color-error-strong) !important;
     padding: 0 16px !important;
     height: 48px !important;
     border-radius: 18px !important;
@@ -1022,8 +1022,8 @@
 
 .media-gallery-header-delete-btn:hover {
     background: var(--color-error-border) !important;
-    border-color: #f87171 !important;
-    color: #b91c1c !important;
+    border-color: var(--color-error) !important;
+    color: var(--color-error-deep) !important;
 }
 
 @media (max-width: 768px) {
@@ -1044,8 +1044,8 @@
 .media-gallery-footer-btn-danger {
     border-radius: 16px !important;
     padding: 0 20px !important;
-    border-color: #fca5a5 !important;
-    color: #dc2626 !important;
+    border-color: var(--color-error-soft) !important;
+    color: var(--color-error-strong) !important;
 }
 
 .media-gallery-footer-btn-secondary {
@@ -1067,9 +1067,9 @@
 }
 
 .media-gallery-footer-btn-primary.is-disabled {
-    background: #d1d5db !important;
-    border-color: #d1d5db !important;
-    color: #6b7280 !important;
+    background: var(--color-text-disabled) !important;
+    border-color: var(--color-border-strong) !important;
+    color: var(--color-text-muted) !important;
     cursor: not-allowed !important;
 }
 

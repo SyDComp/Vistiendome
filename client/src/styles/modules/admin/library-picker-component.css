@@ -44,7 +44,7 @@
 .library-picker-icon-wrap {
     width: 56px;
     height: 56px;
-    background: var(--brand-lighter);
+    background: var(--color-brand-lighter);
     border-radius: 18px;
     display: flex;
     align-items: center;
@@ -75,7 +75,7 @@
 .library-picker-btn-mode {
     padding: 10px 20px;
     border-radius: 14px;
-    border: 2px solid var(--border-medium);
+    border: 2px solid var(--color-border);
     background: transparent;
     color: var(--color-text-muted);
     font-size: 12px;
@@ -89,7 +89,7 @@
 
 .library-picker-btn-mode.active {
     border-color: var(--color-brand);
-    background: var(--brand-lighter);
+    background: var(--color-brand-lighter);
     color: var(--color-brand);
 }
 
@@ -97,7 +97,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--border-medium);
+    background: var(--color-border);
 }
 
 .library-picker-btn-mode.active .library-picker-mode-dot {
@@ -109,7 +109,7 @@
     height: 44px;
     border-radius: 50%;
     border: none;
-    background: var(--bg-surface);
+    background: var(--color-surface);
     color: var(--color-text-muted);
     cursor: pointer;
     display: flex;
@@ -142,7 +142,7 @@
     left: 20px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--text-muted);
+    color: var(--color-text-muted);
 }
 
 .library-picker-search-input {
@@ -153,7 +153,7 @@
     font-size: 16px;
     outline: none;
     transition: all 0.2s;
-    background: var(--bg-surface);
+    background: var(--color-surface);
 }
 
 .library-picker-search-input:focus {
@@ -200,7 +200,7 @@
 
 .library-picker-btn-action {
     background: none;
-    border: 1px solid var(--border-medium);
+    border: 1px solid var(--color-border);
     padding: 8px 16px;
     border-radius: 12px;
     font-size: 12px;
@@ -211,12 +211,12 @@
 }
 
 .library-picker-btn-action:hover {
-    background: var(--bg-surface);
+    background: var(--color-surface);
 }
 
 .library-picker-btn-clear-all {
     background: none;
-    border: 1px solid var(--border-medium);
+    border: 1px solid var(--color-border);
     padding: 8px 16px;
     border-radius: 12px;
     font-size: 12px;
@@ -227,7 +227,7 @@
 }
 
 .library-picker-btn-clear-all:hover {
-    background: var(--brand-lighter);
+    background: var(--color-brand-lighter);
     border-color: var(--color-brand);
 }
 
@@ -254,7 +254,7 @@
 }
 
 .library-picker-card.selectable:hover {
-    border-color: var(--brand-light);
+    border-color: var(--color-brand);
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.05);
 }
@@ -275,7 +275,7 @@
 .library-picker-card-icon {
     width: 36px;
     height: 36px;
-    background: var(--bg-surface);
+    background: var(--color-surface);
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -302,7 +302,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-muted);
+    color: var(--color-text-muted);
 }
 
 .library-picker-check {
@@ -341,7 +341,7 @@
 .library-picker-empty-icon {
     width: 80px;
     height: 80px;
-    background: var(--bg-surface);
+    background: var(--color-surface);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -380,7 +380,7 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: var(--border-medium);
+    background: var(--color-border);
 }
 
 .library-picker-footer-dot.active {
@@ -408,7 +408,7 @@
 
 .library-picker-preview-tag {
     padding: 4px 8px;
-    background: var(--bg-surface);
+    background: var(--color-surface);
     border-radius: 6px;
     font-size: 11px;
     color: var(--color-text-muted);
@@ -417,7 +417,7 @@
 
 .library-picker-preview-more {
     font-size: 11px;
-    color: var(--text-muted);
+    color: var(--color-text-muted);
 }
 
 .library-picker-preview-prod {
@@ -441,7 +441,7 @@
 
 .library-picker-preview-prod-desc {
     font-size: 12px;
-    color: var(--text-muted);
+    color: var(--color-text-muted);
 }
 
 .library-picker-preview-variant {
@@ -474,7 +474,7 @@
 
 .library-picker-preview-variant-config {
     padding: 2px 6px;
-    background: var(--brand-lighter);
+    background: var(--color-brand-lighter);
     color: var(--color-brand);
     border-radius: 4px;
     font-size: 10px;
@@ -518,7 +518,7 @@
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: var(--bg-surface);
+    background: var(--color-surface);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -527,7 +527,7 @@
 
 .library-picker-preview-options-hex {
     font-size: 11px;
-    color: var(--text-muted);
+    color: var(--color-text-muted);
     font-family: monospace;
     font-weight: 700;
 }

@@ -13,7 +13,7 @@
     --ana-texto: var(--color-text-muted);
     --ana-gris: var(--color-text-placeholder);
     --ana-linea: var(--color-border);
-    --ana-fondo: var(--color-bg-elevated);
+    --ana-fondo: var(--color-bg);
 
     height: 100%;
     display: flex;
@@ -137,7 +137,7 @@
     padding: 0.5rem;
     background: var(--color-surface);
     border-radius: 0.625rem;
-    border: 1px solid #eef2f7;
+    border: 1px solid var(--color-border-subtle);
 }
 .ana-dia-numero-valor { font-size: 1.25rem; font-weight: 900; }
 .ana-dia-numero-nombre { font-size: 0.6875rem; color: var(--ana-gris); font-weight: 600; }
@@ -162,7 +162,7 @@
 }
 .ana-fila-nombre {
     font-size: 0.875rem;
-    color: #334155;
+    color: var(--color-text-tertiary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -205,7 +205,7 @@
     flex: 1;
     text-align: center;
     padding: 0.625rem;
-    background: var(--ana-fondo, var(--color-bg-elevated));
+    background: var(--ana-fondo, var(--color-bg));
     border-radius: 0.75rem;
 }
 .ana-fila { display: flex; gap: 0.625rem; }
@@ -245,7 +245,7 @@
     border: none;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.9);
-    color: #1e293b;
+    color: var(--color-text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;

@@ -30,7 +30,7 @@
 .catalog-title {
     font-size: 3rem;
     font-weight: 900;
-    color: #0f172a;
+    color: var(--color-text-primary);
     letter-spacing: -1.5px;
     margin: 0;
     line-height: 1;
@@ -93,7 +93,7 @@
 .catalog-empty-state {
     text-align: center;
     padding: 5rem 0;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     border-radius: 30px;
     border: 2px dashed var(--color-border);
 }
@@ -112,7 +112,7 @@
 
 .catalog-btn-reset {
     margin-top: 20px;
-    background: #0f172a;
+    background: var(--color-bg-dark);
     color: white;
     border: none;
     padding: 12px 24px;
@@ -124,5 +124,5 @@
 
 .catalog-btn-reset:hover {
     transform: scale(1.05);
-    background: #1e293b;
+    background: var(--color-text-secondary);
 }

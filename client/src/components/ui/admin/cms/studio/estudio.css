@@ -16,7 +16,7 @@
     --est-rotulo: rgba(255, 255, 255, 0.35);
     --est-apagado: rgba(255, 255, 255, 0.4);
     --est-medio: rgba(255, 255, 255, 0.5);
-    --est-peligro: #ff4d4d;
+    --est-peligro: var(--color-error);
 }
 
 /* El rótulo de un control. Diminuto y en mayúsculas: acompaña, no compite. */
@@ -108,7 +108,7 @@
 .est-insignia {
     font-size: 0.5625rem;
     background: rgba(143, 6, 83, 0.2);
-    color: #c56fa8;
+    color: var(--color-brand);
     padding: 0.125rem 0.5rem;
     border-radius: 0.375rem;
     font-weight: 900;
@@ -125,7 +125,7 @@
     padding: 0.625rem;
     border-radius: 0.625rem;
     border: 1px solid rgba(255, 77, 77, 0.3);
-    color: var(--est-peligro, #ff4d4d);
+    color: var(--est-peligro, var(--color-error));
     background: transparent;
     font-weight: 800;
     font-size: 0.6875rem;
@@ -194,7 +194,7 @@
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 0.75rem;
-    background: linear-gradient(135deg, var(--color-brand), #530432);
+    background: linear-gradient(135deg, var(--color-brand), var(--color-brand-dark));
 }
 
 .est-seccion {
@@ -337,7 +337,7 @@
 /* Barra inferior del estudio, respetando el borde del telefono. */
 .est-barra-pie {
     display: flex;
-    background: #0a081c;
+    background: var(--color-ink);
     border-top: 1px solid var(--est-velo-borde, rgba(255, 255, 255, 0.05));
     padding-bottom: env(safe-area-inset-bottom);
 }
@@ -345,7 +345,7 @@
 /* Lienzo de escenas. */
 .est-escena {
     flex: 1;
-    background: #080808;
+    background: var(--color-ink);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -405,7 +405,7 @@
 .est-escena-quitar {
     background: transparent;
     border: none;
-    color: #ffb3b3;
+    color: var(--color-error-soft);
     cursor: pointer;
     display: flex;
     padding: 0.25rem;
@@ -527,8 +527,8 @@
     left: 50%;
     transform: translateX(-50%);
     z-index: 9999;
-    background: #1cce8e;
-    color: #052b1d;
+    background: var(--color-success);
+    color: var(--color-text-secondary);
     padding: 0.75rem 1.5rem;
     border-radius: 6.25rem;
     font-size: 0.6875rem;

@@ -9,7 +9,7 @@
 
 .items-pedido-total {
     display: flex; justify-content: space-between; align-items: baseline;
-    margin-top: 16px; padding-top: 12px; border-top: 2px solid #000;
+    margin-top: 16px; padding-top: 12px; border-top: 2px solid var(--color-ink);
     font-size: 14px; font-weight: 800;
 }
 .items-pedido-total strong { font-size: 16px; }

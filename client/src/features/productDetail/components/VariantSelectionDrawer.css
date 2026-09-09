@@ -58,7 +58,7 @@
 .drawer-title {
     font-size: 18px;
     font-weight: 900;
-    color: #0f172a;
+    color: var(--color-text-primary);
     margin: 0;
 }
 
@@ -66,7 +66,7 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: var(--color-bg-elevated);
+    background: var(--color-bg);
     border: 1px solid var(--color-border);
     display: flex;
     align-items: center;
@@ -94,7 +94,7 @@
 
 .btn-confirm-selection {
     width: 100%;
-    background: #0f172a;
+    background: var(--color-bg-dark);
     color: var(--color-surface);
     border: none;
     padding: 18px;
