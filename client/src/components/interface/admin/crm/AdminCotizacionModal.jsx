@@ -6,6 +6,7 @@ import { getProducts } from '../../../../lib/api/endpoints/products.api';
 import { getAdminAttributes } from '../../../../lib/api/endpoints/admin.api';
 import { useNotification } from '../../../../context/NotificationContext';
 import Imagen from '../../../ui/Imagen';
+import { formatearTelefono, normalizarTelefono } from '../../../../utils/telefono';
 import './AdminCotizacionModal.css';
 
 const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = null }) => {
@@ -49,8 +50,18 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
     // un transportista inventado, y asi salia impreso en la etiqueta.
     const [modoEntrega, setModoEntrega] = useState('DESPACHO');
     const [tipoDespacho, setTipoDespacho] = useState('DOMICILIO');
+    // REGION Y COMUNA SE ELIGEN, NO SE ESCRIBEN
+    // Estos dos eran campos de texto libre, con un `placeholder` que decia
+    // "Biobio, RM, etc.". Cada cotizacion manual guardaba lo que se hubiera
+    // tecleado -"RM", "Region Metropolitana", "metropolitana"- mientras el
+    // formulario publico y la ficha del cliente guardan la comuna elegida de
+    // la lista, con su id. Dos verdades distintas sobre el mismo dato, y la
+    // etiqueta de envio imprime la que le toque.
     const [region, setRegion] = useState('');
     const [comuna, setComuna] = useState('');
+    const [comunaId, setComunaId] = useState('');
+    const [regiones, setRegiones] = useState([]);
+    const [comunas, setComunas] = useState([]);
     const [direccion, setDireccion] = useState('');
     const [mensaje, setMensaje] = useState('');
     
@@ -68,14 +79,30 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                 if (initialCliente.direccion) setDireccion(initialCliente.direccion);
                 if (initialCliente.region_nombre) setRegion(initialCliente.region_nombre);
                 if (initialCliente.comuna_nombre) setComuna(initialCliente.comuna_nombre);
+                if (initialCliente.comuna_id) setComunaId(initialCliente.comuna_id);
             } else {
                 setSelectedCliente(null);
                 setClientMode('select');
             }
             fetchClientes();
             fetchCatalog();
+            fetch('/api/v1/geo/regiones')
+                .then(res => res.json())
+                .then(setRegiones)
+                .catch(err => console.error('No se pudieron cargar las regiones:', err));
         }
     }, [isOpen, initialCliente]);
+
+    // Las comunas dependen de la region: no tiene sentido ofrecer las 346 del
+    // pais cuando ya se sabe cual es.
+    useEffect(() => {
+        const elegida = regiones.find(r => r.nombre === region);
+        if (!elegida) { setComunas([]); return; }
+        fetch(`/api/v1/geo/regiones/${elegida.id}/comunas`)
+            .then(res => res.json())
+            .then(setComunas)
+            .catch(err => console.error('No se pudieron cargar las comunas:', err));
+    }, [region, regiones]);
 
     const fetchClientes = async () => {
         setLoadingClientes(true);
@@ -299,7 +326,10 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                 nombres: clientMode === 'select' ? selectedCliente.nombres : newClienteData.nombres,
                 apellidos: clientMode === 'select' ? selectedCliente.apellidos : newClienteData.apellidos,
                 email_personal: clientMode === 'select' ? selectedCliente.email_personal : newClienteData.email_personal,
-                telefono: clientMode === 'select' ? selectedCliente.telefono : newClienteData.telefono,
+                // Se guarda normalizado: si cada formulario guarda lo que le
+                // escriban, la misma columna termina con dos formatos, que es
+                // justo lo que hay hoy en la base.
+                telefono: normalizarTelefono(clientMode === 'select' ? selectedCliente.telefono : newClienteData.telefono),
                 origen: "MANUAL",
                 modo_entrega: modoEntrega,
                 // Un retiro no viaja: no se le guarda transportista ni destino. Si
@@ -308,6 +338,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                 tipo_despacho: modoEntrega === 'RETIRO' ? null : tipoDespacho,
                 region: modoEntrega === 'RETIRO' ? '' : region,
                 comuna: modoEntrega === 'RETIRO' ? '' : comuna,
+                comuna_id: modoEntrega === 'RETIRO' ? null : (comunaId || null),
                 direccion: modoEntrega === 'RETIRO' ? '' : direccion,
                 mensaje,
                 items: items.map(it => ({
@@ -476,7 +507,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                                         {selectedCliente.nombres} {selectedCliente.apellidos} {selectedCliente.rut ? `(${selectedCliente.rut})` : ''}
                                                     </div>
                                                     <div className="cot-dato-menor">
-                                                        📞 {selectedCliente.telefono || 'Sin teléfono'} • 📧 {selectedCliente.email_personal || 'Sin correo'}
+                                                        📞 {formatearTelefono(selectedCliente.telefono) || 'Sin teléfono'} • 📧 {selectedCliente.email_personal || 'Sin correo'}
                                                     </div>
                                                 </div>
                                                 <button
@@ -513,6 +544,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                                                     if (c.direccion) setDireccion(c.direccion);
                                                                     if (c.region_nombre) setRegion(c.region_nombre);
                                                                     if (c.comuna_nombre) setComuna(c.comuna_nombre);
+                                                                    if (c.comuna_id) setComunaId(c.comuna_id);
                                                                 }}
                                                                 className="adm-opcion-fila"
                                                                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
@@ -520,7 +552,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                                             >
                                                                 <div>
                                                                     <div className="adm-dato">{c.nombres} {c.apellidos}</div>
-                                                                    <div className="adm-dato-secundario">{c.rut || 'Sin RUT'} • {c.telefono || c.email_personal || 'Sin contacto'}</div>
+                                                                    <div className="adm-dato-secundario">{c.rut || 'Sin RUT'} • {formatearTelefono(c.telefono) || c.email_personal || 'Sin contacto'}</div>
                                                                 </div>
                                                                 <span className="cot-insignia">Seleccionar</span>
                                                             </div>
@@ -761,19 +793,41 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                     </div>
                                     <div>
                                         <label className="adm-etiqueta">Región</label>
-                                        <input
-                                            type="text" placeholder="Biobío, RM, etc."
-                                            value={region} onChange={e => setRegion(e.target.value)}
+                                        <select
+                                            value={region}
+                                            onChange={e => {
+                                                setRegion(e.target.value);
+                                                // La comuna anterior pertenece a otra region.
+                                                setComuna('');
+                                                setComunaId('');
+                                            }}
                                             className="adm-campo"
-                                        />
+                                        >
+                                            <option value="">Seleccione una región</option>
+                                            {regiones.map(r => (
+                                                <option key={r.id} value={r.nombre}>{r.nombre}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                     <div>
                                         <label className="adm-etiqueta">Comuna</label>
-                                        <input
-                                            type="text" placeholder="Chillán, Concepción, etc."
-                                            value={comuna} onChange={e => setComuna(e.target.value)}
+                                        <select
+                                            value={comuna}
+                                            onChange={e => {
+                                                const elegida = comunas.find(c => c.nombre === e.target.value);
+                                                setComuna(e.target.value);
+                                                setComunaId(elegida ? elegida.id : '');
+                                            }}
                                             className="adm-campo"
-                                        />
+                                            disabled={!region}
+                                        >
+                                            <option value="">
+                                                {region ? 'Seleccione una comuna' : 'Elija primero la región'}
+                                            </option>
+                                            {comunas.map(c => (
+                                                <option key={c.id} value={c.nombre}>{c.nombre}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                     <div className="adm-ancho-total">
                                         <label className="adm-etiqueta">Dirección exacta o Sucursal</label>

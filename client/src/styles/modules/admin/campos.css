@@ -958,3 +958,138 @@
 @media (max-width: 639.98px) {
     .adm-tabla { min-width: 43.75rem; }
 }
+
+/* ── Las celdas de las tablas del panel ─────────────────────────────────────
+   Clientes, Cotizaciones y Ordenes de Corte pintan sus celdas igual: un dato
+   principal arriba y uno o dos secundarios debajo.
+
+   ESTAS REGLAS FALTABAN. El commit que saco los estilos del JSX ("las celdas se
+   declaran una vez") cambio los tres archivos JSX y no escribio ninguna hoja:
+   las clases se usaban y no existian en ninguna parte. Una clase que no existe
+   no falla, simplemente no pinta, asi que la comuna y la region quedaban una
+   pegada a la otra en la misma linea, sin tamanos ni colores. Los valores de
+   aqui son los que tenian esos estilos, recuperados de ese mismo commit. */
+
+.adm-celda {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: flex-start;
+    min-width: 0;
+}
+
+/* Dos variantes de separacion, para cuando el dato de abajo es una aclaracion
+   del de arriba y conviene que se lean como una sola cosa. */
+.adm-celda--pegada { gap: 0.125rem; }
+.adm-celda--junta  { gap: 0.1875rem; }
+
+/* El dato que se busca al recorrer la tabla con la vista. */
+.adm-celda-principal {
+    font-weight: 700;
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    text-transform: capitalize;
+}
+.adm-celda-principal--nombre {
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.adm-celda-texto {
+    font-size: 0.8125rem;
+    color: var(--color-text-tertiary);
+    font-weight: 500;
+}
+
+.adm-celda-secundaria {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+/* La aclaracion: mas chica, para que no compita con el dato de arriba. */
+.adm-celda-menor {
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+}
+
+/* Un dato que falta. No es lo mismo que no tenerlo: se muestra igual, apagado,
+   para que la fila no quede con un hueco. */
+.adm-celda-apagada {
+    color: var(--color-text-placeholder);
+    font-size: 0.8125rem;
+}
+.adm-celda-tenue {
+    color: var(--color-text-disabled);
+    font-size: 0.75rem;
+}
+
+/* Un dato con su icono al lado. */
+.adm-celda-con-icono {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+.adm-celda-con-icono--junta {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--color-text-muted);
+    font-size: 0.8125rem;
+    min-width: 0;
+    /* Un telefono partido en dos lineas deja de leerse como un numero. Si no
+       cabe, la tabla ya se desplaza de lado. */
+    white-space: nowrap;
+}
+
+/* ── La cabecera y los filtros de una vista del panel ───────────────────── */
+
+.adm-vista-fondo { padding-bottom: 2.5rem; }
+
+.adm-vista-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.adm-vista-filtros {
+    display: flex;
+    gap: 0.625rem;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: flex-start;
+}
+
+.adm-titulo-grande {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: var(--color-admin-dark);
+}
+
+.adm-titulo-simple {
+    margin: 0;
+    color: var(--color-admin-dark);
+}
+
+.adm-titulo-fila {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 800;
+    color: var(--color-admin-dark);
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.adm-separacion { margin-bottom: 1rem; }
+
+@media (max-width: 1023.98px) {
+    .adm-titulo-grande { font-size: 1.375rem; }
+}

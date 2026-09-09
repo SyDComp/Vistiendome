@@ -8,6 +8,7 @@ import DetailDrawer from '../../../ui/admin/DetailDrawer';
 import { useNotification } from '../../../../context/NotificationContext';
 import { Users, Mail, Phone, Calendar, ArrowLeft, FileText, Plus } from 'lucide-react';
 import AdminCotizacionModal from './AdminCotizacionModal';
+import { formatearTelefono } from '../../../../utils/telefono';
 
 const TypeBadge = ({ type }) => {
     const isLead = type === 'LEAD';
@@ -112,19 +113,22 @@ const ClientesView = () => {
             key: 'correo',
             label: 'Correo',
             render: (_, row) => row.email_personal ? (
-                <div className="flex items-center gap-1 text-sm text-slate-600">
+                <div className="adm-celda-con-icono--junta">
                     <Mail size={14} /> {row.email_personal}
                 </div>
-            ) : <span className="text-slate-400 text-sm">--</span>
+            ) : <span className="adm-celda-apagada">--</span>
         },
         {
             key: 'telefono',
             label: 'Teléfono',
+            // Se muestra siempre igual, venga como venga guardado: en la base
+            // conviven numeros con +56 y sin el, y la columna quedaba con dos
+            // formatos distintos segun la fila.
             render: (_, row) => row.telefono ? (
-                <div className="flex items-center gap-1 text-sm text-slate-600">
-                    <Phone size={14} /> {row.telefono}
+                <div className="adm-celda-con-icono--junta">
+                    <Phone size={14} /> {formatearTelefono(row.telefono)}
                 </div>
-            ) : <span className="text-slate-400 text-sm">--</span>
+            ) : <span className="adm-celda-apagada">--</span>
         },
         { 
             key: 'created_at', 
