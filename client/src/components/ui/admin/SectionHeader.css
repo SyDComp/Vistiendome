@@ -1,0 +1,114 @@
+/* La cabecera de cada seccion del panel: titulo, bajada y sus botones.
+   ==========================================================================
+
+   Todo esto vivia dentro del JSX, y las decisiones de ancho las tomaba
+   JavaScript: `flexDirection: isMobile ? 'column' : 'row'`, y asi diez veces.
+   El componente tenia que saber cuan ancha era la pantalla para poder dibujar
+   una cabecera, cuando lo unico que hace falta es una consulta de medios.
+
+   La clase `.admin-section-header` ya se usaba en el JSX, pero no existia en
+   ninguna hoja: no pintaba nada. */
+
+.admin-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+    gap: 0;
+    margin-bottom: 1.5rem;
+    /* No crece ni se encoge: es el encabezado de una zona que si lo hace. */
+    flex: 0 0 auto;
+}
+
+/* El icono y el texto van juntos, y se separan del bloque de botones. */
+.adm-titulo-cabecera-grupo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+/* El distintivo redondo del titulo, igual que el de las demas pantallas. */
+.adm-emblema-cabecera {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.6875rem;
+    background: var(--color-brand-lighter);
+    color: var(--color-brand);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.adm-titulo-seccion-cabecera {
+    margin: 0;
+    color: var(--color-admin-dark);
+    font-size: 1.375rem;
+    font-weight: 800;
+    letter-spacing: -0.01875rem;
+}
+
+/* Los botones de accion de la cabecera. */
+.adm-acciones-cabecera {
+    display: flex;
+    gap: 0.75rem;
+    width: auto;
+    flex-wrap: wrap;
+    flex-direction: row;
+}
+
+.adm-boton-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background-color: var(--color-brand);
+    color: var(--color-surface);
+    border: none;
+    border-radius: 0.625rem;
+    cursor: pointer;
+    font-size: 0.84375rem;
+    font-weight: 700;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(143, 6, 83, 0.3);
+    white-space: nowrap;
+    width: auto;
+    flex: none;
+}
+
+/* La variante sobria: el mismo boton, sin peso. */
+.adm-boton-cabecera--contorno {
+    background-color: var(--color-surface);
+    color: var(--color-brand);
+    border: 1px solid var(--color-brand);
+    box-shadow: none;
+}
+
+/* EN PANTALLA ANGOSTA
+   El titulo y los botones dejan de caber lado a lado, asi que se apilan y los
+   botones pasan a ocupar todo el ancho: en un telefono, un boton angosto en una
+   esquina es dificil de acertar con el pulgar. */
+@media (max-width: 639.98px) {
+    .admin-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .adm-titulo-seccion-cabecera { font-size: 1.25rem; }
+
+    .adm-acciones-cabecera {
+        width: 100%;
+        gap: 0.5rem;
+        flex-direction: column;
+    }
+
+    .adm-boton-cabecera {
+        width: 100%;
+        flex: 1 1 100%;
+        padding: 0.625rem 0.875rem;
+    }
+}

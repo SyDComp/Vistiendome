@@ -1,10 +1,14 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Search, ChevronDown, X } from 'lucide-react';
-import { useHasta } from '../../../hooks/useCorte';
+import './FilterBar.css';
 
 /**
- * FilterBar — Barra de búsqueda y filtros desplegables.
- * Optimizado para ser responsivo.
+ * La barra de busqueda y filtros de las listas del panel.
+ *
+ * Este componente ya no sabe cuan ancha es la pantalla ni de que color es
+ * nada: antes preguntaba el ancho a JavaScript cinco veces para decidir si
+ * apilar las cosas, y escribia en `element.style` desde los eventos de foco y
+ * de raton para pintar bordes. Las dos cosas las hace ahora la hoja.
  */
 const FilterBar = ({
     searchPlaceholder = 'Buscar...',
@@ -15,12 +19,10 @@ const FilterBar = ({
     initialSearchValue = ''
 }) => {
     const [searchValue, setSearchValue] = useState(initialSearchValue);
-    const isMobile = useHasta('md');
 
     useEffect(() => {
         setSearchValue(initialSearchValue);
     }, [initialSearchValue]);
-
 
     const handleSearch = useCallback((e) => {
         const val = e.target.value;
@@ -43,34 +45,9 @@ const FilterBar = ({
     const hasActiveFilters = searchValue || Object.keys(activeFilters).length > 0;
 
     return (
-        <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: isMobile ? '8px' : '10px',
-            marginBottom: '16px',
-            flex: '0 0 auto',
-            flexWrap: 'wrap',
-            flexDirection: isMobile ? 'column' : 'row'
-        }}>
-            {/* Barra de búsqueda */}
-            <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                flex: isMobile ? '0 0 auto' : '1 1 240px',
-                minWidth: '200px',
-                width: isMobile ? '100%' : 'auto',
-                backgroundColor: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '10px',
-                padding: '0 14px',
-                transition: 'all 0.2s ease',
-                boxSizing: 'border-box'
-            }}
-                onFocusCapture={e => e.currentTarget.style.borderColor = '#8f0653'}
-                onBlurCapture={e => e.currentTarget.style.borderColor = '#e2e8f0'}
-            >
-                <Search size={15} color="#94a3b8" />
+        <div className="adm-filtros">
+            <div className="adm-filtros-buscador">
+                <Search size={15} className="adm-filtros-icono" />
                 <input
                     value={searchValue}
                     onChange={handleSearch}
@@ -78,76 +55,38 @@ const FilterBar = ({
                     className="adm-buscador-campo"
                 />
                 {searchValue && (
-                    <button onClick={() => { setSearchValue(''); onSearchChange?.(''); }} className="adm-icono-plano">
-                        <X size={14} color="#94a3b8" />
+                    <button
+                        onClick={() => { setSearchValue(''); onSearchChange?.(''); }}
+                        className="adm-icono-plano"
+                        aria-label="Borrar la búsqueda"
+                    >
+                        <X size={14} className="adm-filtros-icono" />
                     </button>
                 )}
             </div>
 
-            {/* Contenedor de Filtros (para que se apilen mejor en móvil) */}
-            <div style={{ 
-                display: 'flex', 
-                gap: '8px', 
-                flexWrap: 'wrap', 
-                width: isMobile ? '100%' : 'auto',
-                flexDirection: isMobile ? 'column' : 'row'
-            }}>
-                {filters.map(filter => (
-                    <div key={filter.key} style={{ 
-                        position: 'relative', 
-                        width: isMobile ? '100%' : 'auto',
-                        minWidth: isMobile ? '100%' : '150px' 
-                    }}>
-                        <select
-                            value={activeFilters[filter.key] || ''}
-                            onChange={e => handleFilterSelect(filter.key, e.target.value)}
-                            style={{
-                                appearance: 'none',
-                                backgroundColor: activeFilters[filter.key] ? '#fdf2f8' : '#f8fafc',
-                                border: `1px solid ${activeFilters[filter.key] ? '#8f0653' : '#e2e8f0'}`,
-                                borderRadius: '10px',
-                                padding: '9px 36px 9px 14px',
-                                fontSize: '13.5px',
-                                color: activeFilters[filter.key] ? '#8f0653' : '#64748b',
-                                fontWeight: activeFilters[filter.key] ? '600' : '400',
-                                cursor: 'pointer',
-                                outline: 'none',
-                                transition: 'all 0.2s ease',
-                                width: '100%',
-                                boxSizing: 'border-box'
-                            }}
-                        >
-                            <option value="">{filter.label}</option>
-                            {filter.options.map(opt => (
-                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                            ))}
-                        </select>
-                        <ChevronDown size={13} color={activeFilters[filter.key] ? '#8f0653' : '#94a3b8'} className="adm-icono-derecha" />
-                    </div>
-                ))}
+            <div className="adm-filtros-grupo">
+                {filters.map(filter => {
+                    const activo = Boolean(activeFilters[filter.key]);
+                    return (
+                        <div key={filter.key} className="adm-filtro-caja">
+                            <select
+                                value={activeFilters[filter.key] || ''}
+                                onChange={e => handleFilterSelect(filter.key, e.target.value)}
+                                className={`adm-filtro${activo ? ' adm-filtro--activo' : ''}`}
+                            >
+                                <option value="">{filter.label}</option>
+                                {filter.options.map(opt => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                            </select>
+                            <ChevronDown size={13} className="adm-icono-derecha adm-filtro-flecha" />
+                        </div>
+                    );
+                })}
 
-                {/* Limpiar filtros */}
                 {hasActiveFilters && (
-                    <button
-                        onClick={clearAll}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '5px',
-                            backgroundColor: 'transparent',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '10px',
-                            padding: '9px 14px',
-                            fontSize: '13px',
-                            color: '#64748b',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                            width: isMobile ? '100%' : 'auto'
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = '#ef4444'; e.currentTarget.style.color = '#ef4444'; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#64748b'; }}
-                    >
+                    <button onClick={clearAll} className="adm-filtros-limpiar">
                         <X size={13} />
                         Limpiar todo
                     </button>

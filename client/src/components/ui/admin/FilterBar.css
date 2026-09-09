@@ -1,0 +1,149 @@
+/* La barra de busqueda y filtros del panel.
+   ==========================================================================
+
+   Todo esto vivia dentro del JSX. Ademas de los colores y las medidas, habia
+   dos cosas que el CSS ya sabe hacer solo y que estaban resueltas a mano
+   manipulando el DOM en pleno evento:
+
+     - `onFocusCapture` / `onBlurCapture` cambiaban el borde del buscador
+       escribiendo en `e.currentTarget.style`. Eso es `:focus-within`.
+     - `onMouseEnter` / `onMouseLeave` hacian lo mismo con el boton de limpiar.
+       Eso es `:hover`.
+
+   Escribir en `style` desde un evento gana sobre cualquier regla de la hoja,
+   asi que el estilo quedaba pegado al elemento y ya no habia forma de cambiarlo
+   desde aqui. */
+
+.adm-filtros {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin-bottom: 1rem;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    flex-direction: row;
+}
+
+/* ── El buscador ────────────────────────────────────────────────────────── */
+
+.adm-filtros-buscador {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    flex: 1 1 15rem;
+    min-width: 12.5rem;
+    width: auto;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 0.625rem;
+    padding: 0 0.875rem;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+/* Se ilumina cuando el cursor esta escribiendo DENTRO, aunque el foco lo tenga
+   el campo y no la caja. */
+.adm-filtros-buscador:focus-within {
+    border-color: var(--color-brand);
+}
+
+.adm-filtros-icono { color: var(--color-text-placeholder); flex-shrink: 0; }
+
+/* ── Los desplegables ───────────────────────────────────────────────────── */
+
+.adm-filtros-grupo {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    width: auto;
+    flex-direction: row;
+}
+
+.adm-filtro-caja {
+    position: relative;
+    width: auto;
+    min-width: 9.375rem;
+}
+
+.adm-filtro {
+    appearance: none;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 0.625rem;
+    padding: 0.5625rem 2.25rem 0.5625rem 0.875rem;
+    font-size: 0.84375rem;
+    font-family: inherit;
+    color: var(--color-text-muted);
+    font-weight: 400;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Un filtro puesto se nota a simple vista: si no, se olvida que esta ahi y la
+   lista parece vacia sin motivo. */
+.adm-filtro--activo {
+    background-color: var(--color-brand-lighter);
+    border-color: var(--color-brand);
+    color: var(--color-brand);
+    font-weight: 600;
+}
+
+.adm-filtro-flecha { color: var(--color-text-placeholder); }
+.adm-filtro--activo + .adm-filtro-flecha { color: var(--color-brand); }
+
+/* ── Limpiar ────────────────────────────────────────────────────────────── */
+
+.adm-filtros-limpiar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3125rem;
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 0.625rem;
+    padding: 0.5625rem 0.875rem;
+    font-size: 0.8125rem;
+    font-family: inherit;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: auto;
+}
+
+/* Se pone rojo al pasar por encima: borra lo que el usuario eligio, y conviene
+   que se vea antes de pincharlo. */
+.adm-filtros-limpiar:hover {
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+/* ── EN PANTALLA ANGOSTA ─────────────────────────────────────────────────
+   Buscador y filtros dejan de caber en una fila. Se apilan, y cada uno pasa a
+   ocupar el ancho completo: un desplegable angosto en un telefono es dificil
+   de acertar. */
+@media (max-width: 639.98px) {
+    .adm-filtros {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .adm-filtros-buscador {
+        flex: 0 0 auto;
+        width: 100%;
+    }
+
+    .adm-filtros-grupo {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .adm-filtro-caja {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .adm-filtros-limpiar { width: 100%; }
+}
