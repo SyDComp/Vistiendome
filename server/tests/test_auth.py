@@ -67,11 +67,11 @@ def test_login_wrong_password(client: TestClient, session: Session):
 
 def test_login_con_apodo(client: TestClient, session: Session):
     """Entrar con el apodo en vez del correo: es la otra mitad del endpoint."""
-    setup_test_user(session, "test3@admin.com", "testpassword123", apodo="paola")
+    setup_test_user(session, "test3@admin.com", "testpassword123", apodo="usuaria_prueba")
 
     response = client.post(
         "/api/v1/auth/login",
-        json={"identificador": "paola", "password": "testpassword123"}
+        json={"identificador": "usuaria_prueba", "password": "testpassword123"}
     )
 
     assert response.status_code == 200, response.text
