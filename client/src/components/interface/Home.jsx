@@ -8,6 +8,7 @@ import CartDrawer from './cart/CartDrawer';
 import WelcomeModal from './WelcomeModal';
 import TopBanner from './TopBanner';
 import WhatsAppFAB from './WhatsAppFAB';
+import useAltoEncabezado from '../../hooks/useAltoEncabezado';
 
 const Home = ({ isModalView = false }) => {
     const location = useLocation();
@@ -15,6 +16,10 @@ const Home = ({ isModalView = false }) => {
 
     // Determinar si debemos mostrar el Navbar (se oculta en colecciones porque tienen su propio header hero)
     const hideNavbar = location.pathname.startsWith('/coleccion/');
+
+    // Publica cuanto mide el encabezado para que las hojas no tengan que
+    // adivinarlo con un numero escrito a mano. Ver el propio hook.
+    useAltoEncabezado();
 
     // Gestión dinámica de estilos globales: Solo aplicar padding si el Navbar es visible
     useEffect(() => {

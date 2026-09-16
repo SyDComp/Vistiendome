@@ -98,13 +98,16 @@
 
 /* Empuja el navbar fijo y el contenido cuando la barra está visible */
 body.has-top-banner .navbar-header {
-    top: 40px;
+    /* Justo debajo de la barra, mida lo que mida. */
+    top: var(--alto-banner, 40px);
 }
 /* Base: en páginas sin navbar fijo (ej: colecciones) la barra empuja 40px */
 body.has-top-banner {
-    padding-top: 40px;
+    padding-top: var(--alto-banner, 40px);
 }
 /* Con navbar fijo presente: 70px navbar + 40px barra */
 body.has-top-banner.has-fixed-navbar {
-    padding-top: 110px;
+    /* Decia 110px con el comentario "70px navbar + 40px barra". La cabecera
+       mide 71, no 70, y la barra crece cuando su texto pasa a dos lineas. */
+    padding-top: var(--alto-encabezado, 110px);
 }

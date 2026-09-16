@@ -419,23 +419,7 @@ body.no-scroll {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* Mobile Drawer - Forced Dimensions */
-/* .nav-menu-mobile {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100dvw !important;
-  height: 100dvh !important;
-  background-color: #ffffff !important;
-  z-index: 1200;
-  display: flex;
-  flex-direction: column;
-  padding: 100px 40px;
-  transform: translateX(100%);
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow-y: auto;
-  visibility: hidden;
-} */
+/* Mobile Drawer */
 
 .nav-menu-mobile {
   position: fixed;
@@ -447,7 +431,12 @@ body.no-scroll {
   z-index: 1200;
   display: flex;
   flex-direction: column;
-  padding: 100px 40px;
+  /* La altura del encabezado se MIDE (ver el hook useAltoEncabezado), no se
+     adivina. Decia 100px y el encabezado mide 111: los primeros 11 pixeles del
+     buscador quedaban debajo del logo. Y el texto de la barra promocional lo
+     escribe Paola, asi que en cuanto pasa a dos lineas el desfase se duplica.
+     El 111px es solo respaldo para el primer pintado. */
+  padding: var(--alto-encabezado, 111px) 40px 40px;
   transform: translateX(100%);
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
@@ -1651,7 +1640,7 @@ body.no-scroll {
   .ayuda-sidebar nav {
     flex-direction: column;
     position: sticky;
-    top: 100px;
+    top: var(--alto-encabezado, 100px);
     padding-bottom: 0;
     mask-image: none;
     -webkit-mask-image: none;
@@ -1890,7 +1879,7 @@ body.no-scroll {
 /* Galería */
 .product-gallery {
   position: sticky;
-  top: 100px;
+  top: var(--alto-encabezado, 100px);
 }
 
 .main-image-container {
