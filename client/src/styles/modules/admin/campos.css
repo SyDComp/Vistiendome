@@ -164,10 +164,10 @@
     flex-shrink: 0;
 }
 .adm-emblema-color--marca { background: var(--color-brand-lighter); color: var(--color-brand); }
-.adm-emblema-color--ambar { background: var(--color-warning-border); color: var(--color-warning); }
+.adm-emblema-color--ambar { background: var(--color-warning-border); color: var(--color-warning-strong); }
 .adm-emblema-color--azul  { background: var(--color-info-bg); color: var(--color-info); }
 .adm-emblema-color--rosa  { background: var(--color-brand-soft); color: var(--color-brand-vivid); }
-.adm-emblema-color--verde { background: var(--color-success-border); color: var(--color-success); }
+.adm-emblema-color--verde { background: var(--color-success-border); color: var(--color-success-strong); }
 
 /* ── Formularios de ajustes ─────────────────────────────────────────────── */
 
@@ -606,7 +606,7 @@
 }
 .adm-mover:disabled { cursor: not-allowed; color: var(--color-border); }
 
-.adm-boton-verde { background: var(--color-success-deep); height: 3rem; }
+.adm-boton-verde { background: #059669; height: 3rem; }
 
 /* Codigos de barras: pie de la ventana y boton de imprimir. */
 .adm-pie-ventana {

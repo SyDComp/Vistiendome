@@ -400,7 +400,7 @@
 }
 .coll-manager-dt-status.active {
     background: var(--color-success-bg);
-    color: var(--color-success);
+    color: var(--color-success-strong);
 }
 .coll-manager-dt-status.inactive {
     background: var(--color-error-bg);

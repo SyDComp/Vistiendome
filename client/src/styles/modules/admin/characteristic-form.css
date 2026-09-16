@@ -58,7 +58,7 @@
 .char-form-section-1 {
     padding: 32px;
     border-bottom: 1px solid var(--color-border-subtle);
-    background: var(--color-surface);
+    background: #fcfcfc;
 }
 
 .char-form-label {
@@ -181,7 +181,7 @@
     border-radius: 16px;
 }
 .char-form-row.system {
-    background: var(--color-surface);
+    background: #fcfcfc;
     border: 1px dashed var(--color-border);
     opacity: 0.9;
 }
@@ -265,7 +265,7 @@
 .char-form-badge-linked {
     font-size: 10px;
     background: var(--color-brand-lighter);
-    color: var(--color-brand-vivid);
+    color: #db2777;
     padding: 4px 8px;
     border-radius: 8px;
     font-weight: 800;

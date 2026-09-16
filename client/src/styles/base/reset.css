@@ -31,8 +31,8 @@ body,
   width: 100%;
   height: 100%;
   position: relative;
-  background-color: var(--color-bg);
-  color: var(--color-text-secondary);
+  background-color: #fcfbfa;
+  color: #2c2c2c;
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -41,7 +41,7 @@ body,
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: 500;
-  color: var(--color-text-primary);
+  color: #1a1a1a;
   letter-spacing: 0.5px;
   margin: 0;
 }
@@ -81,7 +81,7 @@ img {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-error-soft);
+  background: #b38b8b;
 }
 
 /* Firefox */

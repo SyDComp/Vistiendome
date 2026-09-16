@@ -7,7 +7,7 @@
 }
 
 .admin-login-title {
-    color: var(--color-text-secondary);
+    color: #333;
     text-align: center;
     margin-bottom: 20px;
 }
@@ -24,13 +24,13 @@
 }
 
 .admin-login-status.error {
-    background-color: var(--color-error-bg);
-    color: var(--color-error-deep);
+    background-color: #ffebee;
+    color: #c62828;
 }
 
 .admin-login-status.success {
-    background-color: var(--color-success-bg);
-    color: var(--color-success-deep);
+    background-color: #e8f5e9;
+    color: #2e7d32;
 }
 
 .admin-login-btn {

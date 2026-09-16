@@ -32,7 +32,7 @@
 
 /* Online State */
 .heartbeat-indicator.online .heart-dot {
-    background: var(--color-success-strong); /* Emerald 500 */
+    background: #10b981; /* Emerald 500 */
     box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
 }
 
@@ -42,7 +42,7 @@
 }
 
 .heartbeat-indicator.online .heart-label {
-    color: var(--color-success-strong);
+    color: #10b981;
 }
 
 /* Offline State */

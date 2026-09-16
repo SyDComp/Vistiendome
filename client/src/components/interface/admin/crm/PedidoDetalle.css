@@ -28,11 +28,11 @@ body { margin: 0; font-family: 'Inter', system-ui, sans-serif; }
     border: 2px solid var(--color-ink);
     border-radius: 8px;
     padding: 30px;
-    color: var(--color-ink);
+    color: #000;
 }
 .pedido-header { text-align: center; border-bottom: 3px solid var(--color-ink); padding-bottom: 16px; margin-bottom: 20px; }
 .pedido-header h1 { font-size: 28px; font-weight: 900; margin: 0 0 4px; letter-spacing: 1px; }
-.pedido-subtitle { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--color-text-body); margin: 0; }
+.pedido-subtitle { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #4b5563; margin: 0; }
 .pedido-numero { font-size: 13px; font-weight: 700; color: var(--color-brand); margin: 4px 0 0; }
 
 .pedido-acciones { position: fixed; top: 20px; right: 20px; z-index: 10; }

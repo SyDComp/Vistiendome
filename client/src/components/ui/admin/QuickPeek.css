@@ -131,7 +131,7 @@
     margin-bottom: 0.25rem;
 }
 .qp-cifra-valor { font-size: 1.125rem; font-weight: 800; color: var(--color-admin-dark); }
-.qp-cifra-valor--precio { color: var(--color-success); }
+.qp-cifra-valor--precio { color: var(--color-success-strong); }
 .qp-cifra-unidad { font-size: 0.75rem; font-weight: 600; color: var(--color-text-placeholder); }
 
 .qp-config { margin-bottom: 1.5rem; }

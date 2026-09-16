@@ -448,7 +448,7 @@
     position: fixed;
     inset: 0;
     z-index: 10000;
-    background: var(--color-ink);
+    background: #0a0a0f;
     display: flex;
     flex-direction: column;
     animation: fadeIn 0.3s ease;
@@ -872,13 +872,13 @@
 }
 
 .media-delete-assoc-badge.type-product {
-    background: var(--color-info-bg);
+    background: #e0f2fe;
     color: var(--color-info-darkest);
 }
 
 .media-delete-assoc-badge.type-sku {
-    background: var(--color-brand-soft);
-    color: var(--color-info-deep);
+    background: #f3e8ff;
+    color: #6b21a8;
 }
 
 .media-delete-assoc-badge.type-homepage {

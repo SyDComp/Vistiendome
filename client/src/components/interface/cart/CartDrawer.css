@@ -54,13 +54,13 @@
 .item-price { font-weight: 800; color: var(--color-admin-dark); }
 .item-price-original { font-weight: 500; color: var(--color-text-placeholder); text-decoration: line-through; margin-right: 4px; }
 .cart-subtotal-row { font-size: 13px; color: var(--color-text-muted); font-weight: 600; }
-.cart-discount-row { font-size: 13px; color: var(--color-success); font-weight: 700; }
+.cart-discount-row { font-size: 13px; color: var(--color-success-strong); font-weight: 700; }
 .cart-gifts { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
 .cart-gift-row {
-    display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-success);
+    display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-success-strong);
     background: var(--color-success-bg); border: 1px solid var(--color-success-border-strong); border-radius: 8px; padding: 8px 10px;
 }
-.item-tier-badge { font-size: 11px; font-weight: 800; color: var(--color-success); margin: 2px 0; text-transform: uppercase; letter-spacing: 0.3px; }
+.item-tier-badge { font-size: 11px; font-weight: 800; color: var(--color-success-strong); margin: 2px 0; text-transform: uppercase; letter-spacing: 0.3px; }
 
 .quantity-controls-mini {
     display: flex;
@@ -118,7 +118,7 @@
     touch-action: manipulation;
 }
 
-.cart-footer { padding: 24px 24px calc(env(safe-area-inset-bottom, 24px) + 24px); border-top: 1px solid var(--color-border-subtle); background: var(--color-bg); }
+.cart-footer { padding: 24px 24px calc(env(safe-area-inset-bottom, 24px) + 24px); border-top: 1px solid var(--color-border-subtle); background: #fafafa; }
 .cart-total-summary { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .cart-total-summary span:first-child { color: var(--color-text-muted); font-weight: 600; }
 .total-amount-display { font-size: 1.5rem; font-weight: 900; color: var(--color-admin-dark); }
@@ -142,7 +142,7 @@
     box-shadow: 0 4px 15px rgba(30, 27, 75, 0.2);
     touch-action: manipulation;
 }
-.btn-checkout-primary:hover { background: var(--color-info-darkest); transform: translateY(-2px); }
+.btn-checkout-primary:hover { background: #2d2a6e; transform: translateY(-2px); }
 
 @media (max-width: 480px) {
     .cart-drawer { max-width: 100%; }

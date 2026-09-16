@@ -132,7 +132,7 @@
     color: var(--color-brand);
 }
 .barcode-printer-product-btn.some {
-    color: var(--color-info);
+    color: #c084fc;
 }
 .barcode-printer-product-btn.none {
     color: var(--color-text-disabled);
@@ -206,7 +206,7 @@
 .barcode-printer-left-footer {
     padding: 12px 16px;
     border-top: 1px solid var(--color-border-subtle);
-    background: var(--color-bg);
+    background: #fafafa;
     display: flex;
     gap: 8px;
     align-items: center;

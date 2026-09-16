@@ -11,7 +11,7 @@
 .ayuda-hero {
     padding: 2.5rem 0 2rem;
     text-align: center;
-    background-color: var(--color-bg);
+    background-color: #fbfbfb;
     margin-bottom: 1.5rem;
 }
 .ayuda-hero h1 {
@@ -45,7 +45,7 @@
 .ayuda-card-item:active {
     transform: scale(0.98);
     background: var(--color-brand-lighter);
-    border-color: var(--color-brand-border);
+    border-color: #d1a3d4;
 }
 
 .ayuda-card-icon {

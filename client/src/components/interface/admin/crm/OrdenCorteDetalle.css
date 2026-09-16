@@ -26,7 +26,7 @@
 
 .oc-detalle .oc-agrupar button.activo { border-color:var(--color-admin-dark); background:var(--color-admin-dark); color:var(--color-surface); }
 
-.oc-detalle .oc-agrupar button.activo small { color:var(--color-info-border); }
+.oc-detalle .oc-agrupar button.activo small { color:#c7d2fe; }
 
 .oc-detalle .oc-estado { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:5px 12px; border-radius:20px; }
 
@@ -34,7 +34,7 @@
 
 .oc-detalle .oc-btn { display:flex; align-items:center; gap:6px; background:var(--color-surface); border:1px solid var(--color-border); padding:8px 14px; border-radius:8px; font-size:13px; font-weight:700; color:var(--color-text-tertiary); cursor:pointer; }
 
-.oc-detalle .oc-btn:hover { background:var(--color-info-bg); }
+.oc-detalle .oc-btn:hover { background:#eef2ff; }
 
 .oc-detalle .oc-nota-rep { font-size:12px; color:var(--color-text-muted); margin-left:auto; }
 
@@ -44,7 +44,7 @@
 
 .oc-detalle .oc-origen { font-size:11px; font-weight:700; padding:3px 9px; border-radius:6px; }
 
-.oc-detalle .oc-origen.stock { background:var(--color-info-bg); color:var(--color-info-deep); }
+.oc-detalle .oc-origen.stock { background:#eef2ff; color:#4338ca; }
 
 .oc-detalle .oc-enlace { border:none; font:inherit; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
 

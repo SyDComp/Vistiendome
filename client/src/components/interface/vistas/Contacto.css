@@ -73,18 +73,18 @@
 .prendas-pedidas { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .prendas-pedidas li {
     display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
-    background: var(--color-brand-lighter); border: 1px solid var(--color-brand-border); border-radius: 10px; padding: 10px 12px;
+    background: #fdf4ff; border: 1px solid var(--color-brand-border); border-radius: 10px; padding: 10px 12px;
 }
 .prendas-pedidas strong { display: block; font-size: 13.5px; color: var(--color-admin-dark); }
 .prenda-detalle { display: block; font-size: 11.5px; color: var(--color-text-muted); margin-top: 2px; }
-.prenda-propuesta { display: block; font-size: 11.5px; color: var(--color-warning-deep); margin-top: 2px; }
+.prenda-propuesta { display: block; font-size: 11.5px; color: #a16207; margin-top: 2px; }
 .prendas-pedidas button { background: none; border: none; cursor: pointer; color: var(--color-text-placeholder); display: flex; padding: 2px; }
 .btn-armar-prenda {
     width: 100%; padding: 11px; border-radius: 10px; cursor: pointer;
-    border: 1.5px dashed var(--color-info-deep); background: var(--color-brand-lighter); color: var(--color-brand);
+    border: 1.5px dashed var(--color-info-deep); background: #fdf4ff; color: #86198f;
     font-weight: 800; font-size: 13px; font-family: inherit;
 }
-.btn-armar-prenda:hover { background: var(--color-brand-soft); }
+.btn-armar-prenda:hover { background: #fae8ff; }
 
 /* UNA SOLA CAJA, NO TRES
    El overlay ponia 16px, la caja 6px y el armador otros 14px
@@ -221,7 +221,7 @@
 }
 .contacto-aviso--info {
     color: var(--color-info-darkest);
-    background: var(--color-info-bg);
+    background: #e0f2fe;
     border: 1px solid var(--color-info-border);
 }
 

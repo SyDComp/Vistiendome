@@ -30,24 +30,24 @@
 }
 
 .ui-btn-primary:hover:not(:disabled) {
-    background-color: var(--color-error-soft);
+    background-color: #b38b8b;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(200, 162, 162, 0.2);
 }
 
 .ui-btn-secondary {
     background-color: transparent;
-    border-color: var(--color-border);
-    color: var(--color-text-secondary);
+    border-color: #e0e0e0;
+    color: #2c2c2c;
 }
 
 .ui-btn-secondary:hover:not(:disabled) {
-    background-color: var(--color-bg);
+    background-color: #fcfbfa;
     border-color: var(--color-brand);
 }
 
 .ui-btn-danger {
-    background-color: var(--color-error);
+    background-color: #e74c3c;
     color: white;
 }
 
@@ -72,7 +72,7 @@
 
 .ui-btn-secondary .ui-loader {
     border: 3px solid rgba(0, 0, 0, 0.1);
-    border-top-color: var(--color-text-body);
+    border-top-color: #495057;
 }
 
 @keyframes spin {

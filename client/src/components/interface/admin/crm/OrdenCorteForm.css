@@ -30,7 +30,7 @@
 
 .oc-form .oc-resultado { display:flex; align-items:center; gap:8px; text-align:left; background:var(--color-bg); border:1px solid var(--color-border); border-radius:8px; padding:8px 10px; font-size:13px; cursor:pointer; color:var(--color-text-tertiary); }
 
-.oc-form .oc-resultado:hover { background:var(--color-info-bg); }
+.oc-form .oc-resultado:hover { background:#eef2ff; }
 
 .oc-form .oc-cantidad { width:70px; height:34px; text-align:right; padding:0 8px; border:1px solid var(--color-border); border-radius:8px; }
 

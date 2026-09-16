@@ -49,10 +49,10 @@
     font-family: monospace;
     font-size: 0.5625rem;
     font-weight: 700;
-    color: var(--color-text-body);
+    color: #4a5568;
     margin-top: 0.1875rem;
 }
-.et-ok { display: block; font-size: 0.6875rem; color: var(--color-success-deep); font-weight: 700; margin-top: 0.25rem; }
+.et-ok { display: block; font-size: 0.6875rem; color: #059669; font-weight: 700; margin-top: 0.25rem; }
 
 /* El rótulo de un grupo de opciones. */
 .et-rotulo {
@@ -200,7 +200,7 @@
 }
 .et-boton-enlace--gris { color: var(--color-text-muted); }
 .et-boton-morado {
-    background: var(--color-info-deep);
+    background: #5b21b6;
     color: var(--color-surface);
     border: none;
     border-radius: 0.5rem;
@@ -213,7 +213,7 @@
 .et-boton-morado-plano {
     background: none;
     border: none;
-    color: var(--color-info-deep);
+    color: #7c3aed;
     font-size: 0.75rem;
     font-weight: 700;
     cursor: pointer;
@@ -249,7 +249,7 @@
     margin-bottom: 0.5rem;
 }
 .et-etiqueta-titulo { font-size: 0.875rem; font-weight: 900; letter-spacing: 0.03125rem; }
-.et-etiqueta-seccion { font-size: 0.8125rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--color-ink); }
+.et-etiqueta-seccion { font-size: 0.8125rem; font-weight: 800; margin-bottom: 0.5rem; color: #000; }
 .et-etiqueta-lineas {
     display: flex;
     flex-direction: column;
@@ -398,7 +398,7 @@
 .et-destinatario {
     font-size: 1rem;
     font-weight: 900;
-    color: var(--color-ink);
+    color: #000;
     line-height: 1.1;
     margin-bottom: 0.5rem;
 }
@@ -410,7 +410,7 @@
     gap: 0.75rem;
     flex-wrap: wrap;
     padding: 0.5625rem 1rem;
-    background: var(--color-info-bg);
+    background: #f5f3ff;
     border-bottom: 1px solid var(--color-info-border);
 }
 .et-sub { margin: 0.125rem 0 0 0; font-size: 0.75rem; color: var(--color-text-muted); }
@@ -477,7 +477,7 @@
     margin: 0;
     font-size: 1.25rem;
     font-weight: 900;
-    color: var(--color-admin-dark);
+    color: var(--color-text-secondary);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -683,7 +683,7 @@
 }
 
 /* La casilla de cada pedido. */
-.et-marca { color: var(--color-text-disabled); display: flex; align-items: center; }
+.et-marca { color: var(--color-brand); display: flex; align-items: center; }
 .et-pedido--elegido .et-marca { color: var(--color-brand); }
 
 /* Los dos botones de consumo de tinta. */

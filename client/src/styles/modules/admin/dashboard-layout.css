@@ -181,7 +181,7 @@
     background: transparent;
 }
 .admin-sidebar-link.disabled {
-    color: var(--color-info-darkest);
+    color: #433e7a;
     background: transparent;
     cursor: not-allowed;
 }

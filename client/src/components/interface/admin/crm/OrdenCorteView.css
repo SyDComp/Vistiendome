@@ -44,7 +44,7 @@
 
 .oc-lista .oc-notas { color:var(--color-text-muted); font-size:12px; }
 
-.oc-lista .oc-badge-rep { margin-left:8px; font-size:10px; font-weight:800; color:var(--color-info-deep); background:var(--color-info-bg); padding:2px 7px; border-radius:6px; }
+.oc-lista .oc-badge-rep { margin-left:8px; font-size:10px; font-weight:800; color:#4338ca; background:#eef2ff; padding:2px 7px; border-radius:6px; }
 
 .oc-lista .oc-quitar { background:none; border:none; color:var(--color-error-strong); cursor:pointer; padding:4px; }
 

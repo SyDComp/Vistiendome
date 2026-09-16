@@ -101,7 +101,7 @@
 
 .cms-studio-btn-outline.preview-mode {
     background: var(--color-surface);
-    color: var(--color-ink);
+    color: #000;
 }
 
 .cms-studio-btn-primary {
@@ -279,7 +279,7 @@
 }
 
 .cms-studio-layer-trash:hover {
-    color: var(--color-error);
+    color: #ff4d4d;
 }
 
 .cms-studio-toolbar {
@@ -332,7 +332,7 @@
 
 .cms-studio-canvas-container {
     flex: 1;
-    background: var(--color-ink);
+    background: #080808;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -629,7 +629,7 @@
     padding: 12px;
     border-radius: 12px;
     border: 1px solid var(--color-error);
-    color: var(--color-error);
+    color: #ff4d4d;
     background: transparent;
     font-weight: 800;
     font-size: 11px;

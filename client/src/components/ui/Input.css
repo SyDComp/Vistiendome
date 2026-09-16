@@ -30,7 +30,7 @@
 }
 
 .premium-input:focus {
-    border-color: var(--color-warning);
+    border-color: #fbbf24;
     box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
 }
 
@@ -74,7 +74,7 @@
 
 /* Error text (migrated from ui.css) */
 .ui-error-text {
-    color: var(--color-error-soft);
+    color: #d89b9b;
     font-size: 12px;
     margin-top: 6px;
     animation: fadeIn 0.3s ease;
@@ -86,6 +86,6 @@
 }
 
 .ui-required-mark {
-    color: var(--color-error);
+    color: #e74c3c;
     margin-left: 3px;
 }

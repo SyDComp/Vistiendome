@@ -74,9 +74,9 @@
     flex-shrink: 0;
 }
 /* Encendida: el estado se ve en el marcado, no en un color calculado. */
-.cms-adm-accion--activa { background: var(--color-success-bg); color: var(--color-success-deep); }
+.cms-adm-accion--activa { background: #ecfdf5; color: #059669; }
 .cms-adm-accion--marca { background: var(--cms-marca-suave); color: var(--cms-marca); }
-.cms-adm-accion--borrar { background: var(--color-error-bg); color: var(--color-error); }
+.cms-adm-accion--borrar { background: #fff1f2; color: #e11d48; }
 
 .cms-adm-lista { flex: 1; overflow-y: auto; }
 .cms-adm-flexible { flex: 1; min-height: 0; }
@@ -223,7 +223,7 @@
     font-family: inherit;
     min-height: 2.25rem;
 }
-.cms-pg-verde { background: var(--color-success-deep); }
+.cms-pg-verde { background: #059669; }
 /* Nombre editable en la propia fila: se escribe donde se lee. */
 .cms-pg-editable {
     border: none;

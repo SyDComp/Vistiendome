@@ -58,8 +58,8 @@
     font-size: 12px;
     font-weight: 600;
 }
-.type-badge.prenda { background: var(--color-success-bg); color: var(--color-success); }
-.type-badge.accesorio { background: var(--color-brand-lighter); color: var(--color-info-deep); }
+.type-badge.prenda { background: var(--color-success-bg); color: var(--color-success-strong); }
+.type-badge.accesorio { background: #fdf4ff; color: #9333ea; }
 .type-badge.default { background: var(--color-bg-subtle); color: var(--color-text-muted); }
 
 /* UNA PILDORA NO PARTE SU TEXTO
@@ -75,7 +75,7 @@
     font-weight: 700;
 }
 .stock-badge.empty { background: var(--color-error-bg); color: var(--color-error); }
-.stock-badge.low { background: var(--color-warning-bg); color: var(--color-warning); }
+.stock-badge.low { background: var(--color-warning-bg); color: var(--color-warning-strong); }
 .stock-badge.normal { background: var(--color-success-bg); color: var(--color-success-deep); }
 
 .admin-product-thumb {
@@ -110,7 +110,7 @@
 
 .admin-product-name { font-weight: 700; color: var(--color-admin-dark); }
 .admin-product-name.parent { font-weight: 600; color: var(--color-text-muted); }
-.admin-product-price { font-weight: 800; color: var(--color-success); }
+.admin-product-price { font-weight: 800; color: var(--color-success-strong); }
 
 /* Misma razon que `.stock-badge`: "2399 und." se partia en dos lineas. */
 .admin-stock-val {
