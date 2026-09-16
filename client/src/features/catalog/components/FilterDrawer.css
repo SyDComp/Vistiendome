@@ -25,7 +25,12 @@
 
 .filter-drawer-container {
     position: fixed;
-    top: 0;
+    /* Empieza donde termina el encabezado. Con `top: 0` el panel arrancaba
+       debajo de la barra promocional y la cabecera, que van fijas y por
+       delante: los primeros 111 pixeles quedaban tapados, y ahi es justo donde
+       estan el titulo "Filtros" y el boton de cerrar. Medido en la web: la
+       cabecera del panel iba de 0 a 73, entera debajo del encabezado. */
+    top: var(--alto-encabezado, 111px);
     right: 0;
     bottom: 0;
     width: 100%;
@@ -36,7 +41,9 @@
     display: flex;
     flex-direction: column;
     animation: slideInRight 0.3s ease-out;
-    height: 100dvh;
+    /* Sin `height`: la dan `top` y `bottom`. Estaba puesta en 100dvh, que es
+       una pantalla completa contada desde donde empieza el panel, asi que se
+       pasaba por abajo tanto como midiera el encabezado. */
 }
 
 .filter-drawer-header {
