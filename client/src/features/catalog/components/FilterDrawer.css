@@ -1,3 +1,159 @@
+/* EL CAJON DE FILTROS DEL CATALOGO
+   ==========================================================================
+
+   Las reglas que siguen -el fondo, el panel, su cabecera, su pie y los botones
+   de opcion- estaban en esta misma hoja hasta el commit af631e7, la
+   reestructuracion del cliente a carpetas por feature, donde se perdieron. El
+   JSX siguio usando las clases igual.
+
+   Una clase sin regla no da error: el navegador pinta el elemento con su
+   estilo por defecto. Por eso el panel se veia como HTML crudo -el titulo y el
+   boton de cerrar uno debajo del otro, los campos sin borde, los botones del
+   pie sin repartirse el ancho- y no habia nada que fallara en ninguna parte.
+
+   Recuperadas tal cual estaban.
+   ========================================================================== */
+
+.filter-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.filter-drawer-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 400px;
+    background: #fff;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    animation: slideInRight 0.3s ease-out;
+    height: 100dvh;
+}
+
+.filter-drawer-header {
+    padding: 20px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.filter-drawer-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 900;
+    color: #1e1b4b;
+}
+
+.filter-drawer-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-drawer-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.filter-section {
+    margin-bottom: 24px;
+}
+
+.filter-section-toggle {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 1px solid #f8fafc;
+    touch-action: manipulation;
+}
+
+.filter-section-title {
+    font-weight: 800;
+    font-size: 14px;
+    color: #1e1b4b;
+    text-transform: uppercase;
+}
+
+.filter-options-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.filter-option-btn {
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    touch-action: manipulation;
+}
+
+.filter-option-btn.active {
+    border-color: #8f0653;
+    background: #fdf2f8;
+    color: #8f0653;
+}
+
+.filter-option-btn.active-primary {
+    border-color: #8f0653;
+    background: #8f0653;
+    color: #fff;
+}
+
+.filter-price-range {
+    margin-top: 16px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.filter-drawer-footer {
+    padding: 20px 20px calc(env(safe-area-inset-bottom, 20px) + 20px);
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    gap: 12px;
+    background: #fff;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
 /* El arbol de filtros del catalogo: categorias, y dentro de cada una sus
    subcategorias.
    ==========================================================================
@@ -77,3 +233,57 @@
     font-style: italic;
 }
 .cat-subrama--elegida { color: var(--color-brand); font-weight: 800; }
+
+/* ── LA ESTRUCTURA DEL CAJON ─────────────────────────────────────────────
+   Estas clases se usaban en el JSX desde que se le sacaron los estilos de
+   adentro, pero las reglas nunca se escribieron. Una clase sin regla no da
+   error: el elemento se queda con el estilo por defecto del navegador. Por eso
+   el panel de filtros se veia descuadrado -los campos de precio uno debajo del
+   otro, sin bordes, sin separacion- sin que nada fallara en ninguna parte.
+
+   Los valores son los que tenian escritos en el JSX antes de moverlos, pasados
+   a rem: 8px = 0.5rem, 16px = 1rem, 24px = 1.5rem. */
+
+/* Una seccion del cajon, de arriba abajo y a todo el ancho. */
+.fd-columna {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* Un grupo de opciones, con aire debajo para separarlo del siguiente.
+   `gap: 0` a proposito: las opciones traen su propia separacion. */
+.fd-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 1.5rem;
+}
+
+/* El grupo que ademas va despegado de lo que tiene encima. */
+.fd-grupo--separado {
+    margin-top: 1rem;
+}
+
+/* Una fila: lo que va lado a lado, centrado entre si. */
+.fd-fila {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+/* Un campo de texto del cajon: los dos del rango de precio. */
+.fd-campo {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    outline: none;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+/* Reparto del ancho entre los dos botones del pie: el segundo pesa el doble. */
+.fd-flexible       { flex: 1; gap: 0.5rem; }
+.fd-flexible-doble { flex: 2; }
