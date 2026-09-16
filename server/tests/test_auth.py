@@ -78,6 +78,38 @@ def test_login_con_apodo(client: TestClient, session: Session):
     assert "access_token" in response.json()
 
 
+def test_login_identificador_con_espacios_y_mayusculas(client: TestClient, session: Session):
+    """
+    El identificador se limpia antes de buscar la cuenta.
+
+    Copiar y pegar un correo arrastra un espacio, y escribirlo con mayusculas
+    es normal. Cuando la comparacion era literal, las dos cosas hacian que la
+    cuenta NO se encontrara y la respuesta era "Credenciales invalidas": el
+    mismo texto que cuando la clave esta mala, asi que desde afuera no habia
+    forma de saber cual de las dos cosas pasaba.
+    """
+    setup_test_user(session, "qa@admin.com", "testpassword123", apodo="revisora")
+
+    espacios = " " + chr(9) + chr(10)
+    for identificador in ("  qa@admin.com  ", "QA@Admin.com",
+                          espacios + "qa@admin.com" + espacios, "  Revisora "):
+        response = client.post(
+            "/api/v1/auth/login",
+            json={"identificador": identificador, "password": "testpassword123"}
+        )
+        assert response.status_code == 200, "fallo con %r: %s" % (identificador, response.text)
+        assert "access_token" in response.json()
+
+
+def test_login_identificador_vacio(client: TestClient):
+    """Un identificador en blanco es un rechazo, no una busqueda con texto vacio."""
+    response = client.post(
+        "/api/v1/auth/login",
+        json={"identificador": "   ", "password": "loquesea"}
+    )
+    assert response.status_code == 401, response.text
+
+
 def test_login_usuario_inexistente(client: TestClient):
     """Quien no existe recibe lo MISMO que quien erro la clave.
 

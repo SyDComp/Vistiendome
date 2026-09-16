@@ -23,14 +23,19 @@ const AdminLogin = () => {
 
     const performLogin = async (payload) => {
         setAuthStatus(null);
-        console.log("Iniciando Acceso Administrador para:", payload.identificador);
+
+        // Copiar y pegar un correo casi siempre arrastra un espacio, y ese
+        // espacio hacia que la cuenta no se encontrara. El servidor ya lo
+        // limpia por su cuenta; se limpia tambien aca para que lo que se manda
+        // sea lo que la persona quiso escribir.
+        const credenciales = { ...payload, identificador: (payload.identificador || '').trim() };
 
         try {
             const res = await fetch('/api/v1/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify(payload)
+                body: JSON.stringify(credenciales)
             });
 
             const data = await res.json();

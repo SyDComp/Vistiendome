@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
-from sqlmodel import Session, select, or_
+from sqlmodel import Session, select, or_, func
 from pydantic import BaseModel
 import pyotp
 
@@ -113,10 +113,32 @@ def basic_login(data: LoginMfaSchema, response: Response, db: Session = Depends(
     Login simplificado para el Administrador (MVP).
     Retorna JWT directamente si las credenciales son válidas y lo establece en una cookie segura.
     """
+    # QUIEN ESCRIBE NO TECLEA IGUAL QUE LA BASE DE DATOS
+    #
+    # Esto comparaba el texto tal cual llegaba. Un espacio pegado al final -lo
+    # que deja cualquier copiar y pegar- o una mayuscula de mas bastaban para
+    # que la cuenta NO se encontrara, y la respuesta era "Credenciales
+    # invalidas": el mismo mensaje que cuando la clave esta mala. Imposible de
+    # distinguir desde afuera, y manda a buscar el problema donde no esta.
+    #
+    # Se nota en que `intentos_fallidos` no sube: ese contador solo avanza
+    # cuando la cuenta SI aparece y lo que falla es la clave. Con el contador
+    # en cero y accesos fallando, lo que no cuadra es el identificador.
+    #
+    # El correo no distingue mayusculas -- 'A@X.CL' y 'a@x.cl' son la misma
+    # casilla -- asi que se comparan ambos lados en minuscula. El apodo igual:
+    # nadie recuerda con que mayusculas lo escribio.
+    identificador = (data.identificador or "").strip()
+    if not identificador:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciales inválidas"
+        )
+
     cuenta = db.exec(select(CuentaAcceso).where(
         or_(
-            CuentaAcceso.email_corporativo == data.identificador,
-            CuentaAcceso.apodo == data.identificador
+            func.lower(CuentaAcceso.email_corporativo) == identificador.lower(),
+            func.lower(CuentaAcceso.apodo) == identificador.lower()
         )
     )).first()
     
