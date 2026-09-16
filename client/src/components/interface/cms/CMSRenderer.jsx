@@ -246,8 +246,8 @@ export const SceneCarouselBlock = ({ config, previewMode = false, forceMobile = 
 
                 {scenes.length > 1 && (
                     <>
-                        <button onClick={e => { e.stopPropagation(); go(-1); }} className="cms-flecha cms-flecha--izquierda"><ChevronLeft size={20} /></button>
-                        <button onClick={e => { e.stopPropagation(); go(1); }}  className="cms-flecha cms-flecha--derecha"><ChevronRight size={20} /></button>
+                        <button onClick={e => { e.stopPropagation(); go(-1); }} className="flecha-nav flecha-nav--sobre-foto flecha-nav--al-medio cms-flecha--izquierda"><ChevronLeft size={20} /></button>
+                        <button onClick={e => { e.stopPropagation(); go(1); }}  className="flecha-nav flecha-nav--sobre-foto flecha-nav--al-medio cms-flecha--derecha"><ChevronRight size={20} /></button>
                     </>
                 )}
             </div>
@@ -492,7 +492,7 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
                         <>
                             <button
                                 onClick={(e) => { e.stopPropagation(); scroll('left'); }}
-                                className="floating-nav-btn tap-44"
+                                className="flecha-nav flecha-nav--clara flecha-nav--al-medio tap-44"
                                 style={{
                                     left: isMobile ? '4px' : '-22px',
                                     width: isMobile ? '36px' : '44px',
@@ -503,7 +503,7 @@ export const ProductCarouselBlock = ({ config, title, previewMode = false, force
                             </button>
                             <button
                                 onClick={(e) => { e.stopPropagation(); scroll('right'); }}
-                                className="floating-nav-btn tap-44"
+                                className="flecha-nav flecha-nav--clara flecha-nav--al-medio tap-44"
                                 style={{
                                     right: isMobile ? '4px' : '-22px',
                                     width: isMobile ? '36px' : '44px',

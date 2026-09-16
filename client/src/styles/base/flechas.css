@@ -1,0 +1,81 @@
+/* LAS FLECHAS DE PASAR CONTENIDO, DEFINIDAS UNA VEZ
+   ==========================================================================
+
+   En el proyecto habia ocho flechas distintas para hacer lo mismo, cada una
+   escrita desde cero en la hoja de su componente:
+
+     .floating-nav-btn                    el carrusel de productos
+     .cms-flecha                          el carrusel de la portada
+     .lightbox-nav                        la foto a pantalla completa
+     .qp-flecha                           la vista rapida del panel
+     .media-gallery-lightbox-arrow-*      la galeria de medios
+     .detail-drawer-reorder-nav-btn       reordenar en el panel
+     .carousel-controls-wrapper           la previa del producto
+
+   Lo que se ve en pantalla cuando cada una se escribe aparte: en la MISMA
+   portada, una salia como un boton redondo de 44 con sombra y la otra como un
+   rectangulo de 36x29, de esquinas rectas, casi transparente y con la flecha
+   negra sin centrar. No porque alguien lo decidiera, sino porque a la segunda
+   le faltaban las lineas que la primera si tenia.
+
+   Aca esta lo que TODAS comparten: que sea redonda, que centre su icono, que se
+   pueda pinchar. Lo unico que cambia entre un sitio y otro es donde se coloca y
+   de que color va, y eso lo pone cada componente.
+   ========================================================================== */
+
+.flecha-nav {
+    /* Cuadrada de 2.75rem = 44px, que es el minimo que se acierta con el pulgar
+       sin apuntar. Es lo que ya usaban las que estaban bien hechas. */
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+
+    /* El icono va al centro. `display: block` -lo que tenia la del CMS- deja la
+       flecha arriba a la izquierda de su caja. */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+/* Sobre fondo claro: se tiene que leer como un boton, no como una mancha. */
+.flecha-nav--clara {
+    background: var(--color-surface);
+    color: var(--color-admin-dark);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.flecha-nav--clara:hover {
+    background: var(--color-admin-dark);
+    color: var(--color-surface);
+}
+
+/* Sobre una foto: translucida, para no taparla mas de lo necesario. */
+.flecha-nav--sobre-foto {
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(6px);
+    color: var(--color-surface);
+}
+
+.flecha-nav--sobre-foto:hover {
+    background: rgba(255, 255, 255, 0.32);
+}
+
+/* Colgada del borde de lo que hace pasar. */
+.flecha-nav--al-medio {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+}
+
+.flecha-nav--al-medio:hover {
+    /* Si no se repite el `translateY`, el hover la manda de vuelta hacia abajo:
+       `transform` reemplaza, no suma. */
+    transform: translateY(-50%) scale(1.08);
+}

@@ -25,14 +25,7 @@
 .rich-text-content img { height: auto; border-radius: 12px; }
 
 .product-carousel-scroll::-webkit-scrollbar { display: none; }
-.floating-nav-btn {
-    position: absolute; top: 40%; transform: translateY(-50%);
-    width: 44px; height: 44px; background: var(--color-surface); color: var(--color-admin-dark);
-    border: none; border-radius: 4px; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    transition: all 0.2s ease;
-}
-.floating-nav-btn:hover { background: var(--color-admin-dark); color: var(--color-surface); transform: translateY(-50%) scale(1.1); }
+/* Las flechas del carrusel de productos usan base/flechas.css. */
 .add-to-cart-banner {
     position: absolute; bottom: 0; left: 0; right: 0;
     background: rgba(255,255,255,0.95); padding: 12px;
@@ -176,13 +169,13 @@
     color: var(--color-surface);
     border-radius: 0.25rem;
 }
-.cms-flecha {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(6px);
-}
+/* Como se ven estas flechas esta en base/flechas.css, igual que las del resto
+   del sitio. Aca queda solo donde se cuelga cada una.
+
+   Antes esta regla traia la posicion y un fondo translucido, y nada mas: sin
+   tamano, sin forma, sin centrar el icono. Salian de 36x29 con esquinas rectas
+   y la flecha negra en un rincon, al lado de otro carrusel de la misma portada
+   cuyas flechas si eran botones redondos. */
 .cms-flecha--izquierda { left: 1rem; }
 .cms-flecha--derecha { right: 1rem; }
 .cms-foto {
