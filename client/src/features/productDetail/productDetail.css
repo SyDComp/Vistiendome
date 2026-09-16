@@ -394,6 +394,12 @@
     font-size: 15px;
     display: flex;
     align-items: center;
+    /* Faltaba, y es lo unico que separaba a este boton de su vecino: con
+       `align-items` solo se centra de arriba abajo, no de lado a lado, asi que
+       el icono y el texto quedaban pegados al borde izquierdo mientras "Al
+       Carrito", que si lo tiene, salia centrado. */
+    justify-content: center;
+    cursor: pointer;
     gap: 8px;
 }
 

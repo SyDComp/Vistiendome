@@ -130,7 +130,7 @@ const FilterBar = ({
 
                     {activeFilterTags.length > 0 && (
                         <div className="active-filters-container">
-                            <span className="adm-celda-secundaria">Filtros activos:</span>
+                            <span className="fb-rotulo-activos">Filtros activos:</span>
                             {activeFilterTags.map((tag, i) => (
                                 <button
                                     key={i}

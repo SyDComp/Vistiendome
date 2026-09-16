@@ -79,7 +79,17 @@
     align-items: center;
 }
 
-/* Filtros activos del catalogo. */
+/* Filtros activos del catalogo.
+   La fila la forman tres cosas -el rotulo, los chips y el enlace de limpiar- y
+   cada una traia una tipografia distinta: medido en la web, 13px, 13.33px y
+   12px en la misma linea, y el chip ademas en negro porque es un <button> y no
+   declaraba ni color ni fuente, asi que usaba los del navegador. Verticalmente
+   estaban bien centradas; lo que no cuadraba era el tamaño y el color. */
+.fb-rotulo-activos {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+}
+
 .fb-etiqueta {
     display: flex;
     align-items: center;
@@ -87,6 +97,14 @@
     padding: 0.375rem 0.75rem;
     border-radius: 1rem;
     background: var(--color-brand-lighter);
+    /* Lo que faltaba: sin esto el chip se pintaba con la fuente y el color por
+       defecto de un boton, distintos de los de sus dos vecinos. */
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-brand);
+    border: none;
+    cursor: pointer;
 }
 .fb-limpiar {
     font-size: 0.75rem;
