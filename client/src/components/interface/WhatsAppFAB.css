@@ -37,3 +37,21 @@
         height: 50px;
     }
 }
+
+/* SE APARTA CUANDO HAY UN PANEL ABIERTO
+   ==========================================================================
+
+   El boton flota abajo a la derecha con z-index 1400, por encima de los
+   paneles. Medido en la web: tapaba los ultimos 56 pixeles de "Aplicar
+   Filtros", que es el boton con el que se cierra esa tarea. El de arriba no
+   estorba a nadie; el de abajo se come el boton principal del panel.
+
+   `:has()` deja resolverlo en la hoja: si en la pagina hay un panel abierto,
+   el boton se va. Los tres paneles solo existen en el documento mientras estan
+   abiertos -el del menu vive siempre, pero solo lleva `open` cuando lo esta-,
+   asi que el boton vuelve solo al cerrarlos. */
+:root:has(.filter-drawer-container) .whatsapp-fab,
+:root:has(.cart-drawer) .whatsapp-fab,
+:root:has(.nav-menu-mobile.open) .whatsapp-fab {
+    display: none;
+}
