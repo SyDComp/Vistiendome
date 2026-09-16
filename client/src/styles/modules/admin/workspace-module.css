@@ -535,7 +535,7 @@
 .detail-drawer-library-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
 .detail-drawer-library-grid-item { background: var(--color-surface); padding: 16px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s; position: relative; }
 .detail-drawer-reorder-actions { position: absolute; top: -10px; left: 0; right: 0; display: flex; justify-content: center; gap: 8px; z-index: 10; }
-.detail-drawer-reorder-nav-btn { width: 28px; height: 28px; border-radius: 50%; background: var(--color-brand); color: var(--color-surface); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(143,6,83,0.3); }
+/* Estas flechas pasaron a base/flechas.css (variantes --chica y --marca). */
 
 /* 1400-1866 */
 .detail-drawer-system-tag { background: var(--color-brand-lighter); color: var(--color-brand); font-size: 8px; font-weight: 900; padding: 2px 5px; border-radius: 4px; display: flex; align-items: center; gap: 2px; }

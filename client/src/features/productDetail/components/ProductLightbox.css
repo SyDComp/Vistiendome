@@ -48,21 +48,12 @@
 }
 .lightbox-close:hover { transform: scale(1.1); opacity: 1; }
 
+/* Como se ve esta flecha esta en base/flechas.css. Aca queda lo suyo: que sea
+   mas grande que la de a pie -hay sitio de sobra y se mira de lejos- y el aire
+   que la separa de la foto. */
 .lightbox-nav {
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    color: white;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin: 0 20px;
-    backdrop-filter: blur(5px);
-    flex-shrink: 0;
+    --flecha-tamano: 3.75rem;
+    margin: 0 1.25rem;
 }
 .lightbox-nav:hover { background: rgba(255, 255, 255, 0.2); }
 

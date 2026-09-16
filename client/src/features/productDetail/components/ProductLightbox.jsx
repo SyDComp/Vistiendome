@@ -62,7 +62,7 @@ const ProductLightbox = ({ images = [], currentIndex = 0, isOpen, onClose, onPre
 
             <div className="lightbox-content">
                 {images.length > 1 && (
-                    <button className="lightbox-nav" onClick={onPrev}>
+                    <button className="flecha-nav flecha-nav--sobre-foto lightbox-nav" onClick={onPrev}>
                         <ChevronLeft size={48} />
                     </button>
                 )}
@@ -77,7 +77,7 @@ const ProductLightbox = ({ images = [], currentIndex = 0, isOpen, onClose, onPre
                 </div>
 
                 {images.length > 1 && (
-                    <button className="lightbox-nav" onClick={onNext}>
+                    <button className="flecha-nav flecha-nav--sobre-foto lightbox-nav" onClick={onNext}>
                         <ChevronRight size={48} />
                     </button>
                 )}

@@ -277,7 +277,7 @@ const ProductPreviewCarousel = ({
             </div>
 
             <div className="carousel-controls-wrapper">
-                <button className="scroll-btn" onClick={() => navigateImage('left')} title="Imagen anterior">
+                <button className="flecha-nav flecha-nav--contorno scroll-btn" onClick={() => navigateImage('left')} title="Imagen anterior">
                     <ChevronLeft size={24} />
                 </button>
 
@@ -308,7 +308,7 @@ const ProductPreviewCarousel = ({
                     </div>
                 </div>
 
-                <button className="scroll-btn" onClick={() => navigateImage('right')} title="Siguiente imagen">
+                <button className="flecha-nav flecha-nav--contorno scroll-btn" onClick={() => navigateImage('right')} title="Siguiente imagen">
                     <ChevronRight size={24} />
                 </button>
 

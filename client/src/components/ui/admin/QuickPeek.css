@@ -69,22 +69,7 @@
 }
 
 /* Las flechas de la galería: 2.75rem para que se acierten con el dedo. */
-.qp-flecha {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: var(--color-surface);
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
-}
+/* Como se ven estas flechas esta en base/flechas.css; aca solo donde se cuelgan. */
 .qp-flecha--atras { left: 0.75rem; }
 .qp-flecha--adelante { right: 0.75rem; }
 

@@ -1475,7 +1475,7 @@ const DetailDrawer = ({
                                                                         [newDomain[i], newDomain[i-1]] = [newDomain[i-1], newDomain[i]];
                                                                         onReorder(newDomain);
                                                                     }}
-                                                                    className="detail-drawer-reorder-nav-btn"
+                                                                    className="flecha-nav flecha-nav--chica flecha-nav--marca"
                                                                 >
                                                                     <ChevronLeft size={16} />
                                                                 </button>
@@ -1488,7 +1488,7 @@ const DetailDrawer = ({
                                                                         [newDomain[i], newDomain[i+1]] = [newDomain[i+1], newDomain[i]];
                                                                         onReorder(newDomain);
                                                                     }}
-                                                                    className="detail-drawer-reorder-nav-btn"
+                                                                    className="flecha-nav flecha-nav--chica flecha-nav--marca"
                                                                 >
                                                                     <ChevronRight size={16} />
                                                                 </button>

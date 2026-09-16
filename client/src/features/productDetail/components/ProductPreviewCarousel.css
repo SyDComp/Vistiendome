@@ -127,20 +127,10 @@
 /* Eliminada la opacidad para que los colores no se laven ni se vean grises */
 .carousel-thumb-item.secondary-pack { opacity: 1; }
 
+/* Como se ve esta flecha esta en base/flechas.css. Aca solo su tamano: va al
+   lado de las miniaturas, asi que no puede ser mas alta que ellas. */
 .scroll-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 1px solid var(--color-border-subtle);
-    background: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-text-body);
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    flex-shrink: 0;
-    touch-action: manipulation;
+    --flecha-tamano: 2.25rem;
 }
 
 .carousel-fade-edge {

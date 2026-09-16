@@ -71,8 +71,8 @@ const QuickPeek = ({ isOpen, onClose, data, type = 'product' }) => {
                             />
                             {images.length > 1 && (
                                 <>
-                                    <button onClick={() => go(-1)} className="qp-flecha qp-flecha--atras"><ChevronLeft size={16} /></button>
-                                    <button onClick={() => go(1)} className="qp-flecha qp-flecha--adelante"><ChevronRight size={16} /></button>
+                                    <button onClick={() => go(-1)} className="flecha-nav flecha-nav--sobre-foto flecha-nav--al-medio qp-flecha--atras"><ChevronLeft size={16} /></button>
+                                    <button onClick={() => go(1)} className="flecha-nav flecha-nav--sobre-foto flecha-nav--al-medio qp-flecha--adelante"><ChevronRight size={16} /></button>
                                     
                                     {/* Indicators */}
                                     <div className="qp-puntos">

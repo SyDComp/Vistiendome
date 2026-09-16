@@ -526,53 +526,22 @@
     position: relative;
 }
 
+/* Como se ven esta en base/flechas.css (oscura, al medio). Aca su sitio y su
+   tamano, mas grande que el de a pie porque la foto ocupa la pantalla.
+   Tenia !important en cada linea sin que nada la estuviera pisando. */
 .media-gallery-lightbox-arrow-left {
-    position: absolute;
     left: 40px;
-    background: rgba(15, 23, 42, 0.6) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    color: var(--color-surface) !important;
-    cursor: pointer;
-    width: 56px !important;
-    height: 56px !important;
-    border-radius: 50% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    opacity: 0.8 !important;
-    z-index: 1001 !important;
-    transition: all 0.2s ease;
+    --flecha-tamano: 3.5rem;
 }
 
-.media-gallery-lightbox-arrow-left:hover {
-    opacity: 1 !important;
-    background: rgba(15, 23, 42, 0.9) !important;
-    transform: scale(1.05);
-}
+
 
 .media-gallery-lightbox-arrow-right {
-    position: absolute;
     right: 40px;
-    background: rgba(15, 23, 42, 0.6) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    color: var(--color-surface) !important;
-    cursor: pointer;
-    width: 56px !important;
-    height: 56px !important;
-    border-radius: 50% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    opacity: 0.8 !important;
-    z-index: 1001 !important;
-    transition: all 0.2s ease;
+    --flecha-tamano: 3.5rem;
 }
 
-.media-gallery-lightbox-arrow-right:hover {
-    opacity: 1 !important;
-    background: rgba(15, 23, 42, 0.9) !important;
-    transform: scale(1.05);
-}
+
 
 .media-gallery-lightbox-img {
     max-height: 85vh;
@@ -694,20 +663,12 @@
         padding: 10px 16px !important;
         font-size: 11px !important;
     }
-    .media-gallery-lightbox-arrow-left {
-        left: 16px !important;
-        width: 44px !important;
-        height: 44px !important;
-    }
-    .media-gallery-lightbox-arrow-right {
-        right: 16px !important;
-        width: 44px !important;
-        height: 44px !important;
-    }
+    .media-gallery-lightbox-arrow-left { left: 16px; --flecha-tamano: 2.75rem; }
+    .media-gallery-lightbox-arrow-right { right: 16px; --flecha-tamano: 2.75rem; }
     .media-gallery-lightbox-arrow-left svg,
     .media-gallery-lightbox-arrow-right svg {
-        width: 24px !important;
-        height: 24px !important;
+        width: 24px;
+        height: 24px;
     }
     .media-gallery-lightbox-body {
         padding: 8px !important;

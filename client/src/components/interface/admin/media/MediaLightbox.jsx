@@ -71,7 +71,7 @@ const MediaLightbox = ({
                 </div>
             </div>
             <div className="media-gallery-lightbox-body">
-                <button className="media-gallery-lightbox-arrow-left" onClick={onPrev}>
+                <button className="flecha-nav flecha-nav--oscura flecha-nav--al-medio media-gallery-lightbox-arrow-left" onClick={onPrev}>
                     <ChevronLeft size={64} />
                 </button>
                 <Imagen
@@ -80,7 +80,7 @@ const MediaLightbox = ({
                     alt={img.filename || ''}
                     sizes="90vw"
                 />
-                <button className="media-gallery-lightbox-arrow-right" onClick={onNext}>
+                <button className="flecha-nav flecha-nav--oscura flecha-nav--al-medio media-gallery-lightbox-arrow-right" onClick={onNext}>
                     <ChevronRight size={64} />
                 </button>
             </div>

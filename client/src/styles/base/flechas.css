@@ -7,41 +7,57 @@
      .floating-nav-btn                    el carrusel de productos
      .cms-flecha                          el carrusel de la portada
      .lightbox-nav                        la foto a pantalla completa
+     .scroll-btn                          la previa del producto
      .qp-flecha                           la vista rapida del panel
      .media-gallery-lightbox-arrow-*      la galeria de medios
      .detail-drawer-reorder-nav-btn       reordenar en el panel
-     .carousel-controls-wrapper           la previa del producto
 
    Lo que se ve en pantalla cuando cada una se escribe aparte: en la MISMA
    portada, una salia como un boton redondo de 44 con sombra y la otra como un
    rectangulo de 36x29, de esquinas rectas, casi transparente y con la flecha
    negra sin centrar. No porque alguien lo decidiera, sino porque a la segunda
-   le faltaban las lineas que la primera si tenia.
+   le faltaban las lineas que la primera si tenia. Escrita ocho veces, basta con
+   que una se quede a medias para que nadie lo note hasta verlo en pantalla.
 
-   Aca esta lo que TODAS comparten: que sea redonda, que centre su icono, que se
-   pueda pinchar. Lo unico que cambia entre un sitio y otro es donde se coloca y
-   de que color va, y eso lo pone cada componente.
+   Aca esta lo que TODAS comparten: redonda, con su icono al centro, que se
+   pueda pinchar. Lo que cambia de un sitio a otro -el tamano, el color y donde
+   se cuelga- son variantes, y cada componente elige las suyas.
    ========================================================================== */
 
 .flecha-nav {
-    /* Cuadrada de 2.75rem = 44px, que es el minimo que se acierta con el pulgar
-       sin apuntar. Es lo que ya usaban las que estaban bien hechas. */
-    width: 2.75rem;
-    height: 2.75rem;
+    /* 2.75rem = 44px, el minimo que se acierta con el pulgar sin apuntar.
+       Es lo que ya usaban las que estaban bien hechas. Va en una variable para
+       que una variante cambie el tamano sin repetir ancho y alto. */
+    --flecha-tamano: 2.75rem;
+
+    width: var(--flecha-tamano);
+    height: var(--flecha-tamano);
     border-radius: 50%;
     border: none;
     padding: 0;
 
-    /* El icono va al centro. `display: block` -lo que tenia la del CMS- deja la
-       flecha arriba a la izquierda de su caja. */
+    /* El icono va al centro. Con `display: block` -lo que tenia la del CMS- la
+       flecha queda arriba a la izquierda de su caja. */
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 
     cursor: pointer;
-    transition: transform 0.2s ease, background-color 0.2s ease;
+    touch-action: manipulation;
+    transition: transform 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
 }
+
+/* ── De que tamano ───────────────────────────────────────────────────────── */
+
+/* Para controles apretados, donde no compite con nada por el espacio. */
+.flecha-nav--chica  { --flecha-tamano: 1.75rem; }
+
+/* Para una foto a pantalla completa, donde hay sitio de sobra y conviene que se
+   vea desde lejos. */
+.flecha-nav--grande { --flecha-tamano: 3.5rem; }
+
+/* ── De que color ────────────────────────────────────────────────────────── */
 
 /* Sobre fondo claro: se tiene que leer como un boton, no como una mancha. */
 .flecha-nav--clara {
@@ -55,7 +71,15 @@
     color: var(--color-surface);
 }
 
-/* Sobre una foto: translucida, para no taparla mas de lo necesario. */
+/* Igual que la clara pero discreta, con un filo en vez de sombra. */
+.flecha-nav--contorno {
+    background: var(--color-surface);
+    color: var(--color-text-body);
+    border: 1px solid var(--color-border-subtle);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Sobre una foto clara: translucida, para no taparla mas de lo necesario. */
 .flecha-nav--sobre-foto {
     background: rgba(255, 255, 255, 0.18);
     backdrop-filter: blur(6px);
@@ -66,7 +90,32 @@
     background: rgba(255, 255, 255, 0.32);
 }
 
-/* Colgada del borde de lo que hace pasar. */
+/* Sobre una foto a pantalla completa con fondo oscuro: al reves, oscura y con
+   un filo claro, porque sobre una foto cualquiera el blanco translucido puede
+   desaparecer. */
+.flecha-nav--oscura {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--color-surface);
+    opacity: 0.8;
+}
+
+.flecha-nav--oscura:hover {
+    background: rgba(15, 23, 42, 0.9);
+    opacity: 1;
+}
+
+/* Cuando la flecha es la accion principal y no un auxiliar. */
+.flecha-nav--marca {
+    background: var(--color-brand);
+    color: var(--color-surface);
+    box-shadow: 0 4px 8px rgba(143, 6, 83, 0.3);
+}
+
+/* ── Donde se cuelga ─────────────────────────────────────────────────────── */
+
+/* Pegada al borde de lo que hace pasar, a media altura. Sin esta variante, la
+   flecha va en el flujo como un boton mas. */
 .flecha-nav--al-medio {
     position: absolute;
     top: 50%;
@@ -75,7 +124,11 @@
 }
 
 .flecha-nav--al-medio:hover {
-    /* Si no se repite el `translateY`, el hover la manda de vuelta hacia abajo:
-       `transform` reemplaza, no suma. */
+    /* Hay que repetir el `translateY`: `transform` reemplaza, no suma, asi que
+       sin esto el hover la manda de vuelta hacia abajo. */
     transform: translateY(-50%) scale(1.08);
+}
+
+.flecha-nav:not(.flecha-nav--al-medio):hover {
+    transform: scale(1.08);
 }
