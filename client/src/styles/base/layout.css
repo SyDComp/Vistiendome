@@ -44,7 +44,25 @@ html, body { min-height: 100vh; min-height: 100dvh; }
    Se usa en controles chicos (íconos de cerrar, hamburguesa, flechas) donde
    agregar padding deformaría el diseño — el menú hamburguesa, por ejemplo,
    separa sus barras con space-between y con padding se abriría. */
-.tap-44 { position: relative; }
+/* `:where()` A PROPOSITO: ESTA REGLA NO DEBE GANARLE A NADIE
+ *
+ * El `::after` de abajo necesita que su elemento sea un contenedor de
+ * posicionamiento, y para eso alcanza cualquier `position` que no sea
+ * `static`. Pero esto estaba escrito como `.tap-44 { position: relative; }`,
+ * que le gana a cualquier otra clase declarada antes.
+ *
+ * Asi se rompieron las flechas del carrusel de la portada: `.floating-nav-btn`
+ * pide `position: absolute` para colgarse de los bordes, esta regla se lo
+ * cambiaba a `relative`, y con `relative` un `left` o un `right` ya no anclan
+ * al contenedor: solo corren el boton de su lugar en el flujo. Las dos flechas
+ * terminaban una encima de la otra contra el borde izquierdo.
+ *
+ * Que funcionara en el resto de los botones era suerte: dependia de si su hoja
+ * cargaba antes o despues que esta.
+ *
+ * `:where()` tiene especificidad cero. Sigue dando `relative` al que no pidio
+ * ninguna posicion, y se aparta en cuanto alguien pide la suya. */
+:where(.tap-44) { position: relative; }
 .tap-44::after {
   content: '';
   position: absolute;
