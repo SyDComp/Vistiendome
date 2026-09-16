@@ -35,10 +35,17 @@
     flex-shrink: 0;
 }
 
+/* OJO CON DONDE SE DECIDE EL RECORTE
+   Esta clase NO cae sobre la foto: PremiumImage la pone en el <div> que la
+   envuelve, y a la <img> le escribe el `object-fit` desde el JavaScript. Aqui
+   ponia `object-fit: cover` y la tarjeta pedia `contain`, asi que esta linea no
+   pintaba nada y mandaba la otra: un div no tiene `object-fit`.
+
+   Se quita para que no engañe. Como se recorta se decide en ProductCard.jsx,
+   con las props `objectFit` y `objectPosition`. */
 .product-card__image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
     position: absolute;
     top: 0;
     left: 0;

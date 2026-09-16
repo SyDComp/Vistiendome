@@ -89,7 +89,8 @@ const ProductCard = ({
                     priority={priority}
                     alt={name}
                     className="product-card__image product-card__image--current tarjeta-flotante"
-                    objectFit="contain"
+                    objectFit="cover"
+                    objectPosition="center top"
                 />
                 {isTransitioning && (
                     <PremiumImage
@@ -97,7 +98,8 @@ const ProductCard = ({
                         srcSet={srcSetPorUrl[nextImage] || ''}
                         alt={name}
                         className="product-card__image product-card__image--next tarjeta-flotante"
-                        objectFit="contain"
+                        objectFit="cover"
+                        objectPosition="center top"
                     />
                 )}
             </div>

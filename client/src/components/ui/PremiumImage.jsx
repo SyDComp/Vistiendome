@@ -23,6 +23,10 @@ const PremiumImage = ({
     skeletonClassName = '',
     aspectRatio = '3/4',
     objectFit = 'cover',
+    // Donde se ancla la foto cuando `objectFit` recorta. En ropa conviene
+    // 'center top': lo que sobra se corta por abajo, que es el suelo, y no
+    // por arriba, que es la cara y el cuello de la prenda.
+    objectPosition = 'center',
     style = {},
     ...props
 }) => {
@@ -103,6 +107,7 @@ const PremiumImage = ({
                     width: '100%',
                     height: '100%',
                     objectFit: objectFit,
+                    objectPosition: objectPosition,
                     opacity: isLoaded ? 1 : 0,
                     transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
                     position: 'absolute',
