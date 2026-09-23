@@ -259,7 +259,9 @@ def get_filters_metadata(db: Session = Depends(get_session)):
                 attributes_data[char.name] = values
 
     # 3. Rango de Precios
-    prices = db.exec(select(SKU.price)).all()
+    # Solo los precios de verdad. Un SKU que se cotiza queda guardado con -1, y
+    # entrando en este calculo el panel de filtros ofrecia "Min ($-1)".
+    prices = [p for p in db.exec(select(SKU.price)).all() if p is not None and p > 0]
     price_range = {
         "min": min(prices) if prices else 0,
         "max": max(prices) if prices else 0

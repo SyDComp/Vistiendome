@@ -97,13 +97,19 @@ const FilterDrawer = ({
                         type="button"
                         onClick={(e) => {
                             e.preventDefault();
-                            if (hasChildren) {
-                                toggleCategoryAccordion(categoryKey);
-                            } else {
-                                handleCategorySelect(cat.slug);
-                            }
+                            // PINCHAR EL NOMBRE ELIGE LA CATEGORIA, TENGA HIJOS O NO
+                            //
+                            // Antes, si la categoria tenia hijos, pinchar su nombre solo la
+                            // desplegaba. Para elegir "Vestidos" habia que desplegarla y
+                            // buscar un "Ver todo Vestidos" que recien aparece al
+                            // desplegarla: desde fuera, las categorias principales parecian
+                            // no responder. Y son justo las que mas se usan.
+                            //
+                            // Desplegar ya tiene su propio control al lado, la flecha, y
+                            // todas las categorias con hijos la traen.
+                            handleCategorySelect(cat.slug);
                         }}
-                        className={`cat-rama-nombre${isSelected && !hasChildren ? ' cat-rama-nombre--elegida' : ''}`}
+                        className={`cat-rama-nombre${isSelected ? ' cat-rama-nombre--elegida' : ''}`}
                     >
                         {cat.name}
                     </button>

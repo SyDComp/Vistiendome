@@ -106,8 +106,29 @@ export const filterByPriceRange = (products, priceRange) => {
     if (!products?.length) return [];
     if (!priceRange) return products;
     
+    const hayFiltro = (priceRange.min !== undefined && priceRange.min !== null)
+        || (priceRange.max !== undefined && priceRange.max !== null);
+    if (!hayFiltro) return products;
+
     return products.filter(p => {
-        const price = p.price || 0;
+        // QUE CUENTA COMO "TENER PRECIO"
+        //
+        // La tarjeta ya lo decide asi -`precio > 0`, y si no, escribe
+        // "Consultar"-, pero aca se comparaba el numero crudo. Con ese criterio
+        // un producto guardado con -1, que es como queda el que se cotiza,
+        // pasaba cualquier filtro "hasta X" -porque -1 es menor que todo- y
+        // caia de cualquier "desde X".
+        //
+        // Se vio en la tienda: filtrando "hasta $5.000" aparecia el Tapado
+        // Magdalena Verano, que no muestra precio sino "Consultar", cuando el
+        // producto mas barato del catalogo vale $10.990.
+        //
+        // Un producto sin precio no se puede afirmar que entre en un rango, asi
+        // que queda fuera mientras haya filtro de precio. Sin filtro se muestra
+        // igual que siempre.
+        const price = p.price;
+        if (price === null || price === undefined || !(price > 0)) return false;
+
         if (priceRange.min !== undefined && priceRange.min !== null && price < priceRange.min) return false;
         if (priceRange.max !== undefined && priceRange.max !== null && price > priceRange.max) return false;
         return true;
