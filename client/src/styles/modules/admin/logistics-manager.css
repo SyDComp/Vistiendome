@@ -190,6 +190,17 @@
     border-radius: 16px;
     border: 1px solid var(--color-border-subtle);
 }
+.logistics-history-empty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    background: var(--color-bg-subtle);
+    border-radius: 16px;
+    border: 1px dashed var(--color-border);
+    color: var(--color-text-muted);
+    font-size: 13px;
+}
 .logistics-history-icon-wrapper {
     width: 40px;
     height: 40px;

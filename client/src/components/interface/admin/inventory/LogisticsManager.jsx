@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import SectionHeader from '../../../ui/admin/SectionHeader';
 import DataTable from '../../../ui/admin/DataTable';
 import RowActions from '../../../ui/admin/RowActions';
@@ -14,7 +14,10 @@ const LogisticsManager = () => {
     const [balances, setBalances] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    
+    // Filtros por atributo de variante (Talla, Color, etc.), independientes
+    // del buscador de texto. { nombreDelAtributo: valorElegido }
+    const [activeFilters, setActiveFilters] = useState({});
+
     const [showHistory, setShowHistory] = useState(false);
     const [historyData, setHistoryData] = useState(null);
     const [historyLoading, setHistoryLoading] = useState(false);
@@ -81,10 +84,46 @@ const LogisticsManager = () => {
         }
     };
 
-    const filteredBalances = balances.filter(b => 
-        b.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        b.product_name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Los atributos de variante (Talla, Color...) que hay HOY entre los saldos
+    // cargados, con sus valores distintos. Se derivan en el cliente porque acá
+    // ya se cargó todo de una vez (`GET /kardex` sin paginar): no hace falta
+    // pedirle nada nuevo al servidor.
+    const filtrosDeAtributos = useMemo(() => {
+        const porClave = new Map();
+        for (const b of balances) {
+            for (const [clave, valor] of Object.entries(b.config || {})) {
+                if (valor === null || valor === undefined || valor === '') continue;
+                if (!porClave.has(clave)) porClave.set(clave, new Set());
+                porClave.get(clave).add(String(valor));
+            }
+        }
+        return Array.from(porClave.entries()).map(([clave, valores]) => ({
+            key: clave,
+            label: clave,
+            options: Array.from(valores).sort().map(v => ({ value: v, label: v })),
+        }));
+    }, [balances]);
+
+    const handleFilterChange = (updated) => setActiveFilters(updated);
+
+    const filteredBalances = balances.filter(b => {
+        // El buscador de texto miraba solo el SKU y el nombre del producto.
+        // Con 1049 variantes, buscar "coral" o "3xl" -que es lo que se ve en
+        // la columna Variante- no encontraba nada: no es que no funcionara,
+        // es que no miraba donde Paola esperaba que mirara.
+        const termino = searchTerm.toLowerCase();
+        const enSkuONombre = b.sku.toLowerCase().includes(termino) ||
+            b.product_name.toLowerCase().includes(termino);
+        const enVariante = Object.values(b.config || {}).some(v =>
+            String(v).toLowerCase().includes(termino)
+        );
+        if (termino && !enSkuONombre && !enVariante) return false;
+
+        return Object.entries(activeFilters).every(([clave, valor]) => {
+            if (!valor) return true;
+            return String(b.config?.[clave] ?? '') === valor;
+        });
+    });
 
     const LOGISTICS_COLUMNS = [
         { 
@@ -130,9 +169,12 @@ const LogisticsManager = () => {
                 description="Control de inventario basado en eventos. Todos los movimientos son inmutables y trazables."
             />
 
-            <FilterBar 
-                searchPlaceholder="Buscar por SKU o Producto..."
+            <FilterBar
+                searchPlaceholder="Buscar por SKU, producto, talla, color..."
                 onSearchChange={setSearchTerm}
+                filters={filtrosDeAtributos}
+                activeFilters={activeFilters}
+                onFilterChange={handleFilterChange}
             />
 
             <DataTable 
@@ -246,6 +288,19 @@ const LogisticsManager = () => {
                         </div>
 
                         <div className="logistics-history-list">
+                            {data.history.length === 0 && (
+                                // Un `.map` sobre un array vacio no pinta nada, ni
+                                // siquiera un espacio en blanco: el drawer se abria
+                                // con la cabecera y el cuerpo quedaba sin una sola
+                                // linea, sin decir por que. Paola lo vio como "aprieto
+                                // el boton y no aparece nada". Con 728 de 1049
+                                // variantes sin un solo movimiento hoy, este es el
+                                // caso mas comun, no la excepcion.
+                                <div className="logistics-history-empty">
+                                    <Info size={18} color="#94a3b8" />
+                                    <span>Esta variante no tiene ningún movimiento registrado todavía.</span>
+                                </div>
+                            )}
                             {data.history.map((m) => (
                                 <div key={m.id} className="logistics-history-item">
                                     <div className={`logistics-history-icon-wrapper ${m.type}`}>
