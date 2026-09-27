@@ -62,24 +62,44 @@ export const useCatalog = () => {
         }
     }, [lastMessage, loadData]);
 
-    // Filtrado y ordenamiento memoizado
-    const filteredProducts = useMemo(() => {
+    // Categoría y specs se evalúan a nivel de PRODUCTO: son "¿alguna variante
+    // calza?", y el conjunto de valores del producto (`facets`) es la unión de
+    // sus variantes, así que si el producto entra, hay al menos una variante
+    // que también entra. El precio queda fuera a propósito — ver el porqué
+    // donde se aplica más abajo.
+    const productosPorCategoriaYSpecs = useMemo(() => {
         let result = filterByCategory(products, selectedCategory, appliedFilters.category, categories);
         result = filterBySpecs(result, appliedFilters.specs);
-        result = filterByPriceRange(result, appliedFilters.priceRange);
+        return result;
+    }, [products, selectedCategory, appliedFilters.category, appliedFilters.specs, categories]);
+
+    // Filtrado y ordenamiento memoizado
+    const filteredProducts = useMemo(() => {
+        let result = filterByPriceRange(productosPorCategoriaYSpecs, appliedFilters.priceRange);
         result = sortProducts(result, sortOrder);
         return result;
-    }, [products, selectedCategory, appliedFilters, sortOrder]);
+    }, [productosPorCategoriaYSpecs, appliedFilters.priceRange, sortOrder]);
 
-    // Looks de los productos que pasaron el filtro, más el filtro de specs
-    // aplicado a la variante que representa cada look. El catálogo filtra
-    // productos; el explorador filtra looks. Misma fuente, distinta proyección.
+    // Looks de los productos que pasaron categoría y specs, más el filtro de
+    // specs y de PRECIO aplicados otra vez sobre el look mismo. El catálogo
+    // filtra productos; el explorador filtra looks. Misma fuente, distinta
+    // proyección.
+    //
+    // POR QUÉ EL PRECIO NO SE HEREDA DE `filteredProducts`
+    // `p.price` es el precio MÁS BAJO entre las variantes del producto (así lo
+    // arma el backend, para el "Desde $X" de la tarjeta que representa al
+    // producto entero). Que el producto pase un filtro de precio con su
+    // variante más barata no dice nada del precio de las otras: heredar ese
+    // resultado dejaba pasar looks más caros que el límite, y podía descartar
+    // looks baratos si el producto entero quedaba fuera por tener el mínimo por
+    // encima del límite. Cada look trae su propio `price`, así que se filtra
+    // con él directamente.
     const filteredLooks = useMemo(() => {
-        const idsVisibles = new Set(filteredProducts.map(p => p.id));
+        const idsVisibles = new Set(productosPorCategoriaYSpecs.map(p => p.id));
         const specs = appliedFilters.specs || {};
         const activos = Object.entries(specs).filter(([, v]) => v && v.length);
 
-        return looks.filter(l => {
+        let result = looks.filter(l => {
             if (!idsVisibles.has(l.product_id)) return false;
             return activos.every(([key, values]) => {
                 const lk = key.toLowerCase().trim();
@@ -93,7 +113,9 @@ export const useCatalog = () => {
                 );
             });
         });
-    }, [looks, filteredProducts, appliedFilters.specs]);
+
+        return filterByPriceRange(result, appliedFilters.priceRange);
+    }, [looks, productosPorCategoriaYSpecs, appliedFilters.specs, appliedFilters.priceRange]);
 
     // Analítica: registrar cada valor de filtro nuevo que el cliente aplica
     const prevSpecsRef = useRef({});

@@ -38,7 +38,14 @@ const FilterBar = ({
         
         if (activeFilters.priceRange) {
             const { min, max } = activeFilters.priceRange;
-            if (min !== null || max !== null) {
+            // Un campo que nunca se tocó llega como `undefined`, no `null`.
+            // Comparar solo contra `null` dejaba pasar `undefined !== null`
+            // (verdadero) y el chip se dibujaba igual, vacío ("Precio: " sin
+            // nada detrás): al vaciar el campo de precio a mano -en vez de
+            // quitar el filtro con la X del chip- el filtro real se limpiaba
+            // bien, pero el chip quedaba huérfano en la pantalla.
+            const hayValor = v => v !== null && v !== undefined;
+            if (hayValor(min) || hayValor(max)) {
                 let label = 'Precio: ';
                 if (min && max) label += `$${min.toLocaleString()} - $${max.toLocaleString()}`;
                 else if (min) label += `Desde $${min.toLocaleString()}`;
