@@ -110,7 +110,7 @@ const LogisticsManager = () => {
         // El buscador de texto miraba solo el SKU y el nombre del producto.
         // Con 1049 variantes, buscar "coral" o "3xl" -que es lo que se ve en
         // la columna Variante- no encontraba nada: no es que no funcionara,
-        // es que no miraba donde Paola esperaba que mirara.
+        // es que no miraba donde el QA esperaba que mirara.
         const termino = searchTerm.toLowerCase();
         const enSkuONombre = b.sku.toLowerCase().includes(termino) ||
             b.product_name.toLowerCase().includes(termino);
@@ -292,7 +292,7 @@ const LogisticsManager = () => {
                                 // Un `.map` sobre un array vacio no pinta nada, ni
                                 // siquiera un espacio en blanco: el drawer se abria
                                 // con la cabecera y el cuerpo quedaba sin una sola
-                                // linea, sin decir por que. Paola lo vio como "aprieto
+                                // linea, sin decir por que. El QA lo vio como "aprieto
                                 // el boton y no aparece nada". Con 728 de 1049
                                 // variantes sin un solo movimiento hoy, este es el
                                 // caso mas comun, no la excepcion.
