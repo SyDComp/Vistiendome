@@ -1,12 +1,11 @@
 """
 Colapso de variantes en "looks" para el catálogo y el explorador.
 
-Un look es una tarjeta visualmente distinta. El navegador venía descargando
-todas las variantes (1.049 para 4 productos, 278 KB) sólo para dibujar 60
-tarjetas: el colapso se hace acá y se manda ya resuelto.
+Un look es una tarjeta visualmente distinta. El colapso se hace en el servidor
+para que el navegador reciba las tarjetas ya resueltas y no todas las
+variantes, cuyo número crece multiplicando las opciones de cada producto.
 
-La regla es la misma que estaba probada en el cliente (clusterUtils.js), en
-orden de prioridad:
+La regla, en orden de prioridad:
 
   1. Imagen propia  -> un look por imagen distinta.
   2. Sin imagen     -> un look por valor del atributo que distingue.
@@ -18,8 +17,8 @@ característica que efectivamente varía entre las variantes, descartando las qu
 no cambian la apariencia (talla y equivalentes).
 
 El paso 3 es deliberado: una variante sin imagen es un estado legítimo, no un
-dato incompleto. Antes esto caía a una tarjeta por SKU y un producto sin fotos
-por variante llenaba el explorador de tarjetas idénticas.
+dato incompleto. Una tarjeta por SKU llenaría el explorador de tarjetas
+idénticas cuando un producto no tiene fotos por variante.
 """
 from typing import Any, Dict, List, Optional
 
