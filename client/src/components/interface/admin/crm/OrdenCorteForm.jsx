@@ -48,6 +48,20 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
         return n;
     });
 
+    // Si ya estan todas elegidas, el mismo boton las quita; si falta alguna
+    // (o no hay ninguna), las agrega todas de una vez. Antes habia que
+    // marcar el checkbox pieza por pieza, y una orden puede traer decenas.
+    const todasElegidas = pendientes.length > 0
+        && pendientes.every(p => elegidas[p.cotizacion_item_id]);
+
+    const alternarTodas = () => {
+        if (todasElegidas) {
+            setElegidas({});
+        } else {
+            setElegidas(Object.fromEntries(pendientes.map(p => [p.cotizacion_item_id, p])));
+        }
+    };
+
     const agregarStock = (v) => {
         setParaStock(prev => [...prev, {
             sku_id: v.id,
@@ -100,11 +114,20 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
             </div>
 
             <section className="oc-bloque">
-                <h3>Piezas de pedidos confirmados</h3>
-                <p className="oc-hint">
-                    Lo que las clientas ya compraron y todavía no se corta. Elige lo que
-                    entra en esta orden; lo que no elijas queda disponible para la próxima.
-                </p>
+                <div className="oc-bloque-cabecera">
+                    <div>
+                        <h3>Piezas de pedidos confirmados</h3>
+                        <p className="oc-hint">
+                            Lo que las clientas ya compraron y todavía no se corta. Elige lo que
+                            entra en esta orden; lo que no elijas queda disponible para la próxima.
+                        </p>
+                    </div>
+                    {!cargando && pendientes.length > 0 && (
+                        <button type="button" className="oc-btn-seleccionar-todo" onClick={alternarTodas}>
+                            {todasElegidas ? 'Quitar selección' : 'Seleccionar todo'}
+                        </button>
+                    )}
+                </div>
 
                 {cargando ? (
                     <div className="oc-vacio">Cargando...</div>
