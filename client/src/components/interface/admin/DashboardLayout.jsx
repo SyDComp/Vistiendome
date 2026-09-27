@@ -114,6 +114,12 @@ const DashboardLayout = () => {
             children: [
                 { label: 'Productos', path: '/admin/dashboard/inventory/products' },
                 { label: 'Variantes', path: '/admin/dashboard/inventory/variants' },
+                // La pantalla (LogisticsManager, ruta "bodega") existe hace tiempo
+                // y funciona -saldo de stock por SKU, historial de movimientos,
+                // ajuste manual con nota obligatoria- pero no tenia entrada de
+                // menu: solo se llegaba escribiendo la URL a mano. Nadie podia
+                // encontrarla sin que alguien se la pasara.
+                { label: '📦 Bodega', path: '/admin/dashboard/inventory/bodega' },
                 { label: 'Colecciones', path: '/admin/dashboard/inventory/collections' },
                 { label: 'Categorias', path: '/admin/dashboard/inventory/categories' },
                 { label: 'Caracteristicas', path: '/admin/dashboard/inventory/characteristics' },
