@@ -44,7 +44,7 @@ def bootstrap_system(data: BootstrapSchema, db: Session = Depends(get_session)):
     if not estado_activo:
          raise HTTPException(
              status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-             detail="Error Crítico: Faltan datos maestros. Ejecute seed_master.py primero."
+             detail="Faltan los datos maestros: la base no tiene aplicadas las migraciones (alembic upgrade head)."
          )
          
     cuenta = CuentaAcceso(

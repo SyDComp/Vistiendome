@@ -16,8 +16,8 @@ migraciones. Pruebas con pytest.
 | `app/api/v1/` | Rutas, una por área (`products`, `crm`, `taller`, `media`…) |
 | `app/models/` | Tablas de la base |
 | `app/core/` | Configuración, seguridad y reglas compartidas |
-| `app/scripts/` | Tareas de mantenimiento; `verificar_medios` comprueba que cada foto registrada exista en disco y la usan el respaldo y la restauración |
-| `alembic/versions/` | Migraciones del esquema |
+| `app/scripts/` | Tareas de mantenimiento: `verificar_medios` comprueba que cada foto registrada exista en disco (la usan el respaldo y la restauración) y `restablecer_acceso` cambia la contraseña de una cuenta del panel |
+| `alembic/versions/` | Migraciones. La primera crea el esquema completo desde `alembic/esquema_base.sql`; la siguiente carga los datos maestros |
 | `tests/` | Pruebas |
 
 Las fotos subidas se guardan en `media/`, que en producción es un volumen de

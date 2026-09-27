@@ -39,6 +39,14 @@ cp .env.example .env            # y completarlo
 docker compose -f docker-compose-prod.yml up -d --build
 ```
 
+Al arrancar, el backend crea todas las tablas y carga los datos que el sistema
+necesita para funcionar: estados de cuenta, permisos, regiones y comunas de
+Chile, y las secciones de la página de ayuda.
+
+Después se crea la cuenta de administrador entrando a
+`https://<dominio>/admin/bootstrap`. Esa página funciona una sola vez: con la
+primera cuenta creada, queda bloqueada.
+
 ## Actualizar a una versión nueva
 
 ```bash
@@ -93,6 +101,17 @@ Reemplaza la base **y** las fotos actuales por las del respaldo; no permite
 restaurar solo una de las dos. Pide escribir `RESTAURAR` para confirmar. Al
 terminar comprueba que cada registro de la base tenga su foto, y si falta
 alguna lo informa como error.
+
+## Restablecer una contraseña del panel
+
+Si alguien olvida su contraseña o queda bloqueado por intentos fallidos:
+
+```bash
+docker exec -it vistiendome_backend_prod python -m app.scripts.restablecer_acceso
+```
+
+Muestra las cuentas, se elige una y se escribe la contraseña nueva dos veces.
+No se ve en pantalla mientras se escribe.
 
 ## Mudarse a otro servidor
 
