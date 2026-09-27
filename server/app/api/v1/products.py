@@ -545,5 +545,18 @@ def get_product_detail(
         "image": main_img,
         "image_srcset": srcset_de(product.media_assets[0]) if product.media_assets else "",
         "images": [{"url": m.url, "srcset": srcset_de(m), "config_match": {}, "is_main": (i == 0), "ui_config": {}} for i, m in enumerate(product.media_assets)],
-        "skus": skus_data
+        "skus": skus_data,
+        # `extras` -ahi vive `video_url`, entre otras cosas- faltaba en esta
+        # respuesta. La ficha abre con el producto que ya traia de la
+        # navegacion (o de la cache), CON extras, y a los pocos segundos este
+        # mismo endpoint la revalida en segundo plano para actualizar precio y
+        # stock; esa revalidacion reemplaza el producto ENTERO, y sin este
+        # campo el video que se estaba viendo desaparecia solo. Reportado por
+        # QA como "se veia el video, pero luego desaparecia".
+        #
+        # La misma funcion que ya usan /looks y el listado, para que un
+        # carrusel de fotos en `extras` salga igual de enriquecido -con su
+        # srcset- aca tambien, y no vuelva a bajar las fotos originales
+        # completas sin que nada avise (ver el comentario de la funcion).
+        "extras": _extras_con_carrusel(product),
     }
