@@ -164,7 +164,7 @@ const CotizacionesView = () => {
         const term = searchTerm.trim().toLowerCase();
         if (!term) return true;
         return (
-            (coti.cliente?.nombres?.toLowerCase() || '').includes(term) ||
+            (coti.nombre_contacto?.toLowerCase() || coti.cliente?.nombres?.toLowerCase() || '').includes(term) ||
             (coti.numero != null && String(coti.numero).includes(term)) ||
             (coti.id?.toLowerCase() || '').includes(term) ||
             (coti.origen?.toLowerCase() || '').includes(term) ||
@@ -189,7 +189,12 @@ const CotizacionesView = () => {
             render: (_, row) => (
                 <div className="adm-celda adm-celda--pegada">
                     <span className="adm-celda-principal adm-celda-principal--nombre">
-                        {row.cliente?.nombres || 'Sin nombre'}
+                        {/* El nombre de ESTE pedido, no el de la Persona vinculada:
+                            pueden diferir a proposito cuando el mismo RUT trae un
+                            nombre distinto de verdad (ver Cotizacion.nombre_contacto
+                            en el backend). Sin esto, un pedido nuevo mostraba el
+                            nombre de una compra anterior con el mismo RUT. */}
+                        {row.nombre_contacto || row.cliente?.nombres || 'Sin nombre'}
                     </span>
                     <span className="font-mono">
                         {row.numero != null ? `N° ${row.numero}` : row.id?.substring(0, 8).toUpperCase()}

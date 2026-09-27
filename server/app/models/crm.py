@@ -116,7 +116,26 @@ class Cotizacion(SQLModel, table=True):
     region: Optional[str] = Field(default=None, max_length=100)
     comuna: Optional[str] = Field(default=None, max_length=100)
     direccion: Optional[str] = Field(default=None, max_length=255) # O 'Sucursal Chillan' si es a sucursal
-    
+
+    # EL NOMBRE QUE LA PERSONA ESCRIBIO EN ESTE PEDIDO PUNTUAL, TAL CUAL.
+    #
+    # La identidad del cliente la decide el RUT, y solo el RUT (ver
+    # crear_cotizacion): dos pedidos con el mismo RUT son la misma Persona,
+    # aunque el nombre tecleado difiera de verdad -no solo mayusculas, minusculas
+    # o tildes- de lo que esa Persona tenia guardado. Pero "la misma Persona"
+    # para efectos de identidad no significa que el nombre viejo sea el
+    # correcto para ESTE pedido: alguien pudo escribir mal su RUT una vez, o
+    # el pedido puede ser para otra persona con el mismo RUT familiar.
+    #
+    # Sin este campo, la pantalla de pedidos y la orden de corte mostraban
+    # siempre `persona.nombres`, el de la Persona vinculada -que puede ser
+    # el de una compra anterior-, y el nombre que se escribio recien se
+    # perdia sin quedar en ningun lado.
+    #
+    # Nulo en los pedidos de antes de que este campo existiera; ahi se sigue
+    # mostrando el de la Persona.
+    nombre_contacto: Optional[str] = Field(default=None, max_length=200)
+
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     

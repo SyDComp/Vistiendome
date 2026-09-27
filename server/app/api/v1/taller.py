@@ -109,7 +109,10 @@ def _salida(orden: OrdenCorte, db: Session) -> OrdenSalida:
             cotizacion_item_id=it.cotizacion_item_id,
             para_stock=it.cotizacion_item_id is None,
             pedido_numero=cot.numero if cot else None,
-            cliente=f"{persona.nombres} {persona.apellidos}".strip() if persona else None,
+            # Mismo criterio que en la lista de arriba: el nombre de este
+            # pedido puntual, no el de la Persona vinculada por RUT.
+            cliente=(cot.nombre_contacto if cot and cot.nombre_contacto else None)
+                or (f"{persona.nombres} {persona.apellidos}".strip() if persona else None),
             cotizacion_id=cot.id if cot else None,
         ))
 
@@ -188,7 +191,13 @@ def piezas_pendientes(
             "config_propuesta": it.config_propuesta or {},
             "cantidad": it.cantidad,
             "pedido_numero": cot.numero if cot else None,
-            "cliente": f"{persona.nombres} {persona.apellidos}".strip() if persona else "—",
+            # El nombre de ESTE pedido, no el de la Persona vinculada: pueden
+            # diferir a proposito (ver Cotizacion.nombre_contacto) cuando el
+            # mismo RUT trae un nombre distinto de verdad, y la orden de corte
+            # tiene que hablar del pedido que se esta cortando ahora, no de
+            # quien quedo registrada bajo ese RUT la primera vez.
+            "cliente": (cot.nombre_contacto if cot and cot.nombre_contacto else None)
+                or (f"{persona.nombres} {persona.apellidos}".strip() if persona else "—"),
             "fecha": cot.created_at.isoformat() if cot else None,
         })
     return filas

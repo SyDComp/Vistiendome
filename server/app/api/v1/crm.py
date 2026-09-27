@@ -115,6 +115,10 @@ class CotizacionRead(BaseModel):
     region: Optional[str] = None
     comuna: Optional[str] = None
     direccion: Optional[str] = None
+    # El nombre tal cual se escribio en este pedido. Ver el comentario en el
+    # modelo (Cotizacion.nombre_contacto): puede diferir de `cliente.nombres`
+    # a proposito, y es el que hay que mostrar.
+    nombre_contacto: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     cliente: Optional[PersonaRead] = None
@@ -290,20 +294,27 @@ class CotizacionCreate(BaseModel):
 @router.post("/", response_model=CotizacionRead)
 def crear_cotizacion(data: CotizacionCreate, session: Session = Depends(get_session)):
     # 1. Buscar o Crear Persona
+    #
+    # LA IDENTIDAD DEL CLIENTE LA DECIDE EL RUT. SOLO EL RUT.
+    #
+    # Antes tambien se buscaba por email y por telefono cuando no habia rut o
+    # no calzaba, y eso mezclaba pedidos de personas DISTINTAS que comparten un
+    # telefono o un correo -pareja, familia, el telefono del local- bajo un
+    # mismo cliente. El telefono y el correo son datos de contacto, no
+    # identidad: no deciden quien es quien.
     persona = None
-    
+
     if data.persona_id:
         persona = session.get(Persona, data.persona_id)
-        
+
     if not persona and data.rut:
         persona = session.exec(select(Persona).where(Persona.rut == data.rut)).first()
-    
-    if not persona and data.email_personal:
-        persona = session.exec(select(Persona).where(Persona.email_personal == data.email_personal)).first()
-        
-    if not persona and data.telefono:
-        persona = session.exec(select(Persona).where(Persona.telefono == data.telefono)).first()
-        
+
+    # El nombre con el que se identifico ESTE pedido, tal cual se escribio.
+    # Se guarda siempre en la cotizacion (ver mas abajo), sin importar si
+    # coincide o no con el de la Persona.
+    nombre_contacto = f"{(data.nombres or '').strip()} {(data.apellidos or '').strip()}".strip() or None
+
     if not persona:
         nombres_final = data.nombres or "Cliente"
         apellidos_final = data.apellidos or ""
@@ -319,7 +330,24 @@ def crear_cotizacion(data: CotizacionCreate, session: Session = Depends(get_sess
         session.commit()
         session.refresh(persona)
     else:
-        # Actualizar info si está vacía o el admin modificó algo
+        # MISMO RUT, ¿MISMO NOMBRE?
+        #
+        # "Mismo nombre" tolera mayusculas, minusculas y tildes -"Maria Jose"
+        # y "MARIA JOSÉ" son la misma persona escribiendo distinto-, pero no
+        # tolera un nombre de verdad diferente. Ahi no se sabe si quien
+        # escribio se equivoco de RUT, o si el RUT es compartido (un
+        # familiar, una cuenta empresarial) y se trata de otra persona.
+        #
+        # En cualquier caso la Persona ya existe por ese RUT y no se puede
+        # crear una segunda con el mismo RUT (es unico en la base), asi que
+        # se sigue usando esta misma fila para vincular el pedido. Lo que NO
+        # se hace es pisarle el nombre con el que llego esta vez: ese nombre
+        # queda en la cotizacion (`nombre_contacto`, ya calculado arriba), y
+        # de ahi lo toman la lista de pedidos y la orden de corte.
+        nombre_nuevo = f"{(data.nombres or '').strip()} {(data.apellidos or '').strip()}".strip()
+        nombre_guardado = f"{persona.nombres} {persona.apellidos}".strip()
+        mismo_nombre = not nombre_nuevo or core_propuestas.normalizar(nombre_nuevo) == core_propuestas.normalizar(nombre_guardado)
+
         update_needed = False
         if data.rut and not persona.rut:
             persona.rut = data.rut
@@ -330,10 +358,10 @@ def crear_cotizacion(data: CotizacionCreate, session: Session = Depends(get_sess
         if data.telefono and not persona.telefono:
             persona.telefono = data.telefono
             update_needed = True
-        if data.nombres and persona.nombres == "Cliente":
+        if mismo_nombre and data.nombres and persona.nombres == "Cliente":
             persona.nombres = data.nombres
             update_needed = True
-            
+
         if update_needed:
             session.add(persona)
             session.commit()
@@ -376,6 +404,7 @@ def crear_cotizacion(data: CotizacionCreate, session: Session = Depends(get_sess
         region=data.region,
         comuna=data.comuna,
         direccion=data.direccion,
+        nombre_contacto=nombre_contacto,
         estado=EstadoCotizacion.NUEVA
     )
     session.add(cotizacion)

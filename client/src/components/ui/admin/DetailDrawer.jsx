@@ -301,7 +301,11 @@ const DetailDrawer = ({
                     { label: 'Estado', value: currData.estado || 'NUEVA' },
                     { label: 'Transporte / Envío', value: currData.transporte || 'STARKEN', isTransport: true },
                     { label: 'Tipo Despacho', value: currData.tipo_despacho === 'SUCURSAL' ? 'A Sucursal / Retiro' : 'A Domicilio' },
-                    { label: 'Monto Total Estimado', value: `$${calculatedTotal.toLocaleString()}` }
+                    { label: 'Monto Total Estimado', value: `$${calculatedTotal.toLocaleString()}` },
+                    // El nombre que se escribio en ESTE pedido. Puede diferir del
+                    // de "Cliente Asociado" abajo -mismo RUT, otro nombre de
+                    // verdad-, y ahi es donde queda a la vista sin perderse.
+                    ...(currData.nombre_contacto ? [{ label: 'Nombre en este pedido', value: currData.nombre_contacto }] : [])
                 ]
             });
             if (currData.cliente) {

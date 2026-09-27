@@ -36,7 +36,12 @@ const PedidoDetalle = () => {
     if (error || !cotizacion) return <div className="pedido-detalle-status error">{error || 'Pedido no encontrado'}</div>;
 
     const cliente = cotizacion.cliente;
-    const nombreCompleto = cliente ? `${cliente.nombres || ''} ${cliente.apellidos || ''}`.trim() : 'Cliente';
+    // El nombre de ESTE pedido primero: puede diferir del que tiene guardado
+    // la Persona vinculada (mismo RUT, otro nombre de verdad — ver
+    // Cotizacion.nombre_contacto en el backend), y esta hoja es del pedido,
+    // no del cliente en general.
+    const nombreCompleto = cotizacion.nombre_contacto
+        || (cliente ? `${cliente.nombres || ''} ${cliente.apellidos || ''}`.trim() : 'Cliente');
     const esTaller = modo === 'taller';
 
     return (

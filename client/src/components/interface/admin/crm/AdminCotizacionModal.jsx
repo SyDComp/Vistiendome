@@ -386,7 +386,9 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
             return;
         }
 
-        const clientName = createdCotizacion?.cliente?.nombres || 
+        // El nombre de ESTE pedido, no el que la Persona vinculada tenia
+        // guardado de antes (mismo RUT, otro nombre de verdad).
+        const clientName = createdCotizacion?.nombre_contacto || createdCotizacion?.cliente?.nombres ||
                            (clientMode === 'select' ? selectedCliente?.nombres : newClienteData.nombres) || "Cliente";
 
         const itemsSummary = items.map(it => `• ${it.cantidad}x ${it.sku_name} ($${(it.cantidad * it.precio_unitario_estimado).toLocaleString()})`).join('\n');
