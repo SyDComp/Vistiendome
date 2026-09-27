@@ -1,41 +1,40 @@
-# Vistiendome - Frontend (Cliente)
+# Vistiendome — cliente
 
-Plataforma frontend para el e-commerce "Vistiendome". Este proyecto está construido para ofrecer una experiencia de usuario fluida, elegante y orientada a la venta de colecciones de moda.
+Sitio público (portada, catálogo, fichas, carrito, cotización) y panel de
+administración, en una sola aplicación.
 
-## 🚀 Tecnologías Principales
-- **Framework:** React 19 + Vite
-- **Enrutamiento:** React Router v7
-- **Estilos:** CSS puro (organizado en `src/styles/`)
-- **Gestión de Estado:** React Context API
-- **Iconografía:** Lucide React
+## Tecnología
 
-## 🧠 Estructura y Patrones Clave (Para Humanos y Agentes)
+React 19, Vite, React Router 7, CSS propio (sin framework) e íconos de
+Lucide. Pruebas con Vitest.
 
-**Nota SDD:** Antes de modificar el código, por favor revisa las especificaciones en `../../agent/client/` para mantener la consistencia.
+## Estructura
 
-1. **Gestión de Estado Global (`src/context/`)**
-   - El proyecto no utiliza Redux ni Zustand. Todo el estado global se maneja a través de Contextos de React.
-   - `CartContext`: Manejo del carrito de compras.
-   - `NotificationContext`: Sistema global de alertas (toasts).
-   - `WebSocketContext`: Conexión en tiempo real con el backend.
+| Carpeta | Contenido |
+|---|---|
+| `src/features/` | Módulos completos del sitio público: catálogo y ficha de producto |
+| `src/components/interface/` | Pantallas, agrupadas por área (`admin/`, `vistas/`, `cart/`, `catalogo/`…) |
+| `src/components/ui/`, `shared/`, `layout/` | Piezas reutilizables y estructura común |
+| `src/context/` | Estado global: carrito, ajustes del sitio, notificaciones y conexión en tiempo real |
+| `src/lib/api/` | Toda la comunicación con el servidor |
+| `src/hooks/`, `src/utils/`, `src/constants/` | Lógica reutilizable sin interfaz |
+| `src/styles/` | Estilos base y variables de diseño |
 
-2. **Enrutamiento Avanzado (Modal Routing)**
-   - El componente principal `App.jsx` implementa una solución de *Modal Routing*.
-   - Al navegar a detalles de productos, se utiliza `location.state?.backgroundLocation` para renderizar un modal superpuesto (`<Home isModalView={true} />`) sin perder la vista del catálogo o colección de fondo. **Cuidado al modificar enlaces o redirecciones para no romper este flujo.**
+La ficha de producto se abre como ventana sobre la página de origen, sin
+perderla de fondo: la ruta guarda la página anterior en
+`location.state.backgroundLocation` (ver `src/App.jsx`). Los enlaces a fichas
+deben conservar ese estado.
 
-3. **Arquitectura de Componentes (`src/components/interface/`)**
-   - `/vistas`: Componentes de cara al cliente (Inicio, Catálogo, Nosotros).
-   - `/admin`: Panel de control (Dashboard, Setup inicial, Login).
-
-## 🛠 Instalación y Uso Local
+## Comandos
 
 ```bash
-# Instalar dependencias (usamos yarn)
 yarn install
-
-# Iniciar servidor de desarrollo
-yarn dev
-
-# Construir para producción
-yarn build
+yarn dev        # desarrollo, con recarga en caliente
+yarn build      # compila a dist/
+yarn preview    # sirve la compilación, contra el servidor local
+yarn test       # pruebas
+yarn lint
 ```
+
+En desarrollo, `/api`, `/ws` y `/media` se reenvían al servidor en
+`http://127.0.0.1:8000`, o al indicado en `VITE_API_BASE`.

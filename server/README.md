@@ -1,34 +1,42 @@
-# Vistiendome - Backend (Servidor)
+# Vistiendome — servidor
 
-API RESTful que potencia la plataforma de e-commerce "Vistiendome", orientada a servir las necesidades del negocio con alto rendimiento.
+API del sistema: catálogo, inventario, clientes, cotizaciones, órdenes de
+corte, contenido del sitio, medios y estadísticas.
 
-## 🚀 Tecnologías Principales
-- **Framework:** FastAPI (Python)
-- **ORM:** SQLModel
-- **Base de Datos:** PostgreSQL
-- **Migraciones:** Alembic
+## Tecnología
 
-## 🧠 Estructura y Patrones Clave (Para Humanos y Agentes)
+FastAPI, SQLModel sobre PostgreSQL 16 (driver psycopg 3) y Alembic para las
+migraciones. Pruebas con pytest.
 
-**Nota SDD:** Antes de modificar el código, por favor revisa las especificaciones en `../../agent/server/` para mantener la consistencia arquitectónica.
+## Estructura
 
-1. **Arquitectura y Rutas (`app/api/v1/`)**
-   - El punto de entrada principal es `app/main.py`.
-   - Las rutas están lógicamente separadas en módulos: `auth` (Autenticación JWT), `products` (Catálogo público), `admin` (Panel de control), `cms` (Gestión de portada estática).
+| Carpeta | Contenido |
+|---|---|
+| `app/main.py` | Punto de entrada: registra las rutas y el middleware |
+| `app/api/v1/` | Rutas, una por área (`products`, `crm`, `taller`, `media`…) |
+| `app/models/` | Tablas de la base |
+| `app/core/` | Configuración, seguridad y reglas compartidas |
+| `app/scripts/` | Tareas de mantenimiento; `verificar_medios` comprueba que cada foto registrada exista en disco y la usan el respaldo y la restauración |
+| `alembic/versions/` | Migraciones del esquema |
+| `tests/` | Pruebas |
 
-2. **Gestión de Base de Datos**
-   - Se utiliza **PostgreSQL** como motor principal (configurado vía Docker o variable de entorno `DATABASE_URL`).
-   - Los modelos de datos se definen usando `SQLModel` en la carpeta `app/models/`.
+Las fotos subidas se guardan en `media/`, que en producción es un volumen de
+Docker. La base guarda el registro de cada foto y el disco guarda el archivo,
+por eso se respaldan siempre juntos (ver `docs/OPERACION.md` en la raíz).
 
-3. **Manejo de Medios y Archivos Estáticos**
-   - Las imágenes subidas de productos o recursos de la tienda se sirven estáticamente desde la carpeta `/media`. **Precaución al manejar contenedores Docker para no perder este volumen de datos.**
+## Comandos
 
-4. **Tiempo Real**
-   - Se soporta comunicación bidireccional mediante WebSockets (`app/api/v1/websockets.py`).
+Todo se ejecuta desde esta carpeta, con el entorno virtual `venv/`. La
+configuración se lee del `.env` de la raíz del proyecto.
 
-5. **Scripts Utilitarios**
-   - La raíz del servidor contiene varios scripts (`seed_priscila.py`, `normalize_db.py`, etc.) utilizados para sembrar la base de datos o realizar mantenimiento. Utilizarlos con precaución.
+```bash
+./venv/Scripts/alembic upgrade head                      # aplicar migraciones
+./venv/Scripts/alembic revision --autogenerate -m "..."  # crear una migración
+./venv/Scripts/uvicorn app.main:app --reload --port 8000
+./venv/Scripts/python -m pytest
+```
 
-## 🛠 Entorno de Desarrollo (Docker)
+En Linux/macOS, `venv/bin/` en lugar de `venv/Scripts/`.
 
-La forma recomendada de levantar el backend y su base de datos es utilizando el `docker-compose.yml` que se encuentra en la raíz del monorepo, el cual orquesta FastAPI junto al contenedor de PostgreSQL.
+Con el servidor levantado, la documentación interactiva de la API está en
+`/docs`.

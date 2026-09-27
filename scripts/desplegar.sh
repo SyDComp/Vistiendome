@@ -2,7 +2,7 @@
 # Despliegue de Vistiendome, entero y en orden.
 #
 # POR QUE EXISTE
-# El procedimiento estaba escrito en DESPLIEGUE.md y habia que seguirlo a mano.
+# El procedimiento esta descrito en docs/OPERACION.md; aca se ejecuta entero.
 # El paso 1 es el respaldo, y es justamente el que se saltea cuando uno esta
 # apurado por subir un arreglo. Aca no se puede saltear: si el respaldo falla,
 # no se despliega.
