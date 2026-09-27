@@ -362,8 +362,15 @@
 }
 
 /* Proporcion de una hoja carta, con las cuatro casillas del formato por
-   defecto. Es una silueta, no una vista previa real: por eso va en gris. */
-.et-hoja {
+   defecto. Es una silueta, no una vista previa real: por eso va en gris.
+
+   Clase propia y no `.et-hoja`: son selectores de la misma especificidad, y
+   antes de este comentario los dos se llamaban igual -esta silueta fija y la
+   hoja real de mas abajo, que ahora toma su proporcion del formato elegido-.
+   Con el mismo nombre, cual de las dos ganaba dependia solo de cual estuviera
+   escrita despues en el archivo, no de que una viviera "dentro" de la otra
+   como sugeria la sangria. */
+.et-hoja-silueta {
     width: min(18rem, 60vw);
     aspect-ratio: 1 / 1.294;
     background: var(--color-surface);
@@ -541,15 +548,24 @@
     width: 100%;
 }
 
-/* La hoja de papel con sus etiquetas. Cuantas columnas trae lo dice el formato
-   elegido, y por eso llega como variable; el CSS decide cuando ignorarlo. */
+/* La hoja de papel con sus etiquetas. Cuantas columnas trae, el ancho, el
+   alto y el margen los dice el formato elegido, y por eso llegan como
+   variables; el CSS decide cuando ignorarlas.
+
+   `aspect-ratio` es lo que faltaba para que la hoja en pantalla tuviera la
+   proporcion real del papel: antes el alto no dependia del formato, asi que
+   el rollo termico (proporcion angosta y alta, bien distinta de un A4) se
+   dibujaba con la proporcion que le tocara al contenido, no la del papel.
+   Sin alto real -la ticketera de 80mm, una tira continua- la variable llega
+   en 'auto' y esta regla no hace nada, que es lo correcto ahi. */
 .et-hoja {
     width: 100%;
     max-width: 100%;
+    aspect-ratio: var(--hoja-aspecto, auto);
     background: var(--color-surface);
     border-radius: 0.75rem;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
+    padding: var(--hoja-padding, 1.5rem);
     border: 1px solid var(--color-text-disabled);
     display: grid;
     grid-template-columns: repeat(var(--columnas, 1), 1fr);

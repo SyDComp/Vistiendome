@@ -53,6 +53,17 @@ const SE_PUEDE_DESPACHAR = ['CONFIRMADA', 'DESPACHADA'];
 
 // Formatos de disposición de papel/rollo
 const LABEL_FORMATS = {
+    // `paddingMm`: el mismo margen que usa el formato correspondiente en la
+    // hoja de impresion real (ShippingLabelPrinter.impresion.css:
+    // .print-page-wrapper 8mm, .format-thermal-* 3mm, .format-a4-full 10mm).
+    // Se repite aca -no se importa el CSS de impresion en esta pantalla, y
+    // convertirlo a texto para leerlo seria mas fragil que declararlo una vez
+    // mas- para que la vista previa reserve el mismo aire que va a tener el
+    // papel real. Antes el padding de pantalla era un 1.5rem fijo para
+    // cualquier formato: le achicaba a los rollos termicos el espacio real de
+    // texto que si tienen en papel (24px de margen en pantalla contra 3mm
+    // ~11px en el rollo real), lo que corria el riesgo de recortar contenido
+    // que en papel entra perfecto.
     'a4_2x2': {
         name: 'Hoja A4 / Carta - 4 por Hoja (2×2)',
         subtitle: 'Ahorro 75% Papel • Aprox. 10.5 × 14.8 cm (A6)',
@@ -60,7 +71,8 @@ const LABEL_FORMATS = {
         rows: 2,
         pageClass: 'format-a4-grid cols-2 rows-2',
         width: '105mm',
-        height: '148mm'
+        height: '148mm',
+        paddingMm: 8
     },
     'a4_1x2': {
         name: 'Hoja A4 / Carta - 2 por Hoja (1×2)',
@@ -69,7 +81,8 @@ const LABEL_FORMATS = {
         rows: 2,
         pageClass: 'format-a4-grid cols-1 rows-2',
         width: '210mm',
-        height: '148mm'
+        height: '148mm',
+        paddingMm: 8
     },
     'a4_2x3': {
         name: 'Hoja A4 / Carta - 6 por Hoja (2×3)',
@@ -78,7 +91,8 @@ const LABEL_FORMATS = {
         rows: 3,
         pageClass: 'format-a4-grid cols-2 rows-3',
         width: '105mm',
-        height: '98mm'
+        height: '98mm',
+        paddingMm: 8
     },
     'thermal_100x150': {
         name: 'Rollo Térmico Courier (100 × 150 mm)',
@@ -87,7 +101,8 @@ const LABEL_FORMATS = {
         rows: 1,
         pageClass: 'format-thermal-100x150',
         width: '100mm',
-        height: '150mm'
+        height: '150mm',
+        paddingMm: 3
     },
     'thermal_80mm': {
         name: 'Rollo Térmico Ticketera POS (80 mm)',
@@ -96,7 +111,8 @@ const LABEL_FORMATS = {
         rows: 1,
         pageClass: 'format-thermal-80mm',
         width: '80mm',
-        height: 'auto'
+        height: 'auto',
+        paddingMm: 3
     },
     'a4_full': {
         name: 'Hoja Completa A4 / Carta (1 por Hoja)',
@@ -105,7 +121,8 @@ const LABEL_FORMATS = {
         rows: 1,
         pageClass: 'format-a4-full',
         width: '210mm',
-        height: '297mm'
+        height: '297mm',
+        paddingMm: 10
     }
 };
 
@@ -315,6 +332,32 @@ const ShippingLabelPrinter = () => {
     // Paginación en hojas para formatos A4/Carta
     const formatCfg = LABEL_FORMATS[formatKey] || LABEL_FORMATS['a4_2x2'];
     const slotsPerPage = formatCfg.cols * formatCfg.rows;
+
+    // EL TAMAÑO DE LA HOJA EN PANTALLA, SACADO DEL FORMATO REAL.
+    //
+    // Antes el marco de la vista previa tenia un ancho fijo que solo distinguia
+    // "es A4" de "no es A4": los dos rollos termicos -100x150mm y 80mm, de
+    // proporciones bien distintas- caian en el mismo caso y salian del mismo
+    // tamaño. Cambiar de uno a otro no cambiaba nada en pantalla.
+    //
+    // Por que alcanza con el ancho/alto real, sin inventar una ampliacion: el
+    // texto de la etiqueta en pantalla ya usa los mismos tamaños en px que la
+    // hoja de impresion real (10.brand-title: 14px alla y en .et-etiqueta-titulo
+    // 0.875rem = 14px aca, por ejemplo). El texto fue pensado para el tamaño
+    // fisico del papel, asi que si el contenedor mide lo que el papel mide de
+    // verdad -a 96dpi, el estandar de CSS: 1 pulgada = 25.4mm = 96px- el
+    // contenido encaja solo, sin recortarse.
+    const PX_POR_MM = 96 / 25.4;
+    const anchoFormatoMm = parseFloat(formatCfg.width) || 100;
+    const altoFormatoMm = formatCfg.height === 'auto' ? null : (parseFloat(formatCfg.height) || null);
+    const hojaEstiloVars = {
+        '--hoja-max': `${(anchoFormatoMm * PX_POR_MM).toFixed(1)}px`,
+        // Sin alto real -la ticketera de 80mm es una tira continua, su largo
+        // lo decide el contenido- no se fuerza proporcion: el alto lo sigue
+        // dando el contenido, como hoy.
+        '--hoja-aspecto': altoFormatoMm ? `${anchoFormatoMm} / ${altoFormatoMm}` : 'auto',
+        '--hoja-padding': `${((formatCfg.paddingMm ?? 8) * PX_POR_MM).toFixed(1)}px`,
+    };
 
     const pages = useMemo(() => {
         if (slotsPerPage === 1) {
@@ -766,7 +809,7 @@ const ShippingLabelPrinter = () => {
                                cuantas etiquetas entran en el formato elegido, que es
                                justo la decision que se esta tomando en esa pantalla. */
                             <div className="et-hoja-vacia">
-                                <div className="et-hoja">
+                                <div className="et-hoja-silueta">
                                     {Array.from({ length: 4 }).map((_, i) => (
                                         <div key={i} className="et-hoja-celda">
                                             <Package size={18} />
@@ -780,7 +823,7 @@ const ShippingLabelPrinter = () => {
                             </div>
                         ) : (
                             pages.map((pageSlots, pageIdx) => (
-                                <div key={pageIdx} className="et-hoja-marco" style={{ '--hoja-max': formatKey.startsWith('a4_') ? '51.25rem' : '27.5rem' }}>
+                                <div key={pageIdx} className="et-hoja-marco" style={hojaEstiloVars}>
                                     <div className="et-etiqueta-pie">
                                         <span>Hoja {pageIdx + 1} de {pages.length}</span>
                                     </div>
