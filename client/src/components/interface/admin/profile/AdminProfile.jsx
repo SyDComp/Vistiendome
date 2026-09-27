@@ -140,7 +140,7 @@ const AdminProfile = () => {
                                 name="apodo"
                                 value={profile.apodo || ''}
                                 onChange={handleChange}
-                                placeholder="Ej: paola123"
+                                placeholder="Ej: usuaria123"
                             />
                             <span className="adm-pie-ayuda">
                                 Puedes usar este apodo para iniciar sesión más rápido en lugar de tu correo.
