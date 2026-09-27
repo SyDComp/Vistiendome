@@ -700,8 +700,18 @@ const SettingsManager = () => {
                             promos: prev.promos.map((x, k) => k === i ? { ...x, ...campos } : x)
                         }));
                         const esRegalo = p.type === 'regalo';
+                        // El mismo criterio que usa el carrito para decidir si
+                        // aplica una promocion (ver evaluarPromociones en
+                        // utils/promotions.js): sin el campo, o en true, esta
+                        // activa. Solo `false` la apaga. Asi la pantalla nunca
+                        // puede mostrar "activa" mientras el carrito la ignora,
+                        // o al reves.
+                        const activa = p.active !== false;
                         return (
-                            <div key={i} className="adm-tarjeta-interna">
+                            <div key={i} className={`adm-tarjeta-interna${activa ? '' : ' adm-tarjeta-interna--inactiva'}`}>
+                                {!activa && (
+                                    <span className="adm-etiqueta-inactiva">Desactivada — no se aplica en la tienda</span>
+                                )}
                                 <div className="adm-rejilla--estrecha">
                                     <div className="input-group">
                                         <label className="adm-rotulo">Nombre</label>
@@ -801,11 +811,18 @@ const SettingsManager = () => {
                                     </span>
                                 </label>
 
-                                <button type="button"
-                                    onClick={() => setPromotions(prev => ({ ...prev, promos: prev.promos.filter((_, k) => k !== i) }))}
-                                    className="adm-quitar">
-                                    Eliminar esta promoción
-                                </button>
+                                <div className="adm-acciones-tarjeta">
+                                    <button type="button"
+                                        onClick={() => editar({ active: activa ? false : true })}
+                                        className={`adm-boton-secundario adm-boton-secundario--bajo${activa ? '' : ' adm-boton-secundario--activar'}`}>
+                                        {activa ? 'Desactivar' : 'Activar de nuevo'}
+                                    </button>
+                                    <button type="button"
+                                        onClick={() => setPromotions(prev => ({ ...prev, promos: prev.promos.filter((_, k) => k !== i) }))}
+                                        className="adm-quitar">
+                                        Eliminar esta promoción
+                                    </button>
+                                </div>
                             </div>
                         );
                     })}
