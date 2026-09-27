@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { ChevronLeft, Share2, ShieldCheck, Truck, MessageCircle, ShoppingBag, Barcode as BarcodeIcon, Users } from 'lucide-react';
 import ReactBarcode from 'react-barcode';
 import ProductPreviewCarousel from './ProductPreviewCarousel';
@@ -18,7 +18,7 @@ import VideoYoutube from '../../../components/ui/VideoYoutube';
 import { track } from '../../../lib/analytics';
 import '../productDetail.css';
 
-const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
+const ProductDetailViewInterno = ({ producto: initialProduct, isModal = false }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { addItem, filtersMetadata } = useCart();
@@ -458,6 +458,36 @@ const ProductDetailView = ({ producto: initialProduct, isModal = false }) => {
             />
         </>
     );
+};
+
+// NINGUNA de las rutas que llegan aca (App.jsx) le pone `key` a esta vista, y
+// el patron de la ruta -"producto/:slug/:sku?/:imgIndex?"- es EL MISMO al
+// pasar de una ficha a otra: solo cambian los parametros. React Router no
+// desmonta el componente cuando eso pasa, asi que su estado interno de la
+// ficha ANTERIOR seguia vivo mientras los props ya apuntaban al producto
+// NUEVO.
+//
+// Eso se vio como dos cosas sueltas, pero eran la misma causa:
+//   - ProductPreviewCarousel guarda la foto que muestra en un estado propio
+//     (`selectedImageUrl`) que solo se resincroniza cuando cambia el SKU
+//     DENTRO del mismo producto; no cuando el producto entero cambia. La foto
+//     vieja quedaba a la vista -una franja del producto anterior- mientras el
+//     resto de la ficha (nombre, video, specs) ya mostraba el producto nuevo.
+//   - useProductDetail dispara su carga en un useEffect por slug, sin cancelar
+//     la peticion anterior si el usuario navega de nuevo antes de que
+//     termine. Sin la key, dos cargas en vuelo para dos productos distintos
+//     podian resolverse en cualquier orden y pisarse una a la otra, dejando
+//     "Cargando producto..." pegado si la que gana la carrera queda a medio
+//     camino.
+//
+// Con la key en el slug, cambiar de PRODUCTO desmonta el arbol entero -se
+// pierde el estado viejo de raiz, y la promesa que seguia en vuelo actualiza
+// un componente que ya no existe, sin ningun efecto-. Cambiar de VARIANTE
+// (mismo slug, sku distinto) no se ve afectado: sigue siendo la misma
+// instancia, que es donde el resto del componente ya sincroniza bien.
+const ProductDetailView = (props) => {
+    const { slug } = useParams();
+    return <ProductDetailViewInterno key={slug} {...props} />;
 };
 
 export default ProductDetailView;
