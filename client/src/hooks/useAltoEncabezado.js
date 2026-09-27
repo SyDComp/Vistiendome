@@ -16,9 +16,9 @@ import { useEffect } from 'react';
  * primeros 11 pixeles del buscador quedaban tapados por el logo. Eso es lo que
  * se veia como el buscador pegado al logo.
  *
- * Y 11 pixeles es el caso bueno: el texto de la barra promocional lo escribe
- * Paola desde el panel, y en cuanto no cabe en una linea pasa a dos y la barra
- * mide el doble. Ahi ya no son 11 pixeles, es media pantalla corrida.
+ * Y 11 pixeles es el caso bueno: el texto de la barra promocional se edita
+ * desde el panel, y en cuanto no cabe en una linea pasa a dos y la barra mide
+ * el doble. Ahi ya no son 11 pixeles, es media pantalla corrida.
  *
  * POR QUE ESTO SI VA EN JAVASCRIPT
  * Se saco de aca todo lo que decidia DISEÑO mirando la ventana -si apilar, si

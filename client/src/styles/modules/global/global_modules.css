@@ -433,9 +433,9 @@ body.no-scroll {
   flex-direction: column;
   /* La altura del encabezado se MIDE (ver el hook useAltoEncabezado), no se
      adivina. Decia 100px y el encabezado mide 111: los primeros 11 pixeles del
-     buscador quedaban debajo del logo. Y el texto de la barra promocional lo
-     escribe Paola, asi que en cuanto pasa a dos lineas el desfase se duplica.
-     El 111px es solo respaldo para el primer pintado. */
+     buscador quedaban debajo del logo. Y el texto de la barra promocional se
+     edita desde el panel, asi que en cuanto pasa a dos lineas el desfase se
+     duplica. El 111px es solo respaldo para el primer pintado. */
   padding: var(--alto-encabezado, 111px) 40px 40px;
   transform: translateX(100%);
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
