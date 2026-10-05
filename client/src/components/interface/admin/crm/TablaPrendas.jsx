@@ -1,5 +1,5 @@
 import React from 'react';
-import { agrupar, nombreDeProducto, describirPedidos } from '../../../../utils/prendas';
+import { agrupar, nombreDeProducto } from '../../../../utils/prendas';
 import './TablaPrendas.css';
 
 /**
@@ -24,7 +24,7 @@ import './TablaPrendas.css';
  *                       mano. La planilla de papel las tiene y se usan.
  * @param columnasPermitidas `Set` de características que la clienta eligió
  *                       mostrar. `null` = todas.
- * @param agruparPor     'producto' (para cortar) o 'cliente' (para entregar).
+ * @param agruparPor     'producto' (para cortar) o 'pedido' (para armar y entregar).
  *                       Ver `utils/prendas.js` para por qué existen las dos.
  */
 const TablaPrendas = ({
@@ -48,17 +48,12 @@ const TablaPrendas = ({
 
     return (
         <div>
-            {grupos.map(({ titulo, columnas, filas, unidades, pedidos, conColumnaProducto }) => (
-                <section key={titulo} className="tp-grupo">
+            {grupos.map(({ clave, titulo, pedido, columnas, filas, unidades, conColumnaProducto }) => (
+                <section key={clave} className="tp-grupo">
                     <header className="tp-grupo-cab">
                         <div className="tp-grupo-titulo">
                             <h4 className="tp-producto">{titulo}</h4>
-                            {/* Por clienta, de qué pedido es: con eso se arma y
-                                se despacha el paquete. Por modelo ya lo dice
-                                cada fila. */}
-                            {conColumnaProducto && pedidos.length > 0 && (
-                                <span className="tp-pedidos">{describirPedidos(pedidos)}</span>
-                            )}
+                            {pedido != null && <span className="tp-pedido">Pedido N° {pedido}</span>}
                         </div>
                         <span className="tp-unidades">
                             {unidades} {unidades === 1 ? 'unidad' : 'unidades'}

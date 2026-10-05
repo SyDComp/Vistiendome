@@ -16,9 +16,12 @@
  *                Cada modelo trae exactamente sus características, así que la
  *                tabla queda densa.
  *
- *   POR CLIENTA  "¿qué le entrego a cada persona?" — es lo que hace el papel.
- *                Acá el producto pasa a ser UNA COLUMNA MÁS, porque una clienta
- *                compra varios modelos distintos. El precio de esto es que las
+ *   POR PEDIDO   "¿qué va en cada paquete?" — lo que se arma y se despacha es
+ *                un pedido, no una persona: cada uno tiene su entrega y su
+ *                etiqueta. Una clienta con dos pedidos en la misma orden sale
+ *                en dos grupos, y así se sabe qué prenda va en cuál. Acá el
+ *                producto pasa a ser UNA COLUMNA MÁS, porque un pedido trae
+ *                varios modelos distintos. El precio de esto es que las
  *                columnas son la unión de las características de todos sus
  *                modelos, así que aparecen celdas "—" donde no aplica. Es
  *                inevitable: no se puede alinear en una fila lo que no comparte
@@ -57,62 +60,70 @@ export const ordenarCaracteristicas = (claves) =>
 export const nombreDeProducto = (item) =>
     item.producto || item.producto_nombre || item.sku_name || 'Sin producto';
 
-// Una línea cortada para stock no tiene clienta, y eso es información: se
-// agrupa aparte en vez de caer en un grupo "sin nombre".
-const nombreDeCliente = (item) =>
-    item.para_stock ? 'Para stock' : (item.cliente || 'Sin clienta');
+// Una línea cortada para stock no es de ningún pedido, y eso es información:
+// se agrupa aparte en vez de caer en un grupo "sin nombre".
+//
+// La clave es el pedido y no el nombre: dos clientas pueden llamarse igual,
+// y una clienta puede tener dos pedidos en la misma orden.
+const grupoDePedido = (item) => {
+    if (item.para_stock) return { clave: 'stock', titulo: 'Para stock', pedido: null };
+    const pedido = item.pedido_numero ?? null;
+    return {
+        clave: `pedido-${item.cotizacion_id ?? pedido ?? 'sin-pedido'}`,
+        titulo: item.cliente || 'Sin clienta',
+        pedido,
+    };
+};
+
+const grupoDeProducto = (item) => {
+    const titulo = nombreDeProducto(item);
+    return { clave: `producto-${titulo}`, titulo, pedido: null };
+};
 
 /**
  * @param items
- * @param por          'producto' (para cortar) o 'cliente' (para entregar).
+ * @param por          'producto' (para cortar) o 'pedido' (para armar y entregar).
  * @param permitidas   `Set` con los nombres de las características que la
  *                     clienta eligió que salgan ("Sale en la orden de corte").
  *                     `null`/`undefined` = salen todas; NO es lo mismo que un
  *                     Set vacío, que significa "no quiere ninguna".
- * @returns {{titulo: string, columnas: string[], filas: object[],
- *            unidades: number, pedidos: number[], conColumnaProducto: boolean}[]}
- *          En el orden en que aparecen en el pedido.
+ * @returns {{clave: string, titulo: string, pedido: number|null,
+ *            columnas: string[], filas: object[], unidades: number,
+ *            conColumnaProducto: boolean}[]}
+ *          En el orden en que aparecen.
  */
 export const agrupar = (items = [], { por = 'producto', permitidas = null } = {}) => {
     const sale = (clave) => !permitidas || permitidas.has(String(clave).toUpperCase());
-    const porCliente = por === 'cliente';
-    const titularDe = porCliente ? nombreDeCliente : nombreDeProducto;
+    const porPedido = por === 'pedido';
+    const grupoDe = porPedido ? grupoDePedido : grupoDeProducto;
 
     const grupos = new Map();
     items.forEach(item => {
-        const titulo = titularDe(item);
-        if (!grupos.has(titulo)) {
-            grupos.set(titulo, { titulo, claves: new Set(), filas: [], unidades: 0, pedidos: new Set() });
+        const { clave, titulo, pedido } = grupoDe(item);
+        if (!grupos.has(clave)) {
+            grupos.set(clave, { clave, titulo, pedido, claves: new Set(), filas: [], unidades: 0 });
         }
-        const grupo = grupos.get(titulo);
+        const grupo = grupos.get(clave);
         // Sólo se hace columna la característica que tiene valor en alguna fila
         // del grupo: una columna entera vacía es ruido para quien lee.
-        Object.entries(item.config || {}).forEach(([clave, valor]) => {
-            if (valor && sale(clave)) grupo.claves.add(clave);
+        Object.entries(item.config || {}).forEach(([caracteristica, valor]) => {
+            if (valor && sale(caracteristica)) grupo.claves.add(caracteristica);
         });
         grupo.filas.push(item);
         grupo.unidades += Number(item.cantidad) || 0;
-        if (item.pedido_numero != null) grupo.pedidos.add(item.pedido_numero);
     });
 
-    return [...grupos.values()].map(({ titulo, claves, filas, unidades, pedidos }) => ({
+    return [...grupos.values()].map(({ clave, titulo, pedido, claves, filas, unidades }) => ({
+        clave,
         titulo,
-        // De qué pedidos salen las piezas del grupo. Agrupado por clienta es lo
-        // que permite buscar el pedido al armar el paquete.
-        pedidos: [...pedidos].sort((a, b) => a - b),
+        pedido,
         columnas: ordenarCaracteristicas(claves),
         filas,
         unidades,
-        // Agrupado por clienta, el producto deja de ser el título del grupo y
-        // pasa a ser una columna: una clienta compra varios modelos.
-        conColumnaProducto: porCliente,
+        // Agrupado por pedido, el producto deja de ser el título del grupo y
+        // pasa a ser una columna: un pedido trae varios modelos.
+        conColumnaProducto: porPedido,
     }));
-};
-
-/** "Pedido N° 30" o "Pedidos N° 12, 15"; vacío si no hay ninguno. */
-export const describirPedidos = (pedidos = []) => {
-    if (!pedidos.length) return '';
-    return `${pedidos.length === 1 ? 'Pedido' : 'Pedidos'} N° ${pedidos.join(', ')}`;
 };
 
 /** Total de unidades de todo el pedido, no de un grupo. */

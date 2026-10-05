@@ -25,8 +25,8 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
     const navigate = useNavigate();
     // Dos preguntas distintas sobre la misma orden, y hay que poder hacer las
     // dos: por modelo se corta (se tiende la tela de un modelo y salen todas
-    // sus tallas juntas); por clienta se arma y se entrega, que es como está
-    // hecha la planilla de papel.
+    // sus tallas juntas); por pedido se arma y se entrega, porque cada pedido
+    // es un paquete con su propio despacho.
     const [agruparPor, setAgruparPor] = useState('producto');
 
     const cambiar = async (estado) => {
@@ -124,10 +124,10 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
                 </button>
                 <button
                     type="button"
-                    className={agruparPor === 'cliente' ? 'activo' : ''}
-                    onClick={() => setAgruparPor('cliente')}
+                    className={agruparPor === 'pedido' ? 'activo' : ''}
+                    onClick={() => setAgruparPor('pedido')}
                 >
-                    Por clienta
+                    Por pedido
                     <small>para armar y entregar</small>
                 </button>
             </div>
@@ -137,9 +137,9 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
                 columnasPermitidas={columnasCorte}
                 agruparPor={agruparPor}
                 casilla
-                // Agrupado por clienta ya se sabe de quién es cada fila: esa
+                // Agrupado por pedido ya se sabe de quién es cada fila: esa
                 // columna sobra y el ancho lo necesita Producto.
-                columnasExtra={agruparPor === 'cliente' ? [] : [{
+                columnasExtra={agruparPor === 'pedido' ? [] : [{
                     clave: 'origen',
                     etiqueta: 'Para',
                     // Enlace, no etiqueta: desde acá se llega al pedido sin

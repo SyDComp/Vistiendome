@@ -54,7 +54,7 @@ body {
 }
 .modelo-cab span { font-size: 13px; font-weight: 700; }
 .modelo-titulo { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-.modelo-titulo .pedidos { font-size: 13px; font-weight: 800; }
+.modelo-titulo .pedido { font-size: 13px; font-weight: 800; }
 
 table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 

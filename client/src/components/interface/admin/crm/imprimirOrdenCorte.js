@@ -1,4 +1,4 @@
-import { agrupar, nombreDeProducto, describirPedidos } from '../../../../utils/prendas';
+import { agrupar, nombreDeProducto } from '../../../../utils/prendas';
 import { imprimirDocumento } from '../../../../utils/impresion';
 // La hoja vive en un .css de verdad y se trae como texto: asi el editor la
 // entiende, y una comilla invertida en un comentario deja de romper la
@@ -13,7 +13,8 @@ import estilos from './imprimirOrdenCorte.impresion.css?raw';
  * `utils/impresion.js`.
  *
  * Mismo agrupado que la pantalla (`agrupar`), y las dos vistas: por modelo para
- * cortar, por clienta para entregar. La planilla de papel usa la segunda; lo
+ * cortar, por pedido para armar y entregar. La planilla de papel agrupa por
+ * clienta; por pedido es lo mismo pero sin mezclar dos pedidos de una persona. Lo
  * que agrega ésta es que las columnas salen de los datos (así no se pierde la
  * quinta característica de un producto) y que cada grupo trae su total, en vez
  * de contar filas a mano.
@@ -31,8 +32,8 @@ const origenDe = (i) => i.para_stock
 // tiene y se usan.
 const FILAS_EN_BLANCO = 2;
 
-const tablaDe = ({ titulo, columnas, filas, unidades, pedidos, conColumnaProducto }) => {
-    // Agrupado por clienta ya se sabe para quién es: la columna "Para" sobra y
+const tablaDe = ({ titulo, pedido, columnas, filas, unidades, conColumnaProducto }) => {
+    // Agrupado por pedido ya se sabe para quién es: la columna "Para" sobra y
     // ese ancho lo necesita "Producto", que es lo que distingue las filas.
     const colProducto = conColumnaProducto ? '<th class="ancha">Producto</th>' : '';
     const colDestino = conColumnaProducto ? '' : '<th class="ancha">Para</th>';
@@ -56,7 +57,7 @@ const tablaDe = ({ titulo, columnas, filas, unidades, pedidos, conColumnaProduct
         <div class="modelo-cab">
             <div class="modelo-titulo">
                 <h2>${escapar(titulo)}</h2>
-                ${conColumnaProducto && pedidos.length ? `<span class="pedidos">${escapar(describirPedidos(pedidos))}</span>` : ''}
+                ${pedido != null ? `<span class="pedido">Pedido N° ${escapar(pedido)}</span>` : ''}
             </div>
             <span>${unidades} ${unidades === 1 ? 'unidad' : 'unidades'}</span>
         </div>
@@ -72,14 +73,14 @@ export const imprimirOrdenCorte = (orden, etiquetaEstado, columnasPermitidas = n
     // ("Sale en la orden de corte"). Si todavía no se sabe, salen todas: una
     // columna de más molesta, una hoja sin la talla manda a cortar mal.
     const grupos = agrupar(orden.items || [], { por, permitidas: columnasPermitidas });
-    const porCliente = por === 'cliente';
+    const porPedido = por === 'pedido';
     const fecha = new Date(orden.created_at).toLocaleDateString('es-CL');
 
     const cuerpo = `
 <div class="cab">
     <h1>Orden de Corte N° ${escapar(orden.numero)}</h1>
-    <div class="meta">${escapar(etiquetaEstado)} · ${grupos.length} ${porCliente ? (grupos.length === 1 ? 'clienta' : 'clientas') : (grupos.length === 1 ? 'modelo' : 'modelos')} · ${escapar(orden.total_unidades)} unidades · ${escapar(fecha)}</div>
-    <div class="meta">${porCliente ? 'Agrupada por clienta — para armar y entregar' : 'Agrupada por modelo — para cortar'}</div>
+    <div class="meta">${escapar(etiquetaEstado)} · ${grupos.length} ${porPedido ? (grupos.length === 1 ? 'pedido' : 'pedidos') : (grupos.length === 1 ? 'modelo' : 'modelos')} · ${escapar(orden.total_unidades)} unidades · ${escapar(fecha)}</div>
+    <div class="meta">${porPedido ? 'Agrupada por pedido — para armar y entregar' : 'Agrupada por modelo — para cortar'}</div>
 </div>
 ${orden.notas ? `<div class="notas"><b>Notas</b>${escapar(orden.notas)}</div>` : ''}
 ${grupos.map(tablaDe).join('')}
