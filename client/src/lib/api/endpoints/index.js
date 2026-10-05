@@ -4,3 +4,4 @@ export * from './settings.api.js';
 export * from './admin.api.js';
 export * from './images.api.js';
 export * from './taller.api.js';
+export * from './kardex.api.js';

@@ -209,9 +209,8 @@
     align-items: center;
     justify-content: center;
 }
-.logistics-history-icon-wrapper.receipt { background: #ecfdf5; }
-.logistics-history-icon-wrapper.sale { background: var(--color-error-bg); }
-.logistics-history-icon-wrapper.adjustment { background: var(--color-warning-bg); }
+.logistics-history-icon-wrapper.positivo { background: var(--color-success-bg); color: var(--color-success); }
+.logistics-history-icon-wrapper.negativo { background: var(--color-error-bg); color: var(--color-error); }
 
 .logistics-history-details { flex: 1; }
 .logistics-history-row {
@@ -228,8 +227,9 @@
     font-size: 14px;
     font-weight: 900;
 }
-.logistics-history-qty.positive { color: #10b981; }
-.logistics-history-qty.negative { color: var(--color-error); }
+.logistics-history-qty.positivo { color: var(--color-success); }
+.logistics-history-qty.negativo { color: var(--color-error); }
+.logistics-history-saldo { font-size: 12px; font-weight: 700; color: var(--color-text-muted); }
 
 .logistics-history-date {
     font-size: 12px;
@@ -241,3 +241,32 @@
     margin-top: 6px;
     font-style: italic;
 }
+
+/* La lista del historial es una lista de verdad, sin viñetas. */
+ul.logistics-history-list { list-style: none; margin: 0; padding: 0; }
+
+.logistics-drawer-variante { margin-top: 8px; }
+.logistics-drawer-stock { margin-top: 10px; font-size: 13px; color: var(--color-text-body); }
+
+/* El icono toma el color del botón: gris si no está elegido, el del tipo si lo está. */
+.logistics-type-btn { color: var(--color-text-disabled); }
+.logistics-type-btn.active.receipt { color: var(--color-success); }
+.logistics-type-btn.active.adjustment { color: var(--color-warning); }
+.logistics-type-btn-text { color: var(--color-text-primary); }
+
+.logistics-modal-ayuda { margin: 8px 0 0; font-size: 12px; color: var(--color-text-muted); }
+
+/* Con cuánto queda el stock si se confirma. */
+.logistics-modal-resultado {
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: var(--color-bg-subtle);
+    font-size: 14px;
+    color: var(--color-text-body);
+}
+.logistics-modal-resultado--imposible { background: var(--color-error-bg); color: var(--color-error-deep); }
+
+.logistics-modal-aviso { margin: 14px 0 0; font-size: 13px; font-weight: 600; color: var(--color-text-muted); }
+.logistics-modal-aviso--error { color: var(--color-error-deep); }
+
+.logistics-modal-btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
