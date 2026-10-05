@@ -48,7 +48,8 @@ export const openWhatsApp = (phone, message) => {
  * @param {object} [opts.cliente]   { nombre, rut, email, telefono }
  * @param {object} [opts.despacho]  { transporte, direccion, comuna, region, tipo_despacho }
  * @param {object} [opts.grupo]     { tipo, cantidad, evento }
- * @param {Array}  [opts.productos] [{ name, variantLabel, quantity, price, url }]
+ * @param {Array}  [opts.productos] [{ name, variantLabel, quantity, price, descuento, url }]
+ *                                  `descuento`: { motivos, antes }, ver descuentoDeLinea
  * @param {number} [opts.total]
  * @param {string} [opts.mensaje]
  */
@@ -128,7 +129,11 @@ export const buildWhatsAppMessage = ({ tipo = 'pedido', cliente, despacho, grupo
             const prefix = productos.length > 1 ? `*${index + 1}. Producto:* ` : '*Producto:* ';
             prodLines.push(`${prefix}${p.name}`);
             if (p.quantity) prodLines.push(`*Cantidad:* ${p.quantity}`);
-            if (p.price != null) prodLines.push(`*Precio:* ${formatCurrency(p.price)}${p.quantity ? ' c/u' : ''}`);
+            const porUnidad = p.quantity ? ' c/u' : '';
+            if (p.price != null) prodLines.push(`*Precio:* ${formatCurrency(p.price)}${porUnidad}`);
+            if (p.descuento) {
+                prodLines.push(`*Descuento:* ${p.descuento.motivos.join(' + ')} (antes ${formatCurrency(p.descuento.antes)}${porUnidad})`);
+            }
             formatVariantAttributes(p).forEach(line => prodLines.push(line));
             if (p.url) prodLines.push(`*Enlace:* ${p.url}`);
         });

@@ -14,6 +14,7 @@ import { generateEAN13, formatSku } from '../utils/skuUtils';
 import { handleShare } from '../utils/shareUtils';
 import { buildWhatsAppMessage, formatCurrency } from '../../../utils/cartUtils';
 import { valoresEnRango, aplicarDescuento } from '../../../utils/priceTiers';
+import { enOferta } from '../../../utils/oferta';
 import VideoYoutube from '../../../components/ui/VideoYoutube';
 import { track } from '../../../lib/analytics';
 import '../productDetail.css';
@@ -146,6 +147,10 @@ const ProductDetailViewInterno = ({ producto: initialProduct, isModal = false })
             skuId: skuActual?.id,
             name: producto?.name,
             price: precioFinal,
+            // Con qué precio de antes compite la oferta: el pedido tiene que
+            // poder decir que lo fue.
+            original_price: skuActual?.original_price,
+            on_sale: skuActual?.on_sale,
             image: currentImage,
             variantLabel: Object.entries(selections).map(([k, v]) => `${k}: ${v}`).join(', '),
             selections: selections,
@@ -242,7 +247,7 @@ const ProductDetailViewInterno = ({ producto: initialProduct, isModal = false })
                                         <span className="esqueleto esqueleto--texto esqueleto--corto" />
                                     ) : (() => {
                                         const refSku = skuActual || producto?.skus?.[0];
-                                        const onSale = refSku?.on_sale && refSku?.original_price > precioFinal;
+                                        const onSale = enOferta(refSku);
                                         return (
                                             <>
                                                 {onSale && <span className="price-sale-badge">Oferta</span>}

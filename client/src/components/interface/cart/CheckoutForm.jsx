@@ -4,6 +4,7 @@ import { useForm } from '../../../hooks/useForm';
 import { validarRut } from '../../../utils/rut';
 import { useCart } from '../../../context/CartContext';
 import { buildWhatsAppMessage, openWhatsApp } from '../../../utils/cartUtils';
+import { descuentoDeLinea } from '../../../utils/descuentoDeLinea';
 import { track } from '../../../lib/analytics';
 import { get, post } from '../../../lib/api/client';
 import { formatRUT } from '../../../utils/formatters';
@@ -172,15 +173,12 @@ const CheckoutForm = ({ onClose }) => {
             },
             productos: cart.map(item => ({
                 name: item.name,
-                // Si el precio de tramo (mayorista, iglesia) aplica, es el que
-                // realmente se le va a cobrar — El taller necesita verlo en el
-                // mensaje, no el unitario que ya no corresponde.
-                variantLabel: item.tramoAplicado
-                    ? `${item.variantLabel} · Precio ${item.tramoAplicado}`
-                    : item.variantLabel,
+                variantLabel: item.variantLabel,
                 selections: item.selections,
                 quantity: item.quantity,
+                // El precio que realmente se cobra, y el descuento que lo explica.
                 price: item.precioTramo ?? item.price,
+                descuento: descuentoDeLinea(item),
                 url: item.productUrl,
             })),
             descuentos,

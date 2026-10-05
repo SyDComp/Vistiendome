@@ -53,10 +53,11 @@ export const CartProvider = ({ children }) => {
         try {
             const precios = await getPreciosVigentes(skus);
             const { items, cambios } = aplicarPreciosVigentes(cart, precios);
-            if (!cambios.length) return;
+            // Una línea que no cambió vuelve como el mismo objeto.
+            if (items.every((item, i) => item === cart[i])) return;
 
             setCart(items);
-            toast.info(
+            if (cambios.length) toast.info(
                 cambios.length === 1
                     ? `El precio de "${cambios[0].nombre}" cambió a $${Number(cambios[0].ahora).toLocaleString('es-CL')}.`
                     : `${cambios.length} productos de tu cotización cambiaron de precio.`,

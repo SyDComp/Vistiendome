@@ -30,9 +30,14 @@ export const aplicarPreciosVigentes = (carrito = [], precios = []) => {
         // conviene inventarle un precio ni sacarlo del carrito sin avisar.
         if (!vigente || vigente.price == null) return item;
 
-        if (Number(vigente.price) === Number(item.price)) return item;
+        const mismoPrecio = Number(vigente.price) === Number(item.price);
+        const mismaOferta = Boolean(vigente.on_sale) === Boolean(item.on_sale)
+            && Number(vigente.original_price) === Number(item.original_price);
+        if (mismoPrecio && mismaOferta) return item;
 
-        cambios.push({ nombre: item.name, antes: item.price, ahora: vigente.price });
+        // A la clienta solo se le avisa lo que le cambia el bolsillo; los datos
+        // de la oferta se ponen al día igual, porque el pedido los informa.
+        if (!mismoPrecio) cambios.push({ nombre: item.name, antes: item.price, ahora: vigente.price });
         return {
             ...item,
             price: vigente.price,
