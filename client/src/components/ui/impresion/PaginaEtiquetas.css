@@ -1,6 +1,5 @@
 /* La página de etiquetas, con las medidas del papel. Se usa igual en pantalla
-   y en la hoja impresa: las medidas llegan como variables desde el formato
-   elegido (formatosEtiqueta.js). */
+   y en la hoja impresa: las medidas llegan como variables (ver pagina.js). */
 
 .et-pagina {
     box-sizing: border-box;

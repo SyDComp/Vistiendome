@@ -63,20 +63,3 @@ export const describirMedida = (g) => {
         ? `Cada etiqueta: ${cm(g.etiquetaAnchoMm)} × ${cm(g.etiquetaAltoMm)} cm`
         : `Cada etiqueta: ${cm(g.etiquetaAnchoMm)} cm de ancho, el largo que necesite`;
 };
-
-/**
- * Lo único de la hoja de impresión que no puede vivir en un .css: `@page`
- * no acepta variables, y el tamaño depende de lo que se eligió.
- */
-export const estilosDePagina = (g) =>
-    `@page { size: ${g.altoMm ? `${g.anchoMm}mm ${g.altoMm}mm` : 'auto'}; margin: 0; }`;
-
-/** Variables que dibujan la página con sus medidas reales. */
-export const variablesDePagina = (g) => ({
-    '--pag-ancho': `${g.anchoMm}mm`,
-    '--pag-alto': g.altoMm ? `${g.altoMm}mm` : 'auto',
-    '--pag-cols': g.cols,
-    '--pag-filas': g.filas,
-    '--pag-margen': `${g.margenMm}mm`,
-    '--pag-separacion': `${g.separacionMm}mm`,
-});

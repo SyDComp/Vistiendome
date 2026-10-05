@@ -10,8 +10,8 @@ import './EtiquetaEnvio.css';
  * La etiqueta que se pega al paquete. La misma pieza se usa en la vista
  * previa y en la hoja que se imprime, así que lo que se ve es lo que sale.
  *
- * No decide su tamaño de letra: lo toma de `--ee-escala`, que ajusta quien
- * la acomoda en la hoja (ver useAjusteAlEspacio).
+ * No decide su tamaño de letra: lo toma de `--escala`, que ajusta quien la
+ * acomoda en la hoja (ver ui/impresion/ajusteAlEspacio.js).
  */
 const EtiquetaEnvio = ({
     cotizacion,
@@ -38,7 +38,7 @@ const EtiquetaEnvio = ({
     ].filter(Boolean).join(' ');
 
     return (
-        <div className={clases}>
+        <div className={clases} data-ajuste={continua ? 'continuo' : ''}>
             <div className="ee-contenido">
                 <div className="ee-marca">
                     <div className="ee-marca-nombre">VISTIENDOMÉ CHILE</div>

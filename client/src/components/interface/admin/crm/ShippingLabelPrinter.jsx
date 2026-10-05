@@ -18,15 +18,16 @@ import { useHasta } from '../../../../hooks/useCorte';
 import { PAPELES } from '../../../../utils/papeles';
 import { nombreDelPedido } from '../../../../utils/nombreDelPedido';
 import EtiquetaEnvio from './etiquetas/EtiquetaEnvio';
-import PaginaEtiquetas from './etiquetas/PaginaEtiquetas';
-import EncuadrePagina from './etiquetas/EncuadrePagina';
-import { useAjusteAlEspacio } from './etiquetas/ajusteAlEspacio';
+import PaginaEtiquetas from '../../../ui/impresion/PaginaEtiquetas';
+import EncuadrePagina from '../../../ui/impresion/EncuadrePagina';
+import { useAjusteAlEspacio } from '../../../ui/impresion/ajusteAlEspacio';
+import { estilosDePagina } from '../../../ui/impresion/pagina';
 import {
-    FORMATOS, usaPapel, geometria, porPagina, describirMedida, estilosDePagina,
+    FORMATOS, usaPapel, geometria, porPagina, describirMedida,
 } from './etiquetas/formatosEtiqueta';
-import estilosPagina from './etiquetas/PaginaEtiquetas.css?raw';
+import estilosPagina from '../../../ui/impresion/PaginaEtiquetas.css?raw';
 import estilosEtiqueta from './etiquetas/EtiquetaEnvio.css?raw';
-import estilosImpresion from './etiquetas/impresion.css?raw';
+import estilosImpresion from '../../../ui/impresion/paginas.impresion.css?raw';
 
 /**
  * Qué pedidos se ven. Existe porque la pantalla traía TODOS —nuevos, en

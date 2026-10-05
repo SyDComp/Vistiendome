@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import DOMPurify from 'dompurify';
 import './BarcodePrinter.css';
 import {
     Printer, Search, ChevronDown, ChevronRight, CheckSquare, Square,
@@ -8,16 +7,18 @@ import {
 } from 'lucide-react';
 import Barcode from 'react-barcode';
 import { generateEAN13 } from '../../../../features/productDetail/utils/skuUtils';
-import { formatCurrency } from '../../../../utils/cartUtils';
 import { imprimirDocumento } from '../../../../utils/impresion';
-import estilosImpresion from './BarcodePrinter.impresion.css?raw';
+import estilosPagina from '../../../ui/impresion/PaginaEtiquetas.css?raw';
+import estilosImpresion from '../../../ui/impresion/paginas.impresion.css?raw';
+import estilosEtiqueta from './codigos/EtiquetaCodigo.css?raw';
+import { estilosDePagina } from '../../../ui/impresion/pagina';
 import HojaDeEtiquetas from './HojaDeEtiquetas';
 import { useHasta } from '../../../../hooks/useCorte';
 
 // ─── Configuración de tamaños ─────────────────────────────────────────────────
 const PAPER_SIZES = {
-    carta: { label: 'Carta (8.5 × 11")', widthMm: 215.9, heightMm: 279.4, widthPx: '8.5in', heightPx: '11in' },
-    oficio: { label: 'Oficio (8.5 × 14")', widthMm: 215.9, heightMm: 355.6, widthPx: '8.5in', heightPx: '14in' },
+    carta: { label: 'Carta (8.5 × 11")', widthMm: 215.9, heightMm: 279.4 },
+    oficio: { label: 'Oficio (8.5 × 14")', widthMm: 215.9, heightMm: 355.6 },
 };
 
 const LABEL_SIZES = {
@@ -42,6 +43,7 @@ const LABEL_SIZES = {
 };
 
 const MARGIN_MM = 10; // margen de página
+const SEPARACION_MM = 2; // entre etiquetas, para que la tijera tenga por dónde pasar
 
 // Calcula cuántas etiquetas caben en una hoja
 const calcGrid = (paper, label, orientation = 'portrait') => {
@@ -86,60 +88,6 @@ const buildColorMap = (selectedList) => {
         map[item.sku] = PALETTE[i % PALETTE.length];
     });
     return map;
-};
-
-// ─── Generador de HTML para ventana de impresión (usa SVGs pre-renderizados, sin CDN) ────
-const buildPrintHTML = (slots, paperCfg, labelCfg, grid, options = {}) => {
-    const { labelStyle = 'classic', showSkuText = true, colorMap = {}, svgMap = {}, orientation = 'portrait' } = options;
-    const { cols, rows, paperW, paperH } = grid;
-    const mmToPx = mm => `${mm}mm`;
-
-    const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
-    const pages = chunkArray(slots, grid.total);
-
-    const pagesHTML = pages.map(pageSlots => {
-        const labelItems = pageSlots.map(({ sku, barcode, productName, config, price }) => {
-            const configText = Object.values(config || {}).join(' / ');
-            const label = configText ? `${productName} – ${configText}` : productName || sku;
-            const color = colorMap[sku] || { bg: '#fff', border: '#ddd', text: '#333' };
-            const bgStyle = labelStyle === 'color'
-                ? `background:${color.bg}; border:0.5px solid ${color.border};`
-                : `background:#fff; border:0.3px solid #ddd;`;
-
-            const svgContent = svgMap[barcode]
-                ? `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;">${svgMap[barcode]}</div>`
-                : `<div style="font-size:9px;font-family:monospace;color:#000;padding:2px;">${barcode}</div>`;
-
-            const fontSize = Math.max(6, labelCfg.bcFontSize * 0.5);
-            const textColor = labelStyle === 'color' ? color.text : '#555';
-            const nameLine = showSkuText
-                ? `<div style="font-size:${fontSize}px;color:${textColor};text-align:center;margin-top:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:bold;flex-shrink:0;">${label}</div>`
-                : '';
-            // Precio + marca: siempre visible (identifica la prenda aunque el lector de barras no esté a mano)
-            const priceBrandLine = price != null
-                ? `<div style="font-size:${fontSize}px;color:${textColor};text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;"><b>${formatCurrency(price)}</b> · Vistiendomé</div>`
-                : '';
-
-            return `<div class="etiqueta" style="${bgStyle}">${svgContent}${nameLine}${priceBrandLine}</div>`;
-        }).join('');
-        return `<div class="page"><div class="grid">${labelItems}</div></div>`;
-    }).join('');
-
-    const wPx = orientation === 'landscape' ? paperCfg.heightPx : paperCfg.widthPx;
-    const hPx = orientation === 'landscape' ? paperCfg.widthPx : paperCfg.heightPx;
-
-    // Lo unico que no puede vivir en el .css: depende del papel y de la
-    // cuadricula que eligio quien imprime, y `@page { size }` no acepta una
-    // variable de CSS.
-    const medidas = `
-  @page { size: ${wPx} ${hPx}; margin: 0; }
-  .page { padding: ${mmToPx(MARGIN_MM)}; }
-  .grid {
-      grid-template-columns: repeat(${cols}, minmax(0, 1fr));
-      grid-template-rows: repeat(${rows}, minmax(0, 1fr));
-  }`;
-
-    return { cuerpo: pagesHTML, medidas };
 };
 
 // ─── Componente principal ────────────────────────────────────────────────────
@@ -194,6 +142,17 @@ const BarcodePrinter = () => {
     const paperCfg = PAPER_SIZES[paper];
     const labelCfg = LABEL_SIZES[labelSize];
     const grid = useMemo(() => calcGrid(paperCfg, labelCfg, orientation), [paperCfg, labelCfg, orientation]);
+    // La página en milímetros, la misma para la vista previa y el papel.
+    const geometria = useMemo(() => ({
+        anchoMm: grid.paperW,
+        altoMm: grid.paperH,
+        cols: grid.cols,
+        filas: grid.rows,
+        margenMm: MARGIN_MM,
+        separacionMm: SEPARACION_MM,
+    }), [grid]);
+    // La vista previa es también lo que se imprime: se copian sus páginas.
+    const vistaRef = useRef(null);
 
     const selectedList = Object.values(selected); // [{sku, barcode, productName, copies}]
     const totalCopies = selectedList.reduce((s, v) => s + (v.copies || 0), 0);
@@ -304,15 +263,12 @@ const BarcodePrinter = () => {
     };
 
     const handlePrint = () => {
-        if (!selectedList.length) return;
-        const slots = buildSlots();
-        const colorMap = buildColorMap(selectedList);
-        
-        const { cuerpo, medidas } = buildPrintHTML(slots, paperCfg, labelCfg, grid, { labelStyle, showSkuText, colorMap, svgMap, orientation });
+        const paginas = [...(vistaRef.current?.querySelectorAll('.et-pagina') || [])];
+        if (!paginas.length) return;
         imprimirDocumento({
             titulo: 'Códigos de Barras – Vistiendomé',
-            cuerpo,
-            estilos: [estilosImpresion, medidas],
+            cuerpo: paginas.map(p => p.outerHTML).join('\n'),
+            estilos: [estilosPagina, estilosEtiqueta, estilosImpresion, estilosDePagina(geometria)],
             // La hoja de codigos se revisa antes de mandarla al papel: si la
             // ventana se cerrara sola no habria como comprobar la cuadricula.
             cerrarAlTerminar: false,
@@ -625,15 +581,16 @@ const BarcodePrinter = () => {
                                 <p className="barcode-printer-preview-empty-desc">La página se llenará automáticamente con las etiquetas configuradas</p>
                             </div>
                         ) : (
-                            <HojaDeEtiquetas
-                                etiquetas={previewSlots}
-                                grid={grid}
-                                colorMap={buildColorMap(selectedList)}
-                                svgMap={svgMap}
-                                paleta={PALETTE}
-                                estilo={labelStyle}
-                                mostrarTexto={showSkuText}
-                            />
+                            <div ref={vistaRef}>
+                                <HojaDeEtiquetas
+                                    etiquetas={previewSlots}
+                                    geometria={geometria}
+                                    colorMap={buildColorMap(selectedList)}
+                                    svgMap={svgMap}
+                                    estilo={labelStyle}
+                                    mostrarTexto={showSkuText}
+                                />
+                            </div>
                         )}
                     </div>
 
@@ -716,13 +673,11 @@ const BarcodePrinter = () => {
                                     ) : (
                                         <HojaDeEtiquetas
                                             etiquetas={previewSlots}
-                                            grid={grid}
+                                            geometria={geometria}
                                             colorMap={buildColorMap(selectedList)}
                                             svgMap={svgMap}
-                                            paleta={PALETTE}
                                             estilo={labelStyle}
                                             mostrarTexto={showSkuText}
-                                            amplia
                                         />
                                     )}
                                 </div>

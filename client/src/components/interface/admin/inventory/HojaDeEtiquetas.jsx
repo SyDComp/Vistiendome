@@ -1,116 +1,50 @@
-import React from 'react';
-import DOMPurify from 'dompurify';
-import { formatCurrency } from '../../../../utils/cartUtils';
+import React, { useRef } from 'react';
+import PaginaEtiquetas from '../../../ui/impresion/PaginaEtiquetas';
+import EncuadrePagina from '../../../ui/impresion/EncuadrePagina';
+import { useAjusteAlEspacio } from '../../../ui/impresion/ajusteAlEspacio';
+import EtiquetaCodigo from './codigos/EtiquetaCodigo';
 
 /**
- * La vista previa de una hoja de codigos de barra, tal como saldra impresa.
+ * Las hojas de códigos de barra, tal como saldrán impresas.
  *
- * POR QUE EXISTE ESTE ARCHIVO
- * Este bloque estaba escrito DOS VECES dentro de `BarcodePrinter`, palabra por
- * palabra: una para el panel lateral y otra para la ventana ampliada. Cincuenta
- * lineas repetidas, y la unica diferencia entre las dos copias era el ancho de
- * la hoja. Cualquier arreglo habia que hacerlo dos veces, y bastaba olvidar una
- * para que las dos vistas previas dejaran de coincidir entre si.
+ * Cada página mide lo que mide el papel elegido; en pantalla solo se achica
+ * para mirarla (EncuadrePagina). Por eso la impresión copia estas mismas
+ * páginas: lo que se ve es lo que sale, con la misma letra ya ajustada.
  *
- * QUIEN CALCULA EL TAMANO
- * Antes lo hacia JavaScript: media `window.innerWidth`, le restaba los
- * margenes, sacaba el alto por regla de tres y dividia el resto entre las
- * columnas para dar a cada etiqueta su ancho en pixeles. Todo eso obligaba a
- * escuchar el `resize` de la ventana y a redibujar la hoja entera en cada pixel
- * que se arrastraba el borde.
- *
- * Ahora lo hace el CSS, que es quien sabe de esto:
- *
- *     el ancho de la hoja   `clamp()` sobre el ancho disponible
- *     el alto               `aspect-ratio`, con la proporcion del papel real
- *     cada etiqueta         `1fr` dentro de la rejilla
- *     el texto              `cqh`, proporcional a la altura de su etiqueta
- *
- * De aqui solo salen los datos que el CSS no puede saber: cuantas columnas y
- * filas tiene el papel elegido, y de que color es cada etiqueta.
+ * @param geometria  la página en milímetros (ver ui/impresion/pagina.js)
  */
 
-/** Reparte las etiquetas en hojas del tamano que entre en el papel. */
+/** Reparte las etiquetas en hojas del tamaño que entre en el papel. */
 const enPaginas = (etiquetas, porPagina) =>
     Array.from(
         { length: Math.ceil(etiquetas.length / porPagina) },
         (_, i) => etiquetas.slice(i * porPagina, i * porPagina + porPagina)
     );
 
-const LIMPIEZA_SVG = { ADD_TAGS: ['svg', 'g', 'rect', 'text', 'path'] };
-
-const HojaDeEtiquetas = ({
-    etiquetas,
-    grid,
-    colorMap,
-    svgMap,
-    paleta,
-    estilo,
-    mostrarTexto,
-    amplia = false,
-}) => {
+const HojaDeEtiquetas = ({ etiquetas, geometria, colorMap, svgMap, estilo, mostrarTexto }) => {
+    const hojasRef = useRef(null);
     const clasica = estilo === 'classic';
+    const paginas = enPaginas(etiquetas, geometria.cols * geometria.filas);
+
+    useAjusteAlEspacio(hojasRef, [etiquetas, geometria, svgMap, estilo, mostrarTexto]);
 
     return (
-        <div className="barcode-printer-pages">
-            {enPaginas(etiquetas, grid.total).map((pagina, nPagina) => (
-                <div
-                    key={nPagina}
-                    className={`barcode-printer-page${amplia ? ' barcode-printer-page--amplia' : ''}`}
-                    style={{
-                        '--columnas': grid.cols,
-                        '--filas': grid.rows,
-                        '--papel-ancho': grid.paperW,
-                        '--papel-alto': grid.paperH,
-                    }}
-                >
-                    {pagina.map((etiqueta, i) => {
-                        const color = colorMap[etiqueta.sku] || paleta[0];
-                        const detalle = Object.values(etiqueta.config || {}).join(' / ');
-                        const nombre = detalle
-                            ? `${etiqueta.productName} – ${detalle}`
-                            : etiqueta.productName || etiqueta.sku;
-
-                        return (
-                            <div
+        <div ref={hojasRef} className="barcode-printer-pages">
+            {paginas.map((pagina, nPagina) => (
+                <EncuadrePagina key={nPagina}>
+                    <PaginaEtiquetas geometria={geometria}>
+                        {pagina.map((etiqueta, i) => (
+                            <EtiquetaCodigo
                                 key={i}
-                                title={`${etiqueta.productName}\n${etiqueta.sku}`}
-                                className={`barcode-printer-label${clasica ? ' barcode-printer-label--clasica' : ''}`}
-                                // Solo el color viaja por el estilo, porque es un
-                                // dato: cada variante tiene el suyo. El resto es
-                                // igual para todas y vive en la hoja.
-                                style={clasica ? undefined : {
-                                    '--etiqueta-fondo': color.bg,
-                                    '--etiqueta-borde': color.border,
-                                    '--etiqueta-texto': color.text,
-                                }}
-                            >
-                                <div className="barcode-printer-label-svg">
-                                    {svgMap[etiqueta.barcode] ? (
-                                        <div
-                                            className="barcode-printer-label-svg-inner"
-                                            dangerouslySetInnerHTML={{
-                                                __html: DOMPurify.sanitize(svgMap[etiqueta.barcode], LIMPIEZA_SVG),
-                                            }}
-                                        />
-                                    ) : (
-                                        <span className="barcode-printer-label-loading">Generando...</span>
-                                    )}
-                                </div>
-
-                                {mostrarTexto && (
-                                    <span className="barcode-printer-label-text">{nombre}</span>
-                                )}
-
-                                {etiqueta.price != null && (
-                                    <span className="barcode-printer-label-text">
-                                        <strong>{formatCurrency(etiqueta.price)}</strong> · Vistiendomé
-                                    </span>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
+                                etiqueta={etiqueta}
+                                svg={svgMap[etiqueta.barcode]}
+                                color={colorMap[etiqueta.sku]}
+                                clasica={clasica}
+                                mostrarTexto={mostrarTexto}
+                            />
+                        ))}
+                    </PaginaEtiquetas>
+                </EncuadrePagina>
             ))}
         </div>
     );

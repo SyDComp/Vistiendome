@@ -1,0 +1,55 @@
+/* La etiqueta de código de barras. Se usa igual en pantalla y en la hoja
+   impresa.
+
+   Como toda hoja de impresión, NO usa los tokens de `variables.css`: el papel
+   es blanco y el código negro, porque así lo lee un lector de barras. Los
+   colores del estilo "Color" llegan por variables, uno por variante.
+
+   Letras en puntos y espacios en milímetros, multiplicados por `--escala`:
+   quien la acomoda en la hoja busca la escala con la que entra completa.
+   Arial porque mide lo mismo en la vista previa y en la ventana de impresión. */
+
+.cb-etiqueta {
+    --escala: 1;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    overflow: hidden;
+    padding: calc(var(--escala) * 1.2mm);
+    background: var(--cb-fondo, #fff);
+    border: 0.3mm solid var(--cb-borde, #ddd);
+    color: var(--cb-texto, #333);
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.15;
+    text-align: center;
+    overflow-wrap: break-word;
+    break-inside: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+.cb-etiqueta *, .cb-etiqueta *::before, .cb-etiqueta *::after { box-sizing: border-box; margin: 0; }
+
+/* La sobria: sin el color de la variante. */
+.cb-etiqueta--clasica { background: #fff; border-color: #ddd; color: #333; }
+
+/* Centrada en la casilla. Sus hijos van sin margen y separados con `gap`:
+   su alto natural es la suma de ellos, que es lo que mide el ajuste. */
+.cb-contenido {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: calc(var(--escala) * 0.6mm);
+    min-height: 100%;
+    min-width: 0;
+}
+
+/* El código se achica sin deformarse: estirado en un eje deja de leerse. */
+.cb-barras { height: calc(var(--escala) * 9mm); display: flex; justify-content: center; }
+.cb-barras-svg { height: 100%; width: 100%; display: flex; justify-content: center; }
+.cb-barras-svg svg { display: block; width: 100%; height: 100%; }
+.cb-cargando { font-size: calc(var(--escala) * 6pt); color: #888; align-self: center; }
+
+.cb-talla { font-size: calc(var(--escala) * 8pt); font-weight: 900; letter-spacing: 0.03em; color: #000; }
+.cb-descripcion { font-size: calc(var(--escala) * 6.5pt); font-weight: 700; }
+.cb-precio { font-size: calc(var(--escala) * 6.5pt); }
