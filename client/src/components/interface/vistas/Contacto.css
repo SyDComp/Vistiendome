@@ -184,22 +184,27 @@
     letter-spacing: normal;
     margin-bottom: 8px;
 }
-.contact-form input, 
-.contact-form select, 
+/* Alto mínimo y no alto fijo: con un alto fijo, el relleno y la letra se
+   disputan el mismo espacio y lo primero que se pierde son las colas de la
+   "g" o la "q" ("Reaion", "Ouirihue"). Así el campo crece lo que necesite.
+   La letra en 1rem (16 px): con menos, el iPhone hace zoom al tocar el campo. */
+.contact-form input,
+.contact-form select,
 .contact-form textarea {
-    height: 48px;
-    padding: 0 16px;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.75rem 1rem;
+    line-height: 1.4;
     border-radius: 12px;
     border: 1px solid var(--color-border);
-    font-size: 14px;
+    background: var(--color-bg);
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--color-text-primary);
     transition: border-color 0.2s, box-shadow 0.2s;
-    width: 100%;
-    background: white;
 }
-.contact-form textarea {
-    height: auto;
-    padding: 16px;
-}
+.contact-form textarea { padding: 1rem; }
 .contact-form input:focus, 
 .contact-form select:focus, 
 .contact-form textarea:focus {

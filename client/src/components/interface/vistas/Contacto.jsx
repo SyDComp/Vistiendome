@@ -4,12 +4,35 @@ import './Contacto.css';
 import { useSettings } from '../../../context/SettingsContext';
 import { Camera, Globe, MessageCircle, Mail, Phone, MapPin, Clock, User, Users, Calendar, FileText, X, Map, Navigation, Package } from 'lucide-react';
 import { formatRUT } from '../../../utils/formatters';
-import { buildWhatsAppMessage } from '../../../utils/cartUtils';
+import { openWhatsApp } from '../../../utils/cartUtils';
 import { buildMapLinks } from '../../../utils/mapLinks';
 import Button from '../../ui/Button';
-import { get, post } from '../../../lib/api/client';
+import { post } from '../../../lib/api/client';
 import { useScrollLock } from '../../../hooks/useScrollLock';
 import { formatearTelefono } from '../../../utils/telefono';
+import CamposEntrega from './contacto/CamposEntrega';
+import { armarSolicitud } from './contacto/armarSolicitud';
+import { ENTREGA_INICIAL } from './contacto/entrega';
+
+const BORRADOR = 'contactoDraft';
+const METODOS_POR_DEFECTO = ['STARKEN', 'CORREOS DE CHILE', 'OTRO'];
+
+const formularioVacio = (transporte) => ({
+    rut: '',
+    nombre: '',
+    email: '',
+    whatsapp: '+569',
+    entrega: ENTREGA_INICIAL,
+    transporte,
+    region: '',
+    comuna: '',
+    comuna_id: '',
+    direccion: '',
+    mensaje: '',
+    tipoGrupo: 'Coristas',
+    cantidad: '',
+    evento: ''
+});
 
 const Contacto = () => {
     const { settings } = useSettings();
@@ -17,11 +40,13 @@ const Contacto = () => {
     const social = settings.social_links || {};
     const { googleMapsUrl, wazeUrl } = buildMapLinks();
 
-    const rawShippingMethods = settings?.shipping_methods !== undefined
-        ? settings.shipping_methods
-        : ['STARKEN', 'CORREOS DE CHILE', 'RETIRO EN LOCAL', 'OTRO'];
-    const shippingMethods = rawShippingMethods.filter(m => !m.toUpperCase().includes('CHILEXPRESS'));
-    const finalShippingMethods = shippingMethods.length > 0 ? shippingMethods : ['STARKEN', 'CORREOS DE CHILE', 'RETIRO EN LOCAL', 'OTRO'];
+    // Los transportistas. El retiro en tienda no es uno de ellos: es su propio
+    // tipo de entrega (ver contacto/entrega.js), igual que en el carrito.
+    const metodosConfigurados = (settings?.shipping_methods ?? METODOS_POR_DEFECTO).filter(m => {
+        const nombre = m.toUpperCase();
+        return !nombre.includes('CHILEXPRESS') && !nombre.includes('RETIRO');
+    });
+    const finalShippingMethods = metodosConfigurados.length > 0 ? metodosConfigurados : METODOS_POR_DEFECTO;
 
     const [tipoContacto, setTipoContacto] = useState('seleccion'); // 'seleccion', 'individual', 'grupo'
 
@@ -52,104 +77,31 @@ const Contacto = () => {
             setCatalogo(Array.isArray(prods) ? prods : []);
         } catch { /* si falla, el armador lo dice y se puede pedir igual por el mensaje */ }
     };
-    const [formData, setFormData] = useState({
-        rut: '',
-        nombre: '',
-        email: '',
-        whatsapp: '+569',
-        transporte: finalShippingMethods[0] || 'STARKEN',
-        tipo_despacho: 'DOMICILIO',
-        region: '',
-        comuna: '',
-        comuna_id: '',
-        direccion: '',
-        mensaje: '',
-        tipoGrupo: 'Coristas',
-        cantidad: '',
-        evento: ''
-    });
 
-    const [status, setStatus] = useState(''); // 'sending', 'success', 'error'
-    const [regiones, setRegiones] = useState([]);
-    const [comunas, setComunas] = useState([]);
-
-    useEffect(() => {
-        get('/api/v1/geo/regiones')
-            .then(data => setRegiones(data))
-            .catch(err => console.error('Error fetching regiones:', err));
-    }, []);
-
-    // Los settings (y por ende finalShippingMethods) cargan async: si el método
-    // por defecto quedó desfasado con la lista real, lo resincronizamos.
-    useEffect(() => {
-        if (finalShippingMethods.length > 0 && !finalShippingMethods.includes(formData.transporte)) {
-            setFormData(prev => ({ ...prev, transporte: finalShippingMethods[0] }));
-        }
-    }, [finalShippingMethods, formData.transporte]);
-
-    useEffect(() => {
+    // Lo escrito se guarda mientras se llena, para no perderlo si se recarga
+    // la página. Un borrador viejo se completa con los campos que le falten.
+    const [formData, setFormData] = useState(() => {
+        const vacio = formularioVacio(finalShippingMethods[0]);
         try {
-            const saved = localStorage.getItem('contactoDraft');
-            if (saved) {
-                setFormData(JSON.parse(saved));
-            }
-        } catch (e) {}
-    }, []);
+            const guardado = JSON.parse(localStorage.getItem(BORRADOR) || 'null');
+            return guardado ? { ...vacio, ...guardado } : vacio;
+        } catch {
+            return vacio;
+        }
+    });
+    const cambiar = (parcial) => setFormData(prev => ({ ...prev, ...parcial }));
+
+    const [status, setStatus] = useState(''); // 'sending', 'success', 'error-whatsapp'
+
+    // Los ajustes cargan después: si el transportista elegido no está en la
+    // lista real, vale el primero. Se resuelve al leer, sin reescribir lo guardado.
+    const datos = finalShippingMethods.includes(formData.transporte)
+        ? formData
+        : { ...formData, transporte: finalShippingMethods[0] };
 
     useEffect(() => {
-        localStorage.setItem('contactoDraft', JSON.stringify(formData));
+        try { localStorage.setItem(BORRADOR, JSON.stringify(formData)); } catch { /* sin almacenamiento se sigue igual */ }
     }, [formData]);
-
-    useEffect(() => {
-        if (!formData.region || regiones.length === 0) {
-            if (!formData.region) setComunas([]);
-            return;
-        }
-        const regionObj = regiones.find(r =>
-            r.nombre.trim().toLowerCase() === String(formData.region).trim().toLowerCase() ||
-            String(r.id) === String(formData.region)
-        );
-        if (regionObj) {
-            get(`/api/v1/geo/regiones/${regionObj.id}/comunas`)
-                .then(data => {
-                    const loadedComunas = Array.isArray(data) ? data : [];
-                    setComunas(loadedComunas);
-                    setFormData(prev => {
-                        const match = loadedComunas.find(c =>
-                            c.nombre.trim().toLowerCase() === String(prev.comuna || '').trim().toLowerCase() ||
-                            String(c.id) === String(prev.comuna_id || '')
-                        );
-                        if (match && (prev.comuna !== match.nombre || prev.comuna_id !== match.id)) {
-                            return { ...prev, comuna: match.nombre, comuna_id: match.id };
-                        }
-                        return prev;
-                    });
-                })
-                .catch(err => console.error('Error fetching comunas:', err));
-        } else {
-            setComunas([]);
-        }
-    }, [formData.region, regiones]);
-
-    const handleRegionChange = (e) => {
-        const selectedRegionNombre = e.target.value;
-        setFormData(prev => ({
-            ...prev,
-            region: selectedRegionNombre,
-            comuna: '',
-            comuna_id: ''
-        }));
-    };
-
-    const handleComunaChange = (e) => {
-        const selectedComunaNombre = e.target.value;
-        const comunaObj = comunas.find(c => c.nombre === selectedComunaNombre);
-        setFormData(prev => ({
-            ...prev,
-            comuna: selectedComunaNombre,
-            comuna_id: comunaObj ? comunaObj.id : ''
-        }));
-    };
 
     const handleWhatsAppChange = (e) => {
         let value = e.target.value;
@@ -157,125 +109,49 @@ const Contacto = () => {
             value = '+569';
         }
         const numbers = value.slice(4).replace(/\D/g, '').slice(0, 8);
-        setFormData({ ...formData, whatsapp: '+569' + numbers });
+        cambiar({ whatsapp: '+569' + numbers });
     };
 
-    const validateWhatsApp = (number) => {
-        return /^\+569\d{8}$/.test(number);
+    const validateWhatsApp = (number) => /^\+569\d{8}$/.test(number);
+
+    const olvidarFormulario = () => {
+        setFormData(formularioVacio(finalShippingMethods[0]));
+        setPrendas([]);
+        try { localStorage.removeItem(BORRADOR); } catch { /* nada que borrar */ }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!validateWhatsApp(formData.whatsapp)) {
+        if (!validateWhatsApp(datos.whatsapp)) {
             setStatus('error-whatsapp');
             return;
         }
 
-        // Abrir WhatsApp del taller con el resumen (sincrónico, dentro del gesto del usuario,
-        // para evitar bloqueo de pop-ups). Además se guarda en el CRM más abajo.
+        const { mensaje, pedido } = armarSolicitud({ tipo: tipoContacto, datos, prendas });
+
+        // Se olvida ANTES de abrir WhatsApp. Si el navegador lo abre en esta
+        // misma pestaña, lo que viene después ya no corre: el borrador quedaba
+        // guardado y al volver el formulario aparecía con todo lo enviado.
+        olvidarFormulario();
+
+        // keepalive: el registro llega al panel aunque la página se vaya a
+        // WhatsApp mientras viaja.
+        const registro = post('/api/v1/crm/', pedido, { keepalive: true });
+
+        // Dentro del mismo clic y sin esperar nada: si no, el navegador
+        // bloquea la ventana (iPhone, iPad).
         const numeroTaller = (social.whatsapp || '').replace(/\D/g, '');
-        if (numeroTaller) {
-            const esGrupo = tipoContacto === 'grupo';
-            const esRetiro = formData.transporte?.toUpperCase().includes('RETIRO');
-            const mensajeWA = buildWhatsAppMessage({
-                tipo: esGrupo ? 'grupo' : 'consulta',
-                cliente: { nombre: formData.nombre, rut: formData.rut, email: formData.email, telefono: formData.whatsapp },
-                despacho: esRetiro ? {
-                    transporte: formData.transporte
-                } : {
-                    transporte: formData.tipo_despacho === 'SUCURSAL' ? `${formData.transporte} (retiro en sucursal)` : formData.transporte,
-                    direccion: formData.tipo_despacho === 'SUCURSAL' ? null : formData.direccion,
-                    comuna: formData.comuna,
-                    region: formData.region,
-                },
-                grupo: esGrupo ? { tipo: formData.tipoGrupo, cantidad: formData.cantidad, evento: formData.evento } : undefined,
-                mensaje: formData.mensaje,
-            });
-            const whatsappUrl = `https://wa.me/${numeroTaller}?text=${encodeURIComponent(mensajeWA)}`;
-            const isIOSOrIPad = /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
-                                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
-                                /Android/i.test(navigator.userAgent);
-            let popup = null;
-            if (!isIOSOrIPad) {
-                popup = window.open(whatsappUrl, '_blank');
-            }
-            if (isIOSOrIPad || !popup || popup.closed || typeof popup.closed === 'undefined') {
-                window.location.href = whatsappUrl;
-            }
-        }
+        if (numeroTaller) openWhatsApp(numeroTaller, mensaje);
 
         setStatus('sending');
-
         try {
-            const partesNombre = formData.nombre.trim().split(' ');
-            const nombres = partesNombre[0] || '';
-            const apellidos = partesNombre.slice(1).join(' ') || '';
-
-            const origen = tipoContacto === 'individual' ? 'CONTACTO_INDIVIDUAL' : 'CONTACTO_GRUPAL';
-            const esRetiro = formData.transporte?.toUpperCase().includes('RETIRO');
-
-            const payload = {
-                rut: formData.rut,
-                nombres: nombres,
-                apellidos: apellidos,
-                email_personal: formData.email,
-                telefono: formData.whatsapp,
-                transporte: formData.transporte,
-                tipo_despacho: esRetiro ? 'TIENDA' : formData.tipo_despacho,
-                region: esRetiro ? null : formData.region,
-                comuna: esRetiro ? null : formData.comuna,
-                comuna_id: esRetiro ? null : formData.comuna_id,
-                direccion: esRetiro ? null : formData.direccion,
-                mensaje: formData.mensaje,
-                origen: origen,
-                // Antes la prenda que quería la clienta viajaba dentro del
-                // mensaje, en un párrafo. Así no se podía cortar ni cotizar:
-                // ahora va estructurada, igual que un pedido del catálogo.
-                items: prendas.map(pr => ({
-                    sku_id: null,
-                    cantidad: pr.cantidad || 1,
-                    precio_unitario_estimado: 0,
-                    nombre_custom: pr.nombre,
-                    config_custom: pr.config || null,
-                    config_propuesta: pr.propuestos || null,
-                })),
-            };
-
-            if (tipoContacto === 'grupo') {
-                payload.tipo_grupo = formData.tipoGrupo;
-                payload.cantidad_aprox = formData.cantidad ? parseInt(formData.cantidad, 10) : null;
-                payload.fecha_evento = formData.evento;
-            }
-
-            try {
-                await post('/api/v1/crm/', payload);
-            } catch (error) {
-                console.error("Error al registrar el contacto en el backend", error);
-            }
-
-            setStatus('success');
-            setFormData({
-                rut: '',
-                nombre: '',
-                email: '',
-                whatsapp: '+569',
-                transporte: finalShippingMethods[0] || 'STARKEN',
-                tipo_despacho: 'DOMICILIO',
-                region: '',
-                comuna: '',
-                comuna_id: '',
-                direccion: '',
-                mensaje: '',
-                tipoGrupo: 'Coristas',
-                cantidad: '',
-                evento: ''
-            });
-            localStorage.removeItem('contactoDraft');
-
+            await registro;
         } catch (error) {
-            console.error("Error de red al enviar contacto:", error);
-            setStatus('error-whatsapp'); // Reutilizamos este estado o creamos uno nuevo
+            // WhatsApp ya se abrió con la solicitud completa: no se le pide a
+            // la clienta que lo haga de nuevo.
+            console.error('No se pudo registrar el contacto en el panel', error);
         }
+        setStatus('success');
     };
 
     const renderSelection = () => (
@@ -341,8 +217,8 @@ const Contacto = () => {
                         placeholder="Ej: 12.345.678-9"
                         required
                         value={formData.rut}
-                        onChange={(e) => setFormData({...formData, rut: e.target.value})}
-                        onBlur={(e) => setFormData({...formData, rut: formatRUT(e.target.value)})}
+                        onChange={(e) => cambiar({ rut: e.target.value })}
+                        onBlur={(e) => cambiar({ rut: formatRUT(e.target.value) })}
                     />
                 </div>
                 <div className="form-group">
@@ -352,7 +228,7 @@ const Contacto = () => {
                         placeholder="Ej: María González"
                         required
                         value={formData.nombre}
-                        onChange={(e) => setFormData({...formData, nombre: e.target.value})}
+                        onChange={(e) => cambiar({ nombre: e.target.value })}
                     />
                 </div>
                 <div className="form-group">
@@ -361,7 +237,7 @@ const Contacto = () => {
                         type="email"
                         placeholder="tu@email.com"
                         value={formData.email}
-                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        onChange={(e) => cambiar({ email: e.target.value })}
                     />
                 </div>
                 <div className="form-group">
@@ -377,84 +253,7 @@ const Contacto = () => {
                     {status === 'error-whatsapp' && <span className="error-msg">El número debe tener 8 dígitos después del +569</span>}
                 </div>
 
-                <div className="form-group">
-                    <label><MapPin size={16} /> Método de Envío *</label>
-                    <select
-                        value={formData.transporte}
-                        onChange={(e) => setFormData({...formData, transporte: e.target.value})}
-                    >
-                        {finalShippingMethods.map((method, idx) => (
-                            <option key={idx} value={method}>{method}</option>
-                        ))}
-                    </select>
-                </div>
-
-                {formData.transporte?.toUpperCase().includes('RETIRO') ? (
-                    <div className="form-group">
-                        <p className="contacto-aviso contacto-aviso--info">
-                            📍 <strong>Retiro presencial en Tienda / Taller en San Carlos, Región de Ñuble.</strong> Te contactaremos por WhatsApp con la dirección exacta y horarios disponibles para la entrega.
-                        </p>
-                    </div>
-                ) : (
-                    <>
-                        <div className="form-group">
-                            <label><MapPin size={16} /> Tipo de Entrega *</label>
-                            <select
-                                value={formData.tipo_despacho}
-                                onChange={(e) => setFormData({...formData, tipo_despacho: e.target.value})}
-                            >
-                                <option value="DOMICILIO">Despacho a Domicilio</option>
-                                <option value="SUCURSAL">Retiro en Sucursal de Envío</option>
-                            </select>
-                        </div>
-
-                        <div className="form-row--dos">
-                            <div className="form-group">
-                                <label><MapPin size={16} /> Región</label>
-                                <select
-                                    value={formData.region}
-                                    onChange={handleRegionChange}
-                                >
-                                    <option value="">Selecciona una región</option>
-                                    {regiones.map(r => (
-                                        <option key={r.id} value={r.nombre}>{r.nombre}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label><MapPin size={16} /> Comuna</label>
-                                <select
-                                    value={formData.comuna || ''}
-                                    onChange={handleComunaChange}
-                                    disabled={!formData.region}
-                                >
-                                    <option value="">Selecciona una comuna</option>
-                                    {comunas.map(c => (
-                                        <option key={c.id} value={c.nombre}>{c.nombre}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-
-                        {formData.tipo_despacho === 'SUCURSAL' ? (
-                            <div className="form-group">
-                                <p className="contacto-aviso">
-                                    Retiras en una sucursal de <strong>{formData.transporte}</strong>. Coordinarás la sucursal exacta por WhatsApp según tu comuna.
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="form-group">
-                                <label><MapPin size={16} /> Dirección (Opcional)</label>
-                                <input
-                                    type="text"
-                                    placeholder="Calle, número..."
-                                    value={formData.direccion}
-                                    onChange={(e) => setFormData({...formData, direccion: e.target.value})}
-                                />
-                            </div>
-                        )}
-                    </>
-                )}
+                <CamposEntrega datos={datos} cambiar={cambiar} metodosEnvio={finalShippingMethods} />
 
                 {tipoContacto === 'grupo' && (
                     <>
@@ -463,7 +262,7 @@ const Contacto = () => {
                                 <label><Users size={16} /> Tipo de Grupo</label>
                                 <select
                                     value={formData.tipoGrupo}
-                                    onChange={(e) => setFormData({...formData, tipoGrupo: e.target.value})}
+                                    onChange={(e) => cambiar({ tipoGrupo: e.target.value })}
                                 >
                                     <option>Coristas</option>
                                     <option>Dorcas</option>
@@ -477,7 +276,7 @@ const Contacto = () => {
                                     placeholder="Ej: 20"
                                     required
                                     value={formData.cantidad}
-                                    onChange={(e) => setFormData({...formData, cantidad: e.target.value})}
+                                    onChange={(e) => cambiar({ cantidad: e.target.value })}
                                 />
                             </div>
                         </div>
@@ -487,7 +286,7 @@ const Contacto = () => {
                                 type="text"
                                 placeholder="Ej: Aniversario en Noviembre"
                                 value={formData.evento}
-                                onChange={(e) => setFormData({...formData, evento: e.target.value})}
+                                onChange={(e) => cambiar({ evento: e.target.value })}
                             />
                         </div>
                     </>
@@ -536,7 +335,7 @@ const Contacto = () => {
                         rows="4"
                         placeholder="Cuéntanos más para asesorarte mejor..."
                         value={formData.mensaje}
-                        onChange={(e) => setFormData({...formData, mensaje: e.target.value})}
+                        onChange={(e) => cambiar({ mensaje: e.target.value })}
  ></textarea>
                 </div>
 
