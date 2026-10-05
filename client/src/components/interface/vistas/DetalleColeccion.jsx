@@ -5,6 +5,7 @@ import { ArrowLeft, Sparkles } from 'lucide-react';
 import { useWebSocket } from '../../../context/WebSocketContext';
 import PremiumLoader from '../../ui/PremiumLoader';
 import PremiumImage from '../../ui/PremiumImage';
+import { enOferta } from '../../../utils/oferta';
 
 const DetalleColeccion = () => {
     const { slug } = useParams();
@@ -255,13 +256,11 @@ const DetalleColeccion = () => {
                                         ) : (
                                             <div/>
                                         )}
-                                        {/* `compare_at_price` no existe en esta API: es un nombre de otra
-                                            plataforma que quedo copiado. La condicion daba siempre falso, asi
-                                            que el descuento no se mostraba NUNCA en las colecciones. Los campos
-                                            reales son `on_sale` y `original_price`, los que ya usa el catalogo. */}
-                                        {variant.on_sale && variant.original_price > variant.price && (
+                                        {/* La etiqueta dice que está en oferta, sin porcentaje: el
+                                            precio de antes y el de ahora ya van abajo. */}
+                                        {enOferta(variant) && (
                                             <div className="discount-tag">
-                                                -{Math.round((1 - variant.price / variant.original_price) * 100)}%
+                                                Oferta
                                             </div>
                                         )}
                                     </div>
@@ -271,7 +270,7 @@ const DetalleColeccion = () => {
                                         </h3>
                                         <div>
                                             <span className="product-price">
-                                                {variant.on_sale && variant.original_price > variant.price && (
+                                                {enOferta(variant) && (
                                                     <span className="product-price-antes">${variant.original_price?.toLocaleString('es-CL')}</span>
                                                 )}
                                                 ${variant.price?.toLocaleString('es-CL')}
@@ -322,9 +321,9 @@ const DetalleColeccion = () => {
                                             ) : (
                                                 <div/>
                                             )}
-                                            {variant.on_sale && variant.original_price > variant.price && (
+                                            {enOferta(variant) && (
                                                 <div className="discount-tag">
-                                                    -{Math.round((1 - variant.price / variant.original_price) * 100)}%
+                                                    Oferta
                                                 </div>
                                             )}
                                         </div>
@@ -334,7 +333,7 @@ const DetalleColeccion = () => {
                                             </h3>
                                             <div>
                                                 <span className="product-price">
-                                                {variant.on_sale && variant.original_price > variant.price && (
+                                                {enOferta(variant) && (
                                                     <span className="product-price-antes">${variant.original_price?.toLocaleString('es-CL')}</span>
                                                 )}
                                                 ${variant.price?.toLocaleString('es-CL')}
