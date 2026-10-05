@@ -5,10 +5,8 @@ import './ShippingLabelPrinter.css';
 import './ShippingLabelPrinter.parte.css';
 import {
     Printer, Search, CheckSquare, Square, Package, Settings2, RefreshCw,
-    Maximize2, Info, FileText, LayoutGrid, Zap, Sparkles, User, Phone,
-    MapPin, Truck, Mail, ArrowLeft, Scissors, Check
+    LayoutGrid, Zap, ArrowLeft
 } from 'lucide-react';
-import Barcode from 'react-barcode';
 import Button from '../../../ui/Button';
 import { useSettings } from '../../../../context/SettingsContext';
 import { getShippingColor } from '../../../../utils/shippingColors';
@@ -16,9 +14,19 @@ import { actualizarEstadoCotizacion } from '../../../../lib/api/endpoints';
 import { useNotification } from '../../../../context/NotificationContext';
 import { estadoDeProduccion, TONOS } from '../../../../utils/produccion';
 import { imprimirDocumento } from '../../../../utils/impresion';
-import estilosImpresion from './ShippingLabelPrinter.impresion.css?raw';
 import { useHasta } from '../../../../hooks/useCorte';
-import { formatearTelefono } from '../../../../utils/telefono';
+import { PAPELES } from '../../../../utils/papeles';
+import { nombreDelPedido } from '../../../../utils/nombreDelPedido';
+import EtiquetaEnvio from './etiquetas/EtiquetaEnvio';
+import PaginaEtiquetas from './etiquetas/PaginaEtiquetas';
+import EncuadrePagina from './etiquetas/EncuadrePagina';
+import { useAjusteAlEspacio } from './etiquetas/ajusteAlEspacio';
+import {
+    FORMATOS, usaPapel, geometria, porPagina, describirMedida, estilosDePagina,
+} from './etiquetas/formatosEtiqueta';
+import estilosPagina from './etiquetas/PaginaEtiquetas.css?raw';
+import estilosEtiqueta from './etiquetas/EtiquetaEnvio.css?raw';
+import estilosImpresion from './etiquetas/impresion.css?raw';
 
 /**
  * Qué pedidos se ven. Existe porque la pantalla traía TODOS —nuevos, en
@@ -50,93 +58,6 @@ const VISTAS = {
 
 // Sólo un pedido aceptado o ya despachado tiene sentido en una etiqueta.
 const SE_PUEDE_DESPACHAR = ['CONFIRMADA', 'DESPACHADA'];
-
-// Formatos de disposición de papel/rollo
-const LABEL_FORMATS = {
-    // `paddingMm`: el mismo margen que usa el formato correspondiente en la
-    // hoja de impresion real (ShippingLabelPrinter.impresion.css:
-    // .print-page-wrapper 8mm, .format-thermal-* 3mm, .format-a4-full 10mm).
-    // Se repite aca -no se importa el CSS de impresion en esta pantalla, y
-    // convertirlo a texto para leerlo seria mas fragil que declararlo una vez
-    // mas- para que la vista previa reserve el mismo aire que va a tener el
-    // papel real. Antes el padding de pantalla era un 1.5rem fijo para
-    // cualquier formato: le achicaba a los rollos termicos el espacio real de
-    // texto que si tienen en papel (24px de margen en pantalla contra 3mm
-    // ~11px en el rollo real), lo que corria el riesgo de recortar contenido
-    // que en papel entra perfecto.
-    'a4_2x2': {
-        name: 'Hoja A4 / Carta - 4 por Hoja (2×2)',
-        subtitle: 'Ahorro 75% Papel • Aprox. 10.5 × 14.8 cm (A6)',
-        cols: 2,
-        rows: 2,
-        pageClass: 'format-a4-grid cols-2 rows-2',
-        width: '105mm',
-        height: '148mm',
-        paddingMm: 8
-    },
-    'a4_1x2': {
-        name: 'Hoja A4 / Carta - 2 por Hoja (1×2)',
-        subtitle: 'Ahorro 50% Papel • Aprox. 21 × 14.8 cm (Media Carta/A5)',
-        cols: 1,
-        rows: 2,
-        pageClass: 'format-a4-grid cols-1 rows-2',
-        width: '210mm',
-        height: '148mm',
-        paddingMm: 8
-    },
-    'a4_2x3': {
-        name: 'Hoja A4 / Carta - 6 por Hoja (2×3)',
-        subtitle: 'Ahorro 83% Papel • Aprox. 10.5 × 9.8 cm (Compacto)',
-        cols: 2,
-        rows: 3,
-        pageClass: 'format-a4-grid cols-2 rows-3',
-        width: '105mm',
-        height: '98mm',
-        paddingMm: 8
-    },
-    'thermal_100x150': {
-        name: 'Rollo Térmico Courier (100 × 150 mm)',
-        subtitle: 'Estándar Starken / BlueExpress / Chilexpress (4×6")',
-        cols: 1,
-        rows: 1,
-        pageClass: 'format-thermal-100x150',
-        width: '100mm',
-        height: '150mm',
-        paddingMm: 3
-    },
-    'thermal_80mm': {
-        name: 'Rollo Térmico Ticketera POS (80 mm)',
-        subtitle: 'Impresora de boletas / Tira continua',
-        cols: 1,
-        rows: 1,
-        pageClass: 'format-thermal-80mm',
-        width: '80mm',
-        height: 'auto',
-        paddingMm: 3
-    },
-    'a4_full': {
-        name: 'Hoja Completa A4 / Carta (1 por Hoja)',
-        subtitle: 'Formato clásico página entera',
-        cols: 1,
-        rows: 1,
-        pageClass: 'format-a4-full',
-        width: '210mm',
-        height: '297mm',
-        paddingMm: 10
-    }
-};
-
-const getBarcodeProps = (val, size) => {
-    const len = val ? val.length : 10;
-    if (size === 'micro') {
-        return { width: len > 20 ? 0.45 : 0.65, height: 16 };
-    }
-    if (size === 'standard') {
-        return { width: len > 20 ? 0.95 : 1.4, height: 32 };
-    }
-    // compact (default)
-    return { width: len > 20 ? 0.65 : 0.95, height: 22 };
-};
 
 const ShippingLabelPrinter = () => {
     const { settings } = useSettings();
@@ -175,18 +96,17 @@ const ShippingLabelPrinter = () => {
     const [ultimoDespacho, setUltimoDespacho] = useState(null);
 
     // Configuración de impresión
-    const [formatKey, setFormatKey] = useState('a4_2x2');
+    const [formatKey, setFormatKey] = useState('hoja_4');
+    const [papelKey, setPapelKey] = useState('carta');
     const [inkMode, setInkMode] = useState('eco'); // 'eco' | 'standard'
     const [showBarcode, setShowBarcode] = useState(true);
     const [barcodeSize, setBarcodeSize] = useState('compact'); // 'micro' | 'compact' | 'standard'
     const [showCutLines, setShowCutLines] = useState(true);
     const [showTransportColor, setShowTransportColor] = useState(true);
     const isMobile = useHasta('lg');
-    // Los controles y la hoja de etiquetas dejan de caber lado a lado antes de
-    // llegar al telefono, y por eso este corte es aparte.
-    const isStacked = useHasta('2xl');
 
-    const printContainerRef = useRef(null);
+    // La vista previa es también lo que se imprime: se copian sus páginas.
+    const vistaRef = useRef(null);
 
     // Cargar datos CRM
     const fetchData = async () => {
@@ -252,7 +172,7 @@ const ShippingLabelPrinter = () => {
         const q = searchQuery.toLowerCase();
         return cotizaciones.filter(c => {
             const cli = clientesMap[c.persona_id];
-            const name = cli ? `${cli.nombres || ''} ${cli.apellidos || ''}`.toLowerCase() : '';
+            const name = nombreDelPedido(c, cli).toLowerCase();
             const rut = cli?.rut ? cli.rut.toLowerCase() : '';
             const cotiId = c.id?.toLowerCase() || '';
             const comuna = c.comuna?.toLowerCase() || '';
@@ -329,46 +249,21 @@ const ShippingLabelPrinter = () => {
         return slots;
     }, [selectedList]);
 
-    // Paginación en hojas para formatos A4/Carta
-    const formatCfg = LABEL_FORMATS[formatKey] || LABEL_FORMATS['a4_2x2'];
-    const slotsPerPage = formatCfg.cols * formatCfg.rows;
-
-    // EL TAMAÑO DE LA HOJA EN PANTALLA, SACADO DEL FORMATO REAL.
-    //
-    // Antes el marco de la vista previa tenia un ancho fijo que solo distinguia
-    // "es A4" de "no es A4": los dos rollos termicos -100x150mm y 80mm, de
-    // proporciones bien distintas- caian en el mismo caso y salian del mismo
-    // tamaño. Cambiar de uno a otro no cambiaba nada en pantalla.
-    //
-    // Por que alcanza con el ancho/alto real, sin inventar una ampliacion: el
-    // texto de la etiqueta en pantalla ya usa los mismos tamaños en px que la
-    // hoja de impresion real (10.brand-title: 14px alla y en .et-etiqueta-titulo
-    // 0.875rem = 14px aca, por ejemplo). El texto fue pensado para el tamaño
-    // fisico del papel, asi que si el contenedor mide lo que el papel mide de
-    // verdad -a 96dpi, el estandar de CSS: 1 pulgada = 25.4mm = 96px- el
-    // contenido encaja solo, sin recortarse.
-    const PX_POR_MM = 96 / 25.4;
-    const anchoFormatoMm = parseFloat(formatCfg.width) || 100;
-    const altoFormatoMm = formatCfg.height === 'auto' ? null : (parseFloat(formatCfg.height) || null);
-    const hojaEstiloVars = {
-        '--hoja-max': `${(anchoFormatoMm * PX_POR_MM).toFixed(1)}px`,
-        // Sin alto real -la ticketera de 80mm es una tira continua, su largo
-        // lo decide el contenido- no se fuerza proporcion: el alto lo sigue
-        // dando el contenido, como hoy.
-        '--hoja-aspecto': altoFormatoMm ? `${anchoFormatoMm} / ${altoFormatoMm}` : 'auto',
-        '--hoja-padding': `${((formatCfg.paddingMm ?? 8) * PX_POR_MM).toFixed(1)}px`,
-    };
+    // El papel y el formato deciden cuánto mide cada etiqueta y cuántas van
+    // por página (ver formatosEtiqueta.js).
+    const medidas = geometria(formatKey, papelKey);
+    const slotsPerPage = porPagina(medidas);
+    const codigo = showBarcode ? barcodeSize : null;
 
     const pages = useMemo(() => {
-        if (slotsPerPage === 1) {
-            return previewSlots.map(slot => [slot]);
-        }
         const result = [];
         for (let i = 0; i < previewSlots.length; i += slotsPerPage) {
             result.push(previewSlots.slice(i, i + slotsPerPage));
         }
         return result;
     }, [previewSlots, slotsPerPage]);
+
+    useAjusteAlEspacio(vistaRef, [pages, formatKey, papelKey, inkMode, codigo, showCutLines, showTransportColor]);
 
     const marcarComoDespachadas = async () => {
         const pendientes = selectedList
@@ -420,16 +315,18 @@ const ShippingLabelPrinter = () => {
     // Manejar Impresión en ventana limpia
     const handlePrint = async () => {
         if (totalCopies === 0) return;
-        const printContent = printContainerRef.current?.innerHTML;
-        if (!printContent) return;
+        // Las páginas de la vista previa tal cual, con la escala de letra ya
+        // ajustada: lo que se vio es lo que sale.
+        const paginas = [...(vistaRef.current?.querySelectorAll('.et-pagina') || [])];
+        if (!paginas.length) return;
 
         // Se marca despues de comprobar que la ventana abrio: si el navegador
         // bloqueo el pop-up no se imprimio nada, y no corresponde dar por
         // despachado un pedido cuya etiqueta nunca salio.
         const seImprimio = imprimirDocumento({
             titulo: 'Etiquetas de Envío - Vistiendome',
-            cuerpo: printContent,
-            estilos: estilosImpresion,
+            cuerpo: paginas.map(p => p.outerHTML).join('\n'),
+            estilos: [estilosPagina, estilosEtiqueta, estilosImpresion, estilosDePagina(medidas)],
         });
         if (seImprimio && marcarDespachadas) marcarComoDespachadas();
     };
@@ -593,7 +490,7 @@ const ShippingLabelPrinter = () => {
                         ) : (
                             filteredCotizaciones.map(c => {
                                 const cli = clientesMap[c.persona_id];
-                                const fullName = cli ? `${cli.nombres || ''} ${cli.apellidos || ''}`.trim() : 'Cliente sin registro';
+                                const fullName = nombreDelPedido(c, cli) || 'Cliente sin registro';
                                 const isSel = !!selected[c.id];
                                 const copies = isSel ? selected[c.id].copies : 0;
                                 // Un pedido sin confirmar o cancelado no se
@@ -711,23 +608,38 @@ const ShippingLabelPrinter = () => {
                     {/* BARRA DE HERRAMIENTAS DE AHORRO */}
                     <div className="et-barra-opciones">
 
-                        {/* SELECTOR DE FORMATO DE PAPEL */}
+                        {/* FORMATO Y PAPEL */}
                         <div className="et-bloque--ancho">
-                            <label className="et-rotulo--grande">
+                            <label className="et-rotulo--grande" htmlFor="et-formato">
                                 <LayoutGrid size={14} /> Formato / Disposición de Hoja
                             </label>
-                            <select
-                                value={formatKey}
-                                onChange={(e) => setFormatKey(e.target.value)}
-                                className="et-campo"
-                            >
-                                {Object.entries(LABEL_FORMATS).map(([k, v]) => (
-                                    <option key={k} value={k}>{v.name}</option>
-                                ))}
-                            </select>
-                            <span className="et-ok">
-                                ✨ {LABEL_FORMATS[formatKey]?.subtitle}
-                            </span>
+                            <div className="et-fila-campos">
+                                <select
+                                    id="et-formato"
+                                    value={formatKey}
+                                    onChange={(e) => setFormatKey(e.target.value)}
+                                    className="et-campo"
+                                >
+                                    {Object.entries(FORMATOS).map(([k, v]) => (
+                                        <option key={k} value={k}>{v.nombre}</option>
+                                    ))}
+                                </select>
+                                {/* El papel solo importa en una hoja: un rollo ya
+                                    trae su medida. */}
+                                {usaPapel(formatKey) && (
+                                    <select
+                                        aria-label="Papel"
+                                        value={papelKey}
+                                        onChange={(e) => setPapelKey(e.target.value)}
+                                        className="et-campo et-campo--papel"
+                                    >
+                                        {Object.entries(PAPELES).map(([k, v]) => (
+                                            <option key={k} value={k}>{v.nombre}</option>
+                                        ))}
+                                    </select>
+                                )}
+                            </div>
+                            <span className="et-ok">{describirMedida(medidas)}</span>
                         </div>
 
                         {/* SELECTOR DE MODO DE TINTA */}
@@ -800,17 +712,22 @@ const ShippingLabelPrinter = () => {
 
                     </div>
 
-                    {/* ÁREA DE VISTA PREVIA */}
-                    <div className="et-vista">
+                    {/* ÁREA DE VISTA PREVIA: las páginas tal como se imprimen */}
+                    <div className="et-vista" ref={vistaRef}>
                         {totalCopies === 0 ? (
-                            /* El hueco de la vista previa es enorme y estaba ocupado por
-                               una cajita perdida en medio del gris. Ahora se dibuja la
-                               HOJA que se va a imprimir, con sus casillas: se ve de una
-                               cuantas etiquetas entran en el formato elegido, que es
-                               justo la decision que se esta tomando en esa pantalla. */
+                            /* Sin pedidos marcados se dibuja la silueta de la hoja con
+                               sus casillas: se ve cuántas etiquetas entran en el formato
+                               elegido, que es la decisión que se toma en esta pantalla. */
                             <div className="et-hoja-vacia">
-                                <div className="et-hoja-silueta">
-                                    {Array.from({ length: 4 }).map((_, i) => (
+                                <div
+                                    className="et-hoja-silueta"
+                                    style={{
+                                        '--silueta-cols': medidas.cols,
+                                        '--silueta-filas': medidas.filas,
+                                        '--silueta-aspecto': medidas.altoMm ? `${medidas.anchoMm} / ${medidas.altoMm}` : '1 / 1.5',
+                                    }}
+                                >
+                                    {Array.from({ length: slotsPerPage }).map((_, i) => (
                                         <div key={i} className="et-hoja-celda">
                                             <Package size={18} />
                                         </div>
@@ -823,191 +740,30 @@ const ShippingLabelPrinter = () => {
                             </div>
                         ) : (
                             pages.map((pageSlots, pageIdx) => (
-                                <div key={pageIdx} className="et-hoja-marco" style={hojaEstiloVars}>
+                                <div key={pageIdx} className="et-hoja-marco">
                                     <div className="et-etiqueta-pie">
                                         <span>Hoja {pageIdx + 1} de {pages.length}</span>
                                     </div>
-
-                                    {/* HOJA SIMULADA EN PANTALLA */}
-                                    <div className="et-hoja" style={{ '--columnas': formatCfg.cols }}>
-                                        {pageSlots.map((slot, sIdx) => {
-                                            const coti = slot.coti;
-                                            const cli = slot.cliente;
-                                            const entrega = describirEntrega(coti);
-                                            const fullName = cli ? `${cli.nombres || ''} ${cli.apellidos || ''}`.trim() : 'Destinatario';
-                                            const barcodeVal = coti.id ? `COTI-${coti.id}` : 'COTI-0000';
-                                            const scaleClass = formatKey === 'a4_2x3' || formatKey === 'thermal_80mm' ? 'scale-compact' : formatKey === 'a4_full' ? 'scale-large' : '';
-
-                                            return (
-                                                <div
-                                                    key={`${coti.id}-${slot.index}-${sIdx}`}
-                                                    className={`et-etiqueta${showCutLines ? ' et-etiqueta--con-corte' : ''} mode-${inkMode} ${scaleClass}`}
-                                                >
-                                                    {/* ENCABEZADO MARCA */}
-                                                    <div>
-                                                        <div className="brand-box" style={{ borderBottom: inkMode === 'eco' ? '1.5px solid #000' : 'none', background: inkMode === 'standard' ? '#000' : 'transparent', color: inkMode === 'standard' ? '#fff' : '#000', padding: inkMode === 'standard' ? '8px' : '0 0 8px 0', marginBottom: '8px', textAlign: 'center', borderRadius: inkMode === 'standard' ? '4px' : '0' }}>
-                                                            <div className="et-etiqueta-titulo">VISTIENDOMÉ CHILE</div>
-                                                            <div style={{ fontSize: '8px', fontWeight: '700', color: inkMode === 'standard' ? '#cbd5e1' : '#4a5568', letterSpacing: '1.5px' }}>TIENDA DE MODA CRISTIANA</div>
-                                                        </div>
-
-                                                        {/* DESTINATARIO */}
-                                                        <div className="et-rotulo">DESTINATARIO</div>
-                                                        <div className="et-destinatario">
-                                                            {fullName.toUpperCase()}
-                                                        </div>
-
-                                                        <div className="et-etiqueta-lineas">
-                                                            {cli?.rut && <div><strong>RUT:</strong> {cli.rut}</div>}
-                                                            {cli?.telefono && <div><strong>TEL:</strong> {formatearTelefono(cli.telefono)}</div>}
-                                                            {cli?.email_personal && <div className="et-dato">{cli.email_personal}</div>}
-                                                        </div>
-
-                                                        {/* INFORMACIÓN DE DESPACHO */}
-                                                        <div className="et-etiqueta-separador">
-                                                            <div className="et-rotulo">
-                                                                {entrega.titulo}
-                                                            </div>
-                                                            {entrega.transporte && (() => {
-                                                                const transColor = getShippingColor(entrega.transporte, shippingColors);
-                                                                return (
-                                                                    <div style={{ fontSize: '11px', fontWeight: '900', border: showTransportColor ? `2px solid ${transColor}` : '1.5px solid #000', padding: '4px 8px', borderRadius: '4px', display: 'inline-block', marginBottom: '8px', background: showTransportColor ? `${transColor}15` : '#fff', color: showTransportColor ? transColor : '#000' }}>
-                                                                        TRANSPORTE: {entrega.transporte.toUpperCase()}
-                                                                    </div>
-                                                                );
-                                                            })()}
-
-                                                            <div className="et-rotulo">{entrega.etiquetaDestino}</div>
-                                                            <div className="et-etiqueta-seccion">
-                                                                {entrega.destino.toUpperCase()}
-                                                            </div>
-
-                                                            <div style={{ display: entrega.muestraComuna ? 'flex' : 'none', justifyContent: 'space-between', border: '1.5px solid #000', padding: '6px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '900', background: inkMode === 'standard' ? '#f8fafc' : '#fff', boxSizing: 'border-box', width: '100%', maxWidth: '100%' }}>
-                                                                <div>
-                                                                    <div className="et-dato-menudo">COMUNA</div>
-                                                                    <div>{(coti.comuna || '---').toUpperCase()}</div>
-                                                                </div>
-                                                                <div className="et-a-la-derecha">
-                                                                    <div className="et-dato-menudo">REGIÓN</div>
-                                                                    <div>{(coti.region || '---').toUpperCase()}</div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* CÓDIGO DE BARRAS INFERIOR */}
-                                                    {showBarcode && (
-                                                        <div className="et-etiqueta-codigo">
-                                                            <div className="et-etiqueta-codigo-caja">
-                                                                <Barcode
-                                                                    value={barcodeVal}
-                                                                    format="CODE128"
-                                                                    {...getBarcodeProps(barcodeVal, barcodeSize)}
-                                                                    margin={0}
-                                                                    displayValue={false}
-                                                                    background="transparent"
-                                                                    lineColor="#000000"
-                                                                />
-                                                            </div>
-                                                            <div className="et-codigo">
-                                                                PEDIDO #{coti.id}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
+                                    <EncuadrePagina>
+                                        <PaginaEtiquetas geometria={medidas}>
+                                            {pageSlots.map((slot, sIdx) => (
+                                                <EtiquetaEnvio
+                                                    key={`${slot.coti.id}-${slot.index}-${sIdx}`}
+                                                    cotizacion={slot.coti}
+                                                    persona={slot.cliente}
+                                                    tinta={inkMode}
+                                                    conCorte={showCutLines}
+                                                    continua={!medidas.altoMm}
+                                                    codigo={codigo}
+                                                    conColorTransporte={showTransportColor}
+                                                    coloresTransporte={shippingColors}
+                                                />
+                                            ))}
+                                        </PaginaEtiquetas>
+                                    </EncuadrePagina>
                                 </div>
                             ))
                         )}
-                    </div>
-
-                    {/* CONTENEDOR OCULTO PARA IMPRESIÓN PURA */}
-                    <div className="et-oculto">
-                        <div ref={printContainerRef}>
-                            {pages.map((pageSlots, pIdx) => (
-                                <div key={pIdx} className={`print-page-wrapper ${formatCfg.pageClass}`}>
-                                    {pageSlots.map((slot, sIdx) => {
-                                        const coti = slot.coti;
-                                        const cli = slot.cliente;
-                                        const entrega = describirEntrega(coti);
-                                        const fullName = cli ? `${cli.nombres || ''} ${cli.apellidos || ''}`.trim() : 'Destinatario';
-                                        const barcodeVal = coti.id ? `COTI-${coti.id}` : 'COTI-0000';
-                                        const scaleClass = formatKey === 'a4_2x3' || formatKey === 'thermal_80mm' ? 'scale-compact' : formatKey === 'a4_full' ? 'scale-large' : '';
-
-                                        return (
-                                            <div
-                                                key={`${coti.id}-${slot.index}-${sIdx}`}
-                                                className={`label-item mode-${inkMode} ${scaleClass} ${showCutLines ? 'cut-border' : ''}`}
-                                            >
-                                                <div>
-                                                    <div className="brand-box">
-                                                        <div className="brand-title">VISTIENDOMÉ CHILE</div>
-                                                        <div className="brand-sub">TIENDA DE MODA CRISTIANA</div>
-                                                    </div>
-
-                                                    <div className="sec-title">DESTINATARIO</div>
-                                                    <div className="recipient-name">
-                                                        {fullName.toUpperCase()}
-                                                    </div>
-
-                                                    <div className="et-separacion-impresion">
-                                                        {cli?.rut && <div className="info-row"><strong>RUT:</strong> {cli.rut}</div>}
-                                                        {cli?.telefono && <div className="info-row"><strong>TEL:</strong> {formatearTelefono(cli.telefono)}</div>}
-                                                        {cli?.email_personal && <div className="info-row">{cli.email_personal}</div>}
-                                                    </div>
-
-                                                    <div className="address-box">
-                                                        <div className="sec-title">{entrega.titulo}</div>
-                                                        {entrega.transporte && (() => {
-                                                            const transColor = getShippingColor(entrega.transporte, shippingColors);
-                                                            return (
-                                                                <div className="transport-tag" style={showTransportColor ? { borderColor: transColor, backgroundColor: `${transColor}15`, color: transColor } : { borderColor: '#000', backgroundColor: '#fff', color: '#000' }}>
-                                                                    TRANSPORTE: {entrega.transporte.toUpperCase()}
-                                                                </div>
-                                                            );
-                                                        })()}
-
-                                                        <div className="sec-title">{entrega.etiquetaDestino}</div>
-                                                        <div className="main-address">
-                                                            {entrega.destino.toUpperCase()}
-                                                        </div>
-
-                                                        <div className="city-box" style={{ display: entrega.muestraComuna ? undefined : 'none' }}>
-                                                            <div className="city-col">
-                                                                <div className="city-label">COMUNA</div>
-                                                                <div className="city-val">{(coti.comuna || '---').toUpperCase()}</div>
-                                                            </div>
-                                                            <div className="city-col">
-                                                                <div className="city-label">REGIÓN</div>
-                                                                <div className="city-val">{(coti.region || '---').toUpperCase()}</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {showBarcode && (
-                                                    <div className="barcode-box">
-                                                        <div className="et-etiqueta-codigo-caja">
-                                                            <Barcode
-                                                                value={barcodeVal}
-                                                                format="CODE128"
-                                                                {...getBarcodeProps(barcodeVal, barcodeSize)}
-                                                                margin={0}
-                                                                displayValue={false}
-                                                                background="transparent"
-                                                                lineColor="#000000"
-                                                            />
-                                                        </div>
-                                                        <div className="coti-badge">PEDIDO #{coti.id}</div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            ))}
-                        </div>
                     </div>
 
                 </div>

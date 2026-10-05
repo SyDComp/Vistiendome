@@ -1,0 +1,134 @@
+/* La etiqueta de envío. Se usa igual en pantalla y en la hoja impresa.
+
+   Como toda hoja de impresión, NO usa los tokens de `variables.css`: en papel
+   manda el contraste, porque la lee un repartidor a la carrera.
+
+   TODO SE MIDE CONTRA `--ee-escala`. Letras en puntos y espacios en
+   milímetros, multiplicados por la escala: así una sola variable agranda o
+   achica la etiqueta entera sin desarmar sus proporciones, y quien la acomoda
+   en la hoja busca la escala con la que entra completa.
+
+   Arial y no la fuente del sitio: está en todo equipo, y mide lo mismo en la
+   vista previa y en la ventana de impresión. Con una fuente que se descarga,
+   la ventana podría medir con otra y la escala calculada dejaría de servir. */
+
+.ee-etiqueta {
+    --ee-escala: 1;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    overflow: hidden;
+    padding: calc(var(--ee-escala) * 3mm);
+    border: 0.3mm solid #000;
+    border-radius: 1.5mm;
+    background: #fff;
+    color: #000;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.15;
+    /* Una palabra se corta solo si no cabe ni en una línea entera (un correo
+       largo). Con `anywhere`, en la caja de comuna y región la región larga
+       le quitaba ancho a la comuna y la partía al medio: "INDEPENDE-NCIA". */
+    overflow-wrap: break-word;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+.ee-etiqueta *, .ee-etiqueta *::before, .ee-etiqueta *::after { box-sizing: border-box; margin: 0; }
+
+/* Las líneas de corte marcan por dónde pasa la tijera. */
+.ee-etiqueta--corte { border-style: dashed; border-color: #718096; }
+
+/* Tira continua: el largo lo pone el contenido. */
+.ee-etiqueta--continua { height: auto; }
+
+/* Ocupa la etiqueta entera para que el pie quede abajo. Sus hijos van sin
+   margen y separados con `gap`: así su alto natural es la suma de ellos, que
+   es lo que mide el ajuste. */
+.ee-contenido {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--ee-escala) * 2.2mm);
+    min-height: 100%;
+    min-width: 0;
+}
+
+.ee-marca {
+    text-align: center;
+    padding-bottom: calc(var(--ee-escala) * 1.6mm);
+    border-bottom: 0.4mm solid #000;
+}
+.ee-marca-nombre { font-size: calc(var(--ee-escala) * 12pt); font-weight: 900; letter-spacing: 0.04em; }
+.ee-marca-lema { font-size: calc(var(--ee-escala) * 6pt); font-weight: 700; color: #4a5568; letter-spacing: 0.15em; }
+
+.ee-bloque { display: flex; flex-direction: column; gap: calc(var(--ee-escala) * 0.8mm); }
+.ee-bloque--entrega { border-top: 0.3mm dashed #a0aec0; padding-top: calc(var(--ee-escala) * 1.6mm); }
+
+.ee-rotulo {
+    font-size: calc(var(--ee-escala) * 6pt);
+    font-weight: 800;
+    color: #4a5568;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.ee-nombre { font-size: calc(var(--ee-escala) * 14pt); font-weight: 900; line-height: 1.05; }
+.ee-dato { font-size: calc(var(--ee-escala) * 8.5pt); font-weight: 600; }
+
+.ee-transporte {
+    align-self: flex-start;
+    font-size: calc(var(--ee-escala) * 8.5pt);
+    font-weight: 900;
+    padding: calc(var(--ee-escala) * 0.8mm) calc(var(--ee-escala) * 2mm);
+    border: 0.4mm solid #000;
+    border-radius: 1mm;
+}
+.ee-transporte--color {
+    color: var(--ee-transporte);
+    border: 0.5mm solid var(--ee-transporte);
+    background: color-mix(in srgb, var(--ee-transporte) 10%, #fff);
+}
+
+.ee-destino { font-size: calc(var(--ee-escala) * 10.5pt); font-weight: 800; }
+
+.ee-lugar {
+    display: flex;
+    justify-content: space-between;
+    gap: calc(var(--ee-escala) * 2mm);
+    padding: calc(var(--ee-escala) * 1.2mm) calc(var(--ee-escala) * 2mm);
+    border: 0.4mm solid #000;
+    border-radius: 1mm;
+    font-size: calc(var(--ee-escala) * 9pt);
+    font-weight: 900;
+}
+.ee-lugar-region { text-align: right; }
+.ee-lugar-rotulo { font-size: calc(var(--ee-escala) * 5.5pt); font-weight: 800; color: #4a5568; text-transform: uppercase; }
+
+.ee-pie {
+    margin-top: auto;
+    padding-top: calc(var(--ee-escala) * 1.2mm);
+    border-top: 0.3mm solid #cbd5e0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--ee-escala) * 0.8mm);
+}
+
+/* El SVG trae su viewBox: se le da alto y lo ancho lo pone la proporción,
+   con el ancho de la etiqueta como tope. */
+.ee-codigo-barras { width: 100%; display: flex; justify-content: center; }
+.ee-codigo-barras svg { display: block; width: auto; max-width: 100%; }
+.ee-codigo-barras--micro svg { height: calc(var(--ee-escala) * 6mm); }
+.ee-codigo-barras--compact svg { height: calc(var(--ee-escala) * 9mm); }
+.ee-codigo-barras--standard svg { height: calc(var(--ee-escala) * 13mm); }
+
+.ee-pedido { font-size: calc(var(--ee-escala) * 7.5pt); font-weight: 800; color: #4a5568; letter-spacing: 0.05em; }
+
+/* Tinta estándar: la marca en un bloque negro y la comuna con fondo. */
+.ee-etiqueta--standard .ee-marca {
+    background: #000;
+    color: #fff;
+    border-bottom: none;
+    padding: calc(var(--ee-escala) * 1.6mm);
+    border-radius: 1mm;
+}
+.ee-etiqueta--standard .ee-marca-lema { color: #cbd5e1; }
+.ee-etiqueta--standard .ee-lugar { background: #f8fafc; }

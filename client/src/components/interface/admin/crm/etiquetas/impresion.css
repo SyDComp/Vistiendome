@@ -1,0 +1,14 @@
+/* La ventana de impresión de las etiquetas. Las medidas de la página y de la
+   etiqueta vienen de PaginaEtiquetas.css y EtiquetaEnvio.css, que son las
+   mismas de la vista previa; acá solo va lo propio del papel. */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #fff; }
+
+.et-pagina { break-after: page; overflow: hidden; }
+.et-pagina:last-child { break-after: auto; }
+
+/* Una página exactamente del alto del papel puede empujar una hoja en blanco
+   al final por redondeo. El medio milímetro sale de la reserva que deja el
+   ajuste de letra (ajusteAlEspacio.js). */
+.et-pagina { height: calc(var(--pag-alto) - 0.5mm); }
