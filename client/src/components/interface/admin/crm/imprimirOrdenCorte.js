@@ -1,4 +1,4 @@
-import { agrupar, nombreDeProducto } from '../../../../utils/prendas';
+import { agrupar, nombreDeProducto, describirPedidos } from '../../../../utils/prendas';
 import { imprimirDocumento } from '../../../../utils/impresion';
 // La hoja vive en un .css de verdad y se trae como texto: asi el editor la
 // entiende, y una comilla invertida en un comentario deja de romper la
@@ -31,7 +31,7 @@ const origenDe = (i) => i.para_stock
 // tiene y se usan.
 const FILAS_EN_BLANCO = 2;
 
-const tablaDe = ({ titulo, columnas, filas, unidades, conColumnaProducto }) => {
+const tablaDe = ({ titulo, columnas, filas, unidades, pedidos, conColumnaProducto }) => {
     // Agrupado por clienta ya se sabe para quién es: la columna "Para" sobra y
     // ese ancho lo necesita "Producto", que es lo que distingue las filas.
     const colProducto = conColumnaProducto ? '<th class="ancha">Producto</th>' : '';
@@ -54,7 +54,10 @@ const tablaDe = ({ titulo, columnas, filas, unidades, conColumnaProducto }) => {
     return `
     <section class="modelo">
         <div class="modelo-cab">
-            <h2>${escapar(titulo)}</h2>
+            <div class="modelo-titulo">
+                <h2>${escapar(titulo)}</h2>
+                ${conColumnaProducto && pedidos.length ? `<span class="pedidos">${escapar(describirPedidos(pedidos))}</span>` : ''}
+            </div>
             <span>${unidades} ${unidades === 1 ? 'unidad' : 'unidades'}</span>
         </div>
         <table>

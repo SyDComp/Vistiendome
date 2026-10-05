@@ -70,7 +70,7 @@ const nombreDeCliente = (item) =>
  *                     `null`/`undefined` = salen todas; NO es lo mismo que un
  *                     Set vacío, que significa "no quiere ninguna".
  * @returns {{titulo: string, columnas: string[], filas: object[],
- *            unidades: number, conColumnaProducto: boolean}[]}
+ *            unidades: number, pedidos: number[], conColumnaProducto: boolean}[]}
  *          En el orden en que aparecen en el pedido.
  */
 export const agrupar = (items = [], { por = 'producto', permitidas = null } = {}) => {
@@ -82,7 +82,7 @@ export const agrupar = (items = [], { por = 'producto', permitidas = null } = {}
     items.forEach(item => {
         const titulo = titularDe(item);
         if (!grupos.has(titulo)) {
-            grupos.set(titulo, { titulo, claves: new Set(), filas: [], unidades: 0 });
+            grupos.set(titulo, { titulo, claves: new Set(), filas: [], unidades: 0, pedidos: new Set() });
         }
         const grupo = grupos.get(titulo);
         // Sólo se hace columna la característica que tiene valor en alguna fila
@@ -92,10 +92,14 @@ export const agrupar = (items = [], { por = 'producto', permitidas = null } = {}
         });
         grupo.filas.push(item);
         grupo.unidades += Number(item.cantidad) || 0;
+        if (item.pedido_numero != null) grupo.pedidos.add(item.pedido_numero);
     });
 
-    return [...grupos.values()].map(({ titulo, claves, filas, unidades }) => ({
+    return [...grupos.values()].map(({ titulo, claves, filas, unidades, pedidos }) => ({
         titulo,
+        // De qué pedidos salen las piezas del grupo. Agrupado por clienta es lo
+        // que permite buscar el pedido al armar el paquete.
+        pedidos: [...pedidos].sort((a, b) => a - b),
         columnas: ordenarCaracteristicas(claves),
         filas,
         unidades,
@@ -103,6 +107,12 @@ export const agrupar = (items = [], { por = 'producto', permitidas = null } = {}
         // pasa a ser una columna: una clienta compra varios modelos.
         conColumnaProducto: porCliente,
     }));
+};
+
+/** "Pedido N° 30" o "Pedidos N° 12, 15"; vacío si no hay ninguno. */
+export const describirPedidos = (pedidos = []) => {
+    if (!pedidos.length) return '';
+    return `${pedidos.length === 1 ? 'Pedido' : 'Pedidos'} N° ${pedidos.join(', ')}`;
 };
 
 /** Total de unidades de todo el pedido, no de un grupo. */

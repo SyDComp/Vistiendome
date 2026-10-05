@@ -1,5 +1,5 @@
 import React from 'react';
-import { agrupar, nombreDeProducto } from '../../../../utils/prendas';
+import { agrupar, nombreDeProducto, describirPedidos } from '../../../../utils/prendas';
 import './TablaPrendas.css';
 
 /**
@@ -48,10 +48,18 @@ const TablaPrendas = ({
 
     return (
         <div>
-            {grupos.map(({ titulo, columnas, filas, unidades, conColumnaProducto }) => (
+            {grupos.map(({ titulo, columnas, filas, unidades, pedidos, conColumnaProducto }) => (
                 <section key={titulo} className="tp-grupo">
                     <header className="tp-grupo-cab">
-                        <h4 className="tp-producto">{titulo}</h4>
+                        <div className="tp-grupo-titulo">
+                            <h4 className="tp-producto">{titulo}</h4>
+                            {/* Por clienta, de qué pedido es: con eso se arma y
+                                se despacha el paquete. Por modelo ya lo dice
+                                cada fila. */}
+                            {conColumnaProducto && pedidos.length > 0 && (
+                                <span className="tp-pedidos">{describirPedidos(pedidos)}</span>
+                            )}
+                        </div>
                         <span className="tp-unidades">
                             {unidades} {unidades === 1 ? 'unidad' : 'unidades'}
                         </span>

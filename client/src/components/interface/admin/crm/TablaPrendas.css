@@ -22,6 +22,8 @@
     text-transform: uppercase; letter-spacing: .4px;
 }
 .tp-unidades { font-size: 13px; font-weight: 800; color: var(--color-admin-dark); }
+.tp-grupo-titulo { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.tp-pedidos { font-size: 13px; font-weight: 800; color: var(--color-brand); }
 
 /* El ancho lo puede pasar el número de características: que
    ruede la tabla, nunca la página. */
