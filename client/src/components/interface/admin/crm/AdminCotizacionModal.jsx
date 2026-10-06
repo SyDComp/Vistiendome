@@ -355,7 +355,9 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                 }))
             };
 
-            const res = await fetch('/api/v1/crm/', {
+            // Ruta del panel, con sesión. La pública (/api/v1/crm/) es la de
+            // la tienda y no acepta pedidos manuales.
+            const res = await fetch('/api/v1/crm/cotizaciones', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

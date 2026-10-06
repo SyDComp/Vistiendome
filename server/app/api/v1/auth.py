@@ -63,43 +63,10 @@ def bootstrap_system(data: BootstrapSchema, db: Session = Depends(get_session)):
     db.commit()
     return {"msg": "Primer Administrador aprovisionado correctamente. SuperUser mode activo y bloqueado para externos."}
 
-class RegisterClientSchema(BaseModel):
-    rut: str
-    nombres: str
-    apellidos: str
-    email: str
-    password: str
-
-@router.post("/register")
-def register_client(data: RegisterClientSchema, db: Session = Depends(get_session)):
-    """
-    Registro Público para Clientes. No otorga permisos IAM del backend.
-    Enlaza el perfil de cliente nativamente al E-commerce.
-    """
-    existente = db.exec(select(CuentaAcceso).where(CuentaAcceso.email_corporativo == data.email)).first()
-    if existente:
-        raise HTTPException(status_code=400, detail="Este correo ya está registrado en la base de datos.")
-        
-    estado_activo = db.exec(select(EstadoCuenta).where(EstadoCuenta.nombre == "ACTIVO")).first()
-
-    # 1. Crear Persona y Cuenta
-    persona = Persona(rut=data.rut, nombres=data.nombres, apellidos=data.apellidos, email_personal=data.email)
-    cuenta = CuentaAcceso(
-        persona=persona, 
-        email_corporativo=data.email, # Para clientes usamos su personal como principal
-        password_hash=security.get_password_hash(data.password),
-        estado_id=estado_activo.id
-    )
-    db.add(persona)
-    db.add(cuenta)
-    
-    # 2. Asignar Perfil de Cliente de E-commerce (Sin Permisos Admin)
-    from ...models.iam import PerfilCliente
-    perfil = PerfilCliente(persona=persona, tipo_perfil="ESTANDAR")
-    db.add(perfil)
-    
-    db.commit()
-    return {"msg": "Cliente registrado exitosamente."}
+# No hay registro público de cuentas. Las cuentas de esta tabla son las del
+# panel: la tienda no tiene cuentas de clientas, y un registro abierto dejaba a
+# cualquiera crear una cuenta junto a las de administración. Si algún día hay
+# cuentas de clientas, se diseñan aparte.
 
 class LoginMfaSchema(BaseModel):
 

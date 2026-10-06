@@ -29,13 +29,13 @@ def slugify(text: str) -> str:
     return text
 
 @router.get("/collections")
-def list_collections(db: Session = Depends(get_session)):
+def list_collections(db: Session = Depends(get_session), current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
     return db.exec(select(Collection)).all()
 
 from sqlalchemy.orm import selectinload
 
 @router.get("/collections/{id}")
-def get_collection(id: int, db: Session = Depends(get_session)):
+def get_collection(id: int, db: Session = Depends(get_session), current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
     # Usar selectinload para traer SKUs y sus media_assets/product en una sola ráfaga
     statement = select(Collection).where(Collection.id == id).options(
         selectinload(Collection.skus).selectinload(SKU.media_assets),

@@ -48,6 +48,39 @@ def client_fixture(session: Session):
         return session
 
     app.dependency_overrides[get_session] = get_session_override
+    # El limite de pedidos publicos vive en memoria del proceso: sin esto, las
+    # pruebas se lo gastarian entre ellas y fallarian segun el orden.
+    from app.api.v1.crm import _LIMITE_PEDIDOS
+    _LIMITE_PEDIDOS._marcas.clear()
     client = TestClient(app)
     yield client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(name="cuenta_admin")
+def cuenta_admin_fixture(session: Session):
+    """Una cuenta del panel con el permiso de administrador, como la real."""
+    from app.models.iam import CuentaAcceso, EstadoCuenta, Permiso, Persona, UsuarioPermisosDirectos
+
+    persona = Persona(rut="99999999-9", nombres="Admin", apellidos="Prueba")
+    estado = EstadoCuenta(nombre="ACTIVO")
+    permiso = Permiso(recurso="SISTEMA", accion="ADMINISTRAR")
+    session.add_all([persona, estado, permiso])
+    session.commit()
+    cuenta = CuentaAcceso(persona_id=persona.id, email_corporativo="admin@prueba.cl",
+                          password_hash="-", estado_id=estado.id)
+    session.add(cuenta)
+    session.commit()
+    session.add(UsuarioPermisosDirectos(cuenta_id=cuenta.id, permiso_id=permiso.id))
+    session.commit()
+    session.refresh(cuenta)
+    return cuenta
+
+
+@pytest.fixture(name="client_admin")
+def client_admin_fixture(client: TestClient, cuenta_admin):
+    """El mismo cliente, entrando con un token de verdad: pasa por el control real de permisos."""
+    from app.core.security import create_access_token
+
+    client.headers["Authorization"] = f"Bearer {create_access_token(cuenta_admin.id)}"
+    return client

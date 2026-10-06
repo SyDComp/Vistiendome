@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlmodel import Session, select, func
-from sqlalchemy import text
 from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel, Field, field_validator
@@ -13,7 +12,8 @@ from app.models.taller import OrdenCorte, OrdenCorteItem, EstadoOrdenCorte
 from app.api.deps import get_current_user, RequirePermiso
 from app.core import existencias as existencias_core
 from app.core import movimientos as movimientos_core
-from app.core import propuestas as core_propuestas
+from app.core import pedidos as pedidos_core
+from app.core.limites import VentanaDeslizante
 from app.models.propuestas import OpcionPropuesta
 
 router = APIRouter()
@@ -221,27 +221,6 @@ class CotizacionItemCreate(BaseModel):
     # Cuales de esos valores no existen en el catalogo y los propuso el cliente.
     config_propuesta: Optional[dict] = None
 
-def _modo_de(data) -> ModoEntrega:
-    """
-    El modo que declara el pedido. Si no viene —clientes viejos que todavía no
-    mandan el campo— se infiere del nombre del transporte, que es justo lo que
-    NO queremos hacer: por eso la inferencia vive acá, en el borde, y no
-    repartida por el sistema.
-
-    "…(retiro en sucursal)" es un DESPACHO y se descarta primero, porque
-    contiene la palabra "retiro" y si no se mirara antes caería del lado
-    equivocado.
-    """
-    if getattr(data, "modo_entrega", None):
-        return data.modo_entrega
-    texto = (data.transporte or "").upper()
-    if "SUCURSAL" in texto:
-        return ModoEntrega.DESPACHO
-    if texto in ("RETIRO_LOCAL", "RETIRO EN LOCAL", "RETIRO EN TIENDA", "RETIRO"):
-        return ModoEntrega.RETIRO
-    return ModoEntrega.DESPACHO
-
-
 class CotizacionCreate(BaseModel):
     """
     Los largos son los de las columnas, para que un texto de más devuelva 422
@@ -292,156 +271,55 @@ class CotizacionCreate(BaseModel):
     
     items: List[CotizacionItemCreate] = []
 
-@router.post("/", response_model=CotizacionRead)
-def crear_cotizacion(data: CotizacionCreate, session: Session = Depends(get_session)):
-    # 1. Buscar o Crear Persona
-    #
-    # LA IDENTIDAD DEL CLIENTE LA DECIDE EL RUT. SOLO EL RUT.
-    #
-    # Antes tambien se buscaba por email y por telefono cuando no habia rut o
-    # no calzaba, y eso mezclaba pedidos de personas DISTINTAS que comparten un
-    # telefono o un correo -pareja, familia, el telefono del local- bajo un
-    # mismo cliente. El telefono y el correo son datos de contacto, no
-    # identidad: no deciden quien es quien.
-    persona = None
+class PedidoRecibido(BaseModel):
+    """
+    Lo único que la tienda recibe de vuelta: el número de su pedido.
 
-    if data.persona_id:
-        persona = session.get(Persona, data.persona_id)
+    Antes devolvía el pedido entero con los datos de la clienta, y bastaba
+    mandar un pedido con el RUT de otra persona para recibir su nombre, correo,
+    teléfono y dirección. La tienda no usa nada de eso.
+    """
+    numero: Optional[int] = None
 
-    if not persona and data.rut:
-        persona = session.exec(select(Persona).where(Persona.rut == data.rut)).first()
 
-    # El nombre con el que se identifico ESTE pedido, tal cual se escribio.
-    # Se guarda siempre en la cotizacion (ver mas abajo), sin importar si
-    # coincide o no con el de la Persona.
-    nombre_contacto = f"{(data.nombres or '').strip()} {(data.apellidos or '').strip()}".strip() or None
+# Un pedido real se manda una vez; un script, cientos. 20 cada 10 minutos por
+# IP no frena a nadie que esté comprando, y sí a quien llena el panel de basura.
+# La IP es la del visitante: el proxy la pasa y uvicorn corre con
+# --proxy-headers.
+_LIMITE_PEDIDOS = VentanaDeslizante(maximo=20, ventana_seg=600)
 
-    if not persona:
-        nombres_final = data.nombres or "Cliente"
-        apellidos_final = data.apellidos or ""
-        persona = Persona(
-            rut=data.rut,
-            nombres=nombres_final,
-            apellidos=apellidos_final,
-            email_personal=data.email_personal,
-            telefono=data.telefono,
-            tipo_persona=TipoPersona.CLIENTE if data.origen == OrigenCotizacion.MANUAL else TipoPersona.LEAD
-        )
-        session.add(persona)
-        session.commit()
-        session.refresh(persona)
-    else:
-        # MISMO RUT, ¿MISMO NOMBRE?
-        #
-        # "Mismo nombre" tolera mayusculas, minusculas y tildes -"Maria Jose"
-        # y "MARIA JOSÉ" son la misma persona escribiendo distinto-, pero no
-        # tolera un nombre de verdad diferente. Ahi no se sabe si quien
-        # escribio se equivoco de RUT, o si el RUT es compartido (un
-        # familiar, una cuenta empresarial) y se trata de otra persona.
-        #
-        # En cualquier caso la Persona ya existe por ese RUT y no se puede
-        # crear una segunda con el mismo RUT (es unico en la base), asi que
-        # se sigue usando esta misma fila para vincular el pedido. Lo que NO
-        # se hace es pisarle el nombre con el que llego esta vez: ese nombre
-        # queda en la cotizacion (`nombre_contacto`, ya calculado arriba), y
-        # de ahi lo toman la lista de pedidos y la orden de corte.
-        nombre_nuevo = f"{(data.nombres or '').strip()} {(data.apellidos or '').strip()}".strip()
-        nombre_guardado = f"{persona.nombres} {persona.apellidos}".strip()
-        mismo_nombre = not nombre_nuevo or core_propuestas.normalizar(nombre_nuevo) == core_propuestas.normalizar(nombre_guardado)
+_ORIGENES_PUBLICOS = {
+    OrigenCotizacion.CATALOGO,
+    OrigenCotizacion.CONTACTO_INDIVIDUAL,
+    OrigenCotizacion.CONTACTO_GRUPAL,
+}
 
-        update_needed = False
-        if data.rut and not persona.rut:
-            persona.rut = data.rut
-            update_needed = True
-        if data.email_personal and not persona.email_personal:
-            persona.email_personal = data.email_personal
-            update_needed = True
-        if data.telefono and not persona.telefono:
-            persona.telefono = data.telefono
-            update_needed = True
-        if mismo_nombre and data.nombres and persona.nombres == "Cliente":
-            persona.nombres = data.nombres
-            update_needed = True
 
-        if update_needed:
-            session.add(persona)
-            session.commit()
-            session.refresh(persona)
-            
-    # 1.5 Crear o Buscar Direccion si viene en el payload
-    if data.comuna_id and data.direccion:
-        direccion_existente = session.exec(
-            select(Direccion).where(
-                Direccion.persona_id == persona.id,
-                Direccion.comuna_id == data.comuna_id,
-                Direccion.calle_y_numero == data.direccion
-            )
-        ).first()
-        
-        if not direccion_existente:
-            nueva_direccion = Direccion(
-                persona_id=persona.id,
-                comuna_id=data.comuna_id,
-                calle_y_numero=data.direccion
-            )
-            session.add(nueva_direccion)
-            session.commit()
-            
-    # 2. Crear Cotizacion
-    numero = session.execute(text("SELECT nextval('cotizaciones_numero_seq')")).scalar_one()
-    cotizacion = Cotizacion(
-        numero=numero,
-        persona_id=persona.id,
-        origen=data.origen,
-        mensaje=data.mensaje,
-        tipo_grupo=data.tipo_grupo,
-        cantidad_aprox=data.cantidad_aprox,
-        fecha_evento=data.fecha_evento,
-        modo_entrega=_modo_de(data),
-        # Un retiro no tiene transportista ni destino: guardarlos sería dejar
-        # datos que contradicen el modo.
-        transporte=data.transporte if _modo_de(data) == ModoEntrega.DESPACHO else None,
-        tipo_despacho=data.tipo_despacho if _modo_de(data) == ModoEntrega.DESPACHO else None,
-        region=data.region,
-        comuna=data.comuna,
-        direccion=data.direccion,
-        nombre_contacto=nombre_contacto,
-        estado=EstadoCotizacion.NUEVA
-    )
-    session.add(cotizacion)
-    session.commit()
-    session.refresh(cotizacion)
-    
-    # 3. Crear Items
-    for item_data in data.items:
-        item = CotizacionItem(
-            cotizacion_id=cotizacion.id,
-            sku_id=item_data.sku_id,
-            cantidad=item_data.cantidad,
-            precio_unitario_estimado=item_data.precio_unitario_estimado,
-            nombre_custom=item_data.nombre_custom,
-            config_custom=item_data.config_custom or None,
-            config_propuesta=item_data.config_propuesta or None,
-        )
-        session.add(item)
+@router.post("/", response_model=PedidoRecibido)
+def crear_cotizacion(data: CotizacionCreate, request: Request, session: Session = Depends(get_session)):
+    """
+    Pedido que llega de la tienda o del formulario de contacto, sin sesión.
 
-        # Lo que el cliente propuso y no existe en el catalogo queda registrado
-        # como propuesta, con quien la pidio y de que pedido salio. El pedido no
-        # se cae si algo de esto falla: registrar es un efecto, no el objetivo.
-        if item_data.config_propuesta:
-            try:
-                core_propuestas.registrar(
-                    session,
-                    item_data.config_propuesta,
-                    persona_id=cotizacion.persona_id,
-                    cotizacion_id=cotizacion.id,
-                )
-            except Exception:
-                pass
+    No puede crear un pedido "manual" —esos se cargan en el panel, y quién los
+    cargó tiene que ser cierto— ni elegir a la persona por id.
+    """
+    if data.origen not in _ORIGENES_PUBLICOS or data.persona_id:
+        raise HTTPException(status_code=403, detail="Los pedidos manuales se crean desde el panel.")
+    if not _LIMITE_PEDIDOS.permite(request.client.host if request.client else "?"):
+        raise HTTPException(status_code=429, detail="Demasiados pedidos seguidos. Espera unos minutos.")
+    cotizacion = pedidos_core.crear_pedido(session, data)
+    return PedidoRecibido(numero=cotizacion.numero)
 
-    session.commit()
-    session.refresh(cotizacion)
-    
+
+@router.post("/cotizaciones", response_model=CotizacionRead)
+def crear_cotizacion_manual(
+    data: CotizacionCreate,
+    session: Session = Depends(get_session),
+    current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR")),
+):
+    """Pedido cargado en el panel. Siempre es manual: lo carga alguien con sesión."""
+    data.origen = OrigenCotizacion.MANUAL
+    cotizacion = pedidos_core.crear_pedido(session, data)
     return _get_cotizacion_read(cotizacion)
 
 @router.get("/conteo-estados")

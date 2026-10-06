@@ -132,7 +132,7 @@ def mapa_srcsets(db: Session = Depends(get_session)):
 
 
 @router.get("/")
-def list_media(db: Session = Depends(get_session)):
+def list_media(db: Session = Depends(get_session), current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
     """Lista todos los archivos de medios (Directo desde la BD)"""
     # De la mas reciente a la mas antigua: quien abre la galeria viene casi
     # siempre de subir una foto y la busca arriba. Sin orden explicito, Postgres
