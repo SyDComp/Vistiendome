@@ -807,7 +807,8 @@ def list_categories(
     
     results = []
     for c in categories:
-        product_count = len(c.products)
+        # Los desactivados no cuentan: ya no se venden ni se muestran.
+        product_count = sum(1 for p in c.products if not p.is_deleted)
         results.append({
             "id": c.id,
             "name": c.name,
@@ -852,7 +853,7 @@ def get_category(category_id: int, db: Session = Depends(get_session)):
             "slug": sub.slug
         } for sub in category.subcategories],
         "is_filterable": category.is_filterable,
-        "product_count": len(category.products)
+        "product_count": sum(1 for p in category.products if not p.is_deleted)
     }
 
 @router.post("/categories")
