@@ -201,11 +201,15 @@ def test_borrar_una_categoria_mueve_sus_productos_a_sin_categoria(session, catal
 
 def test_borrar_una_categoria_deja_sus_subcategorias_en_la_raiz(session, catalogo):
     padre = catalogo["categoria"]
-    sub = Category(name="Vestidos", slug="vestidos", parent_id=padre.id)
-    session.add(sub)
+    padre.level, padre.path = 1, "/vestimenta"
+    sub = Category(name="Vestidos", slug="vestimenta-vestidos", parent_id=padre.id,
+                   level=2, path="/vestimenta/vestimenta-vestidos")
+    session.add_all([padre, sub])
     session.commit()
+    nieto = Category(name="Noemi", slug="vestidos-noemi", parent_id=sub.id,
+                     level=3, path="/vestimenta/vestimenta-vestidos/vestidos-noemi")
     prod = Product(name="Vestido Abril", slug="vestido-abril", description="", category_id=sub.id)
-    session.add(prod)
+    session.add_all([nieto, prod])
     session.commit()
 
     catalog_admin.delete_category(padre.id, db=session)
@@ -214,3 +218,9 @@ def test_borrar_una_categoria_deja_sus_subcategorias_en_la_raiz(session, catalog
     sobreviviente = session.get(Category, sub.id)
     assert sobreviviente is not None and sobreviviente.parent_id is None
     assert session.get(Product, prod.id).category_id == sub.id
+    # Queda en la raíz con su rama, y con la misma dirección pública.
+    assert (sobreviviente.level, sobreviviente.path, sobreviviente.slug) == (
+        1, "/vestimenta-vestidos", "vestimenta-vestidos")
+    nieto = session.get(Category, nieto.id)
+    assert (nieto.level, nieto.path, nieto.slug) == (
+        2, "/vestimenta-vestidos/vestidos-noemi", "vestidos-noemi")

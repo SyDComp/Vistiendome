@@ -305,21 +305,17 @@ const InventoryModule = ({ view = 'products' }) => {
     const handleFilterChange = (filters) => { setActiveFilters(filters); setPage(1); };
 
     const handleDelete = async (row) => {
-        // En desarrollo, queremos alertar sobre el Hard Delete si hay versiones
-        const hasVersions = row.stock_total > 0 || row.sku_count > 0; // sku_count vendría del backend ajustado
-        
-        let message = '¿Estás seguro de que quieres eliminar este producto?';
-        if (hasVersions) {
-            message = `Este producto tiene versiones activas. ¿Deseas continuar con la eliminación completa del producto y todas sus versiones? Esta acción no se puede deshacer.`;
-        }
+        // Lo que pasa lo decide el servidor: si alguna versión tiene historia
+        // (bodega, pedidos, cortes), el producto se desactiva y la conserva.
+        const message = `¿Eliminar "${row.name}"? Si alguna de sus versiones tiene historia en bodega, pedidos o cortes, se desactiva y esa historia se conserva.`;
 
         if (!await confirm(message)) return;
 
         try {
-            // Enviamos force=true por si acaso para asegurar el Hard Delete en desarrollo
             const res = await fetch(`${API_BASE}/products/${row.id}?force=true`, { method: 'DELETE' });
             if (res.ok) {
-                toast.success('Producto eliminado con éxito');
+                const { msg } = await res.json().catch(() => ({}));
+                toast.success(msg || 'Producto eliminado');
                 fetchProducts();
             } else {
                 toast.error('No se pudo eliminar el producto');

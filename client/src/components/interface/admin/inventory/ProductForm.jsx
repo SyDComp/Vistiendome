@@ -21,7 +21,7 @@ import { useHasta } from '../../../../hooks/useCorte';
 const API_BASE = `/api/v1/admin/catalog`;
 
 const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = false }) => {
-    const { toast } = useNotification();
+    const { toast, confirm } = useNotification();
     const [productId, setProductId] = useState(initialData?.id || null);
     const [batchErrors, setBatchErrors] = useState(null);
     const [categories, setCategories] = useState([]);
@@ -794,20 +794,26 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                                     toast.success("Versión actualizada");
                                 }}
                                 onDelete={async (variantToDelete) => {
+                                    if (!await confirm(`¿Quitar la versión ${variantToDelete.sku}?`)) return;
                                     try {
-                                        // Si ya existe en la base de datos, lo borramos de verdad en el servidor
+                                        // Ya guardada: el servidor decide. Si tiene historia
+                                        // (bodega, pedidos, cortes) la da de baja y la conserva;
+                                        // si no, la borra. Su respuesta dice cuál de las dos.
+                                        let mensaje = "Versión quitada";
                                         if (variantToDelete.id) {
                                             const res = await fetch(`${API_BASE}/skus/${variantToDelete.id}`, {
                                                 method: 'DELETE'
                                             });
                                             if (!res.ok) throw new Error("Error al eliminar del servidor");
+                                            const { msg } = await res.json().catch(() => ({}));
+                                            if (msg) mensaje = msg;
                                         }
 
                                         // Limpieza local en el estado
                                         const filtered = generatedVariants.filter((_, idx) => idx !== selectedVariant.index);
                                         setGeneratedVariants(filtered);
                                         setShowVariantDetail(false);
-                                        toast.success("Versión eliminada permanentemente");
+                                        toast.success(mensaje);
                                     } catch (err) {
                                         console.error(err);
                                         toast.error("No se pudo eliminar la versión");

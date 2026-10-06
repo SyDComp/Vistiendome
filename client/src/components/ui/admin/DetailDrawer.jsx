@@ -75,12 +75,12 @@ const DetailDrawer = ({
                     .then(data => setAllSpecs(data || []))
                     .catch(console.error);
             }
-            if (allCategories.length === 0) {
-                fetch(`/api/v1/admin/catalog/categories?page_size=500`)
-                    .then(r => r.json())
-                    .then(data => setAllCategories(data.items || []))
-                    .catch(console.error);
-            }
+            // Siempre de nuevo al abrir: una categoría recién creada tiene que
+            // poder elegirse como padre sin recargar la página.
+            fetch(`/api/v1/admin/catalog/categories?page_size=500`)
+                .then(r => r.json())
+                .then(data => setAllCategories(data.items || []))
+                .catch(console.error);
             if (allCollections.length === 0) {
                 fetch(`/api/v1/admin/catalog/collections?page_size=500`)
                     .then(r => r.json())
@@ -88,7 +88,7 @@ const DetailDrawer = ({
                     .catch(console.error);
             }
         }
-    }, [isOpen, currType, allSpecs.length, allCategories.length, allCollections.length]);
+    }, [isOpen, currType, allSpecs.length, allCollections.length]);
     
     // Estado local para permitir navegación profunda
     const [history, setHistory] = useState([]);

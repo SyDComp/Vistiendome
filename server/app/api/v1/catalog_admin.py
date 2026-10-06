@@ -156,19 +156,32 @@ def update_category_metadata_recursive(db: Session, category: Category):
     
     # Nuevo slug basado en nombre
     category.slug = slugify(category.name)
-    
-    # Nuevo level
-    category.level = (parent.level + 1) if parent else 1
-    
-    # Nuevo path (ej: /root/child)
-    category.path = (f"{parent.path}/{category.slug}") if parent else f"/{category.slug}"
-    
+    _ubicar(category, parent)
+
     db.add(category)
     db.flush()
-    
+
     # Recursión para hijos
     for child in category.subcategories:
         update_category_metadata_recursive(db, child)
+
+
+def _ubicar(category: Category, parent: Optional[Category]) -> None:
+    """Nivel y ruta (ej: /root/child) según dónde cuelga la categoría."""
+    category.level = (parent.level + 1) if parent else 1
+    category.path = (f"{parent.path}/{category.slug}") if parent else f"/{category.slug}"
+
+
+def reubicar(db: Session, category: Category, parent: Optional[Category]) -> None:
+    """
+    Recalcula nivel y ruta de la categoría y sus descendientes, sin tocar el
+    slug: es la dirección pública de la categoría, y moverla de lugar no
+    tiene por qué cambiarla (ni chocar con otra del mismo nombre).
+    """
+    _ubicar(category, parent)
+    db.add(category)
+    for child in category.subcategories:
+        reubicar(db, child, category)
 
 # --- ENDPOINTS DE ATRIBUTOS ---
 
@@ -953,7 +966,7 @@ def delete_category(category_id: int, db: Session = Depends(get_session)):
 
     for sub in list(category.subcategories):
         sub.parent = None
-        db.add(sub)
+        reubicar(db, sub, None)
 
     db.delete(category)
     db.commit()
@@ -1567,13 +1580,14 @@ async def delete_product(product_id: int, force: bool = False, db: Session = Dep
             "product_id": product_id
         })
 
-        return {"msg": "Producto y todos sus datos relacionados eliminados permanentemente (Hard Delete)"}
+        return {"msg": "Producto eliminado"}
     else:
         # SOFT DELETE: Marcado lógico (Producción)
         product.is_deleted = True
         db.add(product)
         db.commit()
-        return {"msg": "Producto desactivado correctamente (Soft Delete)"}
+        return {"msg": ("Producto desactivado: tiene historia en bodega, pedidos o cortes, y se conserva"
+                        if con_historia else "Producto desactivado")}
 
 @router.post("/attributes/seed-system")
 def seed_system_attributes(db: Session = Depends(get_session)):
