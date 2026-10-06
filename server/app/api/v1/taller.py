@@ -21,9 +21,10 @@ from pydantic import BaseModel
 from app.database import get_session
 from app.models.taller import OrdenCorte, OrdenCorteItem, EstadoOrdenCorte
 from app.models.crm import CotizacionItem, Cotizacion
-from app.models.catalog import SKU, StockMovement, MovementType
+from app.models.catalog import SKU, MovementType
 from app.models.iam import CuentaAcceso
 from app.api.deps import RequirePermiso
+from app.core import movimientos as movimientos_core
 
 router = APIRouter()
 
@@ -261,8 +262,9 @@ def _aplicar_finalizacion(db: Session, orden: OrdenCorte, finalizando: bool) -> 
     """
     Cierra (o revierte) el efecto de finalizar una orden.
 
-    Idempotente por `reference_id`: marcar finalizada dos veces no suma el stock
-    dos veces, y revertir no deja movimientos huérfanos.
+    Lo que entró a bodega por cada línea es la suma de lo anotado con su
+    `reference_id`: finalizar dos veces no suma dos veces, y revertir agrega
+    una salida en vez de borrar la entrada (ver core/movimientos.py).
     """
     for it in orden.items:
         if it.cotizacion_item_id:
@@ -273,25 +275,20 @@ def _aplicar_finalizacion(db: Session, orden: OrdenCorte, finalizando: bool) -> 
                 db.add(cot_item)
             continue
 
-        # Para stock: las unidades producidas entran al inventario.
-        existente = db.exec(
-            select(StockMovement).where(
-                StockMovement.sku_id == it.sku_id,
-                StockMovement.type == MovementType.RECEIPT,
-                StockMovement.reference_id == it.id,
-            )
-        ).first()
-
-        if finalizando and not existente:
-            db.add(StockMovement(
-                sku_id=it.sku_id,
-                type=MovementType.RECEIPT,
-                quantity=it.cantidad,
-                reference_id=it.id,
-                note=f"Orden de corte N° {orden.numero}",
-            ))
-        elif not finalizando and existente:
-            db.delete(existente)
+        # Para stock: las unidades producidas entran al inventario. Sin
+        # variante no hay a qué sumarlas.
+        if not it.sku_id:
+            continue
+        movimientos_core.llevar_a(
+            db,
+            sku_id=it.sku_id,
+            reference_id=it.id,
+            objetivo=it.cantidad if finalizando else 0,
+            tipo_si_resta=MovementType.ADJUSTMENT,
+            tipo_si_suma=MovementType.RECEIPT,
+            nota=(f"Orden de corte N° {orden.numero}" if finalizando
+                  else f"Se reabrió la orden de corte N° {orden.numero}"),
+        )
 
 
 @router.put("/{orden_id}/estado", response_model=OrdenSalida)

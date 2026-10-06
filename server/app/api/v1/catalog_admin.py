@@ -7,6 +7,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 from ...database import get_session
 from ...core import existencias as existencias_core
+from ...core import retiro_variantes
+from ...core.movimientos import tienen_historia
 from ...models.catalog import (
     Product, Category, SKU, MediaAsset, ProductMediaLink, SKUMediaLink,
     Characteristic, Specification, SpecificationCharacteristicLink, CategorySpecificationLink,
@@ -36,6 +38,12 @@ import unicodedata
 from ...core.config import settings
 from ...core.sockets import manager
 from ...api.deps import RequirePermiso
+
+# La categoría de seguridad: recibe los productos de una categoría que se borra
+# y no se puede borrar ella. Un solo nombre interno para todo el módulo: antes
+# unos lugares la buscaban con guion y otros con guion bajo, y la protección
+# nunca la encontraba.
+SLUG_SIN_CATEGORIA = "sin_categoria"
 
 router = APIRouter(dependencies=[Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))])
 
@@ -338,6 +346,7 @@ def kardex_saldos(db: Session = Depends(get_session)):
     filas = []
     for sku, product_name in db.exec(
         select(SKU, Product.name).join(Product, SKU.product_id == Product.id)
+        .where(SKU.is_deleted == False)
     ).all():
         filas.append({
             "sku_id": sku.id,
@@ -382,33 +391,6 @@ def kardex_historial(sku_id: int, db: Session = Depends(get_session)):
             for m in movimientos
         ],
     }
-
-
-@router.post("/kardex/reparar")
-def kardex_reparar(db: Session = Depends(get_session)):
-    """
-    Deja el inventario consistente y dice que hizo.
-
-    Existe porque un stock negativo no es informacion, es una inconsistencia: en
-    la pantalla aparece como "-1 und.", igual que cualquier otro numero, cuando
-    en realidad significa que una prenda salio sin que su entrada se registrara.
-
-    Borra los movimientos que no son historia real del negocio: los que restan
-    por un pedido que ya no existe, y las ventas que dejan un SKU en negativo
-    —salidas sin que la entrada se registrara nunca—. Esas prendas quedan como
-    salieron de fabrica: en cero y sin movimientos.
-
-    No se conserva un "rastro" de la inconsistencia: documentaria un error del
-    sistema sobre datos de prueba, y se le entregaria a la duena como si fuera
-    historia de su negocio.
-
-    Es un endpoint y no un script suelto para que se pueda volver a correr
-    cuando haga falta, con permiso de administracion y sin entrar al servidor.
-    Correrlo dos veces no hace nada la segunda: ya no queda nada negativo.
-    """
-    resultado = existencias_core.limpiar(db)
-    db.commit()
-    return resultado
 
 
 @router.post("/kardex/movement")
@@ -507,11 +489,8 @@ async def delete_sku(sku_id: int, db: Session = Depends(get_session)):
     if not sku:
         raise HTTPException(status_code=404, detail="Versión no encontrada")
     
-    # 1. Limpiar movimientos de stock relacionados (Forma correcta SQLModel)
-    db.exec(delete(StockMovement).where(StockMovement.sku_id == sku_id))
-    
-    # 2. Borrar SKU
-    db.delete(sku)
+    # Con historia se da de baja y la historia se conserva; sin ella se borra.
+    de_baja, _ = retiro_variantes.retirar(db, [sku])
     db.commit()
 
     # Notificar cambio en tiempo real
@@ -522,7 +501,11 @@ async def delete_sku(sku_id: int, db: Session = Depends(get_session)):
         "sku": sku.sku
     })
 
-    return {"ok": True, "msg": "Versión eliminada permanentemente"}
+    return {
+        "ok": True,
+        "msg": ("Versión dada de baja: tiene historia en bodega, pedidos o cortes, y se conserva"
+                if de_baja else "Versión eliminada"),
+    }
 
 @router.get("/skus/{sku_id}")
 def get_sku(sku_id: int, db: Session = Depends(get_session)):
@@ -819,7 +802,7 @@ def list_categories(
             "parent_id": c.parent_id,
             "parent_name": c.parent.name if c.parent else None,
             "product_count": product_count,
-            "is_joker": c.slug == "sin_categoria",
+            "is_joker": c.slug == SLUG_SIN_CATEGORIA,
             "is_filterable": c.is_filterable,
             "level": c.level,
             "suggested_specification_ids": [s.id for s in c.suggested_specifications]
@@ -897,7 +880,7 @@ async def update_category(category_id: int, data: CategoryUpdate, db: Session = 
     if not category:
         raise HTTPException(status_code=404, detail="Categoría no encontrada")
     
-    if category.slug == "sin_categoria":
+    if category.slug == SLUG_SIN_CATEGORIA:
         raise HTTPException(status_code=403, detail="No se puede editar la categoría de seguridad del sistema")
 
     needs_slug_update = False
@@ -951,19 +934,27 @@ def delete_category(category_id: int, db: Session = Depends(get_session)):
     if not category:
         raise HTTPException(status_code=404, detail="Categoría no encontrada")
     
-    if category.slug == "sin-categoria":
+    if category.slug == SLUG_SIN_CATEGORIA:
         raise HTTPException(status_code=403, detail="No se puede eliminar la categoría de seguridad")
 
-    joker = db.exec(select(Category).where(Category.slug == "sin-categoria")).first()
+    joker = db.exec(select(Category).where(Category.slug == SLUG_SIN_CATEGORIA)).first()
+    if category.products and not joker:
+        raise HTTPException(
+            status_code=409,
+            detail="Falta la categoría 'Sin Categoría', que recibe los productos de una categoría borrada. Créala antes de borrar esta.",
+        )
     
-    for p in category.products:
-        p.category_id = joker.id
+    # Se mueven por la relación, no por la columna: si quedaran en
+    # `category.products`, al borrar la categoría SQLAlchemy les pondría
+    # category_id en nulo, y eso la base lo rechaza.
+    for p in list(category.products):
+        p.category = joker
         db.add(p)
-    
-    for sub in category.subcategories:
-        sub.parent_id = None
+
+    for sub in list(category.subcategories):
+        sub.parent = None
         db.add(sub)
-        
+
     db.delete(category)
     db.commit()
     return {"msg": "Categoría eliminada, productos movidos a 'Sin Categoría'"}
@@ -1082,7 +1073,7 @@ def list_skus_admin(
     """Lista SKUs sin límites de paginación."""
     # Join con Product para filtrar y obtener nombres
     statement = select(SKU, Product.name, Product.category_id).join(Product, SKU.product_id == Product.id).options(selectinload(SKU.media_assets))
-    statement = statement.where(Product.is_deleted == False)
+    statement = statement.where(Product.is_deleted == False, SKU.is_deleted == False)
     
     # 1. Búsqueda por texto (SKU o Nombre)
     if search:
@@ -1395,7 +1386,7 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
     
     # --- ESTRATEGIA DE OPTIMIZACIÓN MASIVA (STOCK) ---
     # Obtenemos el stock actual de TODOS los SKUs existentes del producto en una sola consulta
-    existing_sku_ids = [s.id for s in product.skus]
+    existing_sku_ids = [s.id for s in product.todas_las_skus]
     stock_map = {}
     if existing_sku_ids:
         # Consulta bulk agrupada por sku_id
@@ -1407,7 +1398,7 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
         stock_map = {sid: total for sid, total in stock_results}
     
     # Update SKUs
-    existing_skus_by_code = {s.sku: s for s in product.skus}
+    existing_skus_by_code = {s.sku: s for s in product.todas_las_skus}
     operation_errors = []
     success_count = 0
     
@@ -1422,6 +1413,8 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
                 if s_data.sku in existing_skus_by_code:
                     # Actualizar existente
                     sku = existing_skus_by_code[s_data.sku]
+                    # Vuelve a venderse si se había dado de baja.
+                    sku.is_deleted = False
                     sku.price = s_data.price
                     sku.barcode = s_data.barcode or (sku.barcode if sku.barcode else inventory_core.generate_barcode_eAN13(sku.sku))
                     sku.config = norm_config
@@ -1495,15 +1488,12 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
 
     # Eliminar SKUs que ya no vienen en el nuevo set (si aplica)
     incoming_sku_names = {s_data.sku for s_data in data.skus}
-    for sku_name, sku_obj in existing_skus_by_code.items():
-        if sku_name not in incoming_sku_names:
-            # En Desarrollo o si se requiere limpieza, borramos movimientos antes
-            # Borrado robusto de movimientos para evitar bloqueo de integridad
-            db.exec(
-                delete(StockMovement).where(StockMovement.sku_id == sku_obj.id)
-            )
-            db.delete(sku_obj)
-        
+    # Las que tienen historia se dan de baja; las demás se borran.
+    retiro_variantes.retirar(db, [
+        sku_obj for sku_name, sku_obj in existing_skus_by_code.items()
+        if sku_name not in incoming_sku_names and not sku_obj.is_deleted
+    ])
+
     # Update Images (Delete and recreate)
     db.exec(delete(ProductMediaLink).where(ProductMediaLink.product_id == product.id))
         
@@ -1548,7 +1538,11 @@ async def delete_product(product_id: int, force: bool = False, db: Session = Dep
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     
     # Decisión Arquitectónica: Hard vs Soft Delete
-    perform_hard_delete = settings.is_dev or force
+    # Un producto cuyas variantes tienen historia (bodega, pedidos, cortes)
+    # nunca se borra del todo, se pida como se pida: se desactiva y esa
+    # historia sigue apuntándole.
+    con_historia = tienen_historia(db, [s.id for s in product.todas_las_skus])
+    perform_hard_delete = (settings.is_dev or force) and not con_historia
 
     if perform_hard_delete:
         # HARD DELETE: Limpieza profunda física
@@ -1557,12 +1551,10 @@ async def delete_product(product_id: int, force: bool = False, db: Session = Dep
         # 1. Borrar enlaces de fotos del producto (los MediaAssets se conservan en la galería)
         db.exec(delete(ProductMediaLink).where(ProductMediaLink.product_id == product.id))
         
-        # 2. Borrar SKUs, sus movimientos y sus enlaces de medios
-        for sku in product.skus:
-            db.exec(delete(StockMovement).where(StockMovement.sku_id == sku.id))
-            db.exec(delete(SKUMediaLink).where(SKUMediaLink.sku_id == sku.id))
-            db.delete(sku)
-        
+        # 2. Borrar sus variantes. Llegar acá significa que ninguna tiene
+        #    historia: no hay movimientos que perder.
+        retiro_variantes.retirar(db, list(product.todas_las_skus))
+
         # 3. Borrar producto base
         db.delete(product)
         db.commit()

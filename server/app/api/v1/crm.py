@@ -12,6 +12,7 @@ from app.models.catalog import StockMovement, MovementType, SKU
 from app.models.taller import OrdenCorte, OrdenCorteItem, EstadoOrdenCorte
 from app.api.deps import get_current_user, RequirePermiso
 from app.core import existencias as existencias_core
+from app.core import movimientos as movimientos_core
 from app.core import propuestas as core_propuestas
 from app.models.propuestas import OpcionPropuesta
 
@@ -483,17 +484,13 @@ def listar_cotizaciones(
 
 def _sincronizar_stock_venta(session: Session, cotizacion: Cotizacion, estado_anterior: EstadoCotizacion, estado_nuevo: EstadoCotizacion) -> None:
     """
-    Al pasar a DESPACHADA descuenta el stock (un StockMovement SALE por ítem con
-    SKU real); al salir de DESPACHADA lo revierte.
+    Al pasar a DESPACHADA descuenta el stock de cada prenda con SKU real; al
+    salir de DESPACHADA lo devuelve.
 
-    En DESPACHADA y no antes: la prenda deja la bodega cuando sale del taller,
-    no cuando la clienta acepta. Antes el gancho estaba en "aceptó", así que el
-    stock bajaba semanas antes de que la prenda existiera siquiera.
-
-    Idempotente vía reference_id=item.id: despachar, revertir y volver a
-    despachar no descuenta dos veces, porque siempre revisa si el movimiento de
-    ESE ítem ya existe antes de crearlo — y lo borra al revertir, así que el
-    siguiente despacho lo vuelve a crear limpio.
+    Nada se borra: devolver es otro movimiento, y lo que movió cada prenda es
+    la suma de lo anotado con su `reference_id` (ver core/movimientos.py).
+    Despachar, deshacer y volver a despachar queda escrito tal cual pasó, y
+    nunca descuenta dos veces.
     """
     entra_a_despacho = estado_nuevo == EstadoCotizacion.DESPACHADA and estado_anterior != EstadoCotizacion.DESPACHADA
     sale_de_despacho = estado_anterior == EstadoCotizacion.DESPACHADA and estado_nuevo != EstadoCotizacion.DESPACHADA
@@ -501,38 +498,25 @@ def _sincronizar_stock_venta(session: Session, cotizacion: Cotizacion, estado_an
     if not entra_a_despacho and not sale_de_despacho:
         return
 
+    prendas = [item for item in cotizacion.items if item.sku_id]
+
     # NO SE DESPACHA LO QUE NO HAY
-    # Antes esto restaba sin mirar: despachar una prenda sin existencia dejaba
-    # el stock en negativo y nadie se enteraba. En el catalogo aparecia
-    # "-1 und." como si fuera un dato mas, cuando en realidad significa que una
-    # prenda real salio sin registrarse.
-    #
     # Se comprueba TODO el pedido antes de tocar nada, y se avisa de una vez de
     # todo lo que falta: quien despacha no tiene por que descubrirlo de a uno.
+    # Lo que este mismo pedido ya tiene descontado no cuenta como faltante.
     if entra_a_despacho:
+        ya_movido = movimientos_core.netos_de(session, [i.id for i in prendas])
         por_sacar = {}
-        for item in cotizacion.items:
-            if item.sku_id:
-                por_sacar[item.sku_id] = por_sacar.get(item.sku_id, 0) + item.cantidad
-
-        # Lo ya descontado por este mismo pedido no cuenta como faltante: si se
-        # revierte y se vuelve a despachar, esa salida ya esta registrada.
-        ya_descontado = session.exec(
-            select(StockMovement).where(
-                StockMovement.type == MovementType.SALE,
-                StockMovement.reference_id.in_([i.id for i in cotizacion.items if i.sku_id]),
-            )
-        ).all() if por_sacar else []
-        for m in ya_descontado:
-            if m.sku_id in por_sacar:
-                por_sacar[m.sku_id] += m.quantity  # quantity es negativo
-
+        for item in prendas:
+            falta = item.cantidad + ya_movido.get(item.id, 0)  # el neto es negativo
+            if falta > 0:
+                por_sacar[item.sku_id] = por_sacar.get(item.sku_id, 0) + falta
         problemas = existencias_core.faltantes(session, por_sacar)
         if problemas:
             detalle = []
             for sku_id, hay, pide in problemas:
                 sku = session.get(SKU, sku_id)
-                nombre = sku.sku_code if sku and sku.sku_code else f"SKU {sku_id}"
+                nombre = sku.sku if sku else f"SKU {sku_id}"
                 detalle.append(f"{nombre}: hay {hay}, se necesitan {pide}")
             raise HTTPException(
                 status_code=409,
@@ -543,27 +527,18 @@ def _sincronizar_stock_venta(session: Session, cotizacion: Cotizacion, estado_an
                 ),
             )
 
-    for item in cotizacion.items:
-        if not item.sku_id:
-            continue
-        existente = session.exec(
-            select(StockMovement).where(
-                StockMovement.sku_id == item.sku_id,
-                StockMovement.type == MovementType.SALE,
-                StockMovement.reference_id == item.id,
-            )
-        ).first()
+    for item in prendas:
+        movimientos_core.llevar_a(
+            session,
+            sku_id=item.sku_id,
+            reference_id=item.id,
+            objetivo=-item.cantidad if entra_a_despacho else 0,
+            tipo_si_resta=MovementType.SALE,
+            tipo_si_suma=MovementType.RETURN,
+            nota=(f"Despacho pedido #{cotizacion.numero}" if entra_a_despacho
+                  else f"Se deshizo el despacho del pedido #{cotizacion.numero}"),
+        )
 
-        if entra_a_despacho and not existente:
-            session.add(StockMovement(
-                sku_id=item.sku_id,
-                type=MovementType.SALE,
-                quantity=-item.cantidad,
-                reference_id=item.id,
-                note=f"Despacho pedido #{cotizacion.numero}",
-            ))
-        elif sale_de_despacho and existente:
-            session.delete(existente)
 
 class EstadoUpdate(BaseModel):
     estado: EstadoCotizacion
@@ -612,6 +587,8 @@ def eliminar_cotizacion(
 
       · DESPACHADA          ya descontó stock. Sin el pedido, ese descuento
                             queda sin explicacion en el historial.
+      · con movimientos     aunque el despacho se haya deshecho, la salida y
+                            la vuelta siguen anotadas y apuntan a sus prendas.
       · en una orden de corte  el taller ya la tomó para cortar.
       · con piezas cortadas    la tela ya se corto: el gasto existio.
 
@@ -632,6 +609,18 @@ def eliminar_cotizacion(
         )
 
     items = db.exec(select(CotizacionItem).where(CotizacionItem.cotizacion_id == cot.id)).all()
+
+    # Un despacho que se deshizo dejó su salida y su vuelta en la bodega. Esa
+    # historia apunta a las prendas de este pedido: sin el pedido, nadie
+    # podría saber de dónde salió.
+    con_movimientos = db.exec(
+        select(StockMovement.id).where(StockMovement.reference_id.in_([it.id for it in items]))
+    ).first() if items else None
+    if con_movimientos:
+        raise HTTPException(
+            status_code=409,
+            detail="Este pedido ya movió stock en la bodega, aunque se haya deshecho. No se borra: cancélalo.",
+        )
 
     if any(it.cortado for it in items):
         raise HTTPException(

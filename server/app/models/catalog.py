@@ -134,7 +134,17 @@ class Product(SQLModel, table=True):
     sale_start: Optional[datetime] = Field(default=None)
     sale_end: Optional[datetime] = Field(default=None)
 
-    skus: List["SKU"] = Relationship(back_populates="product")
+    # Las variantes que se venden. Una variante dada de baja no aparece acá,
+    # pero no se borra: su historia (bodega, pedidos, cortes) sigue apuntándole.
+    skus: List["SKU"] = Relationship(
+        sa_relationship_kwargs={
+            "primaryjoin": "and_(Product.id == SKU.product_id, SKU.is_deleted == False)",
+            "viewonly": True,
+        }
+    )
+    # Todas, incluidas las dadas de baja: para editar el producto y poder
+    # reactivar una combinación que se había quitado.
+    todas_las_skus: List["SKU"] = Relationship(back_populates="product")
     media_assets: List["MediaAsset"] = Relationship(
         back_populates="products",
         link_model=ProductMediaLink
@@ -168,10 +178,11 @@ class Category(SQLModel, table=True):
         link_model=CategorySpecificationLink
     )
     
-    subcategories: List["Category"] = Relationship(
-        back_populates="parent",
-        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
-    )
+    # Sin cascada de borrado: al borrar una categoría sus subcategorías quedan
+    # en la raíz, con sus productos. Es lo mismo que dice la base
+    # (ON DELETE SET NULL); con la cascada, el borrado se llevaba el árbol
+    # entero antes de que la base alcanzara a actuar.
+    subcategories: List["Category"] = Relationship(back_populates="parent")
     parent: Optional["Category"] = Relationship(
         back_populates="subcategories",
         sa_relationship_kwargs={"remote_side": "Category.id"}
@@ -195,7 +206,10 @@ class SKU(SQLModel, table=True):
     sale_start: Optional[datetime] = Field(default=None)
     sale_end: Optional[datetime] = Field(default=None)
 
-    product: "Product" = Relationship(back_populates="skus")
+    # Dada de baja: ya no se vende ni se muestra, pero se conserva con su
+    # historia. Ver Product.skus.
+    is_deleted: bool = Field(default=False, index=True)
+    product: "Product" = Relationship(back_populates="todas_las_skus")
     movements: List["StockMovement"] = Relationship(back_populates="sku")
     media_assets: List["MediaAsset"] = Relationship(
         back_populates="skus",

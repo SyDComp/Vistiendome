@@ -470,7 +470,9 @@ def precios_vigentes(
     if not codigos:
         return []
 
-    filas = db.exec(select(SKU).where(SKU.sku.in_(codigos))).all()
+    # Una variante dada de baja no tiene precio vigente: el carrito la trata
+    # como sin respuesta y no le inventa uno.
+    filas = db.exec(select(SKU).where(SKU.sku.in_(codigos), SKU.is_deleted == False)).all()
     now = get_chile_time()
 
     salida = []
