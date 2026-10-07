@@ -23,14 +23,21 @@ class NoSeCotiza(Exception):
 
 
 def nombre_de_prenda(item: CotizacionItem) -> str:
-    """Cómo se nombra la prenda en la historia: lo bastante para reconocerla."""
+    """
+    Cómo se nombra la prenda en la historia: lo bastante para reconocerla.
+
+    Con sus características: un pedido puede tener tres "Tapado Magdalena
+    Verano" que solo se distinguen por la talla, y la historia tiene que decir
+    cuál se cotizó.
+    """
     if item.sku is not None:
-        valores = [str(v) for v in (item.sku.config or {}).values() if v]
         base = item.sku.product.name if item.sku.product else item.sku.sku
-        return f"{base} ({' / '.join(valores)})" if valores else base
-    if item.producto is not None:
-        return f"{item.producto.name} (personalizada)"
-    return item.nombre_custom or "Pieza especial"
+        config = item.sku.config
+    else:
+        base = item.producto.name if item.producto is not None else (item.nombre_custom or "Pieza especial")
+        config = {**(item.config_custom or {}), **(item.config_propuesta or {})}
+    valores = [str(v) for v in (config or {}).values() if v]
+    return f"{base} ({' / '.join(valores)})" if valores else base
 
 
 def cotizar(

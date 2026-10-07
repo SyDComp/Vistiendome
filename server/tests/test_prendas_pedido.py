@@ -177,3 +177,23 @@ def test_un_producto_con_piezas_personalizadas_no_se_borra_del_todo(client, sess
     _contacto(client, session, [{"producto_id": noemi.id, "config_custom": {"TALLA": "XS"}}])
     asyncio.run(catalog_admin.delete_product(noemi.id, force=True, db=session))
     assert session.get(Product, noemi.id).is_deleted
+
+
+def test_la_historia_dice_cual_prenda_se_cotizo(client_admin, session):
+    res = client_admin.post("/api/v1/crm/cotizaciones", json={
+        "rut": "11111111-1", "nombres": "Ana", "canal": "WhatsApp",
+        "items": [{"nombre_custom": "Tapado", "config_custom": {"TALLA": "L"}},
+                  {"nombre_custom": "Tapado", "config_custom": {"TALLA": "XS"}}]})
+    pedido = res.json()
+    xs = next(i for i in pedido["items"] if i["config"] == {"TALLA": "XS"})
+    client_admin.put(f"/api/v1/crm/cotizaciones/{pedido['id']}/prendas/{xs['id']}/precio", json={"precio": 1000})
+    evento = session.exec(select(PedidoEvento).where(PedidoEvento.tipo == TipoEvento.PRECIO)).one()
+    assert evento.datos["prenda"] == "Tapado (XS)"
+
+
+def test_las_prendas_vuelven_en_el_orden_en_que_se_agregaron(client_admin):
+    nombres = ["Primera", "Segunda", "Tercera"]
+    res = client_admin.post("/api/v1/crm/cotizaciones", json={
+        "rut": "11111111-1", "nombres": "Ana", "canal": "WhatsApp",
+        "items": [{"nombre_custom": n} for n in nombres]})
+    assert [i["sku_name"] for i in res.json()["items"]] == nombres

@@ -148,7 +148,14 @@ class Cotizacion(SQLModel, table=True):
     
     # Relationships
     persona: "Persona" = Relationship(back_populates="cotizaciones")
-    items: List["CotizacionItem"] = Relationship(back_populates="cotizacion")
+    # En el orden en que se agregaron. Sin orden fijo, Postgres devolvía las
+    # prendas en otro orden después de editar una, y en pantalla la prenda
+    # recién cotizada saltaba de lugar. El id no sirve para esto: dos ULID del
+    # mismo milisegundo no salen en orden.
+    items: List["CotizacionItem"] = Relationship(
+        back_populates="cotizacion",
+        sa_relationship_kwargs={"order_by": "(CotizacionItem.posicion, CotizacionItem.id)"},
+    )
 
 class CotizacionItem(SQLModel, table=True):
     __tablename__ = "cotizacion_items"
@@ -164,6 +171,9 @@ class CotizacionItem(SQLModel, table=True):
     producto_id: Optional[int] = Field(default=None, foreign_key="product.id", index=True)
 
     cantidad: int = Field(default=1)
+
+    # Su lugar en el pedido (0, 1, 2...): el orden en que se agregaron.
+    posicion: int = Field(default=0)
 
     # TRES ESTADOS, NUNCA UN CERO AMBIGUO
     #   None  → por cotizar: nadie ha decidido el precio todavía.

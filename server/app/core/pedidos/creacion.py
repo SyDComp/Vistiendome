@@ -170,11 +170,12 @@ def crear_pedido(session: Session, data, actor: Actor, canal: str = None, permit
     session.refresh(cotizacion)
     
     # 3. Crear Items
-    for item_data in data.items:
+    for posicion, item_data in enumerate(data.items):
         # Qué prenda es (variante, personalizada de un producto, o escrita a
         # mano) y su precio en tres estados: ver core/pedidos/prendas.py.
         item = CotizacionItem(
             cotizacion_id=cotizacion.id,
+            posicion=posicion,
             **prenda_desde(session, item_data, permitir_sin_costo),
         )
         session.add(item)
