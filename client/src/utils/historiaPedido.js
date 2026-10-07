@@ -93,6 +93,20 @@ export const describirEvento = ({ tipo, datos = {} }, modoEntrega) => {
     }
 };
 
+/**
+ * "¿Cómo llegó?" según la historia: lo que se dijo al crearlo, o la última
+ * corrección. Se lee de ahí y no de una copia del pedido, que en pantalla
+ * puede haber quedado vieja. Sin historia todavía, vale `respaldo`.
+ */
+export const canalSegunHistoria = (eventos, respaldo = null) => {
+    let canal = respaldo;
+    for (const { tipo, datos = {} } of eventos) {
+        if (tipo === 'CREADO' && datos.canal) canal = datos.canal;
+        if (tipo === 'CANAL') canal = datos.a;
+    }
+    return canal || null;
+};
+
 /** Quién lo hizo, o por qué no se sabe. Null cuando no corresponde decirlo. */
 export const autorDe = ({ tipo, datos = {}, actor_nombre }) => {
     if (actor_nombre) return actor_nombre;

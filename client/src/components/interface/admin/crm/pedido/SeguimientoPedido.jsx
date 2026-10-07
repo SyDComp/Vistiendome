@@ -1,6 +1,7 @@
 import React from 'react';
 import { History, Megaphone } from 'lucide-react';
 import useHistoriaPedido from '../../../../../hooks/useHistoriaPedido';
+import { canalSegunHistoria } from '../../../../../utils/historiaPedido';
 import CanalPedido from './CanalPedido';
 import HistoriaPedido from './HistoriaPedido';
 import './pedido.css';
@@ -23,16 +24,20 @@ const Seccion = ({ icono, titulo, children }) => (
 /**
  * Cómo llegó el pedido y qué le ha pasado desde entonces.
  *
+ * `abierto`: el panel lateral no se desmonta al cerrarse, así que la historia
+ * se vuelve a pedir cada vez que se abre.
+ *
  * Corregir "¿Cómo llegó?" recarga la historia: la corrección misma queda
- * anotada, y se tiene que ver ahí.
+ * anotada, y el valor que se muestra se lee de ahí.
  */
-const SeguimientoPedido = ({ cotizacion }) => {
-    const { eventos, cargando, error, recargar } = useHistoriaPedido(cotizacion.id);
+const SeguimientoPedido = ({ cotizacion, abierto = true }) => {
+    const { eventos, cargando, error, recargar } = useHistoriaPedido(cotizacion.id, abierto);
+    const canal = canalSegunHistoria(eventos, cotizacion.canal);
 
     return (
         <>
             <Seccion icono={<Megaphone size={18} />} titulo="¿Cómo llegó?">
-                <CanalPedido key={cotizacion.id} cotizacion={cotizacion} onCambio={recargar} />
+                <CanalPedido key={cotizacion.id} cotizacion={cotizacion} canal={canal} onCambio={recargar} />
             </Seccion>
             <Seccion icono={<History size={18} />} titulo="Historia">
                 <HistoriaPedido

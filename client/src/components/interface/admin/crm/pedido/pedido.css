@@ -1,11 +1,14 @@
 /* Seguimiento del pedido: "¿Cómo llegó?" e Historia. Solo tokens del tema. */
 
-.sp-rotulo {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--color-text-tertiary);
-    margin-bottom: 0.35rem;
+/* El título de la sección ya dice "¿Cómo llegó?": la etiqueta del selector
+   existe para lectores de pantalla, sin repetirse a la vista. */
+.sp-oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
 }
 
 .sp-canal {

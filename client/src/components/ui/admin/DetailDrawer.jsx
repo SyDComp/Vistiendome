@@ -1760,7 +1760,7 @@ const DetailDrawer = ({
                     )}
                     
                     {currType === 'cotizacion' && currData?.id && (
-                        <SeguimientoPedido key={currData.id} cotizacion={currData} />
+                        <SeguimientoPedido key={currData.id} cotizacion={currData} abierto={isOpen} />
                     )}
 
                     {currType === 'cotizacion' && currData?.id && (

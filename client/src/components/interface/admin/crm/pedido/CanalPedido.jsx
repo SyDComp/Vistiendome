@@ -6,14 +6,17 @@ import SelectorCanal from './SelectorCanal';
 /**
  * "¿Cómo llegó?" de un pedido, con la opción de completarlo o corregirlo.
  *
+ * El valor llega ya leído de la historia (`canal`): no se guarda una copia
+ * acá, que podría quedar vieja. Después de corregir, `onCambio` recarga la
+ * historia y el valor nuevo vuelve por ahí.
+ *
  * Solo los pedidos cargados en el panel se pueden corregir: los de la web
  * llegaron por la web, y eso no es una opinión.
  */
-const CanalPedido = ({ cotizacion, onCambio }) => {
+const CanalPedido = ({ cotizacion, canal, onCambio }) => {
     const { toast } = useNotification();
-    const [canal, setCanal] = useState(cotizacion.canal || null);
     const [editando, setEditando] = useState(false);
-    const [eleccion, setEleccion] = useState(cotizacion.canal || '');
+    const [eleccion, setEleccion] = useState('');
     const [guardando, setGuardando] = useState(false);
 
     if (cotizacion.origen !== 'MANUAL') {
@@ -24,7 +27,6 @@ const CanalPedido = ({ cotizacion, onCambio }) => {
         setGuardando(true);
         try {
             await corregirCanalPedido(cotizacion.id, eleccion);
-            setCanal(eleccion);
             setEditando(false);
             toast.success('Quedó anotado cómo llegó el pedido');
             onCambio?.();
@@ -38,7 +40,7 @@ const CanalPedido = ({ cotizacion, onCambio }) => {
     if (editando) {
         return (
             <div className="sp-canal-edicion">
-                <label htmlFor={`canal-${cotizacion.id}`} className="sp-rotulo">¿Cómo llegó?</label>
+                <label htmlFor={`canal-${cotizacion.id}`} className="sp-oculto">¿Cómo llegó?</label>
                 <SelectorCanal id={`canal-${cotizacion.id}`} value={eleccion} onChange={setEleccion} disabled={guardando} />
                 <div className="sp-acciones">
                     <button type="button" className="sp-boton" onClick={() => setEditando(false)} disabled={guardando}>

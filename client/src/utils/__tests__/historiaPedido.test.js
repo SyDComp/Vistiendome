@@ -1,5 +1,24 @@
 import { describe, it, expect } from 'vitest';
-import { describirEvento, autorDe } from '../historiaPedido';
+import { describirEvento, autorDe, canalSegunHistoria } from '../historiaPedido';
+
+describe('canalSegunHistoria', () => {
+    it('vale la última corrección, no la copia del pedido', () => {
+        const eventos = [
+            { tipo: 'CREADO', datos: { origen: 'MANUAL', canal: 'WhatsApp' } },
+            { tipo: 'CANAL', datos: { de: 'WhatsApp', a: 'Instagram' } },
+        ];
+        expect(canalSegunHistoria(eventos, 'WhatsApp')).toBe('Instagram');
+    });
+
+    it('un manual antiguo sin dato sigue sin dato hasta que se indique', () => {
+        const eventos = [{ tipo: 'CREADO', datos: { origen: 'MANUAL', canal: null, anterior_al_registro: true } }];
+        expect(canalSegunHistoria(eventos, null)).toBeNull();
+    });
+
+    it('mientras carga la historia, vale lo que traía el pedido', () => {
+        expect(canalSegunHistoria([], 'Feria')).toBe('Feria');
+    });
+});
 
 describe('describirEvento', () => {
     it('un pedido de la web dice por dónde llegó', () => {
