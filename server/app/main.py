@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 
 from .database import init_db
-from .api.v1 import auth, products, admin, websockets, media, catalog_admin, catalog_collections, collections, cms, settings as site_settings, crm, geo, analytics, taller, propuestas, historia_pedido, ajustes_negocio
+from .api.v1 import auth, products, admin, websockets, media, catalog_admin, catalog_collections, collections, cms, settings as site_settings, crm, geo, analytics, taller, propuestas, historia_pedido, ajustes_negocio, precios_pedido
 
 app = FastAPI(
     title="Vistiendomé API",
@@ -36,6 +36,7 @@ app.include_router(site_settings.router, prefix="/api/v1/settings", tags=["Confi
 app.include_router(media.router, prefix="/api/v1/media", tags=["Medios"])
 app.include_router(crm.router, prefix="/api/v1/crm", tags=["CRM y Cotizaciones"])
 app.include_router(historia_pedido.router, prefix="/api/v1/crm", tags=["Historia del pedido"])
+app.include_router(precios_pedido.router, prefix="/api/v1/crm", tags=["Precios del pedido"])
 app.include_router(ajustes_negocio.router, prefix="/api/v1/ajustes-negocio", tags=["Ajustes del negocio"])
 app.include_router(geo.router, prefix="/api/v1/geo", tags=["Geografía"])
 app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Inteligencia de Negocio"])

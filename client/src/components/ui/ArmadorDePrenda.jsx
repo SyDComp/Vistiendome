@@ -199,9 +199,17 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
             if (v) propuestosLimpios[clave] = v;
         });
 
+        // De qué producto del catálogo es, si se eligió de la lista. Con eso el
+        // servidor sabe su categoría y, si lo elegido coincide exacto con una
+        // variante, que ES esa variante. "Otra" no tiene producto.
+        const producto = prenda === OTRO ? null : productos.find(x => x.name === prenda);
+        const monto = parseFloat(precio);
+
         onAgregar({
             nombre: nombreFinal,
-            precio: parseFloat(precio) || 0,
+            productoId: producto?.id ?? null,
+            // Vacío no es cero: es "por cotizar".
+            precio: monto > 0 ? monto : null,
             // Sólo lo elegido. Una característica en blanco no se guarda:
             // "sin especificar" y "no aplica" no son lo mismo para quien corta.
             config,

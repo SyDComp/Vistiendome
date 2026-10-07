@@ -190,8 +190,8 @@ const Contacto = () => {
                                 productos={catalogo}
                                 mostrarPrecio={false}
                                 textoBoton="Agregar esta prenda"
-                                onAgregar={({ nombre, config, propuestos }) => {
-                                    setPrendas(p => [...p, { nombre, config, propuestos, cantidad: 1 }]);
+                                onAgregar={({ nombre, productoId, config, propuestos }) => {
+                                    setPrendas(p => [...p, { nombre, productoId, config, propuestos, cantidad: 1 }]);
                                     setArmando(false);
                                 }}
                                 onCancelar={() => setArmando(false)}

@@ -19,10 +19,13 @@ const prendaParaMensaje = (prenda) => {
     };
 };
 
+// El precio no lo pone la clienta: queda por cotizar, salvo que el servidor
+// reconozca una variante exacta del catálogo y le ponga su precio vigente.
 const prendaParaPedido = (prenda) => ({
     sku_id: null,
+    producto_id: prenda.productoId ?? null,
     cantidad: prenda.cantidad || 1,
-    precio_unitario_estimado: 0,
+    precio_unitario_estimado: null,
     nombre_custom: prenda.nombre,
     config_custom: prenda.config || null,
     config_propuesta: prenda.propuestos || null,

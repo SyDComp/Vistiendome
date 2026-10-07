@@ -28,6 +28,7 @@ class TipoEvento:
     CREADO = "CREADO"                        # {origen, canal}
     ESTADO = "ESTADO"                        # {de, a, motivo?}
     CANAL = "CANAL"                          # {de, a}
+    PRECIO = "PRECIO"                        # {prenda, de, a}: None por cotizar, 0 sin costo
     ORDEN_AGREGADA = "ORDEN_AGREGADA"        # {orden, prendas}
     ORDEN_ESTADO = "ORDEN_ESTADO"            # {orden, de, a, prendas}
     ORDEN_ELIMINADA = "ORDEN_ELIMINADA"      # {orden, prendas}

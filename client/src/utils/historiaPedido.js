@@ -7,6 +7,7 @@
  */
 import { etiquetaEstado } from './estadosPedido';
 import { estiloEstado } from './estadosOrdenCorte';
+import { textoPrecio } from './precioPrenda';
 
 const ORIGENES = {
     CATALOGO: 'el catálogo del sitio',
@@ -53,6 +54,12 @@ export const describirEvento = ({ tipo, datos = {} }, modoEntrega) => {
             return datos.de
                 ? { texto: `Cómo llegó: ${datos.de} → ${datos.a}`, detalle: null }
                 : { texto: `Se indicó cómo llegó: ${datos.a}`, detalle: null };
+
+        case 'PRECIO':
+            return {
+                texto: `Precio de ${datos.prenda}: ${textoPrecio(datos.de)} → ${textoPrecio(datos.a)}`,
+                detalle: null,
+            };
 
         case 'ORDEN_AGREGADA':
             return { texto: `${prendas(datos.prendas)} entraron a la orden de corte N° ${datos.orden}`, detalle: null };

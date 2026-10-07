@@ -42,6 +42,11 @@ describe('describirEvento', () => {
         expect(describirEvento(ev, 'DESPACHO').detalle).toBe('Al imprimir las etiquetas de envío');
     });
 
+    it('un cambio de precio dice sus tres estados con palabras, nunca $0', () => {
+        expect(describirEvento({ tipo: 'PRECIO', datos: { prenda: 'Bolero', de: null, a: 0 } }).texto)
+            .toBe('Precio de Bolero: Por cotizar → Sin costo');
+    });
+
     it('finalizar y reabrir una orden', () => {
         expect(describirEvento({ tipo: 'ORDEN_ESTADO', datos: { orden: 6, prendas: 1, de: 'EN_PROCESO', a: 'FINALIZADA' } }))
             .toEqual({ texto: 'Orden de corte N° 6 finalizada', detalle: '1 prenda de este pedido quedó lista' });

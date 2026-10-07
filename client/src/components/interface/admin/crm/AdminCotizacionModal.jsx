@@ -8,6 +8,8 @@ import { useNotification } from '../../../../context/NotificationContext';
 import Imagen from '../../../ui/Imagen';
 import { formatearTelefono, normalizarTelefono } from '../../../../utils/telefono';
 import SelectorCanal from './pedido/SelectorCanal';
+import SelectorPrecio from './pedido/SelectorPrecio';
+import { valorDesde, precioDeValor, esValido, paraServidor, textoSubtotal, textoTotal } from '../../../../utils/precioPrenda';
 import './AdminCotizacionModal.css';
 
 const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = null }) => {
@@ -250,7 +252,10 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                     sku_id: variant.sku_id,
                     sku_name: variant.sku_name,
                     sku_code: variant.sku_code,
-                    precio_unitario_estimado: variant.price,
+                    // Su precio vigente; se puede ajustar, o dejar por cotizar
+                    // o sin costo. Lo elegido vive en `valorPrecio`.
+                    precio_unitario_estimado: precioDeValor(valorDesde(variant.price)),
+                    valorPrecio: valorDesde(variant.price),
                     cantidad: 1,
                     image: variant.image,
                     nombre_custom: variant.sku_name
@@ -263,12 +268,14 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
     // Antes esto eran dos prompt() —nombre y precio— y la pieza entraba al pedido
     // como un texto suelto, sin talla ni color: llegaba a la orden de corte sin
     // nada con que confeccionarla.
-    const handleAgregarPersonalizado = ({ nombre, precio, config, propuestos }) => {
+    const handleAgregarPersonalizado = ({ nombre, productoId, precio, config, propuestos }) => {
         setItems(prev => [...prev, {
             sku_id: null,
+            producto_id: productoId,
             sku_name: nombre,
             sku_code: 'CUSTOM',
-            precio_unitario_estimado: precio,
+            precio_unitario_estimado: precioDeValor(valorDesde(precio)),
+            valorPrecio: valorDesde(precio),
             cantidad: 1,
             image: null,
             config_custom: config,
@@ -294,19 +301,19 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
         });
     };
 
-    const handlePriceChange = (index, newPrice) => {
-        setItems(prev => {
-            const updated = [...prev];
-            updated[index].precio_unitario_estimado = parseFloat(newPrice) || 0;
-            return updated;
-        });
+    // Por cotizar, sin costo o un monto: nunca un 0 que nadie eligió.
+    const handlePriceChange = (index, valor) => {
+        setItems(prev => prev.map((it, i) => (i === index
+            ? { ...it, valorPrecio: valor, precio_unitario_estimado: precioDeValor(valor) }
+            : it)));
     };
 
     const handleRemoveItem = (index) => {
         setItems(prev => prev.filter((_, i) => i !== index));
     };
 
-    const totalCotizacion = items.reduce((acc, it) => acc + (it.cantidad * (it.precio_unitario_estimado || 0)), 0);
+    // "$35.980 + 1 por cotizar": el total dicho entero (utils/precioPrenda).
+    const totalCotizacion = textoTotal(items);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -326,6 +333,11 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
         }
         if (!canal) {
             toast.error("Indica cómo llegó el pedido");
+            return;
+        }
+        const sinMonto = items.find(it => !esValido(it.valorPrecio));
+        if (sinMonto) {
+            toast.error(`Falta el monto de "${sinMonto.sku_name}" (o elige Por cotizar o Sin costo)`);
             return;
         }
 
@@ -348,15 +360,17 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                 // se guardaran, la etiqueta y el mensaje los imprimirian.
                 transporte: modoEntrega === 'RETIRO' ? null : transporte,
                 tipo_despacho: modoEntrega === 'RETIRO' ? null : tipoDespacho,
-                region: modoEntrega === 'RETIRO' ? '' : region,
-                comuna: modoEntrega === 'RETIRO' ? '' : comuna,
+                region: modoEntrega === 'RETIRO' ? null : region,
+                comuna: modoEntrega === 'RETIRO' ? null : comuna,
                 comuna_id: modoEntrega === 'RETIRO' ? null : (comunaId || null),
-                direccion: modoEntrega === 'RETIRO' ? '' : direccion,
+                direccion: modoEntrega === 'RETIRO' ? null : direccion,
                 mensaje,
                 items: items.map(it => ({
                     sku_id: typeof it.sku_id === 'number' ? it.sku_id : null,
+                    producto_id: it.producto_id ?? null,
                     cantidad: it.cantidad,
-                    precio_unitario_estimado: it.precio_unitario_estimado,
+                    precio_unitario_estimado: paraServidor(it.valorPrecio).precio,
+                    sin_costo: paraServidor(it.valorPrecio).sin_costo,
                     // Sin esto la pieza personalizada se guardaba SIN nombre y sin
                     // caracteristicas: el backend los acepta desde siempre, pero el
                     // formulario no los mandaba. Llegaba al taller como un renglon
@@ -405,8 +419,8 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
         const clientName = createdCotizacion?.nombre_contacto || createdCotizacion?.cliente?.nombres ||
                            (clientMode === 'select' ? selectedCliente?.nombres : newClienteData.nombres) || "Cliente";
 
-        const itemsSummary = items.map(it => `• ${it.cantidad}x ${it.sku_name} ($${(it.cantidad * it.precio_unitario_estimado).toLocaleString()})`).join('\n');
-        const textMessage = `¡Hola ${clientName}! 👗✨ Te enviamos el detalle de la cotización N° ${createdCotizacion?.numero ?? ''} en Vistiendomé:\n\n${itemsSummary}\n\n*Total Estimado: $${totalCotizacion.toLocaleString()}*\n${describirEntrega({ modo_entrega: modoEntrega, tipo_despacho: tipoDespacho, transporte, direccion }).esRetiro ? '🏪 Retiro en el local' : `🚚 Despacho: ${transporte} (${tipoDespacho === 'SUCURSAL' ? 'A sucursal' : 'A domicilio'})`}\n${mensaje ? `📌 Nota: ${mensaje}\n\n` : '\n'}Quedamos atentas para confirmar tu pedido o resolver cualquier duda que tengas. ¡Un abrazo! 💕`;
+        const itemsSummary = items.map(it => `• ${it.cantidad}x ${it.sku_name} (${textoSubtotal(it)})`).join('\n');
+        const textMessage = `¡Hola ${clientName}! 👗✨ Te enviamos el detalle de la cotización N° ${createdCotizacion?.numero ?? ''} en Vistiendomé:\n\n${itemsSummary}\n\n*Total Estimado: ${totalCotizacion}*\n${describirEntrega({ modo_entrega: modoEntrega, tipo_despacho: tipoDespacho, transporte, direccion }).esRetiro ? '🏪 Retiro en el local' : `🚚 Despacho: ${transporte} (${tipoDespacho === 'SUCURSAL' ? 'A sucursal' : 'A domicilio'})`}\n${mensaje ? `📌 Nota: ${mensaje}\n\n` : '\n'}Quedamos atentas para confirmar tu pedido o resolver cualquier duda que tengas. ¡Un abrazo! 💕`;
 
         let cleanPhone = clientPhone.replace(/\D/g, '');
         if (cleanPhone.startsWith('0')) cleanPhone = cleanPhone.substring(1);
@@ -459,7 +473,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                 <div className="cot-rotulo">RESUMEN</div>
                                 <div className="cot-linea-total">
                                     <span>Total Estimado:</span>
-                                    <span className="cot-paso-icono">${totalCotizacion.toLocaleString()}</span>
+                                    <span className="cot-paso-icono">{totalCotizacion}</span>
                                 </div>
                                 <div className="cot-dato">
                                     {items.length} ítem(s) • {modoEntrega === 'RETIRO' ? 'Retiro en el local' : `Transporte: ${transporte}`}
@@ -636,6 +650,9 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                         contexto="panel"
                                         enmarcado
                                         atributos={atributosCatalogo}
+                                        // Con el catálogo, la pieza queda vinculada a su
+                                        // producto (y por él, a su categoría).
+                                        productos={productsList}
                                         onAgregar={handleAgregarPersonalizado}
                                         onCancelar={() => setMostrandoFormLibre(false)}
                                     />
@@ -710,15 +727,11 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                                 </div>
 
                                                 <div className="cot-fila-ancha">
-                                                    <div className="cot-fila-apretada">
-                                                        <span className="cot-dato-minimo">Precio ($):</span>
-                                                        <input
-                                                            type="number"
-                                                            value={it.precio_unitario_estimado}
-                                                            onChange={(e) => handlePriceChange(idx, e.target.value)}
-                                                            className="cot-campo-corto"
-                                                        />
-                                                    </div>
+                                                    <SelectorPrecio
+                                                        id={`cot-precio-${idx}`}
+                                                        valor={it.valorPrecio}
+                                                        onChange={(valor) => handlePriceChange(idx, valor)}
+                                                    />
 
                                                     <div className="cot-cantidad">
                                                         <button
@@ -735,7 +748,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                                     </div>
 
                                                     <div className="cot-precio cot-precio--alineado">
-                                                        ${(it.cantidad * (it.precio_unitario_estimado || 0)).toLocaleString()}
+                                                        {textoSubtotal(it)}
                                                     </div>
 
                                                     <button
@@ -752,7 +765,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                         <div className="cot-pie-total">
                                             <div className="cot-entrega">
                                                 <span className="cot-dato-fuerte">TOTAL COTIZACIÓN:</span>
-                                                <span className="cot-total">${totalCotizacion.toLocaleString()}</span>
+                                                <span className="cot-total">{totalCotizacion}</span>
                                             </div>
                                         </div>
                                     </div>

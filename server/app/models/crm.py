@@ -157,8 +157,20 @@ class CotizacionItem(SQLModel, table=True):
     cotizacion_id: str = Field(foreign_key="cotizaciones.id", index=True, max_length=26)
     
     sku_id: Optional[int] = Field(default=None, foreign_key="sku.id", index=True)
+
+    # De qué producto es la prenda, aunque no sea una variante exacta: una
+    # pieza personalizada de un Vestido Noemi sigue siendo un Vestido Noemi, y
+    # de ahí sale su categoría. Nulo solo en lo escrito a mano ("Otra").
+    producto_id: Optional[int] = Field(default=None, foreign_key="product.id", index=True)
+
     cantidad: int = Field(default=1)
-    precio_unitario_estimado: float = Field(default=0.0)
+
+    # TRES ESTADOS, NUNCA UN CERO AMBIGUO
+    #   None  → por cotizar: nadie ha decidido el precio todavía.
+    #   0     → sin costo: alguien lo eligió a propósito (un regalo).
+    #   > 0   → el monto.
+    # El sistema nunca escribe 0 por su cuenta: ver core/pedidos/precios.py.
+    precio_unitario_estimado: Optional[float] = Field(default=None)
     nombre_custom: Optional[str] = Field(default=None, max_length=255)
 
     # Las caracteristicas de una pieza que NO esta en el catalogo.
@@ -190,3 +202,4 @@ class CotizacionItem(SQLModel, table=True):
     # Relationships
     cotizacion: Cotizacion = Relationship(back_populates="items")
     sku: Optional["SKU"] = Relationship(back_populates="cotizacion_items")
+    producto: Optional["Product"] = Relationship()

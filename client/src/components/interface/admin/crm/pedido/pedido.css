@@ -160,3 +160,130 @@
     font-size: 0.8rem;
     color: var(--color-text-tertiary);
 }
+
+/* Precio en tres estados: se elige uno, y el monto solo si es un monto. */
+.sp-precio {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.sp-precio-opciones {
+    display: inline-flex;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.sp-precio-opcion {
+    padding: 0.35rem 0.6rem;
+    border: none;
+    border-right: 1px solid var(--color-border-strong);
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.sp-precio-opcion:last-child {
+    border-right: none;
+}
+
+.sp-precio-opcion--activa {
+    background: var(--color-brand);
+    color: var(--color-surface);
+}
+
+.sp-precio-opcion:focus-visible,
+.sp-precio-monto:focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+}
+
+.sp-precio-monto {
+    width: 7.5rem;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 0.5rem;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font: inherit;
+}
+
+/* Las prendas del pedido, cada una con su precio. */
+.sp-prendas {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.sp-prenda {
+    display: grid;
+    gap: 0.4rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.sp-prenda:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.sp-prenda-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.sp-prenda-nombre {
+    margin: 0;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    overflow-wrap: break-word;
+}
+
+.sp-prenda-detalle {
+    margin: 0.1rem 0 0;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.sp-prenda-precio {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.sp-prenda-monto {
+    display: block;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.sp-prenda-monto--pendiente {
+    font-weight: 600;
+    font-style: italic;
+    color: var(--color-warning-darkest);
+}
+
+.sp-total {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 2px solid var(--color-border);
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.sp-nota {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}

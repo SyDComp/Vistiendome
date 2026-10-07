@@ -1,6 +1,6 @@
 import React from 'react';
 import TablaPrendas from './TablaPrendas';
-import { formatCurrency } from '../../../../utils/cartUtils';
+import { textoPrecio, textoSubtotal, textoTotal } from '../../../../utils/precioPrenda';
 import './ItemsPedidoTable.css';
 
 /**
@@ -13,18 +13,16 @@ import './ItemsPedidoTable.css';
  * obliga a leer una frase por fila en vez de bajar la vista por una columna.
  */
 const ItemsPedidoTable = ({ items = [], mostrarPrecios = true }) => {
-    const total = items.reduce(
-        (acc, it) => acc + (it.cantidad || 0) * (it.precio_unitario_estimado || 0), 0
-    );
-
+    // Una prenda sin precio dice "Por cotizar", y una regalada "Sin costo":
+    // nunca "$0" (ver utils/precioPrenda).
     const columnasExtra = mostrarPrecios ? [
         {
             clave: 'precio', etiqueta: 'Precio', alinear: 'derecha',
-            valor: (i) => formatCurrency(i.precio_unitario_estimado),
+            valor: (i) => textoPrecio(i.precio_unitario_estimado),
         },
         {
             clave: 'subtotal', etiqueta: 'Subtotal', alinear: 'derecha',
-            valor: (i) => formatCurrency((i.cantidad || 0) * (i.precio_unitario_estimado || 0)),
+            valor: (i) => textoSubtotal(i),
         },
     ] : [];
 
@@ -43,7 +41,7 @@ const ItemsPedidoTable = ({ items = [], mostrarPrecios = true }) => {
             {mostrarPrecios && items.length > 0 && (
                 <div className="items-pedido-total">
                     <span>Total del pedido</span>
-                    <strong>{formatCurrency(total)}</strong>
+                    <strong>{textoTotal(items)}</strong>
                 </div>
             )}
 

@@ -7,3 +7,4 @@ export * from './taller.api.js';
 export * from './kardex.api.js';
 export * from './historiaPedido.api.js';
 export * from './ajustesNegocio.api.js';
+export * from './pedido.api.js';

@@ -298,7 +298,6 @@ const DetailDrawer = ({
             // La entrega se describe donde se describe en todo el panel: un retiro
             // no tiene transportista, y antes acá caía a "STARKEN / A Domicilio".
             const entrega = describirEntrega(currData);
-            const calculatedTotal = currData.total || (currData.items ? currData.items.reduce((acc, item) => acc + ((item.cantidad || 0) * (item.precio_unitario_estimado || 0)), 0) : 0);
             s.push({
                 title: 'Detalles de Cotización',
                 icon: <FileText size={18} />,
@@ -311,7 +310,6 @@ const DetailDrawer = ({
                             { label: 'Transporte / Envío', value: entrega.transporte || 'Sin transportista', isTransport: !!entrega.transporte },
                             { label: 'Tipo Despacho', value: currData.tipo_despacho === 'SUCURSAL' ? 'A Sucursal' : 'A Domicilio' },
                         ]),
-                    { label: 'Monto Total Estimado', value: `$${calculatedTotal.toLocaleString()}` },
                     // El nombre que se escribio en ESTE pedido. Puede diferir del
                     // de "Cliente Asociado" abajo -mismo RUT, otro nombre de
                     // verdad-, y ahi es donde queda a la vista sin perderse.
@@ -329,22 +327,8 @@ const DetailDrawer = ({
                     ]
                 });
             }
-            if (currData.items && currData.items.length > 0) {
-                s.push({
-                    title: 'Productos Cotizados',
-                    icon: <Package size={18} />,
-                    items: currData.items.map(it => {
-                        const nameStr = it.sku_name || it.nombre_custom || 'Producto del Catálogo / Especial';
-                        const codeStr = it.sku_code && it.sku_code !== 'SKU-CUSTOM' ? ` [SKU: ${it.sku_code}]` : '';
-                        const total = (it.cantidad || 1) * (it.precio_unitario_estimado || 0);
-                        const unitDesc = (it.cantidad || 1) > 1 ? ` ($${(it.precio_unitario_estimado || 0).toLocaleString('es-CL')} c/u)` : '';
-                        return {
-                            label: `${it.cantidad || 1}x ${nameStr}${codeStr}`,
-                            value: `$${total.toLocaleString('es-CL')}${unitDesc}`
-                        };
-                    })
-                });
-            }
+            // Las prendas, con su precio y el total, las muestra SeguimientoPedido
+            // (abajo): las lee frescas del servidor y permite cotizarlas.
             if (currData.mensaje) {
                 s.push({
                     title: 'Nota / Observaciones',

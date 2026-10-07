@@ -8,7 +8,7 @@ const datos = (extra = {}) => ({
     ...extra,
 });
 
-const prenda = { nombre: 'Tapado Magdalena Verano', config: { TALLA: 'L', COLOR: 'Coral' }, propuestos: { MANGAS: 'Corta' }, cantidad: 1 };
+const prenda = { nombre: 'Tapado Magdalena Verano', productoId: 12, config: { TALLA: 'L', COLOR: 'Coral' }, propuestos: { MANGAS: 'Corta' }, cantidad: 1 };
 
 describe('armarSolicitud', () => {
     it('las prendas elegidas salen en el mensaje, con lo propuesto marcado', () => {
@@ -35,6 +35,8 @@ describe('armarSolicitud', () => {
         expect(pedido.origen).toBe('CONTACTO_GRUPAL');
         expect(pedido.cantidad_aprox).toBe(20);
         expect(pedido.items[0]).toMatchObject({ nombre_custom: 'Tapado Magdalena Verano', config_propuesta: { MANGAS: 'Corta' } });
+        // De qué producto es, y sin precio: lo cotiza la tienda, no la clienta.
+        expect(pedido.items[0]).toMatchObject({ producto_id: 12, precio_unitario_estimado: null });
         expect(pedido).toMatchObject({ nombres: 'Ana', apellidos: 'María Pérez' });
     });
 });

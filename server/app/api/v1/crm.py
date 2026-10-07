@@ -68,7 +68,9 @@ class CotizacionItemRead(BaseModel):
     id: str
     sku_id: Optional[int] = None
     cantidad: int
-    precio_unitario_estimado: float
+    # None = por cotizar, 0 = sin costo (elegido), > 0 = monto.
+    precio_unitario_estimado: Optional[float] = None
+    producto_id: Optional[int] = None
     sku_name: Optional[str] = None
     sku_code: Optional[str] = None
     sku_image: Optional[str] = None
@@ -160,9 +162,9 @@ def _get_item_read(it: CotizacionItem) -> CotizacionItemRead:
         it_dict["producto_nombre"] = it.sku.product.name
         it_dict["config"] = it.sku.config or {}
     else:
-        it_dict["sku_name"] = it.nombre_custom or "Producto del Catálogo / Especial"
+        it_dict["sku_name"] = it.nombre_custom or (it.producto.name if it.producto else "Pieza especial")
         it_dict["sku_code"] = "SKU-CUSTOM"
-        it_dict["producto_nombre"] = it.nombre_custom or "Especial"
+        it_dict["producto_nombre"] = it.producto.name if it.producto else (it.nombre_custom or "Especial")
         # Sus caracteristicas van en el mismo campo que las de una variante del
         # catalogo: la planilla y la orden de corte las pintan igual, sin tener
         # que saber de donde salio la pieza.
@@ -215,8 +217,14 @@ def _get_cotizacion_read(c: Cotizacion, ordenes: Optional[List[OrdenDeCorteDelPe
 
 class CotizacionItemCreate(BaseModel):
     sku_id: Optional[int] = None
-    cantidad: int = 1
-    precio_unitario_estimado: float = 0.0
+    # De qué producto es, si se armó desde uno. El servidor decide si además
+    # es una variante exacta (core/pedidos/prendas.py).
+    producto_id: Optional[int] = None
+    cantidad: int = Field(default=1, ge=1)
+    # Sin precio = por cotizar. Un 0 no significa nada: para regalar está
+    # `sin_costo`, y solo lo acepta el panel.
+    precio_unitario_estimado: Optional[float] = None
+    sin_costo: bool = False
     nombre_custom: Optional[str] = None
     # Caracteristicas de una pieza que no esta en el catalogo, para que se
     # pueda cortar igual que las demas. Mismo formato que SKU.config.
@@ -327,7 +335,8 @@ def crear_cotizacion_manual(
     if not canal:
         raise HTTPException(status_code=422, detail="Falta indicar cómo llegó el pedido.")
     data.origen = OrigenCotizacion.MANUAL
-    cotizacion = pedidos_core.crear_pedido(session, data, historia.de_cuenta(current_admin), canal=canal)
+    cotizacion = pedidos_core.crear_pedido(session, data, historia.de_cuenta(current_admin), canal=canal,
+                                           permitir_sin_costo=True)
     return _get_cotizacion_read(cotizacion)
 
 @router.get("/conteo-estados")

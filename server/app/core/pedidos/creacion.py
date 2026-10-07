@@ -15,6 +15,7 @@ from ...models.iam import Direccion, Persona, TipoPersona
 from .. import propuestas as core_propuestas
 from ...models.historia import TipoEvento
 from .historia import Actor, anotar
+from .prendas import prenda_desde
 
 
 def modo_de(data) -> ModoEntrega:
@@ -38,12 +39,17 @@ def modo_de(data) -> ModoEntrega:
     return ModoEntrega.DESPACHO
 
 
-def crear_pedido(session: Session, data, actor: Actor, canal: str = None) -> Cotizacion:
+def crear_pedido(session: Session, data, actor: Actor, canal: str = None, permitir_sin_costo: bool = False) -> Cotizacion:
     """
     Crea el pedido con sus prendas y anota quién lo creó. `data` trae los
     campos de CotizacionCreate; `canal` es el "¿Cómo llegó?" de los que se
-    cargan en el panel.
+    cargan en el panel. `permitir_sin_costo`: solo el panel puede regalar.
     """
+    # Un retiro no viaja: no tiene región, comuna ni dirección de despacho,
+    # las mande quien las mande. Guardarlas sería dejar datos que contradicen
+    # el modo (y que la etiqueta o el mensaje podrían imprimir).
+    despacho = modo_de(data) == ModoEntrega.DESPACHO
+
     # 1. Buscar o Crear Persona
     #
     # LA IDENTIDAD DEL CLIENTE LA DECIDE EL RUT. SOLO EL RUT.
@@ -118,8 +124,8 @@ def crear_pedido(session: Session, data, actor: Actor, canal: str = None) -> Cot
             session.commit()
             session.refresh(persona)
             
-    # 1.5 Crear o Buscar Direccion si viene en el payload
-    if data.comuna_id and data.direccion:
+    # 1.5 Crear o Buscar Direccion si viene en el payload (solo un despacho tiene)
+    if despacho and data.comuna_id and data.direccion:
         direccion_existente = session.exec(
             select(Direccion).where(
                 Direccion.persona_id == persona.id,
@@ -150,11 +156,11 @@ def crear_pedido(session: Session, data, actor: Actor, canal: str = None) -> Cot
         modo_entrega=modo_de(data),
         # Un retiro no tiene transportista ni destino: guardarlos sería dejar
         # datos que contradicen el modo.
-        transporte=data.transporte if modo_de(data) == ModoEntrega.DESPACHO else None,
-        tipo_despacho=data.tipo_despacho if modo_de(data) == ModoEntrega.DESPACHO else None,
-        region=data.region,
-        comuna=data.comuna,
-        direccion=data.direccion,
+        transporte=data.transporte if despacho else None,
+        tipo_despacho=data.tipo_despacho if despacho else None,
+        region=(data.region or None) if despacho else None,
+        comuna=(data.comuna or None) if despacho else None,
+        direccion=(data.direccion or None) if despacho else None,
         nombre_contacto=nombre_contacto,
         canal=canal,
         estado=EstadoCotizacion.NUEVA
@@ -165,14 +171,11 @@ def crear_pedido(session: Session, data, actor: Actor, canal: str = None) -> Cot
     
     # 3. Crear Items
     for item_data in data.items:
+        # Qué prenda es (variante, personalizada de un producto, o escrita a
+        # mano) y su precio en tres estados: ver core/pedidos/prendas.py.
         item = CotizacionItem(
             cotizacion_id=cotizacion.id,
-            sku_id=item_data.sku_id,
-            cantidad=item_data.cantidad,
-            precio_unitario_estimado=item_data.precio_unitario_estimado,
-            nombre_custom=item_data.nombre_custom,
-            config_custom=item_data.config_custom or None,
-            config_propuesta=item_data.config_propuesta or None,
+            **prenda_desde(session, item_data, permitir_sin_costo),
         )
         session.add(item)
 

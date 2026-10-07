@@ -9,6 +9,7 @@ from ...database import get_session
 from ...core import existencias as existencias_core
 from ...core import retiro_variantes
 from ...core.movimientos import tienen_historia
+from ...models.crm import CotizacionItem
 from ...models.catalog import (
     Product, Category, SKU, MediaAsset, ProductMediaLink, SKUMediaLink,
     Characteristic, Specification, SpecificationCharacteristicLink, CategorySpecificationLink,
@@ -1555,7 +1556,12 @@ async def delete_product(product_id: int, force: bool = False, db: Session = Dep
     # Un producto cuyas variantes tienen historia (bodega, pedidos, cortes)
     # nunca se borra del todo, se pida como se pida: se desactiva y esa
     # historia sigue apuntándole.
-    con_historia = tienen_historia(db, [s.id for s in product.todas_las_skus])
+    # También cuenta una prenda de pedido que es de este producto sin ser una
+    # variante (una pieza personalizada): borrar el producto la dejaría
+    # apuntando a nada.
+    con_historia = bool(tienen_historia(db, [s.id for s in product.todas_las_skus])) or bool(
+        db.exec(select(CotizacionItem.id).where(CotizacionItem.producto_id == product.id)).first()
+    )
     perform_hard_delete = (settings.is_dev or force) and not con_historia
 
     if perform_hard_delete:
