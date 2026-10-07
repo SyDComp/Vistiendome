@@ -9,7 +9,7 @@ import { buildMapLinks } from '../../../utils/mapLinks';
 import Button from '../../ui/Button';
 import { post } from '../../../lib/api/client';
 import { useScrollLock } from '../../../hooks/useScrollLock';
-import { formatearTelefono } from '../../../utils/telefono';
+import { formatearTelefono, digitosDeCelular } from '../../../utils/telefono';
 import CamposEntrega from './contacto/CamposEntrega';
 import { armarSolicitud } from './contacto/armarSolicitud';
 import { ENTREGA_INICIAL } from './contacto/entrega';
@@ -103,13 +103,10 @@ const Contacto = () => {
         try { localStorage.setItem(BORRADOR, JSON.stringify(formData)); } catch { /* sin almacenamiento se sigue igual */ }
     }, [formData]);
 
+    // El campo muestra "+569" fijo. Si la clienta escribe o pega su número
+    // completo, el prefijo repetido se descarta (ver utils/telefono).
     const handleWhatsAppChange = (e) => {
-        let value = e.target.value;
-        if (!value.startsWith('+569')) {
-            value = '+569';
-        }
-        const numbers = value.slice(4).replace(/\D/g, '').slice(0, 8);
-        cambiar({ whatsapp: '+569' + numbers });
+        cambiar({ whatsapp: '+569' + digitosDeCelular(e.target.value) });
     };
 
     const validateWhatsApp = (number) => /^\+569\d{8}$/.test(number);

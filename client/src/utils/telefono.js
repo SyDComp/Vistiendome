@@ -68,3 +68,28 @@ export const formatearTelefono = (valor) => {
 
 /** ¿Se puede reconocer como telefono chileno? */
 export const esTelefonoValido = (valor) => nueveDigitos(valor).length === 9;
+
+/**
+ * Los ocho dígitos de un celular que van después de "+569", a partir de lo
+ * que haya en un campo que ya muestra ese "+569".
+ *
+ * Antes el campo agregaba todo lo escrito detrás del prefijo: quien escribía o
+ * pegaba su número completo ("+569 1234 5678") quedaba con "+569 5691 2345", un
+ * número de otra persona, sin ningún aviso. Acá se reconoce el prefijo
+ * repetido y se descarta.
+ *
+ * @param {string} valor  lo que hay en el campo, prefijo incluido
+ * @returns {string} hasta 8 dígitos
+ */
+export const digitosDeCelular = (valor) => {
+    const d = soloDigitos(valor);
+    let resto = d.startsWith('569') ? d.slice(3) : d;
+    if (resto.length > 8) {
+        if (resto.startsWith('569')) resto = resto.slice(3);
+        else if (resto.startsWith('56')) resto = resto.slice(2);
+        if (resto.length > 8 && resto.startsWith('9')) resto = resto.slice(1);
+    } else if (!d.startsWith('569') && resto.length === 9 && resto.startsWith('9')) {
+        resto = resto.slice(1);
+    }
+    return resto.slice(0, 8);
+};
