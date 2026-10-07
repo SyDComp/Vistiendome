@@ -5,8 +5,11 @@ import CanalPedido from './CanalPedido';
 import HistoriaPedido from './HistoriaPedido';
 import './pedido.css';
 
+// El contenedor de sección del panel parte invisible (opacity: 0) y aparece
+// con esta animación, igual que las demás secciones del detalle. Sin ella, la
+// sección ocupa su lugar pero no se ve.
 const Seccion = ({ icono, titulo, children }) => (
-    <div className="detail-drawer-section-wrapper">
+    <div className="detail-drawer-section-wrapper" style={{ animation: 'slideUp 0.4s ease forwards' }}>
         <div className="detail-drawer-section-header">
             <div className="detail-drawer-flex-row-12">
                 <div className="detail-drawer-section-icon">{icono}</div>
