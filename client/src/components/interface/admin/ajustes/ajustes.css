@@ -1,0 +1,141 @@
+/* Ajustes del negocio. Solo tokens del tema. */
+
+.aj-tarjeta {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    max-width: 40rem;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.aj-titulo {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--color-text-primary);
+}
+
+.aj-explicacion,
+.aj-nota {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+}
+
+.aj-editor {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.aj-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.4rem;
+}
+
+.aj-opcion,
+.aj-agregar {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+.aj-campo {
+    flex: 1;
+    min-width: 0;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 0.5rem;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font: inherit;
+}
+
+.aj-campo--error {
+    border-color: var(--color-error);
+    background: var(--color-error-bg);
+}
+
+.aj-icono,
+.aj-boton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 0.5rem;
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.aj-icono {
+    padding: 0.45rem;
+}
+
+.aj-boton {
+    padding: 0.5rem 0.9rem;
+    white-space: nowrap;
+}
+
+.aj-icono--quitar {
+    color: var(--color-error-strong);
+}
+
+.aj-boton--principal {
+    background: var(--color-brand);
+    border-color: var(--color-brand);
+    color: var(--color-surface);
+}
+
+.aj-icono:disabled,
+.aj-boton:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.aj-campo:focus-visible,
+.aj-icono:focus-visible,
+.aj-boton:focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+}
+
+.aj-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.aj-error {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-error-deep);
+}
+
+.aj-error--bloque {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    max-width: 40rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-error-border-strong);
+    border-radius: 0.5rem;
+    background: var(--color-error-bg);
+}
+
+.aj-oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}

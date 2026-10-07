@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlmodel import Session, select, func
-from typing import List, Optional
+from typing import List, Literal, Optional
 from datetime import datetime
 from pydantic import BaseModel, Field, field_validator
 
@@ -13,6 +13,8 @@ from app.api.deps import get_current_user, RequirePermiso
 from app.core import existencias as existencias_core
 from app.core import movimientos as movimientos_core
 from app.core import pedidos as pedidos_core
+from app.core.pedidos import historia
+from app.models.historia import TipoEvento
 from app.core.limites import VentanaDeslizante
 from app.models.propuestas import OpcionPropuesta
 
@@ -106,6 +108,7 @@ class CotizacionRead(BaseModel):
     persona_id: str
     origen: OrigenCotizacion
     estado: EstadoCotizacion
+    canal: Optional[str] = None
     mensaje: Optional[str] = None
     tipo_grupo: Optional[str] = None
     cantidad_aprox: Optional[int] = None
@@ -240,6 +243,8 @@ class CotizacionCreate(BaseModel):
     telefono: Optional[str] = Field(default=None, max_length=20)
     
     origen: OrigenCotizacion = OrigenCotizacion.CATALOGO
+    # "¿Cómo llegó?". Solo lo usa la ruta del panel; la tienda no lo manda.
+    canal: Optional[str] = Field(default=None, max_length=60)
     mensaje: Optional[str] = None
     tipo_grupo: Optional[str] = None
     cantidad_aprox: Optional[int] = None
@@ -307,7 +312,7 @@ def crear_cotizacion(data: CotizacionCreate, request: Request, session: Session 
         raise HTTPException(status_code=403, detail="Los pedidos manuales se crean desde el panel.")
     if not _LIMITE_PEDIDOS.permite(request.client.host if request.client else "?"):
         raise HTTPException(status_code=429, detail="Demasiados pedidos seguidos. Espera unos minutos.")
-    cotizacion = pedidos_core.crear_pedido(session, data)
+    cotizacion = pedidos_core.crear_pedido(session, data, historia.SITIO_WEB)
     return PedidoRecibido(numero=cotizacion.numero)
 
 
@@ -318,8 +323,11 @@ def crear_cotizacion_manual(
     current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR")),
 ):
     """Pedido cargado en el panel. Siempre es manual: lo carga alguien con sesión."""
+    canal = (data.canal or "").strip()
+    if not canal:
+        raise HTTPException(status_code=422, detail="Falta indicar cómo llegó el pedido.")
     data.origen = OrigenCotizacion.MANUAL
-    cotizacion = pedidos_core.crear_pedido(session, data)
+    cotizacion = pedidos_core.crear_pedido(session, data, historia.de_cuenta(current_admin), canal=canal)
     return _get_cotizacion_read(cotizacion)
 
 @router.get("/conteo-estados")
@@ -420,6 +428,10 @@ def _sincronizar_stock_venta(session: Session, cotizacion: Cotizacion, estado_an
 
 class EstadoUpdate(BaseModel):
     estado: EstadoCotizacion
+    # De dónde vino el cambio, si no fue a mano. Hoy imprimir etiquetas marca
+    # el pedido como despachado —y esa misma pantalla lo puede deshacer—, y la
+    # historia tiene que decirlo.
+    motivo: Optional[Literal["etiquetas", "deshacer_etiquetas"]] = None
 
 @router.put("/cotizaciones/{cotizacion_id}/estado", response_model=CotizacionRead)
 def actualizar_estado_cotizacion(cotizacion_id: str, data: EstadoUpdate, session: Session = Depends(get_session), current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
@@ -431,6 +443,10 @@ def actualizar_estado_cotizacion(cotizacion_id: str, data: EstadoUpdate, session
     cotizacion.estado = data.estado
     session.add(cotizacion)
     _sincronizar_stock_venta(session, cotizacion, estado_anterior, data.estado)
+    if estado_anterior != data.estado:
+        historia.anotar(session, cotizacion, TipoEvento.ESTADO, historia.de_cuenta(current_admin),
+                        de=getattr(estado_anterior, "value", estado_anterior), a=data.estado.value,
+                        motivo=data.motivo)
     session.commit()
     session.refresh(cotizacion)
     return _get_cotizacion_read(cotizacion, _mapa_ordenes_de_corte(session, [cotizacion.id]).get(cotizacion.id, []))
@@ -533,6 +549,10 @@ def eliminar_cotizacion(
         prop.cotizacion_id = None
         db.add(prop)
 
+    # Su historia se conserva, con esta última línea. Al borrarse el pedido la
+    # base deja las anotaciones sin vínculo (ON DELETE SET NULL), y el número
+    # sigue diciendo de qué pedido eran.
+    historia.anotar(db, cot, TipoEvento.ELIMINADO, historia.de_cuenta(admin))
     for it in items:
         db.delete(it)
     db.delete(cot)

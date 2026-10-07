@@ -58,8 +58,8 @@ export const getAdminAttributes = async () => {
  * Ojo con DESPACHADA: ese estado descuenta el stock. No es una etiqueta, es un
  * hecho — ver `EstadoCotizacion` en el servidor.
  */
-export const actualizarEstadoCotizacion = (id, estado) =>
-    put(`/api/v1/crm/cotizaciones/${id}/estado`, { estado });
+export const actualizarEstadoCotizacion = (id, estado, motivo = null) =>
+    put(`/api/v1/crm/cotizaciones/${id}/estado`, { estado, motivo });
 
 // ==================== COLLECTIONS ====================
 

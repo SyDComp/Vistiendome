@@ -277,7 +277,7 @@ const ShippingLabelPrinter = () => {
         if (!pendientes.length) return;
 
         const resultados = await Promise.allSettled(
-            pendientes.map(c => actualizarEstadoCotizacion(c.id, 'DESPACHADA'))
+            pendientes.map(c => actualizarEstadoCotizacion(c.id, 'DESPACHADA', 'etiquetas'))
         );
         const fallaron = resultados.filter(r => r.status === 'rejected').length;
 
@@ -298,9 +298,9 @@ const ShippingLabelPrinter = () => {
 
     const deshacerDespacho = async () => {
         const ids = ultimoDespacho || [];
-        // Volver a CONFIRMADA borra los movimientos de venta: el gancho de
-        // stock revierte al salir de DESPACHADA. No queda rastro contable.
-        const r = await Promise.allSettled(ids.map(id => actualizarEstadoCotizacion(id, 'CONFIRMADA')));
+        // Volver a CONFIRMADA devuelve el stock con un movimiento de vuelta
+        // (la salida no se borra), y la historia de cada pedido lo anota.
+        const r = await Promise.allSettled(ids.map(id => actualizarEstadoCotizacion(id, 'CONFIRMADA', 'deshacer_etiquetas')));
         const fallaron = r.filter(x => x.status === 'rejected').length;
         if (fallaron) {
             toast.error(`${fallaron} de ${ids.length} no se pudieron revertir. Revísalos en Cotizaciones.`);

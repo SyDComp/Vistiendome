@@ -111,7 +111,7 @@ def test_el_panel_crea_pedidos_solo_con_sesion(client: TestClient, session: Sess
 
 
 def test_lo_que_crea_el_panel_es_manual(client_admin: TestClient, session: Session):
-    res = client_admin.post("/api/v1/crm/cotizaciones", json=_pedido(origen="CATALOGO"))
+    res = client_admin.post("/api/v1/crm/cotizaciones", json=_pedido(origen="CATALOGO", canal="WhatsApp"))
     assert res.status_code == 200, res.text
     assert res.json()["origen"] == "MANUAL"
     assert session.exec(select(Cotizacion)).one().origen == OrigenCotizacion.MANUAL
@@ -121,7 +121,7 @@ def test_el_panel_puede_elegir_a_la_clienta_por_id(client_admin: TestClient, ses
     persona = Persona(rut="22222222-2", nombres="Beatriz", apellidos="Lagos")
     session.add(persona)
     session.commit()
-    res = client_admin.post("/api/v1/crm/cotizaciones", json=_pedido(rut=None, persona_id=persona.id))
+    res = client_admin.post("/api/v1/crm/cotizaciones", json=_pedido(rut=None, persona_id=persona.id, canal="WhatsApp"))
     assert res.status_code == 200, res.text
     assert res.json()["persona_id"] == persona.id
 

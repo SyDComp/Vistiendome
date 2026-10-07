@@ -15,6 +15,9 @@ const API_BASE = '/api/v1/admin/catalog';
 
 import Skeleton, { SectionSkeleton } from '../Skeleton';
 import { generateEAN13 } from '../../../features/productDetail/utils/skuUtils';
+import { describirEntrega } from '../../../utils/entrega';
+import { etiquetaEstado } from '../../../utils/estadosPedido';
+import SeguimientoPedido from '../../interface/admin/crm/pedido/SeguimientoPedido';
 
 /**
  * DetailDrawer: Vista de detalles potente con navegación histórica (Stack-based).
@@ -292,15 +295,22 @@ const DetailDrawer = ({
                 ]
             });
         } else if (currType === 'cotizacion') {
+            // La entrega se describe donde se describe en todo el panel: un retiro
+            // no tiene transportista, y antes acá caía a "STARKEN / A Domicilio".
+            const entrega = describirEntrega(currData);
             const calculatedTotal = currData.total || (currData.items ? currData.items.reduce((acc, item) => acc + ((item.cantidad || 0) * (item.precio_unitario_estimado || 0)), 0) : 0);
             s.push({
                 title: 'Detalles de Cotización',
                 icon: <FileText size={18} />,
                 items: [
-                    { label: 'Número', value: `#${currData.id}` },
-                    { label: 'Estado', value: currData.estado || 'NUEVA' },
-                    { label: 'Transporte / Envío', value: currData.transporte || 'STARKEN', isTransport: true },
-                    { label: 'Tipo Despacho', value: currData.tipo_despacho === 'SUCURSAL' ? 'A Sucursal / Retiro' : 'A Domicilio' },
+                    { label: 'Número', value: currData.numero ? `N° ${currData.numero}` : 'Sin número' },
+                    { label: 'Estado', value: etiquetaEstado(currData.estado || 'NUEVA', currData.modo_entrega) },
+                    ...(entrega.esRetiro
+                        ? [{ label: 'Entrega', value: 'Retiro en el local' }]
+                        : [
+                            { label: 'Transporte / Envío', value: entrega.transporte || 'Sin transportista', isTransport: !!entrega.transporte },
+                            { label: 'Tipo Despacho', value: currData.tipo_despacho === 'SUCURSAL' ? 'A Sucursal' : 'A Domicilio' },
+                        ]),
                     { label: 'Monto Total Estimado', value: `$${calculatedTotal.toLocaleString()}` },
                     // El nombre que se escribio en ESTE pedido. Puede diferir del
                     // de "Cliente Asociado" abajo -mismo RUT, otro nombre de
@@ -1749,6 +1759,10 @@ const DetailDrawer = ({
                         ))
                     )}
                     
+                    {currType === 'cotizacion' && currData?.id && (
+                        <SeguimientoPedido key={currData.id} cotizacion={currData} />
+                    )}
+
                     {currType === 'cotizacion' && currData?.id && (
                         <div className="dd-separador">
                             <div className="dd-bloque-destacado">

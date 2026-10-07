@@ -7,6 +7,7 @@ import { getAdminAttributes } from '../../../../lib/api/endpoints/admin.api';
 import { useNotification } from '../../../../context/NotificationContext';
 import Imagen from '../../../ui/Imagen';
 import { formatearTelefono, normalizarTelefono } from '../../../../utils/telefono';
+import SelectorCanal from './pedido/SelectorCanal';
 import './AdminCotizacionModal.css';
 
 const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = null }) => {
@@ -64,6 +65,9 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
     const [comunas, setComunas] = useState([]);
     const [direccion, setDireccion] = useState('');
     const [mensaje, setMensaje] = useState('');
+    // "¿Cómo llegó?": obligatorio. Es lo que permite saber después cuántos
+    // pedidos llegaron por WhatsApp, por Instagram, en la tienda...
+    const [canal, setCanal] = useState('');
     
     // Estado de carga y éxito
     const [submitting, setSubmitting] = useState(false);
@@ -73,6 +77,9 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
     useEffect(() => {
         if (isOpen) {
             setCreatedCotizacion(null);
+            // Cada pedido se pregunta de nuevo: heredar el del anterior es
+            // justo cómo se cuela un dato equivocado.
+            setCanal('');
             if (initialCliente) {
                 setSelectedCliente(initialCliente);
                 setClientMode('select');
@@ -317,6 +324,10 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
             toast.error("Añade al menos un producto a la cotización");
             return;
         }
+        if (!canal) {
+            toast.error("Indica cómo llegó el pedido");
+            return;
+        }
 
         setSubmitting(true);
         try {
@@ -331,6 +342,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                 // justo lo que hay hoy en la base.
                 telefono: normalizarTelefono(clientMode === 'select' ? selectedCliente.telefono : newClienteData.telefono),
                 origen: "MANUAL",
+                canal,
                 modo_entrega: modoEntrega,
                 // Un retiro no viaja: no se le guarda transportista ni destino. Si
                 // se guardaran, la etiqueta y el mensaje los imprimirian.
@@ -394,7 +406,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                            (clientMode === 'select' ? selectedCliente?.nombres : newClienteData.nombres) || "Cliente";
 
         const itemsSummary = items.map(it => `• ${it.cantidad}x ${it.sku_name} ($${(it.cantidad * it.precio_unitario_estimado).toLocaleString()})`).join('\n');
-        const textMessage = `¡Hola ${clientName}! 👗✨ Te enviamos el detalle de la cotización #${createdCotizacion?.id?.substring(0, 8) || ''} en Vistiendomé:\n\n${itemsSummary}\n\n*Total Estimado: $${totalCotizacion.toLocaleString()}*\n${describirEntrega({ modo_entrega: modoEntrega, tipo_despacho: tipoDespacho, transporte, direccion }).esRetiro ? '🏪 Retiro en el local' : `🚚 Despacho: ${transporte} (${tipoDespacho === 'SUCURSAL' ? 'A sucursal' : 'A domicilio'})`}\n${mensaje ? `📌 Nota: ${mensaje}\n\n` : '\n'}Quedamos atentas para confirmar tu pedido o resolver cualquier duda que tengas. ¡Un abrazo! 💕`;
+        const textMessage = `¡Hola ${clientName}! 👗✨ Te enviamos el detalle de la cotización N° ${createdCotizacion?.numero ?? ''} en Vistiendomé:\n\n${itemsSummary}\n\n*Total Estimado: $${totalCotizacion.toLocaleString()}*\n${describirEntrega({ modo_entrega: modoEntrega, tipo_despacho: tipoDespacho, transporte, direccion }).esRetiro ? '🏪 Retiro en el local' : `🚚 Despacho: ${transporte} (${tipoDespacho === 'SUCURSAL' ? 'A sucursal' : 'A domicilio'})`}\n${mensaje ? `📌 Nota: ${mensaje}\n\n` : '\n'}Quedamos atentas para confirmar tu pedido o resolver cualquier duda que tengas. ¡Un abrazo! 💕`;
 
         let cleanPhone = clientPhone.replace(/\D/g, '');
         if (cleanPhone.startsWith('0')) cleanPhone = cleanPhone.substring(1);
@@ -438,7 +450,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                 <Check size={36} strokeWidth={3} />
                             </div>
                             <h3 className="cot-titulo">
-                                ¡Cotización #{createdCotizacion.id?.substring(0, 8)} creada!
+                                ¡Cotización N° {createdCotizacion.numero} creada!
                             </h3>
                             <p className="cot-explicacion">
                                 La cotización quedó registrada en el CRM. Ahora puedes enviarle el resumen directamente al WhatsApp de tu cliente si lo deseas.
@@ -450,7 +462,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                     <span className="cot-paso-icono">${totalCotizacion.toLocaleString()}</span>
                                 </div>
                                 <div className="cot-dato">
-                                    {items.length} ítem(s) • Transporte: {transporte}
+                                    {items.length} ítem(s) • {modoEntrega === 'RETIRO' ? 'Retiro en el local' : `Transporte: ${transporte}`}
                                 </div>
                             </div>
                             <div className="cot-exito-acciones">
@@ -753,6 +765,13 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                     <MapPin size={18} color="#8f0653" /> 3. Envío y Observaciones
                                 </div>
                                 <div className="cot-rejilla--estrecha">
+                                    <div className="adm-ancho-total">
+                                        <label className="adm-etiqueta" htmlFor="cot-canal">¿Cómo llegó? *</label>
+                                        <SelectorCanal
+                                            id="cot-canal" value={canal} onChange={setCanal} required
+                                            className="adm-campo adm-campo--fuerte"
+                                        />
+                                    </div>
                                     <div className="adm-ancho-total">
                                         <label className="adm-etiqueta">Tipo de entrega</label>
                                         <select

@@ -100,6 +100,13 @@ class Cotizacion(SQLModel, table=True):
     origen: OrigenCotizacion = Field(default=OrigenCotizacion.CATALOGO)
     estado: EstadoCotizacion = Field(default=EstadoCotizacion.NUEVA)
 
+    # "¿Cómo llegó?": WhatsApp, Instagram, en la tienda... Solo en los pedidos
+    # cargados en el panel; los de la web llegaron por la web y lo dice
+    # `origen`. Texto, no una referencia a la lista de Ajustes del negocio: si
+    # mañana se quita una opción, los pedidos viejos siguen diciendo lo que
+    # decían. Nulo en los manuales anteriores a este campo: no se sabe.
+    canal: Optional[str] = Field(default=None, max_length=60)
+
     # Retiro o despacho. Nullable sólo por los pedidos anteriores a que este
     # campo existiera; los nuevos siempre lo traen.
     modo_entrega: Optional[ModoEntrega] = Field(default=None)

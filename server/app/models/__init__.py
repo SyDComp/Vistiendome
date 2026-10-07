@@ -6,6 +6,8 @@ from .crm import Cotizacion, CotizacionItem
 from .analytics import AnalyticsEvent
 from .taller import OrdenCorte, OrdenCorteItem, EstadoOrdenCorte
 from .propuestas import OpcionPropuesta, EstadoPropuesta
+from .historia import PedidoEvento, TipoEvento
+from .ajustes import AjusteNegocio
 
 # Para que SQLAlchemy/SQLModel detecte las tablas de la Nueva Arquitectura
 __all__ = [
@@ -14,5 +16,6 @@ __all__ = [
     "SKU", "HomepageSection", "SiteSetting",
     "Cotizacion", "CotizacionItem", "AnalyticsEvent",
     "OrdenCorte", "OrdenCorteItem", "EstadoOrdenCorte",
-    "OpcionPropuesta", "EstadoPropuesta"
+    "OpcionPropuesta", "EstadoPropuesta",
+    "PedidoEvento", "TipoEvento", "AjusteNegocio"
 ]

@@ -9,14 +9,8 @@ import { imprimirOrdenCorte } from './imprimirOrdenCorte';
 import useCaracteristicasCorte from '../../../../hooks/useCaracteristicasCorte';
 import './OrdenCorteDetalle.css';
 
-export const ESTADOS = [
-    { value: 'PENDIENTE', label: 'Pendiente', color: '#64748b', bg: '#f1f5f9' },
-    { value: 'EN_PROCESO', label: 'En proceso', color: '#b45309', bg: '#fef3c7' },
-    { value: 'FINALIZADA', label: 'Finalizada', color: '#15803d', bg: '#dcfce7' },
-    { value: 'CANCELADA', label: 'Cancelada', color: '#b91c1c', bg: '#fee2e2' },
-];
-
-export const estiloEstado = (e) => ESTADOS.find(x => x.value === e) || ESTADOS[0];
+import { ESTADOS, estiloEstado } from '../../../../utils/estadosOrdenCorte';
+export { ESTADOS, estiloEstado };
 
 const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
     const { toast, confirm } = useNotification();

@@ -17,7 +17,8 @@ import {
     Zap,
     Hammer,
     User,
-    BarChart3
+    BarChart3,
+    SlidersHorizontal
 } from 'lucide-react';
 
 
@@ -43,6 +44,7 @@ const PropuestasView = React.lazy(() => import('./crm/PropuestasView'));
 const ShippingLabelPrinter = React.lazy(() => import('./crm/ShippingLabelPrinter'));
 const AnalyticsModule = React.lazy(() => import('./analytics/AnalyticsModule'));
 const AdminProfile = React.lazy(() => import('./profile/AdminProfile'));
+const AjustesNegocio = React.lazy(() => import('./ajustes/AjustesNegocio'));
 
 const DashboardLayout = () => {
     const navigate = useNavigate();
@@ -155,6 +157,7 @@ const DashboardLayout = () => {
             ]
         },
         { id: 'analytics', label: 'Estadísticas', path: '/admin/dashboard/analytics', icon: BarChart3 },
+        { id: 'ajustes', label: 'Ajustes del negocio', path: '/admin/dashboard/ajustes', icon: SlidersHorizontal },
         { id: 'profile', label: 'Mi Perfil', path: '/admin/dashboard/profile', icon: User },
     ];
 
@@ -308,6 +311,7 @@ const DashboardLayout = () => {
                             <Route path="/crm/shipping-labels" element={<ShippingLabelPrinter/>} />
                             <Route path="/crm/propuestas" element={<PropuestasView/>} />
                             <Route path="/profile" element={<AdminProfile/>} />
+                            <Route path="/ajustes" element={<AjustesNegocio/>} />
                             <Route path="*" element={<Navigate to="/admin/dashboard/inventory/products" />} />
                         </Routes>
                         </Suspense>

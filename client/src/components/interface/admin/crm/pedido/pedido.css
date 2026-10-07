@@ -1,0 +1,163 @@
+/* Seguimiento del pedido: "¿Cómo llegó?" e Historia. Solo tokens del tema. */
+
+.sp-cuerpo {
+    padding: 0.25rem 0 0.5rem;
+}
+
+.sp-rotulo {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-tertiary);
+    margin-bottom: 0.35rem;
+}
+
+.sp-canal {
+    margin: 0;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.sp-canal--sin-dato {
+    font-weight: 400;
+    font-style: italic;
+    color: var(--color-text-muted);
+}
+
+.sp-canal-fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.sp-canal-edicion {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.sp-select {
+    width: 100%;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 0.5rem;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font: inherit;
+}
+
+.sp-select:focus-visible,
+.sp-boton:focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+}
+
+.sp-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.sp-boton {
+    padding: 0.4rem 0.85rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 0.5rem;
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.sp-boton--principal {
+    background: var(--color-brand);
+    border-color: var(--color-brand);
+    color: var(--color-surface);
+}
+
+.sp-boton:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.sp-aviso {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+}
+
+.sp-aviso--error {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--color-error-border-strong);
+    border-radius: 0.5rem;
+    background: var(--color-error-bg);
+    color: var(--color-error-deep);
+}
+
+/* La historia: una línea de tiempo, de lo más antiguo a lo más reciente. */
+.sp-historia {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sp-evento {
+    position: relative;
+    padding: 0 0 1rem 1.25rem;
+    border-left: 2px solid var(--color-border);
+    margin-left: 0.35rem;
+}
+
+.sp-evento:last-child {
+    padding-bottom: 0;
+    border-left-color: transparent;
+}
+
+.sp-evento::before {
+    content: '';
+    position: absolute;
+    left: -0.4rem;
+    top: 0.2rem;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: var(--color-brand);
+    border: 2px solid var(--color-surface);
+}
+
+/* El inicio del registro no es algo que le pasó al pedido: se ve distinto. */
+.sp-evento--inicio::before {
+    background: var(--color-surface);
+    border-color: var(--color-text-placeholder);
+}
+
+.sp-cuando {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.sp-que {
+    margin: 0.1rem 0 0;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    overflow-wrap: break-word;
+}
+
+.sp-detalle {
+    margin: 0.15rem 0 0;
+    font-size: 0.875rem;
+    color: var(--color-text-body);
+}
+
+.sp-quien {
+    margin: 0.15rem 0 0;
+    font-size: 0.8rem;
+    color: var(--color-text-tertiary);
+}

@@ -25,6 +25,8 @@ from app.models.catalog import SKU, MovementType
 from app.models.iam import CuentaAcceso
 from app.api.deps import RequirePermiso
 from app.core import movimientos as movimientos_core
+from app.core.pedidos import historia
+from app.models.historia import TipoEvento
 
 router = APIRouter()
 
@@ -253,6 +255,9 @@ def crear(data: OrdenCrear, db: Session = Depends(get_session), admin: CuentaAcc
             cantidad=entrada.cantidad,
             cotizacion_item_id=entrada.cotizacion_item_id,
         ))
+    db.flush()
+    db.refresh(orden)
+    historia.anotar_en_sus_pedidos(db, orden, TipoEvento.ORDEN_AGREGADA, historia.de_cuenta(admin))
     db.commit()
     db.refresh(orden)
     return _salida(orden, db)
@@ -307,6 +312,10 @@ def cambiar_estado(orden_id: str, data: EstadoEntrada, db: Session = Depends(get
     if entra or sale:
         _aplicar_finalizacion(db, orden, finalizando=entra)
 
+    historia.anotar_en_sus_pedidos(
+        db, orden, TipoEvento.ORDEN_ESTADO, historia.de_cuenta(admin),
+        de=getattr(anterior, "value", anterior), a=nuevo.value,
+    )
     orden.estado = nuevo
     orden.finalizada_at = datetime.utcnow() if entra else (None if sale else orden.finalizada_at)
     orden.updated_at = datetime.utcnow()
@@ -360,6 +369,7 @@ def eliminar(orden_id: str, db: Session = Depends(get_session), admin: CuentaAcc
             status_code=403,
             detail="Una orden finalizada no se borra: ya movió stock y marcó piezas cortadas. Cancélala si hace falta.",
         )
+    historia.anotar_en_sus_pedidos(db, orden, TipoEvento.ORDEN_ELIMINADA, historia.de_cuenta(admin))
     for it in list(orden.items):
         db.delete(it)
     db.delete(orden)

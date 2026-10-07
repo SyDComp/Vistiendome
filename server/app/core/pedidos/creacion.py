@@ -13,6 +13,8 @@ from sqlmodel import Session, select
 from ...models.crm import Cotizacion, CotizacionItem, EstadoCotizacion, ModoEntrega, OrigenCotizacion
 from ...models.iam import Direccion, Persona, TipoPersona
 from .. import propuestas as core_propuestas
+from ...models.historia import TipoEvento
+from .historia import Actor, anotar
 
 
 def modo_de(data) -> ModoEntrega:
@@ -36,8 +38,12 @@ def modo_de(data) -> ModoEntrega:
     return ModoEntrega.DESPACHO
 
 
-def crear_pedido(session: Session, data) -> Cotizacion:
-    """Crea el pedido con sus prendas. `data` trae los campos de CotizacionCreate."""
+def crear_pedido(session: Session, data, actor: Actor, canal: str = None) -> Cotizacion:
+    """
+    Crea el pedido con sus prendas y anota quién lo creó. `data` trae los
+    campos de CotizacionCreate; `canal` es el "¿Cómo llegó?" de los que se
+    cargan en el panel.
+    """
     # 1. Buscar o Crear Persona
     #
     # LA IDENTIDAD DEL CLIENTE LA DECIDE EL RUT. SOLO EL RUT.
@@ -150,6 +156,7 @@ def crear_pedido(session: Session, data) -> Cotizacion:
         comuna=data.comuna,
         direccion=data.direccion,
         nombre_contacto=nombre_contacto,
+        canal=canal,
         estado=EstadoCotizacion.NUEVA
     )
     session.add(cotizacion)
@@ -183,6 +190,8 @@ def crear_pedido(session: Session, data) -> Cotizacion:
             except Exception:
                 pass
 
+    origen = getattr(cotizacion.origen, "value", cotizacion.origen)
+    anotar(session, cotizacion, TipoEvento.CREADO, actor, origen=origen, canal=canal)
     session.commit()
     session.refresh(cotizacion)
 
