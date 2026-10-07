@@ -16,7 +16,7 @@ const Seccion = ({ icono, titulo, children }) => (
                 <h3 className="detail-drawer-section-title">{titulo}</h3>
             </div>
         </div>
-        <div className="sp-cuerpo">{children}</div>
+        <div className="detail-drawer-summary-card">{children}</div>
     </div>
 );
 
