@@ -17,6 +17,7 @@ import { formatChar, formatOpt } from '../../../../utils/formatters';
 import { getYoutubeEmbedUrl } from '../../../../utils/youtube';
 import AdminFormLayout, { AdminFormRow, AdminFormSection, AdminFormSubmit } from '../../../ui/admin/AdminFormLayout';
 import { useHasta } from '../../../../hooks/useCorte';
+import { mensajeDeError } from '../../../../utils/errorServidor';
 
 const API_BASE = `/api/v1/admin/catalog`;
 
@@ -330,6 +331,13 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
             sale_end: formValues.sale_type ? (formValues.sale_end || null) : null
         };
 
+        // Toda variante del catálogo tiene un monto (el servidor también lo exige).
+        const sinPrecio = payload.skus.filter(s => !(Number(s.price) > 0));
+        if (sinPrecio.length) {
+            toast.error(`Falta el precio de: ${sinPrecio.map(s => s.sku).join(', ')}`, 'Variantes sin precio');
+            return;
+        }
+
         const isNew = !productId;
         const method = productId ? 'PUT' : 'POST';
         const url = productId ? `${API_BASE}/products/${productId}` : `${API_BASE}/products`;
@@ -364,8 +372,8 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                     }
                 }
             } else {
-                const err = await res.json();
-                toast.error(err.detail || "Error al guardar");
+                const err = await res.json().catch(() => ({}));
+                toast.error(mensajeDeError(err.detail, "Error al guardar"));
             }
         } catch (err) { 
             console.error("Error:", err); 

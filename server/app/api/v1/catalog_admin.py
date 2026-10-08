@@ -8,6 +8,7 @@ from sqlalchemy.orm import selectinload
 from ...database import get_session
 from ...core import existencias as existencias_core
 from ...core import retiro_variantes
+from ...core import categorias as categorias_core
 from ...core.movimientos import tienen_historia
 from ...models.crm import CotizacionItem
 from ...models.catalog import (
@@ -33,7 +34,7 @@ def normalize_opt(text: str) -> str:
     return string.capwords(cleaned.lower())
 
 from ...core import inventory_core
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator, model_validator
 import re
 import unicodedata
 from ...core.config import settings
@@ -53,7 +54,10 @@ router = APIRouter(dependencies=[Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"
 class SKUCreate(BaseModel):
     sku: str
     barcode: Optional[str] = None
-    price: float
+    # Siempre un monto. Un 0 en el catálogo se mostraría como "$0" en la
+    # tienda: no es un precio, es uno que falta. Lo que se hace a pedido sin
+    # precio fijo va por Contacto, donde sí existe "por cotizar".
+    price: Optional[float] = None
 
     # OPCIONAL a proposito: `None` significa "no estoy gestionando el stock en
     # esta peticion", y entonces no se toca. Antes era obligatorio, asi que
@@ -71,6 +75,12 @@ class SKUCreate(BaseModel):
     sale_value: Optional[float] = None
     sale_start: Optional[datetime] = None
     sale_end: Optional[datetime] = None
+
+    @model_validator(mode="after")
+    def _con_precio(self):
+        if self.price is None or self.price <= 0:
+            raise ValueError(f"La variante {self.sku} no tiene precio: toda variante del catálogo necesita un monto mayor que cero.")
+        return self
 
 class ImageCreate(BaseModel):
     media_asset_id: int
@@ -107,9 +117,14 @@ class SpecificationCreate(BaseModel):
 
 class CategoryUpdate(BaseModel):
     name: Optional[str] = None
+    # Para mover a la raíz se manda null EXPLÍCITO: "no vino" y "sin padre"
+    # se distinguen con model_fields_set.
     parent_id: Optional[int] = None
     is_filterable: Optional[bool] = None
     suggested_specification_ids: List[int] = []
+    # Nulo = igual que su categoría padre (ver core/categorias).
+    abastecimiento: Optional[str] = None
+    acepta_personalizacion: Optional[bool] = None
 
 class ColorSwatchCreate(BaseModel):
     name: str
@@ -146,43 +161,6 @@ def get_descendant_ids(db: Session, category_id: int) -> List[int]:
     
     recurse(category_id)
     return all_ids
-
-def update_category_metadata_recursive(db: Session, category: Category):
-    """
-    Recalcula slug, path y level de la categoría y todos sus descendientes.
-    """
-    parent = None
-    if category.parent_id:
-        parent = db.get(Category, category.parent_id)
-    
-    # Nuevo slug basado en nombre
-    category.slug = slugify(category.name)
-    _ubicar(category, parent)
-
-    db.add(category)
-    db.flush()
-
-    # Recursión para hijos
-    for child in category.subcategories:
-        update_category_metadata_recursive(db, child)
-
-
-def _ubicar(category: Category, parent: Optional[Category]) -> None:
-    """Nivel y ruta (ej: /root/child) según dónde cuelga la categoría."""
-    category.level = (parent.level + 1) if parent else 1
-    category.path = (f"{parent.path}/{category.slug}") if parent else f"/{category.slug}"
-
-
-def reubicar(db: Session, category: Category, parent: Optional[Category]) -> None:
-    """
-    Recalcula nivel y ruta de la categoría y sus descendientes, sin tocar el
-    slug: es la dirección pública de la categoría, y moverla de lugar no
-    tiene por qué cambiarla (ni chocar con otra del mismo nombre).
-    """
-    _ubicar(category, parent)
-    db.add(category)
-    for child in category.subcategories:
-        reubicar(db, child, category)
 
 # --- ENDPOINTS DE ATRIBUTOS ---
 
@@ -553,6 +531,13 @@ def get_sku(sku_id: int, db: Session = Depends(get_session)):
 
 class SKUUpdate(BaseModel):
     price: Optional[float] = None
+
+    @field_validator("price")
+    @classmethod
+    def _monto(cls, v):
+        if v is not None and v <= 0:
+            raise ValueError("El precio tiene que ser un monto mayor que cero.")
+        return v
     sale_type: Optional[str] = None      # 'percent' | 'fixed' | None (sin oferta)
     sale_value: Optional[float] = None
     sale_start: Optional[datetime] = None
@@ -780,6 +765,26 @@ def get_category_attributes(category_id: int, db: Session = Depends(get_session)
 
 # --- ENDPOINTS DE CATEGORIAS ---
 
+def _ajustes_salida(c: Category) -> dict:
+    """Lo propio de la categoría y lo que vale en efecto (heredado o no)."""
+    ef = categorias_core.efectivos(c)
+    return {
+        "abastecimiento": c.abastecimiento,
+        "acepta_personalizacion": c.acepta_personalizacion,
+        "abastecimiento_efectivo": ef.abastecimiento,
+        "abastecimiento_texto": categorias_core.etiqueta(ef.abastecimiento),
+        "abastecimiento_heredado_de": ef.abastecimiento_desde.name if ef.abastecimiento_desde else None,
+        "acepta_personalizacion_efectiva": ef.acepta_personalizacion,
+        "acepta_heredado_de": ef.acepta_desde.name if ef.acepta_desde else None,
+    }
+
+
+@router.get("/categories/opciones-abastecimiento")
+def opciones_abastecimiento():
+    """Las formas de abastecerse que se pueden elegir hoy, con su texto."""
+    return [{"valor": k, "texto": v} for k, v in categorias_core.ABASTECIMIENTOS.items()]
+
+
 @router.get("/categories")
 def list_categories(
     db: Session = Depends(get_session),
@@ -820,7 +825,8 @@ def list_categories(
             "is_joker": c.slug == SLUG_SIN_CATEGORIA,
             "is_filterable": c.is_filterable,
             "level": c.level,
-            "suggested_specification_ids": [s.id for s in c.suggested_specifications]
+            "suggested_specification_ids": [s.id for s in c.suggested_specifications],
+            **_ajustes_salida(c),
         })
     
     return {
@@ -854,28 +860,56 @@ def get_category(category_id: int, db: Session = Depends(get_session)):
             "slug": sub.slug
         } for sub in category.subcategories],
         "is_filterable": category.is_filterable,
-        "product_count": sum(1 for p in category.products if not p.is_deleted)
+        "product_count": sum(1 for p in category.products if not p.is_deleted),
+        "is_joker": category.slug == SLUG_SIN_CATEGORIA,
+        **_ajustes_salida(category),
     }
+
+def _validar_ajustes(data: CategoryUpdate) -> None:
+    try:
+        categorias_core.validar_abastecimiento(data.abastecimiento)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error))
+
+
+def _principal_completa(abastecimiento, acepta) -> None:
+    """Una categoría principal dice cómo se abastece: no queda un valor puesto en silencio."""
+    if abastecimiento is None or acepta is None:
+        raise HTTPException(
+            status_code=422,
+            detail="Una categoría principal tiene que decir qué pasa cuando no hay en bodega y si acepta personalizaciones.",
+        )
+
 
 @router.post("/categories")
 async def create_category(category_data: CategoryUpdate, db: Session = Depends(get_session)):
+    nombre = (category_data.name or "").strip()
+    if not nombre:
+        raise HTTPException(status_code=422, detail="La categoría necesita un nombre.")
+    _validar_ajustes(category_data)
+    padre = db.get(Category, category_data.parent_id) if category_data.parent_id else None
+    if category_data.parent_id and padre is None:
+        raise HTTPException(status_code=404, detail="Categoría padre no encontrada")
+    if padre is None:
+        _principal_completa(category_data.abastecimiento, category_data.acepta_personalizacion)
+
     new_cat = Category(
-        name=category_data.name,
-        slug="temp-slug-" + str(func.random()),
-        parent_id=category_data.parent_id,
-        is_filterable=category_data.is_filterable if category_data.is_filterable is not None else True
+        name=nombre,
+        slug=categorias_core.slug_unico(db, nombre, padre),
+        parent_id=padre.id if padre else None,
+        is_filterable=category_data.is_filterable if category_data.is_filterable is not None else True,
+        abastecimiento=category_data.abastecimiento,
+        acepta_personalizacion=category_data.acepta_personalizacion,
     )
+    categorias_core.ubicar(new_cat, padre)
     db.add(new_cat)
-    db.flush() 
-    
+    db.flush()
+
     # Vincular especificaciones
     for spec_id in category_data.suggested_specification_ids:
         link = CategorySpecificationLink(category_id=new_cat.id, specification_id=spec_id)
         db.add(link)
-    
-    # Calculamos metadatos jerárquicos reales
-    update_category_metadata_recursive(db, new_cat)
-    
+
     db.commit()
     db.refresh(new_cat)
 
@@ -898,23 +932,49 @@ async def update_category(category_id: int, data: CategoryUpdate, db: Session = 
     if category.slug == SLUG_SIN_CATEGORIA:
         raise HTTPException(status_code=403, detail="No se puede editar la categoría de seguridad del sistema")
 
-    needs_slug_update = False
-    
-    if data.name and data.name != category.name: 
-        category.name = data.name
-        needs_slug_update = True
-        
+    _validar_ajustes(data)
+    enviados = data.model_fields_set
+
+    # El nombre cambia; la dirección pública (slug) no: ver core/categorias/ubicacion.
+    if data.name and data.name.strip() and data.name.strip() != category.name:
+        category.name = data.name.strip()
+
     if data.is_filterable is not None:
         category.is_filterable = data.is_filterable
 
-    if data.parent_id is not None:
-        if data.parent_id == category_id:
-            raise HTTPException(status_code=400, detail="Una categoría no puede ser su propio padre")
-        
-        if data.parent_id != category.parent_id:
-            category.parent_id = data.parent_id
-            needs_slug_update = True
-            
+    if "abastecimiento" in enviados:
+        category.abastecimiento = data.abastecimiento
+    if "acepta_personalizacion" in enviados:
+        category.acepta_personalizacion = data.acepta_personalizacion
+
+    se_mueve = "parent_id" in enviados and data.parent_id != category.parent_id
+    nuevo_padre = category.parent
+    if se_mueve:
+        nuevo_padre = db.get(Category, data.parent_id) if data.parent_id else None
+        if data.parent_id and nuevo_padre is None:
+            raise HTTPException(status_code=404, detail="Categoría padre no encontrada")
+        if nuevo_padre is not None and (
+            nuevo_padre.id == category.id
+            or nuevo_padre.id in {d.id for d in categorias_core.descendientes(category)}
+        ):
+            raise HTTPException(status_code=400, detail="Una categoría no puede quedar dentro de sí misma ni de una de sus subcategorías.")
+        if nuevo_padre is None:
+            # Pasa a ser principal: se queda con lo que tenía en efecto, en
+            # vez de quedar sin decir cómo se abastece.
+            antes = categorias_core.efectivos(category)
+            if category.abastecimiento is None:
+                category.abastecimiento = antes.abastecimiento
+            if category.acepta_personalizacion is None:
+                category.acepta_personalizacion = antes.acepta_personalizacion
+
+    if nuevo_padre is None:
+        _principal_completa(category.abastecimiento, category.acepta_personalizacion)
+
+    if se_mueve:
+        category.parent = nuevo_padre
+        categorias_core.reubicar(db, category, nuevo_padre)
+
+
     # Sincronizar especificaciones sugeridas
     # Borrar vinculaciones previas
     old_links = db.exec(select(CategorySpecificationLink).where(CategorySpecificationLink.category_id == category_id)).all()
@@ -926,9 +986,6 @@ async def update_category(category_id: int, data: CategoryUpdate, db: Session = 
         link = CategorySpecificationLink(category_id=category_id, specification_id=spec_id)
         db.add(link)
             
-    if needs_slug_update:
-        update_category_metadata_recursive(db, category)
-        
     db.add(category)
     db.commit()
     db.refresh(category)
@@ -953,26 +1010,28 @@ def delete_category(category_id: int, db: Session = Depends(get_session)):
         raise HTTPException(status_code=403, detail="No se puede eliminar la categoría de seguridad")
 
     joker = db.exec(select(Category).where(Category.slug == SLUG_SIN_CATEGORIA)).first()
-    if category.products and not joker:
+    if category.products and category.parent is None and not joker:
         raise HTTPException(
             status_code=409,
-            detail="Falta la categoría 'Sin Categoría', que recibe los productos de una categoría borrada. Créala antes de borrar esta.",
+            detail="Falta la categoría 'Sin Categoría', que recibe los productos de una categoría principal borrada. Créala antes de borrar esta.",
         )
-    
-    # Se mueven por la relación, no por la columna: si quedaran en
-    # `category.products`, al borrar la categoría SQLAlchemy les pondría
-    # category_id en nulo, y eso la base lo rechaza.
-    for p in list(category.products):
-        p.category = joker
-        db.add(p)
 
-    for sub in list(category.subcategories):
-        sub.parent = None
-        reubicar(db, sub, None)
-
-    db.delete(category)
+    # Lo que colgaba de ella sube un nivel, sin cambiar comportamientos en
+    # silencio (core/categorias/borrado.py).
+    resumen = categorias_core.plan(category, joker)
+    categorias_core.borrar(db, category, joker)
     db.commit()
-    return {"msg": "Categoría eliminada, productos movidos a 'Sin Categoría'"}
+    return {"msg": "Categoría eliminada", **resumen}
+
+
+@router.get("/categories/{category_id}/borrado")
+def plan_de_borrado(category_id: int, db: Session = Depends(get_session)):
+    """Qué pasaría al borrarla: a dónde van sus subcategorías y productos. No cambia nada."""
+    category = db.get(Category, category_id)
+    if not category:
+        raise HTTPException(status_code=404, detail="Categoría no encontrada")
+    joker = db.exec(select(Category).where(Category.slug == SLUG_SIN_CATEGORIA)).first()
+    return categorias_core.plan(category, joker)
 
 # --- ENDPOINTS DE PRODUCTOS (con paginación del servidor) ---
 

@@ -8,6 +8,7 @@ import Button from '../../../ui/Button';
 import { useNotification } from '../../../../context/NotificationContext';
 import LibraryPicker from './LibraryPicker';
 import DetailDrawer from '../../../ui/admin/DetailDrawer';
+import { mensajeBorrado } from '../../../../utils/categoriaAjustes';
 import { X, Layers, Plus, Shield } from 'lucide-react';
 
 const API_BASE = `/api/v1/admin/catalog`;
@@ -233,6 +234,19 @@ const CATEGORY_COLUMNS = [
             return <ParentCategoryBadge name={v} />;
         }
     },
+    {
+        // Lo que vale en efecto; si es heredado, de quién.
+        key: 'abastecimiento_texto',
+        label: 'Cuando no hay en bodega',
+        render: (v, row) => (
+            <span>
+                {v}
+                {row.abastecimiento_heredado_de && (
+                    <span className="adm-celda-tenue"> · igual que {row.abastecimiento_heredado_de}</span>
+                )}
+            </span>
+        )
+    },
     { 
         key: 'slug', 
         label: 'Slug / URL', 
@@ -307,6 +321,13 @@ const CategoryManager = () => {
 
     const handleUpdate = async (formData) => {
         const isEditing = formData.id;
+
+        // Una categoría principal dice cómo se consigue: no queda un valor
+        // puesto en silencio. El servidor también lo exige.
+        if (!formData.parent_id && (!formData.abastecimiento || formData.acepta_personalizacion == null)) {
+            toast.error('Una categoría principal tiene que decir qué pasa cuando no hay en bodega y si acepta personalizaciones.');
+            return;
+        }
         const url = isEditing
             ? `${API_BASE}/categories/${formData.id}`
             : `${API_BASE}/categories`;
@@ -343,7 +364,14 @@ const CategoryManager = () => {
     };
 
     const handleDelete = async (category) => {
-        if (!await confirm(`¿Eliminar la categoría "${category.name}"? Los productos se moverán a 'Sin Categoría'.`)) return;
+        // Antes de preguntar, el servidor dice a dónde va todo: lo que colgaba
+        // de ella sube un nivel, y si algún producto cambiaría de abastecimiento.
+        let aviso = `¿Eliminar la categoría "${category.name}"?`;
+        try {
+            const r = await fetch(`${API_BASE}/categories/${category.id}/borrado`);
+            if (r.ok) aviso = mensajeBorrado(await r.json());
+        } catch { /* sin el detalle se pregunta igual, con el aviso corto */ }
+        if (!await confirm(aviso)) return;
         const res = await fetch(`${API_BASE}/categories/${category.id}`, { method: 'DELETE' });
         if (res.ok) {
             toast.success('Categoría eliminada con éxito');

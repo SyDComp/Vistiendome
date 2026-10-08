@@ -64,6 +64,13 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
 
     const nombreFinal = (prenda === OTRO ? prendaLibre : prenda).trim();
 
+    // Si la categoría del producto no acepta personalizaciones, en la tienda
+    // la clienta solo elige entre lo que existe: sin proponer valores ni
+    // agregar o quitar características. En el panel no aplica: ahí arma la
+    // pieza quien decide.
+    const productoElegido = prenda && prenda !== OTRO ? productos.find(x => x.name === prenda) : null;
+    const soloCatalogo = contexto === 'publico' && productoElegido?.acepta_personalizacion === false;
+
     const elegir = (clave, valor) => {
         if (valor === OTRO) {
             setPropuestos(p => ({ ...p, [clave]: '' }));
@@ -199,15 +206,14 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
             if (v) propuestosLimpios[clave] = v;
         });
 
-        // De qué producto del catálogo es, si se eligió de la lista. Con eso el
-        // servidor sabe su categoría y, si lo elegido coincide exacto con una
-        // variante, que ES esa variante. "Otra" no tiene producto.
-        const producto = prenda === OTRO ? null : productos.find(x => x.name === prenda);
+        // De qué producto del catálogo es (productoElegido): con eso el servidor
+        // sabe su categoría y, si lo elegido coincide exacto con una variante,
+        // que ES esa variante. "Otra" no tiene producto.
         const monto = parseFloat(precio);
 
         onAgregar({
             nombre: nombreFinal,
-            productoId: producto?.id ?? null,
+            productoId: productoElegido?.id ?? null,
             // Vacío no es cero: es "por cotizar".
             precio: monto > 0 ? monto : null,
             // Sólo lo elegido. Una característica en blanco no se guarda:
@@ -226,8 +232,9 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
                 </button>
             </div>
             <p className="armador__intro">
-                Se arma igual que una variante del catálogo. Si algo no está en la lista,
-                se puede proponer con Otro.
+                {soloCatalogo
+                    ? 'Este producto se pide tal como está en el catálogo: elige entre las opciones que tiene.'
+                    : 'Se arma igual que una variante del catálogo. Si algo no está en la lista, se puede proponer con Otro.'}
             </p>
 
             <div className="armador__grilla">
@@ -277,10 +284,12 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
                                 {/* Se puede quitar: si el encargo no necesita precisar
                                     esta característica, no tiene por qué ocupar espacio
                                     ni obligar a elegir. Vuelve con «agregar». */}
-                                <button type="button" onClick={() => quitar(clave)}
-                                    title={`Quitar ${clave}`} className="armador__quitar">
-                                    <X size={13} />
-                                </button>
+                                {!soloCatalogo && (
+                                    <button type="button" onClick={() => quitar(clave)}
+                                        title={`Quitar ${clave}`} className="armador__quitar">
+                                        <X size={13} />
+                                    </button>
+                                )}
                             </label>
                             <select
                                 className="armador__campo"
@@ -289,7 +298,7 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
                             >
                                 <option value="">— sin especificar —</option>
                                 {(visibles[clave] || []).map(v => <option key={v} value={v}>{v}</option>)}
-                                <option value={OTRO}>Otro (proponer)</option>
+                                {!soloCatalogo && <option value={OTRO}>Otro (proponer)</option>}
                             </select>
                             {enModoNuevo && (
                                 <>
@@ -321,7 +330,7 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
                 })}
             </div>
 
-            {prenda && (
+            {prenda && !soloCatalogo && (
                 <div className="armador__caracteristicas">
                     <button type="button" onClick={() => setAbriendoSelector(v => !v)}
                         className="armador__boton-selector">

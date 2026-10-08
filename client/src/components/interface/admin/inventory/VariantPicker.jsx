@@ -51,8 +51,9 @@ const VariantPicker = ({
     // NUEVO: Filtros inteligentes para el Workspace (Paso 3)
     const [activeFilters, setActiveFilters] = useState({}); // { attrName: Set(values) }
 
+    // El precio parte vacío, no en 0: un 0 se vería como "$0" en la tienda.
     const [commercialData, setCommercialData] = useState({
-        price: 0,
+        price: '',
         stock: 0,
         sku: '',
         barcode: ''
@@ -86,7 +87,7 @@ const VariantPicker = ({
             setSelection(new Set());
             setActiveFilters({});
             setSearchTerm('');
-            setCommercialData({ price: 0, stock: 0, sku: '', barcode: '' });
+            setCommercialData({ price: '', stock: 0, sku: '', barcode: '' });
         }
     }
 
@@ -409,7 +410,7 @@ const VariantPicker = ({
                 config,
                 sku,
                 barcode: generateEAN13(sku),
-                price: commercialData.price || 0,
+                price: commercialData.price || '',
                 stock: 0,
                 media_ids: [],
                 media_assets: [],
@@ -559,9 +560,10 @@ const VariantPicker = ({
                                         <input
                                             type="number"
                                             value={row.price}
+                                            placeholder="Monto"
                                             onChange={(e) => {
                                                 const next = [...generatedPreview];
-                                                next[idx].price = parseFloat(e.target.value);
+                                                next[idx].price = e.target.value === '' ? '' : parseFloat(e.target.value);
                                                 setGeneratedPreview(next);
                                             }}
                                             className="variant-picker-price-input"
@@ -717,6 +719,12 @@ const VariantPicker = ({
                                     <span className="variant-picker-footer-value">
                                         {generatedPreview.length} Variantes Configurales
                                     </span>
+                                    {/* Toda variante del catálogo tiene un monto: sin él no se confirma. */}
+                                    {generatedPreview.some(r => !(Number(r.price) > 0)) && (
+                                        <span className="variant-picker-footer-label" role="alert">
+                                            Falta el precio de {generatedPreview.filter(r => !(Number(r.price) > 0)).length} variante(s)
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                             <div className="variant-picker-footer-actions">
@@ -727,6 +735,7 @@ const VariantPicker = ({
                                         onConfirm(generatedPreview);
                                         onClose();
                                     }}
+                                    disabled={generatedPreview.some(r => !(Number(r.price) > 0))}
                                     className="variant-picker-footer-btn-confirm"
                                 >
                                     <Check size={18} /> Confirmar Lote

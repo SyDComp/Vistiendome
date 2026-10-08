@@ -164,7 +164,19 @@ class Category(SQLModel, table=True):
         default_factory=datetime.utcnow,
         sa_column=Column(DateTime(timezone=True), server_default=sa_func.now())
     )
-    
+
+    # CÓMO TRABAJA LA TIENDA CON LO DE ESTA CATEGORÍA (ver core/categorias)
+    # Nulo = igual que su categoría padre. Una categoría principal siempre los
+    # dice, salvo "Sin Categoría", cuyo abastecimiento se decide al confirmar
+    # cada pedido (recibe de todo: ropa o libros).
+    #
+    # Cuando no hay en bodega: "TALLER" (se confecciona) o "SOLO_BODEGA".
+    # Texto y no enum de la base: el encargo a proveedor llega en la Fase 3.
+    abastecimiento: Optional[str] = Field(default=None, max_length=20)
+    # Si la clienta puede proponer valores o características que el catálogo
+    # no tiene. Si no, solo elige entre lo que existe.
+    acepta_personalizacion: Optional[bool] = Field(default=None)
+
     # Relationships
     products: List["Product"] = Relationship(back_populates="category")
     
@@ -178,10 +190,9 @@ class Category(SQLModel, table=True):
         link_model=CategorySpecificationLink
     )
     
-    # Sin cascada de borrado: al borrar una categoría sus subcategorías quedan
-    # en la raíz, con sus productos. Es lo mismo que dice la base
-    # (ON DELETE SET NULL); con la cascada, el borrado se llevaba el árbol
-    # entero antes de que la base alcanzara a actuar.
+    # Sin cascada de borrado: al borrar una categoría, lo que colgaba de ella
+    # sube un nivel (core/categorias/borrado.py). Con la cascada, el borrado se
+    # llevaba el árbol entero.
     subcategories: List["Category"] = Relationship(back_populates="parent")
     parent: Optional["Category"] = Relationship(
         back_populates="subcategories",

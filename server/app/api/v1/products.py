@@ -7,6 +7,7 @@ from ...models.catalog import Product, Category, SKU, StockMovement, Characteris
 from ...core.pricing import compute_effective_price, get_chile_time
 from ...core.looks import colapsar_en_looks, imagen_de_variante, asset_de_variante
 from ...core.imagenes import srcset_de
+from ...core.categorias import efectivos
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -36,6 +37,9 @@ class ProductListSchema(BaseModel):
     variants: List[VariantSummary] = []
     specs: Dict[str, str] = {}
     extras: Dict[str, Any] = {}
+    # Si la clienta puede proponer valores o características que el catálogo
+    # no tiene (lo dice su categoría). Si no, el armador solo deja elegir.
+    acepta_personalizacion: bool = False
 
 def _extras_con_carrusel(producto, media_id_to_sku: Optional[Dict[int, str]] = None) -> Dict[str, Any]:
     """
@@ -158,7 +162,8 @@ def list_products(db: Session = Depends(get_session)):
             on_sale=product_on_sale,
             variants=variant_summaries,
             specs=p.specs,
-            extras=modified_extras
+            extras=modified_extras,
+            acepta_personalizacion=efectivos(p.category).acepta_personalizacion,
         ))
     return results
 

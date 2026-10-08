@@ -18,6 +18,8 @@ import { generateEAN13 } from '../../../features/productDetail/utils/skuUtils';
 import { describirEntrega } from '../../../utils/entrega';
 import { etiquetaEstado } from '../../../utils/estadosPedido';
 import SeguimientoPedido from '../../interface/admin/crm/pedido/SeguimientoPedido';
+import AjustesCategoria from '../../interface/admin/inventory/categoria/AjustesCategoria';
+import { textoAbastecimiento, textoPersonalizacion } from '../../../utils/categoriaAjustes';
 
 /**
  * DetailDrawer: Vista de detalles potente con navegación histórica (Stack-based).
@@ -352,7 +354,9 @@ const DetailDrawer = ({
                             value: currData.parent_name || 'Ninguno (Raíz)',
                             link: currData.parent_id ? { id: currData.parent_id, type: 'category' } : null
                         },
-                        { label: 'Productos', value: `${currData.product_count || 0} productos asociados` }
+                        { label: 'Productos', value: `${currData.product_count || 0} productos asociados` },
+                        { label: 'Cuando no hay en bodega', value: textoAbastecimiento(currData) },
+                        { label: '¿Acepta personalizaciones?', value: textoPersonalizacion(currData) }
                     ]
                 });
 
@@ -398,6 +402,22 @@ const DetailDrawer = ({
                         },
                         { label: 'Visible como Filtro', type: 'checkbox', name: 'is_filterable', value: editData.is_filterable, onChange: (e) => setEditData({...editData, is_filterable: e.target.checked}) }
                     ]
+                });
+
+                // Cómo se consigue lo de esta categoría (ver AjustesCategoria).
+                s.push({
+                    title: 'Cómo se consigue',
+                    icon: <Package size={18} />,
+                    editable: true,
+                    type: 'custom',
+                    content: (
+                        <AjustesCategoria
+                            abastecimiento={editData.abastecimiento}
+                            acepta={editData.acepta_personalizacion}
+                            padre={allCategories.find(c => String(c.id) === String(editData.parent_id)) || null}
+                            onChange={(parcial) => setEditData(prev => ({ ...prev, ...parcial }))}
+                        />
+                    )
                 });
 
                 if (currData.subcategories && currData.subcategories.length > 0) {

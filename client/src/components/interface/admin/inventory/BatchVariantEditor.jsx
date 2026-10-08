@@ -8,6 +8,7 @@ import Accordion from '../../../ui/Accordion';
 import MediaGallery from '../media/MediaGallery';
 import Imagen from '../../../ui/Imagen';
 import { useNotification } from '../../../../context/NotificationContext';
+import { mensajeDeError } from '../../../../utils/errorServidor';
 
 const API_BASE = `/api/v1/admin/catalog`;
 
@@ -206,6 +207,10 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
     };
 
     const handleSave = async () => {
+        if (sinPrecioCount > 0) {
+            toast.error(`${sinPrecioCount} variante(s) sin precio: toda variante del catálogo necesita un monto.`);
+            return;
+        }
         setSaving(true);
         try {
             // Usamos el endpoint de actualización masiva del producto, que es el oficial y robusto
@@ -228,15 +233,15 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
             });
 
             if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.detail || "Error al guardar los cambios masivos");
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(mensajeDeError(errorData.detail, "Error al guardar los cambios masivos"));
             }
 
             toast.success("Workspace sincronizado con el servidor con éxito");
             if (onSave) onSave();
         } catch (err) {
             console.error(err);
-            toast.error("Error al guardar algunos cambios");
+            toast.error(err.message || "Error al guardar algunos cambios");
         } finally {
             setSaving(false);
         }
