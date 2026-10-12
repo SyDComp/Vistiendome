@@ -1174,7 +1174,7 @@ const DetailDrawer = ({
         }
 
         return s;
-    }, [currData, currType, currTitle, currMetadata, editData.price, editData.sale_type, editData.sale_value, editData.sale_start, editData.sale_end, editData.value, editData.hex_code, editData.title, editData.config, editData.name, editData.slug, editData.parent_id, editData.is_filterable, editData.suggested_specifications, editData.is_editing, allCategories, allSpecs, loading, isReorderMode, activeSlideIndex, activeLayerIndex]);
+    }, [currData, currType, currTitle, currMetadata, editData.price, editData.sale_type, editData.sale_value, editData.sale_start, editData.sale_end, editData.value, editData.hex_code, editData.title, editData.config, editData.name, editData.slug, editData.parent_id, editData.is_filterable, editData.abastecimiento, editData.acepta_personalizacion, editData.suggested_specifications, editData.is_editing, allCategories, allSpecs, loading, isReorderMode, activeSlideIndex, activeLayerIndex]);
 
     // Cálculo memoizado de items para la biblioteca
     const librarySkus = useMemo(() => {
