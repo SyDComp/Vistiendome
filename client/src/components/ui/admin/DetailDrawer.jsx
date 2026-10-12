@@ -1461,6 +1461,12 @@ const DetailDrawer = ({
                                     </div>
                                 )}
 
+                                {/* Una sección 'custom' trae su propio contenido y se pinta tal
+                                    cual. Antes se excluía de la caja de abajo y no se pintaba en
+                                    ningún otro lado: salían vacías (especificaciones de una
+                                    categoría, tablas y diapositivas de la portada). */}
+                                {section.type === 'custom' && section.content}
+
                                 {section.content && section.type !== 'custom' && (
                                     <div className="detail-drawer-content-box">
                                        {section.content}
