@@ -1465,7 +1465,9 @@ const DetailDrawer = ({
                                     cual. Antes se excluía de la caja de abajo y no se pintaba en
                                     ningún otro lado: salían vacías (especificaciones de una
                                     categoría, tablas y diapositivas de la portada). */}
-                                {section.type === 'custom' && section.content}
+                                {section.type === 'custom' && (
+                                    <div className="detail-drawer-summary-card">{section.content}</div>
+                                )}
 
                                 {section.content && section.type !== 'custom' && (
                                     <div className="detail-drawer-content-box">
