@@ -236,13 +236,14 @@ const CATEGORY_COLUMNS = [
     },
     {
         // Lo que vale en efecto; si es heredado, de quién.
-        key: 'abastecimiento_texto',
-        label: 'Cuando no hay en bodega',
+        // Corto para que la tabla quepa; el texto completo está en el detalle.
+        key: 'abastecimiento_corto',
+        label: 'Sin stock',
         render: (v, row) => (
-            <span>
+            <span title={`Cuando no hay en bodega: ${row.abastecimiento_texto}`}>
                 {v}
                 {row.abastecimiento_heredado_de && (
-                    <span className="adm-celda-tenue"> · igual que {row.abastecimiento_heredado_de}</span>
+                    <span className="adm-celda-tenue"> (heredado)</span>
                 )}
             </span>
         )

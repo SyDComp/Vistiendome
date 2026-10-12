@@ -773,6 +773,7 @@ def _ajustes_salida(c: Category) -> dict:
         "acepta_personalizacion": c.acepta_personalizacion,
         "abastecimiento_efectivo": ef.abastecimiento,
         "abastecimiento_texto": categorias_core.etiqueta(ef.abastecimiento),
+        "abastecimiento_corto": categorias_core.etiqueta_corta(ef.abastecimiento),
         "abastecimiento_heredado_de": ef.abastecimiento_desde.name if ef.abastecimiento_desde else None,
         "acepta_personalizacion_efectiva": ef.acepta_personalizacion,
         "acepta_heredado_de": ef.acepta_desde.name if ef.acepta_desde else None,

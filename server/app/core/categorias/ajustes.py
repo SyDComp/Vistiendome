@@ -20,6 +20,10 @@ ABASTECIMIENTOS = {
 }
 SE_DECIDE_AL_CONFIRMAR = "Se decide al confirmar"
 
+# Lo mismo, corto, para una columna de tabla.
+ABASTECIMIENTOS_CORTO = {TALLER: "Taller", SOLO_BODEGA: "Solo bodega"}
+SE_DECIDE_CORTO = "Se decide"
+
 
 class Efectivos(NamedTuple):
     # None: nadie lo dice en la rama ("Sin Categoría"): se decide al confirmar.
@@ -49,6 +53,10 @@ def efectivos(categoria: Category) -> Efectivos:
 
 def etiqueta(abastecimiento: Optional[str]) -> str:
     return ABASTECIMIENTOS.get(abastecimiento, SE_DECIDE_AL_CONFIRMAR) if abastecimiento else SE_DECIDE_AL_CONFIRMAR
+
+
+def etiqueta_corta(abastecimiento: Optional[str]) -> str:
+    return ABASTECIMIENTOS_CORTO.get(abastecimiento, SE_DECIDE_CORTO) if abastecimiento else SE_DECIDE_CORTO
 
 
 def validar_abastecimiento(valor: Optional[str]) -> None:
