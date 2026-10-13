@@ -129,7 +129,8 @@ const ConfirmarPedido = ({ pedido, onConfirmado, onCerrar }) => {
                             <FechaPropuesta fecha={fecha} propuesta={propuesta} fechaEvento={pedido.fecha_evento}
                                 onCambiar={setFechaElegida} disabled={enviando} />
 
-                            <AbonoConfirmacion pedidoId={pedido.id} abono={propuesta.abono} onPagado={recargar} disabled={enviando} />
+                            <AbonoConfirmacion pedidoId={pedido.id} abono={propuesta.abono} onPagado={recargar} disabled={enviando}
+                                incompleto={prendas.some(p => p.precio === null)} />
 
                             {necesitaNota && (
                                 <div className="cfp-nota">
