@@ -22,6 +22,11 @@ const AjustesNegocio = () => {
         toast.success('Plazos guardados');
     };
 
+    const guardarMedios = async (lista) => {
+        await guardar('medios_pago', lista);
+        toast.success('Medios de pago guardados');
+    };
+
     const guardarCanales = async (lista) => {
         await guardar('canales_pedido', lista);
         toast.success('Opciones de "¿Cómo llegó?" guardadas');
@@ -53,6 +58,22 @@ const AjustesNegocio = () => {
                         Los feriados no se descuentan: si cae uno, se ajusta la fecha a mano.
                     </p>
                     <EditorPlazos plazos={ajustes.plazos_pedido || {}} onGuardar={guardarPlazos} />
+                </section>
+            )}
+
+            {!cargando && !error && ajustes && (
+                <section className="aj-tarjeta" aria-labelledby="aj-medios-titulo">
+                    <h3 id="aj-medios-titulo" className="aj-titulo">Medios de pago</h3>
+                    <p className="aj-explicacion">
+                        Cómo se puede pagar un pedido. Aparecen al registrar un pago
+                        (Cotizaciones › detalle del pedido › Pagos).
+                    </p>
+                    <EditorOpciones
+                        id="medios"
+                        opciones={ajustes.medios_pago || []}
+                        onGuardar={guardarMedios}
+                        aviso="Quitar o renombrar un medio no cambia los pagos ya registrados: siguen diciendo cómo se pagó."
+                    />
                 </section>
             )}
 

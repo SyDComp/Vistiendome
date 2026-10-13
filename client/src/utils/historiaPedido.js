@@ -9,6 +9,7 @@ import { etiquetaEstado } from './estadosPedido';
 import { estiloEstado } from './estadosOrdenCorte';
 import { textoPrecio } from './precioPrenda';
 import { textoFecha } from './fechaComprometida';
+import { formatCurrency } from './cartUtils';
 
 const ORIGENES = {
     CATALOGO: 'el catálogo del sitio',
@@ -86,6 +87,15 @@ export const describirEvento = ({ tipo, datos = {} }, modoEntrega) => {
                     ? `Fecha comprometida: ${textoFecha(datos.de)} → ${textoFecha(datos.a)}`
                     : `Se puso fecha comprometida: ${textoFecha(datos.a)}`,
                 detalle: datos.nota ? `Motivo: ${datos.nota}` : null,
+            };
+
+        case 'PAGO':
+            return { texto: `Pago de ${formatCurrency(datos.monto)} · ${datos.medio}`, detalle: datos.nota || null };
+
+        case 'PAGO_ANULADO':
+            return {
+                texto: `Se anuló el pago de ${formatCurrency(datos.monto)} · ${datos.medio}`,
+                detalle: datos.motivo ? `Motivo: ${datos.motivo}` : null,
             };
 
         case 'PRENDA_CANCELADA':

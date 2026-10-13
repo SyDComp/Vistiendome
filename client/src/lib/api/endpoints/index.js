@@ -9,3 +9,4 @@ export * from './historiaPedido.api.js';
 export * from './ajustesNegocio.api.js';
 export * from './pedido.api.js';
 export * from './piezas.api.js';
+export * from './pagos.api.js';

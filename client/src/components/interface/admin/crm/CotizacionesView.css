@@ -80,3 +80,10 @@
 .cotv-fecha--atrasado { color: var(--color-error-deep); }
 .cotv-fecha--pronto { color: var(--color-warning-deep); }
 .cotv-fecha--sin { color: var(--color-text-muted); font-weight: 400; font-style: italic; }
+
+/* Columna "Pago". */
+.cotv-pago { font-size: 11px; font-weight: 700; white-space: nowrap; }
+.cotv-pago--espera { color: var(--color-warning-deep); }
+.cotv-pago--proceso { color: var(--color-info-darkest); }
+.cotv-pago--listo { color: var(--color-success); }
+.cotv-pago--alerta { color: var(--color-error-deep); }

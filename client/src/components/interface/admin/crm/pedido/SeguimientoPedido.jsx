@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { History, Megaphone, Package, Truck } from 'lucide-react';
+import { History, Megaphone, Package, Truck, Wallet } from 'lucide-react';
 import useHistoriaPedido from '../../../../../hooks/useHistoriaPedido';
 import usePedido from '../../../../../hooks/usePedido';
 import { canalSegunHistoria } from '../../../../../utils/historiaPedido';
+import { obtenerPedido } from '../../../../../lib/api/endpoints';
 import CanalPedido from './CanalPedido';
 import FechaPedido from './FechaPedido';
 import ConfirmarPedido from './confirmar/ConfirmarPedido';
 import HistoriaPedido from './HistoriaPedido';
+import PagosPedido from './pagos/PagosPedido';
 import PrendasPedido from './PrendasPedido';
 import SalidaPedido from './SalidaPedido';
 import './pedido.css';
@@ -50,6 +52,11 @@ const SeguimientoPedido = ({ cotizacion, abierto = true, onCambio }) => {
     const alCerrarConfirmacion = () => { setConfirmando(false); alCotizar(); };
     const alConfirmar = (actualizado) => { alCerrarConfirmacion(); onCambio?.(actualizado); };
     const alSalir = (actualizado) => { alCotizar(); onCambio?.(actualizado); };
+    // Un pago no devuelve el pedido: se lo pide, para que la lista se entere.
+    const alPagar = async () => {
+        alCotizar();
+        try { onCambio?.(await obtenerPedido(cotizacion.id)); } catch { /* la lista queda como estaba */ }
+    };
     const sale = ['CONFIRMADA', 'DESPACHADA'].includes(fresco.pedido?.estado);
 
     return (
@@ -65,6 +72,11 @@ const SeguimientoPedido = ({ cotizacion, abierto = true, onCambio }) => {
                     onCambio={alSalir}
                 />
             </Seccion>
+            {fresco.pedido && (
+                <Seccion icono={<Wallet size={18} />} titulo="Pagos">
+                    <PagosPedido pedido={fresco.pedido} abierto={abierto} onCambio={alPagar} />
+                </Seccion>
+            )}
             {sale && (
                 <Seccion icono={<Truck size={18} />} titulo={fresco.pedido.modo_entrega === 'RETIRO' ? 'Entrega' : 'Despacho'}>
                     <FechaPedido pedido={fresco.pedido} onCambio={alSalir} />

@@ -401,3 +401,18 @@
 .sp-fecha-valor--atrasado { color: var(--color-error-deep); }
 .sp-fecha-valor--pronto { color: var(--color-warning-deep); }
 .sp-fecha-valor--sin { color: var(--color-text-muted); font-weight: 400; font-style: italic; }
+
+/* Pagos del pedido: total, pagado, lo que falta y la lista. */
+.sp-pagos { display: grid; gap: 0.6rem; }
+.sp-pagos-resumen { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; color: var(--color-text-secondary); }
+.sp-pagos-resumen strong { color: var(--color-text-primary); }
+.sp-pagos-saldo { margin: 0; font-weight: 600; color: var(--color-text-primary); }
+.sp-pago-estado { padding: 0.1rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; border: 1px solid var(--color-border-strong); }
+.sp-pago-estado--espera { color: var(--color-warning-darkest); background: var(--color-warning-bg); border-color: var(--color-warning-border); }
+.sp-pago-estado--proceso { color: var(--color-info-darkest); }
+.sp-pago-estado--listo { color: var(--color-success); }
+.sp-pago-estado--alerta { color: var(--color-error-deep); border-color: var(--color-error-border-strong); }
+.sp-pago-monto { font-weight: 700; }
+.sp-pago--anulado .sp-pago-monto { text-decoration: line-through; color: var(--color-text-muted); }
+.sp-pago-anulado { margin: 0.2rem 0 0; font-size: 0.8rem; color: var(--color-error-deep); }
+.sp-pago-campo { display: grid; gap: 0.25rem; font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary); }

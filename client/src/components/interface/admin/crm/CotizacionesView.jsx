@@ -14,6 +14,7 @@ import AdminCotizacionModal from './AdminCotizacionModal';
 import { ESTADOS } from '../../../../utils/estadosPedido';
 import { avisoVolverAtras } from '../../../../utils/volverAtras';
 import { estadoFecha } from '../../../../utils/fechaComprometida';
+import { ESTADOS_PAGO } from '../../../../utils/pagos';
 import { mensajeDeError } from '../../../../utils/errorServidor';
 import { actualizarEstadoCotizacion, obtenerPedido } from '../../../../lib/api/endpoints';
 import ConfirmarPedido from './pedido/confirmar/ConfirmarPedido';
@@ -220,6 +221,16 @@ const CotizacionesView = () => {
             render: (value, row) => (
                 <StateSelector cotizacion={row} onUpdate={alCambiarPedido} onConfirmar={setConfirmando} />
             )
+        },
+        {
+            // En qué está el pago: lo calcula el servidor (core/pagos/cuentas.py).
+            key: 'pago',
+            label: 'Pago',
+            render: (_, row) => {
+                const e = ESTADOS_PAGO[row.pago?.estado];
+                if (!e || row.estado === 'CANCELADA') return <span className="adm-celda-tenue">—</span>;
+                return <span className={`cotv-pago cotv-pago--${e.tono}`}>{e.texto}</span>;
+            }
         },
         {
             // Para cuándo se prometió. Atrasado en rojo, por vencer en amarillo.

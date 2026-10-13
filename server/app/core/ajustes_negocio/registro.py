@@ -16,7 +16,8 @@ class Ajuste(NamedTuple):
     validar: Callable[[Any], Any]
 
 
-def _lista_de_canales(valor: Any) -> list:
+def _lista_de_opciones(valor: Any) -> list:
+    """Una lista de opciones de texto: sin vacías, sin repetidas, al menos una."""
     if not isinstance(valor, list):
         raise ValueError("Debe ser una lista de opciones.")
     limpias, vistas = [], set()
@@ -32,7 +33,7 @@ def _lista_de_canales(valor: Any) -> list:
         vistas.add(clave)
         limpias.append(texto)
     if not limpias:
-        raise ValueError("Tiene que quedar al menos una opción: se pide al cargar cada pedido.")
+        raise ValueError("Tiene que quedar al menos una opción.")
     return limpias
 
 
@@ -53,12 +54,13 @@ def _plazos(valor: Any) -> dict:
 
 CANALES_PEDIDO = "canales_pedido"
 PLAZOS_PEDIDO = "plazos_pedido"
+MEDIOS_PAGO = "medios_pago"
 
 AJUSTES: Dict[str, Ajuste] = {
     # "¿Cómo llegó?" de los pedidos cargados en el panel.
     CANALES_PEDIDO: Ajuste(
         defecto=["WhatsApp", "Instagram", "Facebook", "Llamada", "En la tienda", "Recomendación", "Otro"],
-        validar=_lista_de_canales,
+        validar=_lista_de_opciones,
     ),
     # En cuántos días hábiles (lunes a viernes) suele estar listo un pedido:
     # si todo sale de bodega, o si algo lo hace el taller. Con eso se propone
@@ -66,5 +68,11 @@ AJUSTES: Dict[str, Ajuste] = {
     PLAZOS_PEDIDO: Ajuste(
         defecto={"bodega": 2, "taller": 15},
         validar=_plazos,
+    ),
+    # Cómo se puede pagar un pedido. "Link de pago": Mercado Pago, Webpay,
+    # Flow… lo que la clienta paga con tarjeta desde el celular.
+    MEDIOS_PAGO: Ajuste(
+        defecto=["Efectivo", "Transferencia", "Débito", "Crédito", "Link de pago", "Otro"],
+        validar=_lista_de_opciones,
     ),
 }

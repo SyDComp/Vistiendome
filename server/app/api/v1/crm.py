@@ -18,6 +18,8 @@ from app.core.limites import VentanaDeslizante
 from app.models.propuestas import OpcionPropuesta
 from app.models.piezas import EstadoPieza
 from app.core import piezas as piezas_core
+from app.core import pagos as pagos_core
+from app.models.pagos import Pago
 
 router = APIRouter()
 
@@ -119,6 +121,15 @@ class ProduccionRead(BaseModel):
     ordenes: List[OrdenDeCorteDelPedido] = []
 
 
+class PagoResumen(BaseModel):
+    """En qué está el pago del pedido (ver core/pagos/cuentas.py)."""
+    total: int = 0
+    por_cotizar: int = 0
+    pagado: int = 0
+    saldo: int = 0
+    estado: str = "SIN_PAGAR"
+
+
 class CotizacionRead(BaseModel):
     id: str
     numero: Optional[int] = None
@@ -147,6 +158,7 @@ class CotizacionRead(BaseModel):
     cliente: Optional[PersonaRead] = None
     items: List[CotizacionItemRead] = []
     produccion: ProduccionRead = ProduccionRead()
+    pago: PagoResumen = PagoResumen()
 
     class Config:
         from_attributes = True
@@ -218,7 +230,7 @@ def _mapa_ordenes_de_corte(session: Session, cotizacion_ids: List[str]) -> dict:
 
 
 def _get_cotizacion_read(c: Cotizacion, ordenes: Optional[List[OrdenDeCorteDelPedido]] = None,
-                         en_bodega: Optional[dict] = None) -> CotizacionRead:
+                         en_bodega: Optional[dict] = None, pagos: Optional[list] = None) -> CotizacionRead:
     c_dict = c.dict()
     if c.persona:
         c_dict["cliente"] = _get_persona_read(c.persona)
@@ -232,6 +244,7 @@ def _get_cotizacion_read(c: Cotizacion, ordenes: Optional[List[OrdenDeCorteDelPe
         taller=a.taller, hechas=a.hechas, bodega=a.bodega, esperando=a.esperando,
         listo=a.listo, falta=a.falta, ordenes=ordenes or [],
     )
+    c_dict["pago"] = PagoResumen(**vars(pagos_core.cuentas(c, pagos or [])))
     return CotizacionRead(**c_dict)
 
 
@@ -239,7 +252,8 @@ def leer_pedidos(session: Session, cotizaciones: List[Cotizacion]) -> List[Cotiz
     """Los pedidos como los ve el panel, con sus órdenes de corte y su bodega, en pocas consultas."""
     ordenes = _mapa_ordenes_de_corte(session, [c.id for c in cotizaciones])
     en_bodega = ciclo.estado_en_bodega(session, cotizaciones)
-    return [_get_cotizacion_read(c, ordenes.get(c.id, []), en_bodega) for c in cotizaciones]
+    pagos = pagos_core.pagos_de(session, [c.id for c in cotizaciones])
+    return [_get_cotizacion_read(c, ordenes.get(c.id, []), en_bodega, pagos.get(c.id, [])) for c in cotizaciones]
 
 class CotizacionItemCreate(BaseModel):
     sku_id: Optional[int] = None
@@ -517,6 +531,12 @@ def eliminar_cotizacion(
         raise HTTPException(
             status_code=409,
             detail="Este pedido ya movió stock en la bodega, aunque se haya deshecho. No se borra: cancélalo.",
+        )
+
+    if db.exec(select(Pago.id).where(Pago.cotizacion_id == cot.id)).first():
+        raise HTTPException(
+            status_code=409,
+            detail="Este pedido tiene pagos registrados (aunque estén anulados). No se borra: cancélalo.",
         )
 
     if any(it.cortado for it in items):
