@@ -41,7 +41,11 @@ const PagosPedido = ({ pedido, abierto = true, onCambio }) => {
     if (!datos) return null;
 
     const { cuentas, pagos } = datos;
-    const estado = ESTADOS_PAGO[cuentas.estado] || { texto: cuentas.estado, tono: 'espera' };
+    // Un pedido cancelado sin nada pendiente no está "sin pagar": no se cobra.
+    const cerrado = pedido.estado === 'CANCELADA' && cuentas.saldo === 0;
+    const estado = cerrado
+        ? { texto: 'Cuentas cerradas', tono: 'listo' }
+        : ESTADOS_PAGO[cuentas.estado] || { texto: cuentas.estado, tono: 'espera' };
     const saldo = textoSaldo(cuentas);
     const sePaga = pedido.estado !== 'CANCELADA';
 
