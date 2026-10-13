@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatCurrency } from '../../../../../utils/cartUtils';
 
 /**
  * Después de imprimir: "¿ya salieron?". Imprimir no despacha —una etiqueta se
@@ -9,8 +10,14 @@ import React from 'react';
  * `pedidos`: los recién impresos que se despachan (confirmados, no retiros).
  */
 const DespachoTrasImprimir = ({ pedidos, onMarcar, onCerrar }) => {
-    const listos = pedidos.filter(c => c.produccion?.listo);
-    const noListos = pedidos.filter(c => !c.produccion?.listo);
+    // Sale lo listo y pagado: un despacho se paga entero antes de mandarlo.
+    const sale = (c) => c.produccion?.listo && (c.pago?.saldo || 0) <= 0;
+    const listos = pedidos.filter(sale);
+    const noListos = pedidos.filter(c => !sale(c));
+    const falta = (c) => [
+        ...(c.produccion?.falta || []),
+        ...((c.pago?.saldo || 0) > 0 ? [`falta pagar ${formatCurrency(c.pago.saldo)}`] : []),
+    ].join('; ');
     return (
         <div className="et-despacho et-despacho--pregunta" role="status">
             <div className="et-despacho-texto">
@@ -22,7 +29,7 @@ const DespachoTrasImprimir = ({ pedidos, onMarcar, onCerrar }) => {
                     <ul className="et-despacho-falta">
                         {noListos.map(c => (
                             <li key={c.id}>
-                                N° {c.numero} todavía no está listo: {(c.produccion?.falta || []).join('; ') || 'revísalo en Cotizaciones'}.
+                                N° {c.numero} todavía no sale: {falta(c) || 'revísalo en Cotizaciones'}.
                             </li>
                         ))}
                     </ul>

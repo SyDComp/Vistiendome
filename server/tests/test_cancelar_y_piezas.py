@@ -10,7 +10,7 @@ from app.models.crm import CotizacionItem
 from app.models.historia import PedidoEvento, TipoEvento
 from app.models.piezas import PiezaUnica
 from test_ciclo_pedido import (  # noqa: F401  (tienda es un fixture)
-    CRM, _confirmar, _estado, _hay, _hechas, _leer, _pedido, _saldo, tienda,
+    CRM, _confirmar, _estado, _hay, _hechas, _leer, _pagar_todo, _pedido, _saldo, sin_abono_minimo, tienda,
 )
 
 BOLERO = {"nombre_custom": "Bolero tejido", "precio_unitario_estimado": 5000, "config_custom": {"TALLA": "M"}}
@@ -106,6 +106,7 @@ def test_solo_se_cancela_en_un_pedido_confirmado(client_admin, tienda, session):
 
     _confirmar(client_admin, pedido)
     _hechas(session, pedido, 0)
+    _pagar_todo(client_admin, pedido)
     _estado(client_admin, pedido, "DESPACHADA")
     assert _cancelar(client_admin, pedido, 0).status_code == 409
 
@@ -161,6 +162,7 @@ def test_una_pieza_asignada_sale_de_bodega_apartada_y_se_vende_al_despachar(clie
     assert _confirmar(client_admin, pedido).status_code == 200
     assert _leer(client_admin, pedido)["produccion"]["listo"] is True
 
+    _pagar_todo(client_admin, pedido)
     assert _estado(client_admin, pedido, "DESPACHADA").status_code == 200
     assert client_admin.get("/api/v1/admin/piezas-unicas/").json()[0]["estado"] == "VENDIDA"
     assert _estado(client_admin, pedido, "CONFIRMADA").status_code == 200

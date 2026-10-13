@@ -21,6 +21,7 @@ from ....models.catalog import SKU
 from ....models.crm import Cotizacion, EstadoCotizacion
 from ....models.historia import TipoEvento
 from .. import fecha as fecha_core
+from ... import pagos
 from ..historia import Actor, anotar
 from .caminos import BODEGA, ESPERANDO, TALLER
 from .propuesta import PrendaPropuesta, proponer
@@ -41,17 +42,27 @@ class CambioLaBodega(Exception):
         self.propuesta = propuesta
 
 
+def abono_de(db: Session, cotizacion: Cotizacion, propuesta: List[PrendaPropuesta]) -> dict:
+    """El abono mínimo de este pedido tal como se confirmaría, lo pagado y lo que falta."""
+    total = sum(round((p.precio or 0) * p.cantidad) for p in propuesta)
+    a = pagos.minimo(db, total, [p.camino for p in propuesta])
+    pagado = pagos.cuentas(cotizacion, pagos.pagos_de(db, [cotizacion.id])[cotizacion.id]).pagado
+    return {"minimo": a.minimo, "porcentaje": a.porcentaje, "por": a.por, "pagado": pagado,
+            "falta": max(a.minimo - pagado, 0)}
+
+
 def _lista(nombres: List[str]) -> str:
     return ", ".join(nombres)
 
 
 def problemas(cotizacion: Cotizacion, propuesta: List[PrendaPropuesta], nota: Optional[str],
-               fecha: Optional[date] = None, al_confirmar: bool = True) -> List[str]:
+               fecha: Optional[date] = None, al_confirmar: bool = True, abono_faltante: int = 0) -> List[str]:
     """
     Lo que impide confirmar, en el orden en que conviene resolverlo. Vacío si
     se puede. `al_confirmar=False` para mostrar la propuesta: la nota y la
     fecha se completan en la misma pantalla, y avisar que faltan antes de que
-    la vean sería ruido.
+    la vean sería ruido. `abono_faltante`: cuánto falta para el abono mínimo;
+    si falta algo, se puede confirmar igual, pero con una nota.
     """
     estado = EstadoCotizacion(getattr(cotizacion.estado, "value", cotizacion.estado))
     if estado not in SE_CONFIRMAN:
@@ -66,8 +77,12 @@ def problemas(cotizacion: Cotizacion, propuesta: List[PrendaPropuesta], nota: Op
     sin_camino = [p.nombre for p in propuesta if p.camino is None]
     if sin_camino:
         faltan.append(f"Elige de dónde sale: {_lista(sin_camino)}.")
-    if al_confirmar and any(p.requiere_nota for p in propuesta) and not (nota or "").strip():
+    sin_nota = not (nota or "").strip()
+    if al_confirmar and any(p.requiere_nota for p in propuesta) and sin_nota:
         faltan.append("Escribe una nota: hay prendas que se confirman distinto de lo habitual.")
+    if al_confirmar and abono_faltante > 0 and sin_nota:
+        faltan.append(f"Falta {pagos.pesos(abono_faltante)} para el abono mínimo: regístralo, "
+                      "o escribe una nota de por qué se confirma sin él.")
     if al_confirmar and fecha_core.no_sirve(fecha):
         faltan.append(fecha_core.no_sirve(fecha))
     return faltan
@@ -100,7 +115,8 @@ def confirmar(
     if {p.item_id for p in propuesta if p.queda == ESPERANDO} != set(esperando_vistas):
         raise CambioLaBodega(propuesta)
 
-    faltan = problemas(cotizacion, propuesta, nota, fecha)
+    abono = abono_de(db, cotizacion, propuesta)
+    faltan = problemas(cotizacion, propuesta, nota, fecha, abono_faltante=abono["falta"])
     if faltan:
         raise NoSeConfirma(" ".join(faltan))
 
@@ -124,5 +140,6 @@ def confirmar(
         esperando=[p.nombre for p in propuesta if p.queda == ESPERANDO],
         nota=nota,
         fecha=fecha.isoformat(),
+        abono_faltante=abono["falta"] or None,
     )
     return propuesta

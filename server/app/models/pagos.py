@@ -24,8 +24,11 @@ def _ahora() -> datetime:
 class TipoPago:
     """Texto y no ENUM de la base: agregar uno no pide migración."""
     PAGO = "PAGO"
-    # La devolución de lo pagado de más (Fase 2, entrega 2).
+    # Lo pagado de más que se le devolvió a la clienta.
     DEVOLUCION = "DEVOLUCION"
+    # Lo pagado de más que quedó a favor de la clienta para otra compra (ver
+    # core/pagos/a_favor.py).
+    A_FAVOR = "A_FAVOR"
 
 
 class Pago(SQLModel, table=True):

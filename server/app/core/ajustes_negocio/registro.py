@@ -52,9 +52,25 @@ def _plazos(valor: Any) -> dict:
     return limpios
 
 
+def _porcentajes(valor: Any) -> dict:
+    if not isinstance(valor, dict):
+        raise ValueError("Deben ser los dos porcentajes: bodega y taller.")
+    limpios = {}
+    for clave, nombre in (("bodega", "si todo sale de bodega"), ("taller", "si algo va al taller")):
+        try:
+            porcentaje = int(valor.get(clave))
+        except (TypeError, ValueError):
+            raise ValueError(f"El abono {nombre} tiene que ser un número (un porcentaje).")
+        if not 0 <= porcentaje <= 100:
+            raise ValueError(f"El abono {nombre} tiene que estar entre 0 y 100%.")
+        limpios[clave] = porcentaje
+    return limpios
+
+
 CANALES_PEDIDO = "canales_pedido"
 PLAZOS_PEDIDO = "plazos_pedido"
 MEDIOS_PAGO = "medios_pago"
+ABONO_MINIMO = "abono_minimo"
 
 AJUSTES: Dict[str, Ajuste] = {
     # "¿Cómo llegó?" de los pedidos cargados en el panel.
@@ -74,5 +90,11 @@ AJUSTES: Dict[str, Ajuste] = {
     MEDIOS_PAGO: Ajuste(
         defecto=["Efectivo", "Transferencia", "Débito", "Crédito", "Link de pago", "Otro"],
         validar=_lista_de_opciones,
+    ),
+    # Qué porcentaje del total se pide pagar para confirmar un pedido. Se
+    # puede confirmar sin él, con una nota (ver core/pagos/abono.py).
+    ABONO_MINIMO: Ajuste(
+        defecto={"bodega": 100, "taller": 50},
+        validar=_porcentajes,
     ),
 }

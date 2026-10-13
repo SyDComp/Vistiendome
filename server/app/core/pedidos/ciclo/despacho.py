@@ -1,7 +1,8 @@
 """
 La bodega al despachar un pedido, y al deshacer el despacho.
 
-Solo sale un pedido listo (ver listo.py): todo apartado o hecho.
+Solo sale un pedido listo (ver listo.py) y pagado: todo apartado o hecho, y
+sin saldo pendiente.
 
 Solo las prendas que van por BODEGA salen de la bodega: las del taller se
 hicieron para este pedido y nunca entraron a ella. Antes se descontaba todo, y
@@ -16,7 +17,7 @@ from sqlmodel import Session
 from ....models.catalog import MovementType
 from ....models.crm import Cotizacion
 from ....models.piezas import PiezaUnica
-from ... import movimientos, piezas
+from ... import movimientos, pagos, piezas
 from ..prendas import activas
 from .apartado import estado_en_bodega
 from .caminos import BODEGA
@@ -35,6 +36,11 @@ def sacar(db: Session, cotizacion: Cotizacion) -> None:
     a = avance(cotizacion, estado_en_bodega(db, [cotizacion]))
     if not a.listo:
         raise NoSeDespacha(f"Todavía no está listo para salir. Falta: {'; '.join(a.falta)}.")
+    # Se paga todo antes de que salga: después no hay cómo cobrar (decisión
+    # del usuario 2026-10-13). En un retiro, se cobra ahí mismo.
+    c = pagos.cuentas(cotizacion, pagos.pagos_de(db, [cotizacion.id])[cotizacion.id])
+    if c.saldo > 0:
+        raise NoSeDespacha(f"Falta pagar {pagos.pesos(c.saldo)}: regístralo antes de que salga.")
     for item in activas(cotizacion):
         if item.pieza_id:
             pieza = db.get(PiezaUnica, item.pieza_id)

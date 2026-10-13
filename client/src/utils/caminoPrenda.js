@@ -39,6 +39,11 @@ export const esperandoVistas = (prendas) => prendas.filter(p => p.queda === 'ESP
 /** ¿Hay prendas que se confirman distinto de lo habitual? Entonces la nota es obligatoria. */
 export const pideNota = (prendas) => prendas.some(p => p.requiere_nota);
 
-/** Se puede apretar "Confirmar": no falta nada, y si hace falta nota, está escrita. */
-export const sePuedeConfirmar = ({ prendas = [], problemas = [] }, nota = '') =>
-    prendas.length > 0 && problemas.length === 0 && (!pideNota(prendas) || nota.trim().length > 0);
+/**
+ * Se puede apretar "Confirmar": no falta nada, y si hace falta nota, está
+ * escrita. Hace falta si hay prendas contra lo habitual o si falta abono.
+ */
+export const sePuedeConfirmar = ({ prendas = [], problemas = [], abono = null }, nota = '') => {
+    const necesitaNota = pideNota(prendas) || (abono?.falta || 0) > 0;
+    return prendas.length > 0 && problemas.length === 0 && (!necesitaNota || nota.trim().length > 0);
+};

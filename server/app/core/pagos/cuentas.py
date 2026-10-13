@@ -28,7 +28,7 @@ PAGADO_DE_MAS = "PAGADO_DE_MAS"
 class Cuentas:
     total: int = 0          # lo que suman las prendas con monto
     por_cotizar: int = 0    # prendas sin precio todavía: el total está incompleto
-    pagado: int = 0         # pagos menos devoluciones, sin los anulados
+    pagado: int = 0         # pagos menos devoluciones y lo dejado a favor, sin anulados
     saldo: int = 0          # total - pagado (negativo: pagado de más)
     estado: str = SIN_PAGAR
 
@@ -47,6 +47,7 @@ def total_de(cotizacion: Cotizacion) -> Tuple[int, int]:
 def cuentas(cotizacion: Cotizacion, pagos: Iterable[Pago]) -> Cuentas:
     total, por_cotizar = total_de(cotizacion)
     pagado = sum(
+        # Devolver o dejar a favor saca plata del pedido.
         (p.monto if p.tipo == TipoPago.PAGO else -p.monto)
         for p in pagos if p.anulado_en is None
     )

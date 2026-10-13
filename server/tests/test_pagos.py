@@ -9,7 +9,7 @@ from sqlmodel import select
 from app.models.historia import PedidoEvento, TipoEvento
 from app.models.pagos import Pago
 from test_ciclo_pedido import (  # noqa: F401  (tienda es un fixture)
-    CRM, _confirmar, _estado, _hechas, _leer, _pedido, tienda,
+    CRM, _confirmar, _estado, _hechas, _leer, _pedido, sin_abono_minimo, tienda,
 )
 
 BOLERO = {"nombre_custom": "Bolero", "precio_unitario_estimado": 10000, "cantidad": 2}
@@ -108,3 +108,71 @@ def test_los_medios_de_pago_se_editan_en_ajustes(client_admin, tienda):
     assert res.status_code == 200
     pedido = _pedido(client_admin, BOLERO)
     assert _pagar(client_admin, pedido, 1000, medio="Mach").status_code == 200
+
+
+# --- Las reglas del pago en el ciclo (F2-E2) ---------------------------------
+
+def _con_abono_por_defecto(client_admin):
+    """Las pruebas de acá miden el abono: vuelve a los valores acordados."""
+    assert client_admin.put("/api/v1/ajustes-negocio/abono_minimo",
+                            json={"valor": {"bodega": 100, "taller": 50}}).status_code == 200
+
+
+def test_confirmar_pide_el_abono_minimo_o_una_nota(client_admin, tienda, session):
+    _con_abono_por_defecto(client_admin)
+    pedido = _pedido(client_admin, BOLERO)  # va al taller: 50% de $20.000
+    abono = client_admin.post(f"{CRM}/cotizaciones/{pedido['id']}/propuesta", json={}).json()["abono"]
+    assert abono == {"minimo": 10000, "porcentaje": 50, "por": "taller", "pagado": 0, "falta": 10000}
+
+    res = _confirmar(client_admin, pedido)
+    assert res.status_code == 409 and "$10.000 para el abono mínimo" in res.json()["detail"]
+
+    _pagar(client_admin, pedido, 10000)
+    assert _confirmar(client_admin, pedido).status_code == 200
+
+
+def test_sin_abono_se_confirma_con_nota_y_queda_anotado(client_admin, tienda, session):
+    _con_abono_por_defecto(client_admin)
+    pedido = _pedido(client_admin, BOLERO)
+    _pagar(client_admin, pedido, 4000)
+    res = _confirmar(client_admin, pedido, nota="Clienta de siempre, paga al retirar")
+    assert res.status_code == 200, res.text
+    evento = session.exec(select(PedidoEvento).where(PedidoEvento.tipo == TipoEvento.ESTADO)).all()[-1]
+    assert evento.datos["abono_faltante"] == 6000
+
+
+def test_no_sale_con_saldo_pendiente(client_admin, tienda, session):
+    pedido = _pedido(client_admin, BOLERO)
+    _confirmar(client_admin, pedido)
+    _hechas(session, pedido, 0)
+    res = _estado(client_admin, pedido, "DESPACHADA")
+    assert res.status_code == 409 and "Falta pagar $20.000" in res.json()["detail"]
+    _pagar(client_admin, pedido, 20000)
+    assert _estado(client_admin, pedido, "DESPACHADA").status_code == 200
+
+
+def test_lo_pagado_de_mas_se_devuelve_o_queda_a_favor_y_se_usa_despues(client_admin, tienda):
+    pedido = _pedido(client_admin, BOLERO)
+    _pagar(client_admin, pedido, 15000)
+    url = f"{CRM}/cotizaciones/{pedido['id']}/pagos"
+    # Sin nada pagado de más no hay qué devolver.
+    assert client_admin.post(f"{url}/devolver", json={"monto": 1000, "medio": "Efectivo"}).status_code == 409
+
+    _estado(client_admin, pedido, "CANCELADA")
+    assert _cuentas(client_admin, pedido)["estado"] == "PAGADO_DE_MAS"
+    assert client_admin.post(f"{url}/devolver", json={"monto": 20000, "medio": "Efectivo"}).status_code == 409
+    assert client_admin.post(f"{url}/devolver", json={"monto": 5000, "medio": "Transferencia"}).status_code == 200
+    res = client_admin.post(f"{url}/a-favor", json={"monto": 10000, "nota": "Para su próximo pedido"})
+    assert res.status_code == 200
+    assert res.json()["cuentas"]["saldo"] == 0 and res.json()["a_favor_disponible"] == 10000
+
+    # La misma clienta (mismo RUT) lo usa en otro pedido.
+    otro = _pedido(client_admin, BOLERO)
+    assert _pagar(client_admin, otro, 12000, medio="Saldo a favor").status_code == 409
+    res = _pagar(client_admin, otro, 10000, medio="Saldo a favor")
+    assert res.status_code == 200 and res.json()["a_favor_disponible"] == 0
+
+    # Lo dejado a favor ya se usó: no se puede anular sin anular antes el uso.
+    a_favor = [p for p in client_admin.get(url).json()["pagos"] if p["tipo"] == "A_FAVOR"][0]
+    res = client_admin.post(f"{url}/{a_favor['id']}/anular", json={"motivo": "error"})
+    assert res.status_code == 409 and "ya se usó" in res.json()["detail"]

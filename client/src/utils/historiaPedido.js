@@ -49,6 +49,7 @@ const detalleConfirmacion = (datos) => {
     if (datos.taller) partes.push(`${prendas(datos.taller)} al taller`);
     if ((datos.esperando || []).length) partes.push(`Esperando bodega: ${datos.esperando.join(', ')}`);
     if (datos.fecha) partes.push(`Para el ${textoFecha(datos.fecha)}`);
+    if (datos.abono_faltante) partes.push(`Sin el abono mínimo: faltaban ${formatCurrency(datos.abono_faltante)}`);
     if (datos.nota) partes.push(`Nota: ${datos.nota}`);
     return partes.join(' · ') || null;
 };
@@ -91,6 +92,12 @@ export const describirEvento = ({ tipo, datos = {} }, modoEntrega) => {
 
         case 'PAGO':
             return { texto: `Pago de ${formatCurrency(datos.monto)} · ${datos.medio}`, detalle: datos.nota || null };
+
+        case 'DEVOLUCION':
+            return { texto: `Se devolvió ${formatCurrency(datos.monto)} · ${datos.medio}`, detalle: datos.nota || null };
+
+        case 'A_FAVOR':
+            return { texto: `Quedó ${formatCurrency(datos.monto)} a favor de la clienta`, detalle: datos.nota || null };
 
         case 'PAGO_ANULADO':
             return {

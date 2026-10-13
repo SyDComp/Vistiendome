@@ -188,3 +188,4 @@
 .cfp-ayuda { font-size: 0.8rem; font-weight: 400; color: var(--color-text-muted); }
 .cfp-ayuda--evento { color: var(--color-text-secondary); font-style: italic; }
 
+.cfp-ayuda--falta { color: var(--color-warning-deep); font-weight: 600; }

@@ -15,6 +15,26 @@ from app.models.taller import OrdenCorte, OrdenCorteItem
 CRM = "/api/v1/crm"
 
 
+@pytest.fixture(autouse=True)
+def sin_abono_minimo(session: Session):
+    """
+    Estas pruebas son del ciclo, no de los pagos: el abono mínimo queda en 0
+    para que confirmar no pida pagar. Las reglas de pago se prueban en
+    test_pagos.py.
+    """
+    from app.models.ajustes import AjusteNegocio
+    session.add(AjusteNegocio(clave="abono_minimo", valor={"bodega": 0, "taller": 0}))
+    session.commit()
+
+
+def _pagar_todo(client_admin: TestClient, pedido: dict):
+    """Paga lo que falte: un pedido sale pagado."""
+    saldo = client_admin.get(f"{CRM}/cotizaciones/{pedido['id']}/pagos").json()["cuentas"]["saldo"]
+    if saldo > 0:
+        res = client_admin.post(f"{CRM}/cotizaciones/{pedido['id']}/pagos", json={"monto": saldo, "medio": "Efectivo"})
+        assert res.status_code == 200, res.text
+
+
 @pytest.fixture
 def tienda(session: Session):
     """Una variante de cada clase de categoría: taller, solo bodega y sin decir."""
@@ -220,6 +240,7 @@ def test_solo_se_despacha_lo_confirmado_y_lo_despachado_solo_se_deshace(client_a
     assert _estado(client_admin, pedido, "DESPACHADA").status_code == 409
     _confirmar(client_admin, pedido)
     _hechas(session, pedido, 0)
+    _pagar_todo(client_admin, pedido)
     assert _estado(client_admin, pedido, "DESPACHADA").status_code == 200
     assert _estado(client_admin, pedido, "CANCELADA").status_code == 409
     assert _estado(client_admin, pedido, "CONFIRMADA").status_code == 200
@@ -249,6 +270,7 @@ def test_al_despachar_solo_sale_de_bodega_lo_que_iba_por_bodega(client_admin, ti
     pedido = _pedido(client_admin, (tienda["vestido"], 1), (tienda["vestido"], 1))
     _confirmar(client_admin, pedido)  # una apartada, la otra al taller
     _hechas(session, pedido, 1)
+    _pagar_todo(client_admin, pedido)
     assert _estado(client_admin, pedido, "DESPACHADA").status_code == 200
 
     salidas = session.exec(select(StockMovement).where(StockMovement.type == MovementType.SALE)).all()
@@ -268,6 +290,7 @@ def test_no_sale_hasta_que_el_taller_termina_personalizadas_incluidas(client_adm
 
     _hechas(session, pedido, 1)
     assert _leer(client_admin, pedido)["produccion"]["listo"] is True
+    _pagar_todo(client_admin, pedido)
     assert _estado(client_admin, pedido, "DESPACHADA").status_code == 200
 
 

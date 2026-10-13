@@ -47,11 +47,24 @@ class PagoSalida(BaseModel):
 class PagosSalida(BaseModel):
     cuentas: CuentasSalida
     pagos: List[PagoSalida]
+    # Lo que la clienta tiene a favor de otras compras: se puede usar para pagar.
+    a_favor_disponible: int = 0
 
 
 class PagoEntrada(BaseModel):
     monto: int = Field(gt=0)
     medio: str = Field(max_length=60)
+    nota: Optional[str] = Field(default=None, max_length=300)
+
+
+class DevolverEntrada(BaseModel):
+    monto: int = Field(gt=0)
+    medio: str = Field(max_length=60)
+    nota: Optional[str] = Field(default=None, max_length=300)
+
+
+class AFavorEntrada(BaseModel):
+    monto: int = Field(gt=0)
     nota: Optional[str] = Field(default=None, max_length=300)
 
 
@@ -71,6 +84,7 @@ def _salida(db: Session, cotizacion: Cotizacion) -> PagosSalida:
     return PagosSalida(
         cuentas=CuentasSalida(**vars(core.cuentas(cotizacion, pagos))),
         pagos=[PagoSalida(**p.model_dump()) for p in reversed(pagos)],  # el más nuevo primero
+        a_favor_disponible=core.disponible(db, cotizacion.persona_id),
     )
 
 
@@ -84,6 +98,30 @@ def registrar(cotizacion_id: str, data: PagoEntrada, db: Session = Depends(get_s
     cotizacion = _pedido(db, cotizacion_id)
     try:
         core.registrar(db, cotizacion, data.monto, data.medio, data.nota, historia.de_cuenta(admin))
+    except core.NoSeRegistra as e:
+        raise HTTPException(status_code=409, detail=str(e))
+    db.commit()
+    return _salida(db, cotizacion)
+
+
+@router.post("/cotizaciones/{cotizacion_id}/pagos/devolver", response_model=PagosSalida)
+def devolver(cotizacion_id: str, data: DevolverEntrada, db: Session = Depends(get_session), admin: CuentaAcceso = _ADMIN):
+    """Se le devuelve a la clienta lo pagado de más."""
+    cotizacion = _pedido(db, cotizacion_id)
+    try:
+        core.devolver(db, cotizacion, data.monto, data.medio, data.nota, historia.de_cuenta(admin))
+    except core.NoSeRegistra as e:
+        raise HTTPException(status_code=409, detail=str(e))
+    db.commit()
+    return _salida(db, cotizacion)
+
+
+@router.post("/cotizaciones/{cotizacion_id}/pagos/a-favor", response_model=PagosSalida)
+def a_favor(cotizacion_id: str, data: AFavorEntrada, db: Session = Depends(get_session), admin: CuentaAcceso = _ADMIN):
+    """Lo pagado de más queda a favor de la clienta, para otra compra."""
+    cotizacion = _pedido(db, cotizacion_id)
+    try:
+        core.dejar_a_favor(db, cotizacion, data.monto, data.nota, historia.de_cuenta(admin))
     except core.NoSeRegistra as e:
         raise HTTPException(status_code=409, detail=str(e))
     db.commit()

@@ -37,6 +37,9 @@ export const avisoVolverAtras = (pedido, destino) => {
             ? 'Lo ya hecho no se pierde: lo del catálogo entra a bodega y lo personalizado queda en Bodega › Piezas únicas.'
             : 'Lo ya hecho no se pierde: sigue guardado para este pedido.');
     }
+    if (cancela && (pedido.pago?.pagado || 0) > 0) {
+        partes.push('Lo que ya pagó se devuelve o queda a favor de la clienta, en la sección Pagos.');
+    }
     if (!cancela) partes.push('Al confirmar de nuevo se vuelve a decidir de dónde sale cada prenda.');
     partes.push(cancela ? '¿Cancelar el pedido?' : '¿Volver atrás?');
     return partes.join(' ');

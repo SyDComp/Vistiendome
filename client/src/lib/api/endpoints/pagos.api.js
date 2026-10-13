@@ -13,3 +13,9 @@ export const verPagos = (pedidoId) => get(base(pedidoId));
 export const registrarPago = (pedidoId, pago) => post(base(pedidoId), pago);
 
 export const anularPago = (pedidoId, pagoId, motivo) => post(`${base(pedidoId)}/${pagoId}/anular`, { motivo });
+
+/** Se le devuelve a la clienta lo pagado de más. @param {{monto, medio, nota}} devolucion */
+export const devolverPago = (pedidoId, devolucion) => post(`${base(pedidoId)}/devolver`, devolucion);
+
+/** Lo pagado de más queda a favor de la clienta, para otra compra. */
+export const dejarAFavor = (pedidoId, { monto, nota }) => post(`${base(pedidoId)}/a-favor`, { monto, nota });

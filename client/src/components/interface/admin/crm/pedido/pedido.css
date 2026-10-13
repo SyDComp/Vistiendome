@@ -416,3 +416,8 @@
 .sp-pago--anulado .sp-pago-monto { text-decoration: line-through; color: var(--color-text-muted); }
 .sp-pago-anulado { margin: 0.2rem 0 0; font-size: 0.8rem; color: var(--color-error-deep); }
 .sp-pago-campo { display: grid; gap: 0.25rem; font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary); }
+
+/* Lo pagado de más, y el tipo de un movimiento que no es un pago. */
+.sp-de-mas { display: grid; gap: 0.5rem; padding: 0.6rem 0.75rem; border-radius: 0.5rem; background: var(--color-warning-bg); }
+.sp-acciones--izquierda { justify-content: flex-start; }
+.sp-pago-tipo { font-weight: 600; color: var(--color-text-secondary); }

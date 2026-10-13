@@ -3,6 +3,9 @@ import { formatCurrency } from '../../../../../../utils/cartUtils';
 
 const FECHA = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short' });
 
+// Lo que no es un pago: sale del pedido.
+const TIPOS = { DEVOLUCION: 'Devolución', A_FAVOR: 'Quedó a favor de la clienta' };
+
 /** Un pago de la lista. Anulado se ve tachado, con su motivo: no desaparece. */
 const PagoFila = ({ pago, onAnular }) => {
     const anulado = Boolean(pago.anulado_en);
@@ -11,7 +14,9 @@ const PagoFila = ({ pago, onAnular }) => {
             <div className="sp-prenda-fila">
                 <div>
                     <p className="sp-prenda-nombre">
-                        <span className="sp-pago-monto">{formatCurrency(pago.monto)}</span> · {pago.medio}
+                        {TIPOS[pago.tipo] && <span className="sp-pago-tipo">{TIPOS[pago.tipo]}: </span>}
+                        <span className="sp-pago-monto">{TIPOS[pago.tipo] ? '−' : ''}{formatCurrency(pago.monto)}</span>
+                        {pago.tipo !== 'A_FAVOR' && ` · ${pago.medio}`}
                     </p>
                     <p className="sp-prenda-detalle">
                         {FECHA.format(new Date(pago.registrado_en))}{pago.registrado_por ? ` · ${pago.registrado_por}` : ''}

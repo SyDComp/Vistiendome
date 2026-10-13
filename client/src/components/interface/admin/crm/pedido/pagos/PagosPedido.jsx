@@ -6,6 +6,7 @@ import usePagosPedido from '../../../../../../hooks/usePagosPedido';
 import { formatCurrency } from '../../../../../../utils/cartUtils';
 import { ESTADOS_PAGO, textoSaldo } from '../../../../../../utils/pagos';
 import { mensajeDeError } from '../../../../../../utils/errorServidor';
+import PagadoDeMas from './PagadoDeMas';
 import PagoFila from './PagoFila';
 import RegistrarPago from './RegistrarPago';
 
@@ -63,7 +64,9 @@ const PagosPedido = ({ pedido, abierto = true, onCambio }) => {
                 <span>Pagado <strong>{formatCurrency(cuentas.pagado)}</strong></span>
                 <span className={`sp-pago-estado sp-pago-estado--${estado.tono}`}>{estado.texto}</span>
             </div>
-            {saldo && <p className="sp-pagos-saldo">{saldo}</p>}
+            {cuentas.saldo < 0
+                ? <PagadoDeMas pedidoId={pedido.id} deMas={-cuentas.saldo} medios={ajustes?.medios_pago || []} onCambio={alCambiar} />
+                : saldo && <p className="sp-pagos-saldo">{saldo}</p>}
 
             {pagos.length > 0 && (
                 <ul className="sp-prendas">
@@ -79,7 +82,7 @@ const PagosPedido = ({ pedido, abierto = true, onCambio }) => {
                 </div>
             )}
             {registrando && (
-                <RegistrarPago pedidoId={pedido.id} medios={ajustes?.medios_pago || []}
+                <RegistrarPago pedidoId={pedido.id} medios={ajustes?.medios_pago || []} aFavor={datos.a_favor_disponible}
                     sugerido={cuentas.por_cotizar ? 0 : cuentas.saldo}
                     onRegistrado={alCambiar} onCancelar={() => setRegistrando(false)} />
             )}

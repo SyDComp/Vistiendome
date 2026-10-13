@@ -45,6 +45,13 @@ describe('la propuesta', () => {
         expect(sePuedeConfirmar({ prendas: [apartada, esperando], problemas: [] }, 'llega el jueves')).toBe(true);
     });
 
+    it('sin el abono mínimo, también pide nota', () => {
+        const conAbono = (falta) => ({ prendas: [apartada], problemas: [], abono: { falta } });
+        expect(sePuedeConfirmar(conAbono(5000), '')).toBe(false);
+        expect(sePuedeConfirmar(conAbono(5000), 'paga al retirar')).toBe(true);
+        expect(sePuedeConfirmar(conAbono(0), '')).toBe(true);
+    });
+
     it('no se confirma con problemas ni sin prendas', () => {
         expect(sePuedeConfirmar({ prendas: [apartada], problemas: ['Ponle precio a: X.'] }, '')).toBe(false);
         expect(sePuedeConfirmar({ prendas: [], problemas: [] }, '')).toBe(false);

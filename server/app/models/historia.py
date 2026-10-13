@@ -29,7 +29,9 @@ class TipoEvento:
     ESTADO = "ESTADO"                        # {de, a, motivo?}; al confirmar además {bodega, taller, esperando, nota, fecha}
     FECHA = "FECHA"                          # {de, a, nota}: la fecha comprometida, en ISO (AAAA-MM-DD)
     PAGO = "PAGO"                            # {monto, medio, nota}
-    PAGO_ANULADO = "PAGO_ANULADO"            # {monto, medio, motivo}
+    PAGO_ANULADO = "PAGO_ANULADO"            # {monto, medio, motivo, movimiento?}
+    DEVOLUCION = "DEVOLUCION"                # {monto, medio, nota}: lo pagado de más, devuelto
+    A_FAVOR = "A_FAVOR"                      # {monto, medio, nota}: lo pagado de más, a favor de la clienta
     CANAL = "CANAL"                          # {de, a}
     PRECIO = "PRECIO"                        # {prenda, de, a}: None por cotizar, 0 sin costo
     ORDEN_AGREGADA = "ORDEN_AGREGADA"        # {orden, prendas}

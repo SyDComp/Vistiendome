@@ -4,7 +4,7 @@ import SectionHeader from '../../../ui/admin/SectionHeader';
 import { useNotification } from '../../../../context/NotificationContext';
 import useAjustesNegocio from '../../../../hooks/useAjustesNegocio';
 import EditorOpciones from './EditorOpciones';
-import EditorPlazos from './EditorPlazos';
+import EditorNumeros from './EditorNumeros';
 import './ajustes.css';
 
 /**
@@ -20,6 +20,11 @@ const AjustesNegocio = () => {
     const guardarPlazos = async (plazos) => {
         await guardar('plazos_pedido', plazos);
         toast.success('Plazos guardados');
+    };
+
+    const guardarAbono = async (porcentajes) => {
+        await guardar('abono_minimo', porcentajes);
+        toast.success('Abono mínimo guardado');
     };
 
     const guardarMedios = async (lista) => {
@@ -57,7 +62,35 @@ const AjustesNegocio = () => {
                         confirmarlo, la fecha comprometida se propone con esto, y se puede cambiar.
                         Los feriados no se descuentan: si cae uno, se ajusta la fecha a mano.
                     </p>
-                    <EditorPlazos plazos={ajustes.plazos_pedido || {}} onGuardar={guardarPlazos} />
+                    <EditorNumeros
+                        valores={ajustes.plazos_pedido || {}}
+                        campos={[
+                            { clave: 'bodega', etiqueta: 'Si todo sale de bodega' },
+                            { clave: 'taller', etiqueta: 'Si algo lo hace el taller' },
+                        ]}
+                        unidad="días hábiles" max={365} textoBoton="Guardar plazos"
+                        onGuardar={guardarPlazos}
+                    />
+                </section>
+            )}
+
+            {!cargando && !error && ajustes && (
+                <section className="aj-tarjeta" aria-labelledby="aj-abono-titulo">
+                    <h3 id="aj-abono-titulo" className="aj-titulo">Abono mínimo para confirmar</h3>
+                    <p className="aj-explicacion">
+                        Qué parte del total se pide pagar al confirmar un pedido. Si no se
+                        pagó, se puede confirmar igual, escribiendo una nota de por qué.
+                        Antes de despachar, el pedido se paga entero.
+                    </p>
+                    <EditorNumeros
+                        valores={ajustes.abono_minimo || {}}
+                        campos={[
+                            { clave: 'taller', etiqueta: 'Si algo lo hace el taller' },
+                            { clave: 'bodega', etiqueta: 'Si todo sale de bodega' },
+                        ]}
+                        unidad="% del total" max={100} textoBoton="Guardar abono"
+                        onGuardar={guardarAbono}
+                    />
                 </section>
             )}
 

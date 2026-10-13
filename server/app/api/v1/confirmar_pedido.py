@@ -47,6 +47,8 @@ class PropuestaSalida(BaseModel):
     fecha_propuesta: Optional[date] = None
     plazo_dias: Optional[int] = None
     plazo_por: Optional[str] = None     # "taller" o "bodega"
+    # El abono mínimo: {minimo, porcentaje, por, pagado, falta}. Ver core/pagos/abono.py.
+    abono: Optional[dict] = None
     # Lo que impide confirmar tal como está (sin contar la nota, que se
     # escribe en la misma pantalla).
     problemas: List[str] = []
@@ -62,12 +64,13 @@ class ConfirmarEntrada(BaseModel):
     fecha_comprometida: Optional[date] = None
 
 
-def _salida(db: Session, propuesta, problemas=()) -> PropuestaSalida:
+def _salida(db: Session, propuesta, problemas=(), cotizacion: Optional[Cotizacion] = None) -> PropuestaSalida:
     fecha, dias, por = fecha_core.propuesta(db, [p.camino for p in propuesta])
     return PropuestaSalida(
         prendas=[PrendaPropuestaSalida(**vars(p)) for p in propuesta],
         problemas=list(problemas),
         fecha_propuesta=fecha, plazo_dias=dias, plazo_por=por,
+        abono=ciclo.abono_de(db, cotizacion, propuesta) if cotizacion is not None else None,
     )
 
 
@@ -88,7 +91,7 @@ def propuesta(cotizacion_id: str, data: ConfirmarEntrada, db: Session = Depends(
     """
     cotizacion = _pedido(db, cotizacion_id)
     prendas = ciclo.proponer(db, cotizacion, data.caminos)
-    return _salida(db, prendas, ciclo.problemas(cotizacion, prendas, nota=None, al_confirmar=False))
+    return _salida(db, prendas, ciclo.problemas(cotizacion, prendas, nota=None, al_confirmar=False), cotizacion)
 
 
 @router.post("/cotizaciones/{cotizacion_id}/confirmar")
@@ -105,7 +108,7 @@ def confirmar(cotizacion_id: str, data: ConfirmarEntrada, db: Session = Depends(
         db.rollback()
         return JSONResponse(status_code=409, content={
             "detail": str(e),
-            "propuesta": _salida(db, e.propuesta).model_dump(mode="json"),
+            "propuesta": _salida(db, e.propuesta, cotizacion=cotizacion).model_dump(mode="json"),
         })
     except ciclo.NoSeConfirma as e:
         db.rollback()

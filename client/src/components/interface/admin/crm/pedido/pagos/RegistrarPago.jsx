@@ -2,13 +2,19 @@ import React, { useState } from 'react';
 import { useNotification } from '../../../../../../context/NotificationContext';
 import { registrarPago } from '../../../../../../lib/api/endpoints';
 import { montoDesde } from '../../../../../../utils/pagos';
+import { formatCurrency } from '../../../../../../utils/cartUtils';
 import { mensajeDeError } from '../../../../../../utils/errorServidor';
+
+// El medio con que se paga usando el saldo a favor (core/pagos/a_favor.py).
+const MEDIO_A_FAVOR = 'Saldo a favor';
 
 /**
  * "Registrar pago": monto, medio (los de Ajustes del negocio) y una nota
  * opcional. `sugerido`: lo que falta pagar, para no tener que escribirlo.
+ * `aFavor`: lo que la clienta tiene a favor de otras compras; si tiene, se
+ * puede pagar con eso.
  */
-const RegistrarPago = ({ pedidoId, medios = [], sugerido, onRegistrado, onCancelar }) => {
+const RegistrarPago = ({ pedidoId, medios = [], aFavor = 0, sugerido, onRegistrado, onCancelar }) => {
     const { toast } = useNotification();
     const [monto, setMonto] = useState(sugerido > 0 ? String(sugerido) : '');
     const [medio, setMedio] = useState(medios[0] || '');
@@ -40,6 +46,9 @@ const RegistrarPago = ({ pedidoId, medios = [], sugerido, onRegistrado, onCancel
                 Medio de pago
                 <select className="sp-select" value={medio} onChange={e => setMedio(e.target.value)} disabled={enviando}>
                     {medios.map(m => <option key={m} value={m}>{m}</option>)}
+                    {aFavor > 0 && (
+                        <option value={MEDIO_A_FAVOR}>{MEDIO_A_FAVOR} (tiene {formatCurrency(aFavor)})</option>
+                    )}
                 </select>
             </label>
             <label className="sp-pago-campo">

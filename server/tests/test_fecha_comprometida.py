@@ -10,7 +10,7 @@ from sqlmodel import select
 from app.core.pedidos import fecha
 from app.models.historia import PedidoEvento, TipoEvento
 from test_ciclo_pedido import (  # noqa: F401  (tienda es un fixture)
-    CRM, _confirmar, _estado, _hay, _leer, _pedido, _propuesta, tienda,
+    CRM, _confirmar, _estado, _hay, _leer, _pedido, _propuesta, sin_abono_minimo, tienda,
 )
 
 AJUSTES = "/api/v1/ajustes-negocio"

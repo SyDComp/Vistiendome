@@ -7,6 +7,7 @@ import usePropuestaConfirmacion from '../../../../../../hooks/usePropuestaConfir
 import { mensajeDeError } from '../../../../../../utils/errorServidor';
 import { esperandoVistas, pideNota, sePuedeConfirmar } from '../../../../../../utils/caminoPrenda';
 import { hoyIso } from '../../../../../../utils/fechaComprometida';
+import AbonoConfirmacion from './AbonoConfirmacion';
 import FechaPropuesta from './FechaPropuesta';
 import PrendaPropuesta from './PrendaPropuesta';
 import '../pedido.css';
@@ -36,6 +37,7 @@ const ConfirmarPedido = ({ pedido, onConfirmado, onCerrar }) => {
     const fecha = fechaElegida ?? propuesta?.fecha_propuesta ?? null;
     const fechaValida = Boolean(fecha) && fecha >= hoyIso();
     const problemas = propuesta?.problemas || [];
+    const necesitaNota = pideNota(prendas) || (propuesta?.abono?.falta || 0) > 0;
     const ocupado = cargando || enviando;
 
     const elegir = (prendaId, camino) => setCaminos(prev => ({ ...prev, [prendaId]: camino }));
@@ -127,10 +129,14 @@ const ConfirmarPedido = ({ pedido, onConfirmado, onCerrar }) => {
                             <FechaPropuesta fecha={fecha} propuesta={propuesta} fechaEvento={pedido.fecha_evento}
                                 onCambiar={setFechaElegida} disabled={enviando} />
 
-                            {pideNota(prendas) && (
+                            <AbonoConfirmacion pedidoId={pedido.id} abono={propuesta.abono} onPagado={recargar} disabled={enviando} />
+
+                            {necesitaNota && (
                                 <div className="cfp-nota">
                                     <label htmlFor="cfp-nota">
-                                        Nota (obligatoria: hay prendas que se confirman distinto de lo habitual)
+                                        Nota (obligatoria: {pideNota(prendas)
+                                            ? 'hay prendas que se confirman distinto de lo habitual'
+                                            : 'se confirma sin el abono mínimo'})
                                     </label>
                                     <textarea id="cfp-nota" className="sp-select" rows={2} maxLength={500}
                                         value={nota} onChange={e => setNota(e.target.value)}

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNotification } from '../../../../../context/NotificationContext';
 import { actualizarEstadoCotizacion } from '../../../../../lib/api/endpoints';
 import { mensajeDeError } from '../../../../../utils/errorServidor';
+import { obtenerPedido } from '../../../../../lib/api/endpoints';
+import CobrarSaldo from './pagos/CobrarSaldo';
 
 /**
  * Que el pedido salga: "Despachar", o en un retiro "Marcar como entregado".
@@ -50,6 +52,11 @@ const SalidaPedido = ({ pedido, onCambio }) => {
                 <ul className="sp-falta">{falta.map(f => <li key={f}>{f}</li>)}</ul>
             </div>
         );
+    }
+
+    // Listo pero con saldo: no sale hasta pagarse entero.
+    if ((pedido.pago?.saldo || 0) > 0) {
+        return <CobrarSaldo pedido={pedido} onCobrado={async () => onCambio(await obtenerPedido(pedido.id))} />;
     }
 
     const deBodega = bodega ? ' Lo que va por bodega sale de la bodega.' : '';
