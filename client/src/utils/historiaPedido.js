@@ -91,7 +91,11 @@ export const describirEvento = ({ tipo, datos = {} }, modoEntrega) => {
             };
 
         case 'PAGO':
-            return { texto: `Pago de ${formatCurrency(datos.monto)} · ${datos.medio}`, detalle: datos.nota || null };
+            return {
+                texto: `Pago de ${formatCurrency(datos.monto)} · ${datos.medio}`,
+                // Con saldo a favor que no calzaba: lo que no calzaba y cómo se verificó.
+                detalle: [...(datos.verificacion || []), datos.nota].filter(Boolean).join(' · ') || null,
+            };
 
         case 'DEVOLUCION':
             return { texto: `Se devolvió ${formatCurrency(datos.monto)} · ${datos.medio}`, detalle: datos.nota || null };

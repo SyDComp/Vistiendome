@@ -21,6 +21,7 @@ from ...models.pagos import Pago, TipoPago
 from .. import ajustes_negocio
 from ..pedidos.historia import Actor, anotar
 from .a_favor import MEDIO_A_FAVOR, disponible
+from . import verificar
 from .cuentas import Cuentas, cuentas, pagos_de
 
 
@@ -48,7 +49,7 @@ def _medio_valido(db: Session, medio: str) -> None:
         raise NoSeRegistra(f'"{medio}" no es un medio de pago. Opciones: {", ".join(medios)}.')
 
 
-def _anotar_pago(db, cotizacion, actor, tipo, monto, medio, nota) -> Pago:
+def _anotar_pago(db, cotizacion, actor, tipo, monto, medio, nota, **extra) -> Pago:
     pago = Pago(
         cotizacion_id=cotizacion.id, tipo=tipo, monto=monto, medio=medio,
         nota=(nota or "").strip() or None,
@@ -57,7 +58,8 @@ def _anotar_pago(db, cotizacion, actor, tipo, monto, medio, nota) -> Pago:
     db.add(pago)
     evento = {TipoPago.PAGO: TipoEvento.PAGO, TipoPago.DEVOLUCION: TipoEvento.DEVOLUCION,
               TipoPago.A_FAVOR: TipoEvento.A_FAVOR}[tipo]
-    anotar(db, cotizacion, evento, actor, monto=monto, medio=medio, nota=pago.nota)
+    anotar(db, cotizacion, evento, actor, monto=monto, medio=medio, nota=pago.nota,
+           **{k: v for k, v in extra.items() if v is not None})
     return pago
 
 
@@ -66,17 +68,25 @@ def registrar(db: Session, cotizacion: Cotizacion, monto: int, medio: str, nota:
     if EstadoCotizacion(getattr(cotizacion.estado, "value", cotizacion.estado)) == EstadoCotizacion.CANCELADA:
         raise NoSeRegistra("El pedido está cancelado: no se le registran pagos.")
     _monto_valido(monto)
+    no_calza = []
     if medio == MEDIO_A_FAVOR:
         tiene = disponible(db, cotizacion.persona_id)
         if monto > tiene:
             raise NoSeRegistra(f"La clienta tiene {pesos(tiene)} a favor: no alcanza para {pesos(monto)}.")
+        # ¿Es la misma persona que lo dejó? Si algo no calza, se puede seguir,
+        # pero diciendo cómo se verificó.
+        no_calza = verificar.avisos(db, cotizacion)
+        if no_calza and not (nota or "").strip():
+            raise NoSeRegistra(
+                " ".join(no_calza) + " Escribe en la nota cómo verificaste que es la misma persona."
+            )
     else:
         _medio_valido(db, medio)
 
     c = _cuentas(db, cotizacion)
     if not c.por_cotizar and monto > c.saldo:
         raise NoSeRegistra(f"El pago ({pesos(monto)}) supera lo que falta pagar ({pesos(max(c.saldo, 0))}).")
-    return _anotar_pago(db, cotizacion, actor, TipoPago.PAGO, monto, medio, nota)
+    return _anotar_pago(db, cotizacion, actor, TipoPago.PAGO, monto, medio, nota, verificacion=no_calza or None)
 
 
 def _de_mas(db: Session, cotizacion: Cotizacion, monto: int) -> None:

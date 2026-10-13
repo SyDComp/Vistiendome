@@ -49,6 +49,10 @@ class PagosSalida(BaseModel):
     pagos: List[PagoSalida]
     # Lo que la clienta tiene a favor de otras compras: se puede usar para pagar.
     a_favor_disponible: int = 0
+    # De qué pedidos viene (con el nombre y el teléfono que se dieron ahí) y
+    # qué no calza con este pedido. Ver core/pagos/verificar.py.
+    a_favor_origenes: List[dict] = []
+    a_favor_avisos: List[str] = []
 
 
 class PagoEntrada(BaseModel):
@@ -85,6 +89,9 @@ def _salida(db: Session, cotizacion: Cotizacion) -> PagosSalida:
         cuentas=CuentasSalida(**vars(core.cuentas(cotizacion, pagos))),
         pagos=[PagoSalida(**p.model_dump()) for p in reversed(pagos)],  # el más nuevo primero
         a_favor_disponible=core.disponible(db, cotizacion.persona_id),
+        a_favor_origenes=[o._asdict() for o in core.origenes(db, cotizacion.persona_id)
+                          if o.pedido_numero != cotizacion.numero],
+        a_favor_avisos=core.avisos(db, cotizacion),
     )
 
 

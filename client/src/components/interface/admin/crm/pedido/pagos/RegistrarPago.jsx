@@ -12,15 +12,20 @@ const MEDIO_A_FAVOR = 'Saldo a favor';
  * "Registrar pago": monto, medio (los de Ajustes del negocio) y una nota
  * opcional. `sugerido`: lo que falta pagar, para no tener que escribirlo.
  * `aFavor`: lo que la clienta tiene a favor de otras compras; si tiene, se
- * puede pagar con eso.
+ * puede pagar con eso. Entonces se muestra de qué pedidos viene (`origenes`,
+ * con el nombre y el teléfono que se dieron ahí) y lo que no calza con este
+ * pedido (`avisos`): si algo no calza, la nota es obligatoria (cómo se
+ * verificó que es la misma persona).
  */
-const RegistrarPago = ({ pedidoId, medios = [], aFavor = 0, sugerido, onRegistrado, onCancelar }) => {
+const RegistrarPago = ({ pedidoId, medios = [], aFavor = 0, origenes = [], avisos = [], sugerido, onRegistrado, onCancelar }) => {
     const { toast } = useNotification();
     const [monto, setMonto] = useState(sugerido > 0 ? String(sugerido) : '');
     const [medio, setMedio] = useState(medios[0] || '');
     const [nota, setNota] = useState('');
     const [enviando, setEnviando] = useState(false);
     const valor = montoDesde(monto);
+    const conAFavor = medio === MEDIO_A_FAVOR;
+    const pideNota = conAFavor && avisos.length > 0;
 
     const registrar = async () => {
         setEnviando(true);
@@ -51,15 +56,28 @@ const RegistrarPago = ({ pedidoId, medios = [], aFavor = 0, sugerido, onRegistra
                     )}
                 </select>
             </label>
+            {conAFavor && (
+                <div className="sp-verificar">
+                    {origenes.map(o => (
+                        <p key={o.pedido_numero} className="sp-prenda-detalle">
+                            {formatCurrency(o.monto)} a favor del pedido N° {o.pedido_numero}
+                            {' · '}{o.nombre || 'sin nombre'} · {o.telefono || 'sin teléfono'}
+                        </p>
+                    ))}
+                    {avisos.length > 0 && (
+                        <ul className="sp-falta" role="alert">{avisos.map(a => <li key={a}>{a}</li>)}</ul>
+                    )}
+                </div>
+            )}
             <label className="sp-pago-campo">
-                Nota (opcional)
+                {pideNota ? 'Nota (obligatoria: cómo verificaste que es la misma persona)' : 'Nota (opcional)'}
                 <input type="text" className="sp-select" maxLength={300} placeholder="Ej: abono por transferencia"
                     value={nota} onChange={e => setNota(e.target.value)} disabled={enviando} />
             </label>
             <div className="sp-acciones">
                 <button type="button" className="sp-boton" onClick={onCancelar} disabled={enviando}>Cancelar</button>
                 <button type="button" className="sp-boton sp-boton--principal" onClick={registrar}
-                    disabled={enviando || !valor || !medio}>
+                    disabled={enviando || !valor || !medio || (pideNota && !nota.trim())}>
                     {enviando ? 'Registrando…' : 'Registrar pago'}
                 </button>
             </div>

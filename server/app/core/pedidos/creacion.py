@@ -162,6 +162,7 @@ def crear_pedido(session: Session, data, actor: Actor, canal: str = None, permit
         comuna=(data.comuna or None) if despacho else None,
         direccion=(data.direccion or None) if despacho else None,
         nombre_contacto=nombre_contacto,
+        telefono_contacto=(data.telefono or "").strip() or None,
         canal=canal,
         estado=EstadoCotizacion.NUEVA
     )

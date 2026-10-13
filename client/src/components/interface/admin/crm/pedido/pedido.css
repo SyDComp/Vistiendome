@@ -421,3 +421,6 @@
 .sp-de-mas { display: grid; gap: 0.5rem; padding: 0.6rem 0.75rem; border-radius: 0.5rem; background: var(--color-warning-bg); }
 .sp-acciones--izquierda { justify-content: flex-start; }
 .sp-pago-tipo { font-weight: 600; color: var(--color-text-secondary); }
+
+/* Pagar con saldo a favor: de dónde viene y qué no calza. */
+.sp-verificar { display: grid; gap: 0.3rem; padding: 0.5rem 0.65rem; border-radius: 0.5rem; border: 1px dashed var(--color-border-strong); }

@@ -143,6 +143,12 @@ class Cotizacion(SQLModel, table=True):
     # mostrando el de la Persona.
     nombre_contacto: Optional[str] = Field(default=None, max_length=200)
 
+    # El teléfono que se dio en ESTE pedido, por la misma razón que el nombre:
+    # el de la Persona es el primero que dio y no cambia. Sirve para comprobar
+    # que quien usa un saldo a favor es quien lo dejó (core/pagos/verificar.py).
+    # Nulo en los pedidos anteriores a este campo.
+    telefono_contacto: Optional[str] = Field(default=None, max_length=20)
+
     # Cuándo se confirmó por última vez. Decide quién se lleva primero lo que
     # hay en bodega: el que confirmó antes (ver core/pedidos/ciclo/apartado.py).
     # Nulo si no está confirmado, y en los confirmados antes de este campo: de

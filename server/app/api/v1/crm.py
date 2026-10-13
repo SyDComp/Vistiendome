@@ -151,6 +151,7 @@ class CotizacionRead(BaseModel):
     # modelo (Cotizacion.nombre_contacto): puede diferir de `cliente.nombres`
     # a proposito, y es el que hay que mostrar.
     nombre_contacto: Optional[str] = None
+    telefono_contacto: Optional[str] = None
     confirmada_en: Optional[datetime] = None
     fecha_comprometida: Optional[date] = None
     created_at: datetime

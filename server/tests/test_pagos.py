@@ -168,11 +168,56 @@ def test_lo_pagado_de_mas_se_devuelve_o_queda_a_favor_y_se_usa_despues(client_ad
 
     # La misma clienta (mismo RUT) lo usa en otro pedido.
     otro = _pedido(client_admin, BOLERO)
-    assert _pagar(client_admin, otro, 12000, medio="Saldo a favor").status_code == 409
+    assert _pagar(client_admin, otro, 12000, medio="Saldo a favor", nota="La conozco").status_code == 409
+    # Ninguno de los dos pedidos tiene teléfono: no se puede comprobar, pide nota.
     res = _pagar(client_admin, otro, 10000, medio="Saldo a favor")
+    assert res.status_code == 409 and "No se puede comparar el teléfono" in res.json()["detail"]
+    res = _pagar(client_admin, otro, 10000, medio="Saldo a favor", nota="Confirmé por llamada")
     assert res.status_code == 200 and res.json()["a_favor_disponible"] == 0
 
     # Lo dejado a favor ya se usó: no se puede anular sin anular antes el uso.
     a_favor = [p for p in client_admin.get(url).json()["pagos"] if p["tipo"] == "A_FAVOR"][0]
     res = client_admin.post(f"{url}/{a_favor['id']}/anular", json={"motivo": "error"})
     assert res.status_code == 409 and "ya se usó" in res.json()["detail"]
+
+
+# --- ¿Es la misma persona? (saldo a favor) -----------------------------------
+
+def _con_contacto(client_admin, nombres, telefono, rut="22222222-2"):
+    res = client_admin.post(f"{CRM}/cotizaciones", json={
+        "rut": rut, "nombres": nombres, "telefono": telefono, "canal": "WhatsApp", "items": [BOLERO]})
+    assert res.status_code == 200, res.text
+    return res.json()
+
+
+def _deja_a_favor(client_admin, pedido, monto=20000):
+    _pagar(client_admin, pedido, monto)
+    _estado(client_admin, pedido, "CANCELADA")
+    assert client_admin.post(f"{CRM}/cotizaciones/{pedido['id']}/pagos/a-favor", json={"monto": monto}).status_code == 200
+
+
+def test_mismo_nombre_y_telefono_no_pide_nota(client_admin, tienda, session):
+    origen = _con_contacto(client_admin, "María Pérez", "+56 9 8994 4444")
+    _deja_a_favor(client_admin, origen)
+    nuevo = _con_contacto(client_admin, "maria perez", "989944444")
+    datos = client_admin.get(f"{CRM}/cotizaciones/{nuevo['id']}/pagos").json()
+    assert datos["a_favor_avisos"] == []
+    assert datos["a_favor_origenes"] == [{"pedido_numero": origen["numero"], "monto": 20000,
+                                          "nombre": "María Pérez", "telefono": "+56 9 8994 4444"}]
+    assert _pagar(client_admin, nuevo, 5000, medio="Saldo a favor").status_code == 200
+
+
+def test_otro_telefono_u_otro_nombre_pide_nota_y_queda_anotado(client_admin, tienda, session):
+    origen = _con_contacto(client_admin, "María Pérez", "+56 9 8994 4444")
+    _deja_a_favor(client_admin, origen)
+    nuevo = _con_contacto(client_admin, "Josefa Díaz", "+56 9 1111 2222")
+
+    res = _pagar(client_admin, nuevo, 5000, medio="Saldo a favor")
+    assert res.status_code == 409
+    assert "El teléfono no es el mismo" in res.json()["detail"] and "El nombre no es el mismo" in res.json()["detail"]
+
+    assert _pagar(client_admin, nuevo, 5000, medio="Saldo a favor", nota="Es su hija, lo confirmó María").status_code == 200
+    evento = session.exec(select(PedidoEvento).where(PedidoEvento.tipo == TipoEvento.PAGO)).all()[-1]
+    assert evento.datos["nota"] == "Es su hija, lo confirmó María"
+    assert len(evento.datos["verificacion"]) == 2
+
