@@ -23,10 +23,11 @@ const PagosPedido = ({ pedido, abierto = true, onCambio }) => {
     const { ajustes } = useAjustesNegocio();
     const [registrando, setRegistrando] = useState(false);
 
-    // El total cambia al cotizar o cancelar una prenda en otra sección: las
-    // cuentas se vuelven a pedir para no mostrar un saldo viejo.
-    const { total, por_cotizar: porCotizar } = pedido.pago || {};
-    useEffect(() => { if (abierto) recargar(); }, [total, porCotizar, abierto, recargar]);
+    // Las cuentas cambian también desde otras secciones: al cotizar o cancelar
+    // una prenda (el total) y al cobrar en Entrega (lo pagado). Se vuelven a
+    // pedir para no mostrar un saldo viejo.
+    const { total, por_cotizar: porCotizar, pagado } = pedido.pago || {};
+    useEffect(() => { if (abierto) recargar(); }, [total, porCotizar, pagado, abierto, recargar]);
 
     if (cargando && !datos) return <p className="sp-aviso" aria-busy="true">Cargando los pagos…</p>;
     if (error && !datos) {
