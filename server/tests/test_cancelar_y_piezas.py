@@ -157,7 +157,7 @@ def test_una_pieza_asignada_sale_de_bodega_apartada_y_se_vende_al_despachar(clie
 
     pedido = _leer(client_admin, pedido)
     [p] = client_admin.post(f"{CRM}/cotizaciones/{pedido['id']}/propuesta", json={}).json()["prendas"]
-    assert (p["opciones"], p["camino"], p["queda"]) == (["BODEGA"], "BODEGA", "APARTADA")
+    assert (p["opciones"], p["camino"], p["queda"], p["pieza_numero"]) == (["BODEGA"], "BODEGA", "APARTADA", pieza["numero"])
     assert _confirmar(client_admin, pedido).status_code == 200
     assert _leer(client_admin, pedido)["produccion"]["listo"] is True
 

@@ -23,6 +23,7 @@ export const esperaBodega = (prenda) => prenda?.camino === 'BODEGA' && prenda.en
 
 /** Qué pasa con una prenda de la propuesta si se confirma así. */
 export const textoQueda = (p) => {
+    if (p.pieza_numero) return `Pieza única N° ${p.pieza_numero}: ya está apartada para este pedido`;
     if (p.camino === 'BODEGA') {
         return p.queda === 'APARTADA'
             ? `Se aparta de bodega (libres: ${p.disponible})`

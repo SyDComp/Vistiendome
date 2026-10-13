@@ -31,6 +31,8 @@ describe('la propuesta', () => {
         expect(textoQueda(esperando)).toBe('Queda esperando que llegue a bodega');
         expect(textoQueda({ camino: 'TALLER' })).toBe('Se confecciona en el taller');
         expect(textoQueda({ camino: null })).toBe('Elige de dónde sale');
+        expect(textoQueda({ camino: 'BODEGA', queda: 'APARTADA', disponible: null, pieza_numero: 1 }))
+            .toBe('Pieza única N° 1: ya está apartada para este pedido');
     });
 
     it('manda las que vio esperando', () => {

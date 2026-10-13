@@ -47,6 +47,8 @@ class PrendaPropuesta:
     categoria_dice: str = ""
     aviso: Optional[str] = None
     requiere_nota: bool = False
+    # Si es una pieza única de la bodega, su número (ya está apartada).
+    pieza_numero: Optional[int] = None
 
 
 def _abastecimiento(item: CotizacionItem) -> Optional[str]:
@@ -136,5 +138,6 @@ def proponer(db: Session, cotizacion: Cotizacion, elegidos: Optional[Dict[str, s
             aviso=_aviso(camino, queda, abastecimiento, disponible),
             requiere_nota=(camino == BODEGA and queda == ESPERANDO)
                           or (camino == TALLER and abastecimiento == SOLO_BODEGA),
+            pieza_numero=item.pieza.numero if item.pieza is not None else None,
         ))
     return propuesta

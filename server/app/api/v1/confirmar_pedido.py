@@ -37,6 +37,7 @@ class PrendaPropuestaSalida(BaseModel):
     categoria_dice: str = ""
     aviso: Optional[str] = None
     requiere_nota: bool = False
+    pieza_numero: Optional[int] = None
 
 
 class PropuestaSalida(BaseModel):
