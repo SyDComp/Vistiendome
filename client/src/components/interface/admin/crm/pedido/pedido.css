@@ -305,3 +305,40 @@
     background: var(--color-warning-bg);
     color: var(--color-warning-darkest);
 }
+
+/* Agregar una prenda a un pedido que se conversa. */
+.sp-boton--con-icono {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.sp-agregar {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.sp-agregar[aria-busy="true"] {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.sp-agregar-cantidad {
+    display: grid;
+    gap: 0.25rem;
+    max-width: 8rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+/* "Agregar prenda" a la izquierda y "Confirmar" a la derecha. Abierto, el
+   armador ocupa todo el ancho. */
+.sp-acciones--separadas {
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.sp-acciones--separadas > .sp-agregar {
+    flex: 1 1 100%;
+}

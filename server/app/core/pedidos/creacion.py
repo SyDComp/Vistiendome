@@ -10,12 +10,12 @@ por id; la del panel sí, con sesión.
 from sqlalchemy import text
 from sqlmodel import Session, select
 
-from ...models.crm import Cotizacion, CotizacionItem, EstadoCotizacion, ModoEntrega, OrigenCotizacion
+from ...models.crm import Cotizacion, EstadoCotizacion, ModoEntrega, OrigenCotizacion
 from ...models.iam import Direccion, Persona, TipoPersona
 from .. import propuestas as core_propuestas
 from ...models.historia import TipoEvento
 from .historia import Actor, anotar
-from .prendas import prenda_desde
+from .agregar import poner_prenda
 
 
 def modo_de(data) -> ModoEntrega:
@@ -169,30 +169,9 @@ def crear_pedido(session: Session, data, actor: Actor, canal: str = None, permit
     session.commit()
     session.refresh(cotizacion)
     
-    # 3. Crear Items
+    # 3. Crear Items (la misma regla que al agregar una después: agregar.py)
     for posicion, item_data in enumerate(data.items):
-        # Qué prenda es (variante, personalizada de un producto, o escrita a
-        # mano) y su precio en tres estados: ver core/pedidos/prendas.py.
-        item = CotizacionItem(
-            cotizacion_id=cotizacion.id,
-            posicion=posicion,
-            **prenda_desde(session, item_data, permitir_sin_costo),
-        )
-        session.add(item)
-
-        # Lo que el cliente propuso y no existe en el catalogo queda registrado
-        # como propuesta, con quien la pidio y de que pedido salio. El pedido no
-        # se cae si algo de esto falla: registrar es un efecto, no el objetivo.
-        if item_data.config_propuesta:
-            try:
-                core_propuestas.registrar(
-                    session,
-                    item_data.config_propuesta,
-                    persona_id=cotizacion.persona_id,
-                    cotizacion_id=cotizacion.id,
-                )
-            except Exception:
-                pass
+        poner_prenda(session, cotizacion, item_data, posicion, permitir_sin_costo)
 
     origen = getattr(cotizacion.origen, "value", cotizacion.origen)
     anotar(session, cotizacion, TipoEvento.CREADO, actor, origen=origen, canal=canal)

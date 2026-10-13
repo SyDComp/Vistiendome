@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ArmadorDePrenda from '../../../ui/ArmadorDePrenda';
 import { describirEntrega } from '../../../../utils/entrega';
 import { X, Search, Plus, Trash2, Check, User, Package, MapPin, FileText, ShoppingBag, Send, AlertCircle, DollarSign } from 'lucide-react';
-import { getProducts } from '../../../../lib/api/endpoints/products.api';
-import { getAdminAttributes } from '../../../../lib/api/endpoints/admin.api';
+import useCatalogoParaArmar from '../../../../hooks/useCatalogoParaArmar';
 import { useNotification } from '../../../../context/NotificationContext';
 import Imagen from '../../../ui/Imagen';
 import { formatearTelefono, normalizarTelefono } from '../../../../utils/telefono';
@@ -32,13 +31,12 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
     });
 
     // Estado de Productos del Catálogo
-    const [productsList, setProductsList] = useState([]);
-    const [loadingProducts, setLoadingProducts] = useState(false);
     const [searchProductTerm, setSearchProductTerm] = useState('');
     // Pieza fuera de catalogo: se arma con las MISMAS caracteristicas del
     // catalogo para que pueda cortarse igual que las demas.
     const [mostrandoFormLibre, setMostrandoFormLibre] = useState(false);
-    const [atributosCatalogo, setAtributosCatalogo] = useState({});
+    // Productos y características para armar una pieza (ver el hook).
+    const { productos: productsList, atributos: atributosCatalogo } = useCatalogoParaArmar(isOpen);
     const [isProductSearchFocused, setIsProductSearchFocused] = useState(false);
 
     // Ítems agregados a la Cotización
@@ -94,7 +92,6 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                 setClientMode('select');
             }
             fetchClientes();
-            fetchCatalog();
             fetch('/api/v1/geo/regiones')
                 .then(res => res.json())
                 .then(setRegiones)
@@ -125,43 +122,6 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
             console.error("Error al cargar clientes:", e);
         } finally {
             setLoadingClientes(false);
-        }
-    };
-
-    // El panel NO come de la mesa del publico.
-    //
-    // Antes esto pedia /products/filters-metadata, que es el endpoint publico y
-    // devuelve SOLO las caracteristicas marcadas como filtrables: en su propio
-    // panel se veian menos caracteristicas de las que existen, y una que no
-    // fuera filtrable no se podia usar para armar una pieza.
-    //
-    // El catalogo completo es dato privado y se pide por el endpoint privado,
-    // que exige permiso de administracion.
-    const fetchAtributos = async () => {
-        try {
-            const attrs = await getAdminAttributes();
-            const mapa = {};
-            (attrs || []).forEach(a => {
-                const valores = (a.domain || [])
-                    .slice()
-                    .sort((x, y) => (x?.order ?? 9999) - (y?.order ?? 9999))
-                    .map(o => (typeof o === 'string' ? o : o?.value))
-                    .filter(Boolean);
-                if (valores.length) mapa[a.name] = valores;
-            });
-            setAtributosCatalogo(mapa);
-        } catch { /* sin esto la pieza se puede agregar igual, solo que sin caracteristicas */ }
-    };
-
-    const fetchCatalog = async () => {
-        setLoadingProducts(true);
-        try {
-            const data = await getProducts();
-            setProductsList(data || []);
-        } catch (e) {
-            console.error("Error al cargar productos:", e);
-        } finally {
-            setLoadingProducts(false);
         }
     };
 
@@ -638,7 +598,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                     </div>
                                     <button
                                         type="button"
-                                        onClick={() => { setMostrandoFormLibre(v => !v); if (!Object.keys(atributosCatalogo).length) fetchAtributos(); }}
+                                        onClick={() => setMostrandoFormLibre(v => !v)}
                                         className="cot-boton-marca"
                                     >
                                         <Plus size={14} /> + Ítem Libre / Personalizado

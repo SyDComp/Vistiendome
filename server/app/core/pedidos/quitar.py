@@ -16,10 +16,8 @@ from ...models.catalog import StockMovement
 from ...models.crm import Cotizacion, CotizacionItem, EstadoCotizacion
 from ...models.historia import TipoEvento
 from ...models.taller import OrdenCorte, OrdenCorteItem
-from .cotizar import nombre_de_prenda
+from .cotizar import ESTADOS_QUE_SE_COTIZAN, nombre_de_prenda
 from .historia import Actor, anotar
-
-SE_QUITAN = {EstadoCotizacion.NUEVA, EstadoCotizacion.EN_CONVERSACION}
 
 
 class NoSeQuita(Exception):
@@ -27,7 +25,7 @@ class NoSeQuita(Exception):
 
 
 def _por_que_no(db: Session, cotizacion: Cotizacion, item: CotizacionItem):
-    if EstadoCotizacion(getattr(cotizacion.estado, "value", cotizacion.estado)) not in SE_QUITAN:
+    if EstadoCotizacion(getattr(cotizacion.estado, "value", cotizacion.estado)) not in ESTADOS_QUE_SE_COTIZAN:
         return "Las prendas se quitan mientras el pedido está nuevo o en conversación."
     if item.cortado:
         return "Esta prenda ya se cortó en el taller."

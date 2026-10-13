@@ -32,6 +32,7 @@ class TipoEvento:
     ORDEN_AGREGADA = "ORDEN_AGREGADA"        # {orden, prendas}
     ORDEN_ESTADO = "ORDEN_ESTADO"            # {orden, de, a, prendas}
     ORDEN_ELIMINADA = "ORDEN_ELIMINADA"      # {orden, prendas}
+    PRENDA_AGREGADA = "PRENDA_AGREGADA"      # {prenda, cantidad, precio}: antes de confirmar
     PRENDA_QUITADA = "PRENDA_QUITADA"        # {prenda, cantidad, precio}: antes de confirmar
     ELIMINADO = "ELIMINADO"                  # {}
     # Los pedidos anteriores a la historia: la foto de cómo estaban al empezar

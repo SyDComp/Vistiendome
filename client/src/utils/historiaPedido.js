@@ -64,6 +64,12 @@ export const describirEvento = ({ tipo, datos = {} }, modoEntrega) => {
                 detalle: MOTIVOS[datos.motivo] ? enFrase(MOTIVOS[datos.motivo]) : detalleConfirmacion(datos),
             };
 
+        case 'PRENDA_AGREGADA':
+            return {
+                texto: `Se agregó al pedido: ${datos.cantidad}× ${datos.prenda}`,
+                detalle: `Precio: ${textoPrecio(datos.precio)}`,
+            };
+
         case 'PRENDA_QUITADA':
             return {
                 texto: `Se quitó del pedido: ${datos.cantidad}× ${datos.prenda}`,

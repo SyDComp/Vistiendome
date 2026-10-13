@@ -91,6 +91,12 @@ describe('confirmar y quitar prendas', () => {
         expect(describirEvento({ tipo: 'ESTADO', datos: { de: 'NUEVA', a: 'CONFIRMADA' } }).detalle).toBeNull();
     });
 
+    it('una prenda agregada dice cuál y cuántas', () => {
+        const { texto, detalle } = describirEvento({ tipo: 'PRENDA_AGREGADA', datos: { prenda: 'Vestido Noemi (Coral / M)', cantidad: 12, precio: 17490 } });
+        expect(texto).toBe('Se agregó al pedido: 12× Vestido Noemi (Coral / M)');
+        expect(detalle).toContain('17.490');
+    });
+
     it('una prenda quitada dice cuál era y su precio', () => {
         const { texto } = describirEvento({ tipo: 'PRENDA_QUITADA', datos: { prenda: 'Cinturón (M)', cantidad: 2, precio: null } });
         expect(texto).toBe('Se quitó del pedido: 2× Cinturón (M)');

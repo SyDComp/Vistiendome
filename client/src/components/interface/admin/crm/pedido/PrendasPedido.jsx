@@ -1,13 +1,15 @@
 import React from 'react';
 import { textoTotal } from '../../../../../utils/precioPrenda';
+import AgregarPrenda from './AgregarPrenda';
 import PrendaPedido from './PrendaPedido';
 
 // Mientras se conversa, el precio se cotiza. Confirmar es aceptarlo.
 const SE_COTIZA = ['NUEVA', 'EN_CONVERSACION'];
 
 /**
- * Las prendas del pedido, su precio y el total dicho entero. Solo pinta;
- * `onConfirmar` abre la confirmación mientras el pedido se conversa.
+ * Las prendas del pedido, su precio y el total dicho entero. Mientras el
+ * pedido se conversa se pueden agregar prendas (`onCotizada` recarga) y
+ * `onConfirmar` abre la confirmación.
  */
 const PrendasPedido = ({ pedido, cargando, error, onReintentar, onCotizada, onConfirmar }) => {
     if (cargando && !pedido) return <p className="sp-aviso" aria-busy="true">Cargando las prendas…</p>;
@@ -20,9 +22,20 @@ const PrendasPedido = ({ pedido, cargando, error, onReintentar, onCotizada, onCo
         );
     }
     const items = pedido?.items || [];
-    if (!items.length) return <p className="sp-aviso">Este pedido no tiene prendas.</p>;
-
     const editable = SE_COTIZA.includes(pedido.estado);
+    if (!items.length) {
+        return (
+            <>
+                <p className="sp-aviso">
+                    {editable
+                        ? 'Este pedido todavía no tiene prendas. Agrega las que acuerden con la clienta.'
+                        : 'Este pedido no tiene prendas.'}
+                </p>
+                {editable && <AgregarPrenda pedidoId={pedido.id} onAgregada={onCotizada} />}
+            </>
+        );
+    }
+
     return (
         <>
             <ul className="sp-prendas">
@@ -35,11 +48,14 @@ const PrendasPedido = ({ pedido, cargando, error, onReintentar, onCotizada, onCo
                 <span>Total estimado</span>
                 <span>{textoTotal(items)}</span>
             </div>
-            {editable && onConfirmar && (
-                <div className="sp-acciones">
-                    <button type="button" className="sp-boton sp-boton--principal" onClick={onConfirmar}>
-                        Confirmar pedido…
-                    </button>
+            {editable && (
+                <div className="sp-acciones sp-acciones--separadas">
+                    <AgregarPrenda pedidoId={pedido.id} onAgregada={onCotizada} />
+                    {onConfirmar && (
+                        <button type="button" className="sp-boton sp-boton--principal" onClick={onConfirmar}>
+                            Confirmar pedido…
+                        </button>
+                    )}
                 </div>
             )}
             {!editable && (

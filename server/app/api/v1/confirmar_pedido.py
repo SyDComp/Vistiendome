@@ -1,5 +1,5 @@
 """
-Confirmar un pedido desde el panel, y quitar prendas antes de hacerlo.
+Confirmar un pedido desde el panel.
 
 La regla vive en core/pedidos/ciclo/: acá solo se traduce a HTTP.
 """
@@ -15,8 +15,7 @@ from app.api.deps import RequirePermiso
 from app.api.v1.crm import leer_pedidos
 from app.database import get_session
 from app.core.pedidos import ciclo, historia
-from app.core.pedidos.quitar import NoSeQuita, quitar
-from app.models.crm import Cotizacion, CotizacionItem
+from app.models.crm import Cotizacion
 from app.models.iam import CuentaAcceso
 
 router = APIRouter()
@@ -102,17 +101,3 @@ def confirmar(cotizacion_id: str, data: ConfirmarEntrada, db: Session = Depends(
     db.commit()
     db.refresh(cotizacion)
     return leer_pedidos(db, [cotizacion])[0]
-
-
-@router.delete("/cotizaciones/{cotizacion_id}/prendas/{item_id}")
-def quitar_prenda(cotizacion_id: str, item_id: str, db: Session = Depends(get_session), admin: CuentaAcceso = _ADMIN):
-    cotizacion = _pedido(db, cotizacion_id)
-    item = db.get(CotizacionItem, item_id)
-    if not item or item.cotizacion_id != cotizacion.id:
-        raise HTTPException(status_code=404, detail="Prenda no encontrada en este pedido")
-    try:
-        quitar(db, cotizacion, item, historia.de_cuenta(admin))
-    except NoSeQuita as e:
-        raise HTTPException(status_code=409, detail=str(e))
-    db.commit()
-    return {"ok": True}

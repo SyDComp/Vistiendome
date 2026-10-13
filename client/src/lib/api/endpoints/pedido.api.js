@@ -25,3 +25,11 @@ export const confirmarPedido = (pedidoId, eleccion) =>
 /** Quita una prenda de un pedido que todavía no se confirma. Queda en la historia. */
 export const quitarPrenda = (pedidoId, prendaId) =>
     del(`/api/v1/crm/cotizaciones/${pedidoId}/prendas/${prendaId}`);
+
+/**
+ * Agrega una prenda a un pedido que todavía no se confirma. Devuelve el pedido.
+ * @param {{producto_id?: number, nombre_custom?: string, cantidad: number,
+ *          precio_unitario_estimado?: number|null, config_custom?: object, config_propuesta?: object}} prenda
+ */
+export const agregarPrenda = (pedidoId, prenda) =>
+    post(`/api/v1/crm/cotizaciones/${pedidoId}/prendas`, prenda);

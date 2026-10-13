@@ -197,3 +197,37 @@ def test_las_prendas_vuelven_en_el_orden_en_que_se_agregaron(client_admin):
         "rut": "11111111-1", "nombres": "Ana", "canal": "WhatsApp",
         "items": [{"nombre_custom": n} for n in nombres]})
     assert [i["sku_name"] for i in res.json()["items"]] == nombres
+
+
+# --- Agregar prendas a un pedido que ya existe -------------------------------
+
+def test_a_un_pedido_que_llego_solo_con_un_mensaje_se_le_agregan_prendas(client, client_admin, session, noemi):
+    cot = _contacto(client, session, [], origen="CONTACTO_GRUPAL", mensaje="Uniformes para 12 coristas")
+    url = f"/api/v1/crm/cotizaciones/{cot.id}/prendas"
+
+    res = client_admin.post(url, json={"producto_id": noemi.id, "config_custom": {"TALLA": "M", "COLOR": "Coral"}, "cantidad": 12})
+    assert res.status_code == 200, res.text
+    [prenda] = res.json()["items"]
+    assert (prenda["sku_code"], prenda["cantidad"], prenda["precio_unitario_estimado"]) == ("NOE-CORAL-M", 12, 17490)
+
+    evento = session.exec(select(PedidoEvento).where(PedidoEvento.tipo == TipoEvento.PRENDA_AGREGADA)).one()
+    assert evento.datos == {"prenda": "Vestido Noemi (Coral / M)", "cantidad": 12, "precio": 17490}
+
+
+def test_lo_agregado_va_al_final_y_puede_ser_sin_costo(client_admin, session):
+    pedido = _manual(client_admin)
+    res = client_admin.post(f"/api/v1/crm/cotizaciones/{pedido['id']}/prendas",
+                            json={"nombre_custom": "Lazo de regalo", "sin_costo": True})
+    assert res.status_code == 200, res.text
+    assert [(i["sku_name"], i["precio_unitario_estimado"]) for i in res.json()["items"]] == [
+        ("Bolero tejido", None), ("Lazo de regalo", 0)]
+    posiciones = [i.posicion for i in session.exec(
+        select(CotizacionItem).where(CotizacionItem.cotizacion_id == pedido["id"]).order_by(CotizacionItem.posicion)).all()]
+    assert posiciones == [0, 1]
+
+
+def test_a_un_pedido_confirmado_no_se_le_agregan_prendas(client_admin):
+    pedido = _manual(client_admin, items=[{"nombre_custom": "Bolero tejido", "precio_unitario_estimado": 5000}])
+    assert client_admin.post(f"/api/v1/crm/cotizaciones/{pedido['id']}/confirmar", json={}).status_code == 200
+    res = client_admin.post(f"/api/v1/crm/cotizaciones/{pedido['id']}/prendas", json={"nombre_custom": "Otra"})
+    assert res.status_code == 409 and "En conversación" in res.json()["detail"]
