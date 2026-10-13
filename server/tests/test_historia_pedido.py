@@ -27,7 +27,7 @@ def _pedido(**extra):
 def _eventos(session: Session, numero: int):
     return session.exec(
         select(PedidoEvento).where(PedidoEvento.numero_pedido == numero)
-        .order_by(PedidoEvento.ocurrido_at, PedidoEvento.id)
+        .order_by(PedidoEvento.secuencia)
     ).all()
 
 

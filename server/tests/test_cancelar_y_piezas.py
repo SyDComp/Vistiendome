@@ -21,7 +21,7 @@ def _cancelar(client_admin, pedido, i):
 
 
 def _eventos(session, tipo):
-    return session.exec(select(PedidoEvento).where(PedidoEvento.tipo == tipo).order_by(PedidoEvento.ocurrido_at)).all()
+    return session.exec(select(PedidoEvento).where(PedidoEvento.tipo == tipo).order_by(PedidoEvento.secuencia)).all()
 
 
 def _orden(client_admin, pedido, i):
@@ -199,3 +199,16 @@ def test_al_taller_no_llega_lo_cancelado(client_admin, tienda, session):
     _cancelar(client_admin, pedido, 0)
     pendientes = client_admin.get("/api/v1/ordenes-corte/pendientes").json()
     assert [p["cotizacion_item_id"] for p in pendientes] == [pedido["items"][1]["id"]]
+
+
+def test_la_historia_de_una_sola_accion_queda_en_el_orden_en_que_paso(client_admin, tienda, session):
+    """Cancelar el pedido anota cada prenda y después el estado, todo en el mismo instante."""
+    pedido = _pedido(client_admin, BOLERO, {**BOLERO, "nombre_custom": "Chal"}, {**BOLERO, "nombre_custom": "Faja"})
+    _confirmar(client_admin, pedido)
+    _hechas(session, pedido, 0, 1, 2)
+    _estado(client_admin, pedido, "CANCELADA")
+
+    historia = client_admin.get(f"{CRM}/cotizaciones/{pedido['id']}/historia").json()
+    assert [e["tipo"] for e in historia[-4:]] == ["PRENDA_CANCELADA"] * 3 + ["ESTADO"]
+    assert [e["datos"]["prenda"] for e in historia[-4:-1]] == ["Bolero tejido (M)", "Chal (M)", "Faja (M)"]
+

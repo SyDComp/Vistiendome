@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 import ulid
-from sqlalchemy import JSON, Column, DateTime, ForeignKey, String, event
+from sqlalchemy import JSON, BigInteger, Column, DateTime, ForeignKey, String, event
 from sqlmodel import Field, SQLModel
 
 
@@ -56,6 +56,12 @@ class PedidoEvento(SQLModel, table=True):
     __tablename__ = "pedido_eventos"
 
     id: str = Field(default_factory=lambda: str(ulid.ULID()), primary_key=True, max_length=26)
+
+    # En qué orden se anotó: un correlativo que siempre crece, y es el que
+    # ordena la historia. La hora sola no alcanza (una acción anota varias
+    # cosas en el mismo instante: cada prenda cancelada y después el estado) y
+    # el id tampoco: un ULID no crece en orden dentro de un mismo milisegundo.
+    secuencia: Optional[int] = Field(default=None, sa_column=Column(BigInteger, nullable=False, unique=True))
 
     # Si el pedido se borra, su historia queda: el id pasa a nulo y el número
     # sigue diciendo de qué pedido era.

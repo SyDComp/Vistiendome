@@ -8,10 +8,10 @@ from ....models.historia import PedidoEvento
 
 
 def historia_de(db: Session, cotizacion_id: str) -> List[PedidoEvento]:
-    # El id (ULID) desempata dos anotaciones del mismo instante en el orden en
-    # que se escribieron.
+    # Por el correlativo, no por la hora: varias anotaciones de una misma
+    # acción tienen la misma hora (ver PedidoEvento.secuencia).
     return db.exec(
         select(PedidoEvento)
         .where(PedidoEvento.cotizacion_id == cotizacion_id)
-        .order_by(PedidoEvento.ocurrido_at, PedidoEvento.id)
+        .order_by(PedidoEvento.secuencia)
     ).all()

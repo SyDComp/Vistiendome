@@ -136,7 +136,7 @@ def test_cotizar_queda_en_la_historia(client_admin, session):
     client_admin.put(url, json={})                           # vuelve a por cotizar
 
     cambios = [(e.datos["de"], e.datos["a"]) for e in session.exec(
-        select(PedidoEvento).where(PedidoEvento.tipo == TipoEvento.PRECIO).order_by(PedidoEvento.ocurrido_at, PedidoEvento.id)
+        select(PedidoEvento).where(PedidoEvento.tipo == TipoEvento.PRECIO).order_by(PedidoEvento.secuencia)
     ).all()]
     assert cambios == [(None, 32000), (32000, 0), (0, None)]
     assert session.get(CotizacionItem, item_id).precio_unitario_estimado is None
