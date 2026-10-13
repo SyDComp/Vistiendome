@@ -20,6 +20,10 @@ MEDIO_A_FAVOR = "Saldo a favor"
 
 def disponible(db: Session, persona_id: str) -> int:
     """Lo que la clienta tiene a favor: lo dejado menos lo usado, sin anulados."""
+    # Una venta sin datos no tiene clienta: sin esto, "sin clienta" juntaría
+    # el saldo de todas las ventas anónimas.
+    if not persona_id:
+        return 0
     filas = db.exec(
         select(Pago)
         .join(Cotizacion, Pago.cotizacion_id == Cotizacion.id)

@@ -108,6 +108,8 @@ def devolver(db: Session, cotizacion: Cotizacion, monto: int, medio: str, nota: 
 
 def dejar_a_favor(db: Session, cotizacion: Cotizacion, monto: int, nota: Optional[str], actor: Actor) -> Pago:
     """Lo pagado de más queda a favor de la clienta, para otra compra. No hace commit."""
+    if not cotizacion.persona_id:
+        raise NoSeRegistra("Una venta sin datos no tiene a quién dejarle un saldo a favor: devuélvelo.")
     _de_mas(db, cotizacion, monto)
     return _anotar_pago(db, cotizacion, actor, TipoPago.A_FAVOR, monto, MEDIO_A_FAVOR, nota)
 

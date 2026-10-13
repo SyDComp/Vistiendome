@@ -89,7 +89,9 @@ class Cotizacion(SQLModel, table=True):
     __tablename__ = "cotizaciones"
     
     id: str = Field(default_factory=generate_ulid, primary_key=True, max_length=26)
-    persona_id: str = Field(foreign_key="personas.id", index=True, max_length=26)
+    # Nulo solo en una venta en el local sin datos (core/pedidos/venta_rapida.py):
+    # no se inventa una clienta.
+    persona_id: Optional[str] = Field(default=None, foreign_key="personas.id", index=True, max_length=26)
 
     # Correlativo humano ("N° pedido 56") — el id (ULID) identifica la fila,
     # pero nadie lo puede decir por teléfono ni escribirlo en una etiqueta.
@@ -167,7 +169,7 @@ class Cotizacion(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     
     # Relationships
-    persona: "Persona" = Relationship(back_populates="cotizaciones")
+    persona: Optional["Persona"] = Relationship(back_populates="cotizaciones")
     # En el orden en que se agregaron. Sin orden fijo, Postgres devolvía las
     # prendas en otro orden después de editar una, y en pantalla la prenda
     # recién cotizada saltaba de lugar. El id no sirve para esto: dos ULID del

@@ -45,6 +45,8 @@ def _digitos(telefono: Optional[str]) -> Optional[str]:
 
 def origenes(db: Session, persona_id: str) -> List[Origen]:
     """Los pedidos donde esta clienta dejó saldo a favor (sin anulados), del más antiguo al más nuevo."""
+    if not persona_id:
+        return []
     filas = db.exec(
         select(Pago, Cotizacion)
         .join(Cotizacion, Pago.cotizacion_id == Cotizacion.id)

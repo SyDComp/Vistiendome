@@ -9,7 +9,7 @@ import { useNotification } from '../../../../context/NotificationContext';
 import { useSettings } from '../../../../context/SettingsContext';
 import { getShippingColor } from '../../../../utils/shippingColors';
 import { estadoDeProduccion, TONOS } from '../../../../utils/produccion';
-import { FileText, Calendar, MessageCircle, MapPin, Printer, Plus } from 'lucide-react';
+import { FileText, Calendar, MessageCircle, MapPin, Printer, Plus, Store } from 'lucide-react';
 import AdminCotizacionModal from './AdminCotizacionModal';
 import { ESTADOS } from '../../../../utils/estadosPedido';
 import { avisoVolverAtras } from '../../../../utils/volverAtras';
@@ -18,6 +18,7 @@ import { ESTADOS_PAGO } from '../../../../utils/pagos';
 import { mensajeDeError } from '../../../../utils/errorServidor';
 import { actualizarEstadoCotizacion, obtenerPedido } from '../../../../lib/api/endpoints';
 import ConfirmarPedido from './pedido/confirmar/ConfirmarPedido';
+import VentaLocal from './venta/VentaLocal';
 import './CotizacionesView.css';
 
 
@@ -95,6 +96,7 @@ const CotizacionesView = () => {
     const [detailData, setDetailData] = useState(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [confirmando, setConfirmando] = useState(null);
+    const [vendiendo, setVendiendo] = useState(false);
 
     // Un pedido que cambió (desde la lista o desde su detalle) se reemplaza
     // en los dos lugares.
@@ -322,6 +324,9 @@ const CotizacionesView = () => {
                     >
                         <Plus size={18} strokeWidth={3} /> + Nueva Cotización Manual
                     </button>
+                    <button onClick={() => setVendiendo(true)} className="cotv-accion">
+                        <Store size={16} /> Venta en el local
+                    </button>
                     <button
                         onClick={() => navigate('/admin/dashboard/crm/shipping-labels')}
                         className="cotv-accion cotv-accion--suave"
@@ -414,6 +419,13 @@ const CotizacionesView = () => {
                 title={detailData ? `Cotización N° ${detailData.numero ?? '—'}` : ''}
                 onPedidoCambio={alCambiarPedido}
             />
+
+            {vendiendo && (
+                <VentaLocal
+                    onCerrar={() => setVendiendo(false)}
+                    onVendida={(pedido) => { setVendiendo(false); setCotizaciones(prev => [pedido, ...prev]); }}
+                />
+            )}
 
             {confirmando && (
                 <ConfirmarPedido

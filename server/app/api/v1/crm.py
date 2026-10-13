@@ -133,7 +133,7 @@ class PagoResumen(BaseModel):
 class CotizacionRead(BaseModel):
     id: str
     numero: Optional[int] = None
-    persona_id: str
+    persona_id: Optional[str] = None     # sin clienta: una venta en el local sin datos
     origen: OrigenCotizacion
     estado: EstadoCotizacion
     canal: Optional[str] = None
@@ -373,6 +373,7 @@ def crear_cotizacion(data: CotizacionCreate, request: Request, session: Session 
     if not _LIMITE_PEDIDOS.permite(request.client.host if request.client else "?"):
         raise HTTPException(status_code=429, detail="Demasiados pedidos seguidos. Espera unos minutos.")
     cotizacion = pedidos_core.crear_pedido(session, data, historia.SITIO_WEB)
+    session.commit()
     return PedidoRecibido(numero=cotizacion.numero)
 
 
@@ -389,6 +390,8 @@ def crear_cotizacion_manual(
     data.origen = OrigenCotizacion.MANUAL
     cotizacion = pedidos_core.crear_pedido(session, data, historia.de_cuenta(current_admin), canal=canal,
                                            permitir_sin_costo=True)
+    session.commit()
+    session.refresh(cotizacion)
     return _get_cotizacion_read(cotizacion)
 
 @router.get("/conteo-estados")

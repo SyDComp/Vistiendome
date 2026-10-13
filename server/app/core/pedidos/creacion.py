@@ -39,11 +39,16 @@ def modo_de(data) -> ModoEntrega:
     return ModoEntrega.DESPACHO
 
 
-def crear_pedido(session: Session, data, actor: Actor, canal: str = None, permitir_sin_costo: bool = False) -> Cotizacion:
+def crear_pedido(session: Session, data, actor: Actor, canal: str = None, permitir_sin_costo: bool = False,
+                 sin_clienta: bool = False) -> Cotizacion:
     """
     Crea el pedido con sus prendas y anota quién lo creó. `data` trae los
     campos de CotizacionCreate; `canal` es el "¿Cómo llegó?" de los que se
     cargan en el panel. `permitir_sin_costo`: solo el panel puede regalar.
+    `sin_clienta`: una venta en el local sin datos (ver venta_rapida.py).
+
+    No hace commit: quien llama guarda todo junto, o nada. Antes guardaba por
+    partes, y un error al final dejaba un pedido a medias.
     """
     # Un retiro no viaja: no tiene región, comuna ni dirección de despacho,
     # las mande quien las mande. Guardarlas sería dejar datos que contradicen
@@ -60,11 +65,12 @@ def crear_pedido(session: Session, data, actor: Actor, canal: str = None, permit
     # mismo cliente. El telefono y el correo son datos de contacto, no
     # identidad: no deciden quien es quien.
     persona = None
-
-    if data.persona_id:
+    if sin_clienta:
+        pass
+    elif data.persona_id:
         persona = session.get(Persona, data.persona_id)
 
-    if not persona and data.rut:
+    if not persona and data.rut and not sin_clienta:
         persona = session.exec(select(Persona).where(Persona.rut == data.rut)).first()
 
     # El nombre con el que se identifico ESTE pedido, tal cual se escribio.
@@ -72,7 +78,9 @@ def crear_pedido(session: Session, data, actor: Actor, canal: str = None, permit
     # coincide o no con el de la Persona.
     nombre_contacto = f"{(data.nombres or '').strip()} {(data.apellidos or '').strip()}".strip() or None
 
-    if not persona:
+    if sin_clienta:
+        pass
+    elif not persona:
         nombres_final = data.nombres or "Cliente"
         apellidos_final = data.apellidos or ""
         persona = Persona(
@@ -84,7 +92,7 @@ def crear_pedido(session: Session, data, actor: Actor, canal: str = None, permit
             tipo_persona=TipoPersona.CLIENTE if data.origen == OrigenCotizacion.MANUAL else TipoPersona.LEAD
         )
         session.add(persona)
-        session.commit()
+        session.flush()
         session.refresh(persona)
     else:
         # MISMO RUT, ¿MISMO NOMBRE?
@@ -121,11 +129,11 @@ def crear_pedido(session: Session, data, actor: Actor, canal: str = None, permit
 
         if update_needed:
             session.add(persona)
-            session.commit()
+            session.flush()
             session.refresh(persona)
             
     # 1.5 Crear o Buscar Direccion si viene en el payload (solo un despacho tiene)
-    if despacho and data.comuna_id and data.direccion:
+    if despacho and persona and data.comuna_id and data.direccion:
         direccion_existente = session.exec(
             select(Direccion).where(
                 Direccion.persona_id == persona.id,
@@ -141,13 +149,13 @@ def crear_pedido(session: Session, data, actor: Actor, canal: str = None, permit
                 calle_y_numero=data.direccion
             )
             session.add(nueva_direccion)
-            session.commit()
+            session.flush()
             
     # 2. Crear Cotizacion
     numero = session.execute(text("SELECT nextval('cotizaciones_numero_seq')")).scalar_one()
     cotizacion = Cotizacion(
         numero=numero,
-        persona_id=persona.id,
+        persona_id=persona.id if persona else None,
         origen=data.origen,
         mensaje=data.mensaje,
         tipo_grupo=data.tipo_grupo,
@@ -167,7 +175,7 @@ def crear_pedido(session: Session, data, actor: Actor, canal: str = None, permit
         estado=EstadoCotizacion.NUEVA
     )
     session.add(cotizacion)
-    session.commit()
+    session.flush()
     session.refresh(cotizacion)
     
     # 3. Crear Items (la misma regla que al agregar una después: agregar.py)
@@ -176,7 +184,7 @@ def crear_pedido(session: Session, data, actor: Actor, canal: str = None, permit
 
     origen = getattr(cotizacion.origen, "value", cotizacion.origen)
     anotar(session, cotizacion, TipoEvento.CREADO, actor, origen=origen, canal=canal)
-    session.commit()
+    session.flush()
     session.refresh(cotizacion)
 
     return cotizacion

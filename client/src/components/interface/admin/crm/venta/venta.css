@@ -1,0 +1,61 @@
+/* Venta en el local. Solo tokens del tema; la capa y la tarjeta son las de
+   "Confirmar pedido" (confirmar.css). */
+
+.vl-tarjeta { max-width: 760px; }
+
+.vl-bloque {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 0.75rem;
+}
+
+.vl-titulo { padding: 0 0.3rem; font-weight: 700; color: var(--color-text-primary); }
+
+.vl-opciones { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 0.9rem; }
+
+.vl-campos { display: grid; gap: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); }
+
+.vl-encontrados { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.25rem; max-height: 14rem; overflow-y: auto; }
+
+.vl-encontrado {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 0.5rem;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.vl-encontrado:hover, .vl-encontrado:focus-visible { border-color: var(--color-brand); }
+.vl-encontrado-detalle { color: var(--color-text-muted); }
+
+.vl-linea {
+    display: grid;
+    grid-template-columns: 1fr 6rem 8rem auto;
+    gap: 0.6rem;
+    align-items: end;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-border-strong);
+}
+
+@media (max-width: 560px) {
+    .vl-linea { grid-template-columns: 1fr 1fr; }
+}
+
+.vl-total { margin: 0; text-align: right; font-weight: 700; color: var(--color-text-primary); }
+
+.vl-pago { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.6rem; align-items: end; }
+.vl-pago-pie { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.vl-falta { color: var(--color-warning-deep); font-weight: 600; }
+.vl-sobra { color: var(--color-error-deep); font-weight: 600; }
