@@ -8,6 +8,7 @@ from .apartado import Bodega, bodega_de, estado_en_bodega
 from .caminos import APARTADA, BODEGA, CAMINOS, ESPERANDO, TALLER
 from .confirmar import CambioLaBodega, NoSeConfirma, confirmar, problemas
 from .despacho import NoSeDespacha, devolver, sacar
+from .listo import Avance, avance
 from .propuesta import PrendaPropuesta, proponer
 from .transiciones import al_cambiar, por_que_no
 
@@ -16,6 +17,7 @@ __all__ = [
     "APARTADA", "BODEGA", "CAMINOS", "ESPERANDO", "TALLER",
     "CambioLaBodega", "NoSeConfirma", "confirmar", "problemas",
     "NoSeDespacha", "devolver", "sacar",
+    "Avance", "avance",
     "PrendaPropuesta", "proponer",
     "al_cambiar", "por_que_no",
 ]

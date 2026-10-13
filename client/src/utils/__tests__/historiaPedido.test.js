@@ -37,9 +37,9 @@ describe('describirEvento', () => {
         expect(describirEvento(ev, 'RETIRO').texto).toBe('Confirmada → Entregada');
     });
 
-    it('el despacho al imprimir etiquetas lo dice', () => {
+    it('el despacho desde la pantalla de etiquetas lo dice', () => {
         const ev = { tipo: 'ESTADO', datos: { de: 'CONFIRMADA', a: 'DESPACHADA', motivo: 'etiquetas' } };
-        expect(describirEvento(ev, 'DESPACHO').detalle).toBe('Al imprimir las etiquetas de envío');
+        expect(describirEvento(ev, 'DESPACHO').detalle).toBe('Desde la pantalla de etiquetas de envío');
     });
 
     it('un cambio de precio dice sus tres estados con palabras, nunca $0', () => {

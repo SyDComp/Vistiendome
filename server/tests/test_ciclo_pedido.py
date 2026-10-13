@@ -73,6 +73,15 @@ def _leer(client_admin, pedido) -> dict:
     return client_admin.get(f"{CRM}/cotizaciones/{pedido['id']}").json()
 
 
+def _hechas(session, pedido, *posiciones):
+    """Como si la orden de corte que las tenía se hubiera finalizado."""
+    for i in posiciones:
+        item = session.get(CotizacionItem, pedido["items"][i]["id"])
+        item.cortado = True
+        session.add(item)
+    session.commit()
+
+
 def _saldo(client_admin, sku) -> dict:
     filas = client_admin.get("/api/v1/admin/catalog/kardex").json()
     return next(f for f in filas if f["sku_id"] == sku.id)
@@ -202,10 +211,11 @@ def test_a_confirmada_solo_por_confirmar(client_admin, tienda):
     assert res.status_code == 409 and "Confirmar pedido" in res.json()["detail"]
 
 
-def test_solo_se_despacha_lo_confirmado_y_lo_despachado_solo_se_deshace(client_admin, tienda):
+def test_solo_se_despacha_lo_confirmado_y_lo_despachado_solo_se_deshace(client_admin, tienda, session):
     pedido = _pedido(client_admin, (tienda["vestido"], 1))
     assert _estado(client_admin, pedido, "DESPACHADA").status_code == 409
     _confirmar(client_admin, pedido)
+    _hechas(session, pedido, 0)
     assert _estado(client_admin, pedido, "DESPACHADA").status_code == 200
     assert _estado(client_admin, pedido, "CANCELADA").status_code == 409
     assert _estado(client_admin, pedido, "CONFIRMADA").status_code == 200
@@ -234,17 +244,40 @@ def test_al_despachar_solo_sale_de_bodega_lo_que_iba_por_bodega(client_admin, ti
     _hay(session, tienda["vestido"], 1)
     pedido = _pedido(client_admin, (tienda["vestido"], 1), (tienda["vestido"], 1))
     _confirmar(client_admin, pedido)  # una apartada, la otra al taller
+    _hechas(session, pedido, 1)
     assert _estado(client_admin, pedido, "DESPACHADA").status_code == 200
 
     salidas = session.exec(select(StockMovement).where(StockMovement.type == MovementType.SALE)).all()
     assert [(m.reference_id, m.quantity) for m in salidas] == [(pedido["items"][0]["id"], -1)]
 
 
+def test_no_sale_hasta_que_el_taller_termina_personalizadas_incluidas(client_admin, tienda, session):
+    _hay(session, tienda["vestido"], 1)
+    pedido = _pedido(client_admin, (tienda["vestido"], 1), {"nombre_custom": "Bolero", "precio_unitario_estimado": 5000})
+    _confirmar(client_admin, pedido)
+
+    produccion = _leer(client_admin, pedido)["produccion"]
+    assert (produccion["taller"], produccion["hechas"], produccion["bodega"], produccion["listo"]) == (1, 0, 1, False)
+    assert produccion["falta"] == ["Bolero: por hacer en el taller"]
+    res = _estado(client_admin, pedido, "DESPACHADA")
+    assert res.status_code == 409 and "Bolero: por hacer en el taller" in res.json()["detail"]
+
+    _hechas(session, pedido, 1)
+    assert _leer(client_admin, pedido)["produccion"]["listo"] is True
+    assert _estado(client_admin, pedido, "DESPACHADA").status_code == 200
+
+
+def test_una_prenda_sin_producto_ni_nombre_no_entra(client_admin):
+    res = client_admin.post(f"{CRM}/cotizaciones", json={"rut": "11111111-1", "nombres": "Ana", "canal": "WhatsApp",
+                                                        "items": [{"cantidad": 1}]})
+    assert res.status_code == 422 and "producto o un nombre" in res.text
+
+
 def test_no_se_despacha_lo_que_espera_bodega(client_admin, tienda):
     pedido = _pedido(client_admin, (tienda["cinturon"], 1))
     _confirmar(client_admin, pedido, nota="Llega el jueves")
     res = _estado(client_admin, pedido, "DESPACHADA")
-    assert res.status_code == 409 and "Cinturón (M)" in res.json()["detail"]
+    assert res.status_code == 409 and "Cinturón (M): esperando que llegue a bodega" in res.json()["detail"]
 
 
 def test_al_taller_no_llega_lo_que_va_por_bodega(client_admin, tienda, session):

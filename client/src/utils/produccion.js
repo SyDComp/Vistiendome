@@ -1,43 +1,41 @@
 /**
- * En qué va la confección de un pedido, dicho en una línea.
+ * En qué va un pedido confirmado, dicho en una línea.
  *
- * Es **derivado**: sale de contar las piezas cortadas, que las marca la orden
- * de corte al finalizar. Nadie lo declara, y por eso no puede quedar en
- * desacuerdo con la realidad — que es la razón por la que el pedido no tiene un
- * estado "en corte".
+ * Es **derivado**: lo calcula el servidor (core/pedidos/ciclo/listo.py) de las
+ * prendas hechas en el taller y de lo apartado en bodega. Nadie lo declara, y
+ * por eso no puede quedar en desacuerdo con la realidad — que es la razón por
+ * la que el pedido no tiene un estado "en corte".
  *
  * Sólo tiene sentido a partir de CONFIRMADA: antes de que la clienta acepte no
- * hay nada que cortar, y mostrar "0 de 3 cortadas" en un pedido que quizás no
- * se concrete es ruido.
+ * hay nada que preparar.
  */
 
 const SIN_PRODUCCION = { texto: null, tono: 'neutro', ordenes: [] };
+
+/** "Listo para despachar" o, en un retiro, "Listo para retirar". */
+export const textoListo = (modoEntrega) => (modoEntrega === 'RETIRO' ? 'Listo para retirar' : 'Listo para despachar');
 
 export const estadoDeProduccion = (cotizacion) => {
     const estado = cotizacion?.estado;
     if (estado !== 'CONFIRMADA' && estado !== 'DESPACHADA') return SIN_PRODUCCION;
 
-    const { piezas = 0, cortadas = 0, ordenes = [] } = cotizacion.produccion || {};
+    const { taller = 0, hechas = 0, esperando = 0, listo = false, ordenes = [] } = cotizacion.produccion || {};
 
-    // Un pedido de ítems escritos a mano no tiene nada cortable: decir
-    // "0 de 0 cortadas" sería inventar un problema que no existe.
-    if (!piezas) return SIN_PRODUCCION;
+    if (estado === 'DESPACHADA') {
+        return taller ? { texto: 'Hecho', tono: 'listo', ordenes } : SIN_PRODUCCION;
+    }
+    if (listo) return { texto: textoListo(cotizacion.modo_entrega), tono: 'listo', ordenes };
 
     // Las órdenes no se meten en el texto: la pantalla las pinta como enlaces
     // para poder saltar a ellas, y una cadena armada acá no se puede enlazar.
-    if (cortadas === 0) {
-        return ordenes.length
-            ? { texto: 'Por cortar', tono: 'espera', ordenes }
-            : { texto: 'Por cortar · sin orden todavía', tono: 'espera', ordenes };
+    const partes = [];
+    if (taller && hechas < taller) {
+        if (hechas) partes.push(`${hechas} de ${taller} hechas`);
+        else partes.push(ordenes.length ? 'Por hacer en el taller' : 'Por hacer · sin orden todavía');
     }
-    if (cortadas < piezas) {
-        return { texto: `${cortadas} de ${piezas} cortadas`, tono: 'proceso', ordenes };
-    }
-    return {
-        texto: estado === 'DESPACHADA' ? 'Cortada' : 'Lista para despachar',
-        tono: 'listo',
-        ordenes,
-    };
+    if (esperando) partes.push(esperando === 1 ? '1 esperando bodega' : `${esperando} esperando bodega`);
+    if (!partes.length) return SIN_PRODUCCION;
+    return { texto: partes.join(' · '), tono: hechas ? 'proceso' : 'espera', ordenes };
 };
 
 export const TONOS = {

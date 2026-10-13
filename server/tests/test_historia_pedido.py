@@ -91,6 +91,10 @@ def test_cada_cambio_de_estado_queda_con_su_antes_y_despues(client_admin: TestCl
 def test_despachar_al_imprimir_etiquetas_lo_dice(client_admin: TestClient, session: Session):
     pedido = _manual(client_admin, items=[{"nombre_custom": "Bolero tejido", "precio_unitario_estimado": 5000}])
     assert client_admin.post(f"/api/v1/crm/cotizaciones/{pedido['id']}/confirmar", json={}).status_code == 200
+    bolero = session.get(CotizacionItem, pedido["items"][0]["id"])
+    bolero.cortado = True  # el taller lo terminó
+    session.add(bolero)
+    session.commit()
     res = client_admin.put(f"/api/v1/crm/cotizaciones/{pedido['id']}/estado",
                            json={"estado": "DESPACHADA", "motivo": "etiquetas"})
     assert res.status_code == 200, res.text

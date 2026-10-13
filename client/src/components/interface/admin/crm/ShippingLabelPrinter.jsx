@@ -13,6 +13,7 @@ import { getShippingColor } from '../../../../utils/shippingColors';
 import { actualizarEstadoCotizacion } from '../../../../lib/api/endpoints';
 import { useNotification } from '../../../../context/NotificationContext';
 import { estadoDeProduccion, TONOS } from '../../../../utils/produccion';
+import DespachoTrasImprimir from './etiquetas/DespachoTrasImprimir';
 import { imprimirDocumento } from '../../../../utils/impresion';
 import { useHasta } from '../../../../hooks/useCorte';
 import { PAPELES } from '../../../../utils/papeles';
@@ -31,9 +32,8 @@ import estilosImpresion from '../../../ui/impresion/paginas.impresion.css?raw';
 
 /**
  * Qué pedidos se ven. Existe porque la pantalla traía TODOS —nuevos, en
- * conversación y hasta los cancelados— y desde que imprimir marca DESPACHADA,
- * imprimir la etiqueta de un pedido sin confirmar le descontaría el stock a una
- * venta que nadie aceptó.
+ * conversación y hasta los cancelados—, y una etiqueta de un pedido que nadie
+ * aceptó no tiene destino.
  *
  * La vista por omisión es un conjunto de trabajo que SE VACÍA: lo que está por
  * despachar deja la lista al despacharse. Por eso no crece sin techo; la que
@@ -75,12 +75,10 @@ const ShippingLabelPrinter = () => {
 
     // Selección: mapa de id -> { coti, cliente, copies }
     const [selected, setSelected] = useState({});
-    // Imprimir la etiqueta ES el despacho: es el momento en que la prenda sale
-    // del taller. Marcarlo acá evita pedir un clic aparte para algo que ya se
-    // está haciendo — y ese estado es el que descuenta el stock.
-    // Va encendido por omisión y se puede apagar para reimprimir una etiqueta
-    // sin volver a despachar.
-    const [marcarDespachadas, setMarcarDespachadas] = useState(true);
+    // Imprimir NO despacha: una etiqueta se reimprime, se prueba la impresora.
+    // Después de imprimir se pregunta "¿ya salieron?" por los recién impresos
+    // (ver DespachoTrasImprimir), y despachar es ese clic, solo para los listos.
+    const [impresos, setImpresos] = useState(null);
     const [vista, setVista] = useState('por_despachar');
     const [conteos, setConteos] = useState({});
     // Qué se acaba de marcar, para poder deshacerlo.
@@ -266,14 +264,8 @@ const ShippingLabelPrinter = () => {
 
     useAjusteAlEspacio(vistaRef, [pages, formatKey, papelKey, inkMode, codigo, showCutLines, showTransportColor]);
 
-    const marcarComoDespachadas = async () => {
-        const pendientes = selectedList
-            .map(sel => sel.coti)
-            .filter(c => c && c.estado !== 'DESPACHADA')
-            // Un retiro no se despacha al imprimir: la prenda sigue en el local
-            // hasta que la clienta viene a buscarla. Ahora esto NO se adivina
-            // leyendo el nombre del transporte — el pedido declara su modo.
-            .filter(c => c.modo_entrega !== 'RETIRO');
+    const marcarComoDespachadas = async (pendientes) => {
+        setImpresos(null);
         if (!pendientes.length) return;
 
         const resultados = await Promise.allSettled(
@@ -329,7 +321,14 @@ const ShippingLabelPrinter = () => {
             cuerpo: paginas.map(p => p.outerHTML).join('\n'),
             estilos: [estilosPagina, estilosEtiqueta, estilosImpresion, estilosDePagina(medidas)],
         });
-        if (seImprimio && marcarDespachadas) marcarComoDespachadas();
+        if (!seImprimio) return;
+        // Se pregunta por los que se despachan: confirmados y que viajan. Un
+        // retiro sale cuando la clienta lo viene a buscar, no al imprimir.
+        const porDespachar = selectedList
+            .map(sel => sel.coti)
+            .filter(c => c && c.estado === 'CONFIRMADA' && c.modo_entrega !== 'RETIRO');
+        setUltimoDespacho(null);
+        setImpresos(porDespachar.length ? porDespachar : null);
     };
 
     return (
@@ -363,18 +362,6 @@ const ShippingLabelPrinter = () => {
                     >
                         <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Actualizar
                     </Button>
-                    <label
-                        title="Al imprimir, los pedidos seleccionados pasan a DESPACHADA y se descuentan del stock"
-                        className="et-opcion--holgada"
-                    >
-                        <input
-                            type="checkbox"
-                            checked={marcarDespachadas}
-                            onChange={e => setMarcarDespachadas(e.target.checked)}
-                        />
-                        Marcar como despachadas
-                        <span className="et-apagado">(no aplica a retiros)</span>
-                    </label>
                     <Button
                         variant="primary"
                         onClick={handlePrint}
@@ -391,12 +378,16 @@ const ShippingLabelPrinter = () => {
                 </div>
             </header>
 
+            {impresos && (
+                <DespachoTrasImprimir pedidos={impresos} onMarcar={marcarComoDespachadas} onCerrar={() => setImpresos(null)} />
+            )}
+
             {ultimoDespacho && (
                 <div className="et-despacho">
                     <span>
                         {ultimoDespacho.length === 1
-                            ? 'Se marcó 1 pedido como despachado y se descontó del stock.'
-                            : `Se marcaron ${ultimoDespacho.length} pedidos como despachados y se descontaron del stock.`}
+                            ? 'Se marcó 1 pedido como despachado.'
+                            : `Se marcaron ${ultimoDespacho.length} pedidos como despachados.`}
                     </span>
                     <button
                         type="button"

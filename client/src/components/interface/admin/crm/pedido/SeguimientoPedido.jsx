@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { History, Megaphone, Package } from 'lucide-react';
+import { History, Megaphone, Package, Truck } from 'lucide-react';
 import useHistoriaPedido from '../../../../../hooks/useHistoriaPedido';
 import usePedido from '../../../../../hooks/usePedido';
 import { canalSegunHistoria } from '../../../../../utils/historiaPedido';
@@ -7,6 +7,7 @@ import CanalPedido from './CanalPedido';
 import ConfirmarPedido from './confirmar/ConfirmarPedido';
 import HistoriaPedido from './HistoriaPedido';
 import PrendasPedido from './PrendasPedido';
+import SalidaPedido from './SalidaPedido';
 import './pedido.css';
 
 // El contenedor de sección del panel parte invisible (opacity: 0) y aparece
@@ -33,8 +34,8 @@ const Seccion = ({ icono, titulo, children }) => (
  * Cotizar o corregir "¿Cómo llegó?" recarga lo que corresponde: el cambio
  * mismo queda anotado, y se tiene que ver en la historia.
  *
- * `onCambio(pedido)`: al confirmar, para que la lista que abrió el panel no
- * siga mostrando el estado anterior.
+ * `onCambio(pedido)`: al confirmar o despachar, para que la lista que abrió
+ * el panel no siga mostrando el estado anterior.
  */
 const SeguimientoPedido = ({ cotizacion, abierto = true, onCambio }) => {
     const historia = useHistoriaPedido(cotizacion.id, abierto);
@@ -47,6 +48,8 @@ const SeguimientoPedido = ({ cotizacion, abierto = true, onCambio }) => {
     // Cerrar sin confirmar también recarga: se pudo haber quitado una prenda.
     const alCerrarConfirmacion = () => { setConfirmando(false); alCotizar(); };
     const alConfirmar = (actualizado) => { alCerrarConfirmacion(); onCambio?.(actualizado); };
+    const alSalir = (actualizado) => { alCotizar(); onCambio?.(actualizado); };
+    const sale = ['CONFIRMADA', 'DESPACHADA'].includes(fresco.pedido?.estado);
 
     return (
         <>
@@ -60,6 +63,11 @@ const SeguimientoPedido = ({ cotizacion, abierto = true, onCambio }) => {
                     onConfirmar={() => setConfirmando(true)}
                 />
             </Seccion>
+            {sale && (
+                <Seccion icono={<Truck size={18} />} titulo={fresco.pedido.modo_entrega === 'RETIRO' ? 'Entrega' : 'Despacho'}>
+                    <SalidaPedido pedido={fresco.pedido} onCambio={alSalir} />
+                </Seccion>
+            )}
             {confirmando && fresco.pedido && (
                 <ConfirmarPedido pedido={fresco.pedido} onConfirmado={alConfirmar} onCerrar={alCerrarConfirmacion} />
             )}

@@ -1,6 +1,8 @@
 """
 La bodega al despachar un pedido, y al deshacer el despacho.
 
+Solo sale un pedido listo (ver listo.py): todo apartado o hecho.
+
 Solo las prendas que van por BODEGA salen de la bodega: las del taller se
 hicieron para este pedido y nunca entraron a ella. Antes se descontaba todo, y
 una prenda hecha en el taller se llevaba de la bodega una que era de otro.
@@ -9,26 +11,18 @@ Nada se borra: deshacer es otro movimiento, y lo que movió cada prenda es la
 suma de lo anotado con su `reference_id` (ver core/movimientos.py).
 """
 
-from typing import List
-
 from sqlmodel import Session
 
 from ....models.catalog import MovementType
 from ....models.crm import Cotizacion
 from ... import movimientos
 from .apartado import estado_en_bodega
-from .caminos import BODEGA, ESPERANDO
-from ..cotizar import nombre_de_prenda
+from .caminos import BODEGA
+from .listo import avance
 
 
 class NoSeDespacha(Exception):
-    """Hay prendas por bodega que todavía no tienen con qué salir."""
-
-
-def esperando(db: Session, cotizacion: Cotizacion) -> List[str]:
-    """Las prendas por bodega de este pedido confirmado que todavía esperan."""
-    estados = estado_en_bodega(db, [cotizacion])
-    return [nombre_de_prenda(it) for it in cotizacion.items if estados.get(it.id) == ESPERANDO]
+    """El pedido no está listo: el mensaje dice qué falta, prenda por prenda."""
 
 
 def sacar(db: Session, cotizacion: Cotizacion) -> None:
@@ -36,12 +30,9 @@ def sacar(db: Session, cotizacion: Cotizacion) -> None:
     Descuenta de la bodega las prendas por bodega. Llamar ANTES de cambiar el
     estado: con el pedido todavía confirmado se sabe qué tiene apartado.
     """
-    faltan = esperando(db, cotizacion)
-    if faltan:
-        raise NoSeDespacha(
-            f"No se puede despachar: todavía esperan bodega {', '.join(faltan)}. "
-            "Cuando llegue (orden de corte o ajuste en Bodega) se apartan solas."
-        )
+    a = avance(cotizacion, estado_en_bodega(db, [cotizacion]))
+    if not a.listo:
+        raise NoSeDespacha(f"Todavía no está listo para salir. Falta: {'; '.join(a.falta)}.")
     for item in cotizacion.items:
         if item.camino != BODEGA or not item.sku_id:
             continue

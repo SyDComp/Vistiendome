@@ -633,3 +633,8 @@
     background: var(--color-brand-lighter);
     color: var(--color-brand);
 }
+
+/* Después de imprimir: ¿ya salieron? */
+.et-despacho--pregunta { align-items: flex-start; }
+.et-despacho-texto { font-size: 0.8125rem; color: var(--color-text-body); }
+.et-despacho-falta { margin: 0.25rem 0 0; padding-left: 1.1rem; font-size: 0.75rem; color: var(--color-warning-darkest); }

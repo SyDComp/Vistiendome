@@ -24,7 +24,8 @@ const estadoPedido = (estado, modoEntrega) => enFrase(etiquetaEstado(estado, mod
 const estadoOrden = (estado) => estiloEstado(estado).label;
 
 const MOTIVOS = {
-    etiquetas: 'al imprimir las etiquetas de envío',
+    // Antes se despachaba al imprimir; ahora con un botón en esa misma pantalla.
+    etiquetas: 'desde la pantalla de etiquetas de envío',
     deshacer_etiquetas: 'se deshizo el despacho hecho al imprimir etiquetas',
 };
 

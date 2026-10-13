@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlmodel import Session, select, func
 from typing import List, Literal, Optional
 from datetime import datetime
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database import get_session
 from app.models.crm import Cotizacion, CotizacionItem, EstadoCotizacion, OrigenCotizacion, TipoDespacho, ModoEntrega
@@ -95,15 +95,21 @@ class OrdenDeCorteDelPedido(BaseModel):
 
 class ProduccionRead(BaseModel):
     """
-    En qué va la confección de este pedido. **Todo derivado**, nada declarado.
+    En qué va el pedido. **Todo derivado**, nada declarado (ver
+    core/pedidos/ciclo/listo.py).
 
     Por eso no existe un estado "en corte" en el pedido: el sistema ya sabe
-    pieza por pieza si está cortada (lo pone la orden de corte al finalizar), y
-    pedir que además alguien lo declare abre la puerta a que las dos versiones
-    no coincidan.
+    pieza por pieza si está hecha (lo pone la orden de corte al finalizar) y si
+    lo de bodega está apartado. Pedir que además alguien lo declare abre la
+    puerta a que las dos versiones no coincidan.
     """
-    piezas: int = 0          # ítems con variante real: sólo eso se puede cortar
-    cortadas: int = 0
+    taller: int = 0          # prendas que hace el taller (personalizadas incluidas)
+    hechas: int = 0
+    bodega: int = 0          # prendas que salen de bodega
+    esperando: int = 0       # de esas, las que esperan que llegue
+    # Listo para salir, y si no, qué falta prenda por prenda. Solo en confirmados.
+    listo: bool = False
+    falta: List[str] = []
     ordenes: List[OrdenDeCorteDelPedido] = []
 
 
@@ -213,13 +219,10 @@ def _get_cotizacion_read(c: Cotizacion, ordenes: Optional[List[OrdenDeCorteDelPe
         _get_item_read(it).model_copy(update={"en_bodega": (en_bodega or {}).get(it.id)})
         for it in items
     ]
-    # Sólo cuentan las piezas con variante real: un ítem escrito a mano no se
-    # puede cortar, y sumarlo al total daría un "2 de 3" que nunca llega a 3.
-    cortables = [it for it in items if it.sku_id]
+    a = ciclo.avance(c, en_bodega or {})
     c_dict["produccion"] = ProduccionRead(
-        piezas=len(cortables),
-        cortadas=sum(1 for it in cortables if it.cortado),
-        ordenes=ordenes or [],
+        taller=a.taller, hechas=a.hechas, bodega=a.bodega, esperando=a.esperando,
+        listo=a.listo, falta=a.falta, ordenes=ordenes or [],
     )
     return CotizacionRead(**c_dict)
 
@@ -246,6 +249,17 @@ class CotizacionItemCreate(BaseModel):
     config_custom: Optional[dict] = None
     # Cuales de esos valores no existen en el catalogo y los propuso el cliente.
     config_propuesta: Optional[dict] = None
+
+    @model_validator(mode="after")
+    def _dice_que_prenda_es(self):
+        """
+        Una prenda sin variante, sin producto y sin nombre no le dice nada a
+        nadie: el taller no la puede hacer y el pedido nunca queda listo. Pasó:
+        hay pedidos viejos con renglones así.
+        """
+        if self.sku_id is None and self.producto_id is None and not (self.nombre_custom or "").strip():
+            raise ValueError("Cada prenda necesita un producto o un nombre.")
+        return self
 
 class CotizacionCreate(BaseModel):
     """

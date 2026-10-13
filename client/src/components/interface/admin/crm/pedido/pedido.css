@@ -342,3 +342,17 @@
 .sp-acciones--separadas > .sp-agregar {
     flex: 1 1 100%;
 }
+
+/* Que el pedido salga: listo y su botón, o qué falta. */
+.sp-salida {
+    display: grid;
+    gap: 0.5rem;
+    justify-items: start;
+}
+
+.sp-falta {
+    margin: 0;
+    padding-left: 1.2rem;
+    font-size: 0.85rem;
+    color: var(--color-warning-darkest);
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { conservarDatosCargados } from '../../../../utils/conservarVariantes';
+import { conservarDatosCargados, sumarVersiones } from '../../../../utils/conservarVariantes';
+import { conStockEditado, paraGuardar, trasGuardar } from '../../../../utils/stockAlGuardar';
 import { caracteristicasDe } from '../../../../utils/caracteristicasDeVariantes';
 import { useForm } from '../../../../hooks/useForm';
 import Input from '../../../ui/Input';
@@ -313,8 +314,10 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                 media_asset_id: img.media_asset_id || img.id,
                 is_main: img.is_main
             })),
+            // El stock solo viaja si se editó o la variante es nueva: ver
+            // utils/stockAlGuardar.js.
             skus: (skusOverride || generatedVariants).map(s => ({
-                ...s,
+                ...paraGuardar(s),
                 media_ids: s.media_ids || (s.media_assets?.map(a => a.id)) || []
             })),
             extras: {
@@ -357,6 +360,7 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                     // No llamamos a onSuccess ni cerramos para permitir corrección
                 } else {
                     setBatchErrors(null);
+                    setGeneratedVariants(trasGuardar(skusOverride || generatedVariants));
                     toast.success(isNew ? 'Producto base creado con éxito' : 'Producto actualizado');
                     
                     // Refrescar tabla en segundo plano
@@ -791,10 +795,9 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                                 className="adm-encima"
                                 onUpdate={(newData) => {
                                     const updated = [...generatedVariants];
-                                    updated[selectedVariant.index] = { 
-                                        ...updated[selectedVariant.index], 
-                                        price: newData.price, 
-                                        stock: newData.stock,
+                                    updated[selectedVariant.index] = {
+                                        ...conStockEditado(updated[selectedVariant.index], newData.stock),
+                                        price: newData.price,
                                         barcode: newData.barcode,
                                         image_urls: newData.image_urls 
                                     };
@@ -839,12 +842,12 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                                 categoryId={values.category_id}
                                 allAttributes={allAttributes}
                                 onConfirm={async (newVariants) => {
-                                    // Mecla Inteligente (Smart Merge): Deduplicar por SKU
-                                    const currentMap = new Map(generatedVariants.map(v => [v.sku, v]));
-                                    newVariants.forEach(nv => currentMap.set(nv.sku, nv));
-                                    
-                                    const updatedList = Array.from(currentMap.values());
+                                    // Las que ya existen no se pisan: ver sumarVersiones.
+                                    const { variantes: updatedList, yaExistian } = sumarVersiones(generatedVariants, newVariants);
                                     setGeneratedVariants(updatedList);
+                                    if (yaExistian) {
+                                        toast.info(`${yaExistian} ${yaExistian === 1 ? 'versión ya existía y quedó' : 'versiones ya existían y quedaron'} como estaba${yaExistian === 1 ? '' : 'n'}.`, 'Sin cambios');
+                                    }
                                     setShowVariantPicker(false);
                                     
                                     // Si el producto ya existe, persistimos de inmediato en la base de datos

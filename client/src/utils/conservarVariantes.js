@@ -76,3 +76,22 @@ export const conservarDatosCargados = (combinaciones = [], existentes = []) => {
 
     return { variantes, heredadas, nuevas };
 };
+
+/**
+ * Sumar las versiones de "Añadir Versión" a las que ya tiene el producto.
+ *
+ * Una que ya existe (mismo código) NO se reemplaza. Antes sí: la nueva llegaba
+ * sin id y con stock 0, el servidor la encontraba por su código y ajustaba su
+ * saldo a 0 — borraba de la bodega lo que había.
+ *
+ * @returns {{variantes: Array, yaExistian: number}}
+ */
+export const sumarVersiones = (existentes = [], nuevas = []) => {
+    const porCodigo = new Map(existentes.map(v => [v.sku, v]));
+    let yaExistian = 0;
+    nuevas.forEach(v => {
+        if (porCodigo.has(v.sku)) yaExistian++;
+        else porCodigo.set(v.sku, v);
+    });
+    return { variantes: [...porCodigo.values()], yaExistian };
+};
