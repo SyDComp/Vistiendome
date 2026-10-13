@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNotification } from '../../../../../context/NotificationContext';
 import { cotizarPrenda } from '../../../../../lib/api/endpoints';
 import { textoPrecio, textoSubtotal, estadoPrecio, valorDesde, esValido, paraServidor } from '../../../../../utils/precioPrenda';
+import { esperaBodega, textoCamino } from '../../../../../utils/caminoPrenda';
 import SelectorPrecio from './SelectorPrecio';
 
 /** Las características de una pieza personalizada, con lo propuesto marcado. */
@@ -30,6 +31,7 @@ const PrendaPedido = ({ pedidoId, prenda, editable, onCotizada }) => {
     const precio = prenda.precio_unitario_estimado;
     const pendiente = estadoPrecio(precio) !== 'monto';
     const detalle = detalleDe(prenda);
+    const camino = textoCamino(prenda);
 
     const abrir = () => { setValor(valorDesde(precio)); setEditando(true); };
 
@@ -53,6 +55,9 @@ const PrendaPedido = ({ pedidoId, prenda, editable, onCotizada }) => {
                 <div>
                     <p className="sp-prenda-nombre">{prenda.cantidad}× {prenda.sku_name}</p>
                     {detalle && <p className="sp-prenda-detalle">{detalle}</p>}
+                    {camino && (
+                        <span className={esperaBodega(prenda) ? 'sp-camino sp-camino--espera' : 'sp-camino'}>{camino}</span>
+                    )}
                 </div>
                 <div className="sp-prenda-precio">
                     <span className={pendiente ? 'sp-prenda-monto sp-prenda-monto--pendiente' : 'sp-prenda-monto'}>

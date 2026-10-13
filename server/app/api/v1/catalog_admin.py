@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 from ...database import get_session
 from ...core import existencias as existencias_core
+from ...core.pedidos import ciclo as ciclo_pedido
 from ...core import retiro_variantes
 from ...core import categorias as categorias_core
 from ...core.movimientos import tienen_historia
@@ -328,24 +329,26 @@ class MovimientoKardex(BaseModel):
 
 @router.get("/kardex")
 def kardex_saldos(db: Session = Depends(get_session)):
-    """Saldo actual de cada variante, sumando su libro de movimientos."""
-    saldos = dict(
-        db.exec(
-            select(StockMovement.sku_id, func.sum(StockMovement.quantity))
-            .group_by(StockMovement.sku_id)
-        ).all()
-    )
-    filas = []
-    for sku, product_name in db.exec(
+    """
+    Cada variante: lo que hay, lo apartado para pedidos confirmados y lo que
+    queda libre (negativo = faltan: hay pedidos esperando).
+    """
+    variantes = db.exec(
         select(SKU, Product.name).join(Product, SKU.product_id == Product.id)
         .where(SKU.is_deleted == False)
-    ).all():
+    ).all()
+    bodega = ciclo_pedido.bodega_de(db, [sku.id for sku, _ in variantes])
+    filas = []
+    for sku, product_name in variantes:
+        b = bodega.get(sku.id) or ciclo_pedido.Bodega()
         filas.append({
             "sku_id": sku.id,
             "sku": sku.sku,
             "product_name": product_name,
             "config": sku.config or {},
-            "current_stock": saldos.get(sku.id, 0) or 0,
+            "current_stock": b.hay,
+            "apartado": b.apartado,
+            "disponible": b.disponible,
         })
     return filas
 
@@ -369,6 +372,18 @@ def kardex_historial(sku_id: int, db: Session = Depends(get_session)):
         "product_name": sku.product.name if sku.product else "",
         "config": sku.config or {},
         "current_stock": sum(m.quantity for m in movimientos),
+        # Para qué pedidos está apartada, en el orden en que se la llevan.
+        "apartados": [
+            {
+                "pedido_id": pedido.id,
+                "pedido_numero": pedido.numero,
+                "cliente": pedido.nombre_contacto
+                    or (f"{pedido.persona.nombres} {pedido.persona.apellidos}".strip() if pedido.persona else None),
+                "cantidad": item.cantidad,
+                "estado": estado,
+            }
+            for item, pedido, estado in (ciclo_pedido.bodega_de(db, [sku.id]).get(sku.id) or ciclo_pedido.Bodega()).lineas
+        ],
         "history": [
             {
                 "id": m.id,

@@ -287,3 +287,21 @@
     font-size: 0.8rem;
     color: var(--color-text-muted);
 }
+
+/* El camino de una prenda ya confirmada, en el detalle del pedido. */
+.sp-camino {
+    display: inline-block;
+    margin-top: 0.2rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border-strong);
+    color: var(--color-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.sp-camino--espera {
+    border-color: var(--color-warning-border);
+    background: var(--color-warning-bg);
+    color: var(--color-warning-darkest);
+}

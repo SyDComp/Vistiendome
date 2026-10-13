@@ -77,3 +77,22 @@ describe('autorDe', () => {
         expect(autorDe({ tipo: 'REGISTRO_INICIADO', datos: {}, actor_nombre: null })).toBeNull();
     });
 });
+
+describe('confirmar y quitar prendas', () => {
+    it('la confirmación dice de dónde sale cada prenda, lo que espera y la nota', () => {
+        const { detalle } = describirEvento({ tipo: 'ESTADO', datos: {
+            de: 'EN_CONVERSACION', a: 'CONFIRMADA', bodega: 1, taller: 2,
+            esperando: ['Cinturón (M)'], nota: 'Llega el jueves',
+        } });
+        expect(detalle).toBe('1 prenda de bodega · 2 prendas al taller · Esperando bodega: Cinturón (M) · Nota: Llega el jueves');
+    });
+
+    it('una confirmación anterior a los caminos no inventa detalle', () => {
+        expect(describirEvento({ tipo: 'ESTADO', datos: { de: 'NUEVA', a: 'CONFIRMADA' } }).detalle).toBeNull();
+    });
+
+    it('una prenda quitada dice cuál era y su precio', () => {
+        const { texto } = describirEvento({ tipo: 'PRENDA_QUITADA', datos: { prenda: 'Cinturón (M)', cantidad: 2, precio: null } });
+        expect(texto).toBe('Se quitó del pedido: 2× Cinturón (M)');
+    });
+});

@@ -26,12 +26,13 @@ class TipoEvento:
     """Los tipos de anotación. Texto y no enum de la base: agregar uno no pide migración."""
 
     CREADO = "CREADO"                        # {origen, canal}
-    ESTADO = "ESTADO"                        # {de, a, motivo?}
+    ESTADO = "ESTADO"                        # {de, a, motivo?}; al confirmar además {bodega, taller, esperando, nota}
     CANAL = "CANAL"                          # {de, a}
     PRECIO = "PRECIO"                        # {prenda, de, a}: None por cotizar, 0 sin costo
     ORDEN_AGREGADA = "ORDEN_AGREGADA"        # {orden, prendas}
     ORDEN_ESTADO = "ORDEN_ESTADO"            # {orden, de, a, prendas}
     ORDEN_ELIMINADA = "ORDEN_ELIMINADA"      # {orden, prendas}
+    PRENDA_QUITADA = "PRENDA_QUITADA"        # {prenda, cantidad, precio}: antes de confirmar
     ELIMINADO = "ELIMINADO"                  # {}
     # Los pedidos anteriores a la historia: la foto de cómo estaban al empezar
     # a anotar. {estado, piezas, cortadas, ordenes}

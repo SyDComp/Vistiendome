@@ -89,9 +89,11 @@ def test_cada_cambio_de_estado_queda_con_su_antes_y_despues(client_admin: TestCl
 
 
 def test_despachar_al_imprimir_etiquetas_lo_dice(client_admin: TestClient, session: Session):
-    pedido = _manual(client_admin)
-    client_admin.put(f"/api/v1/crm/cotizaciones/{pedido['id']}/estado",
-                     json={"estado": "CONFIRMADA", "motivo": "etiquetas"})
+    pedido = _manual(client_admin, items=[{"nombre_custom": "Bolero tejido", "precio_unitario_estimado": 5000}])
+    assert client_admin.post(f"/api/v1/crm/cotizaciones/{pedido['id']}/confirmar", json={}).status_code == 200
+    res = client_admin.put(f"/api/v1/crm/cotizaciones/{pedido['id']}/estado",
+                           json={"estado": "DESPACHADA", "motivo": "etiquetas"})
+    assert res.status_code == 200, res.text
     ultimo = _eventos(session, pedido["numero"])[-1]
     assert ultimo.datos["motivo"] == "etiquetas"
 
@@ -165,7 +167,7 @@ def test_un_pedido_borrado_deja_su_historia(client_admin: TestClient, session: S
 
 def test_la_historia_se_lee_en_orden(client_admin: TestClient):
     pedido = _manual(client_admin)
-    client_admin.put(f"/api/v1/crm/cotizaciones/{pedido['id']}/estado", json={"estado": "CONFIRMADA"})
+    client_admin.put(f"/api/v1/crm/cotizaciones/{pedido['id']}/estado", json={"estado": "EN_CONVERSACION"})
 
     res = client_admin.get(f"/api/v1/crm/cotizaciones/{pedido['id']}/historia")
     assert res.status_code == 200

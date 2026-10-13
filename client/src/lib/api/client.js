@@ -6,11 +6,14 @@ import { API_BASE_URL } from '../constants/api.js';
  */
 
 class ApiError extends Error {
-    constructor(message, status, response) {
+    constructor(message, status, response, data = null) {
         super(message);
         this.name = 'ApiError';
         this.status = status;
         this.response = response;
+        // El cuerpo de la respuesta de error, ya leído: hay rechazos que traen
+        // más que un mensaje (al confirmar un pedido, la propuesta nueva).
+        this.data = data;
     }
 }
 
@@ -44,13 +47,14 @@ export const request = async (method, endpoint, options = {}) => {
 
         if (!response.ok) {
             let errorMessage = `Error ${response.status}: ${response.statusText}`;
+            let errorData = null;
             try {
-                const errorData = await response.json();
+                errorData = await response.json();
                 errorMessage = errorData.detail || errorData.message || errorMessage;
             } catch {
                 // Si no hay JSON en el body de error, usamos el statusText
             }
-            throw new ApiError(errorMessage, response.status, response);
+            throw new ApiError(errorMessage, response.status, response, errorData);
         }
 
         // 204 No Content

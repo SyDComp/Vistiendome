@@ -15,7 +15,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
-from sqlalchemy import text
+from sqlalchemy import or_, text
 from pydantic import BaseModel
 
 from app.database import get_session
@@ -25,7 +25,7 @@ from app.models.catalog import SKU, MovementType
 from app.models.iam import CuentaAcceso
 from app.api.deps import RequirePermiso
 from app.core import movimientos as movimientos_core
-from app.core.pedidos import historia
+from app.core.pedidos import ciclo, historia
 from app.models.historia import TipoEvento
 
 router = APIRouter()
@@ -156,6 +156,8 @@ def piezas_pendientes(
     Por omisión sólo pedidos CONFIRMADA: cortar tela es irreversible y cuesta
     material, así que no entra lo que la clienta todavía no aceptó. Se puede
     ampliar con ?estado=TODAS.
+
+    Nunca lo que va por bodega: esa prenda ya existe, se aparta de lo que hay.
     """
     ya_asignados = {
         oi.cotizacion_item_id
@@ -167,7 +169,11 @@ def piezas_pendientes(
         if oi.cotizacion_item_id
     }
 
-    query = select(CotizacionItem).join(Cotizacion, CotizacionItem.cotizacion_id == Cotizacion.id)
+    query = (
+        select(CotizacionItem)
+        .join(Cotizacion, CotizacionItem.cotizacion_id == Cotizacion.id)
+        .where(or_(CotizacionItem.camino.is_(None), CotizacionItem.camino != ciclo.BODEGA))
+    )
     if estado and estado != "TODAS":
         query = query.where(Cotizacion.estado == estado)
     else:

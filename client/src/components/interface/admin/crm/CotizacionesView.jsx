@@ -12,11 +12,21 @@ import { estadoDeProduccion, TONOS } from '../../../../utils/produccion';
 import { FileText, Calendar, MessageCircle, MapPin, Printer, Plus } from 'lucide-react';
 import AdminCotizacionModal from './AdminCotizacionModal';
 import { ESTADOS } from '../../../../utils/estadosPedido';
+import { avisoVolverAtras } from '../../../../utils/volverAtras';
+import { mensajeDeError } from '../../../../utils/errorServidor';
+import { actualizarEstadoCotizacion, obtenerPedido } from '../../../../lib/api/endpoints';
+import ConfirmarPedido from './pedido/confirmar/ConfirmarPedido';
 import './CotizacionesView.css';
 
 
-const StateSelector = ({ cotizacion, onUpdate }) => {
-    const { toast } = useNotification();
+/**
+ * El estado del pedido en la lista. Confirmar no es un cambio de estado más:
+ * abre «Confirmar pedido» (`onConfirmar`), donde se decide de dónde sale cada
+ * prenda. Sacar un pedido de Confirmada pide confirmación, dicha en palabras
+ * de la tienda.
+ */
+const StateSelector = ({ cotizacion, onUpdate, onConfirmar }) => {
+    const { toast, confirm } = useNotification();
     const [loading, setLoading] = useState(false);
 
     const states = ESTADOS;
@@ -28,22 +38,18 @@ const StateSelector = ({ cotizacion, onUpdate }) => {
 
     const handleChange = async (e) => {
         const newState = e.target.value;
+        if (newState === 'CONFIRMADA' && cotizacion.estado !== 'DESPACHADA') {
+            onConfirmar(cotizacion);
+            return;
+        }
+        const aviso = avisoVolverAtras(cotizacion, newState);
+        if (aviso && !await confirm(aviso)) return;
         setLoading(true);
         try {
-            const response = await fetch(`/api/v1/crm/cotizaciones/${cotizacion.id}/estado`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ estado: newState })
-            });
-            if (response.ok) {
-                const updated = await response.json();
-                onUpdate(updated);
-                toast.success('Estado actualizado exitosamente');
-            } else {
-                toast.error("Error al actualizar estado");
-            }
-        } catch(err) {
-            toast.error("Error de red");
+            onUpdate(await actualizarEstadoCotizacion(cotizacion.id, newState));
+            toast.success('Estado actualizado exitosamente');
+        } catch (err) {
+            toast.error(mensajeDeError(err?.message, 'No se pudo cambiar el estado'));
         } finally {
             setLoading(false);
         }
@@ -86,6 +92,20 @@ const CotizacionesView = () => {
     const [showDetail, setShowDetail] = useState(false);
     const [detailData, setDetailData] = useState(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [confirmando, setConfirmando] = useState(null);
+
+    // Un pedido que cambió (desde la lista o desde su detalle) se reemplaza
+    // en los dos lugares.
+    const alCambiarPedido = (actualizado) => {
+        setCotizaciones(prev => prev.map(c => c.id === actualizado.id ? actualizado : c));
+        setDetailData(prev => (prev?.id === actualizado.id ? actualizado : prev));
+    };
+    const cerrarConfirmacion = async () => {
+        const id = confirmando?.id;
+        setConfirmando(null);
+        // Se pudo haber quitado una prenda sin llegar a confirmar.
+        try { if (id) alCambiarPedido(await obtenerPedido(id)); } catch { /* la lista queda como estaba */ }
+    };
 
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -197,13 +217,7 @@ const CotizacionesView = () => {
             key: 'estado',
             label: 'Estado',
             render: (value, row) => (
-                <StateSelector
-                    cotizacion={row}
-                    onUpdate={(updatedCotizacion) => {
-                        setCotizaciones(prev => prev.map(c => c.id === updatedCotizacion.id ? updatedCotizacion : c));
-                        if (detailData?.id === updatedCotizacion.id) setDetailData(updatedCotizacion);
-                    }}
-                />
+                <StateSelector cotizacion={row} onUpdate={alCambiarPedido} onConfirmar={setConfirmando} />
             )
         },
         {
@@ -371,7 +385,16 @@ const CotizacionesView = () => {
                 data={detailData}
                 type="cotizacion"
                 title={detailData ? `Cotización N° ${detailData.numero ?? '—'}` : ''}
+                onPedidoCambio={alCambiarPedido}
             />
+
+            {confirmando && (
+                <ConfirmarPedido
+                    pedido={confirmando}
+                    onConfirmado={(actualizado) => { setConfirmando(null); alCambiarPedido(actualizado); }}
+                    onCerrar={cerrarConfirmacion}
+                />
+            )}
 
             <AdminCotizacionModal
                 isOpen={showCreateModal}

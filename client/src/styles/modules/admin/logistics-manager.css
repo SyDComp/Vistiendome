@@ -270,3 +270,14 @@ ul.logistics-history-list { list-style: none; margin: 0; padding: 0; }
 .logistics-modal-aviso--error { color: var(--color-error-deep); }
 
 .logistics-modal-btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Lo físico y lo apartado van en cifra simple: el color es para lo disponible. */
+.logistics-stock-cifra { font-weight: 700; font-size: 14px; color: var(--color-text-body); }
+
+/* Para qué pedidos está apartada la variante, en el historial. */
+.logistics-apartados { margin-top: 14px; }
+.logistics-apartados-lista { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 6px; }
+.logistics-apartados-item { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--color-text-body); }
+.logistics-apartados-pedido { border: none; background: none; padding: 0; font: inherit; font-weight: 700; color: var(--color-brand); cursor: pointer; text-decoration: underline; }
+.logistics-apartados-estado { margin-left: auto; font-weight: 600; color: var(--color-text-muted); }
+.logistics-apartados-estado.espera { color: var(--color-warning-deep); }

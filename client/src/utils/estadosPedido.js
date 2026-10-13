@@ -16,13 +16,13 @@ export const ESTADOS = [
     { value: 'EN_CONVERSACION', label: 'EN CONVERSACIÓN', color: '#f59e0b', bg: '#fef3c7',
       significa: 'Hablando con la clienta: tallas, precio, plazos.' },
     { value: 'CONFIRMADA', label: 'CONFIRMADA', color: '#3b82f6', bg: '#eff6ff',
-      significa: 'La clienta aceptó. Recién acá las piezas entran a la orden de corte.' },
+      significa: 'La clienta aceptó. Lo de bodega queda apartado y lo del taller entra a la orden de corte. Se llega con «Confirmar pedido».' },
     { value: 'DESPACHADA', label: 'DESPACHADA', color: '#7c3aed', bg: '#f5f3ff',
       // En un retiro la palabra correcta es "entregada": nadie la despachó, la
       // clienta vino a buscarla. El hecho que registra el estado es el mismo
       // —la prenda salió del local— y por eso es un solo valor con dos nombres.
       etiquetaRetiro: 'ENTREGADA',
-      significa: 'Salió del local. Acá se descuenta del stock, no antes. En un retiro se llama ENTREGADA.' },
+      significa: 'Salió del local. Acá sale de la bodega lo que estaba apartado, no antes. En un retiro se llama ENTREGADA.' },
     { value: 'CANCELADA', label: 'CANCELADA', color: '#ef4444', bg: '#fef2f2',
       significa: 'No se concretó, o un pedido confirmado se cayó.' },
 ];

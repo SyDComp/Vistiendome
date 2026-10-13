@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List, Dict
 from sqlmodel import SQLModel, Field, Relationship
-from sqlalchemy import JSON
+from sqlalchemy import JSON, Column, DateTime
 from enum import Enum
 import ulid
 
@@ -143,6 +143,14 @@ class Cotizacion(SQLModel, table=True):
     # mostrando el de la Persona.
     nombre_contacto: Optional[str] = Field(default=None, max_length=200)
 
+    # Cuándo se confirmó por última vez. Decide quién se lleva primero lo que
+    # hay en bodega: el que confirmó antes (ver core/pedidos/ciclo/apartado.py).
+    # Nulo si no está confirmado, y en los confirmados antes de este campo: de
+    # esos no se sabe, y no se inventa.
+    confirmada_en: Optional[datetime] = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )
+
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     
@@ -208,6 +216,12 @@ class CotizacionItem(SQLModel, table=True):
     # ya cortadas y otras no. El estado de la Cotizacion (NUEVA/CONFIRMADA/...)
     # es el ciclo de la VENTA; esto es el ciclo de la CONFECCIÓN — ejes distintos.
     cortado: bool = Field(default=False)
+
+    # De dónde sale la prenda: BODEGA (se aparta de lo que hay) o TALLER (se
+    # confecciona; nunca toca la bodega). Se decide al confirmar y queda
+    # guardado: si mañana cambia la categoría, esta prenda no cambia de camino.
+    # Nulo mientras el pedido no está confirmado. Ver core/pedidos/ciclo/.
+    camino: Optional[str] = Field(default=None, max_length=10)
 
     # Relationships
     cotizacion: Cotizacion = Relationship(back_populates="items")

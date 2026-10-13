@@ -7,11 +7,10 @@ from pydantic import BaseModel, Field, field_validator
 from app.database import get_session
 from app.models.crm import Cotizacion, CotizacionItem, EstadoCotizacion, OrigenCotizacion, TipoDespacho, ModoEntrega
 from app.models.iam import Persona, TipoPersona, Direccion, CuentaAcceso
-from app.models.catalog import StockMovement, MovementType, SKU
+from app.models.catalog import StockMovement
 from app.models.taller import OrdenCorte, OrdenCorteItem, EstadoOrdenCorte
 from app.api.deps import get_current_user, RequirePermiso
-from app.core import existencias as existencias_core
-from app.core import movimientos as movimientos_core
+from app.core.pedidos import ciclo
 from app.core import pedidos as pedidos_core
 from app.core.pedidos import historia
 from app.models.historia import TipoEvento
@@ -82,6 +81,10 @@ class CotizacionItemRead(BaseModel):
     # las marca para que no se confundan con las del catalogo.
     config_propuesta: dict = {}
     cortado: bool = False
+    # BODEGA o TALLER desde que se confirma (ver core/pedidos/ciclo/).
+    camino: Optional[str] = None
+    # Si va por bodega y el pedido está confirmado: APARTADA o ESPERANDO.
+    en_bodega: Optional[str] = None
 
 class OrdenDeCorteDelPedido(BaseModel):
     """Lo justo para nombrarla y poder saltar a ella."""
@@ -125,6 +128,7 @@ class CotizacionRead(BaseModel):
     # modelo (Cotizacion.nombre_contacto): puede diferir de `cliente.nombres`
     # a proposito, y es el que hay que mostrar.
     nombre_contacto: Optional[str] = None
+    confirmada_en: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
     cliente: Optional[PersonaRead] = None
@@ -199,12 +203,16 @@ def _mapa_ordenes_de_corte(session: Session, cotizacion_ids: List[str]) -> dict:
     return {k: list(v.values()) for k, v in mapa.items()}
 
 
-def _get_cotizacion_read(c: Cotizacion, ordenes: Optional[List[OrdenDeCorteDelPedido]] = None) -> CotizacionRead:
+def _get_cotizacion_read(c: Cotizacion, ordenes: Optional[List[OrdenDeCorteDelPedido]] = None,
+                         en_bodega: Optional[dict] = None) -> CotizacionRead:
     c_dict = c.dict()
     if c.persona:
         c_dict["cliente"] = _get_persona_read(c.persona)
     items = list(c.items or [])
-    c_dict["items"] = [_get_item_read(it) for it in items]
+    c_dict["items"] = [
+        _get_item_read(it).model_copy(update={"en_bodega": (en_bodega or {}).get(it.id)})
+        for it in items
+    ]
     # Sólo cuentan las piezas con variante real: un ítem escrito a mano no se
     # puede cortar, y sumarlo al total daría un "2 de 3" que nunca llega a 3.
     cortables = [it for it in items if it.sku_id]
@@ -214,6 +222,13 @@ def _get_cotizacion_read(c: Cotizacion, ordenes: Optional[List[OrdenDeCorteDelPe
         ordenes=ordenes or [],
     )
     return CotizacionRead(**c_dict)
+
+
+def leer_pedidos(session: Session, cotizaciones: List[Cotizacion]) -> List[CotizacionRead]:
+    """Los pedidos como los ve el panel, con sus órdenes de corte y su bodega, en pocas consultas."""
+    ordenes = _mapa_ordenes_de_corte(session, [c.id for c in cotizaciones])
+    en_bodega = ciclo.estado_en_bodega(session, cotizaciones)
+    return [_get_cotizacion_read(c, ordenes.get(c.id, []), en_bodega) for c in cotizaciones]
 
 class CotizacionItemCreate(BaseModel):
     sku_id: Optional[int] = None
@@ -374,66 +389,7 @@ def listar_cotizaciones(
     cotizaciones = session.exec(
         consulta.order_by(Cotizacion.created_at.desc()).offset(skip).limit(limit)
     ).all()
-    ordenes = _mapa_ordenes_de_corte(session, [c.id for c in cotizaciones])
-    return [_get_cotizacion_read(c, ordenes.get(c.id, [])) for c in cotizaciones]
-
-def _sincronizar_stock_venta(session: Session, cotizacion: Cotizacion, estado_anterior: EstadoCotizacion, estado_nuevo: EstadoCotizacion) -> None:
-    """
-    Al pasar a DESPACHADA descuenta el stock de cada prenda con SKU real; al
-    salir de DESPACHADA lo devuelve.
-
-    Nada se borra: devolver es otro movimiento, y lo que movió cada prenda es
-    la suma de lo anotado con su `reference_id` (ver core/movimientos.py).
-    Despachar, deshacer y volver a despachar queda escrito tal cual pasó, y
-    nunca descuenta dos veces.
-    """
-    entra_a_despacho = estado_nuevo == EstadoCotizacion.DESPACHADA and estado_anterior != EstadoCotizacion.DESPACHADA
-    sale_de_despacho = estado_anterior == EstadoCotizacion.DESPACHADA and estado_nuevo != EstadoCotizacion.DESPACHADA
-
-    if not entra_a_despacho and not sale_de_despacho:
-        return
-
-    prendas = [item for item in cotizacion.items if item.sku_id]
-
-    # NO SE DESPACHA LO QUE NO HAY
-    # Se comprueba TODO el pedido antes de tocar nada, y se avisa de una vez de
-    # todo lo que falta: quien despacha no tiene por que descubrirlo de a uno.
-    # Lo que este mismo pedido ya tiene descontado no cuenta como faltante.
-    if entra_a_despacho:
-        ya_movido = movimientos_core.netos_de(session, [i.id for i in prendas])
-        por_sacar = {}
-        for item in prendas:
-            falta = item.cantidad + ya_movido.get(item.id, 0)  # el neto es negativo
-            if falta > 0:
-                por_sacar[item.sku_id] = por_sacar.get(item.sku_id, 0) + falta
-        problemas = existencias_core.faltantes(session, por_sacar)
-        if problemas:
-            detalle = []
-            for sku_id, hay, pide in problemas:
-                sku = session.get(SKU, sku_id)
-                nombre = sku.sku if sku else f"SKU {sku_id}"
-                detalle.append(f"{nombre}: hay {hay}, se necesitan {pide}")
-            raise HTTPException(
-                status_code=409,
-                detail=(
-                    "No se puede despachar: no hay existencia suficiente. "
-                    + " · ".join(detalle)
-                    + ". Registra la entrada (orden de corte o ajuste) y vuelve a intentarlo."
-                ),
-            )
-
-    for item in prendas:
-        movimientos_core.llevar_a(
-            session,
-            sku_id=item.sku_id,
-            reference_id=item.id,
-            objetivo=-item.cantidad if entra_a_despacho else 0,
-            tipo_si_resta=MovementType.SALE,
-            tipo_si_suma=MovementType.RETURN,
-            nota=(f"Despacho pedido #{cotizacion.numero}" if entra_a_despacho
-                  else f"Se deshizo el despacho del pedido #{cotizacion.numero}"),
-        )
-
+    return leer_pedidos(session, cotizaciones)
 
 class EstadoUpdate(BaseModel):
     estado: EstadoCotizacion
@@ -448,24 +404,36 @@ def actualizar_estado_cotizacion(cotizacion_id: str, data: EstadoUpdate, session
     if not cotizacion:
         raise HTTPException(status_code=404, detail="Cotización no encontrada")
 
-    estado_anterior = cotizacion.estado
-    cotizacion.estado = data.estado
-    session.add(cotizacion)
-    _sincronizar_stock_venta(session, cotizacion, estado_anterior, data.estado)
+    estado_anterior = EstadoCotizacion(getattr(cotizacion.estado, "value", cotizacion.estado))
+    no_se_puede = ciclo.por_que_no(estado_anterior, data.estado)
+    if no_se_puede:
+        raise HTTPException(status_code=409, detail=no_se_puede)
+
     if estado_anterior != data.estado:
+        # La bodega se mueve ANTES de cambiar el estado: con el pedido todavía
+        # confirmado se sabe qué tiene apartado.
+        try:
+            if data.estado == EstadoCotizacion.DESPACHADA:
+                ciclo.sacar(session, cotizacion)
+            elif estado_anterior == EstadoCotizacion.DESPACHADA:
+                ciclo.devolver(session, cotizacion)
+        except ciclo.NoSeDespacha as e:
+            raise HTTPException(status_code=409, detail=str(e))
+        ciclo.al_cambiar(cotizacion, data.estado)
+        cotizacion.estado = data.estado
+        session.add(cotizacion)
         historia.anotar(session, cotizacion, TipoEvento.ESTADO, historia.de_cuenta(current_admin),
-                        de=getattr(estado_anterior, "value", estado_anterior), a=data.estado.value,
-                        motivo=data.motivo)
+                        de=estado_anterior.value, a=data.estado.value, motivo=data.motivo)
     session.commit()
     session.refresh(cotizacion)
-    return _get_cotizacion_read(cotizacion, _mapa_ordenes_de_corte(session, [cotizacion.id]).get(cotizacion.id, []))
+    return leer_pedidos(session, [cotizacion])[0]
 
 @router.get("/cotizaciones/{cotizacion_id}", response_model=CotizacionRead)
 def obtener_cotizacion(cotizacion_id: str, session: Session = Depends(get_session), current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
     cotizacion = session.get(Cotizacion, cotizacion_id)
     if not cotizacion:
         raise HTTPException(status_code=404, detail="Cotización no encontrada")
-    return _get_cotizacion_read(cotizacion, _mapa_ordenes_de_corte(session, [cotizacion.id]).get(cotizacion.id, []))
+    return leer_pedidos(session, [cotizacion])[0]
 
 # Acá vivían `PUT /items/{id}/cortado` y `GET /orden-corte`, del diseño anterior
 # a que la orden de corte fuera una entidad propia (`app/models/taller.py`).

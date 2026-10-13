@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { History, Megaphone, Package } from 'lucide-react';
 import useHistoriaPedido from '../../../../../hooks/useHistoriaPedido';
 import usePedido from '../../../../../hooks/usePedido';
 import { canalSegunHistoria } from '../../../../../utils/historiaPedido';
 import CanalPedido from './CanalPedido';
+import ConfirmarPedido from './confirmar/ConfirmarPedido';
 import HistoriaPedido from './HistoriaPedido';
 import PrendasPedido from './PrendasPedido';
 import './pedido.css';
@@ -31,13 +32,21 @@ const Seccion = ({ icono, titulo, children }) => (
  *
  * Cotizar o corregir "¿Cómo llegó?" recarga lo que corresponde: el cambio
  * mismo queda anotado, y se tiene que ver en la historia.
+ *
+ * `onCambio(pedido)`: al confirmar, para que la lista que abrió el panel no
+ * siga mostrando el estado anterior.
  */
-const SeguimientoPedido = ({ cotizacion, abierto = true }) => {
+const SeguimientoPedido = ({ cotizacion, abierto = true, onCambio }) => {
     const historia = useHistoriaPedido(cotizacion.id, abierto);
     const fresco = usePedido(cotizacion.id, abierto);
     const canal = canalSegunHistoria(historia.eventos, cotizacion.canal);
 
+    const [confirmando, setConfirmando] = useState(false);
+
     const alCotizar = () => { fresco.recargar(); historia.recargar(); };
+    // Cerrar sin confirmar también recarga: se pudo haber quitado una prenda.
+    const alCerrarConfirmacion = () => { setConfirmando(false); alCotizar(); };
+    const alConfirmar = (actualizado) => { alCerrarConfirmacion(); onCambio?.(actualizado); };
 
     return (
         <>
@@ -48,8 +57,12 @@ const SeguimientoPedido = ({ cotizacion, abierto = true }) => {
                     error={fresco.error}
                     onReintentar={fresco.recargar}
                     onCotizada={alCotizar}
+                    onConfirmar={() => setConfirmando(true)}
                 />
             </Seccion>
+            {confirmando && fresco.pedido && (
+                <ConfirmarPedido pedido={fresco.pedido} onConfirmado={alConfirmar} onCerrar={alCerrarConfirmacion} />
+            )}
             <Seccion icono={<Megaphone size={18} />} titulo="¿Cómo llegó?">
                 <CanalPedido key={cotizacion.id} cotizacion={cotizacion} canal={canal} onCambio={historia.recargar} />
             </Seccion>

@@ -29,6 +29,20 @@ const MOTIVOS = {
 };
 
 /**
+ * Al confirmar: de dónde sale cada prenda, qué quedó esperando y la nota.
+ * Null en las confirmaciones anteriores a los caminos, que no lo anotaban.
+ */
+const detalleConfirmacion = (datos) => {
+    if (datos.bodega === undefined && datos.taller === undefined) return null;
+    const partes = [];
+    if (datos.bodega) partes.push(`${prendas(datos.bodega)} de bodega`);
+    if (datos.taller) partes.push(`${prendas(datos.taller)} al taller`);
+    if ((datos.esperando || []).length) partes.push(`Esperando bodega: ${datos.esperando.join(', ')}`);
+    if (datos.nota) partes.push(`Nota: ${datos.nota}`);
+    return partes.join(' · ') || null;
+};
+
+/**
  * @param {{tipo: string, datos: object}} evento
  * @param {string} [modoEntrega]  'RETIRO' o 'DESPACHO': cambia cómo se nombra DESPACHADA.
  * @returns {{texto: string, detalle: string|null}}
@@ -47,7 +61,13 @@ export const describirEvento = ({ tipo, datos = {} }, modoEntrega) => {
         case 'ESTADO':
             return {
                 texto: `${estadoPedido(datos.de, modoEntrega)} → ${estadoPedido(datos.a, modoEntrega)}`,
-                detalle: MOTIVOS[datos.motivo] ? enFrase(MOTIVOS[datos.motivo]) : null,
+                detalle: MOTIVOS[datos.motivo] ? enFrase(MOTIVOS[datos.motivo]) : detalleConfirmacion(datos),
+            };
+
+        case 'PRENDA_QUITADA':
+            return {
+                texto: `Se quitó del pedido: ${datos.cantidad}× ${datos.prenda}`,
+                detalle: `Precio: ${textoPrecio(datos.precio)}`,
             };
 
         case 'CANAL':

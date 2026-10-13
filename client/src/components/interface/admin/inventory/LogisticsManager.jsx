@@ -8,6 +8,7 @@ import { History, ArrowLeftRight } from 'lucide-react';
 import FilterBar from '../../../ui/admin/FilterBar';
 import { getSaldosKardex, getHistorialKardex } from '../../../../lib/api/endpoints';
 import HistorialKardex from './kardex/HistorialKardex';
+import { textoDisponible } from './kardex/apartado';
 import MovimientoModal from './kardex/MovimientoModal';
 
 const LogisticsManager = () => {
@@ -118,16 +119,31 @@ const LogisticsManager = () => {
                 </div>
             ) 
         },
-        { 
-            key: 'current_stock', 
-            label: 'Stock Actual', 
+        {
+            // Lo que hay físicamente, apartado o no.
+            key: 'current_stock',
+            label: 'En bodega',
+            width: '110px',
+            align: 'center',
+            render: (v) => <span className="logistics-stock-cifra">{v}</span>
+        },
+        {
+            // Lo que piden los pedidos confirmados (ver core/pedidos/ciclo/).
+            key: 'apartado',
+            label: 'Apartado',
+            width: '110px',
+            align: 'center',
+            render: (v) => <span className="logistics-stock-cifra">{v || '—'}</span>
+        },
+        {
+            key: 'disponible',
+            label: 'Disponible',
             width: '120px',
             align: 'center',
-            render: (v) => (
-                <span className={`logistics-stock-badge ${v <= 0 ? 'empty' : v < 5 ? 'low' : 'good'}`}>
-                    {v}
-                </span>
-            )
+            render: (v) => {
+                const { texto, tono } = textoDisponible(v);
+                return <span className={`logistics-stock-badge ${tono}`}>{texto}</span>;
+            }
         }
     ];
 

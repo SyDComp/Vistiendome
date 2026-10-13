@@ -1,0 +1,184 @@
+/* Confirmar pedido. Solo tokens del tema. Encima del panel lateral (4000) y
+   debajo del diálogo de confirmación (10000), que se abre desde acá. */
+
+.cfp-capa {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(6px);
+}
+
+.cfp-tarjeta {
+    width: 100%;
+    max-width: 640px;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 1rem;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+}
+
+.cfp-cabecera,
+.cfp-pie {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+}
+
+.cfp-cabecera {
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--color-border-strong);
+}
+
+.cfp-pie {
+    justify-content: flex-end;
+    border-top: 1px solid var(--color-border-strong);
+}
+
+.cfp-pie .sp-boton--principal {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.cfp-titulo {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.cfp-subtitulo {
+    margin: 0.25rem 0 0;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+}
+
+.cfp-cerrar {
+    padding: 0.35rem;
+    border: none;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+
+.cfp-cuerpo {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    overflow-y: auto;
+}
+
+.cfp-prendas {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cfp-prendas[aria-busy="true"] {
+    opacity: 0.6;
+}
+
+.cfp-prenda {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 0.75rem;
+}
+
+.cfp-prenda--aviso {
+    border-color: var(--color-warning-border);
+}
+
+.cfp-prenda-fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.cfp-prenda-nombre {
+    margin: 0;
+    font-weight: 600;
+}
+
+.cfp-prenda-detalle {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.cfp-camino {
+    min-width: 9rem;
+}
+
+.cfp-queda {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+}
+
+.cfp-queda--espera {
+    color: var(--color-warning-deep);
+    font-weight: 600;
+}
+
+.cfp-aviso {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 0.5rem 0.65rem;
+    border-radius: 0.5rem;
+    background: var(--color-warning-bg);
+    color: var(--color-warning-darkest);
+    font-size: 0.85rem;
+}
+
+.cfp-aviso p {
+    margin: 0;
+    flex: 1 1 16rem;
+}
+
+.cfp-problemas {
+    margin: 0;
+    padding: 0.6rem 0.75rem 0.6rem 1.75rem;
+    border: 1px solid var(--color-error-border-strong);
+    border-radius: 0.5rem;
+    background: var(--color-error-bg);
+    color: var(--color-error-deep);
+    font-size: 0.875rem;
+}
+
+.cfp-nota {
+    display: grid;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.cfp-nota textarea {
+    resize: vertical;
+}
+
+.cfp-oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}

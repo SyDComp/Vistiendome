@@ -1,6 +1,7 @@
 import React from 'react';
 import { Plus, Minus, ArrowLeftRight, Info } from 'lucide-react';
 import { conSaldo, nombreDelMovimiento } from './movimientos';
+import ApartadosKardex from './ApartadosKardex';
 
 const FECHA = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -26,8 +27,9 @@ const HistorialKardex = ({ datos }) => {
                     </div>
                 )}
                 <div className="logistics-drawer-stock">
-                    Stock actual: <strong>{datos.current_stock}</strong>
+                    En bodega: <strong>{datos.current_stock}</strong>
                 </div>
+                <ApartadosKardex apartados={datos.apartados} />
             </div>
 
             {movimientos.length === 0 ? (

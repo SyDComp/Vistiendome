@@ -29,6 +29,7 @@ const DetailDrawer = ({
     onClose, 
     onSelect, 
     onUpdate, 
+    onPedidoCambio,
     onDelete,
     onReorder,
     data: initialData, 
@@ -1174,7 +1175,10 @@ const DetailDrawer = ({
         }
 
         return s;
-    }, [currData, currType, currTitle, currMetadata, editData.price, editData.sale_type, editData.sale_value, editData.sale_start, editData.sale_end, editData.value, editData.hex_code, editData.title, editData.config, editData.name, editData.slug, editData.parent_id, editData.is_filterable, editData.abastecimiento, editData.acepta_personalizacion, editData.suggested_specifications, editData.is_editing, allCategories, allSpecs, loading, isReorderMode, activeSlideIndex, activeLayerIndex]);
+    // Depende de `editData` entero, no de una lista de sus campos: la lista se
+    // escribía a mano y cada campo nuevo que se olvidaba dejaba su selector
+    // mostrando el valor anterior aunque el dato sí cambiara.
+    }, [currData, currType, currTitle, currMetadata, editData, allCategories, allSpecs, loading, isReorderMode, activeSlideIndex, activeLayerIndex]);
 
     // Cálculo memoizado de items para la biblioteca
     const librarySkus = useMemo(() => {
@@ -1772,7 +1776,7 @@ const DetailDrawer = ({
                     )}
                     
                     {currType === 'cotizacion' && currData?.id && (
-                        <SeguimientoPedido key={currData.id} cotizacion={currData} abierto={isOpen} />
+                        <SeguimientoPedido key={currData.id} cotizacion={currData} abierto={isOpen} onCambio={onPedidoCambio} />
                     )}
 
                     {currType === 'cotizacion' && currData?.id && (

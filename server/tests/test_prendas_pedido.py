@@ -144,8 +144,8 @@ def test_un_precio_en_cero_no_existe(client_admin):
 
 
 def test_un_pedido_confirmado_no_se_cotiza(client_admin):
-    pedido = _manual(client_admin)
-    client_admin.put(f"/api/v1/crm/cotizaciones/{pedido['id']}/estado", json={"estado": "CONFIRMADA"})
+    pedido = _manual(client_admin, items=[{"nombre_custom": "Bolero tejido", "precio_unitario_estimado": 5000}])
+    assert client_admin.post(f"/api/v1/crm/cotizaciones/{pedido['id']}/confirmar", json={}).status_code == 200
     url = f"/api/v1/crm/cotizaciones/{pedido['id']}/prendas/{pedido['items'][0]['id']}/precio"
     assert client_admin.put(url, json={"precio": 1000}).status_code == 409
 

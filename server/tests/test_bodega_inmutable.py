@@ -16,9 +16,10 @@ from fastapi import HTTPException
 from sqlmodel import Session, select
 
 from app.api.v1 import catalog_admin
-from app.api.v1.crm import _sincronizar_stock_venta, eliminar_cotizacion
+from app.api.v1.crm import eliminar_cotizacion
 from app.api.v1.taller import _aplicar_finalizacion
 from app.core import existencias, movimientos, retiro_variantes
+from app.core.pedidos import ciclo
 from app.models.catalog import Category, MovementType, Product, SKU, StockMovement
 from app.models.crm import Cotizacion, CotizacionItem, EstadoCotizacion
 from app.models.iam import Persona
@@ -52,17 +53,20 @@ def _pedido(session: Session, sku: SKU, cantidad: int) -> Cotizacion:
     cot = Cotizacion(persona_id=persona.id, numero=40, estado=EstadoCotizacion.CONFIRMADA)
     session.add(cot)
     session.commit()
-    session.add(CotizacionItem(cotizacion_id=cot.id, sku_id=sku.id, cantidad=cantidad))
+    session.add(CotizacionItem(cotizacion_id=cot.id, sku_id=sku.id, cantidad=cantidad, camino=ciclo.BODEGA))
     session.commit()
     session.refresh(cot)
     return cot
 
 
 def _cambiar(session: Session, cot: Cotizacion, nuevo: EstadoCotizacion):
-    anterior = cot.estado
+    """Como la ruta: la bodega se mueve con el pedido todavía en su estado anterior."""
+    if nuevo == EstadoCotizacion.DESPACHADA:
+        ciclo.sacar(session, cot)
+    elif cot.estado == EstadoCotizacion.DESPACHADA:
+        ciclo.devolver(session, cot)
     cot.estado = nuevo
     session.add(cot)
-    _sincronizar_stock_venta(session, cot, anterior, nuevo)
     session.commit()
 
 
@@ -100,14 +104,14 @@ def test_redespachar_no_descuenta_dos_veces(session, catalogo):
     assert len(_movimientos(session, sku)) == 4  # carga, salida, vuelta, salida
 
 
-def test_despachar_sin_existencia_avisa_con_409_y_el_nombre_de_la_variante(session, catalogo):
+def test_despachar_sin_existencia_avisa_y_nombra_la_prenda(session, catalogo):
     sku = catalogo["sku"]
     cot = _pedido(session, sku, 1)
 
-    with pytest.raises(HTTPException) as error:
+    with pytest.raises(ciclo.NoSeDespacha) as error:
         _cambiar(session, cot, EstadoCotizacion.DESPACHADA)
-    assert error.value.status_code == 409
-    assert "NOE-M-CORAL" in error.value.detail
+    assert "Vestido Noemi (M)" in str(error.value)
+    assert _movimientos(session, sku) == []
 
 
 # --- Orden de corte ---------------------------------------------------------

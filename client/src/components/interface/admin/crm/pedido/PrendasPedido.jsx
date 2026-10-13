@@ -5,8 +5,11 @@ import PrendaPedido from './PrendaPedido';
 // Mientras se conversa, el precio se cotiza. Confirmar es aceptarlo.
 const SE_COTIZA = ['NUEVA', 'EN_CONVERSACION'];
 
-/** Las prendas del pedido, su precio y el total dicho entero. Solo pinta. */
-const PrendasPedido = ({ pedido, cargando, error, onReintentar, onCotizada }) => {
+/**
+ * Las prendas del pedido, su precio y el total dicho entero. Solo pinta;
+ * `onConfirmar` abre la confirmación mientras el pedido se conversa.
+ */
+const PrendasPedido = ({ pedido, cargando, error, onReintentar, onCotizada, onConfirmar }) => {
     if (cargando && !pedido) return <p className="sp-aviso" aria-busy="true">Cargando las prendas…</p>;
     if (error && !pedido) {
         return (
@@ -32,6 +35,13 @@ const PrendasPedido = ({ pedido, cargando, error, onReintentar, onCotizada }) =>
                 <span>Total estimado</span>
                 <span>{textoTotal(items)}</span>
             </div>
+            {editable && onConfirmar && (
+                <div className="sp-acciones">
+                    <button type="button" className="sp-boton sp-boton--principal" onClick={onConfirmar}>
+                        Confirmar pedido…
+                    </button>
+                </div>
+            )}
             {!editable && (
                 <p className="sp-nota">El precio se cotiza mientras el pedido está nuevo o en conversación.</p>
             )}
