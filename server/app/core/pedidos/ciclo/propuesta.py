@@ -23,6 +23,7 @@ from sqlmodel import Session
 from ....models.crm import Cotizacion, CotizacionItem
 from ...categorias import SOLO_BODEGA, TALLER as CATEGORIA_TALLER, efectivos, etiqueta
 from ..cotizar import nombre_de_prenda
+from ..prendas import activas
 from .apartado import bodega_de
 from .caminos import APARTADA, BODEGA, ESPERANDO, TALLER
 
@@ -84,7 +85,7 @@ def proponer(db: Session, cotizacion: Cotizacion, elegidos: Optional[Dict[str, s
     apartaron otros no está libre para él.
     """
     elegidos = elegidos or {}
-    items = list(cotizacion.items)
+    items = activas(cotizacion)
     bodega = bodega_de(db, {it.sku_id for it in items if it.sku_id}, excepto_pedido=cotizacion.id)
     restante = {sku_id: b.disponible for sku_id, b in bodega.items()}
 
@@ -93,7 +94,10 @@ def proponer(db: Session, cotizacion: Cotizacion, elegidos: Optional[Dict[str, s
         abastecimiento = _abastecimiento(item)
         disponible = restante.get(item.sku_id) if item.sku_id else None
 
-        if not item.sku_id:
+        if item.pieza_id:
+            # Una pieza única ya existe y ya está apartada: sale de bodega.
+            opciones, propuesto = [BODEGA], BODEGA
+        elif not item.sku_id:
             opciones, propuesto = [TALLER], TALLER
         else:
             opciones = [BODEGA, TALLER]
@@ -110,7 +114,9 @@ def proponer(db: Session, cotizacion: Cotizacion, elegidos: Optional[Dict[str, s
         camino = elegido if elegido in opciones else propuesto
 
         queda = None
-        if camino == BODEGA:
+        if item.pieza_id:
+            queda = APARTADA
+        elif camino == BODEGA:
             queda = APARTADA if disponible >= item.cantidad else ESPERANDO
             # Lo que esta prenda toma ya no está para las siguientes; si
             # espera, las de detrás tampoco se adelantan.

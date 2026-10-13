@@ -8,6 +8,7 @@ from .taller import OrdenCorte, OrdenCorteItem, EstadoOrdenCorte
 from .propuestas import OpcionPropuesta, EstadoPropuesta
 from .historia import PedidoEvento, TipoEvento
 from .ajustes import AjusteNegocio
+from .piezas import PiezaUnica, EstadoPieza
 
 # Para que SQLAlchemy/SQLModel detecte las tablas de la Nueva Arquitectura
 __all__ = [
@@ -17,5 +18,6 @@ __all__ = [
     "Cotizacion", "CotizacionItem", "AnalyticsEvent",
     "OrdenCorte", "OrdenCorteItem", "EstadoOrdenCorte",
     "OpcionPropuesta", "EstadoPropuesta",
-    "PedidoEvento", "TipoEvento", "AjusteNegocio"
+    "PedidoEvento", "TipoEvento", "AjusteNegocio",
+    "PiezaUnica", "EstadoPieza",
 ]

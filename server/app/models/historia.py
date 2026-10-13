@@ -34,6 +34,13 @@ class TipoEvento:
     ORDEN_ELIMINADA = "ORDEN_ELIMINADA"      # {orden, prendas}
     PRENDA_AGREGADA = "PRENDA_AGREGADA"      # {prenda, cantidad, precio}: antes de confirmar
     PRENDA_QUITADA = "PRENDA_QUITADA"        # {prenda, cantidad, precio}: antes de confirmar
+    # Una prenda de un pedido confirmado que no va. {prenda, cantidad, destino}:
+    # destino "bodega" o "piezas" si ya estaba hecha (o "al_terminar" si estaba
+    # en una orden de corte sin terminar); None si no se había hecho nada.
+    PRENDA_CANCELADA = "PRENDA_CANCELADA"
+    # Lo hecho de una prenda cancelada, cuando la orden se termina después:
+    # {prenda, cantidad, destino, orden}.
+    CANCELADA_TERMINADA = "CANCELADA_TERMINADA"
     ELIMINADO = "ELIMINADO"                  # {}
     # Los pedidos anteriores a la historia: la foto de cómo estaban al empezar
     # a anotar. {estado, piezas, cortadas, ordenes}

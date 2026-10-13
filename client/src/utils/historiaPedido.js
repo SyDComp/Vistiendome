@@ -23,6 +23,13 @@ const enFrase = (texto) => (texto ? texto.charAt(0).toUpperCase() + texto.slice(
 const estadoPedido = (estado, modoEntrega) => enFrase(etiquetaEstado(estado, modoEntrega));
 const estadoOrden = (estado) => estiloEstado(estado).label;
 
+/** Adónde fue lo hecho de una prenda cancelada. */
+const DESTINOS = {
+    bodega: 'Ya estaba hecha: entró a bodega',
+    piezas: 'Quedó en Bodega › Piezas únicas',
+    al_terminar: 'Estaba en una orden de corte: irá a bodega o a Piezas únicas cuando se termine',
+};
+
 const MOTIVOS = {
     // Antes se despachaba al imprimir; ahora con un botón en esa misma pantalla.
     etiquetas: 'desde la pantalla de etiquetas de envío',
@@ -69,6 +76,18 @@ export const describirEvento = ({ tipo, datos = {} }, modoEntrega) => {
             return {
                 texto: `Se agregó al pedido: ${datos.cantidad}× ${datos.prenda}`,
                 detalle: `Precio: ${textoPrecio(datos.precio)}`,
+            };
+
+        case 'PRENDA_CANCELADA':
+            return {
+                texto: `Se canceló: ${datos.cantidad}× ${datos.prenda}`,
+                detalle: DESTINOS[datos.destino] || null,
+            };
+
+        case 'CANCELADA_TERMINADA':
+            return {
+                texto: `Orden de corte N° ${datos.orden} terminada con una prenda cancelada: ${datos.cantidad}× ${datos.prenda}`,
+                detalle: DESTINOS[datos.destino] || null,
             };
 
         case 'PRENDA_QUITADA':

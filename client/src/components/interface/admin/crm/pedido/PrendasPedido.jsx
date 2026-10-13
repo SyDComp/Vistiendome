@@ -1,5 +1,6 @@
 import React from 'react';
 import { textoTotal } from '../../../../../utils/precioPrenda';
+import { activas } from '../../../../../utils/cancelarPrenda';
 import AgregarPrenda from './AgregarPrenda';
 import PrendaPedido from './PrendaPedido';
 
@@ -11,7 +12,7 @@ const SE_COTIZA = ['NUEVA', 'EN_CONVERSACION'];
  * pedido se conversa se pueden agregar prendas (`onCotizada` recarga) y
  * `onConfirmar` abre la confirmación.
  */
-const PrendasPedido = ({ pedido, cargando, error, onReintentar, onCotizada, onConfirmar }) => {
+const PrendasPedido = ({ pedido, cargando, error, onReintentar, onCotizada, onConfirmar, onCambio }) => {
     if (cargando && !pedido) return <p className="sp-aviso" aria-busy="true">Cargando las prendas…</p>;
     if (error && !pedido) {
         return (
@@ -40,13 +41,14 @@ const PrendasPedido = ({ pedido, cargando, error, onReintentar, onCotizada, onCo
         <>
             <ul className="sp-prendas">
                 {items.map(prenda => (
-                    <PrendaPedido key={prenda.id} pedidoId={pedido.id} prenda={prenda}
-                        editable={editable} onCotizada={onCotizada} />
+                    <PrendaPedido key={prenda.id} pedido={pedido} prenda={prenda}
+                        editable={editable} onCotizada={onCotizada} onCambio={onCambio} />
                 ))}
             </ul>
             <div className="sp-total">
                 <span>Total estimado</span>
-                <span>{textoTotal(items)}</span>
+                {/* Lo cancelado no se cobra. */}
+                <span>{textoTotal(activas(items))}</span>
             </div>
             {editable && (
                 <div className="sp-acciones sp-acciones--separadas">

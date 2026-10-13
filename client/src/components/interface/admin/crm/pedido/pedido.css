@@ -356,3 +356,15 @@
     font-size: 0.85rem;
     color: var(--color-warning-darkest);
 }
+
+/* Una prenda cancelada no se borra: se ve tachada. */
+.sp-prenda--cancelada .sp-prenda-nombre,
+.sp-prenda--cancelada .sp-prenda-monto {
+    text-decoration: line-through;
+    color: var(--color-text-muted);
+}
+
+.sp-camino--cancelada {
+    border-color: var(--color-error-border-strong);
+    color: var(--color-error-deep);
+}

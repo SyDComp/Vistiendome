@@ -19,7 +19,7 @@ from app.api.v1 import catalog_admin
 from app.api.v1.crm import eliminar_cotizacion
 from app.api.v1.taller import _aplicar_finalizacion
 from app.core import existencias, movimientos, retiro_variantes
-from app.core.pedidos import ciclo
+from app.core.pedidos import ciclo, historia
 from app.models.catalog import Category, MovementType, Product, SKU, StockMovement
 from app.models.crm import Cotizacion, CotizacionItem, EstadoCotizacion
 from app.models.iam import Persona
@@ -125,9 +125,9 @@ def test_reabrir_una_orden_finalizada_agrega_una_salida_y_no_borra(session, cata
     session.commit()
     session.refresh(orden)
 
-    _aplicar_finalizacion(session, orden, finalizando=True)
-    _aplicar_finalizacion(session, orden, finalizando=True)  # repetir no suma dos veces
-    _aplicar_finalizacion(session, orden, finalizando=False)
+    _aplicar_finalizacion(session, orden, finalizando=True, actor=historia.SITIO_WEB)
+    _aplicar_finalizacion(session, orden, finalizando=True, actor=historia.SITIO_WEB)  # repetir no suma dos veces
+    _aplicar_finalizacion(session, orden, finalizando=False, actor=historia.SITIO_WEB)
     session.commit()
 
     tipos = [(m.type, m.quantity) for m in _movimientos(session, sku)]

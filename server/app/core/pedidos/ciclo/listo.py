@@ -8,8 +8,8 @@ Un pedido confirmado está listo cuando cada prenda tiene con qué salir:
     Personalizadas incluidas: antes solo se contaban las del catálogo, y un
     pedido podía figurar "listo" con una personalizada sin hacer.
 
-Lo que falta se dice prenda por prenda: quien despacha necesita saber de una
-vez todo lo que falta, no descubrirlo de a uno.
+Las canceladas no cuentan. Lo que falta se dice prenda por prenda: quien
+despacha necesita saber de una vez todo lo que falta, no descubrirlo de a uno.
 """
 
 from dataclasses import dataclass, field
@@ -17,6 +17,7 @@ from typing import Dict, List
 
 from ....models.crm import Cotizacion, EstadoCotizacion
 from ..cotizar import nombre_de_prenda
+from ..prendas import activas
 from .caminos import BODEGA, ESPERANDO, TALLER
 
 
@@ -37,7 +38,8 @@ def avance(cotizacion: Cotizacion, en_bodega: Dict[str, str]) -> Avance:
     pedido confirmado: antes no hay nada que preparar, y después ya salió.
     """
     a = Avance()
-    for item in cotizacion.items:
+    prendas = activas(cotizacion)
+    for item in prendas:
         if item.camino == TALLER:
             a.taller += 1
             a.hechas += 1 if item.cortado else 0
@@ -48,7 +50,7 @@ def avance(cotizacion: Cotizacion, en_bodega: Dict[str, str]) -> Avance:
     if EstadoCotizacion(getattr(cotizacion.estado, "value", cotizacion.estado)) != EstadoCotizacion.CONFIRMADA:
         return a
 
-    for item in cotizacion.items:
+    for item in prendas:
         nombre = nombre_de_prenda(item)
         if item.camino == TALLER and not item.cortado:
             a.falta.append(f"{nombre}: por hacer en el taller")
@@ -56,5 +58,5 @@ def avance(cotizacion: Cotizacion, en_bodega: Dict[str, str]) -> Avance:
             a.falta.append(f"{nombre}: esperando que llegue a bodega")
         elif item.camino is None:
             a.falta.append(f"{nombre}: sin decidir de dónde sale")
-    a.listo = bool(cotizacion.items) and not a.falta
+    a.listo = bool(prendas) and not a.falta
     return a

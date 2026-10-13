@@ -33,3 +33,14 @@ export const quitarPrenda = (pedidoId, prendaId) =>
  */
 export const agregarPrenda = (pedidoId, prenda) =>
     post(`/api/v1/crm/cotizaciones/${pedidoId}/prendas`, prenda);
+
+/**
+ * Cancela una prenda de un pedido confirmado. Devuelve el pedido: si no le
+ * queda ninguna prenda, la pantalla pregunta si se cancela entero.
+ */
+export const cancelarPrenda = (pedidoId, prendaId) =>
+    post(`/api/v1/crm/cotizaciones/${pedidoId}/prendas/${prendaId}/cancelar`, {});
+
+/** Los pedidos en esos estados (por ejemplo ['NUEVA', 'EN_CONVERSACION']). */
+export const listarCotizaciones = (estados = []) =>
+    get(`/api/v1/crm/${estados.length ? '?' + estados.map(e => `estado=${e}`).join('&') : ''}`);

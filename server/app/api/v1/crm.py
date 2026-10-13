@@ -10,12 +10,14 @@ from app.models.iam import Persona, TipoPersona, Direccion, CuentaAcceso
 from app.models.catalog import StockMovement
 from app.models.taller import OrdenCorte, OrdenCorteItem, EstadoOrdenCorte
 from app.api.deps import get_current_user, RequirePermiso
-from app.core.pedidos import ciclo
+from app.core.pedidos import cancelar, ciclo
 from app.core import pedidos as pedidos_core
 from app.core.pedidos import historia
 from app.models.historia import TipoEvento
 from app.core.limites import VentanaDeslizante
 from app.models.propuestas import OpcionPropuesta
+from app.models.piezas import EstadoPieza
+from app.core import piezas as piezas_core
 
 router = APIRouter()
 
@@ -81,6 +83,10 @@ class CotizacionItemRead(BaseModel):
     # las marca para que no se confundan con las del catalogo.
     config_propuesta: dict = {}
     cortado: bool = False
+    # Si se canceló: sigue en el pedido, tachada (ver core/pedidos/cancelar.py).
+    cancelada_en: Optional[datetime] = None
+    # Si es una pieza única de la bodega, su número.
+    pieza_numero: Optional[int] = None
     # BODEGA o TALLER desde que se confirma (ver core/pedidos/ciclo/).
     camino: Optional[str] = None
     # Si va por bodega y el pedido está confirmado: APARTADA o ESPERANDO.
@@ -146,6 +152,7 @@ class CotizacionRead(BaseModel):
 
 def _get_item_read(it: CotizacionItem) -> CotizacionItemRead:
     it_dict = it.dict()
+    it_dict["pieza_numero"] = it.pieza.numero if it.pieza is not None else None
     # Siempre un dict: el modelo lo trae en None cuando la pieza viene del
     # catalogo, y el schema espera un diccionario. Sin esto reventaba la
     # lista COMPLETA de cotizaciones, no solo las personalizadas.
@@ -433,6 +440,10 @@ def actualizar_estado_cotizacion(cotizacion_id: str, data: EstadoUpdate, session
                 ciclo.devolver(session, cotizacion)
         except ciclo.NoSeDespacha as e:
             raise HTTPException(status_code=409, detail=str(e))
+        if data.estado == EstadoCotizacion.CANCELADA:
+            # Cada prenda se cancela con su regla: lo hecho va a bodega o a
+            # Piezas únicas, nada queda en el limbo.
+            cancelar.cancelar_pedido(session, cotizacion, historia.de_cuenta(current_admin))
         ciclo.al_cambiar(cotizacion, data.estado)
         cotizacion.estado = data.estado
         session.add(cotizacion)
@@ -545,6 +556,10 @@ def eliminar_cotizacion(
     # sigue diciendo de qué pedido eran.
     historia.anotar(db, cot, TipoEvento.ELIMINADO, historia.de_cuenta(admin))
     for it in items:
+        # Una pieza única asignada vuelve a estar disponible.
+        if it.pieza is not None and it.pieza.estado == EstadoPieza.APARTADA:
+            piezas_core.liberar(it.pieza)
+            db.add(it.pieza)
         db.delete(it)
     db.delete(cot)
     db.commit()

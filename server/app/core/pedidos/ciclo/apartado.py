@@ -24,6 +24,7 @@ from sqlmodel import Session, select
 
 from ....models.crm import Cotizacion, CotizacionItem, EstadoCotizacion
 from ...existencias import existencias_de
+from ..prendas import activas
 from .caminos import APARTADA, BODEGA, ESPERANDO
 
 
@@ -48,6 +49,7 @@ def _comprometidas(db: Session, sku_ids, excepto: Optional[str]) -> List[Tuple[C
         .join(Cotizacion, CotizacionItem.cotizacion_id == Cotizacion.id)
         .where(
             CotizacionItem.camino == BODEGA,
+            CotizacionItem.cancelada_en.is_(None),
             CotizacionItem.sku_id.in_(sku_ids),
             Cotizacion.estado == EstadoCotizacion.CONFIRMADA,
         )
@@ -91,13 +93,18 @@ def bodega_de(db: Session, sku_ids: Iterable[int], excepto_pedido: Optional[str]
 
 
 def estado_en_bodega(db: Session, cotizaciones: Iterable[Cotizacion]) -> Dict[str, str]:
-    """`{prenda_id: APARTADA o ESPERANDO}` de las prendas por bodega de esos pedidos confirmados."""
-    sku_ids = {
-        it.sku_id
+    """
+    `{prenda_id: APARTADA o ESPERANDO}` de las prendas por bodega de esos
+    pedidos confirmados. Una pieza única siempre está apartada: es una sola, y
+    se apartó al asignarla.
+    """
+    por_bodega = [
+        it
         for c in cotizaciones if c.estado == EstadoCotizacion.CONFIRMADA
-        for it in c.items if it.camino == BODEGA and it.sku_id
-    }
-    estados: Dict[str, str] = {}
+        for it in activas(c) if it.camino == BODEGA
+    ]
+    sku_ids = {it.sku_id for it in por_bodega if it.sku_id}
+    estados: Dict[str, str] = {it.id: APARTADA for it in por_bodega if it.pieza_id}
     for b in bodega_de(db, sku_ids).values():
         for item, _, estado in b.lineas:
             estados[item.id] = estado

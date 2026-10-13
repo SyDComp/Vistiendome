@@ -10,6 +10,7 @@ import { getSaldosKardex, getHistorialKardex } from '../../../../lib/api/endpoin
 import HistorialKardex from './kardex/HistorialKardex';
 import { textoDisponible } from './kardex/apartado';
 import MovimientoModal from './kardex/MovimientoModal';
+import PiezasUnicas from './kardex/PiezasUnicas';
 
 const LogisticsManager = () => {
     const { toast } = useNotification();
@@ -186,6 +187,8 @@ const LogisticsManager = () => {
                     </div>
                 )}
             />
+
+            <PiezasUnicas />
 
             {varianteAMover && (
                 <MovimientoModal

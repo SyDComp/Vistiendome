@@ -16,6 +16,7 @@ Por dónde puede pasar un pedido, y qué se deshace al volver atrás.
 from typing import Optional
 
 from ....models.crm import Cotizacion, EstadoCotizacion as E
+from ..prendas import activas
 
 _PERMITIDOS = {
     E.NUEVA: {E.EN_CONVERSACION, E.CANCELADA},
@@ -46,5 +47,5 @@ def al_cambiar(cotizacion: Cotizacion, a: E) -> None:
     """Lo que el cambio a `a` deshace en el pedido. No hace commit."""
     if E(a) in _SIN_CONFIRMAR:
         cotizacion.confirmada_en = None
-        for item in cotizacion.items:
+        for item in activas(cotizacion):
             item.camino = None

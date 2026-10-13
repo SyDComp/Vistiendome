@@ -50,7 +50,7 @@ def cotizar(
 ) -> Optional[float]:
     """Deja el precio y lo anota. Devuelve el precio guardado. No hace commit."""
     estado = EstadoCotizacion(getattr(cotizacion.estado, "value", cotizacion.estado))
-    if estado not in ESTADOS_QUE_SE_COTIZAN:
+    if estado not in ESTADOS_QUE_SE_COTIZAN or item.cancelada_en is not None:
         raise NoSeCotiza()
 
     nuevo = precios.normalizar(precio, sin_costo)

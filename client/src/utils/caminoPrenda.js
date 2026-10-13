@@ -11,6 +11,7 @@ export const CAMINOS = { BODEGA: 'Bodega', TALLER: 'Taller' };
 /** Dónde está una prenda de un pedido confirmado, dicho corto. Null si no tiene camino. */
 export const textoCamino = (prenda) => {
     if (prenda?.camino === 'BODEGA') {
+        if (prenda.pieza_numero) return `Bodega · pieza única N° ${prenda.pieza_numero}`;
         return prenda.en_bodega === 'ESPERANDO' ? 'Bodega · esperando que llegue' : 'Bodega · apartada';
     }
     if (prenda?.camino === 'TALLER') return prenda.cortado ? 'Taller · hecha' : 'Taller';

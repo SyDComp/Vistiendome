@@ -102,3 +102,18 @@ describe('confirmar y quitar prendas', () => {
         expect(texto).toBe('Se quitó del pedido: 2× Cinturón (M)');
     });
 });
+
+describe('prendas canceladas', () => {
+    it('dice adónde fue lo hecho', () => {
+        const ev = describirEvento({ tipo: 'PRENDA_CANCELADA', datos: { prenda: 'Bolero (M)', cantidad: 2, destino: 'piezas' } });
+        expect(ev).toEqual({ texto: 'Se canceló: 2× Bolero (M)', detalle: 'Quedó en Bodega › Piezas únicas' });
+        expect(describirEvento({ tipo: 'PRENDA_CANCELADA', datos: { prenda: 'X', cantidad: 1, destino: null } }).detalle).toBeNull();
+    });
+
+    it('lo que se terminó después de cancelarse', () => {
+        const ev = describirEvento({ tipo: 'CANCELADA_TERMINADA', datos: { prenda: 'Vestido (M)', cantidad: 1, destino: 'bodega', orden: 7 } });
+        expect(ev.texto).toBe('Orden de corte N° 7 terminada con una prenda cancelada: 1× Vestido (M)');
+        expect(ev.detalle).toBe('Ya estaba hecha: entró a bodega');
+    });
+});
+

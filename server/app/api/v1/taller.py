@@ -25,7 +25,7 @@ from app.models.catalog import SKU, MovementType
 from app.models.iam import CuentaAcceso
 from app.api.deps import RequirePermiso
 from app.core import movimientos as movimientos_core
-from app.core.pedidos import ciclo, historia
+from app.core.pedidos import cancelar, ciclo, historia
 from app.models.historia import TipoEvento
 
 router = APIRouter()
@@ -173,6 +173,8 @@ def piezas_pendientes(
         select(CotizacionItem)
         .join(Cotizacion, CotizacionItem.cotizacion_id == Cotizacion.id)
         .where(or_(CotizacionItem.camino.is_(None), CotizacionItem.camino != ciclo.BODEGA))
+        # Ni lo cancelado ni una pieza única: no hay nada que hacer.
+        .where(CotizacionItem.cancelada_en.is_(None), CotizacionItem.pieza_id.is_(None))
     )
     if estado and estado != "TODAS":
         query = query.where(Cotizacion.estado == estado)
@@ -269,7 +271,7 @@ def crear(data: OrdenCrear, db: Session = Depends(get_session), admin: CuentaAcc
     return _salida(orden, db)
 
 
-def _aplicar_finalizacion(db: Session, orden: OrdenCorte, finalizando: bool) -> None:
+def _aplicar_finalizacion(db: Session, orden: OrdenCorte, finalizando: bool, actor: historia.Actor) -> None:
     """
     Cierra (o revierte) el efecto de finalizar una orden.
 
@@ -284,6 +286,10 @@ def _aplicar_finalizacion(db: Session, orden: OrdenCorte, finalizando: bool) -> 
             if cot_item:
                 cot_item.cortado = finalizando
                 db.add(cot_item)
+                # Si esa prenda se canceló mientras se hacía, lo hecho va a
+                # bodega o a Piezas únicas (ver core/pedidos/cancelar.py).
+                if cot_item.cancelada_en is not None:
+                    cancelar.al_terminar_la_orden(db, cot_item, finalizando, orden.numero, actor)
             continue
 
         # Para stock: las unidades producidas entran al inventario. Sin
@@ -316,7 +322,7 @@ def cambiar_estado(orden_id: str, data: EstadoEntrada, db: Session = Depends(get
     entra = nuevo == EstadoOrdenCorte.FINALIZADA and anterior != EstadoOrdenCorte.FINALIZADA
     sale = anterior == EstadoOrdenCorte.FINALIZADA and nuevo != EstadoOrdenCorte.FINALIZADA
     if entra or sale:
-        _aplicar_finalizacion(db, orden, finalizando=entra)
+        _aplicar_finalizacion(db, orden, finalizando=entra, actor=historia.de_cuenta(admin))
 
     historia.anotar_en_sus_pedidos(
         db, orden, TipoEvento.ORDEN_ESTADO, historia.de_cuenta(admin),

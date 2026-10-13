@@ -23,6 +23,7 @@ from ....models.historia import TipoEvento
 from ..historia import Actor, anotar
 from .caminos import BODEGA, ESPERANDO, TALLER
 from .propuesta import PrendaPropuesta, proponer
+from ..prendas import activas
 
 SE_CONFIRMAN = {EstadoCotizacion.NUEVA, EstadoCotizacion.EN_CONVERSACION}
 
@@ -84,7 +85,7 @@ def confirmar(
     if EstadoCotizacion(getattr(cotizacion.estado, "value", cotizacion.estado)) not in SE_CONFIRMAN:
         raise NoSeConfirma("Solo se confirma un pedido nuevo o en conversación.")
 
-    sku_ids =sorted({it.sku_id for it in cotizacion.items if it.sku_id})
+    sku_ids = sorted({it.sku_id for it in activas(cotizacion) if it.sku_id})
     if sku_ids:
         # En orden de id: dos confirmaciones que bloquean las mismas variantes
         # en distinto orden se trabarían entre ellas.

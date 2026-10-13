@@ -8,3 +8,4 @@ export * from './kardex.api.js';
 export * from './historiaPedido.api.js';
 export * from './ajustesNegocio.api.js';
 export * from './pedido.api.js';
+export * from './piezas.api.js';

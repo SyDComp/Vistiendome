@@ -7,6 +7,8 @@
  * confirmar de nuevo se vuelve a decidir de dónde sale cada prenda.
  */
 
+import { activas } from './cancelarPrenda';
+
 const VUELVE = ['NUEVA', 'EN_CONVERSACION'];
 
 const prendas = (n) => (n === 1 ? '1 prenda' : `${n} prendas`);
@@ -17,7 +19,7 @@ export const avisoVolverAtras = (pedido, destino) => {
     const cancela = destino === 'CANCELADA';
     if (!cancela && !VUELVE.includes(destino)) return null;
 
-    const items = pedido.items || [];
+    const items = activas(pedido.items);
     const hechas = items.filter(i => i.cortado).length;
     const apartadas = items.filter(i => i.camino === 'BODEGA').length;
     const ordenes = (pedido.produccion?.ordenes || []).map(o => o.numero);
@@ -30,7 +32,11 @@ export const avisoVolverAtras = (pedido, destino) => {
     if (apartadas) {
         partes.push(`Lo apartado en bodega (${prendas(apartadas)}) queda libre para otros pedidos.`);
     }
-    if (hechas) partes.push('Lo ya hecho no se pierde: sigue guardado para este pedido.');
+    if (hechas) {
+        partes.push(cancela
+            ? 'Lo ya hecho no se pierde: lo del catálogo entra a bodega y lo personalizado queda en Bodega › Piezas únicas.'
+            : 'Lo ya hecho no se pierde: sigue guardado para este pedido.');
+    }
     if (!cancela) partes.push('Al confirmar de nuevo se vuelve a decidir de dónde sale cada prenda.');
     partes.push(cancela ? '¿Cancelar el pedido?' : '¿Volver atrás?');
     return partes.join(' ');

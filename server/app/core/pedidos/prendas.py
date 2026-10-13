@@ -72,3 +72,12 @@ def prenda_desde(session: Session, entrada, permitir_sin_costo: bool) -> Dict:
         vigente, _, _ = compute_effective_price(exacta, producto)  # con la hora de Chile, como el catálogo
         campos["precio_unitario_estimado"] = precios.normalizar(vigente)
     return campos
+
+
+def activas(cotizacion) -> list:
+    """
+    Las prendas que siguen en pedido: las canceladas se ven (tachadas) pero ya
+    no apartan, no se hacen, no se cobran ni salen. Todo cálculo del ciclo
+    parte de acá.
+    """
+    return [item for item in cotizacion.items if item.cancelada_en is None]

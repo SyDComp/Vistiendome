@@ -25,6 +25,13 @@ describe('avisoVolverAtras', () => {
         expect(avisoVolverAtras(confirmado, 'CANCELADA').endsWith('¿Cancelar el pedido?')).toBe(true);
     });
 
+    it('al cancelar dice adónde va lo hecho, y no cuenta lo ya cancelado', () => {
+        const conCancelada = { ...confirmado, items: [...confirmado.items, { camino: 'TALLER', cortado: true, cancelada_en: 'x' }] };
+        const aviso = avisoVolverAtras(conCancelada, 'CANCELADA');
+        expect(aviso).toContain('1 de 3 prendas hechas');
+        expect(aviso).toContain('lo personalizado queda en Bodega › Piezas únicas');
+    });
+
     it('sin nada hecho igual avisa que se vuelve a decidir', () => {
         const aviso = avisoVolverAtras({ estado: 'CONFIRMADA', items: [{ camino: 'TALLER' }] }, 'NUEVA');
         expect(aviso).toBe('Al confirmar de nuevo se vuelve a decidir de dónde sale cada prenda. ¿Volver atrás?');

@@ -61,6 +61,7 @@ const SeguimientoPedido = ({ cotizacion, abierto = true, onCambio }) => {
                     onReintentar={fresco.recargar}
                     onCotizada={alCotizar}
                     onConfirmar={() => setConfirmando(true)}
+                    onCambio={alSalir}
                 />
             </Seccion>
             {sale && (

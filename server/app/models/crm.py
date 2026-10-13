@@ -223,7 +223,21 @@ class CotizacionItem(SQLModel, table=True):
     # Nulo mientras el pedido no está confirmado. Ver core/pedidos/ciclo/.
     camino: Optional[str] = Field(default=None, max_length=10)
 
+    # Cuándo se canceló, si se canceló. La prenda no se borra: sigue en el
+    # pedido, tachada, y su historia también. No se deshace: si hace falta, se
+    # agrega de nuevo. Ver core/pedidos/cancelar.py.
+    cancelada_en: Optional[datetime] = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )
+
+    # Si la prenda es una pieza única de la bodega (ver models/piezas.py): sale
+    # de ahí, apartada desde que se asigna.
+    pieza_id: Optional[str] = Field(default=None, foreign_key="piezas_unicas.id", max_length=26)
+
     # Relationships
     cotizacion: Cotizacion = Relationship(back_populates="items")
     sku: Optional["SKU"] = Relationship(back_populates="cotizacion_items")
     producto: Optional["Product"] = Relationship()
+    # Hay dos claves entre prendas y piezas (de dónde salió una pieza, y qué
+    # pieza es una prenda): se dice cuál es esta.
+    pieza: Optional["PiezaUnica"] = Relationship(sa_relationship_kwargs={"foreign_keys": "[CotizacionItem.pieza_id]"})

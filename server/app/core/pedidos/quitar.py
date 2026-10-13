@@ -15,6 +15,8 @@ from sqlmodel import Session, select
 from ...models.catalog import StockMovement
 from ...models.crm import Cotizacion, CotizacionItem, EstadoCotizacion
 from ...models.historia import TipoEvento
+from ...models.piezas import PiezaUnica
+from .. import piezas
 from ...models.taller import OrdenCorte, OrdenCorteItem
 from .cotizar import ESTADOS_QUE_SE_COTIZAN, nombre_de_prenda
 from .historia import Actor, anotar
@@ -48,4 +50,9 @@ def quitar(db: Session, cotizacion: Cotizacion, item: CotizacionItem, actor: Act
         raise NoSeQuita(motivo)
     anotar(db, cotizacion, TipoEvento.PRENDA_QUITADA, actor,
            prenda=nombre_de_prenda(item), cantidad=item.cantidad, precio=item.precio_unitario_estimado)
+    # Una pieza única asignada vuelve a estar disponible.
+    if item.pieza_id:
+        pieza = db.get(PiezaUnica, item.pieza_id)
+        piezas.liberar(pieza)
+        db.add(pieza)
     db.delete(item)

@@ -15,7 +15,9 @@ from sqlmodel import Session
 
 from ....models.catalog import MovementType
 from ....models.crm import Cotizacion
-from ... import movimientos
+from ....models.piezas import PiezaUnica
+from ... import movimientos, piezas
+from ..prendas import activas
 from .apartado import estado_en_bodega
 from .caminos import BODEGA
 from .listo import avance
@@ -33,7 +35,12 @@ def sacar(db: Session, cotizacion: Cotizacion) -> None:
     a = avance(cotizacion, estado_en_bodega(db, [cotizacion]))
     if not a.listo:
         raise NoSeDespacha(f"Todavía no está listo para salir. Falta: {'; '.join(a.falta)}.")
-    for item in cotizacion.items:
+    for item in activas(cotizacion):
+        if item.pieza_id:
+            pieza = db.get(PiezaUnica, item.pieza_id)
+            piezas.vender(pieza)
+            db.add(pieza)
+            continue
         if item.camino != BODEGA or not item.sku_id:
             continue
         movimientos.llevar_a(
@@ -48,9 +55,16 @@ def devolver(db: Session, cotizacion: Cotizacion) -> None:
     Deshace el despacho: devuelve lo que cada prenda sacó.
 
     Todas las prendas, no solo las de bodega: los pedidos despachados antes de
-    que existieran los caminos descontaron todo, y eso también se devuelve.
+    que existieran los caminos descontaron todo, y eso también se devuelve. Las
+    canceladas no: no salieron (y si estaban hechas, lo que entró a bodega se
+    queda ahí).
     """
-    for item in cotizacion.items:
+    for item in activas(cotizacion):
+        if item.pieza_id:
+            pieza = db.get(PiezaUnica, item.pieza_id)
+            piezas.devolver(pieza)
+            db.add(pieza)
+            continue
         if not item.sku_id:
             continue
         movimientos.llevar_a(
