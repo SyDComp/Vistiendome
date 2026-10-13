@@ -9,8 +9,8 @@ import { ESTADOS_PIEZA, detallePieza, dondePieza } from './piezas';
 import '../../crm/pedido/pedido.css';
 
 /**
- * Bodega › Piezas únicas: prendas personalizadas ya hechas cuyo pedido se
- * canceló. No son una variante del catálogo, pero existen: se asignan a otro
+ * Bodega › Piezas únicas: prendas personalizadas que ya estaban hechas cuando
+ * se cancelaron.No son una variante del catálogo, pero existen: se asignan a otro
  * pedido o se dan de baja (con nota). Ver models/piezas.py en el servidor.
  */
 const PiezasUnicas = () => {
@@ -37,7 +37,7 @@ const PiezasUnicas = () => {
         <section className="logistics-piezas" aria-labelledby="piezas-titulo">
             <h2 id="piezas-titulo" className="logistics-piezas-titulo">Piezas únicas</h2>
             <p className="logistics-piezas-ayuda">
-                Prendas personalizadas ya hechas cuyo pedido se canceló. Se pueden agregar a otro pedido.
+                Prendas personalizadas que ya estaban hechas cuando se cancelaron. Se pueden agregar a otro pedido.
             </p>
 
             {error && (

@@ -27,5 +27,5 @@ export const dondePieza = (pieza) => {
     if (pieza.estado === 'APARTADA' && pieza.pedido_numero) return `Apartada para el pedido N° ${pieza.pedido_numero}`;
     if (pieza.estado === 'VENDIDA' && pieza.pedido_numero) return `Salió con el pedido N° ${pieza.pedido_numero}`;
     if (pieza.estado === 'BAJA') return pieza.nota ? `Baja: ${pieza.nota}` : 'Dada de baja';
-    return pieza.origen_pedido_numero ? `Hecha para el pedido N° ${pieza.origen_pedido_numero}, que se canceló` : null;
+    return pieza.origen_pedido_numero ? `Se hizo para el pedido N° ${pieza.origen_pedido_numero} y se canceló` : null;
 };

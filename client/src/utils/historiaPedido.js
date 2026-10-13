@@ -108,7 +108,10 @@ export const describirEvento = ({ tipo, datos = {} }, modoEntrega) => {
             };
 
         case 'ORDEN_AGREGADA':
-            return { texto: `${prendas(datos.prendas)} entraron a la orden de corte N° ${datos.orden}`, detalle: null };
+            return {
+                texto: `${prendas(datos.prendas)} ${datos.prendas === 1 ? 'entró' : 'entraron'} a la orden de corte N° ${datos.orden}`,
+                detalle: null,
+            };
 
         case 'ORDEN_ESTADO':
             if (datos.a === 'FINALIZADA') {

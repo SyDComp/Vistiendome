@@ -15,7 +15,7 @@ const CancelarPrenda = ({ pedido, prenda, onCambio }) => {
     const [enviando, setEnviando] = useState(false);
 
     const cancelar = async () => {
-        if (!await confirm(avisoCancelarPrenda(prenda, pedido))) return;
+        if (!await confirm(avisoCancelarPrenda(prenda, pedido), { si: 'Sí, cancelar la prenda', no: 'No' })) return;
         setEnviando(true);
         try {
             let actualizado = await cancelarPrenda(pedido.id, prenda.id);
@@ -23,7 +23,8 @@ const CancelarPrenda = ({ pedido, prenda, onCambio }) => {
             if (!activas(actualizado.items).length) {
                 const entero = await confirm(
                     'Era la única prenda que quedaba. ¿Cancelar el pedido entero? '
-                    + 'Si no, vuelve a «En conversación» para agregar otras prendas.'
+                    + 'Si no, vuelve a «En conversación» para agregar otras prendas.',
+                    { si: 'Sí, cancelar el pedido', no: 'No, seguir conversando' }
                 );
                 actualizado = await actualizarEstadoCotizacion(pedido.id, entero ? 'CANCELADA' : 'EN_CONVERSACION');
                 toast.success(entero ? 'Pedido cancelado' : 'El pedido volvió a «En conversación»');

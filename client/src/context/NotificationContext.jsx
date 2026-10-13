@@ -28,9 +28,12 @@ export const NotificationProvider = ({ children }) => {
     };
 
     // --- DIALOGS (Confirm/Prompt) ---
-    const confirm = useCallback((message) => {
+    // `si` y `no`: lo que dicen los botones, cuando "Confirmar" y "Cancelar"
+    // no alcanzan. Frente a "¿Cancelar el pedido entero?", un botón que dice
+    // "Cancelar" no deja claro si cancela el pedido o la pregunta.
+    const confirm = useCallback((message, { si, no } = {}) => {
         return new Promise((resolve) => {
-            setDialog({ type: 'confirm', message, resolve });
+            setDialog({ type: 'confirm', message, resolve, si, no });
         });
     }, []);
 
@@ -101,7 +104,7 @@ export const NotificationProvider = ({ children }) => {
                                 className="btn-confirm secondary" 
                                 onClick={() => handleDialogAction(null)}
                             >
-                                Cancelar
+                                {dialog.no || 'Cancelar'}
                             </button>
                             <button 
                                 className="btn-confirm primary" 
@@ -113,7 +116,7 @@ export const NotificationProvider = ({ children }) => {
                                     }
                                 }}
                             >
-                                {dialog.type === 'prompt' ? 'Aceptar' : 'Confirmar'}
+                                {dialog.si || (dialog.type === 'prompt' ? 'Aceptar' : 'Confirmar')}
                             </button>
                         </div>
                     </div>

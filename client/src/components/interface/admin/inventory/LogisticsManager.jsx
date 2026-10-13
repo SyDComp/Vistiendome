@@ -155,6 +155,9 @@ const LogisticsManager = () => {
                 description="Control de inventario basado en eventos. Todos los movimientos son inmutables y trazables."
             />
 
+            {/* Arriba de la tabla: abajo de mil variantes nadie la encontraría. */}
+            <PiezasUnicas />
+
             <FilterBar
                 searchPlaceholder="Buscar por SKU, producto, talla, color..."
                 onSearchChange={setSearchTerm}
@@ -187,8 +190,6 @@ const LogisticsManager = () => {
                     </div>
                 )}
             />
-
-            <PiezasUnicas />
 
             {varianteAMover && (
                 <MovimientoModal
