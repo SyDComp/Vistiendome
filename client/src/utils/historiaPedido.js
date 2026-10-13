@@ -35,6 +35,7 @@ const DESTINOS = {
 const MOTIVOS = {
     // Antes se despachaba al imprimir; ahora con un botón en esa misma pantalla.
     etiquetas: 'desde la pantalla de etiquetas de envío',
+    venta_local: 'venta en el local: se pagó y se entregó en el momento',
     deshacer_etiquetas: 'se deshizo el despacho hecho al imprimir etiquetas',
 };
 

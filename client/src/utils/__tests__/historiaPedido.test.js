@@ -131,3 +131,10 @@ describe('fecha comprometida', () => {
     });
 });
 
+describe('venta en el local', () => {
+    it('la entrega dice que fue una venta en el local', () => {
+        const ev = describirEvento({ tipo: 'ESTADO', datos: { de: 'CONFIRMADA', a: 'DESPACHADA', motivo: 'venta_local' } }, 'RETIRO');
+        expect(ev.detalle).toBe('Venta en el local: se pagó y se entregó en el momento');
+    });
+});
+
