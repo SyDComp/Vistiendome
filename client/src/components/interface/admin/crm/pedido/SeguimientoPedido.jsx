@@ -4,6 +4,7 @@ import useHistoriaPedido from '../../../../../hooks/useHistoriaPedido';
 import usePedido from '../../../../../hooks/usePedido';
 import { canalSegunHistoria } from '../../../../../utils/historiaPedido';
 import CanalPedido from './CanalPedido';
+import FechaPedido from './FechaPedido';
 import ConfirmarPedido from './confirmar/ConfirmarPedido';
 import HistoriaPedido from './HistoriaPedido';
 import PrendasPedido from './PrendasPedido';
@@ -66,6 +67,7 @@ const SeguimientoPedido = ({ cotizacion, abierto = true, onCambio }) => {
             </Seccion>
             {sale && (
                 <Seccion icono={<Truck size={18} />} titulo={fresco.pedido.modo_entrega === 'RETIRO' ? 'Entrega' : 'Despacho'}>
+                    <FechaPedido pedido={fresco.pedido} onCambio={alSalir} />
                     <SalidaPedido pedido={fresco.pedido} onCambio={alSalir} />
                 </Seccion>
             )}

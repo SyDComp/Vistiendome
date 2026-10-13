@@ -368,3 +368,36 @@
     border-color: var(--color-error-border-strong);
     color: var(--color-error-deep);
 }
+
+/* La fecha comprometida: atrasada en rojo, por vencer en amarillo. */
+.sp-fecha {
+    display: grid;
+    gap: 0.4rem;
+    justify-items: start;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border-strong);
+}
+
+.sp-fecha-linea {
+    margin: 0;
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+    flex-wrap: wrap;
+    color: var(--color-text-secondary);
+}
+
+.sp-fecha-valor {
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.sp-fecha-detalle {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.sp-fecha-valor--atrasado { color: var(--color-error-deep); }
+.sp-fecha-valor--pronto { color: var(--color-warning-deep); }
+.sp-fecha-valor--sin { color: var(--color-text-muted); font-weight: 400; font-style: italic; }

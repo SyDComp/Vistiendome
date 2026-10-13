@@ -73,3 +73,10 @@
     flex: none;
     min-height: 2.25rem;
 }
+
+/* Columna "Para el": la fecha comprometida. */
+.cotv-fecha { font-size: 12px; font-weight: 700; color: var(--color-text-primary); white-space: nowrap; }
+.cotv-fecha-detalle { font-size: 11px; font-weight: 600; }
+.cotv-fecha--atrasado { color: var(--color-error-deep); }
+.cotv-fecha--pronto { color: var(--color-warning-deep); }
+.cotv-fecha--sin { color: var(--color-text-muted); font-weight: 400; font-style: italic; }

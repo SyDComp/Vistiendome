@@ -12,7 +12,7 @@ quedaría esperando —o al revés—, no se confirma: se devuelve la propuesta
 nueva para que la vea.
 """
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Dict, List, Optional, Set
 
 from sqlmodel import Session, select
@@ -20,6 +20,7 @@ from sqlmodel import Session, select
 from ....models.catalog import SKU
 from ....models.crm import Cotizacion, EstadoCotizacion
 from ....models.historia import TipoEvento
+from .. import fecha as fecha_core
 from ..historia import Actor, anotar
 from .caminos import BODEGA, ESPERANDO, TALLER
 from .propuesta import PrendaPropuesta, proponer
@@ -45,11 +46,12 @@ def _lista(nombres: List[str]) -> str:
 
 
 def problemas(cotizacion: Cotizacion, propuesta: List[PrendaPropuesta], nota: Optional[str],
-               pedir_nota: bool = True) -> List[str]:
+               fecha: Optional[date] = None, al_confirmar: bool = True) -> List[str]:
     """
     Lo que impide confirmar, en el orden en que conviene resolverlo. Vacío si
-    se puede. `pedir_nota=False` para mostrar la propuesta: la nota se escribe
-    en la misma pantalla, y avisar que falta antes de que la vean sería ruido.
+    se puede. `al_confirmar=False` para mostrar la propuesta: la nota y la
+    fecha se completan en la misma pantalla, y avisar que faltan antes de que
+    la vean sería ruido.
     """
     estado = EstadoCotizacion(getattr(cotizacion.estado, "value", cotizacion.estado))
     if estado not in SE_CONFIRMAN:
@@ -64,8 +66,10 @@ def problemas(cotizacion: Cotizacion, propuesta: List[PrendaPropuesta], nota: Op
     sin_camino = [p.nombre for p in propuesta if p.camino is None]
     if sin_camino:
         faltan.append(f"Elige de dónde sale: {_lista(sin_camino)}.")
-    if pedir_nota and any(p.requiere_nota for p in propuesta) and not (nota or "").strip():
+    if al_confirmar and any(p.requiere_nota for p in propuesta) and not (nota or "").strip():
         faltan.append("Escribe una nota: hay prendas que se confirman distinto de lo habitual.")
+    if al_confirmar and fecha_core.no_sirve(fecha):
+        faltan.append(fecha_core.no_sirve(fecha))
     return faltan
 
 
@@ -76,11 +80,12 @@ def confirmar(
     nota: Optional[str],
     esperando_vistas: Set[str],
     actor: Actor,
+    fecha: Optional[date] = None,
 ) -> List[PrendaPropuesta]:
     """
-    Confirma con los caminos `elegidos`. `esperando_vistas`: las prendas que la
-    persona vio "esperando bodega" al decidir. Devuelve la propuesta aplicada.
-    No hace commit.
+    Confirma con los caminos `elegidos` y la `fecha` comprometida.
+    `esperando_vistas`: las prendas que la persona vio "esperando bodega" al
+    decidir. Devuelve la propuesta aplicada. No hace commit.
     """
     if EstadoCotizacion(getattr(cotizacion.estado, "value", cotizacion.estado)) not in SE_CONFIRMAN:
         raise NoSeConfirma("Solo se confirma un pedido nuevo o en conversación.")
@@ -95,7 +100,7 @@ def confirmar(
     if {p.item_id for p in propuesta if p.queda == ESPERANDO} != set(esperando_vistas):
         raise CambioLaBodega(propuesta)
 
-    faltan = problemas(cotizacion, propuesta, nota)
+    faltan = problemas(cotizacion, propuesta, nota, fecha)
     if faltan:
         raise NoSeConfirma(" ".join(faltan))
 
@@ -107,6 +112,7 @@ def confirmar(
     anterior = getattr(cotizacion.estado, "value", cotizacion.estado)
     cotizacion.estado = EstadoCotizacion.CONFIRMADA
     cotizacion.confirmada_en = datetime.now(timezone.utc)
+    cotizacion.fecha_comprometida = fecha
     db.add(cotizacion)
 
     nota = (nota or "").strip() or None
@@ -117,5 +123,6 @@ def confirmar(
         taller=sum(1 for p in propuesta if p.camino == TALLER),
         esperando=[p.nombre for p in propuesta if p.queda == ESPERANDO],
         nota=nota,
+        fecha=fecha.isoformat(),
     )
     return propuesta

@@ -117,3 +117,17 @@ describe('prendas canceladas', () => {
     });
 });
 
+describe('fecha comprometida', () => {
+    it('al confirmar dice para cuándo', () => {
+        const { detalle } = describirEvento({ tipo: 'ESTADO', datos: { de: 'NUEVA', a: 'CONFIRMADA', bodega: 0, taller: 1, fecha: '2026-10-20' } });
+        expect(detalle).toMatch(/^1 prenda al taller · Para el .*20 oct$/);
+    });
+
+    it('corregirla dice de cuál a cuál y el motivo', () => {
+        const ev = describirEvento({ tipo: 'FECHA', datos: { de: '2026-10-20', a: '2026-10-25', nota: 'La tela llegó tarde' } });
+        expect(ev.texto).toMatch(/^Fecha comprometida: .*20 oct → .*25 oct$/);
+        expect(ev.detalle).toBe('Motivo: La tela llegó tarde');
+        expect(describirEvento({ tipo: 'FECHA', datos: { de: null, a: '2026-10-25', nota: null } }).texto).toMatch(/^Se puso fecha comprometida/);
+    });
+});
+

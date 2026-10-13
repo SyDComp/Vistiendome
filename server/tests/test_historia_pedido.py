@@ -6,6 +6,8 @@ quiere verificar es que cada acción del panel deje su anotación, y que la
 tienda quede como "Sitio web".
 """
 
+from datetime import date, timedelta
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
@@ -13,6 +15,9 @@ from sqlmodel import Session, select
 from app.models.catalog import Category, Product, SKU
 from app.models.crm import Cotizacion, CotizacionItem
 from app.models.historia import PedidoEvento, TipoEvento
+
+# Una fecha comprometida que siempre está en el futuro.
+EN_UN_MES = (date.today() + timedelta(days=30)).isoformat()
 
 
 def _pedido(**extra):
@@ -90,7 +95,7 @@ def test_cada_cambio_de_estado_queda_con_su_antes_y_despues(client_admin: TestCl
 
 def test_despachar_al_imprimir_etiquetas_lo_dice(client_admin: TestClient, session: Session):
     pedido = _manual(client_admin, items=[{"nombre_custom": "Bolero tejido", "precio_unitario_estimado": 5000}])
-    assert client_admin.post(f"/api/v1/crm/cotizaciones/{pedido['id']}/confirmar", json={}).status_code == 200
+    assert client_admin.post(f"/api/v1/crm/cotizaciones/{pedido['id']}/confirmar", json={"fecha_comprometida": EN_UN_MES}).status_code == 200
     bolero = session.get(CotizacionItem, pedido["items"][0]["id"])
     bolero.cortado = True  # el taller lo terminó
     session.add(bolero)

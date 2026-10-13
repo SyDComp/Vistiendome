@@ -36,12 +36,35 @@ def _lista_de_canales(valor: Any) -> list:
     return limpias
 
 
+def _plazos(valor: Any) -> dict:
+    if not isinstance(valor, dict):
+        raise ValueError("Deben ser los dos plazos: bodega y taller.")
+    limpios = {}
+    for clave, nombre in (("bodega", "de bodega"), ("taller", "del taller")):
+        try:
+            dias = int(valor.get(clave))
+        except (TypeError, ValueError):
+            raise ValueError(f"El plazo {nombre} tiene que ser un número de días.")
+        if not 0 <= dias <= 365:
+            raise ValueError(f"El plazo {nombre} tiene que estar entre 0 y 365 días hábiles.")
+        limpios[clave] = dias
+    return limpios
+
+
 CANALES_PEDIDO = "canales_pedido"
+PLAZOS_PEDIDO = "plazos_pedido"
 
 AJUSTES: Dict[str, Ajuste] = {
     # "¿Cómo llegó?" de los pedidos cargados en el panel.
     CANALES_PEDIDO: Ajuste(
         defecto=["WhatsApp", "Instagram", "Facebook", "Llamada", "En la tienda", "Recomendación", "Otro"],
         validar=_lista_de_canales,
+    ),
+    # En cuántos días hábiles (lunes a viernes) suele estar listo un pedido:
+    # si todo sale de bodega, o si algo lo hace el taller. Con eso se propone
+    # la fecha comprometida al confirmar (ver core/pedidos/fecha.py).
+    PLAZOS_PEDIDO: Ajuste(
+        defecto={"bodega": 2, "taller": 15},
+        validar=_plazos,
     ),
 }

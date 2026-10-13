@@ -8,8 +8,9 @@ Por dónde puede pasar un pedido, y qué se deshace al volver atrás.
     sale cada prenda), o deshaciendo un despacho.
   · A DESPACHADA, solo desde CONFIRMADA.
   · Un pedido DESPACHADO ya salió: solo se puede deshacer el despacho.
-  · Volver a NUEVA o EN CONVERSACIÓN borra los caminos: las prendas de bodega
-    quedan libres para otros, y al confirmar de nuevo se vuelve a proponer.
+  · Volver a NUEVA o EN CONVERSACIÓN borra los caminos y la fecha comprometida:
+    las prendas de bodega quedan libres para otros, y al confirmar de nuevo se
+    vuelve a proponer todo.
     Lo hecho en el taller no se pierde: sigue marcado en sus prendas.
 """
 
@@ -47,5 +48,8 @@ def al_cambiar(cotizacion: Cotizacion, a: E) -> None:
     """Lo que el cambio a `a` deshace en el pedido. No hace commit."""
     if E(a) in _SIN_CONFIRMAR:
         cotizacion.confirmada_en = None
+        # La fecha se acordó al confirmar: al confirmar de nuevo se vuelve a
+        # proponer. La anterior queda en la historia.
+        cotizacion.fecha_comprometida = None
         for item in activas(cotizacion):
             item.camino = None

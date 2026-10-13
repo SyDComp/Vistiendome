@@ -44,3 +44,7 @@ export const cancelarPrenda = (pedidoId, prendaId) =>
 /** Los pedidos en esos estados (por ejemplo ['NUEVA', 'EN_CONVERSACION']). */
 export const listarCotizaciones = (estados = []) =>
     get(`/api/v1/crm/${estados.length ? '?' + estados.map(e => `estado=${e}`).join('&') : ''}`);
+
+/** Corrige la fecha comprometida de un pedido confirmado. `nota`: por qué (opcional). */
+export const cambiarFechaPedido = (pedidoId, fecha, nota = null) =>
+    put(`/api/v1/crm/cotizaciones/${pedidoId}/fecha`, { fecha, nota });

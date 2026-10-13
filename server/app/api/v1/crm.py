@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlmodel import Session, select, func
 from typing import List, Literal, Optional
-from datetime import datetime
+from datetime import date, datetime
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database import get_session
@@ -141,6 +141,7 @@ class CotizacionRead(BaseModel):
     # a proposito, y es el que hay que mostrar.
     nombre_contacto: Optional[str] = None
     confirmada_en: Optional[datetime] = None
+    fecha_comprometida: Optional[date] = None
     created_at: datetime
     updated_at: datetime
     cliente: Optional[PersonaRead] = None

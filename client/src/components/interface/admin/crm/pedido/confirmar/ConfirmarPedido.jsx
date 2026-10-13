@@ -6,6 +6,8 @@ import { confirmarPedido, quitarPrenda } from '../../../../../../lib/api/endpoin
 import usePropuestaConfirmacion from '../../../../../../hooks/usePropuestaConfirmacion';
 import { mensajeDeError } from '../../../../../../utils/errorServidor';
 import { esperandoVistas, pideNota, sePuedeConfirmar } from '../../../../../../utils/caminoPrenda';
+import { hoyIso } from '../../../../../../utils/fechaComprometida';
+import FechaPropuesta from './FechaPropuesta';
 import PrendaPropuesta from './PrendaPropuesta';
 import '../pedido.css';
 import './confirmar.css';
@@ -24,10 +26,15 @@ const ConfirmarPedido = ({ pedido, onConfirmado, onCerrar }) => {
     const { toast, confirm } = useNotification();
     const [caminos, setCaminos] = useState({});
     const [nota, setNota] = useState('');
+    // null: vale la propuesta (que cambia si una prenda pasa de bodega al
+    // taller). Si la persona elige otra, queda la suya.
+    const [fechaElegida, setFechaElegida] = useState(null);
     const [enviando, setEnviando] = useState(false);
     const { propuesta, cargando, error, recargar, reemplazar } = usePropuestaConfirmacion(pedido.id, caminos);
 
     const prendas = propuesta?.prendas || [];
+    const fecha = fechaElegida ?? propuesta?.fecha_propuesta ?? null;
+    const fechaValida = Boolean(fecha) && fecha >= hoyIso();
     const problemas = propuesta?.problemas || [];
     const ocupado = cargando || enviando;
 
@@ -59,6 +66,7 @@ const ConfirmarPedido = ({ pedido, onConfirmado, onCerrar }) => {
                 caminos: Object.fromEntries(prendas.filter(p => p.camino).map(p => [p.item_id, p.camino])),
                 nota: nota.trim() || null,
                 esperando_vistas: esperandoVistas(prendas),
+                fecha_comprometida: fecha,
             });
             toast.success(`Pedido N° ${pedido.numero} confirmado`);
             onConfirmado(actualizado);
@@ -116,6 +124,9 @@ const ConfirmarPedido = ({ pedido, onConfirmado, onCerrar }) => {
                                 </ul>
                             )}
 
+                            <FechaPropuesta fecha={fecha} propuesta={propuesta} fechaEvento={pedido.fecha_evento}
+                                onCambiar={setFechaElegida} disabled={enviando} />
+
                             {pideNota(prendas) && (
                                 <div className="cfp-nota">
                                     <label htmlFor="cfp-nota">
@@ -133,7 +144,7 @@ const ConfirmarPedido = ({ pedido, onConfirmado, onCerrar }) => {
                 <div className="cfp-pie">
                     <button type="button" className="sp-boton" onClick={onCerrar} disabled={enviando}>Cancelar</button>
                     <button type="button" className="sp-boton sp-boton--principal" onClick={confirmar}
-                        disabled={ocupado || !propuesta || !sePuedeConfirmar(propuesta, nota)}>
+                        disabled={ocupado || !propuesta || !fechaValida || !sePuedeConfirmar(propuesta, nota)}>
                         <CheckCircle size={16} /> {enviando ? 'Confirmando…' : 'Confirmar pedido'}
                     </button>
                 </div>

@@ -58,10 +58,14 @@ def _propuesta(client_admin, pedido, **cuerpo) -> dict:
 
 
 def _confirmar(client_admin, pedido, **cuerpo):
-    """Confirma como la pantalla: lo que vio esperando es lo de la propuesta."""
+    """
+    Confirma como la pantalla: lo que vio esperando es lo de la propuesta, y la
+    fecha comprometida es la propuesta.
+    """
+    vista = _propuesta(client_admin, pedido, caminos=cuerpo.get("caminos", {}))
     if "esperando_vistas" not in cuerpo:
-        vista = _propuesta(client_admin, pedido, caminos=cuerpo.get("caminos", {}))
         cuerpo["esperando_vistas"] = [p["item_id"] for p in vista["prendas"] if p["queda"] == "ESPERANDO"]
+    cuerpo.setdefault("fecha_comprometida", vista["fecha_propuesta"])
     return client_admin.post(f"{CRM}/cotizaciones/{pedido['id']}/confirmar", json=cuerpo)
 
 

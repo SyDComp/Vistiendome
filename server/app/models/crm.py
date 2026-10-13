@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Optional, List, Dict
 from sqlmodel import SQLModel, Field, Relationship
-from sqlalchemy import JSON, Column, DateTime
+from sqlalchemy import JSON, Column, Date, DateTime
 from enum import Enum
 import ulid
 
@@ -150,6 +150,12 @@ class Cotizacion(SQLModel, table=True):
     confirmada_en: Optional[datetime] = Field(
         default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
     )
+
+    # Para cuándo se le prometió a la clienta: listo para despachar o retirar.
+    # Una fecha de calendario, sin hora. Se fija al confirmar (propuesta por el
+    # plazo habitual) y se puede corregir, quedando en la historia. Ver
+    # core/pedidos/fecha.py.
+    fecha_comprometida: Optional[date] = Field(default=None, sa_column=Column(Date, nullable=True))
 
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)

@@ -4,6 +4,8 @@ Qué prenda es cada una, su precio en tres estados, y el retiro sin datos de des
 Se prueba por las rutas: la tienda (sin sesión) y el panel (con sesión).
 """
 
+from datetime import date, timedelta
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
@@ -12,6 +14,9 @@ from app.models.catalog import Category, Product, SKU
 from app.models.crm import Cotizacion, CotizacionItem
 from app.models.historia import PedidoEvento, TipoEvento
 from app.models.iam import Direccion
+
+# Una fecha comprometida que siempre está en el futuro.
+EN_UN_MES = (date.today() + timedelta(days=30)).isoformat()
 
 
 @pytest.fixture
@@ -145,7 +150,7 @@ def test_un_precio_en_cero_no_existe(client_admin):
 
 def test_un_pedido_confirmado_no_se_cotiza(client_admin):
     pedido = _manual(client_admin, items=[{"nombre_custom": "Bolero tejido", "precio_unitario_estimado": 5000}])
-    assert client_admin.post(f"/api/v1/crm/cotizaciones/{pedido['id']}/confirmar", json={}).status_code == 200
+    assert client_admin.post(f"/api/v1/crm/cotizaciones/{pedido['id']}/confirmar", json={"fecha_comprometida": EN_UN_MES}).status_code == 200
     url = f"/api/v1/crm/cotizaciones/{pedido['id']}/prendas/{pedido['items'][0]['id']}/precio"
     assert client_admin.put(url, json={"precio": 1000}).status_code == 409
 
@@ -228,6 +233,6 @@ def test_lo_agregado_va_al_final_y_puede_ser_sin_costo(client_admin, session):
 
 def test_a_un_pedido_confirmado_no_se_le_agregan_prendas(client_admin):
     pedido = _manual(client_admin, items=[{"nombre_custom": "Bolero tejido", "precio_unitario_estimado": 5000}])
-    assert client_admin.post(f"/api/v1/crm/cotizaciones/{pedido['id']}/confirmar", json={}).status_code == 200
+    assert client_admin.post(f"/api/v1/crm/cotizaciones/{pedido['id']}/confirmar", json={"fecha_comprometida": EN_UN_MES}).status_code == 200
     res = client_admin.post(f"/api/v1/crm/cotizaciones/{pedido['id']}/prendas", json={"nombre_custom": "Otra"})
     assert res.status_code == 409 and "En conversación" in res.json()["detail"]

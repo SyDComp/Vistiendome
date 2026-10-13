@@ -13,6 +13,7 @@ import { FileText, Calendar, MessageCircle, MapPin, Printer, Plus } from 'lucide
 import AdminCotizacionModal from './AdminCotizacionModal';
 import { ESTADOS } from '../../../../utils/estadosPedido';
 import { avisoVolverAtras } from '../../../../utils/volverAtras';
+import { estadoFecha } from '../../../../utils/fechaComprometida';
 import { mensajeDeError } from '../../../../utils/errorServidor';
 import { actualizarEstadoCotizacion, obtenerPedido } from '../../../../lib/api/endpoints';
 import ConfirmarPedido from './pedido/confirmar/ConfirmarPedido';
@@ -219,6 +220,21 @@ const CotizacionesView = () => {
             render: (value, row) => (
                 <StateSelector cotizacion={row} onUpdate={alCambiarPedido} onConfirmar={setConfirmando} />
             )
+        },
+        {
+            // Para cuándo se prometió. Atrasado en rojo, por vencer en amarillo.
+            key: 'fecha_comprometida',
+            label: 'Para el',
+            render: (_, row) => {
+                const f = estadoFecha(row);
+                if (!f) return <span className="adm-celda-tenue">—</span>;
+                return (
+                    <div className="adm-celda adm-celda--junta">
+                        <span className={`cotv-fecha cotv-fecha--${f.tono}`}>{f.texto}</span>
+                        {f.detalle && <span className={`cotv-fecha-detalle cotv-fecha--${f.tono}`}>{f.detalle}</span>}
+                    </div>
+                );
+            }
         },
         {
             // Derivado de las piezas cortadas, no un estado que alguien mantenga.

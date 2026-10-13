@@ -4,6 +4,7 @@ Confirmar un pedido desde el panel.
 La regla vive en core/pedidos/ciclo/: acá solo se traduce a HTTP.
 """
 
+from datetime import date
 from typing import Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -15,6 +16,7 @@ from app.api.deps import RequirePermiso
 from app.api.v1.crm import leer_pedidos
 from app.database import get_session
 from app.core.pedidos import ciclo, historia
+from app.core.pedidos import fecha as fecha_core
 from app.models.crm import Cotizacion
 from app.models.iam import CuentaAcceso
 
@@ -39,6 +41,11 @@ class PrendaPropuestaSalida(BaseModel):
 
 class PropuestaSalida(BaseModel):
     prendas: List[PrendaPropuestaSalida]
+    # La fecha comprometida que se propone: hoy más el plazo habitual (días
+    # hábiles), el del taller si algo va al taller. Ver core/pedidos/fecha.py.
+    fecha_propuesta: Optional[date] = None
+    plazo_dias: Optional[int] = None
+    plazo_por: Optional[str] = None     # "taller" o "bodega"
     # Lo que impide confirmar tal como está (sin contar la nota, que se
     # escribe en la misma pantalla).
     problemas: List[str] = []
@@ -50,12 +57,16 @@ class ConfirmarEntrada(BaseModel):
     nota: Optional[str] = Field(default=None, max_length=500)
     # Las prendas que la persona vio "esperando bodega" al decidir.
     esperando_vistas: List[str] = []
+    # Para cuándo se le promete a la clienta. Obligatoria al confirmar.
+    fecha_comprometida: Optional[date] = None
 
 
-def _salida(propuesta, problemas=()) -> PropuestaSalida:
+def _salida(db: Session, propuesta, problemas=()) -> PropuestaSalida:
+    fecha, dias, por = fecha_core.propuesta(db, [p.camino for p in propuesta])
     return PropuestaSalida(
         prendas=[PrendaPropuestaSalida(**vars(p)) for p in propuesta],
         problemas=list(problemas),
+        fecha_propuesta=fecha, plazo_dias=dias, plazo_por=por,
     )
 
 
@@ -76,7 +87,7 @@ def propuesta(cotizacion_id: str, data: ConfirmarEntrada, db: Session = Depends(
     """
     cotizacion = _pedido(db, cotizacion_id)
     prendas = ciclo.proponer(db, cotizacion, data.caminos)
-    return _salida(prendas, ciclo.problemas(cotizacion, prendas, nota=None, pedir_nota=False))
+    return _salida(db, prendas, ciclo.problemas(cotizacion, prendas, nota=None, al_confirmar=False))
 
 
 @router.post("/cotizaciones/{cotizacion_id}/confirmar")
@@ -88,12 +99,12 @@ def confirmar(cotizacion_id: str, data: ConfirmarEntrada, db: Session = Depends(
     cotizacion = _pedido(db, cotizacion_id)
     try:
         ciclo.confirmar(db, cotizacion, data.caminos, data.nota, set(data.esperando_vistas),
-                        historia.de_cuenta(admin))
+                        historia.de_cuenta(admin), fecha=data.fecha_comprometida)
     except ciclo.CambioLaBodega as e:
         db.rollback()
         return JSONResponse(status_code=409, content={
             "detail": str(e),
-            "propuesta": _salida(e.propuesta).model_dump(),
+            "propuesta": _salida(db, e.propuesta).model_dump(mode="json"),
         })
     except ciclo.NoSeConfirma as e:
         db.rollback()

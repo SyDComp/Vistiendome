@@ -26,7 +26,8 @@ class TipoEvento:
     """Los tipos de anotación. Texto y no enum de la base: agregar uno no pide migración."""
 
     CREADO = "CREADO"                        # {origen, canal}
-    ESTADO = "ESTADO"                        # {de, a, motivo?}; al confirmar además {bodega, taller, esperando, nota}
+    ESTADO = "ESTADO"                        # {de, a, motivo?}; al confirmar además {bodega, taller, esperando, nota, fecha}
+    FECHA = "FECHA"                          # {de, a, nota}: la fecha comprometida, en ISO (AAAA-MM-DD)
     CANAL = "CANAL"                          # {de, a}
     PRECIO = "PRECIO"                        # {prenda, de, a}: None por cotizar, 0 sin costo
     ORDEN_AGREGADA = "ORDEN_AGREGADA"        # {orden, prendas}

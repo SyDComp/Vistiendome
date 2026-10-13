@@ -8,6 +8,7 @@
 import { etiquetaEstado } from './estadosPedido';
 import { estiloEstado } from './estadosOrdenCorte';
 import { textoPrecio } from './precioPrenda';
+import { textoFecha } from './fechaComprometida';
 
 const ORIGENES = {
     CATALOGO: 'el catálogo del sitio',
@@ -46,6 +47,7 @@ const detalleConfirmacion = (datos) => {
     if (datos.bodega) partes.push(`${prendas(datos.bodega)} de bodega`);
     if (datos.taller) partes.push(`${prendas(datos.taller)} al taller`);
     if ((datos.esperando || []).length) partes.push(`Esperando bodega: ${datos.esperando.join(', ')}`);
+    if (datos.fecha) partes.push(`Para el ${textoFecha(datos.fecha)}`);
     if (datos.nota) partes.push(`Nota: ${datos.nota}`);
     return partes.join(' · ') || null;
 };
@@ -76,6 +78,14 @@ export const describirEvento = ({ tipo, datos = {} }, modoEntrega) => {
             return {
                 texto: `Se agregó al pedido: ${datos.cantidad}× ${datos.prenda}`,
                 detalle: `Precio: ${textoPrecio(datos.precio)}`,
+            };
+
+        case 'FECHA':
+            return {
+                texto: datos.de
+                    ? `Fecha comprometida: ${textoFecha(datos.de)} → ${textoFecha(datos.a)}`
+                    : `Se puso fecha comprometida: ${textoFecha(datos.a)}`,
+                detalle: datos.nota ? `Motivo: ${datos.nota}` : null,
             };
 
         case 'PRENDA_CANCELADA':

@@ -4,6 +4,7 @@ import SectionHeader from '../../../ui/admin/SectionHeader';
 import { useNotification } from '../../../../context/NotificationContext';
 import useAjustesNegocio from '../../../../hooks/useAjustesNegocio';
 import EditorOpciones from './EditorOpciones';
+import EditorPlazos from './EditorPlazos';
 import './ajustes.css';
 
 /**
@@ -15,6 +16,11 @@ import './ajustes.css';
 const AjustesNegocio = () => {
     const { toast } = useNotification();
     const { ajustes, cargando, error, recargar, guardar } = useAjustesNegocio();
+
+    const guardarPlazos = async (plazos) => {
+        await guardar('plazos_pedido', plazos);
+        toast.success('Plazos guardados');
+    };
 
     const guardarCanales = async (lista) => {
         await guardar('canales_pedido', lista);
@@ -36,6 +42,18 @@ const AjustesNegocio = () => {
                     <span>{error}</span>
                     <button type="button" className="aj-boton" onClick={recargar}>Reintentar</button>
                 </div>
+            )}
+
+            {!cargando && !error && ajustes && (
+                <section className="aj-tarjeta" aria-labelledby="aj-plazos-titulo">
+                    <h3 id="aj-plazos-titulo" className="aj-titulo">Plazo habitual de un pedido</h3>
+                    <p className="aj-explicacion">
+                        En cuántos días hábiles (lunes a viernes) suele estar listo un pedido. Al
+                        confirmarlo, la fecha comprometida se propone con esto, y se puede cambiar.
+                        Los feriados no se descuentan: si cae uno, se ajusta la fecha a mano.
+                    </p>
+                    <EditorPlazos plazos={ajustes.plazos_pedido || {}} onGuardar={guardarPlazos} />
+                </section>
             )}
 
             {!cargando && !error && ajustes && (
