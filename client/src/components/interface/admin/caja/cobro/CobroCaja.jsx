@@ -1,8 +1,8 @@
 import React from 'react';
-import { formatCurrency } from '../../../../utils/cartUtils';
-import ClientaVenta from '../crm/venta/ClientaVenta';
-import { pesos } from '../../../../utils/ventaLocal';
-import PagosVenta from '../crm/venta/PagosVenta';
+import { formatCurrency } from '../../../../../utils/cartUtils';
+import ClientaVenta from './ClientaVenta';
+import { pesos } from '../../../../../utils/ventaLocal';
+import PagosVenta from './PagosVenta';
 
 const EFECTIVO = 'Efectivo';
 

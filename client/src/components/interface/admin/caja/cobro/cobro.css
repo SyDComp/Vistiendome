@@ -1,0 +1,21 @@
+/* El cobro de la caja: quién compra y cómo paga. Solo tokens del tema. */
+
+.vl-bloque {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 0.75rem;
+}
+
+.vl-titulo { padding: 0 0.3rem; font-weight: 700; color: var(--color-text-primary); }
+
+.vl-opciones { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 0.9rem; }
+
+.vl-campos { display: grid; gap: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); }
+
+.vl-pago { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.6rem; align-items: end; }
+.vl-pago-pie { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.vl-falta { color: var(--color-warning-deep); font-weight: 600; }
+.vl-sobra { color: var(--color-error-deep); font-weight: 600; }

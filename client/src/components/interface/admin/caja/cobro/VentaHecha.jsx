@@ -1,6 +1,6 @@
 import React from 'react';
 import { CheckCircle2, Printer } from 'lucide-react';
-import { formatCurrency } from '../../../../utils/cartUtils';
+import { formatCurrency } from '../../../../../utils/cartUtils';
 
 /**
  * La venta quedó registrada (y entregada). El comprobante ya salió; si no

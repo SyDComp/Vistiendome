@@ -1,7 +1,7 @@
 import React, { forwardRef, useMemo, useState } from 'react';
 import { ScanBarcode } from 'lucide-react';
-import { formatCurrency } from '../../../../utils/cartUtils';
-import { buscarDisponible } from '../../../../utils/caja';
+import { formatCurrency } from '../../../../../utils/cartUtils';
+import { buscarDisponible } from '../../../../../utils/caja';
 
 const MINIMO_PARA_SUGERIR = 2;
 

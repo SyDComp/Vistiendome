@@ -10,13 +10,13 @@ import { agregarALaVenta, buscarDisponible } from '../../../../utils/caja';
 import { mensajeDeError } from '../../../../utils/errorServidor';
 import { paraServidor, pesos, restante, sePuedeVender, totalVenta } from '../../../../utils/ventaLocal';
 import { loginQueVuelve } from '../../../../utils/volverTrasLogin';
-import CobroCaja from './CobroCaja';
-import LectorCaja from './LectorCaja';
-import LineasCaja from './LineasCaja';
-import VentaHecha from './VentaHecha';
+import CobroCaja from './cobro/CobroCaja';
+import LectorCaja from './prendas/LectorCaja';
+import LineasCaja from './prendas/LineasCaja';
+import VentaHecha from './cobro/VentaHecha';
 import useImprimirComprobante from './comprobante/useImprimirComprobante';
 import '../crm/pedido/pedido.css';
-import '../crm/venta/venta.css';
+import './cobro/cobro.css';
 import './caja.css';
 
 const RUTA = '/admin/caja';
@@ -28,9 +28,9 @@ const escribiendo = (el) => el && (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.t
 /**
  * La caja del local, a pantalla completa (se abre desde un acceso directo en
  * el escritorio del PC de la tienda). Se escanea la etiqueta, se cobra y sale
- * el comprobante. Es la misma venta en el local de Cotizaciones (crea el
- * pedido, lo cobra, lo confirma por bodega y lo entrega de una vez: ver
- * core/pedidos/venta_rapida.py), con la pistola y la impresora térmica.
+ * el comprobante. Es la venta en el local (crea el pedido, lo cobra, lo
+ * confirma por bodega y lo entrega de una vez: ver core/pedidos/venta_rapida.py);
+ * Cotizaciones trae un botón que lleva aquí.
  *
  * Teclas: F2 vuelve a la pistola, F9 cobra, Esc vacía la venta (o empieza la
  * siguiente, si ya se cobró).

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Minus, Plus, Trash2 } from 'lucide-react';
-import { formatCurrency } from '../../../../utils/cartUtils';
-import { totalVenta } from '../../../../utils/ventaLocal';
+import { formatCurrency } from '../../../../../utils/cartUtils';
+import { totalVenta } from '../../../../../utils/ventaLocal';
 
 /**
  * Lo que se lleva, como en la pantalla de una caja: cada prenda con su
