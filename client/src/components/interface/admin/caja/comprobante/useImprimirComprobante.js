@@ -8,8 +8,7 @@ import { imprimirComprobante } from './imprimirComprobante';
 /**
  * Imprimir el comprobante de un pedido entregado. Los pagos se leen del libro
  * del pedido (no de la pantalla), y los datos de la tienda, de Sitio Web ›
- * Redes y Contacto. Lanza si no se pudieron leer los pagos; devuelve false si
- * el navegador bloqueó la ventana.
+ * Redes y Contacto. Lanza si no se pudieron leer los pagos.
  *
  * @returns {(pedido: object, opciones?: {recibido?: number, reimpreso?: boolean}) => Promise<boolean>}
  */

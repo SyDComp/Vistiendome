@@ -23,7 +23,8 @@ const LineasCaja = ({ lineas, onCambiar, onListo, disabled }) => {
                     <li key={l.clave} className="cj-linea">
                         <div className="cj-linea-nombre">
                             <strong>{l.nombre}</strong>
-                            <span>{[l.codigo, ...Object.values(l.config || {})].filter(Boolean).join(' · ')}</span>
+                            <span>{Object.values(l.config || {}).filter(Boolean).join(' · ')}</span>
+                            <span className="cj-linea-codigo" title={l.codigo}>{l.codigo}</span>
                         </div>
                         <div className="cj-cantidad" aria-label={`Cantidad de ${l.nombre}`}>
                             <button type="button" className="cj-icono" aria-label="Una menos" disabled={disabled || cantidad <= 1}

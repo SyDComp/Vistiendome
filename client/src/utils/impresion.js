@@ -42,6 +42,29 @@ const AVISO_POPUP =
     'Por favor permite las ventanas emergentes (pop-ups) en tu navegador para imprimir.';
 
 /**
+ * El HTML completo de una hoja: su CSS y lo que se imprime. `alCargar`, si
+ * viene, es JavaScript que corre dentro de la hoja cuando termina de cargar.
+ */
+export const armarHoja = ({ titulo, cuerpo, estilos, idioma = 'es', alCargar = '' }) => {
+    const hoja = Array.isArray(estilos) ? estilos.join('\n\n') : estilos;
+    const script = alCargar ? `<script>window.onload = function () { ${alCargar} };</` + 'script>' : '';
+    return `<!doctype html>
+<html lang="${idioma}">
+<head>
+<meta charset="utf-8">
+<title>${titulo}</title>
+<style>
+${hoja}
+</style>
+</head>
+<body>
+${cuerpo}
+${script}
+</body>
+</html>`;
+};
+
+/**
  * @param {object} doc
  * @param {string} doc.titulo   nombre de la ventana y del PDF si se guarda
  * @param {string} doc.cuerpo   HTML de lo que se imprime
@@ -71,26 +94,10 @@ export const imprimirDocumento = ({
     }
 
     const cierre = cerrarAlTerminar ? 'window.close();' : '';
-    const hoja = Array.isArray(estilos) ? estilos.join('\n\n') : estilos;
-
-    ventana.document.write(`<!doctype html>
-<html lang="${idioma}">
-<head>
-<meta charset="utf-8">
-<title>${titulo}</title>
-<style>
-${hoja}
-</style>
-</head>
-<body>
-${cuerpo}
-<script>
-window.onload = function () {
-    setTimeout(function () { window.print(); ${cierre} }, ${ESPERA_ANTES_DE_IMPRIMIR});
-};
-<\/script>
-</body>
-</html>`);
+    ventana.document.write(armarHoja({
+        titulo, cuerpo, estilos, idioma,
+        alCargar: `setTimeout(function () { window.print(); ${cierre} }, ${ESPERA_ANTES_DE_IMPRIMIR});`,
+    }));
     ventana.document.close();
     return true;
 };

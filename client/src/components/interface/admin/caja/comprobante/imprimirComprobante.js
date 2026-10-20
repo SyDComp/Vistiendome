@@ -1,14 +1,15 @@
 import { formatCurrency } from '../../../../../utils/cartUtils';
-import { escapar, imprimirDocumento } from '../../../../../utils/impresion';
+import { escapar } from '../../../../../utils/impresion';
+import { imprimirEnMarco } from '../../../../../utils/imprimirEnMarco';
 import estilos from './comprobante.impresion.css?raw';
 
 /**
  * El comprobante en papel térmico de 58 mm (POS-5890F). Este archivo arma el
  * HTML; qué dice lo decide utils/comprobante.js, cómo se ve está en
- * `comprobante.impresion.css`, y abrir la ventana e imprimir lo hace
- * utils/impresion.js. En el PC de la caja, Chrome abre con
- * `--kiosk-printing`: imprime directo en la impresora predeterminada, sin
- * preguntar.
+ * `comprobante.impresion.css`, e imprimirlo, utils/imprimirEnMarco.js: sin
+ * ventana emergente, porque sale después de registrar la venta, sin clic de
+ * por medio. En el PC de la caja, Chrome abre con `--kiosk-printing` e
+ * imprime directo en la impresora predeterminada, sin preguntar.
  */
 
 const fecha = (d) => d.toLocaleString('es-CL', {
@@ -50,8 +51,8 @@ export const htmlComprobante = (c) => `
     <div class="centro">Gracias por tu compra</div>
 </div>`;
 
-/** @returns {boolean} false si el navegador bloqueó la ventana */
-export const imprimirComprobante = (comprobante) => imprimirDocumento({
+/** @returns {Promise<boolean>} */
+export const imprimirComprobante = (comprobante) => imprimirEnMarco({
     titulo: `Comprobante N° ${comprobante.numero}`,
     cuerpo: htmlComprobante(comprobante),
     estilos,

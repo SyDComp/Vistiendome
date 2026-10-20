@@ -108,7 +108,7 @@ const Caja = () => {
     const imprimirComprobante = useCallback(async (pedido, opciones) => {
         setImprimiendo(true);
         try {
-            if (!await imprimir(pedido, opciones)) toast.error('El navegador no dejó abrir el comprobante: reimprímelo.');
+            await imprimir(pedido, opciones);
         } catch (err) {
             toast.error(mensajeDeError(err?.message, 'No se pudo imprimir el comprobante: reimprímelo.'));
         } finally {
