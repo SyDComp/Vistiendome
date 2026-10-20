@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import SectionHeader from '../../../ui/admin/SectionHeader';
 import DataTable from '../../../ui/admin/DataTable';
@@ -16,7 +16,7 @@ import { avisoVolverAtras } from '../../../../utils/volverAtras';
 import { estadoFecha } from '../../../../utils/fechaComprometida';
 import { ESTADOS_PAGO } from '../../../../utils/pagos';
 import { mensajeDeError } from '../../../../utils/errorServidor';
-import { actualizarEstadoCotizacion, obtenerPedido } from '../../../../lib/api/endpoints';
+import { actualizarEstadoCotizacion, listarCotizaciones, obtenerPedido } from '../../../../lib/api/endpoints';
 import ConfirmarPedido from './pedido/confirmar/ConfirmarPedido';
 import VentaLocal from './venta/VentaLocal';
 import './CotizacionesView.css';
@@ -133,24 +133,23 @@ const CotizacionesView = () => {
         }, { replace: true });
     }, [cotizaciones, searchParams, setSearchParams]);
 
-    useEffect(() => {
-        const fetchCotizaciones = async () => {
-            setLoading(true);
-            try {
-                const response = await fetch('/api/v1/crm/');
-                if (response.ok) {
-                    const data = await response.json();
-                    setCotizaciones(data);
-                }
-            } catch (error) {
-                console.error("Error fetching cotizaciones:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchCotizaciones();
+    // Si la lista no carga (el servidor se está reiniciando, no hay internet),
+    // se dice y se ofrece reintentar. Antes quedaba vacía, con "No se
+    // encontraron cotizaciones", como si no hubiera pedidos.
+    const [errorCarga, setErrorCarga] = useState(null);
+    const cargarCotizaciones = useCallback(async () => {
+        setLoading(true);
+        setErrorCarga(null);
+        try {
+            setCotizaciones(await listarCotizaciones());
+        } catch (err) {
+            setErrorCarga(mensajeDeError(err?.message, 'No se pudieron cargar los pedidos.'));
+        } finally {
+            setLoading(false);
+        }
     }, []);
+
+    useEffect(() => { cargarCotizaciones(); }, [cargarCotizaciones]);
 
     // Se busca por lo que una persona tiene en la cabeza cuando llega hasta aca:
     // el nombre de la clienta, o el N de pedido que figura en la planilla y en
@@ -364,10 +363,19 @@ const CotizacionesView = () => {
                 searchPlaceholder="Buscar por nombre, N° de pedido o estado..."
             />
 
-            <DataTable
+            {errorCarga && (
+                <div className="cotv-error" role="alert">
+                    <span>{errorCarga}</span>
+                    <button type="button" className="cotv-accion cotv-accion--suave" onClick={cargarCotizaciones}>
+                        Reintentar
+                    </button>
+                </div>
+            )}
+
+            {!errorCarga && <DataTable
                 columns={columns}
                 data={filteredCotizaciones}
-                loading={loading}
+                isLoading={loading}
                 emptyMessage="No se encontraron cotizaciones"
                 rowActions={(row) => (
                     <RowActions
@@ -409,7 +417,7 @@ const CotizacionesView = () => {
                         }
                     />
                 )}
-            />
+            />}
 
             <DetailDrawer
                 isOpen={showDetail}

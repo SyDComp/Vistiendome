@@ -136,3 +136,10 @@ def test_no_hay_registro_publico_de_cuentas(client: TestClient):
     res = client.post("/api/v1/auth/register", json={"rut": "1-9", "nombres": "x", "apellidos": "y",
                                                      "email": "x@y.cl", "password": "z"})
     assert res.status_code in (404, 405)
+
+
+def test_la_lista_de_cuentas_no_devuelve_contrasenas(client_admin):
+    """Antes devolvía la fila entera, con la contraseña cifrada."""
+    res = client_admin.get("/api/v1/admin/users")
+    assert res.status_code == 200
+    assert res.json() and all("password_hash" not in c and "password" not in str(c).lower() for c in res.json())

@@ -87,3 +87,17 @@
 .cotv-pago--proceso { color: var(--color-info-darkest); }
 .cotv-pago--listo { color: var(--color-success); }
 .cotv-pago--alerta { color: var(--color-error-deep); }
+
+/* La lista no cargó: se dice, en vez de mostrarla vacía. */
+.cotv-error {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-error-border-strong);
+    border-radius: 0.75rem;
+    background: var(--color-error-bg);
+    color: var(--color-error-deep);
+}
