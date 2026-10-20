@@ -49,6 +49,9 @@ PUBLICAS = {
     # Lo que se publica al sitio: redes, contacto. Lo privado del negocio no va acá.
     ("GET", "/api/v1/settings"),
     ("GET", "/api/v1/settings/{key}"),
+    # De los Ajustes del negocio, solo la política de cambios: la dice la página
+    # "Cambios y Devoluciones".
+    ("GET", "/api/v1/politica-cambios"),
 }
 
 # Con sesión pero sin permiso de administrador: el perfil propio.

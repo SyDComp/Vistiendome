@@ -17,7 +17,7 @@ from sqlmodel import Session
 from ....models.catalog import MovementType
 from ....models.crm import Cotizacion
 from ....models.piezas import PiezaUnica
-from ... import movimientos, pagos, piezas
+from ... import ajustes_negocio, movimientos, pagos, piezas
 from ..prendas import activas
 from .apartado import estado_en_bodega
 from .caminos import BODEGA
@@ -41,6 +41,9 @@ def sacar(db: Session, cotizacion: Cotizacion) -> None:
     c = pagos.cuentas(cotizacion, pagos.pagos_de(db, [cotizacion.id])[cotizacion.id])
     if c.saldo > 0:
         raise NoSeDespacha(f"Falta pagar {pagos.pesos(c.saldo)}: regístralo antes de que salga.")
+    # Lo que se le promete al entregar: queda en el pedido, para el comprobante.
+    cotizacion.politica_cambios = ajustes_negocio.leer(db, ajustes_negocio.POLITICA_CAMBIOS)
+    db.add(cotizacion)
     for item in activas(cotizacion):
         if item.pieza_id:
             pieza = db.get(PiezaUnica, item.pieza_id)

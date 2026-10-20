@@ -1,0 +1,33 @@
+/* La política de cambios en el sitio: tarjetas fijas, no texto libre. */
+.cms-politica {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto 2.5rem;
+    padding: 0 1.25rem;
+    box-sizing: border-box;
+}
+.cms-politica--previa { padding: 0 0.6rem; margin-bottom: 1.8rem; }
+.cms-politica-tarjetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1rem;
+}
+.cms-politica-tarjeta {
+    display: grid;
+    gap: 0.35rem;
+    align-content: start;
+    padding: 1.25rem;
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    background: var(--color-surface);
+    color: var(--color-brand);
+}
+.cms-politica-etiqueta {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08rem;
+    color: var(--color-text-muted);
+}
+.cms-politica-cifra { font-size: 1.6rem; font-weight: 900; color: var(--color-admin-dark); }
+.cms-politica-tarjeta p { margin: 0; font-size: 0.95rem; line-height: 1.6; color: var(--color-text-secondary); }

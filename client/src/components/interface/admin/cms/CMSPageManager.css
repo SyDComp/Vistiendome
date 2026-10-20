@@ -13,3 +13,6 @@
 .dropdown:hover .dropdown-content { display: block; }
 .dropdown-content button { width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; font-size: 13px; font-weight: 700; color: var(--color-admin-dark); cursor: pointer; display: flex; alignItems: center; gap: 10px; border-radius: 10px; }
 .dropdown-content button:hover { background: var(--color-brand-lighter); color: var(--color-brand); }
+
+/* Un bloque cuyo contenido sale de otro lado (la política de cambios). */
+.cms-pg-nota { margin: 0.2rem 0 0; font-size: 0.78rem; color: var(--color-text-muted); }

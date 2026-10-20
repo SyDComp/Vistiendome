@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Optional, List, Dict
+from typing import Any, Optional, List, Dict
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import JSON, Column, Date, DateTime
 from enum import Enum
@@ -164,6 +164,11 @@ class Cotizacion(SQLModel, table=True):
     # plazo habitual) y se puede corregir, quedando en la historia. Ver
     # core/pedidos/fecha.py.
     fecha_comprometida: Optional[date] = Field(default=None, sa_column=Column(Date, nullable=True))
+
+    # La política de cambios que valía al entregarse (core/politica_cambios.py):
+    # el comprobante reimpreso dice lo que se le prometió, aunque después la
+    # tienda la haya cambiado. Nulo en lo entregado antes de este campo.
+    politica_cambios: Optional[Dict[str, Any]] = Field(default=None, sa_type=JSON)
 
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)

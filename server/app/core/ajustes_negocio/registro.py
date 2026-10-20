@@ -8,6 +8,8 @@ el panel no crea un ajuste fantasma que nadie lee.
 
 from typing import Any, Callable, Dict, NamedTuple
 
+from .. import politica_cambios
+
 
 class Ajuste(NamedTuple):
     defecto: Any
@@ -71,6 +73,7 @@ CANALES_PEDIDO = "canales_pedido"
 PLAZOS_PEDIDO = "plazos_pedido"
 MEDIOS_PAGO = "medios_pago"
 ABONO_MINIMO = "abono_minimo"
+POLITICA_CAMBIOS = "politica_cambios"
 
 AJUSTES: Dict[str, Ajuste] = {
     # "¿Cómo llegó?" de los pedidos cargados en el panel.
@@ -96,5 +99,12 @@ AJUSTES: Dict[str, Ajuste] = {
     ABONO_MINIMO: Ajuste(
         defecto={"bodega": 100, "taller": 50},
         validar=_porcentajes,
+    ),
+    # El plazo para cambios, su unidad y si lo hecho a medida tiene cambio. Se
+    # publica en el sitio y sale en el comprobante (core/politica_cambios.py).
+    # 15 días: lo que decía la página "Cambios y Devoluciones" al crearlo.
+    POLITICA_CAMBIOS: Ajuste(
+        defecto={"plazo": 15, "unidad": "dias", "personalizadas_sin_cambio": True},
+        validar=politica_cambios.validar,
     ),
 }

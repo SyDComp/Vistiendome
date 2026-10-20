@@ -5,6 +5,7 @@ import { useNotification } from '../../../../context/NotificationContext';
 import useAjustesNegocio from '../../../../hooks/useAjustesNegocio';
 import EditorOpciones from './EditorOpciones';
 import EditorNumeros from './EditorNumeros';
+import EditorPolitica from './EditorPolitica';
 import './ajustes.css';
 
 /**
@@ -27,6 +28,11 @@ const AjustesNegocio = () => {
         toast.success('Abono mínimo guardado');
     };
 
+    const guardarPolitica = async (politica) => {
+        await guardar('politica_cambios', politica);
+        toast.success('Política de cambios guardada');
+    };
+
     const guardarMedios = async (lista) => {
         await guardar('medios_pago', lista);
         toast.success('Medios de pago guardados');
@@ -41,7 +47,7 @@ const AjustesNegocio = () => {
         <div className="adm-pila-alta">
             <SectionHeader
                 title="Ajustes del negocio"
-                description="Cómo trabaja la tienda. Estos ajustes no se publican en el sitio."
+                description="Cómo trabaja la tienda. Estos ajustes no se publican en el sitio, salvo la política de cambios."
                 icon={SlidersHorizontal}
             />
 
@@ -91,6 +97,18 @@ const AjustesNegocio = () => {
                         unidad="% del total" max={100} textoBoton="Guardar abono"
                         onGuardar={guardarAbono}
                     />
+                </section>
+            )}
+
+            {!cargando && !error && ajustes && (
+                <section className="aj-tarjeta" aria-labelledby="aj-politica-titulo">
+                    <h3 id="aj-politica-titulo" className="aj-titulo">Política de cambios</h3>
+                    <p className="aj-explicacion">
+                        Esta sí se publica: sale en la página "Cambios y Devoluciones" del sitio y
+                        en el comprobante de la caja. Cada venta guarda la que valía al entregarse,
+                        así un comprobante reimpreso dice lo que se le prometió a esa clienta.
+                    </p>
+                    <EditorPolitica politica={ajustes.politica_cambios || {}} onGuardar={guardarPolitica} />
                 </section>
             )}
 

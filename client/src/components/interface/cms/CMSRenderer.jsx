@@ -1,4 +1,5 @@
 import VideoYoutube from '../../ui/VideoYoutube';
+import PoliticaCambiosBlock from './PoliticaCambiosBlock';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DOMPurify from 'dompurify';
@@ -695,6 +696,8 @@ const CMSRenderer = ({ page = 'homepage', data = null, previewMode = false, acti
                             return <RecentProductsBlock previewMode={previewMode} />;
                         case 'video':
                             return <VideoBlock config={section.config} title={section.title} />;
+                        case 'politica_cambios':
+                            return <PoliticaCambiosBlock title={section.title} previewMode={previewMode} />;
                         case 'product_carousel':
                             return <ProductCarouselBlock config={section.config} title={section.title} previewMode={previewMode} forceMobile={forceMobile} />;
                         default:

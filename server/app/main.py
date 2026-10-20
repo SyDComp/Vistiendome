@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 
 from .database import init_db
-from .api.v1 import auth, products, admin, websockets, media, catalog_admin, catalog_collections, collections, cms, settings as site_settings, crm, geo, analytics, taller, propuestas, historia_pedido, ajustes_negocio, precios_pedido, confirmar_pedido, prendas_pedido, piezas, fecha_pedido, pagos_pedido, venta_local
+from .api.v1 import auth, products, admin, websockets, media, catalog_admin, catalog_collections, collections, cms, settings as site_settings, crm, geo, analytics, taller, propuestas, historia_pedido, ajustes_negocio, precios_pedido, confirmar_pedido, prendas_pedido, piezas, fecha_pedido, pagos_pedido, venta_local, politica_cambios
 
 app = FastAPI(
     title="Vistiendomé API",
@@ -42,6 +42,7 @@ app.include_router(prendas_pedido.router, prefix="/api/v1/crm", tags=["Prendas d
 app.include_router(fecha_pedido.router, prefix="/api/v1/crm", tags=["Fecha comprometida"])
 app.include_router(pagos_pedido.router, prefix="/api/v1/crm", tags=["Pagos del pedido"])
 app.include_router(venta_local.router, prefix="/api/v1/crm/venta-local", tags=["Venta en el local"])
+app.include_router(politica_cambios.router, prefix="/api/v1/politica-cambios", tags=["Política de cambios"])
 app.include_router(piezas.router, prefix="/api/v1/admin/piezas-unicas", tags=["Piezas únicas"])
 app.include_router(ajustes_negocio.router, prefix="/api/v1/ajustes-negocio", tags=["Ajustes del negocio"])
 app.include_router(geo.router, prefix="/api/v1/geo", tags=["Geografía"])

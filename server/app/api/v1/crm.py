@@ -154,6 +154,8 @@ class CotizacionRead(BaseModel):
     telefono_contacto: Optional[str] = None
     confirmada_en: Optional[datetime] = None
     fecha_comprometida: Optional[date] = None
+    # La política de cambios de cuando se entregó (para el comprobante).
+    politica_cambios: Optional[dict] = None
     created_at: datetime
     updated_at: datetime
     cliente: Optional[PersonaRead] = None

@@ -19,7 +19,7 @@ import {
     ShoppingBag,
     ChevronUp,
     ChevronDown,
-    ArrowUpDown, Video } from 'lucide-react';
+    ArrowUpDown, Video, CalendarClock } from 'lucide-react';
 import DetailDrawer from '../../../ui/admin/DetailDrawer';
 import StudioEditor from '../../../ui/admin/cms/studio/StudioEditor';
 import DataTableStudio from '../../../ui/admin/cms/studio/DataTableStudio';
@@ -103,6 +103,7 @@ const CMSPageManager = ({
         const titleMap = {
             'recent_products':      'Feed de Productos',
             'product_carousel':     'Carrusel de Productos',
+            'politica_cambios':     'Política de cambios',
         };
 
         const newBlock = {
@@ -207,6 +208,7 @@ const CMSPageManager = ({
             case 'text_post': return <Type size={18} />;
             case 'data_table': return <TableIcon size={18} />;
             case 'video': return <Video size={18} />;
+            case 'politica_cambios': return <CalendarClock size={18} />;
             case 'recent_products':
             case 'product_carousel': return <ShoppingBag size={18} />;
             default: return <Layout size={18} />;
@@ -247,6 +249,7 @@ const CMSPageManager = ({
                             <button onClick={() => handleCreate('data_table')}><TableIcon size={14} /> Tabla de Datos</button>
                             <button onClick={() => handleCreate('product_carousel')}><ShoppingBag size={14} /> Carrusel de Productos</button>
                             <button onClick={() => handleCreate('video')}><Video size={14} /> Video de YouTube</button>
+                            <button onClick={() => handleCreate('politica_cambios')}><CalendarClock size={14} /> Política de cambios</button>
                         </div>
                     </div>
                 </div>
@@ -299,12 +302,16 @@ const CMSPageManager = ({
                                             ) : (
                                                 <h4 onClick={() => setEditingTitleId(section.id)} className="adm-titulo-fila">{section.title}</h4>
                                             )}
+                                            {/* Su contenido no se escribe aquí: sale del ajuste, el mismo del comprobante de la caja. */}
+                                            {section.type === 'politica_cambios' && (
+                                                <p className="cms-pg-nota">El plazo y la regla se cambian en Ajustes del negocio › Política de cambios.</p>
+                                            )}
                                         </div>
                                     </div>
 
                                     <div className="cms-pg-acciones-fila">
                                         <button onClick={(e) => { e.stopPropagation(); handleToggleActive(section); }} title="Activar/Desactivar" className={`cms-adm-accion${section.is_active ? ' cms-adm-accion--activa' : ''}`}>{section.is_active ? <Eye size={14} /> : <EyeOff size={14} />}</button>
-                                        <button onClick={(e) => {
+                                        {section.type !== 'politica_cambios' && <button onClick={(e) => {
                                             e.stopPropagation();
                                             setSelectedSection(section);
                                             if (['hero', 'banner', 'composition_carousel'].includes(section.type)) {
@@ -316,7 +323,7 @@ const CMSPageManager = ({
                                             } else {
                                                 setIsDrawerOpen(true);
                                             }
-                                        }} title="Editar Contenido" className="cms-adm-accion cms-adm-accion--marca"><Edit2 size={14} /></button>
+                                        }} title="Editar Contenido" className="cms-adm-accion cms-adm-accion--marca"><Edit2 size={14} /></button>}
                                         <button onClick={(e) => { e.stopPropagation(); handleDelete(section.id); }} title="Eliminar" className="cms-adm-accion cms-adm-accion--borrar"><Trash2 size={14} /></button>
                                     </div>
                                 </div>

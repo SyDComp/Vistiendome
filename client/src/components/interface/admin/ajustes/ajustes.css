@@ -145,3 +145,36 @@
 .aj-plazo { display: grid; gap: 0.3rem; font-weight: 600; color: var(--color-text-primary); }
 .aj-plazo-campo { display: flex; align-items: center; gap: 0.5rem; font-weight: 400; color: var(--color-text-secondary); }
 .aj-plazo-campo .aj-campo { max-width: 6rem; }
+
+/* Política de cambios: plazo con su unidad, la regla de lo hecho a medida y
+   cómo se lee. */
+.aj-plazo-campo .aj-unidad { max-width: 9rem; }
+.aj-interruptor { display: flex; align-items: flex-start; gap: 0.6rem; color: var(--color-text-primary); cursor: pointer; }
+.aj-interruptor input { margin-top: 0.2rem; width: 1.1rem; height: 1.1rem; accent-color: var(--color-brand); }
+.aj-interruptor > span { display: grid; gap: 0.25rem; }
+.aj-estado {
+    justify-self: start;
+    padding: 0.1rem 0.55rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+.aj-estado--activa {
+    border-color: var(--color-success-border-strong);
+    background: var(--color-success-bg);
+    color: var(--color-success-deep);
+}
+.aj-vista {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.75rem 1rem;
+    border-left: 3px solid var(--color-brand);
+    border-radius: 0.5rem;
+    background: var(--color-bg-subtle);
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+.aj-vista p { margin: 0; }
+.aj-vista-titulo { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); }
