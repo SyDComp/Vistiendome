@@ -22,6 +22,7 @@ const SuperSetup = React.lazy(() => import('./components/interface/admin/SuperSe
 const AdminLogin = React.lazy(() => import('./components/interface/admin/AdminLogin'))
 const DashboardLayout = React.lazy(() => import('./components/interface/admin/DashboardLayout'))
 const PedidoDetalle = React.lazy(() => import('./components/interface/admin/crm/PedidoDetalle'))
+const Caja = React.lazy(() => import('./components/interface/admin/caja/Caja'))
 
 const Nosotros = React.lazy(() => import('./components/interface/vistas/Nosotros'))
 const Contacto = React.lazy(() => import('./components/interface/vistas/Contacto'))
@@ -79,6 +80,8 @@ function App() {
                 <Route path="/admin/login" element={<AdminLogin/>} />
                 <Route path="/admin/dashboard/*" element={<DashboardLayout/>} />
                 <Route path="/admin/print/pedido/:id" element={<PedidoDetalle/>} />
+                {/* La caja del local: pantalla completa, sin el menú del panel. */}
+                <Route path="/admin/caja" element={<Caja/>} />
               </Routes>
 
               {/* Ruta para el Modal (Capa Superior) */}

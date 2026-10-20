@@ -3,6 +3,7 @@ import { useNotification } from '../../../../../context/NotificationContext';
 import { actualizarEstadoCotizacion } from '../../../../../lib/api/endpoints';
 import { mensajeDeError } from '../../../../../utils/errorServidor';
 import { obtenerPedido } from '../../../../../lib/api/endpoints';
+import BotonComprobante from '../../caja/comprobante/BotonComprobante';
 import CobrarSaldo from './pagos/CobrarSaldo';
 
 /**
@@ -35,6 +36,7 @@ const SalidaPedido = ({ pedido, onCambio }) => {
         return (
             <div className="sp-salida">
                 <p className="sp-aviso">{retiro ? 'La clienta ya lo retiró.' : 'Ya salió del local.'}</p>
+                <BotonComprobante pedido={pedido} />
                 <button type="button" className="sp-boton" disabled={enviando}
                     onClick={() => cambiar('CONFIRMADA',
                         `¿Deshacer ${retiro ? 'la entrega' : 'el despacho'} del pedido N° ${pedido.numero}? Vuelve a Confirmado y lo que salió de bodega vuelve a ella.`,

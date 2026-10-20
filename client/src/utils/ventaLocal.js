@@ -18,7 +18,7 @@ export const lineaDesde = (d) => ({
 });
 
 /** El monto escrito como entero de pesos, o 0. */
-const pesos = (texto) => parseInt(String(texto ?? '').replace(/[^\d]/g, ''), 10) || 0;
+export const pesos = (texto) => parseInt(String(texto ?? '').replace(/[^\d]/g, ''), 10) || 0;
 
 export const totalVenta = (lineas = []) => lineas.reduce((t, l) => t + pesos(l.precio) * (Number(l.cantidad) || 0), 0);
 

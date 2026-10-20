@@ -1,10 +1,11 @@
 import LogoVistiendome from '../../ui/LogoVistiendome';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import QRCode from 'react-qr-code'; 
 import { useForm } from '../../../hooks/useForm';
 import Input from '../../ui/Input';
 import Button from '../../ui/Button';
+import { destinoTrasLogin } from '../../../utils/volverTrasLogin';
 
 const validateAdminAuth = (values) => {
     const errors = {};
@@ -15,6 +16,7 @@ const validateAdminAuth = (values) => {
 
 const AdminLogin = () => {
     const navigate = useNavigate();
+    const { search } = useLocation();
     const [authStatus, setAuthStatus] = useState(null);
 
     const { values, errors, isSubmitting, handleChange, handleSubmit } = useForm({
@@ -49,7 +51,7 @@ const AdminLogin = () => {
             localStorage.setItem('admin_token', data.access_token);
             
             setTimeout(() => {
-                navigate('/admin/dashboard');
+                navigate(destinoTrasLogin(search));
             }, 1000);
 
         } catch (err) {

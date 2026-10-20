@@ -4,6 +4,7 @@ import { Store, X } from 'lucide-react';
 import { useNotification } from '../../../../../context/NotificationContext';
 import { disponibleParaVenta, registrarVenta } from '../../../../../lib/api/endpoints';
 import useAjustesNegocio from '../../../../../hooks/useAjustesNegocio';
+import usePagosVenta from '../../../../../hooks/usePagosVenta';
 import { formatCurrency } from '../../../../../utils/cartUtils';
 import { mensajeDeError } from '../../../../../utils/errorServidor';
 import { paraServidor, restante, sePuedeVender, totalVenta } from '../../../../../utils/ventaLocal';
@@ -30,8 +31,6 @@ const VentaLocal = ({ onVendida, onCerrar }) => {
     const [sinDatos, setSinDatos] = useState(true);
     const [clienta, setClienta] = useState({});
     const [lineas, setLineas] = useState([]);
-    // `auto`: el monto sigue al total mientras nadie lo haya escrito a mano.
-    const [pagos, setPagos] = useState([{ medio: '', monto: '', auto: true }]);
     const [enviando, setEnviando] = useState(false);
 
     // Una vez al abrir. `toast` no va en las dependencias: el contexto lo
@@ -44,17 +43,7 @@ const VentaLocal = ({ onVendida, onCerrar }) => {
     }, []);
 
     const total = totalVenta(lineas);
-    useEffect(() => {
-        setPagos(prev => prev.map((p, i) => ({
-            ...p,
-            medio: p.medio || medios[0] || '',
-            monto: i === 0 && p.auto && prev.length === 1 ? (total ? String(total) : '') : p.monto,
-        })));
-    }, [total, medios]);
-
-    const cambiarPagos = (nuevos) => setPagos(nuevos.map((p, i) => ({
-        ...p, auto: p.auto && pagos[i]?.monto === p.monto,
-    })));
+    const { pagos, cambiarPagos } = usePagosVenta(total, medios);
 
     const vender = async () => {
         setEnviando(true);

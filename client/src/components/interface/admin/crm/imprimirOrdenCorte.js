@@ -1,5 +1,5 @@
 import { agrupar, nombreDeProducto } from '../../../../utils/prendas';
-import { imprimirDocumento } from '../../../../utils/impresion';
+import { escapar, imprimirDocumento } from '../../../../utils/impresion';
 // La hoja vive en un .css de verdad y se trae como texto: asi el editor la
 // entiende, y una comilla invertida en un comentario deja de romper la
 // compilacion.
@@ -19,9 +19,6 @@ import estilos from './imprimirOrdenCorte.impresion.css?raw';
  * quinta característica de un producto) y que cada grupo trae su total, en vez
  * de contar filas a mano.
  */
-
-const escapar = (v) => String(v ?? '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 const origenDe = (i) => i.para_stock
     ? 'Stock'

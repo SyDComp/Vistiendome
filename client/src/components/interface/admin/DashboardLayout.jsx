@@ -149,6 +149,8 @@ const DashboardLayout = () => {
             path: '/admin/dashboard/crm', 
             icon: Users,
             children: [
+                // Fuera del panel, a pantalla completa: es la del PC de la tienda.
+                { label: '🛒 Caja', path: '/admin/caja' },
                 { label: 'Clientes', path: '/admin/dashboard/crm/clientes' },
                 { label: 'Cotizaciones', path: '/admin/dashboard/crm/cotizaciones' },
                 { label: '✂️ Orden de Corte', path: '/admin/dashboard/crm/orden-corte' },

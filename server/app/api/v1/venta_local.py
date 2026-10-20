@@ -8,6 +8,7 @@ from typing import Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+from sqlalchemy import func
 from sqlmodel import Session, select
 
 from app.api.deps import RequirePermiso
@@ -33,6 +34,7 @@ class Disponible(BaseModel):
     config: Dict[str, str] = {}
     disponible: int
     precio: Optional[int] = None      # el vigente del catálogo; las piezas, sin precio
+    barcode: Optional[str] = None
 
 
 class ClientaEntrada(BaseModel):
@@ -64,6 +66,39 @@ class VentaEntrada(BaseModel):
     pagos: List[PagoEntrada] = []
 
 
+def _variante(sku: SKU, producto: Product, disponible: int, ahora) -> Disponible:
+    precio, _, _ = compute_effective_price(sku, producto, ahora)
+    return Disponible(
+        tipo="variante", sku_id=sku.id, nombre=producto.name, codigo=sku.sku, barcode=sku.barcode,
+        config=sku.config or {}, disponible=disponible, precio=round(precio) if precio else None,
+    )
+
+
+@router.get("/codigo/{codigo}", response_model=Disponible)
+def por_codigo(codigo: str, db: Session = Depends(get_session)):
+    """
+    Lo que leyó la pistola: el código de barras de la etiqueta (o el código
+    de la variante, escrito a mano). 404 si no existe; 409 si existe pero no
+    queda libre, diciendo cuál es.
+    """
+    limpio = codigo.strip()
+    fila = db.exec(
+        select(SKU, Product).join(Product, SKU.product_id == Product.id)
+        .where(SKU.is_deleted == False, Product.is_deleted == False)  # noqa: E712
+        .where((SKU.barcode == limpio) | (func.upper(SKU.sku) == limpio.upper()))
+    ).first()
+    if not fila:
+        raise HTTPException(status_code=404, detail=f"No hay ninguna prenda con el código {limpio}.")
+    sku, producto = fila
+    b = ciclo.bodega_de(db, [sku.id]).get(sku.id)
+    libres = b.disponible if b else 0
+    if libres <= 0:
+        detalle = " / ".join(str(v) for v in (sku.config or {}).values() if v)
+        raise HTTPException(status_code=409, detail=f"No queda disponible de {producto.name} ({detalle}): "
+                                                     "lo que hay está apartado para pedidos o no hay en bodega.")
+    return _variante(sku, producto, libres, get_chile_time())
+
+
 @router.get("/disponible", response_model=List[Disponible])
 def disponible(db: Session = Depends(get_session)):
     """Lo que hay libre para vender: variantes con disponible > 0 y piezas únicas disponibles."""
@@ -78,11 +113,7 @@ def disponible(db: Session = Depends(get_session)):
         b = bodega.get(sku.id)
         if not b or b.disponible <= 0:
             continue
-        precio, _, _ = compute_effective_price(sku, producto, ahora)
-        filas.append(Disponible(
-            tipo="variante", sku_id=sku.id, nombre=producto.name, codigo=sku.sku,
-            config=sku.config or {}, disponible=b.disponible, precio=round(precio) if precio else None,
-        ))
+        filas.append(_variante(sku, producto, b.disponible, ahora))
     for pieza in db.exec(select(PiezaUnica).where(PiezaUnica.estado == EstadoPieza.DISPONIBLE)).all():
         filas.append(Disponible(
             tipo="pieza", pieza_id=pieza.id, nombre=pieza.nombre, codigo=f"Pieza única N° {pieza.numero}",

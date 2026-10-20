@@ -12,3 +12,9 @@ export const disponibleParaVenta = () => get(`${BASE}/disponible`);
  * @param {{clienta: object|null, prendas: object[], pagos: object[]}} venta  clienta null: sin datos.
  */
 export const registrarVenta = (venta) => post(BASE, venta);
+
+/**
+ * Lo que leyó la pistola (el código de barras de la etiqueta) o el código de
+ * la variante. Error 404: no existe; 409: existe pero no queda libre.
+ */
+export const buscarPorCodigo = (codigo) => get(`${BASE}/codigo/${encodeURIComponent(codigo)}`);

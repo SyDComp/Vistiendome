@@ -39,7 +39,8 @@ window.fetch = async function () {
     if (currentPath.startsWith('/admin') && currentPath !== '/admin/login') {
       localStorage.removeItem('admin_token');
       localStorage.removeItem('access_token');
-      window.location.href = '/admin/login?expired=true';
+      // Tras volver a entrar, de vuelta a donde estaba (la caja, por ejemplo).
+      window.location.href = `/admin/login?expired=true&volver=${encodeURIComponent(currentPath)}`;
     }
   }
 

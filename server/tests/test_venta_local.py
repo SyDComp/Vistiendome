@@ -83,3 +83,21 @@ def test_lo_disponible_no_incluye_lo_apartado(client_admin, tienda, session):
     _hay(session, tienda["cinturon"], 2)
     disponible = {d["codigo"]: d["disponible"] for d in client_admin.get(f"{VENTA}/disponible").json()}
     assert disponible == {"CINTURON": 2}
+
+
+def test_la_pistola_encuentra_por_codigo_de_barras_o_por_codigo(client_admin, tienda, session):
+    tienda["cinturon"].barcode = "7800000000017"
+    session.add(tienda["cinturon"])
+    session.commit()
+    _hay(session, tienda["cinturon"], 2)
+
+    por_barras = client_admin.get(f"{VENTA}/codigo/7800000000017").json()
+    assert (por_barras["sku_id"], por_barras["disponible"], por_barras["precio"]) == (tienda["cinturon"].id, 2, 10000)
+    assert client_admin.get(f"{VENTA}/codigo/cinturon").json()["sku_id"] == tienda["cinturon"].id
+
+
+def test_la_pistola_dice_si_no_existe_o_si_no_queda(client_admin, tienda):
+    res = client_admin.get(f"{VENTA}/codigo/999")
+    assert res.status_code == 404 and "999" in res.json()["detail"]
+    res = client_admin.get(f"{VENTA}/codigo/VESTIDO")
+    assert res.status_code == 409 and "Vestido Noemi" in res.json()["detail"]

@@ -34,6 +34,10 @@
  */
 const ESPERA_ANTES_DE_IMPRIMIR = 400;
 
+/** Un texto dentro del HTML de una hoja: lo que escribió alguien no se interpreta como etiquetas. */
+export const escapar = (v) => String(v ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
 const AVISO_POPUP =
     'Por favor permite las ventanas emergentes (pop-ups) en tu navegador para imprimir.';
 

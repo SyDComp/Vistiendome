@@ -1,0 +1,235 @@
+/* La caja: pantalla completa en el PC de la tienda. Solo tokens del tema.
+   Letra grande y botones anchos: se usa de pie, rápido, con la pistola en
+   la mano. */
+
+.cj-pantalla {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+}
+
+.cj-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+}
+
+.cj-marca { display: flex; align-items: baseline; gap: 0.75rem; font-weight: 700; color: var(--color-text-secondary); }
+.cj-ayuda { font-size: 0.85rem; color: var(--color-text-muted); }
+
+kbd {
+    padding: 0.05rem 0.4rem;
+    border: 1px solid var(--color-border-strong);
+    border-bottom-width: 2px;
+    border-radius: 0.3rem;
+    font: inherit;
+    font-size: 0.78em;
+}
+
+.cj-cuerpo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(22rem, 28rem);
+    gap: 1.25rem;
+    padding: 1.25rem;
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .cj-cuerpo { grid-template-columns: 1fr; }
+    .cj-ayuda { display: none; }
+}
+
+.cj-venta { display: grid; gap: 0.75rem; min-width: 0; }
+
+/* El lector */
+.cj-lector { position: relative; }
+.cj-lector-campo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.4rem 1rem;
+    border: 2px solid var(--color-brand);
+    border-radius: 0.9rem;
+    background: var(--color-surface);
+    color: var(--color-brand);
+}
+.cj-lector-campo input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.6rem 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 1.35rem;
+    outline: none;
+}
+
+.cj-sugeridos {
+    position: absolute;
+    z-index: 5;
+    top: calc(100% + 0.35rem);
+    left: 0;
+    right: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0.35rem;
+    display: grid;
+    gap: 0.25rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 0.75rem;
+    background: var(--color-surface);
+    box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 0.12);
+}
+.cj-sugerido {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--color-text-primary);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.cj-sugerido:hover, .cj-sugerido--marcado { border-color: var(--color-brand); background: var(--color-bg-subtle); }
+.cj-sugerido-detalle { color: var(--color-text-muted); font-size: 0.9rem; }
+
+.cj-aviso { margin: 0; padding: 0.55rem 0.9rem; border-radius: 0.6rem; font-weight: 600; }
+.cj-aviso--ok { background: var(--color-success-bg); color: var(--color-success-deep); }
+.cj-aviso--error { background: var(--color-error-bg); color: var(--color-error-deep); }
+
+/* Las prendas */
+.cj-vacio {
+    margin: 0;
+    padding: 3rem 1rem;
+    border: 2px dashed var(--color-border-strong);
+    border-radius: 0.9rem;
+    text-align: center;
+    font-size: 1.1rem;
+    color: var(--color-text-muted);
+}
+
+.cj-lineas {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 0.9rem;
+    background: var(--color-surface);
+}
+.cj-linea {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto 8rem 7rem auto;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+.cj-linea:last-child { border-bottom: 0; }
+.cj-linea-nombre { display: grid; gap: 0.15rem; min-width: 0; }
+.cj-linea-nombre strong { font-size: 1.05rem; }
+.cj-linea-nombre span { font-size: 0.85rem; color: var(--color-text-muted); }
+.cj-cantidad { display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; font-weight: 700; }
+.cj-cantidad span { min-width: 1.5rem; text-align: center; }
+.cj-subtotal { text-align: right; font-weight: 700; font-size: 1.05rem; }
+
+@media (max-width: 640px) {
+    .cj-linea { grid-template-columns: 1fr auto; }
+}
+
+.cj-icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 0.5rem;
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+.cj-icono:disabled { opacity: 0.4; cursor: not-allowed; }
+.cj-icono--quitar { color: var(--color-error-strong); }
+
+.cj-oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* El cobro */
+.cj-cobro {
+    position: sticky;
+    top: 1.25rem;
+    display: grid;
+    gap: 0.9rem;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.9rem;
+    background: var(--color-surface);
+}
+.cj-total { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.cj-total span { font-size: 1rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.cj-total strong { font-size: 2.4rem; font-weight: 900; }
+
+.cj-vuelto { display: grid; gap: 0.4rem; }
+.cj-vuelto p { margin: 0; }
+.cj-vuelto-monto { font-size: 1.3rem; font-weight: 800; color: var(--color-success-deep); }
+
+.cj-cobrar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.95rem 1.25rem;
+    border: 0;
+    border-radius: 0.75rem;
+    background: var(--color-brand);
+    color: var(--color-surface);
+    font: inherit;
+    font-size: 1.15rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+.cj-cobrar:disabled { opacity: 0.45; cursor: not-allowed; }
+.cj-cobrar kbd { border-color: currentColor; }
+
+.cj-lector-campo:focus-within,
+.cj-cobrar:focus-visible,
+.cj-icono:focus-visible,
+.cj-sugerido:focus-visible {
+    outline: 3px solid var(--color-brand-soft);
+    outline-offset: 2px;
+}
+
+/* La venta hecha */
+.cj-hecha {
+    align-self: center;
+    justify-self: center;
+    display: grid;
+    justify-items: center;
+    gap: 0.6rem;
+    padding: 2.5rem;
+    text-align: center;
+    color: var(--color-success-deep);
+}
+.cj-hecha h2 { margin: 0; color: var(--color-text-primary); }
+.cj-hecha p { margin: 0; }
+.cj-hecha-total { font-size: 2.4rem; font-weight: 900; color: var(--color-text-primary); }
+.cj-hecha-vuelto { font-size: 1.4rem; font-weight: 800; }
+.cj-hecha-acciones { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; margin-top: 1rem; }
