@@ -20,6 +20,7 @@ import {
     SlidersHorizontal
 } from 'lucide-react';
 import { RUTA_CAJA, desdeElPanel } from './caja/rutaCaja';
+import { loginQueVuelve } from '../../../utils/volverTrasLogin';
 
 
 // CADA MODULO SE DESCARGA CUANDO SE ENTRA A EL, NO ANTES
@@ -76,10 +77,13 @@ const DashboardLayout = () => {
     }, [isMobile]);
 
     useEffect(() => {
+        // Sin sesión, a iniciarla, y de vuelta a la misma pantalla.
         const token = localStorage.getItem('admin_token');
         if (!token) {
-            navigate('/admin/login');
+            navigate(loginQueVuelve(location.pathname + location.search), { replace: true });
         }
+        // Solo al entrar: cambiar de pantalla dentro del panel no vuelve a mirar.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [navigate]);
 
     // Cerrar sidebar móvil al cambiar de ruta
