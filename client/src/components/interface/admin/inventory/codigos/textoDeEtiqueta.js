@@ -10,12 +10,13 @@ const esTalla = (clave) => String(clave).trim().toLowerCase() === 'talla';
  * que el color esté siempre en el mismo lugar.
  *
  * @param {{productName: string, sku: string, config: object}} etiqueta
+ * @param {string[]} [orden]  las características en el orden de la tienda
  * @returns {{talla: string|null, descripcion: string}}
  */
-export const textoDeEtiqueta = ({ productName, sku, config = {} }) => {
+export const textoDeEtiqueta = ({ productName, sku, config = {} }, orden = []) => {
     const claves = Object.keys(config).filter(clave => config[clave]);
     const claveTalla = claves.find(esTalla);
-    const resto = ordenarCaracteristicas(claves.filter(clave => clave !== claveTalla))
+    const resto = ordenarCaracteristicas(claves.filter(clave => clave !== claveTalla), orden)
         .map(clave => config[clave]);
     const nombre = productName || sku;
     return {

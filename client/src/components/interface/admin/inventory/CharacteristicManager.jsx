@@ -7,7 +7,8 @@ import DetailDrawer from '../../../ui/admin/DetailDrawer';
 import Badge from '../../../ui/Badge';
 import FilterBar from '../../../ui/admin/FilterBar';
 import { useNotification } from '../../../../context/NotificationContext';
-import { Hash, Tag, Palette } from 'lucide-react';
+import { Hash, Tag, Palette, ChevronUp, ChevronDown } from 'lucide-react';
+import { refrescarCaracteristicas } from '../../../../hooks/useCaracteristicas';
 
 const API_BASE = '/api/v1/admin/catalog';
 
@@ -40,6 +41,9 @@ const CharacteristicManager = () => {
             
             setCharacteristics(charData || []);
             setAllCategories(catData.items || []);
+            // Lo que cambió aquí (opciones, orden, colores) lo ven las demás
+            // pantallas abiertas: la caja, la orden de corte, el selector.
+            refrescarCaracteristicas();
         } catch (err) {
             console.error('Error:', err);
             toast.error('No se pudo conectar con el servidor.');
@@ -105,6 +109,27 @@ const CharacteristicManager = () => {
         } catch (err) { 
             console.error(err); 
             toast.error('Error al intentar eliminar');
+        }
+    };
+
+    // El orden en que se muestran en la caja, la orden de corte y el selector
+    // de variantes. Se mueven todas, también las del sistema.
+    const mover = async (indice, paso) => {
+        const ids = characteristics.map(c => c.id);
+        const destino = indice + paso;
+        if (destino < 0 || destino >= ids.length) return;
+        [ids[indice], ids[destino]] = [ids[destino], ids[indice]];
+        try {
+            const res = await fetch(`${API_BASE}/attributes/orden`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids }),
+            });
+            if (!res.ok) throw new Error();
+            setCharacteristics(await res.json());
+            refrescarCaracteristicas();
+        } catch {
+            toast.error('No se pudo cambiar el orden');
         }
     };
 
@@ -235,11 +260,10 @@ const CharacteristicManager = () => {
                                (char.category_ids || []).includes(parseInt(activeFilters.category_id));
         
         return matchesSearch && matchesCategory;
-    }).sort((a, b) => {
-        if (a.is_system && !b.is_system) return -1;
-        if (!a.is_system && b.is_system) return 1;
-        return a.name.localeCompare(b.name);
     });
+    // Llegan en el orden de la tienda. Se mueven solo viendo la lista entera:
+    // con un filtro, "subir" no diría por encima de cuál queda.
+    const sePuedeOrdenar = !searchTerm && !activeFilters.category_id;
 
     if (view === 'edit') {
         return (
@@ -283,6 +307,28 @@ const CharacteristicManager = () => {
 
             <DataTable 
                 columns={[
+                    ...(sePuedeOrdenar ? [{
+                        key: 'orden',
+                        label: 'Orden',
+                        width: '90px',
+                        align: 'center',
+                        render: (_, char) => {
+                            const i = characteristics.findIndex(c => c.id === char.id);
+                            return (
+                                <div className="char-manager-orden">
+                                    <button type="button" className="flecha-nav flecha-nav--chica flecha-nav--marca"
+                                        aria-label={`Subir ${char.name}`} disabled={i === 0} onClick={() => mover(i, -1)}>
+                                        <ChevronUp size={16} />
+                                    </button>
+                                    <button type="button" className="flecha-nav flecha-nav--chica flecha-nav--marca"
+                                        aria-label={`Bajar ${char.name}`} disabled={i === characteristics.length - 1}
+                                        onClick={() => mover(i, 1)}>
+                                        <ChevronDown size={16} />
+                                    </button>
+                                </div>
+                            );
+                        },
+                    }] : []),
                     { 
                         key: 'name', 
                         label: 'Nombre de Característica', 

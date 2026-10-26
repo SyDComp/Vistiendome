@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { ArrowLeft, Search, Check, Package } from 'lucide-react';
 import { get } from '../../../../lib/api/client';
 import { getImageUrl, getSrcSet } from '../../../../lib/api/endpoints';
+import useOrdenCaracteristicas from '../../../../hooks/useOrdenCaracteristicas';
 import { ordenarCaracteristicas } from '../../../../utils/prendas';
 import './SelectorVariantes.css';
 
@@ -22,6 +23,7 @@ const SelectorVariantes = ({ onElegir, yaElegidas = new Set() }) => {
     const [cargando, setCargando] = useState(true);
     const [busqueda, setBusqueda] = useState('');
     const [filtros, setFiltros] = useState({});       // caracteristica -> valor
+    const orden = useOrdenCaracteristicas();
 
     useEffect(() => {
         get('/api/v1/admin/catalog/products?page=1&page_size=500')
@@ -82,8 +84,8 @@ const SelectorVariantes = ({ onElegir, yaElegidas = new Set() }) => {
     // cuál, y como los valores no quedaban alineados entre filas, tampoco se
     // podía recorrer una columna con la vista.
     const columnas = useMemo(
-        () => ordenarCaracteristicas(Object.keys(caracteristicas)),
-        [caracteristicas]
+        () => ordenarCaracteristicas(Object.keys(caracteristicas), orden),
+        [caracteristicas, orden]
     );
 
     // Sólo si una variante no tiene ninguna característica cargada.

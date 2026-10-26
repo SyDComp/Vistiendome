@@ -49,3 +49,12 @@ describe('agrupar por modelo', () => {
         expect(grupos[0].conColumnaProducto).toBe(false);
     });
 });
+
+describe('orden de las características', () => {
+    it('sigue el orden de la tienda; lo que no está, al final y por nombre', async () => {
+        const { ordenarCaracteristicas } = await import('../prendas');
+        expect(ordenarCaracteristicas(['MANGAS', 'Talla', 'ZETA', 'COLOR', 'ALFA'], ['COLOR', 'MANGAS', 'TALLA']))
+            .toEqual(['COLOR', 'MANGAS', 'Talla', 'ALFA', 'ZETA']);
+        expect(ordenarCaracteristicas(['b', 'a'])).toEqual(['a', 'b']);
+    });
+});

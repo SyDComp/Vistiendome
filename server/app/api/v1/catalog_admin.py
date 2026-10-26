@@ -10,6 +10,7 @@ from ...core import existencias as existencias_core
 from ...core.pedidos import ciclo as ciclo_pedido
 from ...core import retiro_variantes
 from ...core import categorias as categorias_core
+from ...core import caracteristicas
 from ...core.movimientos import tienen_historia
 from ...models.crm import CotizacionItem
 from ...models.catalog import (
@@ -167,11 +168,29 @@ def get_descendant_ids(db: Session, category_id: int) -> List[int]:
 
 @router.get("/attributes")
 def list_attributes(db: Session = Depends(get_session)):
-    attrs = db.exec(select(Characteristic)).all()
+    """Todas, en el orden en que se muestran."""
+    en_orden = select(Characteristic).order_by(Characteristic.orden, Characteristic.id)
+    attrs = db.exec(en_orden).all()
     if not any(a.name == "ESTAMPADO" for a in attrs) or not any(a.name == "COLOR" for a in attrs) or not any(a.name == "TALLA" for a in attrs):
         seed_system_attributes(db)
-        attrs = db.exec(select(Characteristic)).all()
+        attrs = db.exec(en_orden).all()
     return attrs
+
+
+class OrdenCaracteristicas(BaseModel):
+    ids: List[int]
+
+
+@router.post("/attributes/orden")
+async def ordenar_attributes(data: OrdenCaracteristicas, db: Session = Depends(get_session)):
+    """El orden en que se muestran: todas las características, en su nuevo orden."""
+    try:
+        ordenadas = caracteristicas.reordenar(db, data.ids)
+    except caracteristicas.NoSeReordena as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    db.commit()
+    await manager.broadcast({"type": "invalidate_cache", "resource": "attributes", "action": "reorder"})
+    return ordenadas
 
 @router.post("/attributes")
 async def create_attribute(data: Dict[str, Any], db: Session = Depends(get_session)):
@@ -190,7 +209,8 @@ async def create_attribute(data: Dict[str, Any], db: Session = Depends(get_sessi
         en_orden_corte=data.get("en_orden_corte", True),
         value_structure=data.get("value_structure", []),
         domain=norm_domain,
-        is_system=data.get("is_system", False)
+        is_system=data.get("is_system", False),
+        orden=caracteristicas.siguiente_orden(db),
     )
     db.add(attr)
     db.commit()
@@ -1751,6 +1771,7 @@ def seed_system_attributes(db: Session = Depends(get_session)):
         
         if not attr:
             attr = Characteristic(
+                orden=caracteristicas.siguiente_orden(db),
                 name=attr_name,
                 description=f"Característica maestra de {attr_name} (Sistema Vistiendomé)",
                 is_system=True,

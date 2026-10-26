@@ -1,6 +1,7 @@
 import React from 'react';
 import DOMPurify from 'dompurify';
 import { formatCurrency } from '../../../../../utils/cartUtils';
+import useOrdenCaracteristicas from '../../../../../hooks/useOrdenCaracteristicas';
 import { textoDeEtiqueta } from './textoDeEtiqueta';
 import './EtiquetaCodigo.css';
 
@@ -19,7 +20,8 @@ const LIMPIEZA_SVG = { ADD_TAGS: ['svg', 'g', 'rect', 'text', 'path'] };
  * @param mostrarTexto  false = solo barras, talla y precio
  */
 const EtiquetaCodigo = ({ etiqueta, svg, color, clasica, mostrarTexto }) => {
-    const { talla, descripcion } = textoDeEtiqueta(etiqueta);
+    const orden = useOrdenCaracteristicas();
+    const { talla, descripcion } = textoDeEtiqueta(etiqueta, orden);
     const estiloColor = clasica || !color ? undefined : {
         '--cb-fondo': color.bg,
         '--cb-borde': color.border,

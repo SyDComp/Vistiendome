@@ -44,3 +44,7 @@
     padding: 2px 6px;
     font-size: 9px;
 }
+
+/* Subir y bajar: el orden en que se muestran en la caja y la orden de corte. */
+.char-manager-orden { display: inline-flex; gap: 0.25rem; }
+.char-manager-orden .flecha-nav:disabled { opacity: 0.3; cursor: not-allowed; }

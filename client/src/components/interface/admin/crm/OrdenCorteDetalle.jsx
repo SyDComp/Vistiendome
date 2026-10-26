@@ -7,6 +7,7 @@ import { cambiarEstadoOrden, repetirOrden } from '../../../../lib/api/endpoints'
 import TablaPrendas from './TablaPrendas';
 import { imprimirOrdenCorte } from './imprimirOrdenCorte';
 import useCaracteristicasCorte from '../../../../hooks/useCaracteristicasCorte';
+import useOrdenCaracteristicas from '../../../../hooks/useOrdenCaracteristicas';
 import './OrdenCorteDetalle.css';
 
 import { ESTADOS, estiloEstado } from '../../../../utils/estadosOrdenCorte';
@@ -16,6 +17,7 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
     const { toast, confirm } = useNotification();
     const [guardando, setGuardando] = useState(false);
     const columnasCorte = useCaracteristicasCorte();
+    const ordenCaracteristicas = useOrdenCaracteristicas();
     const navigate = useNavigate();
     // Dos preguntas distintas sobre la misma orden, y hay que poder hacer las
     // dos: por modelo se corta (se tiende la tela de un modelo y salen todas
@@ -61,7 +63,7 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
     };
 
     const imprimir = () => {
-        if (!imprimirOrdenCorte(orden, estiloEstado(orden.estado).label, columnasCorte, agruparPor)) {
+        if (!imprimirOrdenCorte(orden, estiloEstado(orden.estado).label, columnasCorte, agruparPor, ordenCaracteristicas)) {
             toast.error('El navegador bloqueó la ventana de impresión');
         }
     };

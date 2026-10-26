@@ -1,4 +1,5 @@
 import React from 'react';
+import useOrdenCaracteristicas from '../../../../hooks/useOrdenCaracteristicas';
 import { agrupar, nombreDeProducto } from '../../../../utils/prendas';
 import './TablaPrendas.css';
 
@@ -42,7 +43,8 @@ const TablaPrendas = ({
     const pintarCasilla = typeof casilla === 'function'
         ? casilla
         : () => <span className="tp-cuadro" />;
-    const grupos = agrupar(items, { por: agruparPor, permitidas: columnasPermitidas });
+    const orden = useOrdenCaracteristicas();
+    const grupos = agrupar(items, { por: agruparPor, permitidas: columnasPermitidas, orden });
 
     if (!grupos.length) return <p className="tp-vacio">{vacio}</p>;
 

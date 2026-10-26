@@ -2,11 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { textoDeEtiqueta } from '../textoDeEtiqueta';
 
 describe('textoDeEtiqueta', () => {
-    it('la talla va aparte y el resto en el orden de siempre, completo', () => {
+    it('la talla va aparte y el resto en el orden de la tienda, completo', () => {
         const texto = textoDeEtiqueta({
             productName: 'Tapado Magdalena Invierno',
             config: { CUELLO: 'En V', MANGAS: 'Larga', COLOR: 'Azul Marino', TALLA: 'XS', MATERIAL: 'Tela Sofía' },
-        });
+        }, ['TALLA', 'COLOR', 'ESTAMPADO', 'CUELLO', 'MANGAS', 'MATERIAL']);
         expect(texto.talla).toBe('XS');
         expect(texto.descripcion).toBe('Tapado Magdalena Invierno – Azul Marino / En V / Larga / Tela Sofía');
     });

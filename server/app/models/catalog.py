@@ -64,6 +64,11 @@ class Characteristic(SQLModel, table=True):
     # false, una característica nueva desaparecería de la hoja sin que nadie se
     # entere, y eso se descubre cuando la prenda ya está mal cortada.
     en_orden_corte: bool = Field(default=True)
+
+    # En qué lugar se muestra (1, 2, 3…): la caja, la orden de corte y el
+    # selector de variantes las recorren en este orden. Lo decide la tienda,
+    # incluidas las del sistema. Ver core/caracteristicas/orden.py.
+    orden: int = Field(default=0)
     
     is_system: bool = Field(default=False)
     system_id: Optional[str] = Field(default=None)

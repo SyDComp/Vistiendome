@@ -32,30 +32,23 @@
  * permite recortar la hoja hasta que entre.
  */
 
-// Sólo afecta el ORDEN EN QUE SE MUESTRAN las columnas, nunca qué características
-// existen ni cómo se comportan — eso lo decide la clienta desde el panel.
-// Existe porque quien lee necesita la talla siempre en el mismo lugar: si el
-// orden cambia entre un producto y otro, hay que volver a leer el encabezado
-// cada vez.
-// Lo correcto a futuro es un campo `orden` en la característica, que el taller
-// arrastre desde el panel; mientras no exista, esto es la aproximación.
-const PRIMERAS = ['talla', 'color', 'estampado'];
-
-const peso = (clave) => {
-    const i = PRIMERAS.indexOf(String(clave).toLowerCase());
-    return i === -1 ? PRIMERAS.length : i;
-};
-
 /**
  * El mismo orden en todas partes: la talla siempre en el mismo lugar, en la
- * hoja de taller y en el explorador de variantes. Si cada pantalla ordenara a
- * su manera, habría que releer el encabezado en cada una.
+ * hoja de taller, en la caja y en el selector de variantes. Si cada pantalla
+ * ordenara a su manera, habría que releer el encabezado en cada una.
+ *
+ * El orden lo decide la tienda en Características (hooks/useOrdenCaracteristicas).
+ * Solo afecta cómo se muestran, nunca qué características existen. Una que no
+ * esté en `orden` va al final, por nombre.
+ *
+ * @param {string[]} claves  nombres de características ("TALLA", "Color"…)
+ * @param {string[]} orden   los nombres en el orden de la tienda
  */
-export const ordenarCaracteristicas = (claves) =>
-    [...claves].sort((a, b) => {
-        const d = peso(a) - peso(b);
-        return d !== 0 ? d : a.localeCompare(b);
-    });
+export const ordenarCaracteristicas = (claves, orden = []) => {
+    const posicion = new Map(orden.map((nombre, i) => [String(nombre).toUpperCase(), i]));
+    const peso = (clave) => posicion.get(String(clave).toUpperCase()) ?? orden.length;
+    return [...claves].sort((a, b) => peso(a) - peso(b) || a.localeCompare(b));
+};
 
 export const nombreDeProducto = (item) =>
     item.producto || item.producto_nombre || item.sku_name || 'Sin producto';
@@ -83,6 +76,7 @@ const grupoDeProducto = (item) => {
 /**
  * @param items
  * @param por          'producto' (para cortar) o 'pedido' (para armar y entregar).
+ * @param orden        los nombres de las características en el orden de la tienda.
  * @param permitidas   `Set` con los nombres de las características que la
  *                     clienta eligió que salgan ("Sale en la orden de corte").
  *                     `null`/`undefined` = salen todas; NO es lo mismo que un
@@ -92,7 +86,7 @@ const grupoDeProducto = (item) => {
  *            conColumnaProducto: boolean}[]}
  *          En el orden en que aparecen.
  */
-export const agrupar = (items = [], { por = 'producto', permitidas = null } = {}) => {
+export const agrupar = (items = [], { por = 'producto', permitidas = null, orden = [] } = {}) => {
     const sale = (clave) => !permitidas || permitidas.has(String(clave).toUpperCase());
     const porPedido = por === 'pedido';
     const grupoDe = porPedido ? grupoDePedido : grupoDeProducto;
@@ -117,7 +111,7 @@ export const agrupar = (items = [], { por = 'producto', permitidas = null } = {}
         clave,
         titulo,
         pedido,
-        columnas: ordenarCaracteristicas(claves),
+        columnas: ordenarCaracteristicas(claves, orden),
         filas,
         unidades,
         // Agrupado por pedido, el producto deja de ser el título del grupo y

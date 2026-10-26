@@ -65,11 +65,11 @@ const tablaDe = ({ titulo, pedido, columnas, filas, unidades, conColumnaProducto
     </section>`;
 };
 
-export const imprimirOrdenCorte = (orden, etiquetaEstado, columnasPermitidas = null, por = 'producto') => {
+export const imprimirOrdenCorte = (orden, etiquetaEstado, columnasPermitidas = null, por = 'producto', ordenCaracteristicas = []) => {
     // Las columnas son las que la clienta eligió en cada característica
     // ("Sale en la orden de corte"). Si todavía no se sabe, salen todas: una
     // columna de más molesta, una hoja sin la talla manda a cortar mal.
-    const grupos = agrupar(orden.items || [], { por, permitidas: columnasPermitidas });
+    const grupos = agrupar(orden.items || [], { por, permitidas: columnasPermitidas, orden: ordenCaracteristicas });
     const porPedido = por === 'pedido';
     const fecha = new Date(orden.created_at).toLocaleDateString('es-CL');
 
