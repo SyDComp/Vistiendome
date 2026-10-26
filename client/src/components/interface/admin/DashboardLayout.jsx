@@ -4,7 +4,6 @@ import { useHasta, CORTES } from '../../../hooks/useCorte';
 import React, { useState, useEffect, Suspense } from 'react';
 import { Routes, Route, useNavigate, Navigate, Link, useLocation } from 'react-router-dom';
 import { 
-
     Package, 
     Image as ImageIcon, 
     Users, 
@@ -20,6 +19,7 @@ import {
     BarChart3,
     SlidersHorizontal
 } from 'lucide-react';
+import { RUTA_CAJA, desdeElPanel } from './caja/rutaCaja';
 
 
 // CADA MODULO SE DESCARGA CUANDO SE ENTRA A EL, NO ANTES
@@ -150,7 +150,7 @@ const DashboardLayout = () => {
             icon: Users,
             children: [
                 // Fuera del panel, a pantalla completa: es la del PC de la tienda.
-                { label: '🛒 Caja', path: '/admin/caja' },
+                { label: '🛒 Caja', path: RUTA_CAJA, estado: desdeElPanel(location.pathname) },
                 { label: 'Clientes', path: '/admin/dashboard/crm/clientes' },
                 { label: 'Cotizaciones', path: '/admin/dashboard/crm/cotizaciones' },
                 { label: '✂️ Orden de Corte', path: '/admin/dashboard/crm/orden-corte' },
@@ -252,6 +252,7 @@ const DashboardLayout = () => {
                                                     <li key={child.path} className="admin-sidebar-subitem">
                                                         <Link 
                                                             to={child.path}
+                                                            state={child.estado}
                                                             className={`admin-sidebar-sublink ${isChildActive ? 'active' : 'inactive'} sidebar-child-hover`}
                                                         >
                                                             {child.label}

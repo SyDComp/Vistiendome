@@ -1,201 +1,150 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
-import LogoVistiendome from '../../../ui/LogoVistiendome';
-import { useNotification } from '../../../../context/NotificationContext';
-import { buscarPorCodigo, disponibleParaVenta, registrarVenta } from '../../../../lib/api/endpoints';
-import useAjustesNegocio from '../../../../hooks/useAjustesNegocio';
-import usePagosVenta from '../../../../hooks/usePagosVenta';
-import { agregarALaVenta, buscarDisponible } from '../../../../utils/caja';
-import { mensajeDeError } from '../../../../utils/errorServidor';
-import { paraServidor, pesos, restante, sePuedeVender, totalVenta } from '../../../../utils/ventaLocal';
+import { useLocation, useNavigate } from 'react-router-dom';
+import useCaracteristicas from '../../../../hooks/useCaracteristicas';
+import useOrdenCaracteristicas from '../../../../hooks/useOrdenCaracteristicas';
+import { buscar, interpretar } from '../../../../utils/busquedaCaja';
+import { pesos } from '../../../../utils/ventaLocal';
 import { loginQueVuelve } from '../../../../utils/volverTrasLogin';
+import CabeceraCaja from './CabeceraCaja';
 import CobroCaja from './cobro/CobroCaja';
+import VentaHecha from './cobro/VentaHecha';
 import LectorCaja from './prendas/LectorCaja';
 import LineasCaja from './prendas/LineasCaja';
-import VentaHecha from './cobro/VentaHecha';
-import useImprimirComprobante from './comprobante/useImprimirComprobante';
+import { PANEL_POR_OMISION, RUTA_CAJA } from './rutaCaja';
+import SelectorPrendas from './selector/SelectorPrendas';
+import useAtajosCaja from './teclado/useAtajosCaja';
+import useModoCaja from './teclado/useModoCaja';
+import usePistola from './teclado/usePistola';
+import useVentaCaja from './useVentaCaja';
 import '../crm/pedido/pedido.css';
 import './cobro/cobro.css';
 import './caja.css';
 
-const RUTA = '/admin/caja';
-const EFECTIVO = 'Efectivo';
-
-/** Si el foco está en un campo donde se escribe: ahí la tecla es de ese campo, no de la pistola. */
-const escribiendo = (el) => el && (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable);
+const SIN_CARACTERISTICAS = [];
+const sinMovimiento = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 /**
  * La caja del local, a pantalla completa (se abre desde un acceso directo en
- * el escritorio del PC de la tienda). Se escanea la etiqueta, se cobra y sale
- * el comprobante. Es la venta en el local (crea el pedido, lo cobra, lo
- * confirma por bodega y lo entrega de una vez: ver core/pedidos/venta_rapida.py);
- * Cotizaciones trae un botón que lleva aquí.
+ * el escritorio del PC de la tienda). Es la venta en el local (crea el
+ * pedido, lo cobra, lo confirma por bodega y lo entrega de una vez: ver
+ * core/pedidos/venta_rapida.py); Cotizaciones trae un botón que lleva aquí.
  *
- * Teclas: F2 vuelve a la pistola, F9 cobra, Esc vacía la venta (o empieza la
- * siguiente, si ya se cobró).
+ * Se maneja entera con el teclado: la pistola suma directo, sin pasar por
+ * ningún campo; Esc cambia entre atajos y escribir (teclado/). La venta en sí
+ * vive en useVentaCaja.js.
  */
 const Caja = () => {
     const navigate = useNavigate();
-    const { toast, confirm } = useNotification();
-    const { ajustes } = useAjustesNegocio();
-    const imprimir = useImprimirComprobante();
-    const medios = useMemo(() => ajustes?.medios_pago || [], [ajustes]);
+    const location = useLocation();
+    const v = useVentaCaja();
+    const definiciones = useCaracteristicas() || SIN_CARACTERISTICAS;
+    const orden = useOrdenCaracteristicas();
     const lector = useRef(null);
 
-    const [disponibles, setDisponibles] = useState([]);
-    const [lineas, setLineas] = useState([]);
-    const [sinDatos, setSinDatos] = useState(true);
-    const [clienta, setClienta] = useState({});
-    const [recibido, setRecibido] = useState('');
-    const [aviso, setAviso] = useState(null);       // {tipo: 'ok'|'error', texto}
-    const [enviando, setEnviando] = useState(false);
-    const [hecha, setHecha] = useState(null);       // {pedido, vuelto}
-    const [imprimiendo, setImprimiendo] = useState(false);
+    const [texto, setTexto] = useState('');
+    const [selector, setSelector] = useState(false);
+    const [marcada, setMarcada] = useState(-1);
+    const [saliendo, setSaliendo] = useState(false);
 
-    const total = totalVenta(lineas);
-    const { pagos, cambiarPagos, reiniciar } = usePagosVenta(total, medios);
-    const puedeCobrar = sePuedeVender(lineas, pagos) && (sinDatos || Boolean((clienta.rut || '').trim()));
-
-    const aLaPistola = useCallback(() => lector.current?.focus(), []);
+    const interpretacion = useMemo(() => interpretar(texto, definiciones), [texto, definiciones]);
+    const encontrado = useMemo(() => buscar(v.disponibles, interpretacion), [v.disponibles, interpretacion]);
 
     // Sin sesión, a iniciarla, y de vuelta aquí.
     useEffect(() => {
-        if (!localStorage.getItem('admin_token')) navigate(loginQueVuelve(RUTA), { replace: true });
+        if (!localStorage.getItem('admin_token')) navigate(loginQueVuelve(RUTA_CAJA), { replace: true });
     }, [navigate]);
 
-    // Lo libre para buscar escribiendo. La pistola no depende de esto: cada
-    // código se consulta al servidor en el momento.
-    const cargarDisponibles = useCallback(() => {
-        disponibleParaVenta().then(d => setDisponibles(d || [])).catch(() => setDisponibles([]));
-    }, []);
-    useEffect(() => { cargarDisponibles(); }, [cargarDisponibles]);
+    // La pistola suma esté donde esté el foco. Si la venta anterior ya se
+    // cobró, la lectura empieza la siguiente.
+    const { hecha, nuevaVenta, porCodigo } = v;
+    usePistola(useCallback((codigo) => {
+        if (hecha) nuevaVenta();
+        porCodigo(codigo);
+    }, [hecha, nuevaVenta, porCodigo]));
 
-    // Dos lecturas seguidas pueden responder antes de que se pinte la primera:
-    // la segunda tiene que sumar sobre lo que dejó la primera, no sobre lo pintado.
-    const lineasAlDia = useRef(lineas);
-    lineasAlDia.current = lineas;
-    const agregar = useCallback((d) => {
-        const { lineas: nuevas, aviso: problema } = agregarALaVenta(lineasAlDia.current, d);
-        lineasAlDia.current = nuevas;
-        setLineas(nuevas);
-        setAviso(problema ? { tipo: 'error', texto: problema } : { tipo: 'ok', texto: `${d.nombre}: agregado` });
-        aLaPistola();
-    }, [aLaPistola]);
+    const { modo, nombreCampo, alternar } = useModoCaja(lector);
 
-    const porCodigo = useCallback(async (codigo) => {
-        try {
-            agregar(await buscarPorCodigo(codigo));
-        } catch (err) {
-            // No es un código: quizás es un nombre. Si calza con una sola cosa, es esa.
-            const calzan = err?.status === 404 ? buscarDisponible(disponibles, codigo, 2) : [];
-            if (calzan.length === 1) return agregar(calzan[0]);
-            setAviso({ tipo: 'error', texto: mensajeDeError(err?.message, `No se encontró ${codigo}`) });
-        }
-    }, [agregar, disponibles]);
+    const enfocar = (selector_) => setTimeout(() => document.querySelector(selector_)?.focus(), 0);
+    const linea = v.lineas[marcada];
+    const cambiarCantidad = (paso) => {
+        if (!linea) return;
+        const cantidad = Number(linea.cantidad) + paso;
+        if (cantidad < 1 || cantidad > linea.disponible || (linea.pieza_id && paso > 0)) return;
+        v.cambiarLineas(v.lineas.map(l => (l === linea ? { ...l, cantidad } : l)));
+    };
 
-    const nuevaVenta = useCallback(() => {
-        setLineas([]);
-        setSinDatos(true);
-        setClienta({});
-        setRecibido('');
-        setAviso(null);
-        setHecha(null);
-        reiniciar();
-        setTimeout(aLaPistola, 0);
-    }, [reiniciar, aLaPistola]);
+    useAtajosCaja({
+        modo,
+        alternar,
+        activo: !v.hecha && !selector,
+        acciones: {
+            buscar: () => lector.current?.focus(),
+            elegir: () => setSelector(true),
+            quienCompra: () => {
+                v.setSinDatos(!v.sinDatos);
+                if (v.sinDatos) enfocar('[data-clienta="rut"]');
+            },
+            cobrar: v.cobrar,
+            vaciar: v.vaciar,
+            subir: () => setMarcada(m => Math.max(m - 1, 0)),
+            bajar: () => setMarcada(m => Math.min(m + 1, v.lineas.length - 1)),
+            sumar: () => cambiarCantidad(1),
+            restar: () => cambiarCantidad(-1),
+            quitar: () => {
+                if (!linea) return;
+                v.cambiarLineas(v.lineas.filter(l => l !== linea));
+                setMarcada(m => Math.min(m, v.lineas.length - 2));
+            },
+            editarPrecio: () => linea && enfocar(`[data-precio="${linea.clave}"]`),
+        },
+    });
 
-    const imprimirComprobante = useCallback(async (pedido, opciones) => {
-        setImprimiendo(true);
-        try {
-            await imprimir(pedido, opciones);
-        } catch (err) {
-            toast.error(mensajeDeError(err?.message, 'No se pudo imprimir el comprobante: reimprímelo.'));
-        } finally {
-            setImprimiendo(false);
-        }
-    }, [imprimir, toast]);
-
-    const cobrar = useCallback(async () => {
-        if (!puedeCobrar || enviando) return;
-        setEnviando(true);
-        try {
-            const pedido = await registrarVenta(paraServidor({ clienta: sinDatos ? null : clienta, lineas, pagos }));
-            const efectivo = pagos.filter(p => p.medio === EFECTIVO).reduce((t, p) => t + pesos(p.monto), 0);
-            const conCuanto = pesos(recibido);
-            setHecha({ pedido, vuelto: conCuanto > efectivo ? conCuanto - efectivo : 0 });
-            cargarDisponibles();
-            await imprimirComprobante(pedido, { recibido: conCuanto });
-        } catch (err) {
-            toast.error(mensajeDeError(err?.message, 'No se pudo registrar la venta'));
-        } finally {
-            setEnviando(false);
-        }
-    }, [puedeCobrar, enviando, sinDatos, clienta, lineas, pagos, recibido, cargarDisponibles, imprimirComprobante, toast]);
-
-    // Una sola pregunta a la vez, aunque se aprete Esc de nuevo.
-    const preguntando = useRef(false);
-    const vaciar = useCallback(async () => {
-        if (!lineas.length) return aLaPistola();
-        if (preguntando.current) return;
-        preguntando.current = true;
-        try {
-            if (await confirm('¿Vaciar la venta? Se quitan todas las prendas.', { si: 'Vaciar', no: 'Seguir con la venta' })) {
-                nuevaVenta();
-            }
-        } finally {
-            preguntando.current = false;
-        }
-    }, [lineas.length, confirm, nuevaVenta, aLaPistola]);
-
-    // Las teclas de la caja, y la pistola llegue donde llegue el foco: si
-    // nadie está escribiendo en un campo, lo que se teclea va al lector.
+    // Cobrada la venta: Enter (el botón ya tiene el foco) o Esc empiezan la siguiente.
     useEffect(() => {
-        const teclas = (e) => {
-            if (e.key === 'F2') { e.preventDefault(); return aLaPistola(); }
-            if (e.key === 'F9') { e.preventDefault(); return hecha ? null : cobrar(); }
-            if (e.key === 'Escape') { e.preventDefault(); return hecha ? nuevaVenta() : vaciar(); }
-            if (!hecha && !escribiendo(document.activeElement) && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
-                aLaPistola();
-            }
-        };
+        if (!v.hecha) return undefined;
+        const teclas = (e) => { if (e.key === 'Escape') { e.preventDefault(); nuevaVenta(); } };
         window.addEventListener('keydown', teclas);
         return () => window.removeEventListener('keydown', teclas);
-    }, [aLaPistola, cobrar, vaciar, nuevaVenta, hecha]);
+    }, [v.hecha, nuevaVenta]);
+
+    // Volver: la caja baja y deja ver el panel de donde se vino.
+    const volverA = location.state?.volverA || PANEL_POR_OMISION;
+    const volver = () => (sinMovimiento() ? navigate(volverA) : setSaliendo(true));
+    const clase = `cj-pantalla${location.state?.desdePanel && !saliendo ? ' cj-pantalla--entra' : ''}${saliendo ? ' cj-pantalla--sale' : ''}`;
 
     return (
-        <div className="cj-pantalla">
-            <header className="cj-cabecera">
-                <div className="cj-marca">
-                    <LogoVistiendome tamano="1.3rem" />
-                    <span>Caja</span>
-                </div>
-                <span className="cj-ayuda"><kbd>F2</kbd> pistola · <kbd>F9</kbd> cobrar · <kbd>Esc</kbd> vaciar</span>
-                <button type="button" className="sp-boton" onClick={() => navigate('/admin/dashboard/crm/cotizaciones')}>
-                    <ArrowLeft size={16} /> Panel
-                </button>
-            </header>
+        <div className={clase} onAnimationEnd={() => saliendo && navigate(volverA)}>
+            <CabeceraCaja modo={modo} nombreCampo={nombreCampo} onVolver={volver} />
 
-            {hecha ? (
-                <VentaHecha pedido={hecha.pedido} vuelto={hecha.vuelto} imprimiendo={imprimiendo} onNueva={nuevaVenta}
-                    onReimprimir={() => imprimirComprobante(hecha.pedido, { recibido: pesos(recibido) })} />
+            {v.hecha ? (
+                <VentaHecha pedido={v.hecha.pedido} vuelto={v.hecha.vuelto} imprimiendo={v.imprimiendo} onNueva={nuevaVenta}
+                    onReimprimir={() => v.imprimirComprobante(v.hecha.pedido, { recibido: pesos(v.hecha.recibido) })} />
             ) : (
                 <main className="cj-cuerpo">
                     <section className="cj-venta" aria-label="Venta">
-                        <LectorCaja ref={lector} disponibles={disponibles} onCodigo={porCodigo} onElegido={agregar}
-                            disabled={enviando} />
-                        {aviso && (
-                            <p className={`cj-aviso cj-aviso--${aviso.tipo}`} role={aviso.tipo === 'error' ? 'alert' : 'status'}>
-                                {aviso.texto}
+                        <LectorCaja ref={lector} texto={texto} onTexto={setTexto} interpretacion={interpretacion}
+                            encontrado={encontrado} onElegido={v.agregar} onAbrirSelector={() => setSelector(true)}
+                            onCodigo={v.porCodigo} disabled={v.enviando} />
+                        {v.aviso && (
+                            <p className={`cj-aviso cj-aviso--${v.aviso.tipo}`} role={v.aviso.tipo === 'error' ? 'alert' : 'status'}>
+                                {v.aviso.texto}
                             </p>
                         )}
-                        <LineasCaja lineas={lineas} onCambiar={setLineas} onListo={aLaPistola} disabled={enviando} />
+                        <LineasCaja lineas={v.lineas} marcada={modo === 'atajos' ? marcada : -1} onCambiar={v.cambiarLineas}
+                            onListo={() => document.activeElement?.blur()} disabled={v.enviando} />
                     </section>
-                    <CobroCaja total={total} sinDatos={sinDatos} clienta={clienta} onSinDatos={setSinDatos} onClienta={setClienta}
-                        pagos={pagos} medios={medios} falta={restante(lineas, pagos)} onPagos={cambiarPagos}
-                        recibido={recibido} onRecibido={setRecibido} puedeCobrar={puedeCobrar} onCobrar={cobrar}
-                        enviando={enviando} />
+                    <CobroCaja total={v.total} sinDatos={v.sinDatos} clienta={v.clienta} onSinDatos={v.setSinDatos}
+                        onClienta={v.setClienta} pagos={v.pagos} medios={v.medios} falta={v.falta} onPagos={v.cambiarPagos}
+                        recibido={v.recibido} onRecibido={v.setRecibido} puedeCobrar={v.puedeCobrar} onCobrar={v.cobrar}
+                        enviando={v.enviando} />
                 </main>
+            )}
+
+            {selector && (
+                <SelectorPrendas productos={v.productos} disponibles={v.disponibles} definiciones={definiciones} orden={orden}
+                    interpretacion={texto.trim() ? interpretacion : null}
+                    onElegido={(d) => { v.agregar(d); setTexto(''); }}
+                    onCerrar={() => setSelector(false)} />
             )}
         </div>
     );

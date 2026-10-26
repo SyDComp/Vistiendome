@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import SectionHeader from '../../../ui/admin/SectionHeader';
 import DataTable from '../../../ui/admin/DataTable';
 import FilterBar from '../../../ui/admin/FilterBar';
@@ -19,6 +19,7 @@ import { mensajeDeError } from '../../../../utils/errorServidor';
 import { actualizarEstadoCotizacion, listarCotizaciones, obtenerPedido } from '../../../../lib/api/endpoints';
 import ConfirmarPedido from './pedido/confirmar/ConfirmarPedido';
 import './CotizacionesView.css';
+import { RUTA_CAJA, desdeElPanel } from '../caja/rutaCaja';
 
 
 /**
@@ -86,6 +87,7 @@ const CotizacionesView = () => {
     const { settings } = useSettings();
     const shippingColors = settings?.shipping_colors || {};
     const navigate = useNavigate();
+    const location = useLocation();
     const { toast, confirm } = useNotification();
     const [cotizaciones, setCotizaciones] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -322,7 +324,7 @@ const CotizacionesView = () => {
                         <Plus size={18} strokeWidth={3} /> + Nueva Cotización Manual
                     </button>
                     {/* La venta en el local se hace en la caja, a pantalla completa. */}
-                    <button onClick={() => navigate('/admin/caja')} className="cotv-accion">
+                    <button onClick={() => navigate(RUTA_CAJA, { state: desdeElPanel(location.pathname) })} className="cotv-accion">
                         <Store size={16} /> Caja: venta en el local
                     </button>
                     <button

@@ -18,3 +18,6 @@ export const registrarVenta = (venta) => post(BASE, venta);
  * la variante. Error 404: no existe; 409: existe pero no queda libre.
  */
 export const buscarPorCodigo = (codigo) => get(`${BASE}/codigo/${encodeURIComponent(codigo)}`);
+
+/** Los productos con algo libre, con su foto y lo vendido en 30 días; lo más vendido primero. */
+export const productosParaCaja = () => get(`${BASE}/productos`);

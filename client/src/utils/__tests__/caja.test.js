@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { agregarALaVenta, buscarDisponible } from '../caja';
+import { agregarALaVenta } from '../caja';
 
 const cinturon = { tipo: 'variante', sku_id: 7, nombre: 'Cinturón', codigo: 'CIN-M', barcode: '780001', config: { TALLA: 'M' }, disponible: 2, precio: 9000 };
 
@@ -17,12 +17,5 @@ describe('caja', () => {
         const { lineas, aviso } = agregarALaVenta(dos, cinturon);
         expect(lineas).toBe(dos);
         expect(aviso).toMatch(/No quedan más libres de Cinturón/);
-    });
-
-    it('se busca por nombre, talla o código de barras', () => {
-        expect(buscarDisponible([cinturon], 'cint m')).toHaveLength(1);
-        expect(buscarDisponible([cinturon], '780001')).toHaveLength(1);
-        expect(buscarDisponible([cinturon], 'vestido')).toHaveLength(0);
-        expect(buscarDisponible([cinturon], '  ')).toHaveLength(0);
     });
 });

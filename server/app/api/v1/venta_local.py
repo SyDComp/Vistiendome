@@ -29,6 +29,7 @@ class Disponible(BaseModel):
     tipo: str                         # "variante" o "pieza"
     sku_id: Optional[int] = None
     pieza_id: Optional[str] = None
+    producto_id: Optional[int] = None
     nombre: str
     codigo: Optional[str] = None      # el SKU, o "Pieza única N° 3"
     config: Dict[str, str] = {}
@@ -69,7 +70,7 @@ class VentaEntrada(BaseModel):
 def _variante(sku: SKU, producto: Product, disponible: int, ahora) -> Disponible:
     precio, _, _ = compute_effective_price(sku, producto, ahora)
     return Disponible(
-        tipo="variante", sku_id=sku.id, nombre=producto.name, codigo=sku.sku, barcode=sku.barcode,
+        tipo="variante", sku_id=sku.id, producto_id=producto.id, nombre=producto.name, codigo=sku.sku, barcode=sku.barcode,
         config=sku.config or {}, disponible=disponible, precio=round(precio) if precio else None,
     )
 

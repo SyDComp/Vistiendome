@@ -6,21 +6,22 @@ import { totalVenta } from '../../../../../utils/ventaLocal';
 /**
  * Lo que se lleva, como en la pantalla de una caja: cada prenda con su
  * cantidad, su precio (viene del catálogo y se puede cambiar) y su subtotal.
- * Enter en un campo devuelve el foco a la pistola.
+ * En modo atajos, la marcada (↑ ↓) es a la que van + − Supr y Enter (editar
+ * el precio). Enter en el precio termina de escribir.
  */
-const LineasCaja = ({ lineas, onCambiar, onListo, disabled }) => {
+const LineasCaja = ({ lineas, marcada, onCambiar, onListo, disabled }) => {
     const cambiar = (clave, cambio) => onCambiar(lineas.map(l => (l.clave === clave ? { ...l, ...cambio } : l)));
-    const volverALaPistola = (e) => { if (e.key === 'Enter') { e.preventDefault(); onListo(); } };
+    const terminar = (e) => { if (e.key === 'Enter') { e.preventDefault(); onListo(); } };
 
     if (!lineas.length) {
-        return <p className="cj-vacio">Escanea una prenda para empezar.</p>;
+        return <p className="cj-vacio">Escanea una prenda, búscala con B o elígela con Espacio.</p>;
     }
     return (
         <ul className="cj-lineas" aria-label="Prendas de la venta">
-            {lineas.map(l => {
+            {lineas.map((l, i) => {
                 const cantidad = Number(l.cantidad) || 0;
                 return (
-                    <li key={l.clave} className="cj-linea">
+                    <li key={l.clave} className={`cj-linea${i === marcada ? ' cj-linea--marcada' : ''}`}>
                         <div className="cj-linea-nombre">
                             <strong>{l.nombre}</strong>
                             <span>{Object.values(l.config || {}).filter(Boolean).join(' · ')}</span>
@@ -37,7 +38,7 @@ const LineasCaja = ({ lineas, onCambiar, onListo, disabled }) => {
                         <label className="cj-precio">
                             <span className="cj-oculto">Precio de {l.nombre}</span>
                             <input type="text" inputMode="numeric" className="sp-select" value={l.precio} disabled={disabled}
-                                placeholder="Precio" onKeyDown={volverALaPistola}
+                                placeholder="Precio" onKeyDown={terminar} data-precio={l.clave}
                                 onChange={e => cambiar(l.clave, { precio: e.target.value })} />
                         </label>
                         <span className="cj-subtotal">{formatCurrency(totalVenta([l]))}</span>

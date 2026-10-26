@@ -41,7 +41,7 @@ const CobroCaja = ({
             )}
             <button type="button" className="cj-cobrar" onClick={onCobrar} disabled={!puedeCobrar || enviando}>
                 {enviando ? 'Registrando…' : `Cobrar e imprimir${total ? ` · ${formatCurrency(total)}` : ''}`}
-                <kbd>F9</kbd>
+                <kbd>C</kbd>
             </button>
         </aside>
     );

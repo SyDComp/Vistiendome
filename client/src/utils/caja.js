@@ -1,7 +1,8 @@
 /**
  * La caja: lo que pasa cuando se escanea (o se elige) una prenda. Si ya está
  * en la venta, se suma una; si no queda más libre, se dice y no se suma.
- * Las cuentas (total, pagos) son las de la venta en el local: utils/ventaLocal.js.
+ * Las cuentas (total, pagos) están en utils/ventaLocal.js; la búsqueda, en
+ * utils/busquedaCaja.js.
  */
 import { lineaDesde } from './ventaLocal';
 
@@ -18,14 +19,4 @@ export const agregarALaVenta = (lineas, d) => {
         return { lineas, aviso: `No quedan más libres de ${d.nombre}: ya van ${ya.cantidad}.` };
     }
     return { lineas: lineas.map(l => (l === ya ? { ...l, cantidad, disponible } : l)), aviso: null };
-};
-
-/** "Cinturón M Negro CIN-M 7800000000017": lo que se busca escribiendo. */
-const textoDe = (d) => [d.nombre, d.codigo, d.barcode, ...Object.values(d.config || {})].join(' ').toLowerCase();
-
-/** Lo disponible que calza con lo escrito (todas las palabras), hasta `cuantos`. */
-export const buscarDisponible = (disponibles, texto, cuantos = 8) => {
-    const palabras = texto.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    if (!palabras.length) return [];
-    return disponibles.filter(d => palabras.every(p => textoDe(d).includes(p))).slice(0, cuantos);
 };

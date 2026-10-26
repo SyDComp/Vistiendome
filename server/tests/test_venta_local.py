@@ -101,3 +101,14 @@ def test_la_pistola_dice_si_no_existe_o_si_no_queda(client_admin, tienda):
     assert res.status_code == 404 and "999" in res.json()["detail"]
     res = client_admin.get(f"{VENTA}/codigo/VESTIDO")
     assert res.status_code == 409 and "Vestido Noemi" in res.json()["detail"]
+
+
+def test_los_productos_de_la_caja_traen_lo_libre_y_lo_mas_vendido_primero(client_admin, tienda, session):
+    _hay(session, tienda["cinturon"], 3)
+    _hay(session, tienda["suelto"], 5)
+    _vender(client_admin, [{"sku_id": tienda["cinturon"].id, "cantidad": 2, "precio": 9000}],
+            [{"monto": 18000, "medio": "Efectivo"}])
+    productos = client_admin.get(f"{VENTA}/productos").json()
+    assert [(p["nombre"], p["libres"], p["vendidos"]) for p in productos] == [("Cinturón", 1, 2), ("Pañuelo", 5, 0)]
+    variante = next(d for d in client_admin.get(f"{VENTA}/disponible").json() if d["codigo"] == "SUELTO")
+    assert variante["producto_id"] == tienda["suelto"].product_id
