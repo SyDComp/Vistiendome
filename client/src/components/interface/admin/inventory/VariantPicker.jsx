@@ -5,7 +5,6 @@ import Accordion from '../../../ui/Accordion';
 import LibraryPicker from './LibraryPicker';
 import MediaGallery from '../media/MediaGallery';
 import Imagen from '../../../ui/Imagen';
-import { generateEAN13 } from '../../../../features/productDetail/utils/skuUtils';
 
 // Calcula qué filas (índices) coinciden con los filtros rápidos activos.
 // Semántica: AND entre atributos con filtro, OR entre los valores de un mismo atributo.
@@ -409,7 +408,8 @@ const VariantPicker = ({
             return {
                 config,
                 sku,
-                barcode: generateEAN13(sku),
+                // Lo asigna el servidor al guardar: el siguiente correlativo (core/codigos_barras).
+                barcode: '',
                 price: commercialData.price || '',
                 stock: 0,
                 media_ids: [],
@@ -538,7 +538,7 @@ const VariantPicker = ({
                                         />
                                     </td>
                                     <td className="variant-picker-td sku">{row.sku}</td>
-                                    <td className="variant-picker-td barcode">{row.barcode || generateEAN13(row.sku)}</td>
+                                    <td className="variant-picker-td barcode">{row.barcode || 'Se asigna al guardar'}</td>
                                     {selectedAttrs.map(attr => (
                                         <td key={attr.id} className="variant-picker-td">
                                             <span className="variant-picker-attr-tag">

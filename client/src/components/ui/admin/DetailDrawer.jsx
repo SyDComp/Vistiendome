@@ -14,7 +14,6 @@ import './DetailDrawer.css';
 const API_BASE = '/api/v1/admin/catalog';
 
 import Skeleton, { SectionSkeleton } from '../Skeleton';
-import { generateEAN13 } from '../../../features/productDetail/utils/skuUtils';
 import { describirEntrega } from '../../../utils/entrega';
 import { etiquetaEstado } from '../../../utils/estadosPedido';
 import SeguimientoPedido from '../../interface/admin/crm/pedido/SeguimientoPedido';
@@ -615,7 +614,7 @@ const DetailDrawer = ({
                 )
             });
         } else if (currType === 'variant') {
-            const variantBarcode = currData.barcode || generateEAN13(currData.sku);
+            const variantBarcode = currData.barcode || 'Se asigna al guardar';
             s.push({
                 title: 'Configuración de Versión',
                 icon: <Tag size={18} />,

@@ -11,6 +11,7 @@ from ...core.pedidos import ciclo as ciclo_pedido
 from ...core import retiro_variantes
 from ...core import categorias as categorias_core
 from ...core import caracteristicas
+from ...core import codigos_barras
 from ...core.movimientos import tienen_historia
 from ...models.crm import CotizacionItem
 from ...models.catalog import (
@@ -55,6 +56,8 @@ router = APIRouter(dependencies=[Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"
 
 class SKUCreate(BaseModel):
     sku: str
+    # Vacío: el servidor le asigna el siguiente (core/codigos_barras). Escrito
+    # a mano: si es un EAN-13, su dígito de control tiene que cuadrar.
     barcode: Optional[str] = None
     # Siempre un monto. Un 0 en el catálogo se mostraría como "$0" en la
     # tienda: no es un precio, es uno que falta. Lo que se hace a pedido sin
@@ -77,6 +80,11 @@ class SKUCreate(BaseModel):
     sale_value: Optional[float] = None
     sale_start: Optional[datetime] = None
     sale_end: Optional[datetime] = None
+
+    @field_validator("barcode")
+    @classmethod
+    def _codigo_valido(cls, v):
+        return codigos_barras.revisar(v)
 
     @model_validator(mode="after")
     def _con_precio(self):
@@ -1307,10 +1315,10 @@ def generate_variants(data: VariantGenRequest, db: Session = Depends(get_session
         norm_combo = {normalize_char(k): normalize_opt(v) for k, v in combo.items()}
         
         sku_code = inventory_core.generate_sku_id(category.name, data.product_name, norm_combo)
-        barcode_val = inventory_core.generate_barcode_eAN13(sku_code)
         results.append({
             "sku": sku_code,
-            "barcode": barcode_val,
+            # Se asigna al guardar: una vista previa no gasta correlativos.
+            "barcode": None,
             "config": norm_combo,
             "price": 0,
             "stock": 0
@@ -1345,11 +1353,7 @@ async def create_product(data: ProductCreate, db: Session = Depends(get_session)
         db.refresh(product)
 
         for s_data in data.skus:
-            barcode_val = s_data.barcode
-            if not barcode_val:
-                barcode_val = inventory_core.generate_barcode_eAN13(s_data.sku)
-                # Ya no creamos la imagen física aquí, el frontend lo renderiza
-
+            barcode_val = s_data.barcode or codigos_barras.nuevo_codigo(db)
 
             # Normalizar config del SKU
             norm_config = {normalize_char(k): normalize_opt(v) for k, v in s_data.config.items()}
@@ -1526,7 +1530,7 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
                     # Vuelve a venderse si se había dado de baja.
                     sku.is_deleted = False
                     sku.price = s_data.price
-                    sku.barcode = s_data.barcode or (sku.barcode if sku.barcode else inventory_core.generate_barcode_eAN13(sku.sku))
+                    sku.barcode = s_data.barcode or sku.barcode or codigos_barras.nuevo_codigo(db)
                     sku.config = norm_config
                     sku.sale_type = s_data.sale_type
                     sku.sale_value = s_data.sale_value
@@ -1542,7 +1546,7 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
                     sku = SKU(
                         product_id=product.id,
                         sku=s_data.sku,
-                        barcode=s_data.barcode or inventory_core.generate_barcode_eAN13(s_data.sku),
+                        barcode=s_data.barcode or codigos_barras.nuevo_codigo(db),
                         price=s_data.price,
                         config=norm_config,
                         sale_type=s_data.sale_type,

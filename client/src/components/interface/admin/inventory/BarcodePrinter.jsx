@@ -6,7 +6,6 @@ import {
     FileText, Minus, Plus, LayoutGrid, AlignJustify, Package
 } from 'lucide-react';
 import Barcode from 'react-barcode';
-import { generateEAN13 } from '../../../../features/productDetail/utils/skuUtils';
 import { imprimirDocumento } from '../../../../utils/impresion';
 import estilosPagina from '../../../ui/impresion/PaginaEtiquetas.css?raw';
 import estilosImpresion from '../../../ui/impresion/paginas.impresion.css?raw';
@@ -128,7 +127,8 @@ const BarcodePrinter = () => {
                     }
                     grouped[s.product_id].skus.push({
                         sku: s.sku,
-                        barcode: s.barcode || generateEAN13(s.sku),
+                        // El código lo asigna el servidor (core/codigos_barras): aquí no se inventa.
+                        barcode: s.barcode,
                         config: s.config || {},
                         price: s.price
                     });
@@ -228,7 +228,7 @@ const BarcodePrinter = () => {
                     if (!next[s.sku]) {
                         next[s.sku] = {
                             sku: s.sku,
-                            barcode: s.barcode || generateEAN13(s.sku),
+                            barcode: s.barcode,
                             productName: product.name,
                             config: s.config || {},
                             price: s.price,
@@ -377,7 +377,7 @@ const BarcodePrinter = () => {
                                 {isExpanded && (
                                     <div className="barcode-printer-variants">
                                         {skus.map(s => {
-                                            const bc = s.barcode || generateEAN13(s.sku);
+                                            const bc = s.barcode;
                                             const isSel = !!selected[s.sku];
                                             const config = s.config || {};
                                             return (

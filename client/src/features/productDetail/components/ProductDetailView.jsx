@@ -10,7 +10,7 @@ import { useNotification } from '../../../context/NotificationContext.jsx';
 import { useSettings } from '../../../context/SettingsContext.jsx';
 import { getImageUrl } from '../../../lib/api/endpoints/index.js';
 import useProductDetail from '../hooks/useProductDetail';
-import { generateEAN13, formatSku } from '../utils/skuUtils';
+import { formatSku } from '../utils/skuUtils';
 import { handleShare } from '../utils/shareUtils';
 import { buildWhatsAppMessage, formatCurrency } from '../../../utils/cartUtils';
 import { valoresEnRango, aplicarDescuento } from '../../../utils/priceTiers';
@@ -228,7 +228,7 @@ const ProductDetailViewInterno = ({ producto: initialProduct, isModal = false })
                                             <div className="barcode-display-container">
                                                 <div className="barcode-wrapper">
                                                     <ReactBarcode
-                                                        value={skuActual.barcode || generateEAN13(skuActual.sku) || '000000'}
+                                                        value={skuActual.barcode || skuActual.sku || '000000'}
                                                         format="CODE128"
                                                         width={1.2}
                                                         height={40}
