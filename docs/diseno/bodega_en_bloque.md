@@ -1,6 +1,6 @@
 # Bodega: filtrar por existencias y mover varias variantes de una vez
 
-Estado: **propuesta, sin implementar** (2026-10-27). Nada de esto se programa sin visto bueno.
+Estado: **aprobado** (2026-10-27).
 
 ## El problema
 
@@ -118,10 +118,7 @@ en `inventory/bodega/`, un archivo cada una:
   "Hasta N" es la mitad), pero es otra decisión.
 - Cambios de precio o de fotos en bloque: ya existen en Producción.
 
-## Preguntas abiertas
+## Decisiones del usuario (2026-10-27)
 
-1. ¿Los filtros miran **Disponible** (lo que se puede vender) o **En bodega** (lo que hay
-   físicamente)? Recomiendo Disponible, que es lo que importa para vender.
-2. ¿Te sirve que una merma en bloque sea **todo o nada**, o prefieres que aplique lo que
-   pueda y avise del resto? Recomiendo todo o nada: es más fácil de entender y no deja
-   un lote a medias.
+1. Los filtros miran **Disponible** (lo que se puede vender).
+2. Una merma en bloque es **todo o nada**.
