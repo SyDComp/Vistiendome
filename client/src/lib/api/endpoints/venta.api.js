@@ -29,3 +29,6 @@ export const catalogoCaja = (filtros, pagina = 1) => get(`${BASE}/catalogo?${aPa
 
 /** Las variantes libres de un producto, para elegir característica por característica. */
 export const variantesDeProducto = (productoId) => get(`${BASE}/productos/${productoId}/variantes`);
+
+/** El cierre de caja de un día ('2026-10-26'; hoy si no se dice), calculado del libro de pagos. */
+export const cierreDeCaja = (fecha) => get(`${BASE}/cierre${fecha ? `?fecha=${encodeURIComponent(fecha)}` : ''}`);

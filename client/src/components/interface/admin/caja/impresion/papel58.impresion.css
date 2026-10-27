@@ -1,0 +1,56 @@
+/* El papel térmico de 58 mm de la caja: lo común del comprobante y del cierre
+   de caja. En papel, texto negro sobre blanco (ver utils/impresion.js: estas
+   hojas no usan los tokens de pantalla, a propósito).
+
+   Medido en la caja de la tienda (POS-5890F, Chrome, papel "58 x 3276mm",
+   márgenes "Ninguno"): imprime entre los ~4,4 y los ~49,6 mm de la hoja. El
+   driver declara 5 a 52,9 mm (384 puntos), pero el papel manda: desde 1 mm se
+   cortaba "OTAL", hasta 50,6 mm se cortaba el último dígito, y hasta 48 mm
+   salía entero. Va de 4,7 a 49,3 mm. El margen derecho del papel queda más
+   ancho que el izquierdo porque la impresora no imprime más allá: igualarlos
+   sería achicar el comprobante.
+   */
+
+@page {
+    size: 58mm auto;
+    margin: 0;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    color: #000;
+}
+
+.ticket {
+    width: 44.6mm;
+    margin: 0 0 0 4.7mm;
+    /* Sin relleno arriba: la impresora ya deja el avance del cabezal al corte. */
+    padding: 0 0 6mm;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    line-height: 1.3;
+}
+
+.centro { text-align: center; }
+.titulo { margin-top: 1.5mm; font-weight: 700; text-transform: uppercase; }
+
+hr {
+    border: 0;
+    border-top: 1px dashed #000;
+    margin: 1.5mm 0;
+}
+
+.fila {
+    display: flex;
+    justify-content: space-between;
+    gap: 2mm;
+}
+.fila span:last-child { white-space: nowrap; }
+.fila.total { font-size: 11pt; font-weight: 700; }
+
+.nombre { font-weight: 700; }
+.detalle { font-size: 8pt; }

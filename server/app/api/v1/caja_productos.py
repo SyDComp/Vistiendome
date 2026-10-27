@@ -1,6 +1,7 @@
 """
-El catálogo de la caja, filtrado y paginado en el servidor: con cientos de
-productos, la caja no descarga todo. La regla vive en core/caja/.
+El catálogo de la caja, filtrado y paginado en el servidor (con cientos de
+productos, la caja no descarga todo), y el cierre de caja del día. La regla
+vive en core/caja/.
 
 Los filtros llegan igual en las tres rutas:
   valor=COLOR=Negro      (uno por valor elegido; varios del mismo grupo: Negro o Azul)
@@ -8,7 +9,8 @@ Los filtros llegan igual en las tres rutas:
   palabra=vestido        (lo que el buscador no reconoció como característica)
 """
 
-from typing import List
+from datetime import date
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
@@ -80,3 +82,35 @@ def buscar(valor: List[str] = Query([]), categoria: List[int] = Query([]), palab
     """Lo que muestra el buscador mientras se escribe."""
     resultados, total = caja.buscar(db, _filtro(db, valor, categoria, palabra), cuantos)
     return Encontrado(resultados=[como_disponible(x) for x in resultados], total=total)
+
+
+class MedioCierre(BaseModel):
+    medio: str
+    cobrado: int
+    devuelto: int
+    neto: int
+    pagos: int
+
+
+class CierreCaja(BaseModel):
+    fecha: date
+    por_medio: List[MedioCierre]
+    total_neto: int
+    efectivo_en_cajon: Optional[int]   # None si no hay un medio "Efectivo"
+    con_saldo_a_favor: int
+    ventas_caja: List[dict]
+    anulados_despues: List[dict]
+
+
+@router.get("/cierre", response_model=CierreCaja)
+def cierre(fecha: Optional[date] = None, db: Session = Depends(get_session)):
+    """El cierre de caja de un día (hoy, si no se dice): se calcula del libro de pagos (core/caja/cierre.py)."""
+    c = caja.cierre(db, fecha or caja.hoy())
+    return CierreCaja(
+        fecha=c.fecha, total_neto=c.total_neto, efectivo_en_cajon=c.efectivo_en_cajon,
+        con_saldo_a_favor=c.con_saldo_a_favor,
+        por_medio=[MedioCierre(medio=m.medio, cobrado=m.cobrado, devuelto=m.devuelto, neto=m.neto, pagos=m.pagos)
+                   for m in c.por_medio],
+        ventas_caja=[vars(v) for v in c.ventas_caja],
+        anulados_despues=[vars(a) for a in c.anulados_despues],
+    )

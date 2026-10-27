@@ -1,6 +1,7 @@
 import { formatCurrency } from '../../../../../utils/cartUtils';
 import { escapar } from '../../../../../utils/impresion';
 import { imprimirEnMarco } from '../../../../../utils/imprimirEnMarco';
+import papel from '../impresion/papel58.impresion.css?raw';
 import estilos from './comprobante.impresion.css?raw';
 
 /**
@@ -28,7 +29,7 @@ const prenda = (l) => `
     </div>`;
 
 export const htmlComprobante = (c) => `
-<div class="comprobante">
+<div class="ticket">
     <div class="centro">
         <div class="tienda">${escapar(c.tienda.nombre)}</div>
         ${c.tienda.direccion ? `<div>${escapar(c.tienda.direccion)}</div>` : ''}
@@ -55,5 +56,5 @@ export const htmlComprobante = (c) => `
 export const imprimirComprobante = (comprobante) => imprimirEnMarco({
     titulo: `Comprobante N° ${comprobante.numero}`,
     cuerpo: htmlComprobante(comprobante),
-    estilos,
+    estilos: [papel, estilos],
 });

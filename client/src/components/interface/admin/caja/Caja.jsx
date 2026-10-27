@@ -5,6 +5,7 @@ import useOrdenCaracteristicas from '../../../../hooks/useOrdenCaracteristicas';
 import { pesos } from '../../../../utils/ventaLocal';
 import { loginQueVuelve } from '../../../../utils/volverTrasLogin';
 import CabeceraCaja from './CabeceraCaja';
+import CierreCaja from './cierre/CierreCaja';
 import useBuscadorCaja from './datos/useBuscadorCaja';
 import CobroCaja from './cobro/CobroCaja';
 import VentaHecha from './cobro/VentaHecha';
@@ -43,6 +44,7 @@ const Caja = () => {
 
     const [texto, setTexto] = useState('');
     const [selector, setSelector] = useState(false);
+    const [cierreAbierto, setCierreAbierto] = useState(false);
     const [marcada, setMarcada] = useState(-1);
     const [saliendo, setSaliendo] = useState(false);
 
@@ -75,10 +77,11 @@ const Caja = () => {
     useAtajosCaja({
         modo,
         alternar,
-        activo: !v.hecha && !selector,
+        activo: !v.hecha && !selector && !cierreAbierto,
         acciones: {
             buscar: () => lector.current?.focus(),
             elegir: () => setSelector(true),
+            cierre: () => setCierreAbierto(true),
             quienCompra: () => {
                 v.setSinDatos(!v.sinDatos);
                 if (v.sinDatos) enfocar('[data-clienta="rut"]');
@@ -143,6 +146,8 @@ const Caja = () => {
                         enviando={v.enviando} />
                 </main>
             )}
+
+            {cierreAbierto && <CierreCaja onCerrar={() => setCierreAbierto(false)} />}
 
             {selector && (
                 <SelectorPrendas filtrosIniciales={filtros} definiciones={definiciones} orden={orden} version={v.version}

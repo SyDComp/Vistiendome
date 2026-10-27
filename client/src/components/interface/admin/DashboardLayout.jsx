@@ -46,6 +46,7 @@ const ShippingLabelPrinter = React.lazy(() => import('./crm/ShippingLabelPrinter
 const AnalyticsModule = React.lazy(() => import('./analytics/AnalyticsModule'));
 const AdminProfile = React.lazy(() => import('./profile/AdminProfile'));
 const AjustesNegocio = React.lazy(() => import('./ajustes/AjustesNegocio'));
+const CierrePanel = React.lazy(() => import('./caja/cierre/CierrePanel'));
 
 const DashboardLayout = () => {
     const navigate = useNavigate();
@@ -155,6 +156,7 @@ const DashboardLayout = () => {
             children: [
                 // Fuera del panel, a pantalla completa: es la del PC de la tienda.
                 { label: '🛒 Caja', path: RUTA_CAJA, estado: desdeElPanel(location.pathname) },
+                { label: '🧾 Cierre de caja', path: '/admin/dashboard/crm/cierre' },
                 { label: 'Clientes', path: '/admin/dashboard/crm/clientes' },
                 { label: 'Cotizaciones', path: '/admin/dashboard/crm/cotizaciones' },
                 { label: '✂️ Orden de Corte', path: '/admin/dashboard/crm/orden-corte' },
@@ -317,6 +319,7 @@ const DashboardLayout = () => {
                             <Route path="/crm/orden-corte" element={<OrdenCorteView/>} />
                             <Route path="/crm/shipping-labels" element={<ShippingLabelPrinter/>} />
                             <Route path="/crm/propuestas" element={<PropuestasView/>} />
+                            <Route path="/crm/cierre" element={<CierrePanel/>} />
                             <Route path="/profile" element={<AdminProfile/>} />
                             <Route path="/ajustes" element={<AjustesNegocio/>} />
                             <Route path="*" element={<Navigate to="/admin/dashboard/inventory/products" />} />

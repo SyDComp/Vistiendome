@@ -9,10 +9,11 @@ export const ATAJOS = [
     { tecla: '+ −', que: 'cantidad' },
     { tecla: 'C', que: 'cobrar' },
     { tecla: 'V', que: 'vaciar' },
+    { tecla: 'D', que: 'cierre del día' },
 ];
 
 const ACCION_DE = {
-    b: 'buscar', ' ': 'elegir', p: 'quienCompra', c: 'cobrar', v: 'vaciar',
+    b: 'buscar', ' ': 'elegir', p: 'quienCompra', c: 'cobrar', v: 'vaciar', d: 'cierre',
     ArrowUp: 'subir', ArrowDown: 'bajar', '+': 'sumar', '-': 'restar',
     Delete: 'quitar', Enter: 'editarPrecio',
 };

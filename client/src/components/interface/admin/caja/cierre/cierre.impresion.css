@@ -1,0 +1,7 @@
+/* Lo propio del cierre de caja. El papel, sus medidas y lo común están en
+   impresion/papel58.impresion.css. */
+
+.tienda { font-size: 11pt; font-weight: 700; }
+.cajon { margin: 1mm 0; font-size: 12pt; font-weight: 700; text-align: center; }
+.cajon span { display: block; font-size: 8pt; font-weight: 400; text-transform: uppercase; }
+.seccion { margin: 1mm 0 0.5mm; font-weight: 700; text-transform: uppercase; font-size: 8pt; }

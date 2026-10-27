@@ -147,3 +147,28 @@ def test_el_buscador_de_la_caja_entiende_palabras_sin_tildes(client_admin, tiend
     _hay(session, tienda["suelto"], 5)
     r = client_admin.get(f"{VENTA}/buscar", params={"palabra": ["cinturones"], "valor": "TALLA=M"}).json()
     assert r["total"] == 1 and r["resultados"][0]["nombre"] == "Cinturón"
+
+
+def test_el_cierre_cuenta_todo_lo_cobrado_del_dia_por_medio(client_admin, tienda, session):
+    _hay(session, tienda["cinturon"], 5)
+    _vender(client_admin, [{"sku_id": tienda["cinturon"].id, "cantidad": 2, "precio": 9000}],
+            [{"monto": 10000, "medio": "Efectivo"}, {"monto": 8000, "medio": "Débito"}])
+    # Un abono en efectivo de un pedido que no es de la caja también está en el cajón.
+    otro = _pedido(client_admin, (tienda["cinturon"], 1))
+    client_admin.post(f"{CRM}/cotizaciones/{otro['id']}/pagos", json={"monto": 3000, "medio": "Efectivo"})
+    # Uno anotado y anulado el mismo día no cuenta.
+    mal = client_admin.post(f"{CRM}/cotizaciones/{otro['id']}/pagos", json={"monto": 999, "medio": "Efectivo"}).json()
+    pago_id = next(p["id"] for p in mal["pagos"] if p["monto"] == 999)
+    client_admin.post(f"{CRM}/cotizaciones/{otro['id']}/pagos/{pago_id}/anular", json={"motivo": "mal anotado"})
+
+    c = client_admin.get(f"{VENTA}/cierre").json()
+    assert {m["medio"]: m["neto"] for m in c["por_medio"]} == {"Efectivo": 13000, "Débito": 8000}
+    assert c["por_medio"][0]["medio"] == "Efectivo"
+    assert (c["efectivo_en_cajon"], c["total_neto"]) == (13000, 21000)
+    assert [(v["total"], v["estado"]) for v in c["ventas_caja"]] == [(18000, "DESPACHADA")]
+    assert c["anulados_despues"] == []
+
+
+def test_el_cierre_de_otro_dia_viene_vacio(client_admin, tienda, session):
+    c = client_admin.get(f"{VENTA}/cierre", params={"fecha": "2020-01-01"}).json()
+    assert (c["por_medio"], c["ventas_caja"], c["efectivo_en_cajon"]) == ([], [], None)

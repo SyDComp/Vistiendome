@@ -1,0 +1,53 @@
+/* El cierre de caja en pantalla. Solo tokens del tema. */
+
+.cc { display: grid; gap: 1rem; }
+
+.cc-dia { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.cc-fecha input { width: auto; }
+.cc-largo { font-weight: 600; text-transform: capitalize; color: var(--color-text-secondary); }
+.cc-imprimir { margin-left: auto; padding: 0.6rem 1rem; font-size: 1rem; }
+
+.cc-cuerpo { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); align-items: start; }
+
+.cc-cajon {
+    display: grid;
+    gap: 0.25rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--color-success-border-strong);
+    border-radius: 0.9rem;
+    background: var(--color-success-bg);
+    color: var(--color-success-deep);
+}
+.cc-cajon strong { font-size: 2.2rem; font-weight: 900; }
+.cc-cajon small { color: var(--color-text-muted); }
+
+.cc-bloque {
+    display: grid;
+    gap: 0.6rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.9rem;
+    background: var(--color-surface);
+}
+.cc-bloque h3 { margin: 0; font-size: 1rem; }
+
+.cc-tabla { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.cc-tabla th { text-align: left; font-weight: 600; color: var(--color-text-muted); padding: 0.3rem 0.4rem; }
+.cc-tabla td { padding: 0.35rem 0.4rem; border-top: 1px solid var(--color-border); }
+.cc-tabla th:not(:first-child), .cc-tabla td:not(:first-child) { text-align: right; }
+.cc-tabla tfoot td { font-size: 1rem; }
+
+.cc-ventas { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+.cc-ventas li { display: flex; align-items: center; gap: 0.75rem; }
+.cc-ventas li span { flex: 1; }
+
+.cc-nada, .cc-nota { margin: 0; font-size: 0.85rem; color: var(--color-text-muted); }
+
+.cc kbd {
+    padding: 0.05rem 0.4rem;
+    border: 1px solid currentColor;
+    border-bottom-width: 2px;
+    border-radius: 0.3rem;
+    font: inherit;
+    font-size: 0.78em;
+}
