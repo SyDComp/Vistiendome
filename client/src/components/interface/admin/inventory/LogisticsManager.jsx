@@ -185,7 +185,7 @@ const LogisticsManager = () => {
         {
             key: 'disponible',
             label: <Ordenable columna="disponible" nombre="Disponible" orden={orden} onOrden={setOrden} />,
-            width: '120px',
+            width: '140px',
             align: 'center',
             render: (v) => {
                 const { texto, tono } = textoDisponible(v);
