@@ -1,6 +1,10 @@
 /* Comprobante en papel térmico de 58 mm: unos 48 mm imprimibles. En papel,
    texto negro sobre blanco (ver utils/impresion.js: estas hojas no usan los
-   tokens de pantalla, a propósito). */
+   tokens de pantalla, a propósito).
+
+   Pegado a la izquierda, no centrado: la POS-5890F imprime los primeros
+   ~48 mm desde el borde izquierdo de la hoja. Centrado en 58 mm, lo último de
+   cada línea caía fuera y se cortaba ("2 x $13.990   $27.9"). */
 
 @page {
     size: 58mm auto;
@@ -17,8 +21,8 @@ html, body {
 }
 
 .comprobante {
-    width: 48mm;
-    margin: 0 auto;
+    width: 46mm;
+    margin: 0 0 0 1mm;
     padding: 2mm 0 6mm;
     font-family: Arial, Helvetica, sans-serif;
     font-size: 9pt;

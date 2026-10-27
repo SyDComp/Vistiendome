@@ -99,10 +99,15 @@ const Caja = () => {
         },
     });
 
-    // Cobrada la venta: Enter (el botón ya tiene el foco) o Esc empiezan la siguiente.
+    // Cobrada la venta: Enter o Esc empiezan la siguiente. Enter se escucha
+    // aquí y no solo en el botón: al imprimir, el foco se va al marco de
+    // impresión y el botón lo pierde. Sobre otro botón (Reimprimir), Enter es de ese botón.
     useEffect(() => {
         if (!v.hecha) return undefined;
-        const teclas = (e) => { if (e.key === 'Escape') { e.preventDefault(); nuevaVenta(); } };
+        const teclas = (e) => {
+            const enOtroBoton = e.key === 'Enter' && document.activeElement instanceof HTMLButtonElement;
+            if ((e.key === 'Escape' || e.key === 'Enter') && !enOtroBoton) { e.preventDefault(); nuevaVenta(); }
+        };
         window.addEventListener('keydown', teclas);
         return () => window.removeEventListener('keydown', teclas);
     }, [v.hecha, nuevaVenta]);
