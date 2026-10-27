@@ -1,21 +1,25 @@
 """
-Los productos para el selector visual de la caja: los que tienen algo libre
-para vender, con su foto y cuánto se vendieron, lo más vendido primero.
-Las variantes de cada uno vienen de /disponible (venta_local.py).
+El catálogo de la caja, filtrado y paginado en el servidor: con cientos de
+productos, la caja no descarga todo. La regla vive en core/caja/.
+
+Los filtros llegan igual en las tres rutas:
+  valor=COLOR=Negro      (uno por valor elegido; varios del mismo grupo: Negro o Azul)
+  categoria=3            (incluye sus subcategorías)
+  palabra=vestido        (lo que el buscador no reconoció como característica)
 """
 
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
-from sqlmodel import Session, select
+from sqlmodel import Session
 
 from app.api.deps import RequirePermiso
-from app.core.imagenes import srcset_de
-from app.core.pedidos import ciclo
-from app.core.vendidos import vendidos_por_producto
+from app.api.v1.venta_local import Disponible, como_disponible
+from app.core import caja
+from app.core.categorias import descendientes
 from app.database import get_session
-from app.models.catalog import SKU, MediaAsset, Product, ProductMediaLink
+from app.models.catalog import Category
 
 router = APIRouter(dependencies=[Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))])
 
@@ -23,48 +27,56 @@ router = APIRouter(dependencies=[Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"
 class ProductoCaja(BaseModel):
     id: int
     nombre: str
-    categoria: str = ""
     imagen: str = ""
     imagen_srcset: str = ""   # derivadas webp: la tarjeta no baja el original
-    libres: int
+    libres: int               # de lo que cumple el filtro
     vendidos: int             # en los últimos 30 días
 
 
-def _imagenes(db: Session, ids: List[int]) -> dict:
-    """{producto_id: MediaAsset}: la principal, o cualquiera si no hay principal."""
-    elegidas = {}
-    for pid, principal, asset in db.exec(
-        select(ProductMediaLink.product_id, ProductMediaLink.is_main, MediaAsset)
-        .join(MediaAsset, ProductMediaLink.media_asset_id == MediaAsset.id)
-        .where(ProductMediaLink.product_id.in_(ids))
-    ).all():
-        if pid not in elegidas or principal:
-            elegidas[pid] = asset
-    return elegidas
+class PaginaCaja(BaseModel):
+    productos: List[ProductoCaja]
+    total: int
+    pagina: int
+    paginas: int
+    piezas: List[Disponible]
+    facetas: List[dict]
 
 
-@router.get("/productos", response_model=List[ProductoCaja])
-def productos(db: Session = Depends(get_session)):
-    variantes = db.exec(
-        select(SKU, Product).join(Product, SKU.product_id == Product.id)
-        .where(SKU.is_deleted == False, Product.is_deleted == False)  # noqa: E712
-    ).all()
-    bodega = ciclo.bodega_de(db, [sku.id for sku, _ in variantes])
-    libres, nombres = {}, {}
-    for sku, producto in variantes:
-        b = bodega.get(sku.id)
-        if b and b.disponible > 0:
-            libres[producto.id] = libres.get(producto.id, 0) + b.disponible
-            nombres[producto.id] = producto
-    vendidos = vendidos_por_producto(db)
-    imagenes = _imagenes(db, list(libres))
-    salida = [
-        ProductoCaja(
-            id=pid, nombre=p.name, categoria=p.category.name if p.category else "",
-            imagen=imagenes[pid].url if pid in imagenes else "",
-            imagen_srcset=srcset_de(imagenes[pid]) if pid in imagenes else "",
-            libres=libres[pid], vendidos=vendidos.get(pid, 0),
-        )
-        for pid, p in nombres.items()
-    ]
-    return sorted(salida, key=lambda x: (-x.vendidos, x.nombre))
+class Encontrado(BaseModel):
+    resultados: List[Disponible]
+    total: int
+
+
+def _filtro(db: Session, valor: List[str], categoria: List[int], palabra: List[str]) -> caja.Filtro:
+    ids = set()
+    for cid in categoria:
+        c = db.get(Category, cid)
+        if c:
+            ids |= {c.id} | {d.id for d in descendientes(c)}
+    return caja.Filtro.desde(valor, ids, palabra)
+
+
+@router.get("/catalogo", response_model=PaginaCaja)
+def catalogo(valor: List[str] = Query([]), categoria: List[int] = Query([]), palabra: List[str] = Query([]),
+             pagina: int = Query(1, ge=1), db: Session = Depends(get_session)):
+    """Una página de productos (10: las teclas 1 a 9 y 0), las piezas únicas y los filtros con sus cuentas."""
+    p = caja.pagina(db, _filtro(db, valor, categoria, palabra), pagina)
+    return PaginaCaja(productos=p.productos, total=p.total, pagina=p.pagina, paginas=p.paginas,
+                      piezas=[como_disponible(x) for x in p.piezas], facetas=p.facetas)
+
+
+@router.get("/productos/{producto_id}/variantes", response_model=List[Disponible])
+def variantes(producto_id: int, db: Session = Depends(get_session)):
+    """Las variantes libres de un producto, para elegir característica por característica."""
+    libres = caja.variantes_libres(db, producto_id)
+    if not libres:
+        raise HTTPException(status_code=404, detail="Ese producto no tiene nada libre para vender.")
+    return [como_disponible(x) for x in libres]
+
+
+@router.get("/buscar", response_model=Encontrado)
+def buscar(valor: List[str] = Query([]), categoria: List[int] = Query([]), palabra: List[str] = Query([]),
+           cuantos: int = Query(8, ge=1, le=50), db: Session = Depends(get_session)):
+    """Lo que muestra el buscador mientras se escribe."""
+    resultados, total = caja.buscar(db, _filtro(db, valor, categoria, palabra), cuantos)
+    return Encontrado(resultados=[como_disponible(x) for x in resultados], total=total)

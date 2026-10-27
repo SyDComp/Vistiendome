@@ -5,6 +5,9 @@
  * quitar); las demás buscan en el nombre y el código. Cada palabra que se suma
  * achica la búsqueda.
  *
+ * Aquí se interpreta; buscar lo hace el servidor (core/caja, con la misma
+ * regla de comparación en core/caja/texto.py: si una cambia, cambia la otra).
+ *
  * Se compara sin tildes, sin plural y sin género ("rojas" encuentra "Rojo").
  * Las palabras de una o dos letras solo calzan exactas (la talla "S" no es
  * cualquier palabra que empiece con s).
@@ -58,22 +61,6 @@ export const interpretar = (texto, caracteristicas = []) => {
     // quedan siempre en el mismo lugar.
     const filtros = caracteristicas.map(c => porCaracteristica.get(c.name)).filter(Boolean);
     return { filtros, libres };
-};
-
-const valorDe = (config, caracteristica) => {
-    const clave = Object.keys(config || {}).find(k => k.toUpperCase() === caracteristica.toUpperCase());
-    return clave ? config[clave] : undefined;
-};
-
-/** Si algo disponible (variante o pieza única) cumple lo interpretado. */
-export const cumple = (d, { filtros, libres }) =>
-    filtros.every(f => f.valores.includes(valorDe(d.config, f.caracteristica)))
-    && libres.every(palabra => palabrasDe([d.nombre, d.codigo, d.barcode].join(' ')).some(w => calza(palabra, w)));
-
-/** Lo disponible que cumple, y cuántos son en total. */
-export const buscar = (disponibles, interpretacion, cuantos = 8) => {
-    const todos = disponibles.filter(d => cumple(d, interpretacion));
-    return { resultados: todos.slice(0, cuantos), total: todos.length };
 };
 
 /** El texto sin las palabras de un filtro: quitar la etiqueta es borrar lo que la puso. */

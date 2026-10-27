@@ -108,7 +108,42 @@ def test_los_productos_de_la_caja_traen_lo_libre_y_lo_mas_vendido_primero(client
     _hay(session, tienda["suelto"], 5)
     _vender(client_admin, [{"sku_id": tienda["cinturon"].id, "cantidad": 2, "precio": 9000}],
             [{"monto": 18000, "medio": "Efectivo"}])
-    productos = client_admin.get(f"{VENTA}/productos").json()
+    productos = client_admin.get(f"{VENTA}/catalogo").json()["productos"]
     assert [(p["nombre"], p["libres"], p["vendidos"]) for p in productos] == [("Cinturón", 1, 2), ("Pañuelo", 5, 0)]
     variante = next(d for d in client_admin.get(f"{VENTA}/disponible").json() if d["codigo"] == "SUELTO")
     assert variante["producto_id"] == tienda["suelto"].product_id
+
+
+def test_el_catalogo_de_la_caja_filtra_pagina_y_cuenta(client_admin, tienda, session):
+    from app.models.catalog import SKU, Characteristic
+    session.add(Characteristic(name="TALLA", domain=[{"value": "M"}, {"value": "L"}], is_filterable=True))
+    _hay(session, tienda["cinturon"], 3)
+    _hay(session, tienda["suelto"], 5)
+    negro = SKU(product_id=tienda["suelto"].product_id, sku="SUELTO-L", price=10000, config={"TALLA": "L"})
+    session.add(negro)
+    session.commit()
+    _hay(session, negro, 1)
+
+    todo = client_admin.get(f"{VENTA}/catalogo").json()
+    assert (todo["total"], todo["paginas"]) == (2, 1)
+    talla = next(f for f in todo["facetas"] if f["clave"] == "TALLA")
+    assert {o["valor"]: o["productos"] for o in talla["opciones"]} == {"M": 2, "L": 1}
+
+    solo_l = client_admin.get(f"{VENTA}/catalogo", params={"valor": "TALLA=L"}).json()
+    assert [p["nombre"] for p in solo_l["productos"]] == ["Pañuelo"]
+    assert solo_l["productos"][0]["libres"] == 1
+    # La faceta de Talla sigue contando las otras tallas: se puede cambiar de opción.
+    assert {o["valor"] for o in next(f for f in solo_l["facetas"] if f["clave"] == "TALLA")["opciones"]} == {"M", "L"}
+
+    accesorios = client_admin.get(f"{VENTA}/catalogo", params={"categoria": tienda["cinturon"].product.category_id}).json()
+    assert [p["nombre"] for p in accesorios["productos"]] == ["Cinturón"]
+
+    variantes = client_admin.get(f"{VENTA}/productos/{tienda['suelto'].product_id}/variantes").json()
+    assert sorted(v["codigo"] for v in variantes) == ["SUELTO", "SUELTO-L"]
+
+
+def test_el_buscador_de_la_caja_entiende_palabras_sin_tildes(client_admin, tienda, session):
+    _hay(session, tienda["cinturon"], 3)
+    _hay(session, tienda["suelto"], 5)
+    r = client_admin.get(f"{VENTA}/buscar", params={"palabra": ["cinturones"], "valor": "TALLA=M"}).json()
+    assert r["total"] == 1 and r["resultados"][0]["nombre"] == "Cinturón"

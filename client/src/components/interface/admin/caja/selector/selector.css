@@ -95,3 +95,29 @@
     right: 0.5rem;
     background: var(--color-surface);
 }
+
+/* Un filtro puesto: se ve marcado en la lista de valores. */
+.cj-sel-opcion--puesta {
+    border-color: var(--color-brand);
+    background: var(--color-brand-lighter);
+    color: var(--color-brand-dark);
+}
+
+/* El botón Filtros, cuando hay alguno puesto. */
+.cj-tarjetas--activo {
+    border-color: var(--color-brand);
+    background: var(--color-brand-lighter);
+    color: var(--color-brand-dark);
+}
+.cj-sel-cabecera .cj-tarjetas { padding: 0.5rem 0.8rem; }
+
+/* Página X de Y, con ← → */
+.cj-sel-paginas {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+.cj-sel-ayuda { margin: 0; text-align: center; }

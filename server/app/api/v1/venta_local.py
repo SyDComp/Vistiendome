@@ -13,13 +13,12 @@ from sqlmodel import Session, select
 
 from app.api.deps import RequirePermiso
 from app.api.v1.crm import leer_pedidos
+from app.core import caja
 from app.core.pedidos import ciclo, historia
 from app.core.pedidos.venta_rapida import Clienta, NoSeVende, PagoVenta, PrendaVenta, vender
-from app.core.pricing import compute_effective_price, get_chile_time
 from app.database import get_session
 from app.models.catalog import Product, SKU
 from app.models.iam import CuentaAcceso
-from app.models.piezas import EstadoPieza, PiezaUnica
 
 router = APIRouter(dependencies=[Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))])
 
@@ -67,12 +66,9 @@ class VentaEntrada(BaseModel):
     pagos: List[PagoEntrada] = []
 
 
-def _variante(sku: SKU, producto: Product, disponible: int, ahora) -> Disponible:
-    precio, _, _ = compute_effective_price(sku, producto, ahora)
-    return Disponible(
-        tipo="variante", sku_id=sku.id, producto_id=producto.id, nombre=producto.name, codigo=sku.sku, barcode=sku.barcode,
-        config=sku.config or {}, disponible=disponible, precio=round(precio) if precio else None,
-    )
+def como_disponible(x: caja.Libre) -> Disponible:
+    """Lo libre (core/caja) tal como lo recibe la caja."""
+    return Disponible(**{k: getattr(x, k) for k in Disponible.model_fields})
 
 
 @router.get("/codigo/{codigo}", response_model=Disponible)
@@ -97,30 +93,13 @@ def por_codigo(codigo: str, db: Session = Depends(get_session)):
         detalle = " / ".join(str(v) for v in (sku.config or {}).values() if v)
         raise HTTPException(status_code=409, detail=f"No queda disponible de {producto.name} ({detalle}): "
                                                      "lo que hay está apartado para pedidos o no hay en bodega.")
-    return _variante(sku, producto, libres, get_chile_time())
+    return como_disponible(caja.libres.variante(sku, producto, libres))
 
 
 @router.get("/disponible", response_model=List[Disponible])
 def disponible(db: Session = Depends(get_session)):
     """Lo que hay libre para vender: variantes con disponible > 0 y piezas únicas disponibles."""
-    variantes = db.exec(
-        select(SKU, Product).join(Product, SKU.product_id == Product.id)
-        .where(SKU.is_deleted == False, Product.is_deleted == False)  # noqa: E712
-    ).all()
-    bodega = ciclo.bodega_de(db, [sku.id for sku, _ in variantes])
-    ahora = get_chile_time()
-    filas = []
-    for sku, producto in variantes:
-        b = bodega.get(sku.id)
-        if not b or b.disponible <= 0:
-            continue
-        filas.append(_variante(sku, producto, b.disponible, ahora))
-    for pieza in db.exec(select(PiezaUnica).where(PiezaUnica.estado == EstadoPieza.DISPONIBLE)).all():
-        filas.append(Disponible(
-            tipo="pieza", pieza_id=pieza.id, nombre=pieza.nombre, codigo=f"Pieza única N° {pieza.numero}",
-            config={**(pieza.config or {}), **(pieza.config_propuesta or {})}, disponible=1,
-        ))
-    return filas
+    return [como_disponible(x) for x in caja.variantes_libres(db) + caja.piezas_libres(db)]
 
 
 @router.post("")

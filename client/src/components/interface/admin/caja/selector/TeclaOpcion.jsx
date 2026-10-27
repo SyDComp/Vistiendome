@@ -1,6 +1,10 @@
 import React from 'react';
+import { teclaDe } from '../../../../../utils/filtrosCaja';
 
-/** La tecla que elige esta opción (1 a 9). Desde la décima se elige con flechas. */
-const TeclaOpcion = ({ indice }) => (indice < 9 ? <kbd className="cj-sel-tecla">{indice + 1}</kbd> : null);
+/** La tecla que elige esta opción de la página: 1 a 9, y 0 la décima. */
+const TeclaOpcion = ({ indice }) => {
+    const tecla = teclaDe(indice);
+    return tecla ? <kbd className="cj-sel-tecla">{tecla}</kbd> : null;
+};
 
 export default TeclaOpcion;

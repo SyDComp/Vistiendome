@@ -1,11 +1,13 @@
 import { get, post } from '../client.js';
+import { aParametros } from '../../../utils/filtrosCaja';
 
-/** Venta rápida en el local (core/pedidos/venta_rapida.py en el servidor). */
+/**
+ * Venta en el local, desde la caja (core/pedidos/venta_rapida.py y core/caja
+ * en el servidor). El catálogo se filtra y pagina en el servidor: con cientos
+ * de productos, la caja no descarga todo.
+ */
 
 const BASE = '/api/v1/crm/venta-local';
-
-/** Lo que se puede vender ahora: variantes con disponible y piezas únicas disponibles. */
-export const disponibleParaVenta = () => get(`${BASE}/disponible`);
 
 /**
  * La venta completa en un paso: queda entera o no queda nada. Devuelve el pedido.
@@ -19,5 +21,11 @@ export const registrarVenta = (venta) => post(BASE, venta);
  */
 export const buscarPorCodigo = (codigo) => get(`${BASE}/codigo/${encodeURIComponent(codigo)}`);
 
-/** Los productos con algo libre, con su foto y lo vendido en 30 días; lo más vendido primero. */
-export const productosParaCaja = () => get(`${BASE}/productos`);
+/** Lo libre que cumple los filtros (utils/filtrosCaja.js): {resultados, total}. */
+export const buscarEnCaja = (filtros, cuantos = 8) => get(`${BASE}/buscar?${aParametros(filtros, { cuantos })}`);
+
+/** Una página del selector: {productos, total, pagina, paginas, piezas, facetas}. */
+export const catalogoCaja = (filtros, pagina = 1) => get(`${BASE}/catalogo?${aParametros(filtros, { pagina })}`);
+
+/** Las variantes libres de un producto, para elegir característica por característica. */
+export const variantesDeProducto = (productoId) => get(`${BASE}/productos/${productoId}/variantes`);

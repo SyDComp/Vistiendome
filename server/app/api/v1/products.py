@@ -221,12 +221,11 @@ def get_filters_metadata(db: Session = Depends(get_session)):
         ordered_from_domain = False
         if char.domain:
             ordered_from_domain = True
-            # Respetar el orden configurado (campo 'order') del dominio
-            domain_opts = sorted(
-                char.domain,
-                key=lambda o: (o.get('order', 9999) if isinstance(o, dict) else 9999)
-            )
-            for opt in domain_opts:
+            # El orden de la lista, tal como la tienda la ordena en Características.
+            # No el campo 'order' que traen las opciones del sistema: ese quedó
+            # con el número de cuando se sembraron y no se mueve al reordenar, así
+            # que el sitio y la caja mostraban órdenes distintos.
+            for opt in char.domain:
                 if isinstance(opt, dict) and 'value' in opt:
                     values.append(opt['value'])
                 elif isinstance(opt, str):

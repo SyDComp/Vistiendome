@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useCaracteristicas from '../../../../hooks/useCaracteristicas';
 import useOrdenCaracteristicas from '../../../../hooks/useOrdenCaracteristicas';
-import { buscar, interpretar } from '../../../../utils/busquedaCaja';
 import { pesos } from '../../../../utils/ventaLocal';
 import { loginQueVuelve } from '../../../../utils/volverTrasLogin';
 import CabeceraCaja from './CabeceraCaja';
+import useBuscadorCaja from './datos/useBuscadorCaja';
 import CobroCaja from './cobro/CobroCaja';
 import VentaHecha from './cobro/VentaHecha';
 import LectorCaja from './prendas/LectorCaja';
@@ -46,8 +46,7 @@ const Caja = () => {
     const [marcada, setMarcada] = useState(-1);
     const [saliendo, setSaliendo] = useState(false);
 
-    const interpretacion = useMemo(() => interpretar(texto, definiciones), [texto, definiciones]);
-    const encontrado = useMemo(() => buscar(v.disponibles, interpretacion), [v.disponibles, interpretacion]);
+    const { interpretacion, filtros, encontrado } = useBuscadorCaja(texto, definiciones, v.version);
 
     // Sin sesión, a iniciarla, y de vuelta aquí.
     useEffect(() => {
@@ -146,8 +145,7 @@ const Caja = () => {
             )}
 
             {selector && (
-                <SelectorPrendas productos={v.productos} disponibles={v.disponibles} definiciones={definiciones} orden={orden}
-                    interpretacion={texto.trim() ? interpretacion : null}
+                <SelectorPrendas filtrosIniciales={filtros} definiciones={definiciones} orden={orden} version={v.version}
                     onElegido={(d) => { v.agregar(d); setTexto(''); }}
                     onCerrar={() => setSelector(false)} />
             )}

@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useNotification } from '../../../../context/NotificationContext';
-import { buscarPorCodigo, disponibleParaVenta, productosParaCaja, registrarVenta } from '../../../../lib/api/endpoints';
+import { buscarPorCodigo, registrarVenta } from '../../../../lib/api/endpoints';
 import useAjustesNegocio from '../../../../hooks/useAjustesNegocio';
 import usePagosVenta from '../../../../hooks/usePagosVenta';
 import { agregarALaVenta } from '../../../../utils/caja';
@@ -11,8 +11,10 @@ import useImprimirComprobante from './comprobante/useImprimirComprobante';
 const EFECTIVO = 'Efectivo';
 
 /**
- * La venta que se arma en la caja: lo disponible, las prendas, quién compra,
- * los pagos, cobrar e imprimir. Sin teclado ni pantalla: eso es de Caja.jsx.
+ * La venta que se arma en la caja: las prendas, quién compra, los pagos,
+ * cobrar e imprimir. Sin teclado ni pantalla: eso es de Caja.jsx. Lo libre lo
+ * pregunta al servidor quien lo muestra (datos/); `version` cambia cuando lo
+ * libre cambia (tras una venta), para que lo vuelvan a preguntar.
  */
 export default function useVentaCaja() {
     const { toast, confirm } = useNotification();
@@ -20,8 +22,7 @@ export default function useVentaCaja() {
     const imprimir = useImprimirComprobante();
     const medios = useMemo(() => ajustes?.medios_pago || [], [ajustes]);
 
-    const [disponibles, setDisponibles] = useState([]);
-    const [productos, setProductos] = useState([]);
+    const [version, setVersion] = useState(0);
     const [lineas, setLineas] = useState([]);
     const [sinDatos, setSinDatos] = useState(true);
     const [clienta, setClienta] = useState({});
@@ -34,14 +35,6 @@ export default function useVentaCaja() {
     const total = totalVenta(lineas);
     const { pagos, cambiarPagos, reiniciar } = usePagosVenta(total, medios);
     const puedeCobrar = sePuedeVender(lineas, pagos) && (sinDatos || Boolean((clienta.rut || '').trim()));
-
-    // Lo libre, para buscar y para el selector. La pistola no depende de esto:
-    // cada código se consulta al servidor en el momento.
-    const cargarDisponibles = useCallback(() => {
-        disponibleParaVenta().then(d => setDisponibles(d || [])).catch(() => setDisponibles([]));
-        productosParaCaja().then(p => setProductos(p || [])).catch(() => setProductos([]));
-    }, []);
-    useEffect(() => { cargarDisponibles(); }, [cargarDisponibles]);
 
     // Dos lecturas seguidas pueden responder antes de que se pinte la primera:
     // la segunda tiene que sumar sobre lo que dejó la primera, no sobre lo pintado.
@@ -93,14 +86,14 @@ export default function useVentaCaja() {
             const efectivo = pagos.filter(p => p.medio === EFECTIVO).reduce((t, p) => t + pesos(p.monto), 0);
             const conCuanto = pesos(recibido);
             setHecha({ pedido, vuelto: conCuanto > efectivo ? conCuanto - efectivo : 0, recibido: conCuanto });
-            cargarDisponibles();
+            setVersion(n => n + 1);
             await imprimirComprobante(pedido, { recibido: conCuanto });
         } catch (err) {
             toast.error(mensajeDeError(err?.message, 'No se pudo registrar la venta'));
         } finally {
             setEnviando(false);
         }
-    }, [puedeCobrar, enviando, sinDatos, clienta, lineas, pagos, recibido, cargarDisponibles, imprimirComprobante, toast]);
+    }, [puedeCobrar, enviando, sinDatos, clienta, lineas, pagos, recibido, imprimirComprobante, toast]);
 
     // Una sola pregunta a la vez, aunque se aprete V de nuevo.
     const preguntando = useRef(false);
@@ -117,7 +110,7 @@ export default function useVentaCaja() {
     }, [lineas.length, confirm, nuevaVenta]);
 
     return {
-        disponibles, productos, medios, lineas, cambiarLineas, agregar, porCodigo,
+        version, medios, lineas, cambiarLineas, agregar, porCodigo,
         sinDatos, setSinDatos, clienta, setClienta, pagos, cambiarPagos, falta: restante(lineas, pagos),
         recibido, setRecibido, total, puedeCobrar, cobrar, enviando, aviso,
         hecha, imprimiendo, imprimirComprobante, nuevaVenta, vaciar,
