@@ -23,19 +23,24 @@
 .cj-marca { display: flex; align-items: baseline; gap: 0.75rem; font-weight: 700; color: var(--color-text-secondary); }
 .cj-ayuda { font-size: 0.85rem; color: var(--color-text-muted); }
 
-/* El modo, siempre a la vista: atajos (las letras mandan) o escribir. */
-.cj-modo-zona { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 0.75rem; flex-wrap: wrap; }
+/* El modo, siempre a la vista: atajos (las letras mandan) o escribir.
+   El modo arriba y las teclas abajo, en una sola línea, en los dos modos: si
+   la cabecera cambiara de alto al salir de un campo, la caja se correría bajo
+   el mouse y el clic caería en el vacío. */
+.cj-modo-zona { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+.cj-cabecera .cj-ayuda { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cj-modo {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
     padding: 0.3rem 0.75rem;
+    border: 1px solid transparent;      /* el mismo alto en los dos modos */
     border-radius: 999px;
     font-size: 0.85rem;
     font-weight: 700;
     white-space: nowrap;
 }
-.cj-modo--atajos { background: var(--color-brand); color: var(--color-surface); }
+.cj-modo--atajos { border-color: var(--color-brand); background: var(--color-brand); color: var(--color-surface); }
 .cj-modo--escribir { border: 1px solid var(--color-border-strong); background: var(--color-bg-subtle); color: var(--color-text-secondary); }
 
 .cj-volver {
