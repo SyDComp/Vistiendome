@@ -15,6 +15,13 @@
 .lote-ordenable { all: unset; cursor: pointer; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; white-space: nowrap; }
 .lote-ordenable:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 2px; border-radius: 4px; }
 
+/* Para que la barra quede fija: `sticky` se pega al primer contenedor con
+   overflow distinto de visible, y estos dos tenían `hidden`, así que la barra
+   quedaba al final de la tabla, fuera de la vista. `clip` recorta igual pero no
+   crea ese contenedor. Solo en la bodega. */
+.logistics-manager-layout,
+.admin-inventory-module:has(.logistics-manager-layout) { overflow: clip; }
+
 /* La barra de abajo, fija mientras haya elegidas. */
 .lote-barra {
     position: sticky; bottom: 16px; z-index: 20; margin-top: 16px;
