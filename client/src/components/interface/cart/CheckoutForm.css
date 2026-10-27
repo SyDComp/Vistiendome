@@ -52,10 +52,14 @@
 .form-intro { font-size: 14px; color: var(--color-text-muted); margin-bottom: 24px; line-height: 1.5; }
 
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%;}
-.input-group.full { grid-column: span 2; }
-.input-group { display: flex; flex-direction: column; gap: 8px; width: 100%;}
-.input-group label { font-size: 13px; font-weight: 700; color: var(--color-admin-dark); display: flex; align-items: center; gap: 6px; }
-.input-group input {
+/* Dentro de .checkout-form-body: el CSS se carga para toda la aplicación, y
+   el panel también usa .input-group (Redes y Contacto). Sin este límite, la
+   regla de los inputs volvía casillas de 48 px de alto y de ancho completo las
+   casillas "Negrita" y "Repetir el texto" de la barra de anuncio. */
+.checkout-form-body .input-group.full { grid-column: span 2; }
+.checkout-form-body .input-group { display: flex; flex-direction: column; gap: 8px; width: 100%;}
+.checkout-form-body .input-group label { font-size: 13px; font-weight: 700; color: var(--color-admin-dark); display: flex; align-items: center; gap: 6px; }
+.checkout-form-body .input-group input {
     height: 48px;
     padding: 0 16px;
     border-radius: 12px;
@@ -64,8 +68,8 @@
     transition: border-color 0.2s, box-shadow 0.2s;
     width: 100%;
 }
-.input-group input:focus, .styled-select:focus { outline: none; border-color: var(--color-admin-dark); box-shadow: 0 0 0 3px rgba(30, 27, 75, 0.05); }
-.input-group input.input-error { border-color: var(--color-error); background: #fffafb; }
+.checkout-form-body .input-group input:focus, .styled-select:focus { outline: none; border-color: var(--color-admin-dark); box-shadow: 0 0 0 3px rgba(30, 27, 75, 0.05); }
+.checkout-form-body .input-group input.input-error { border-color: var(--color-error); background: #fffafb; }
 .error-text { font-size: 12px; color: var(--color-error); font-weight: 600; }
 /* Dos opciones que se excluyen y hay que comparar de un
    vistazo: botones, no un desplegable que las esconde. */
@@ -136,7 +140,7 @@
 
 @media (max-width: 600px) {
     .form-grid { grid-template-columns: 1fr; }
-    .input-group.full { grid-column: span 1; }
+    .checkout-form-body .input-group.full { grid-column: span 1; }
 }
 
 /* Safari en iOS hace zoom automático al enfocar un campo con
@@ -144,7 +148,7 @@
    la clienta queda sin saber cómo volver. Solo en pantallas
    táctiles, para no alterar el diseño de escritorio. */
 @media (max-width: 768px) {
-    .input-group input,
+    .checkout-form-body .input-group input,
     .styled-select,
     .checkout-form-body textarea {
         font-size: 16px;
