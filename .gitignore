@@ -53,3 +53,9 @@ _media_sin_registrar/
 # Respaldos de datos reales generados por los scripts de mantenimiento.
 # Nunca van al repositorio: son datos de la clienta.
 respaldo_*.json
+
+# --- Manual de uso: herramienta de capturas (local) ---
+docs/manual/.venv/
+docs/manual/.sesion.json
+docs/manual/capturas/
+docs/manual/**/__pycache__/
