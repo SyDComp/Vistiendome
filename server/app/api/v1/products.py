@@ -7,6 +7,7 @@ from ...models.catalog import Product, Category, SKU, StockMovement, Characteris
 from ...core.pricing import compute_effective_price, get_chile_time
 from ...core.looks import colapsar_en_looks, imagen_de_variante, asset_de_variante
 from ...core.imagenes import srcset_de
+from ...core.portada import portadas
 from ...core.categorias import efectivos
 from pydantic import BaseModel
 
@@ -91,6 +92,7 @@ def list_products(db: Session = Depends(get_session)):
     """
     products = db.exec(select(Product).where(Product.is_deleted == False)).all()
     now = get_chile_time()
+    portada_de = portadas(db, [p.id for p in products])
 
     results = []
     for p in products:
@@ -118,17 +120,11 @@ def list_products(db: Session = Depends(get_session)):
                 on_sale=on_sale
             ))
 
-        # Encontrar imagen principal del producto
-        main_img = None
-        main_srcset = ""
-        if p.media_assets:
-            main_img = p.media_assets[0].url
-            main_srcset = srcset_de(p.media_assets[0])
-        elif p.skus and p.skus[0].media_assets:
-            asset = p.skus[0].media_assets[0]
-            main_img = asset.url
-            main_srcset = srcset_de(asset)
-            
+        # Portada del producto (la regla vive en core/portada.py)
+        asset = portada_de.get(p.id)
+        main_img = asset.url if asset else None
+        main_srcset = srcset_de(asset) if asset else ""
+
         # Encontrar el SKU que "posee" esta imagen principal para Deep Linking
         main_sku_code = None
         if main_img:
@@ -353,6 +349,7 @@ def list_looks(db: Session = Depends(get_session)):
 
     productos = db.exec(select(Product).where(Product.is_deleted == False)).all()
     now = get_chile_time()
+    portada_de = portadas(db, [p.id for p in productos])
     salida: List[LookSchema] = []
     tarjetas: List[ProductCardSchema] = []
 
@@ -374,11 +371,10 @@ def list_looks(db: Session = Depends(get_session)):
         base_min = min([s.price for s in skus] or [0])
 
         por_sku = {s.sku: s for s in skus}
-        # Respaldo de imagen: portada del producto o, si no tiene, cualquier foto
-        # de sus variantes. Una tarjeta con la foto del producto comunica más que
-        # un recuadro vacío cuando esa combinación todavía no tiene foto propia.
-        asset_portada = (p.media_assets[0] if p.media_assets else None) \
-            or next((a for a in (asset_de_variante(s) for s in skus) if a), None)
+        # Respaldo de imagen: la portada del producto (core/portada.py). Una
+        # tarjeta con la foto del producto comunica más que un recuadro vacío
+        # cuando esa combinación todavía no tiene foto propia.
+        asset_portada = portada_de.get(p.id)
         portada = asset_portada.url if asset_portada else None
         portada_srcset = srcset_de(asset_portada) if asset_portada else ""
 
@@ -531,14 +527,8 @@ def get_product_detail(
             "image_srcsets": [srcset_de(m) for m in s.media_assets],
         })
 
-    # Encontrar imagen principal (portada)
-    main_img = product.media_assets[0].url if product.media_assets else None
-    if not main_img and product.skus:
-        # Fallback a la primera imagen de variante disponible si el producto no tiene globales
-        for s in product.skus:
-            if s.media_assets:
-                main_img = s.media_assets[0].url
-                break
+    # Portada (core/portada.py), con sus derivadas también cuando sale de una variante
+    portada = portadas(db, [product.id]).get(product.id)
 
     # Estructura optimizada para DetalleProducto.jsx
     return {
@@ -548,8 +538,8 @@ def get_product_detail(
         "description": product.description,
         "specs": product.specs,
         "category": {"name": product.category.name, "slug": product.category.slug},
-        "image": main_img,
-        "image_srcset": srcset_de(product.media_assets[0]) if product.media_assets else "",
+        "image": portada.url if portada else None,
+        "image_srcset": srcset_de(portada) if portada else "",
         "images": [{"url": m.url, "srcset": srcset_de(m), "config_match": {}, "is_main": (i == 0), "ui_config": {}} for i, m in enumerate(product.media_assets)],
         "skus": skus_data,
         # `extras` -ahi vive `video_url`, entre otras cosas- faltaba en esta

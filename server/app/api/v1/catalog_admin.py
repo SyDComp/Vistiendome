@@ -21,6 +21,7 @@ from ...models.catalog import (
 )
 import string
 from ...core.imagenes import srcset_de
+from ...core.portada import portadas
 
 def normalize_char(text: str) -> str:
     """Normaliza características a MAYÚSCULAS"""
@@ -1133,24 +1134,12 @@ def list_products_admin(
             pid = sku_to_product[sid]
             stock_map[pid] = stock_map.get(pid, 0) + (qty or 0)
 
-    # 3. Carga masiva de imágenes (Optimizado: 1 query para todas las imágenes principales/fallbacks)
-    image_map = {}
-    srcset_map = {}
-    if product_ids:
-        # Obtenemos todos los links y URLs para estos productos
-        all_links = db.exec(
-            select(ProductMediaLink.product_id, ProductMediaLink.is_main, MediaAsset)
-            .join(MediaAsset, ProductMediaLink.media_asset_id == MediaAsset.id)
-            .where(ProductMediaLink.product_id.in_(product_ids))
-        ).all()
-
-        # Procesamos para elegir la mejor imagen (is_main primero, luego cualquiera)
-        for pid, is_main, asset in all_links:
-            if pid not in image_map or is_main:
-                image_map[pid] = asset.url
-                # Derivadas para las miniaturas del panel: sin esto, una grilla
-                # de tarjetas de 120 px baja los originales de ~500 KB cada uno.
-                srcset_map[pid] = srcset_de(asset)
+    # 3. La portada de cada producto (la regla vive en core/portada.py), con sus
+    #    derivadas: sin ellas, una grilla de tarjetas de 120 px baja los
+    #    originales de ~500 KB cada uno.
+    portada_de = portadas(db, product_ids)
+    image_map = {pid: a.url for pid, a in portada_de.items()}
+    srcset_map = {pid: srcset_de(a) for pid, a in portada_de.items()}
 
     # 4. Construir resultados
     results = []

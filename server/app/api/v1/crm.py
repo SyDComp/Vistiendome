@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlmodel import Session, select, func
+from sqlalchemy.orm import object_session
 from typing import List, Literal, Optional
 from datetime import date, datetime
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -20,6 +21,8 @@ from app.models.piezas import EstadoPieza
 from app.core import piezas as piezas_core
 from app.core import pagos as pagos_core
 from app.models.pagos import Pago
+from app.core.looks import asset_de_variante
+from app.core.portada import portadas
 
 router = APIRouter()
 
@@ -188,10 +191,12 @@ def _get_item_read(it: CotizacionItem) -> CotizacionItemRead:
         # Product no tiene "featured_image" (bug preexistente: esto rompía en
         # 500 CUALQUIER cotización con un ítem de SKU real, incluida la lista
         # completa de GET /crm/). La imagen del producto vive en media_assets;
-        # si el SKU tiene foto propia, es más precisa que la de portada.
-        propia = it.sku.media_assets[0].url if it.sku.media_assets else None
-        portada = it.sku.product.media_assets[0].url if it.sku.product.media_assets else None
-        it_dict["sku_image"] = propia or portada
+        # si el SKU tiene foto propia, es más precisa que la de portada
+        # (core/portada.py). La portada solo se busca si hace falta.
+        propia = asset_de_variante(it.sku)
+        if propia is None:
+            propia = portadas(object_session(it), [it.sku.product_id]).get(it.sku.product_id)
+        it_dict["sku_image"] = propia.url if propia else None
         it_dict["producto_nombre"] = it.sku.product.name
         it_dict["config"] = it.sku.config or {}
     else:
