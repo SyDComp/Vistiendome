@@ -1,5 +1,5 @@
 """Las escenas de cada capítulo del manual, por nombre."""
-from . import caja, catalogo, inicio, pedidos, taller
+from . import caja, catalogo, inicio, pedidos, sitio, taller
 
 CAPITULOS = {
     "inicio": inicio.ESCENAS,
@@ -7,4 +7,5 @@ CAPITULOS = {
     "pedidos": pedidos.ESCENAS,
     "taller": taller.ESCENAS,
     "catalogo": catalogo.ESCENAS,
+    "sitio": sitio.ESCENAS,
 }
