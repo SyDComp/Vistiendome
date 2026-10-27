@@ -11,6 +11,19 @@ import HistorialKardex from './kardex/HistorialKardex';
 import { textoDisponible } from './kardex/apartado';
 import MovimientoModal from './kardex/MovimientoModal';
 import PiezasUnicas from './kardex/PiezasUnicas';
+import FiltroExistencias from './kardex/lote/FiltroExistencias';
+import BarraSeleccion from './kardex/lote/BarraSeleccion';
+import MovimientoEnBloque from './kardex/lote/MovimientoEnBloque';
+import useSeleccion from './kardex/lote/useSeleccion';
+import { cumpleExistencia, umbralValido, ordenar, siguienteOrden } from './kardex/lote/existencias';
+
+/** Un encabezado que ordena la tabla al tocarlo: ascendente, descendente, sin orden. */
+const Ordenable = ({ columna, nombre, orden, onOrden }) => (
+    <button type="button" onClick={() => onOrden(siguienteOrden(orden, columna))} className="lote-ordenable"
+        aria-label={`Ordenar por ${nombre}`}>
+        {nombre}{orden?.columna === columna ? (orden.sentido === 'asc' ? ' ↑' : ' ↓') : ''}
+    </button>
+);
 
 const LogisticsManager = () => {
     const { toast } = useNotification();
@@ -25,6 +38,14 @@ const LogisticsManager = () => {
     // un movimiento. null = cerrado.
     const [historial, setHistorial] = useState(null);
     const [varianteAMover, setVarianteAMover] = useState(null);
+
+    // Por existencias (mira "disponible"), el orden de la tabla, y las elegidas
+    // para un movimiento en bloque (docs/diseno/bodega_en_bloque.md).
+    const [filtroExistencia, setFiltroExistencia] = useState('todas');
+    const [umbralTexto, setUmbralTexto] = useState('');
+    const [orden, setOrden] = useState(null);
+    const { elegidas, alternar, alternarTodas, limpiar } = useSeleccion();
+    const [moviendoLote, setMoviendoLote] = useState(false);
 
     const fetchBalances = useCallback(async () => {
         setLoading(true);
@@ -77,7 +98,15 @@ const LogisticsManager = () => {
 
     const handleFilterChange = (updated) => setActiveFilters(updated);
 
-    const filteredBalances = balances.filter(b => {
+    const alRegistrarLote = (r) => {
+        toast.success(`${r.movimientos} movimiento${r.movimientos !== 1 ? 's' : ''} registrado${r.movimientos !== 1 ? 's' : ''}`);
+        setMoviendoLote(false);
+        limpiar();
+        fetchBalances();
+    };
+
+    const umbral = umbralValido(umbralTexto);
+    const filteredBalances = ordenar(balances.filter(b => cumpleExistencia(b, filtroExistencia, umbral)).filter(b => {
         // El buscador de texto miraba solo el SKU y el nombre del producto.
         // Con 1049 variantes, buscar "coral" o "3xl" -que es lo que se ve en
         // la columna Variante- no encontraba nada: no es que no funcionara,
@@ -94,9 +123,26 @@ const LogisticsManager = () => {
             if (!valor) return true;
             return String(b.config?.[clave] ?? '') === valor;
         });
-    });
+    }), orden);
+
+    const idsVisibles = filteredBalances.map(b => b.sku_id);
+    const todasVisiblesElegidas = idsVisibles.length > 0 && idsVisibles.every(id => elegidas.has(id));
 
     const LOGISTICS_COLUMNS = [
+        {
+            key: 'sku_id',
+            label: (
+                <input type="checkbox" className="adm-casilla" checked={todasVisiblesElegidas}
+                    onChange={() => alternarTodas(idsVisibles)}
+                    aria-label={`Elegir las ${idsVisibles.length} filtradas`} title={`Elegir las ${idsVisibles.length} filtradas`} />
+            ),
+            width: '44px',
+            align: 'center',
+            render: (id, row) => (
+                <input type="checkbox" className="adm-casilla" checked={elegidas.has(id)}
+                    onChange={() => alternar(id)} aria-label={`Elegir ${row.sku}`} />
+            ),
+        },
         { 
             key: 'product_name', 
             label: 'Producto / SKU', 
@@ -123,7 +169,7 @@ const LogisticsManager = () => {
         {
             // Lo que hay físicamente, apartado o no.
             key: 'current_stock',
-            label: 'En bodega',
+            label: <Ordenable columna="current_stock" nombre="En bodega" orden={orden} onOrden={setOrden} />,
             width: '110px',
             align: 'center',
             render: (v) => <span className="logistics-stock-cifra">{v}</span>
@@ -131,14 +177,14 @@ const LogisticsManager = () => {
         {
             // Lo que piden los pedidos confirmados (ver core/pedidos/ciclo/).
             key: 'apartado',
-            label: 'Apartado',
+            label: <Ordenable columna="apartado" nombre="Apartado" orden={orden} onOrden={setOrden} />,
             width: '110px',
             align: 'center',
             render: (v) => <span className="logistics-stock-cifra">{v || '—'}</span>
         },
         {
             key: 'disponible',
-            label: 'Disponible',
+            label: <Ordenable columna="disponible" nombre="Disponible" orden={orden} onOrden={setOrden} />,
             width: '120px',
             align: 'center',
             render: (v) => {
@@ -166,6 +212,13 @@ const LogisticsManager = () => {
                 onFilterChange={handleFilterChange}
             />
 
+            <FiltroExistencias
+                filtro={filtroExistencia}
+                onFiltro={setFiltroExistencia}
+                umbral={umbralTexto}
+                onUmbral={setUmbralTexto}
+            />
+
             <DataTable 
                 columns={LOGISTICS_COLUMNS}
                 data={filteredBalances}
@@ -190,6 +243,17 @@ const LogisticsManager = () => {
                     </div>
                 )}
             />
+
+            <BarraSeleccion cuantas={elegidas.size} onMover={() => setMoviendoLote(true)} onQuitar={limpiar} />
+
+            {moviendoLote && (
+                <MovimientoEnBloque
+                    filas={balances.filter(b => elegidas.has(b.sku_id))}
+                    onCerrar={() => setMoviendoLote(false)}
+                    onRegistrado={alRegistrarLote}
+                    onRecargar={fetchBalances}
+                />
+            )}
 
             {varianteAMover && (
                 <MovimientoModal

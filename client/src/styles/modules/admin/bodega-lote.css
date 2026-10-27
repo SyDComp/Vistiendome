@@ -1,0 +1,54 @@
+/* Bodega: filtrar por existencias y mover varias variantes de una vez
+   (docs/diseno/bodega_en_bloque.md). */
+
+.lote-filtro { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0 16px; }
+.lote-filtro-rotulo { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-muted); margin-right: 4px; }
+.lote-filtro-opcion {
+    padding: 8px 14px; border-radius: 999px; border: 1px solid var(--color-border);
+    background: var(--color-surface); color: var(--color-text-body); font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.lote-filtro-opcion--activa { border-color: var(--color-brand); background: var(--color-brand-lighter); color: var(--color-brand); }
+.lote-filtro-numero { width: 80px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--color-border-strong); font-size: 13px; }
+
+/* El encabezado que ordena: parece texto de encabezado, se comporta como botón. */
+.lote-ordenable { all: unset; cursor: pointer; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; }
+.lote-ordenable:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 2px; border-radius: 4px; }
+
+/* La barra de abajo, fija mientras haya elegidas. */
+.lote-barra {
+    position: sticky; bottom: 16px; z-index: 20; margin-top: 16px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+    padding: 12px 16px; border-radius: 16px; background: var(--color-admin-dark); color: #fff;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+}
+.lote-barra-cuantas { font-weight: 800; margin-right: auto; }
+.lote-barra-mover, .lote-barra-quitar {
+    display: inline-flex; align-items: center; gap: 6px; padding: 10px 14px; border-radius: 10px;
+    font-weight: 800; font-size: 13px; cursor: pointer; border: 1px solid transparent;
+}
+.lote-barra-mover { background: var(--color-brand); color: #fff; }
+.lote-barra-quitar { background: transparent; color: #fff; border-color: rgba(255, 255, 255, 0.35); }
+
+/* El panel del movimiento en bloque: más ancho que el de una variante, por el conteo. */
+.lote-modal { max-width: 640px; max-height: 90vh; overflow-y: auto; }
+.lote-modos { display: flex; gap: 6px; padding: 4px; margin: 4px 0 16px; border-radius: 12px; background: var(--color-bg-subtle); }
+.lote-modo { flex: 1; padding: 10px; border: 0; border-radius: 9px; background: transparent; font-weight: 800; font-size: 13px; color: var(--color-text-muted); cursor: pointer; }
+.lote-modo--activo { background: var(--color-surface); color: var(--color-brand); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); }
+
+.lote-conteo { max-height: 320px; overflow-y: auto; border: 1px solid var(--color-border); border-radius: 12px; }
+.lote-conteo-fila { display: grid; grid-template-columns: 1fr 80px 130px; gap: 10px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--color-border-subtle); }
+.lote-conteo-fila:last-child { border-bottom: 0; }
+.lote-conteo-fila--cabecera { position: sticky; top: 0; background: var(--color-bg-subtle); font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--color-text-muted); }
+.lote-conteo-variante { font-size: 13px; color: var(--color-text-primary); }
+.lote-conteo-cifra { text-align: center; font-weight: 800; }
+.lote-conteo-entrada { display: flex; align-items: center; gap: 6px; }
+.lote-conteo-entrada .logistics-modal-input { padding: 8px; }
+.lote-conteo-suma, .lote-conteo-resta { font-style: normal; font-weight: 800; font-size: 12px; }
+.lote-conteo-suma { color: var(--color-success); }
+.lote-conteo-resta { color: var(--color-error); }
+
+.lote-rechazo { margin: 8px 0; padding-left: 18px; font-size: 13px; }
+
+@media (max-width: 600px) {
+    .lote-conteo-fila { grid-template-columns: 1fr 56px 100px; }
+}

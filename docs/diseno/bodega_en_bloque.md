@@ -82,26 +82,33 @@ comparten una referencia (`lote-<n>`), así se puede ver qué entró junto.
 
 ## Servidor
 
-- `core/bodega/lote.py` (subpaquete nuevo con fachada): las dos reglas,
-  `sumar_a_todas(db, sku_ids, tipo, cantidad, motivo)` y
-  `ajustar_a_conteo(db, filas, motivo)`. Validan todo antes de escribir y escriben en una
-  sola transacción. No saben nada de HTTP.
-- `api/v1/bodega_lote.py`: `POST /admin/catalog/kardex/lote`, una ruta delgada con el
-  mismo permiso que el resto de la bodega. Responde 409 con la lista de variantes que
-  impiden el lote (bajo cero, o cambiaron durante el conteo). **No va en
-  `catalog_admin.py`**, que ya tiene 1.900 líneas.
+- `core/bodega/` (subpaquete nuevo con fachada): `sumar.py`
+  (`sumar_a_todas(db, sku_ids, tipo, cantidad, motivo)`), `conteo.py`
+  (`ajustar_a_conteo(db, filas, motivo)`), `validar.py` (lo que todo lote cumple),
+  `rechazo.py` (`LoteInvalido`, `LoteRechazado`) y `referencia.py`. Validan todo antes de
+  escribir y agregan los movimientos a la sesión; la ruta confirma una sola vez. No saben
+  nada de HTTP.
+- `api/v1/bodega_lote.py`: `POST /admin/catalog/kardex/lote/sumar` y
+  `POST /admin/catalog/kardex/lote/conteo`, rutas delgadas con el mismo permiso que el
+  resto de la bodega. 400 si el lote está mal pedido; 409 con la lista de variantes que lo
+  impiden (bajo cero, o cambiaron durante el conteo). **No van en `catalog_admin.py`**,
+  que ya tiene 1.900 líneas.
 - Un solo aviso de "invalidar caché" por lote, no uno por variante.
 - Tope de 2.000 variantes por lote.
 
 ## Pantalla
 
-`LogisticsManager.jsx` (214 líneas) crece solo en lo que lo une; las piezas nuevas van
-en `inventory/bodega/`, un archivo cada una:
+`LogisticsManager.jsx` crece solo en lo que lo une; las piezas nuevas van en
+`inventory/kardex/lote/` (junto a lo demás de la bodega), un archivo cada una:
 
+- `existencias.js` y `enBloque.js`: las reglas sin pantalla (filtro, orden, qué falta
+  para confirmar), con sus pruebas en `__tests__/`.
 - `FiltroExistencias.jsx`: los cuatro filtros y el número N.
 - `useSeleccion.js`: qué está elegido y "elegir las filtradas".
 - `BarraSeleccion.jsx`: la barra de abajo.
-- `MovimientoEnBloque.jsx`: el panel con los dos modos.
+- `MovimientoEnBloque.jsx`: el panel y sus dos pestañas, `SumarEnBloque.jsx` y
+  `ConteoEnBloque.jsx`.
+- Estilos en `styles/modules/admin/bodega-lote.css`.
 
 ## Pruebas
 

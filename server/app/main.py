@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 
 from .database import init_db
-from .api.v1 import auth, products, admin, websockets, media, catalog_admin, catalog_collections, collections, cms, settings as site_settings, crm, geo, analytics, taller, propuestas, historia_pedido, ajustes_negocio, precios_pedido, confirmar_pedido, prendas_pedido, piezas, fecha_pedido, pagos_pedido, venta_local, politica_cambios, caja_productos
+from .api.v1 import auth, bodega_lote, products, admin, websockets, media, catalog_admin, catalog_collections, collections, cms, settings as site_settings, crm, geo, analytics, taller, propuestas, historia_pedido, ajustes_negocio, precios_pedido, confirmar_pedido, prendas_pedido, piezas, fecha_pedido, pagos_pedido, venta_local, politica_cambios, caja_productos
 
 app = FastAPI(
     title="Vistiendomé API",
@@ -31,6 +31,7 @@ app.include_router(taller.router, prefix="/api/v1/ordenes-corte", tags=["Órdene
 app.include_router(propuestas.router, prefix="/api/v1/propuestas", tags=["Opciones propuestas"])
 app.include_router(catalog_admin.router, prefix="/api/v1/admin/catalog", tags=["Gestión de Catálogo"])
 app.include_router(catalog_collections.router, prefix="/api/v1/admin/catalog", tags=["Colecciones"])
+app.include_router(bodega_lote.router, prefix="/api/v1/admin/catalog", tags=["Bodega en bloque"])
 app.include_router(admin.router, prefix="/api/v1/admin", tags=["Administración"])
 app.include_router(site_settings.router, prefix="/api/v1/settings", tags=["Configuraciones"])
 app.include_router(media.router, prefix="/api/v1/media", tags=["Medios"])
