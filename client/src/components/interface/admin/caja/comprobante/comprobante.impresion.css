@@ -2,11 +2,14 @@
    texto negro sobre blanco (ver utils/impresion.js: estas hojas no usan los
    tokens de pantalla, a propósito).
 
-   Medido en la caja de la tienda con una regla impresa (POS-5890F, Chrome,
-   papel "58 x 3276mm", márgenes "Ninguno"): en la hoja de 58 mm imprime entre
-   los 4,3 y los 51 mm, unos 46,7 mm útiles. Va de 4,6 a 50,6 mm, con 0,3 mm de
-   resguardo a cada lado: así usa casi todo el ancho y los dos márgenes del
-   papel quedan parejos (con 5 a 48 mm, el derecho se veía más grande). */
+   Medido en la caja de la tienda (POS-5890F, Chrome, papel "58 x 3276mm",
+   márgenes "Ninguno"): imprime entre los ~4,4 y los ~49,6 mm de la hoja. El
+   driver declara 5 a 52,9 mm (384 puntos), pero el papel manda: desde 1 mm se
+   cortaba "OTAL", hasta 50,6 mm se cortaba el último dígito, y hasta 48 mm
+   salía entero. Va de 4,7 a 49,3 mm. El margen derecho del papel queda más
+   ancho que el izquierdo porque la impresora no imprime más allá: igualarlos
+   sería achicar el comprobante.
+   */
 
 @page {
     size: 58mm auto;
@@ -23,8 +26,8 @@ html, body {
 }
 
 .comprobante {
-    width: 46mm;
-    margin: 0 0 0 4.6mm;
+    width: 44.6mm;
+    margin: 0 0 0 4.7mm;
     /* Sin relleno arriba: la impresora ya deja el avance del cabezal al corte. */
     padding: 0 0 6mm;
     font-family: Arial, Helvetica, sans-serif;
