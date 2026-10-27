@@ -22,10 +22,11 @@ def _zona(p, selectores):
     if isinstance(selectores, str):
         selectores = (selectores,)
     cajas = [p.locator(s).first.bounding_box() for s in selectores]
+    ventana = p.viewport_size or VENTANA
     x0 = max(min(c["x"] for c in cajas) - MARGEN_RECORTE, 0)
     y0 = max(min(c["y"] for c in cajas) - MARGEN_RECORTE, 0)
-    x1 = min(max(c["x"] + c["width"] for c in cajas) + MARGEN_RECORTE, VENTANA["width"])
-    y1 = min(max(c["y"] + c["height"] for c in cajas) + MARGEN_RECORTE, VENTANA["height"])
+    x1 = min(max(c["x"] + c["width"] for c in cajas) + MARGEN_RECORTE, ventana["width"])
+    y1 = min(max(c["y"] + c["height"] for c in cajas) + MARGEN_RECORTE, ventana["height"])
     return {"x": x0, "y": y0, "width": x1 - x0, "height": y1 - y0}
 
 
