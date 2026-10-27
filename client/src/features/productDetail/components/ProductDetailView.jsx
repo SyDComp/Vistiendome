@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { ChevronLeft, Share2, ShieldCheck, Truck, MessageCircle, ShoppingBag, Barcode as BarcodeIcon, Users } from 'lucide-react';
-import ReactBarcode from 'react-barcode';
+import CodigoBarras from '../../../components/ui/CodigoBarras';
 import ProductPreviewCarousel from './ProductPreviewCarousel';
 import VariantSelector from './VariantSelector';
 import VariantSelectionDrawer from './VariantSelectionDrawer';
@@ -215,25 +215,25 @@ const ProductDetailViewInterno = ({ producto: initialProduct, isModal = false })
                                         <div className={`product-sku-pill ${showBarcode ? 'has-barcode' : ''}`}>
                                             <span className="sku-label">SKU</span>
                                             <span className="sku-val">{formatSku(skuActual.sku)}</span>
-                                            <button
-                                                onClick={() => setShowBarcode(!showBarcode)}
-                                                className={`barcode-toggle-btn ${showBarcode ? 'active' : ''}`}
-                                                title="Ver código de barras"
-                                            >
-                                                <BarcodeIcon size={14} />
-                                            </button>
+                                            {skuActual.barcode && (
+                                                <button
+                                                    onClick={() => setShowBarcode(!showBarcode)}
+                                                    className={`barcode-toggle-btn ${showBarcode ? 'active' : ''}`}
+                                                    title="Ver código de barras"
+                                                >
+                                                    <BarcodeIcon size={14} />
+                                                </button>
+                                            )}
                                         </div>
 
-                                        {showBarcode && (
+                                        {showBarcode && skuActual.barcode && (
                                             <div className="barcode-display-container">
                                                 <div className="barcode-wrapper">
-                                                    <ReactBarcode
-                                                        value={skuActual.barcode || skuActual.sku || '000000'}
-                                                        format="CODE128"
+                                                    <CodigoBarras
+                                                        codigo={skuActual.barcode}
                                                         width={1.2}
                                                         height={40}
                                                         fontSize={12}
-                                                        displayValue={true}
                                                         margin={0}
                                                         background="transparent"
                                                     />

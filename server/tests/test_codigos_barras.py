@@ -57,3 +57,24 @@ def test_un_codigo_que_no_cuadra_no_se_guarda(client_admin, session):
         "skus": [{"sku": "V-S", "price": 1000, "config": {"TALLA": "S"}, "barcode": "5915697439607"}],
     })
     assert res.status_code == 422 and "debería ser 4" in res.text
+
+
+def test_la_ficha_del_sitio_trae_el_codigo_de_la_etiqueta(session):
+    """
+    Reportado: la ficha del sitio dibujaba el texto del SKU (45 caracteres) en
+    vez del código de la etiqueta, porque la ficha no recibía `barcode`.
+    """
+    from app.api.v1 import products
+    from app.models.catalog import Category, Product, SKU
+
+    cat = Category(name="Vestimenta", slug="vestimenta")
+    session.add(cat)
+    session.commit()
+    p = Product(name="Vestido Noemi", slug="vestido-noemi", description="", category_id=cat.id)
+    session.add(p)
+    session.commit()
+    session.add(SKU(product_id=p.id, sku="NOE-VES_NOE-REDON-34-BAJ_ROD-TEL_SOF-12-MOSTA", price=16900,
+                    config={"TALLA": "12"}, barcode=codigo_desde(978)))
+    session.commit()
+    ficha = products.get_product_detail(str(p.id), db=session)
+    assert ficha["skus"][0]["barcode"] == codigo_desde(978)

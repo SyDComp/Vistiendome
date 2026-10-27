@@ -5,7 +5,7 @@ import {
     Layers, Settings2, RefreshCw, Maximize2, X, Info, BarChart2,
     FileText, Minus, Plus, LayoutGrid, AlignJustify, Package
 } from 'lucide-react';
-import Barcode from 'react-barcode';
+import CodigoBarras from '../../../ui/CodigoBarras';
 import { imprimirDocumento } from '../../../../utils/impresion';
 import estilosPagina from '../../../ui/impresion/PaginaEtiquetas.css?raw';
 import estilosImpresion from '../../../ui/impresion/paginas.impresion.css?raw';
@@ -598,9 +598,8 @@ const BarcodePrinter = () => {
                     <div ref={barcodeContainerRef} className="barcode-printer-hidden-container">
                         {[...new Set(previewSlots.map(s => s.barcode))].map(bc => (
                             <div key={bc} data-bc={bc}>
-                                <Barcode
-                                    value={bc || '0000000000000'}
-                                    format="CODE128"
+                                <CodigoBarras
+                                    codigo={bc}
                                     width={labelCfg.bcWidth}
                                     height={labelCfg.bcHeight * (showSkuText ? 1 : 1.2)}
                                     fontSize={labelCfg.bcFontSize}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Edit2, Save, Trash2, ArrowLeft, Image as ImageIcon, Sparkles, Folder, Tag, Layers, FileText, Check, LayoutDashboard, Database, ChevronRight, Share2, Upload, AlertCircle, Maximize2, X, Package, FolderOpen, RefreshCw, BarChart2, Info, Lock, ChevronLeft, Plus, Hash, List, Palette, LayoutList, Users, Mail, Printer } from 'lucide-react';
-import Barcode from 'react-barcode';
+import CodigoBarras from '../CodigoBarras';
 import Button from '../Button';
 import MediaGallery from '../../interface/admin/media/MediaGallery';
 import LibraryPicker from '../../interface/admin/inventory/LibraryPicker';
@@ -629,7 +629,9 @@ const DetailDrawer = ({
                 title: 'Código de Barras',
                 icon: <Tag size={18} />,
                 type: 'barcode-visual',
-                value: variantBarcode,
+                // El código de verdad, no `variantBarcode`: ese trae el aviso
+                // "Se asigna al guardar", que se dibujaba como si fuera un código.
+                value: currData.barcode,
                 sku: currData.sku,
                 config_str: Object.values(currData.config || {}).join(' / ') || 'Producto Base'
             });
@@ -1444,7 +1446,7 @@ const DetailDrawer = ({
                                 {section.type === 'barcode-visual' && section.value && (
                                     <div className="detail-drawer-barcode-box">
                                         <div className="detail-drawer-barcode-scroll">
-                                            <Barcode value={section.value} format="CODE128" background="transparent" lineColor="#1e1b4b" height={80} margin={0} displayValue={false} />
+                                            <CodigoBarras codigo={section.value} background="transparent" lineColor="#1e1b4b" height={80} margin={0} displayValue={false} />
                                         </div>
                                         <div className="detail-drawer-barcode-texts">
                                             <span className="detail-drawer-barcode-value">

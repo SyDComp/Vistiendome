@@ -19,7 +19,7 @@ import QuickPeek from '../../../ui/admin/QuickPeek';
 import { useNotification } from '../../../../context/NotificationContext';
 import { useLocation } from 'react-router-dom';
 import { Package, Eye, Barcode as BarcodeIcon, AlertTriangle } from 'lucide-react';
-import ReactBarcode from 'react-barcode';
+import CodigoBarras from '../../../ui/CodigoBarras';
 import { useHasta } from '../../../../hooks/useCorte';
 
 const API_BASE = `/api/v1/admin/catalog`;
@@ -44,7 +44,7 @@ const SkuCell = ({ sku, barcodeValue }) => {
             </div>
             {show && (
                 <div className="sku-barcode-container">
-                    <ReactBarcode value={barcodeValue || sku || '000000'} format="CODE128" width={1.2} height={30} fontSize={10} displayValue={true} margin={0} background="transparent" />
+                    <CodigoBarras codigo={barcodeValue} width={1.2} height={30} fontSize={10} margin={0} background="transparent" />
                 </div>
             )}
         </div>

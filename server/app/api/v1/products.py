@@ -515,6 +515,9 @@ def get_product_detail(
         skus_data.append({
             "id": s.id,
             "sku": s.sku,
+            # El código de la etiqueta: la ficha lo muestra para la caja. Sin
+            # él, la ficha dibujaba el texto del SKU, que la caja no reconoce.
+            "barcode": s.barcode,
             "config": s.config,
             "price": eff_price,
             "original_price": s.price,
