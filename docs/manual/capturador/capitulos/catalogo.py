@@ -66,6 +66,34 @@ def _kardex(p):
     p.wait_for_timeout(600)
 
 
+def _elegidas(p):
+    """Noemi azul rey con 10 o menos disponibles, ordenadas, y tres elegidas."""
+    _bodega_noemi(p)
+    p.get_by_role("radio", name="Hasta…").click()
+    p.locator(".lote-filtro-numero").fill("10")
+    p.get_by_role("button", name="Ordenar por Disponible").click()
+    for i in range(3):
+        p.locator(f"tbody tr >> nth={i} >> input[type=checkbox]").check()
+    p.wait_for_timeout(500)
+
+
+def _en_bloque(modo):
+    """El panel del movimiento en bloque, lleno pero sin confirmar."""
+    def preparar(p):
+        _elegidas(p)
+        p.locator(".lote-barra-mover").click()
+        p.wait_for_selector(".lote-modal")
+        if modo == "conteo":
+            p.get_by_role("tab", name="Conteo").click()
+            p.locator(".lote-conteo input >> nth=0").fill("8")
+            p.locator("#lote-motivo").fill("Inventario de fin de mes")
+        else:
+            p.locator("#lote-cantidad").fill("2")
+            p.locator("#lote-motivo").fill("Llegó la partida del taller")
+        p.wait_for_timeout(400)
+    return preparar
+
+
 def _etiquetas(p):
     p.locator(".barcode-printer-product-row", has_text="Vestido Noemi").click()
     p.wait_for_selector(".barcode-printer-variant-row")
@@ -143,8 +171,8 @@ ESCENAS = [
         Marca('th:has-text("En bodega")', 3),
         Marca('th:has-text("Apartado")', 4),
         Marca('th:has-text("Disponible")', 5, esquina="arriba-derecha"),
-        Marca('tbody tr:has-text("SOF-12-34") >> button >> nth=0', 6, forma="circulo"),
-        Marca('tbody tr:has-text("SOF-12-34") >> button >> nth=1', 7, forma="circulo"),
+        Marca('tbody tr >> nth=0 >> button >> nth=0', 6, forma="circulo"),
+        Marca('tbody tr >> nth=0 >> button >> nth=1', 7, forma="circulo"),
     ]),
     Escena("05-10-ajuste", f"{INV}/bodega", preparar=_ajuste, recorte=".logistics-modal-content", marcas=[
         Marca(".logistics-type-btns", 1),
@@ -157,6 +185,26 @@ ESCENAS = [
         Marca(".logistics-drawer-stock", 1),
         Marca(".logistics-history-item >> nth=0", 2),
         Marca(".logistics-history-item >> nth=0 >> .logistics-history-note", 3, esquina="abajo-izquierda"),
+    ]),
+    Escena("05-13-elegir", f"{INV}/bodega", preparar=_elegidas, recorte=(".lote-filtro", ".lote-barra"), marcas=[
+        Marca(".lote-filtro", 1),
+        Marca(".lote-ordenable:has-text('Disponible')", 2, esquina="arriba-derecha"),
+        Marca("thead input[type=checkbox]", 3, forma="circulo"),
+        Marca("tbody tr >> nth=0 >> input[type=checkbox]", 4, forma="circulo"),
+        Marca(".lote-barra-mover", 5, esquina="arriba-derecha"),
+    ]),
+    Escena("05-14-sumar", f"{INV}/bodega", preparar=_en_bloque("sumar"), recorte=".lote-modal", marcas=[
+        Marca(".lote-modos", 1),
+        Marca(".lote-modal .logistics-type-btns", 2),
+        Marca("#lote-cantidad", 3),
+        Marca("#lote-motivo", 4),
+        Marca(".lote-modal .logistics-modal-btn-confirm", 5, esquina="arriba-derecha"),
+    ]),
+    Escena("05-15-conteo", f"{INV}/bodega", preparar=_en_bloque("conteo"), recorte=".lote-modal", marcas=[
+        Marca(".lote-conteo-fila--cabecera", 1),
+        Marca(".lote-conteo input >> nth=0", 2),
+        Marca(".lote-conteo-fila >> nth=1 >> em", 3, forma="circulo"),
+        Marca(".lote-modal .logistics-modal-btn-confirm", 4, esquina="arriba-derecha"),
     ]),
     Escena("05-12-etiquetas", f"{INV}/barcodes", preparar=_etiquetas, recorte=".barcode-printer-container", marcas=[
         Marca(".barcode-printer-variant-row >> nth=0", 1),
