@@ -16,6 +16,7 @@ import ExplorerView from './features/catalog/components/ExplorerView'
 import ColeccionesIndex from './components/interface/vistas/ColeccionesIndex'
 import ProductDetailView from './features/productDetail/components/ProductDetailView'
 import NoEncontrada from './components/interface/vistas/NoEncontrada'
+import RedDeModulo from './components/ui/admin/RedDeModulo'
 
 // Rutas lazy-loadadas (pesadas o secundarias)
 const SuperSetup = React.lazy(() => import('./components/interface/admin/SuperSetup'))
@@ -81,7 +82,7 @@ function App() {
                 <Route path="/admin/dashboard/*" element={<DashboardLayout/>} />
                 <Route path="/admin/print/pedido/:id" element={<PedidoDetalle/>} />
                 {/* La caja del local: pantalla completa, sin el menú del panel. */}
-                <Route path="/admin/caja" element={<Caja/>} />
+                <Route path="/admin/caja" element={<RedDeModulo><Caja/></RedDeModulo>} />
               </Routes>
 
               {/* Ruta para el Modal (Capa Superior) */}

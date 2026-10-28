@@ -1,0 +1,14 @@
+/* El aviso que queda en lugar de un módulo del panel que se cayó (RedDeModulo). */
+.red-modulo {
+    max-width: 28rem;
+    margin: 4rem auto;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+}
+.red-modulo-icono { color: var(--color-error-strong); margin-bottom: 0.75rem; }
+.red-modulo-titulo { font-size: 1.125rem; font-weight: 800; margin: 0 0 0.5rem; }
+.red-modulo-texto { font-size: 0.875rem; margin: 0 0 1.25rem; opacity: 0.8; }
+.red-modulo-boton { display: inline-flex; align-items: center; gap: 0.5rem; }

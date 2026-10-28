@@ -1,5 +1,6 @@
 import LogoVistiendome from '../../ui/LogoVistiendome';
 import SuspenseFallback from '../../ui/SuspenseFallback';
+import RedDeModulo from '../../ui/admin/RedDeModulo';
 import { useHasta, CORTES } from '../../../hooks/useCorte';
 import React, { useState, useEffect, Suspense } from 'react';
 import { Routes, Route, useNavigate, Navigate, Link, useLocation } from 'react-router-dom';
@@ -293,7 +294,9 @@ const DashboardLayout = () => {
                         {/* El indicador va AQUI DENTRO y no envolviendo el panel
                             entero: al cambiar de modulo se recarga el area de
                             contenido, mientras la barra lateral se queda
-                            quieta. */}
+                            quieta. La red, por fuera, por lo mismo: si un
+                            modulo se cae, el menu sigue. */}
+                        <RedDeModulo key={location.pathname}>
                         <Suspense fallback={<SuspenseFallback/>}>
                         <Routes>
                             <Route path="/" element={<Navigate to="/admin/dashboard/inventory/products" />} />
@@ -325,6 +328,7 @@ const DashboardLayout = () => {
                             <Route path="*" element={<Navigate to="/admin/dashboard/inventory/products" />} />
                         </Routes>
                         </Suspense>
+                        </RedDeModulo>
                     </div>
                 </div>
             </main>
