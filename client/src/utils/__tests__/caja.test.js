@@ -18,4 +18,10 @@ describe('caja', () => {
         expect(lineas).toBe(dos);
         expect(aviso).toMatch(/No quedan más libres de Cinturón/);
     });
+
+    it('lo que se muestra sin stock no entra a la venta, y se dice', () => {
+        const { lineas, aviso } = agregarALaVenta([], { ...cinturon, disponible: 0 });
+        expect(lineas).toEqual([]);
+        expect(aviso).toMatch(/No hay stock de Cinturón/);
+    });
 });

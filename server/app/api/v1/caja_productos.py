@@ -69,11 +69,14 @@ def catalogo(valor: List[str] = Query([]), categoria: List[int] = Query([]), pal
 
 @router.get("/productos/{producto_id}/variantes", response_model=List[Disponible])
 def variantes(producto_id: int, db: Session = Depends(get_session)):
-    """Las variantes libres de un producto, para elegir característica por característica."""
-    libres = caja.variantes_libres(db, producto_id)
-    if not libres:
-        raise HTTPException(status_code=404, detail="Ese producto no tiene nada libre para vender.")
-    return [como_disponible(x) for x in libres]
+    """
+    Las variantes de un producto, con su disponible, para elegir característica
+    por característica: las que no tienen salen apagadas ("no queda").
+    """
+    todas = caja.variantes_del_catalogo(db, producto_id)
+    if not todas:
+        raise HTTPException(status_code=404, detail="Ese producto no tiene variantes.")
+    return [como_disponible(x) for x in todas]
 
 
 @router.get("/buscar", response_model=Encontrado)

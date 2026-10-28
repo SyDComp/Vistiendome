@@ -121,3 +121,6 @@
     color: var(--color-text-secondary);
 }
 .cj-sel-ayuda { margin: 0; text-align: center; }
+/* Un producto sin stock: sale, apagado, y se puede abrir para ver sus variantes. */
+.cj-sel-tarjeta--sin { border-style: dashed; background: var(--color-bg-subtle); color: var(--color-text-muted); }
+.cj-sel-tarjeta--sin .cj-sel-foto { opacity: 0.55; }

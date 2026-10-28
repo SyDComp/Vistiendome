@@ -720,9 +720,9 @@ Si el pago era de un día anterior, el **Cierre de caja** de ese día lo sigue c
 
 En la portada y en las páginas de atención al cliente, los cambios quedan en borrador hasta apretar **Guardar** arriba de la página. El **Guardar cambios** de un bloque o el **Guardar** del estudio solo lo dejan en el borrador (capítulo 6).
 
-### La caja no muestra un producto en las tarjetas
+### Un producto sale "Sin stock" en la caja
 
-Las tarjetas de la caja muestran solo lo que tiene unidades libres en bodega. Un producto sin existencias no aparece hasta que entre mercadería (capítulo 5, La bodega).
+La caja muestra todo lo que calza con la búsqueda, también lo que no tiene unidades libres en bodega: sale al final, apagado y con "Sin stock". Se puede abrir para ver sus variantes, pero no se puede vender hasta que entre mercadería (capítulo 5, La bodega).
 
 ## Guía rápida de la caja
 

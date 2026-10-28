@@ -1,6 +1,7 @@
 """
-Una página del selector de la caja: los productos con algo libre que cumple
-el filtro (lo más vendido primero), las piezas únicas que lo cumplen, y las
+Una página del selector de la caja: los productos con alguna variante que
+cumple el filtro (los que tienen stock primero, y entre ellos lo más vendido;
+los sin stock también salen, con 0 libres), las piezas únicas que lo cumplen, y las
 facetas: por cada filtro posible, sus opciones y cuántos productos quedarían
 al elegirla. Los filtros son la Categoría y las características que la tienda
 marca "Filtro: SÍ", en su orden (decisión del usuario 2026-10-26: sin precio).
@@ -16,7 +17,7 @@ from ...models.catalog import Category, Characteristic
 from ..vendidos import vendidos_por_producto
 from .filtro import Filtro, cumple, valor_de
 from .fotos import fotos
-from .libres import Libre, piezas_libres, variantes_libres
+from .libres import Libre, piezas_libres, variantes_del_catalogo
 
 POR_PAGINA = 10   # las teclas 1 a 9 y 0
 
@@ -78,10 +79,11 @@ def _facetas(db: Session, libres: List[Libre], filtro: Filtro) -> List[dict]:
 
 
 def pagina(db: Session, filtro: Filtro, numero: int = 1, por_pagina: int = POR_PAGINA) -> Pagina:
-    libres = variantes_libres(db)
+    libres = variantes_del_catalogo(db)
     cumplen = _productos_de([x for x in libres if cumple(x, filtro)])
     vendidos = vendidos_por_producto(db)
-    orden = sorted(cumplen, key=lambda pid: (-vendidos.get(pid, 0), cumplen[pid][0].nombre))
+    hay = {pid: sum(x.disponible for x in vs) for pid, vs in cumplen.items()}
+    orden = sorted(cumplen, key=lambda pid: (hay[pid] <= 0, -vendidos.get(pid, 0), cumplen[pid][0].nombre))
     paginas = max(1, math.ceil(len(orden) / por_pagina))
     numero = min(max(1, numero), paginas)
     ids = orden[(numero - 1) * por_pagina: numero * por_pagina]
@@ -89,7 +91,7 @@ def pagina(db: Session, filtro: Filtro, numero: int = 1, por_pagina: int = POR_P
     productos = [{
         "id": pid, "nombre": cumplen[pid][0].nombre,
         "imagen": foto.get(pid, ("", ""))[0], "imagen_srcset": foto.get(pid, ("", ""))[1],
-        "libres": sum(x.disponible for x in cumplen[pid]), "vendidos": vendidos.get(pid, 0),
+        "libres": hay[pid], "vendidos": vendidos.get(pid, 0),
     } for pid in ids]
     # Las piezas únicas no tienen categoría: con una categoría elegida, no van.
     piezas = [] if filtro.categorias else [p for p in piezas_libres(db) if cumple(p, filtro)]

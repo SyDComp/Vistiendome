@@ -2,6 +2,7 @@ import React, { forwardRef, useState } from 'react';
 import { LayoutGrid, Search, X } from 'lucide-react';
 import { formatCurrency } from '../../../../../utils/cartUtils';
 import { sinFiltro } from '../../../../../utils/busquedaCaja';
+import { sinStock } from '../../../../../utils/caja';
 
 const MINIMO_PARA_SUGERIR = 2;
 
@@ -68,11 +69,12 @@ const LectorCaja = forwardRef(({ texto, onTexto, interpretacion, encontrado, onE
                 <ul className="cj-sugeridos" role="listbox" aria-label="Prendas que calzan">
                     {sugeridos.map((d, i) => (
                         <li key={d.sku_id || d.pieza_id} role="option" aria-selected={i === marcado}>
-                            <button type="button" className={`cj-sugerido${i === marcado ? ' cj-sugerido--marcado' : ''}`}
+                            <button type="button"
+                                className={`cj-sugerido${i === marcado ? ' cj-sugerido--marcado' : ''}${sinStock(d) ? ' cj-sugerido--sin' : ''}`}
                                 onMouseDown={e => e.preventDefault()} onClick={() => elegir(d)}>
                                 <span><strong>{d.nombre}</strong> {Object.values(d.config || {}).join(' / ')}</span>
                                 <span className="cj-sugerido-detalle">
-                                    {d.tipo === 'pieza' ? 'pieza única' : `${d.disponible} libres`}
+                                    {d.tipo === 'pieza' ? 'pieza única' : sinStock(d) ? 'sin stock' : `${d.disponible} libres`}
                                     {d.precio ? ` · ${formatCurrency(d.precio)}` : ''}
                                 </span>
                             </button>

@@ -9,6 +9,6 @@ from .buscar import buscar
 from .cierre import Cierre, cierre, hoy
 from .catalogo import Pagina, pagina
 from .filtro import Filtro
-from .libres import Libre, piezas_libres, variantes_libres
+from .libres import Libre, piezas_libres, variantes_del_catalogo, variantes_libres
 
-__all__ = ["Cierre", "cierre", "hoy", "Filtro", "Libre", "Pagina", "buscar", "pagina", "piezas_libres", "variantes_libres"]
+__all__ = ["Cierre", "cierre", "hoy", "Filtro", "Libre", "Pagina", "buscar", "pagina", "piezas_libres", "variantes_del_catalogo", "variantes_libres"]

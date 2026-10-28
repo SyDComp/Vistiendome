@@ -109,7 +109,9 @@ def test_los_productos_de_la_caja_traen_lo_libre_y_lo_mas_vendido_primero(client
     _vender(client_admin, [{"sku_id": tienda["cinturon"].id, "cantidad": 2, "precio": 9000}],
             [{"monto": 18000, "medio": "Efectivo"}])
     productos = client_admin.get(f"{VENTA}/catalogo").json()["productos"]
-    assert [(p["nombre"], p["libres"], p["vendidos"]) for p in productos] == [("Cinturón", 1, 2), ("Pañuelo", 5, 0)]
+    # El vestido no tiene stock: sale igual, al final y con 0 libres, no se esconde.
+    assert [(p["nombre"], p["libres"], p["vendidos"]) for p in productos] == [
+        ("Cinturón", 1, 2), ("Pañuelo", 5, 0), ("Vestido Noemi", 0, 0)]
     variante = next(d for d in client_admin.get(f"{VENTA}/disponible").json() if d["codigo"] == "SUELTO")
     assert variante["producto_id"] == tienda["suelto"].product_id
 
@@ -125,9 +127,9 @@ def test_el_catalogo_de_la_caja_filtra_pagina_y_cuenta(client_admin, tienda, ses
     _hay(session, negro, 1)
 
     todo = client_admin.get(f"{VENTA}/catalogo").json()
-    assert (todo["total"], todo["paginas"]) == (2, 1)
+    assert (todo["total"], todo["paginas"]) == (3, 1)   # el vestido, sin stock, también
     talla = next(f for f in todo["facetas"] if f["clave"] == "TALLA")
-    assert {o["valor"]: o["productos"] for o in talla["opciones"]} == {"M": 2, "L": 1}
+    assert {o["valor"]: o["productos"] for o in talla["opciones"]} == {"M": 3, "L": 1}
 
     solo_l = client_admin.get(f"{VENTA}/catalogo", params={"valor": "TALLA=L"}).json()
     assert [p["nombre"] for p in solo_l["productos"]] == ["Pañuelo"]
@@ -147,6 +149,33 @@ def test_el_buscador_de_la_caja_entiende_palabras_sin_tildes(client_admin, tiend
     _hay(session, tienda["suelto"], 5)
     r = client_admin.get(f"{VENTA}/buscar", params={"palabra": ["cinturones"], "valor": "TALLA=M"}).json()
     assert r["total"] == 1 and r["resultados"][0]["nombre"] == "Cinturón"
+
+
+def test_la_caja_muestra_todo_lo_que_cumple_con_su_stock_aunque_sea_cero(client_admin, tienda, session):
+    """Escribir "rojo" tiene que traer toda prenda roja: la que no tiene stock sale con 0, después."""
+    from app.models.catalog import SKU
+    rojo_sin = SKU(product_id=tienda["vestido"].product_id, sku="VESTIDO-ROJO", price=10000,
+                   config={"COLOR": "Rojo Italiano"})
+    rojo_con = SKU(product_id=tienda["suelto"].product_id, sku="SUELTO-ROJO", price=10000,
+                   config={"COLOR": "Rojo Italiano"})
+    session.add_all([rojo_sin, rojo_con])
+    session.commit()
+    _hay(session, rojo_con, 2)
+
+    r = client_admin.get(f"{VENTA}/buscar", params={"valor": "COLOR=Rojo Italiano"}).json()
+    assert r["total"] == 2
+    assert [(d["codigo"], d["disponible"]) for d in r["resultados"]] == [("SUELTO-ROJO", 2), ("VESTIDO-ROJO", 0)]
+
+    pagina = client_admin.get(f"{VENTA}/catalogo", params={"valor": "COLOR=Rojo Italiano"}).json()
+    assert [(p["nombre"], p["libres"]) for p in pagina["productos"]] == [("Pañuelo", 2), ("Vestido Noemi", 0)]
+
+    # Al abrir el producto sin stock se ven sus variantes, apagadas; venderla no se puede.
+    variantes = client_admin.get(f"{VENTA}/productos/{tienda['vestido'].product_id}/variantes").json()
+    assert {v["codigo"]: v["disponible"] for v in variantes} == {"VESTIDO": 0, "VESTIDO-ROJO": 0}
+    assert "VESTIDO-ROJO" not in {d["codigo"] for d in client_admin.get(f"{VENTA}/disponible").json()}
+    res = _vender(client_admin, [{"sku_id": rojo_sin.id, "cantidad": 1, "precio": 10000}],
+                  [{"monto": 10000, "medio": "Efectivo"}])
+    assert res.status_code == 409
 
 
 def test_el_cierre_cuenta_todo_lo_cobrado_del_dia_por_medio(client_admin, tienda, session):

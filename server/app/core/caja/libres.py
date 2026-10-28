@@ -1,6 +1,6 @@
 """
-Lo que hay libre para vender: variantes con disponible en bodega (lo que no
-está apartado para pedidos) y piezas únicas disponibles.
+Lo que la caja muestra: las variantes con su disponible en bodega (lo que no
+está apartado para pedidos; 0 si no queda) y las piezas únicas disponibles.
 """
 
 from dataclasses import dataclass, field
@@ -38,7 +38,13 @@ def variante(sku: SKU, producto: Product, disponible: int, ahora=None) -> Libre:
     )
 
 
-def variantes_libres(db: Session, producto_id: Optional[int] = None) -> List[Libre]:
+def variantes_del_catalogo(db: Session, producto_id: Optional[int] = None) -> List[Libre]:
+    """
+    Todas las vigentes, con su disponible (0 si no queda). La caja las muestra
+    todas: lo que no hay sale como "sin stock", no se esconde, para que se vea
+    que la prenda existe (decisión del usuario 2026-10-28). Venderla igual no
+    se puede: la venta revisa la bodega.
+    """
     consulta = (select(SKU, Product).join(Product, SKU.product_id == Product.id)
                 .where(SKU.is_deleted == False, Product.is_deleted == False))  # noqa: E712
     if producto_id is not None:
@@ -46,8 +52,13 @@ def variantes_libres(db: Session, producto_id: Optional[int] = None) -> List[Lib
     filas = db.exec(consulta).all()
     bodega = ciclo.bodega_de(db, [sku.id for sku, _ in filas])
     ahora = get_chile_time()
-    return [variante(sku, producto, bodega[sku.id].disponible, ahora)
-            for sku, producto in filas if sku.id in bodega and bodega[sku.id].disponible > 0]
+    return [variante(sku, producto, max(0, bodega[sku.id].disponible) if sku.id in bodega else 0, ahora)
+            for sku, producto in filas]
+
+
+def variantes_libres(db: Session, producto_id: Optional[int] = None) -> List[Libre]:
+    """Solo las que tienen disponible: lo que se puede vender ahora."""
+    return [x for x in variantes_del_catalogo(db, producto_id) if x.disponible > 0]
 
 
 def piezas_libres(db: Session) -> List[Libre]:
