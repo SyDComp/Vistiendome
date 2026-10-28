@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ArmadorDePrenda from '../../../ui/ArmadorDePrenda';
-import { describirEntrega } from '../../../../utils/entrega';
+import { describirEntrega, faltaParaDespachar } from '../../../../utils/entrega';
 import { X, Search, Plus, Trash2, Check, User, Package, MapPin, FileText, ShoppingBag, Send, AlertCircle, DollarSign } from 'lucide-react';
 import useCatalogoParaArmar from '../../../../hooks/useCatalogoParaArmar';
 import { useNotification } from '../../../../context/NotificationContext';
@@ -11,7 +11,15 @@ import SelectorPrecio from './pedido/SelectorPrecio';
 import { valorDesde, precioDeValor, esValido, paraServidor, textoSubtotal, textoTotal } from '../../../../utils/precioPrenda';
 import './AdminCotizacionModal.css';
 
-const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = null }) => {
+/**
+ * El formulario existe solo mientras está abierto: al cerrarlo se desarma y
+ * al abrirlo parte de cero. Antes quedaba montado y oculto, y la cotización
+ * siguiente heredaba las prendas, la clienta nueva, la dirección y la nota
+ * de la anterior.
+ */
+const AdminCotizacionModal = (props) => (props.isOpen ? <FormularioCotizacion {...props} /> : null);
+
+const FormularioCotizacion = ({ onClose, onCreated, initialCliente = null }) => {
     const { toast } = useNotification();
 
     // Estado del Cliente
@@ -36,7 +44,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
     // catalogo para que pueda cortarse igual que las demas.
     const [mostrandoFormLibre, setMostrandoFormLibre] = useState(false);
     // Productos y características para armar una pieza (ver el hook).
-    const { productos: productsList, atributos: atributosCatalogo } = useCatalogoParaArmar(isOpen);
+    const { productos: productsList, atributos: atributosCatalogo } = useCatalogoParaArmar(true);
     const [isProductSearchFocused, setIsProductSearchFocused] = useState(false);
 
     // Ítems agregados a la Cotización
@@ -73,31 +81,27 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
     const [submitting, setSubmitting] = useState(false);
     const [createdCotizacion, setCreatedCotizacion] = useState(null);
 
-    // Cargar clientes y productos al abrir
+    // La dirección de despacho es la de la clienta elegida, o ninguna: si la
+    // nueva no tiene, no se queda la de la anterior.
+    const ponerDireccionDe = (c) => {
+        setDireccion(c?.direccion || '');
+        setRegion(c?.region_nombre || '');
+        setComuna(c?.comuna_nombre || '');
+        setComunaId(c?.comuna_id || '');
+    };
+
+    // Cargar clientes y regiones al abrir (el formulario se monta al abrirse).
     useEffect(() => {
-        if (isOpen) {
-            setCreatedCotizacion(null);
-            // Cada pedido se pregunta de nuevo: heredar el del anterior es
-            // justo cómo se cuela un dato equivocado.
-            setCanal('');
-            if (initialCliente) {
-                setSelectedCliente(initialCliente);
-                setClientMode('select');
-                if (initialCliente.direccion) setDireccion(initialCliente.direccion);
-                if (initialCliente.region_nombre) setRegion(initialCliente.region_nombre);
-                if (initialCliente.comuna_nombre) setComuna(initialCliente.comuna_nombre);
-                if (initialCliente.comuna_id) setComunaId(initialCliente.comuna_id);
-            } else {
-                setSelectedCliente(null);
-                setClientMode('select');
-            }
-            fetchClientes();
-            fetch('/api/v1/geo/regiones')
-                .then(res => res.json())
-                .then(setRegiones)
-                .catch(err => console.error('No se pudieron cargar las regiones:', err));
+        if (initialCliente) {
+            setSelectedCliente(initialCliente);
+            ponerDireccionDe(initialCliente);
         }
-    }, [isOpen, initialCliente]);
+        fetchClientes();
+        fetch('/api/v1/geo/regiones')
+            .then(res => res.json())
+            .then(setRegiones)
+            .catch(err => console.error('No se pudieron cargar las regiones:', err));
+    }, [initialCliente]);
 
     // Las comunas dependen de la region: no tiene sentido ofrecer las 346 del
     // pais cuando ya se sabe cual es.
@@ -124,8 +128,6 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
             setLoadingClientes(false);
         }
     };
-
-    if (!isOpen) return null;
 
     // Filtrado de clientes
     const filteredClientes = clientesList.filter(c => {
@@ -293,6 +295,11 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
         }
         if (!canal) {
             toast.error("Indica cómo llegó el pedido");
+            return;
+        }
+        const falta = faltaParaDespachar({ modo_entrega: modoEntrega, tipo_despacho: tipoDespacho, region, comuna, direccion });
+        if (falta.length) {
+            toast.error(`Para el despacho falta: ${falta.join(', ')} (o elige Retiro en local)`);
             return;
         }
         const sinMonto = items.find(it => !esValido(it.valorPrecio));
@@ -472,7 +479,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => { setClientMode('new'); setSelectedCliente(null); }}
+                                            onClick={() => { setClientMode('new'); setSelectedCliente(null); ponerDireccionDe(null); }}
                                             className={`cot-pestana cot-pestana--nueva${clientMode === 'new' ? ' cot-pestana--elegida' : ''}`}
                                         >
                                             + Nuevo Cliente
@@ -523,10 +530,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                                                 key={c.id}
                                                                 onClick={() => {
                                                                     setSelectedCliente(c);
-                                                                    if (c.direccion) setDireccion(c.direccion);
-                                                                    if (c.region_nombre) setRegion(c.region_nombre);
-                                                                    if (c.comuna_nombre) setComuna(c.comuna_nombre);
-                                                                    if (c.comuna_id) setComunaId(c.comuna_id);
+                                                                    ponerDireccionDe(c);
                                                                 }}
                                                                 className="adm-opcion-fila"
                                                                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
@@ -780,7 +784,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="adm-etiqueta">Región</label>
+                                        <label className="adm-etiqueta">Región *</label>
                                         <select
                                             value={region}
                                             onChange={e => {
@@ -798,7 +802,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="adm-etiqueta">Comuna</label>
+                                        <label className="adm-etiqueta">Comuna *</label>
                                         <select
                                             value={comuna}
                                             onChange={e => {
@@ -818,7 +822,7 @@ const AdminCotizacionModal = ({ isOpen, onClose, onCreated, initialCliente = nul
                                         </select>
                                     </div>
                                     <div className="adm-ancho-total">
-                                        <label className="adm-etiqueta">Dirección exacta o Sucursal</label>
+                                        <label className="adm-etiqueta">{tipoDespacho === 'SUCURSAL' ? 'Sucursal *' : 'Dirección exacta *'}</label>
                                         <input
                                             type="text" placeholder="Calle Ejemplo #123, Depto 4B o Nombre de Sucursal Starken..."
                                             value={direccion} onChange={e => setDireccion(e.target.value)}

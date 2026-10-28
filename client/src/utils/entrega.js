@@ -73,3 +73,21 @@ export const describirEntrega = (cotizacion = {}) => {
         muestraComuna: true,
     };
 };
+
+/**
+ * Lo que le falta a un despacho para poder enviarse: región, comuna y la
+ * dirección (a domicilio) o el nombre de la sucursal. Un retiro no necesita
+ * nada. Obligatorio al crear la cotización desde el panel (decisión del
+ * usuario 2026-10-28): después no hay dónde completarlo, y la etiqueta salía
+ * con "FALTA LA DIRECCIÓN".
+ *
+ * @returns {string[]} los nombres de lo que falta, vacío si está completo
+ */
+export const faltaParaDespachar = ({ modo_entrega, tipo_despacho, region, comuna, direccion } = {}) => {
+    if (modo_entrega === 'RETIRO') return [];
+    const falta = [];
+    if (!String(region || '').trim()) falta.push('región');
+    if (!String(comuna || '').trim()) falta.push('comuna');
+    if (!String(direccion || '').trim()) falta.push(tipo_despacho === 'SUCURSAL' ? 'sucursal' : 'dirección');
+    return falta;
+};
