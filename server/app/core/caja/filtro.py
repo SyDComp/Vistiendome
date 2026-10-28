@@ -46,5 +46,7 @@ def cumple(libre: Libre, filtro: Filtro) -> bool:
         return False
     if any(valor_de(libre.config, c) not in valores for c, valores in filtro.caracteristicas.items()):
         return False
-    donde = palabras(" ".join(str(x) for x in (libre.nombre, libre.codigo, libre.barcode) if x))
+    # También en los valores de sus características: una palabra que calza en
+    # dos (Color y Estampado) llega suelta y trae lo que tenga una u otra.
+    donde = palabras(" ".join(str(x) for x in (libre.nombre, libre.codigo, libre.barcode, *(libre.config or {}).values()) if x))
     return all(any(calza(p, w) for w in donde) for p in filtro.palabras)

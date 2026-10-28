@@ -3,6 +3,7 @@ import { LayoutGrid, Search, X } from 'lucide-react';
 import { formatCurrency } from '../../../../../utils/cartUtils';
 import { sinFiltro } from '../../../../../utils/busquedaCaja';
 import { sinStock } from '../../../../../utils/caja';
+import { cantidad } from '../../../../../utils/cantidad';
 
 const MINIMO_PARA_SUGERIR = 2;
 
@@ -15,6 +16,19 @@ const MINIMO_PARA_SUGERIR = 2;
  *
  * La pistola no pasa por aquí: lo que lee va directo a la venta (teclado/usePistola.js).
  */
+/**
+ * "13 variantes de 1 producto": las tarjetas muestran productos, no variantes,
+ * y sin esto parecía que al abrirlas se perdían prendas.
+ */
+const resumen = ({ total, productos = 0, piezas = 0 }) => {
+    const partes = [];
+    if (total - piezas > 0) {
+        partes.push(`${cantidad(total - piezas, 'variante', 'variantes')} de ${cantidad(productos, 'producto', 'productos')}`);
+    }
+    if (piezas > 0) partes.push(cantidad(piezas, 'pieza única', 'piezas únicas'));
+    return `Son ${partes.join(' y ')}`;
+};
+
 const LectorCaja = forwardRef(({ texto, onTexto, interpretacion, encontrado, onElegido, onAbrirSelector, onCodigo, disabled }, ref) => {
     const [marcado, setMarcado] = useState(-1);
     const sugeridos = texto.trim().length >= MINIMO_PARA_SUGERIR ? encontrado.resultados : [];
@@ -53,7 +67,7 @@ const LectorCaja = forwardRef(({ texto, onTexto, interpretacion, encontrado, onE
                     <LayoutGrid size={18} aria-hidden="true" /> Tarjetas <kbd>Espacio</kbd>
                 </button>
             </div>
-            {interpretacion.filtros.length > 0 && (
+            {(interpretacion.filtros.length > 0 || interpretacion.ambiguas?.length > 0) && (
                 <div className="cj-etiquetas" aria-label="Filtros">
                     {interpretacion.filtros.map(f => (
                         <span key={f.caracteristica} className="cj-etiqueta">
@@ -61,6 +75,15 @@ const LectorCaja = forwardRef(({ texto, onTexto, interpretacion, encontrado, onE
                             {f.valores.join(' o ')}
                             <button type="button" aria-label={`Quitar ${f.caracteristica}`}
                                 onClick={() => onTexto(sinFiltro(texto, f))}><X size={13} /></button>
+                        </span>
+                    ))}
+                    {/* Calza en dos características: se busca en cualquiera (una u otra). */}
+                    {(interpretacion.ambiguas || []).map(a => (
+                        <span key={a.palabra} className="cj-etiqueta">
+                            <span className="cj-etiqueta-nombre">{a.caracteristicas.map(c => c.toLowerCase()).join(' o ')}</span>
+                            {a.palabra}
+                            <button type="button" aria-label={`Quitar ${a.palabra}`}
+                                onClick={() => onTexto(sinFiltro(texto, { palabras: [a.palabra] }))}><X size={13} /></button>
                         </span>
                     ))}
                 </div>
@@ -82,7 +105,7 @@ const LectorCaja = forwardRef(({ texto, onTexto, interpretacion, encontrado, onE
                     ))}
                     {encontrado.total > sugeridos.length && (
                         <li className="cj-sugeridos-mas">
-                            Y {encontrado.total - sugeridos.length} más: Enter abre las tarjetas con esto filtrado.
+                            Y {encontrado.total - sugeridos.length} más. {resumen(encontrado)}: Enter abre las tarjetas con esto filtrado.
                         </li>
                     )}
                 </ul>

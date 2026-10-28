@@ -163,7 +163,7 @@ def test_la_caja_muestra_todo_lo_que_cumple_con_su_stock_aunque_sea_cero(client_
     _hay(session, rojo_con, 2)
 
     r = client_admin.get(f"{VENTA}/buscar", params={"valor": "COLOR=Rojo Italiano"}).json()
-    assert r["total"] == 2
+    assert (r["total"], r["productos"], r["piezas"]) == (2, 2, 0)
     assert [(d["codigo"], d["disponible"]) for d in r["resultados"]] == [("SUELTO-ROJO", 2), ("VESTIDO-ROJO", 0)]
 
     pagina = client_admin.get(f"{VENTA}/catalogo", params={"valor": "COLOR=Rojo Italiano"}).json()
@@ -201,3 +201,15 @@ def test_el_cierre_cuenta_todo_lo_cobrado_del_dia_por_medio(client_admin, tienda
 def test_el_cierre_de_otro_dia_viene_vacio(client_admin, tienda, session):
     c = client_admin.get(f"{VENTA}/cierre", params={"fecha": "2020-01-01"}).json()
     assert (c["por_medio"], c["ventas_caja"], c["efectivo_en_cajon"]) == ([], [], None)
+
+
+def test_una_palabra_suelta_busca_tambien_en_las_caracteristicas(client_admin, tienda, session):
+    """"rojo" en Color o en Estampado: llega como palabra y trae lo que tenga una u otra."""
+    from app.models.catalog import SKU
+    color = SKU(product_id=tienda["vestido"].product_id, sku="V-ROJO", price=10000, config={"COLOR": "Rojo Italiano"})
+    estampado = SKU(product_id=tienda["suelto"].product_id, sku="S-FLORES", price=10000, config={"ESTAMPADO": "Flores Rojas"})
+    session.add_all([color, estampado])
+    session.commit()
+    r = client_admin.get(f"{VENTA}/buscar", params={"palabra": "rojo"}).json()
+    assert sorted(d["codigo"] for d in r["resultados"]) == ["S-FLORES", "V-ROJO"]
+    assert (r["total"], r["productos"]) == (2, 2)

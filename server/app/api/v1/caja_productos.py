@@ -47,6 +47,8 @@ class PaginaCaja(BaseModel):
 class Encontrado(BaseModel):
     resultados: List[Disponible]
     total: int
+    productos: int     # de cuántos productos son las variantes (las tarjetas muestran productos)
+    piezas: int
 
 
 def _filtro(db: Session, valor: List[str], categoria: List[int], palabra: List[str]) -> caja.Filtro:
@@ -83,8 +85,9 @@ def variantes(producto_id: int, db: Session = Depends(get_session)):
 def buscar(valor: List[str] = Query([]), categoria: List[int] = Query([]), palabra: List[str] = Query([]),
            cuantos: int = Query(8, ge=1, le=50), db: Session = Depends(get_session)):
     """Lo que muestra el buscador mientras se escribe."""
-    resultados, total = caja.buscar(db, _filtro(db, valor, categoria, palabra), cuantos)
-    return Encontrado(resultados=[como_disponible(x) for x in resultados], total=total)
+    e = caja.buscar(db, _filtro(db, valor, categoria, palabra), cuantos)
+    return Encontrado(resultados=[como_disponible(x) for x in e.resultados], total=e.total,
+                      productos=e.productos, piezas=e.piezas)
 
 
 class MedioCierre(BaseModel):

@@ -80,10 +80,14 @@ const EtiquetaEnvio = ({
                 </div>
 
                 <div className="ee-pie">
-                    {codigo && (
+                    {/* El código dice lo mismo que el número impreso al lado. Antes
+                        guardaba el id interno ("COTI-57" junto a "PEDIDO N° 12"),
+                        que no es el número que se ve en ningún lado. Un pedido
+                        sin número no lleva código: no se inventa otro. */}
+                    {codigo && cotizacion.numero != null && (
                         <div className={`ee-codigo-barras ee-codigo-barras--${codigo}`}>
                             <Barcode
-                                value={`COTI-${cotizacion.id}`}
+                                value={String(cotizacion.numero)}
                                 format="CODE128"
                                 width={2}
                                 height={60}

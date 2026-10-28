@@ -28,4 +28,12 @@ describe('búsqueda de la caja', () => {
         const [, color] = interpretar('vestido rojo xs', caracteristicas).filtros;
         expect(sinFiltro('vestido Rojo xs', color)).toBe('vestido xs');
     });
+
+    it('una palabra que calza en dos características va suelta (una u otra), no como dos filtros', () => {
+        const conEstampado = [...caracteristicas, { name: 'ESTAMPADO', domain: [{ value: 'Flores Rojas' }] }];
+        const r = interpretar('rojo xs', conEstampado);
+        expect(r.filtros.map(f => f.caracteristica)).toEqual(['TALLA']);
+        expect(r.libres).toEqual(['rojo']);
+        expect(r.ambiguas).toEqual([{ palabra: 'rojo', caracteristicas: ['COLOR', 'ESTAMPADO'] }]);
+    });
 });

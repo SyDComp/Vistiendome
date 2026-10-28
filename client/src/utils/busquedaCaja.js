@@ -11,6 +11,11 @@
  * Se compara sin tildes, sin plural y sin género ("rojas" encuentra "Rojo").
  * Las palabras de una o dos letras solo calzan exactas (la talla "S" no es
  * cualquier palabra que empiece con s).
+ *
+ * Una palabra que calza en DOS características ("rojo": Color Rojo Italiano y
+ * Estampado Flores Rojas) no se vuelve filtro de las dos: eso exigía las dos a
+ * la vez. Va como palabra suelta, y el servidor la busca también en los
+ * valores de las características: trae lo que tenga una u otra.
  */
 
 const normalizar = (texto) => String(texto ?? '')
@@ -35,18 +40,27 @@ const calza = (escrita, delValor) => {
  * Qué características reconoce cada palabra.
  * @param {string} texto
  * @param {{name: string, domain: {value: string}[]}[]} caracteristicas
- * @returns {{filtros: {caracteristica: string, valores: string[], palabras: string[]}[], libres: string[]}}
+ * @returns {{
+ *   filtros: {caracteristica: string, valores: string[], palabras: string[]}[],
+ *   libres: string[],
+ *   ambiguas: {palabra: string, caracteristicas: string[]}[]
+ * }}  `ambiguas` también están en `libres`: se buscan como texto.
  */
 export const interpretar = (texto, caracteristicas = []) => {
     const porCaracteristica = new Map();
     const libres = [];
+    const ambiguas = [];
     palabrasDe(texto).forEach(palabra => {
-        let reconocida = false;
-        caracteristicas.forEach(c => {
-            const valores = (c.domain || []).map(o => o.value)
-                .filter(v => palabrasDe(v).some(w => calza(palabra, w)));
-            if (!valores.length) return;
-            reconocida = true;
+        const calzan = caracteristicas
+            .map(c => ({ c, valores: (c.domain || []).map(o => o.value)
+                .filter(v => palabrasDe(v).some(w => calza(palabra, w))) }))
+            .filter(x => x.valores.length);
+        if (calzan.length !== 1) {
+            libres.push(palabra);
+            if (calzan.length > 1) ambiguas.push({ palabra, caracteristicas: calzan.map(x => x.c.name) });
+            return;
+        }
+        calzan.forEach(({ c, valores }) => {
             const actual = porCaracteristica.get(c.name) || { caracteristica: c.name, valores: null, palabras: [] };
             // Dos palabras de la misma característica se juntan ("azul marino"):
             // vale lo que calza con las dos. Si nada calza con las dos, cualquiera.
@@ -55,12 +69,11 @@ export const interpretar = (texto, caracteristicas = []) => {
             actual.palabras.push(palabra);
             porCaracteristica.set(c.name, actual);
         });
-        if (!reconocida) libres.push(palabra);
     });
     // En el orden de la tienda, no en el que se escribieron: las etiquetas
     // quedan siempre en el mismo lugar.
     const filtros = caracteristicas.map(c => porCaracteristica.get(c.name)).filter(Boolean);
-    return { filtros, libres };
+    return { filtros, libres, ambiguas };
 };
 
 /** El texto sin las palabras de un filtro: quitar la etiqueta es borrar lo que la puso. */
