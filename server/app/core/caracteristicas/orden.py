@@ -25,10 +25,16 @@ def siguiente_orden(db: Session) -> int:
     return (db.exec(select(func.max(Characteristic.orden))).one() or 0) + 1
 
 
-def reordenar(db: Session, ids: List[int]) -> List[Characteristic]:
+def en_orden(db: Session) -> List[Characteristic]:
+    """Todas, en el orden en que se muestran."""
+    return db.exec(select(Characteristic).order_by(Characteristic.orden, Characteristic.id)).all()
+
+
+def reordenar(db: Session, ids: List[int]) -> None:
     """
     Las deja en el orden de `ids`, que tienen que ser todas y cada una una
-    sola vez: una lista a medias dejaría órdenes repetidos.
+    sola vez: una lista a medias dejaría órdenes repetidos. No guarda: el
+    commit es de quien llama, y después del commit se leen con `en_orden`.
     """
     todas = {c.id: c for c in db.exec(select(Characteristic)).all()}
     if len(ids) != len(set(ids)) or set(ids) != set(todas):
@@ -36,4 +42,3 @@ def reordenar(db: Session, ids: List[int]) -> List[Characteristic]:
     for posicion, id_ in enumerate(ids, start=1):
         todas[id_].orden = posicion
         db.add(todas[id_])
-    return [todas[i] for i in ids]

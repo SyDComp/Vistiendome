@@ -178,11 +178,10 @@ def get_descendant_ids(db: Session, category_id: int) -> List[int]:
 @router.get("/attributes")
 def list_attributes(db: Session = Depends(get_session)):
     """Todas, en el orden en que se muestran."""
-    en_orden = select(Characteristic).order_by(Characteristic.orden, Characteristic.id)
-    attrs = db.exec(en_orden).all()
+    attrs = caracteristicas.en_orden(db)
     if not any(a.name == "ESTAMPADO" for a in attrs) or not any(a.name == "COLOR" for a in attrs) or not any(a.name == "TALLA" for a in attrs):
         seed_system_attributes(db)
-        attrs = db.exec(en_orden).all()
+        attrs = caracteristicas.en_orden(db)
     return attrs
 
 
@@ -194,12 +193,14 @@ class OrdenCaracteristicas(BaseModel):
 async def ordenar_attributes(data: OrdenCaracteristicas, db: Session = Depends(get_session)):
     """El orden en que se muestran: todas las características, en su nuevo orden."""
     try:
-        ordenadas = caracteristicas.reordenar(db, data.ids)
+        caracteristicas.reordenar(db, data.ids)
     except caracteristicas.NoSeReordena as e:
         raise HTTPException(status_code=422, detail=str(e))
     db.commit()
     await manager.broadcast({"type": "invalidate_cache", "resource": "attributes", "action": "reorder"})
-    return ordenadas
+    # Se leen de nuevo: los objetos de antes del commit llegaban vacíos ({}),
+    # y el panel, al no encontrar el nombre, se iba a blanco.
+    return caracteristicas.en_orden(db)
 
 @router.post("/attributes")
 async def create_attribute(data: Dict[str, Any], db: Session = Depends(get_session)):

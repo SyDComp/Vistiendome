@@ -23,6 +23,9 @@ def test_se_reordenan_todas_incluidas_las_del_sistema(client_admin):
     res = client_admin.post(f"{ATRIBUTOS}/orden", json={"ids": list(reversed(ids))})
     assert res.status_code == 200, res.text
     assert [a["id"] for a in client_admin.get(ATRIBUTOS).json()] == list(reversed(ids))
+    # El panel reemplaza su lista con esta respuesta: tiene que venir completa,
+    # igual que al listar. Antes llegaba [{}, {}, …] y la pantalla se iba a blanco.
+    assert res.json() == client_admin.get(ATRIBUTOS).json()
 
 
 def test_una_lista_a_medias_o_repetida_no_reordena(client_admin):
