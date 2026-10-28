@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { avanzar, caracteristicasDe, opcionesDe, retroceder } from '../selectorPrendas';
+import { avanzar, caracteristicasDe, elegidasPorFiltro, opcionesDe, retroceder } from '../selectorPrendas';
+import { opcionesPaso } from '../vistasSelector';
 
 const v = (talla, color, disponible, material = 'Tela Sofia') => ({ config: { TALLA: talla, COLOR: color, MATERIAL: material }, disponible });
 const variantes = [v('XS', 'Negro', 2), v('S', 'Negro', 0), v('XS', 'Uva', 1), v('M', 'Uva', 3)];
@@ -34,5 +35,20 @@ describe('selector de prendas', () => {
     it('volver un paso quita la última elección hecha a mano', () => {
         expect(retroceder({ COLOR: 'Uva', TALLA: 'M' })).toEqual({ COLOR: 'Uva' });
         expect(retroceder({})).toBe(null);
+    });
+
+    it('lo que el filtro ya eligió no se vuelve a preguntar; si quedan varios, van marcados', () => {
+        const pasos = ['COLOR', 'TALLA'];
+        // Un solo valor filtrado que el producto tiene: elegido.
+        expect(elegidasPorFiltro(variantes, pasos, { TALLA: ['M'] })).toEqual({ TALLA: 'M' });
+        // "Negro o Azul": el producto solo tiene Negro → Negro.
+        expect(elegidasPorFiltro(variantes, pasos, { COLOR: ['Negro', 'Azul'] })).toEqual({ COLOR: 'Negro' });
+        // Los dos están: se pregunta, con los dos marcados.
+        expect(elegidasPorFiltro(variantes, pasos, { COLOR: ['Negro', 'Uva'] })).toEqual({});
+        const opciones = opcionesPaso(opcionesDe(variantes, 'COLOR', {}, definiciones[0]), ['Negro', 'Uva']);
+        expect(opciones.map(o => [o.clave, o.marcada])).toEqual([['Uva', true], ['Negro', true]]);
+        // Uno con libres y otro sin: el que tiene.
+        const conUnoAgotado = [v('XS', 'Negro', 0), v('XS', 'Uva', 1)];
+        expect(elegidasPorFiltro(conUnoAgotado, pasos, { COLOR: ['Negro', 'Uva'] })).toEqual({ COLOR: 'Uva' });
     });
 });

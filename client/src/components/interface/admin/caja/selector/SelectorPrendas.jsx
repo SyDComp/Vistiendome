@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ArrowLeft, Filter, Gem, X } from 'lucide-react';
-import { alternar, cuantosFiltros, elegidasDe, paginaDe, paginasDe, posicionDe } from '../../../../../utils/filtrosCaja';
-import { avanzar, caracteristicasDe, opcionesDe, retroceder } from '../../../../../utils/selectorPrendas';
+import { alternar, cuantosFiltros, paginaDe, paginasDe, posicionDe } from '../../../../../utils/filtrosCaja';
+import { avanzar, caracteristicasDe, elegidasPorFiltro, opcionesDe, retroceder } from '../../../../../utils/selectorPrendas';
 import { opcionesFiltros, opcionesGrupo, opcionesPaso, opcionesPiezas } from '../../../../../utils/vistasSelector';
 import useCatalogoCaja from '../datos/useCatalogoCaja';
 import useVariantesProducto from '../datos/useVariantesProducto';
@@ -41,10 +41,9 @@ const SelectorPrendas = ({ filtrosIniciales, definiciones, orden, version, onEle
     const pasos = useMemo(() => (variantes ? caracteristicasDe(variantes, orden) : []), [variantes, orden]);
     const definicionDe = (c) => definiciones.find(d => d.name.toUpperCase() === c);
 
-    // Lo filtrado con un solo valor se da por elegido, si el producto lo tiene.
-    const iniciales = useMemo(() => Object.fromEntries(Object.entries(elegidasDe(filtros))
-        .filter(([c, v]) => pasos.includes(c) && (variantes || []).some(d => Object.entries(d.config || {})
-            .some(([k, val]) => k.toUpperCase() === c && val === v)))), [filtros, pasos, variantes]);
+    // Lo que el filtro ya eligió en este producto no se vuelve a preguntar.
+    const iniciales = useMemo(() => elegidasPorFiltro(variantes || [], pasos, filtros.valores),
+        [filtros, pasos, variantes]);
     const estado = variantes ? avanzar(variantes, pasos, { ...iniciales, ...aMano }, definiciones) : null;
 
     const faceta = vista.tipo === 'grupo' ? datos?.facetas.find(f => f.clave === vista.clave) : null;
@@ -54,7 +53,8 @@ const SelectorPrendas = ({ filtrosIniciales, definiciones, orden, version, onEle
         piezas: () => opcionesPiezas(datos?.piezas),
         producto: () => (estado?.variante
             ? [{ clave: 'agregar', titulo: 'Agregar a la venta', detalle: Object.values(estado.variante.config || {}).join(' / ') }]
-            : opcionesPaso(estado?.paso ? opcionesDe(variantes, estado.paso, estado.elegidas, definicionDe(estado.paso)) : [])),
+            : opcionesPaso(estado?.paso ? opcionesDe(variantes, estado.paso, estado.elegidas, definicionDe(estado.paso)) : [],
+                filtros.valores?.[estado?.paso] || [])),
     }[vista.tipo]?.() || [];
     const enProductos = vista.tipo === 'productos';
     const visibles = enProductos ? (datos?.productos || []) : paginaDe(lista, paginaLista);

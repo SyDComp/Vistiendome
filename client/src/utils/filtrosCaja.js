@@ -45,14 +45,6 @@ export const alternar = (filtros, clave, valor) => {
 export const cuantosFiltros = (filtros) =>
     Object.values(filtros.valores || {}).reduce((n, vs) => n + vs.length, 0) + (filtros.categorias || []).length;
 
-/**
- * Lo ya elegido que se da por hecho al abrir un producto: solo las
- * características con un único valor marcado (con dos, todavía hay que elegir).
- */
-export const elegidasDe = (filtros) => Object.fromEntries(
-    Object.entries(filtros.valores || {}).filter(([, vs]) => vs.length === 1).map(([c, vs]) => [c, vs[0]]),
-);
-
 /** Una página de una lista: 10 por página (las teclas 1 a 9 y 0). */
 export const POR_PAGINA = 10;
 export const paginaDe = (lista, pagina) => lista.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);

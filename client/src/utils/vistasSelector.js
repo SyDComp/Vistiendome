@@ -18,10 +18,13 @@ export const opcionesGrupo = (faceta) => (faceta?.opciones || []).map(o => ({
     hex: o.hex, imagen: o.imagen, marcada: o.elegida,
 }));
 
-/** Las opciones de una característica al elegir la prenda (de utils/selectorPrendas.js#opcionesDe). */
-export const opcionesPaso = (opciones = []) => opciones.map(o => ({
+/**
+ * Las opciones de una característica al elegir la prenda (de utils/selectorPrendas.js#opcionesDe).
+ * `puestas`: los valores que ya venían filtrados ("azul" → Azul, Azul Marino): van marcados.
+ */
+export const opcionesPaso = (opciones = [], puestas = []) => opciones.map(o => ({
     clave: o.valor, titulo: o.valor, detalle: o.libres > 0 ? plural(o.libres, 'libre', 'libres') : 'no queda',
-    hex: o.hex, imagen: o.imagen, apagada: o.libres <= 0,
+    hex: o.hex, imagen: o.imagen, apagada: o.libres <= 0, marcada: puestas.includes(o.valor),
 }));
 
 /** Las piezas únicas libres. */

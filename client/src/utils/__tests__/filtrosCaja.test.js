@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-    SIN_FILTROS, aParametros, alternar, cuantosFiltros, desdeInterpretacion, elegidasDe, paginaDe, paginasDe,
+    SIN_FILTROS, aParametros, alternar, cuantosFiltros, desdeInterpretacion, paginaDe, paginasDe,
     posicionDe, teclaDe,
 } from '../filtrosCaja';
 
@@ -18,10 +18,6 @@ describe('filtros de la caja', () => {
         expect(aParametros(f, { pagina: 2 })).toBe('valor=COLOR%3DNegro&valor=COLOR%3DAzul&categoria=3&pagina=2');
         f = alternar(alternar(f, 'COLOR', 'Negro'), 'COLOR', 'Azul');
         expect(f.valores).toEqual({});
-    });
-
-    it('al abrir un producto se da por elegido lo que tiene un solo valor', () => {
-        expect(elegidasDe({ valores: { TALLA: ['M'], COLOR: ['Negro', 'Azul'] } })).toEqual({ TALLA: 'M' });
     });
 
     it('páginas de diez con las teclas 1 a 9 y 0', () => {

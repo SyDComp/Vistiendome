@@ -76,6 +76,29 @@ export const avanzar = (variantes, caracteristicas, elegidas, definiciones = [])
     return { elegidas: ahora, paso: null, variante: quedan.length === 1 ? quedan[0] : null };
 };
 
+/**
+ * Lo que el filtro ya eligió en este producto (lo escrito en el buscador o
+ * lo puesto en Filtros): si de los valores filtrados el producto tiene uno
+ * solo, ese queda elegido sin preguntar. Se prefiere el que tiene libres:
+ * con "azul" (Azul o Azul Marino) y solo Azul Marino con stock, es ese.
+ * Si quedan varios, se pregunta, y van marcados (opcionesPaso).
+ * @param {object} valoresFiltro      {CARACTERISTICA: [valores]}
+ * @returns {object}                  {CARACTERISTICA: valor}
+ */
+export const elegidasPorFiltro = (variantes, caracteristicas, valoresFiltro = {}) => {
+    const elegidas = {};
+    Object.entries(valoresFiltro).forEach(([c, valores]) => {
+        if (!caracteristicas.includes(c)) return;
+        const tiene = (conLibres) => valores.filter(val => variantes.some(v =>
+            valorDe(v.config, c) === val && (!conLibres || Number(v.disponible) > 0)));
+        const conLibres = tiene(true);
+        const cualquiera = tiene(false);
+        if (conLibres.length === 1) elegidas[c] = conLibres[0];
+        else if (!conLibres.length && cualquiera.length === 1) elegidas[c] = cualquiera[0];
+    });
+    return elegidas;
+};
+
 /** Volver un paso: se quita la última elección hecha a mano (y las automáticas que vinieron después). */
 export const retroceder = (elegidasAMano) => {
     const claves = Object.keys(elegidasAMano);
