@@ -19,6 +19,7 @@ import { etiquetaEstado } from '../../../utils/estadosPedido';
 import SeguimientoPedido from '../../interface/admin/crm/pedido/SeguimientoPedido';
 import AjustesCategoria from '../../interface/admin/inventory/categoria/AjustesCategoria';
 import { textoAbastecimiento, textoPersonalizacion } from '../../../utils/categoriaAjustes';
+import { fechaDe } from '../../../utils/fechaServidor';
 
 /**
  * DetailDrawer: Vista de detalles potente con navegación histórica (Stack-based).
@@ -293,7 +294,7 @@ const DetailDrawer = ({
                 items: [
                     { label: 'Correo Electrónico', value: currData.email_personal || 'No registrado' },
                     { label: 'Teléfono', value: currData.telefono || 'No registrado' },
-                    { label: 'Fecha de Registro', value: new Date(currData.created_at || Date.now()).toLocaleDateString() }
+                    { label: 'Fecha de Registro', value: fechaDe(currData.created_at || new Date()) }
                 ]
             });
         } else if (currType === 'cotizacion') {

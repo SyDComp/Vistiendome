@@ -7,6 +7,7 @@ import { getOrdenesCorte, eliminarOrden } from '../../../../lib/api/endpoints';
 import OrdenCorteForm from './OrdenCorteForm';
 import OrdenCorteDetalle, { ESTADOS, estiloEstado } from './OrdenCorteDetalle';
 import './OrdenCorteView.css';
+import { fechaDe } from '../../../../utils/fechaServidor';
 
 /**
  * Órdenes de corte: lista, alta y detalle.
@@ -133,7 +134,7 @@ const OrdenCorteView = () => {
                                 <tr key={o.id} onClick={() => { setActual(o); setVista('detalle'); }} className="oc-fila">
                                     <td className="oc-numero">{o.numero}</td>
                                     <td><span className="oc-estado" style={{ color: est.color, background: est.bg }}>{est.label}</span></td>
-                                    <td>{new Date(o.created_at).toLocaleDateString('es-CL')}</td>
+                                    <td>{fechaDe(o.created_at)}</td>
                                     <td className="num">{o.items.length}</td>
                                     <td className="num">{o.total_unidades}</td>
                                     <td className="oc-notas">

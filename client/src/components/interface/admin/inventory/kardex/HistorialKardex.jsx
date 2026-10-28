@@ -2,8 +2,9 @@ import React from 'react';
 import { Plus, Minus, ArrowLeftRight, Info } from 'lucide-react';
 import { conSaldo, nombreDelMovimiento } from './movimientos';
 import ApartadosKardex from './ApartadosKardex';
+import { desdeServidor, enChile } from '../../../../../utils/fechaServidor';
 
-const FECHA = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short' });
+const FECHA = enChile({ dateStyle: 'medium', timeStyle: 'short' });
 
 const iconoDe = (m) => (m.type === 'receipt' ? Plus : m.quantity < 0 ? Minus : ArrowLeftRight);
 const tonoDe = (m) => (m.quantity > 0 ? 'positivo' : 'negativo');
@@ -55,7 +56,7 @@ const HistorialKardex = ({ datos }) => {
                                     </div>
                                     <div className="logistics-history-row">
                                         <span className="logistics-history-date">
-                                            {m.created_at ? FECHA.format(new Date(m.created_at)) : 'Sin fecha'}
+                                            {m.created_at ? FECHA.format(desdeServidor(m.created_at)) : 'Sin fecha'}
                                         </span>
                                         <span className="logistics-history-saldo">Quedó en {m.saldo}</span>
                                     </div>

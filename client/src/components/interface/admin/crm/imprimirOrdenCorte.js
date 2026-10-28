@@ -4,6 +4,7 @@ import { escapar, imprimirDocumento } from '../../../../utils/impresion';
 // entiende, y una comilla invertida en un comentario deja de romper la
 // compilacion.
 import estilos from './imprimirOrdenCorte.impresion.css?raw';
+import { fechaDe } from '../../../../utils/fechaServidor';
 
 /**
  * El papel que se lleva a la mesa de corte.
@@ -71,7 +72,7 @@ export const imprimirOrdenCorte = (orden, etiquetaEstado, columnasPermitidas = n
     // columna de más molesta, una hoja sin la talla manda a cortar mal.
     const grupos = agrupar(orden.items || [], { por, permitidas: columnasPermitidas, orden: ordenCaracteristicas });
     const porPedido = por === 'pedido';
-    const fecha = new Date(orden.created_at).toLocaleDateString('es-CL');
+    const fecha = fechaDe(orden.created_at);
 
     const cuerpo = `
 <div class="cab">

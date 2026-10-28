@@ -12,6 +12,7 @@
  */
 import { nombreDeProducto } from './prendas';
 import { frasesPolitica, sinCambio } from './politicaCambios';
+import { desdeServidor } from './fechaServidor';
 
 const EFECTIVO = 'Efectivo';
 
@@ -55,7 +56,7 @@ export const armarComprobante = ({ pedido, pagos, tienda, recibido = 0, reimpres
     return {
         tienda,
         numero: pedido.numero,
-        fecha: new Date(pedido.created_at),
+        fecha: desdeServidor(pedido.created_at),
         reimpreso,
         lineas,
         total,

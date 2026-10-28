@@ -12,6 +12,7 @@ import './OrdenCorteDetalle.css';
 
 import { ESTADOS, estiloEstado } from '../../../../utils/estadosOrdenCorte';
 import { cantidad } from '../../../../utils/cantidad';
+import { fechaDe } from '../../../../utils/fechaServidor';
 export { ESTADOS, estiloEstado };
 
 const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
@@ -103,7 +104,7 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
 
             {finalizada && (
                 <p className="oc-aviso">
-                    Orden finalizada el {new Date(orden.finalizada_at).toLocaleDateString('es-CL')}.
+                    Orden finalizada el {fechaDe(orden.finalizada_at)}.
                     Las piezas de pedidos quedaron marcadas como cortadas y las de stock ya entraron al inventario.
                 </p>
             )}

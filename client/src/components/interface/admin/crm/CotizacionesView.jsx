@@ -20,6 +20,7 @@ import { actualizarEstadoCotizacion, listarCotizaciones, obtenerPedido } from '.
 import ConfirmarPedido from './pedido/confirmar/ConfirmarPedido';
 import './CotizacionesView.css';
 import { RUTA_CAJA, desdeElPanel } from '../caja/rutaCaja';
+import { fechaDe } from '../../../../utils/fechaServidor';
 
 
 /**
@@ -203,7 +204,7 @@ const CotizacionesView = () => {
             label: 'Fecha',
             render: (_, row) => (
                 <span className="adm-celda-secundaria">
-                    {new Date(row.created_at).toLocaleDateString()}
+                    {fechaDe(row.created_at)}
                 </span>
             )
         },

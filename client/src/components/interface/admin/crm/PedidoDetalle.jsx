@@ -4,6 +4,7 @@ import { Package, User, Phone, Printer } from 'lucide-react';
 import ItemsPedidoTable from './ItemsPedidoTable';
 import { formatCurrency } from '../../../../utils/cartUtils';
 import './PedidoDetalle.css';
+import { fechaDe } from '../../../../utils/fechaServidor';
 
 /**
  * Planilla de pedido (modo=taller, con precios y detalle de confección) y
@@ -71,7 +72,7 @@ const PedidoDetalle = () => {
                         </div>
                     )}
                     <div className="pedido-meta-item">
-                        <Package size={14} /> {new Date(cotizacion.created_at).toLocaleDateString('es-CL')}
+                        <Package size={14} /> {fechaDe(cotizacion.created_at)}
                     </div>
                 </div>
 

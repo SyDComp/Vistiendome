@@ -3,6 +3,7 @@ import { escapar } from '../../../../../utils/impresion';
 import { imprimirEnMarco } from '../../../../../utils/imprimirEnMarco';
 import papel from '../impresion/papel58.impresion.css?raw';
 import estilos from './comprobante.impresion.css?raw';
+import { ZONA } from '../../../../../utils/fechaServidor';
 
 /**
  * El comprobante en papel térmico de 58 mm (POS-5890F). Este archivo arma el
@@ -14,7 +15,7 @@ import estilos from './comprobante.impresion.css?raw';
  */
 
 const fecha = (d) => d.toLocaleString('es-CL', {
-    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: ZONA,
 });
 
 const fila = (izq, der, clase = '') =>

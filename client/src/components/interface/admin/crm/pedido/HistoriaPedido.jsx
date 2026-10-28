@@ -1,7 +1,8 @@
 import React from 'react';
 import { describirEvento, autorDe } from '../../../../../utils/historiaPedido';
+import { desdeServidor, enChile } from '../../../../../utils/fechaServidor';
 
-const FECHA = new Intl.DateTimeFormat('es-CL', {
+const FECHA = enChile({
     day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
 });
 
@@ -30,7 +31,7 @@ const HistoriaPedido = ({ eventos, cargando, error, modoEntrega, onReintentar })
                 const inicio = ev.tipo === 'REGISTRO_INICIADO';
                 return (
                     <li key={ev.id} className={inicio ? 'sp-evento sp-evento--inicio' : 'sp-evento'}>
-                        <time className="sp-cuando" dateTime={ev.ocurrido_at}>{FECHA.format(new Date(ev.ocurrido_at))}</time>
+                        <time className="sp-cuando" dateTime={ev.ocurrido_at}>{FECHA.format(desdeServidor(ev.ocurrido_at))}</time>
                         <p className="sp-que">{texto}</p>
                         {detalle && <p className="sp-detalle">{detalle}</p>}
                         {autor && <p className="sp-quien">{autor}</p>}
