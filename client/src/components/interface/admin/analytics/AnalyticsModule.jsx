@@ -55,7 +55,8 @@ const AnalyticsModule = () => {
         { key: 'clicks', label: 'Clicks (consultas)', value: t.clicks, icon: <MousePointerClick size={18} />, color: '#8f0653', bg: '#fdf2f8' },
         { key: 'searches', label: 'Búsquedas', value: t.searches, icon: <Search size={18} />, color: '#d97706', bg: '#fef3c7' },
         { key: 'add_to_cart', label: 'Agregados al carrito', value: t.add_to_cart, icon: <ShoppingCart size={18} />, color: '#059669', bg: '#ecfdf5' },
-        { key: 'checkout_whatsapp', label: 'Cierres por WhatsApp', value: t.checkout_whatsapp, icon: <MessageCircle size={18} />, color: '#16a34a', bg: '#f0fdf4' },
+        // Cuenta prendas: un carrito de tres enviado por WhatsApp suma tres.
+        { key: 'checkout_whatsapp', label: 'Prendas pedidas por WhatsApp', value: t.checkout_whatsapp, icon: <MessageCircle size={18} />, color: '#16a34a', bg: '#f0fdf4' },
         { key: 'abandoned', label: 'Carritos abandonados', value: data?.abandoned_carts, icon: <AlertTriangle size={18} />, color: '#dc2626', bg: '#fef2f2' },
         { key: 'pending', label: 'Cotizaciones pendientes', value: data?.pending_quotes, icon: <Clock size={18} />, color: '#7c3aed', bg: '#f5f3ff' },
     ];
@@ -152,10 +153,10 @@ const AnalyticsModule = () => {
                             ))}
                         </ListCard>
 
-                        <ListCard title="Más vistos, menos consultados" icon={<MousePointerClick size={18} />} empty="Sin datos de interés todavía." hint="Mucha mirada, pocos clicks: candidatos a mejorar foto, precio o descripción.">
+                        <ListCard title="Muy vistos, poco pedidos" icon={<MousePointerClick size={18} />} empty="Todavía ningún producto tiene 5 vistas o más." hint="Muchas fichas abiertas y pocas prendas al carrito: candidatos a mejorar foto, precio o descripción. Solo productos con 5 vistas o más.">
                             {(data.interest || []).map((p, i) => (
-                                <Row key={p.product_id} index={i + 1} name={p.name} value={`${p.views} vistas · ${p.clicks} clicks`}
-                                    onClick={() => setPreview({ kind: 'product', product_id: p.product_id, title: p.name, stats: [['Vistas', p.views], ['Clicks', p.clicks]] })} />
+                                <Row key={p.product_id} index={i + 1} name={p.name} value={`${p.views} vistas · ${p.add_to_cart} al carrito`}
+                                    onClick={() => setPreview({ kind: 'product', product_id: p.product_id, title: p.name, stats: [['Vistas', p.views], ['Al carrito', p.add_to_cart]] })} />
                             ))}
                         </ListCard>
 
@@ -179,10 +180,10 @@ const AnalyticsModule = () => {
                             ))}
                         </ListCard>
 
-                        <ListCard title="Variantes más cerradas por WhatsApp" icon={<MessageCircle size={18} />} empty="Sin cierres por WhatsApp todavía." hint="Lo que realmente se va a vender: producto + talla/color.">
+                        <ListCard title="Variantes más pedidas por WhatsApp" icon={<MessageCircle size={18} />} empty="Nadie ha pedido por WhatsApp todavía." hint="Lo que realmente se va a vender: producto + talla/color.">
                             {(data.top_checkout_variants || []).map((v, i) => (
                                 <Row key={v.sku} index={i + 1} name={v.label} value={`${v.count}×`}
-                                    onClick={() => setPreview({ kind: 'variant', product_id: v.product_id, sku: v.sku, title: v.label, stats: [['Cierres', v.count]] })} />
+                                    onClick={() => setPreview({ kind: 'variant', product_id: v.product_id, sku: v.sku, title: v.label, stats: [['Pedidas por WhatsApp', v.count]] })} />
                             ))}
                         </ListCard>
                     </div>

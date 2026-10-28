@@ -16,7 +16,7 @@ niegan a dejar el saldo negativo.
 
 from typing import Dict, Iterable, List, Tuple
 
-from sqlmodel import Session, select
+from sqlmodel import Session, func, select
 
 from ..models.catalog import StockMovement
 
@@ -39,12 +39,15 @@ def existencias_de(db: Session, sku_ids: Iterable[int]) -> Dict[int, int]:
     ids = {i for i in sku_ids if i}
     if not ids:
         return {}
-    movimientos = db.exec(
-        select(StockMovement).where(StockMovement.sku_id.in_(ids))
-    ).all()
+    # La suma la hace la base: traer cada movimiento a Python era miles de
+    # filas para un producto con cientos de variantes.
     total: Dict[int, int] = {i: 0 for i in ids}
-    for m in movimientos:
-        total[m.sku_id] = total.get(m.sku_id, 0) + m.quantity
+    for sku_id, suma in db.exec(
+        select(StockMovement.sku_id, func.sum(StockMovement.quantity))
+        .where(StockMovement.sku_id.in_(ids))
+        .group_by(StockMovement.sku_id)
+    ).all():
+        total[sku_id] = int(suma or 0)
     return total
 
 

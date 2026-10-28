@@ -1,13 +1,15 @@
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlmodel import Session, select, func
+from sqlmodel import Session, select
 from datetime import datetime
 from ...database import get_session
-from ...models.catalog import Product, Category, SKU, StockMovement, Characteristic, Specification
+from ...models.catalog import Product, Category, SKU, Characteristic, Specification
 from ...core.pricing import compute_effective_price, get_chile_time
 from ...core.looks import colapsar_en_looks, imagen_de_variante, asset_de_variante
 from ...core.imagenes import srcset_de
 from ...core.portada import portadas
+from ...core.existencias import existencias_de
+from sqlalchemy.orm import selectinload
 from ...core.categorias import efectivos
 from pydantic import BaseModel
 
@@ -499,18 +501,18 @@ def get_product_detail(
     except ValueError:
         statement = select(Product).where(Product.slug == id_or_slug)
         
-    product = db.exec(statement).first()
-    
+    # Las variantes con sus fotos, y el stock de todas, en pocas consultas: una
+    # por variante tardaba casi 2 s en un producto de 221 variantes.
+    product = db.exec(statement.options(selectinload(Product.skus).selectinload(SKU.media_assets))).first()
+
     if not product:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
-    
+
     now = get_chile_time()
+    stock_de = existencias_de(db, [s.id for s in product.skus])
     skus_data = []
     for s in product.skus:
-        stock = db.exec(
-            select(func.sum(StockMovement.quantity))
-            .where(StockMovement.sku_id == s.id)
-        ).one() or 0
+        stock = stock_de.get(s.id, 0)
         eff_price, on_sale, sale_ends = compute_effective_price(s, product, now)
         skus_data.append({
             "id": s.id,

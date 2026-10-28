@@ -30,6 +30,9 @@ router = APIRouter()
 
 ALLOWED_TYPES = {"view", "click", "search", "add_to_cart", "checkout_whatsapp", "filter"}
 
+# "Muy vistos, poco pedidos": un producto entra con al menos estas fichas abiertas.
+MIN_VISTAS_INTERES = 5
+
 
 # ---------- Captura pública (fire-and-forget) ----------
 
@@ -144,20 +147,26 @@ def analytics_summary(db: Session = Depends(get_session), days: int = Query(30, 
         key=lambda x: x["views"], reverse=True
     )[:10]
 
-    # Análisis de interés: muy vistos pero poco consultados (click) -> menor ratio click/vista
+    # Muy vistos, poco pedidos: fichas abiertas contra prendas agregadas al
+    # carrito (que solo se agrega desde la ficha). Antes se comparaba contra el
+    # clic en la tarjeta del catálogo, que es justo lo que abre la ficha: no
+    # medía interés, medía por dónde se llegó. Con pocas vistas el cociente es
+    # ruido, por eso hay un mínimo.
+    al_carrito = per_product("add_to_cart")
     interest = []
     for pid, v in views.items():
-        c = clicks.get(pid, 0)
-        ratio = round(c / v, 2) if v else 0
+        if v < MIN_VISTAS_INTERES:
+            continue
+        a = al_carrito.get(pid, 0)
         interest.append({
             "product_id": pid,
             "name": names.get(pid, f"#{pid}"),
             "views": v,
-            "clicks": c,
-            "ratio": ratio,
+            "add_to_cart": a,
+            "ratio": round(a / v, 2),
         })
-    # Ordenar: primero los de más vistas con menor ratio (más "mirados pero poco consultados")
-    interest = sorted(interest, key=lambda x: (-x["views"], x["ratio"]))[:10]
+    # Primero los que menos se piden por cada vista; a igual cociente, los más vistos.
+    interest = sorted(interest, key=lambda x: (x["ratio"], -x["views"]))[:10]
 
     # Top búsquedas
     search_rows = db.exec(
