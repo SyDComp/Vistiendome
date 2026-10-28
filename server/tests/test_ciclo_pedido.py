@@ -106,6 +106,15 @@ def _hechas(session, pedido, *posiciones):
     session.commit()
 
 
+def _encontradas(session, pedido, *posiciones):
+    """Como si el taller ya las hubiera buscado en bodega (orden finalizada)."""
+    for i in posiciones:
+        item = session.get(CotizacionItem, pedido["items"][i]["id"])
+        item.encontrada = True
+        session.add(item)
+    session.commit()
+
+
 def _saldo(client_admin, sku) -> dict:
     filas = client_admin.get("/api/v1/admin/catalog/kardex").json()
     return next(f for f in filas if f["sku_id"] == sku.id)
@@ -270,6 +279,7 @@ def test_al_despachar_solo_sale_de_bodega_lo_que_iba_por_bodega(client_admin, ti
     pedido = _pedido(client_admin, (tienda["vestido"], 1), (tienda["vestido"], 1))
     _confirmar(client_admin, pedido)  # una apartada, la otra al taller
     _hechas(session, pedido, 1)
+    _encontradas(session, pedido, 0)
     _pagar_todo(client_admin, pedido)
     assert _estado(client_admin, pedido, "DESPACHADA").status_code == 200
 
@@ -284,12 +294,15 @@ def test_no_sale_hasta_que_el_taller_termina_personalizadas_incluidas(client_adm
 
     produccion = _leer(client_admin, pedido)["produccion"]
     assert (produccion["taller"], produccion["hechas"], produccion["bodega"], produccion["listo"]) == (1, 0, 1, False)
-    assert produccion["falta"] == ["Bolero: por hacer en el taller"]
+    assert [f.split(": ")[1] for f in produccion["falta"]] == ["por buscar en bodega (taller)", "por hacer en el taller"]
     res = _estado(client_admin, pedido, "DESPACHADA")
     assert res.status_code == 409 and "Bolero: por hacer en el taller" in res.json()["detail"]
 
     _hechas(session, pedido, 1)
-    assert _leer(client_admin, pedido)["produccion"]["listo"] is True
+    assert _leer(client_admin, pedido)["produccion"]["falta"][0].endswith("por buscar en bodega (taller)")
+    _encontradas(session, pedido, 0)
+    produccion = _leer(client_admin, pedido)["produccion"]
+    assert (produccion["encontradas"], produccion["listo"]) == (1, True)
     _pagar_todo(client_admin, pedido)
     assert _estado(client_admin, pedido, "DESPACHADA").status_code == 200
 
@@ -307,12 +320,41 @@ def test_no_se_despacha_lo_que_espera_bodega(client_admin, tienda):
     assert res.status_code == 409 and "Cinturón (M): esperando que llegue a bodega" in res.json()["detail"]
 
 
-def test_al_taller_no_llega_lo_que_va_por_bodega(client_admin, tienda, session):
+def test_al_taller_llega_lo_que_hay_que_hacer_y_lo_que_hay_que_buscar(client_admin, tienda, session):
     _hay(session, tienda["vestido"], 1)
     pedido = _pedido(client_admin, (tienda["vestido"], 1), (tienda["vestido"], 1))
-    _confirmar(client_admin, pedido)
+    _confirmar(client_admin, pedido)  # una apartada, la otra al taller
     pendientes = client_admin.get("/api/v1/ordenes-corte/pendientes").json()
-    assert [p["cotizacion_item_id"] for p in pendientes] == [pedido["items"][1]["id"]]
+    assert [(p["cotizacion_item_id"], p["buscar"]) for p in pendientes] == [
+        (pedido["items"][0]["id"], True), (pedido["items"][1]["id"], False)]
+
+
+def test_lo_que_espera_bodega_todavia_no_se_puede_buscar(client_admin, tienda):
+    pedido = _pedido(client_admin, (tienda["cinturon"], 1))
+    _confirmar(client_admin, pedido, nota="Llega el jueves")
+    assert client_admin.get("/api/v1/ordenes-corte/pendientes").json() == []
+
+
+def test_al_terminar_la_orden_lo_buscado_queda_encontrado_sin_mover_stock(client_admin, tienda, session):
+    _hay(session, tienda["vestido"], 1)
+    pedido = _pedido(client_admin, (tienda["vestido"], 1))
+    _confirmar(client_admin, pedido)
+    [p] = client_admin.get("/api/v1/ordenes-corte/pendientes").json()
+    orden = client_admin.post("/api/v1/ordenes-corte/", json={"items": [
+        {"cotizacion_item_id": p["cotizacion_item_id"], "sku_id": p["sku_id"], "cantidad": 1}]}).json()
+    assert [i["buscar"] for i in orden["items"]] == [True]
+    antes = len(session.exec(select(StockMovement)).all())
+
+    assert client_admin.put(f"/api/v1/ordenes-corte/{orden['id']}/estado", json={"estado": "FINALIZADA"}).status_code == 200
+    prenda = _leer(client_admin, pedido)["items"][0]
+    assert (prenda["encontrada"], prenda["cortado"]) == (True, False)
+    assert len(session.exec(select(StockMovement)).all()) == antes
+    assert _leer(client_admin, pedido)["produccion"]["listo"] is True
+    assert client_admin.get("/api/v1/ordenes-corte/pendientes").json() == []
+
+    # Repetir la orden no corta para stock lo que era de bodega.
+    res = client_admin.post(f"/api/v1/ordenes-corte/{orden['id']}/repetir")
+    assert res.status_code == 400 and "bodega no se repite" in res.json()["detail"]
 
 
 # --- Quitar una prenda antes de confirmar -----------------------------------

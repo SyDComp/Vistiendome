@@ -88,6 +88,7 @@ class CotizacionItemRead(BaseModel):
     # las marca para que no se confundan con las del catalogo.
     config_propuesta: dict = {}
     cortado: bool = False
+    encontrada: bool = False   # por bodega: el taller ya la buscó
     # Si se canceló: sigue en el pedido, tachada (ver core/pedidos/cancelar.py).
     cancelada_en: Optional[datetime] = None
     # Si es una pieza única de la bodega, su número.
@@ -118,6 +119,7 @@ class ProduccionRead(BaseModel):
     hechas: int = 0
     bodega: int = 0          # prendas que salen de bodega
     esperando: int = 0       # de esas, las que esperan que llegue
+    encontradas: int = 0     # de esas, las que el taller ya buscó
     # Listo para salir, y si no, qué falta prenda por prenda. Solo en confirmados.
     listo: bool = False
     falta: List[str] = []
@@ -249,7 +251,7 @@ def _get_cotizacion_read(c: Cotizacion, ordenes: Optional[List[OrdenDeCorteDelPe
     ]
     a = ciclo.avance(c, en_bodega or {})
     c_dict["produccion"] = ProduccionRead(
-        taller=a.taller, hechas=a.hechas, bodega=a.bodega, esperando=a.esperando,
+        taller=a.taller, hechas=a.hechas, bodega=a.bodega, esperando=a.esperando, encontradas=a.encontradas,
         listo=a.listo, falta=a.falta, ordenes=ordenes or [],
     )
     c_dict["pago"] = PagoResumen(**vars(pagos_core.cuentas(c, pagos or [])))

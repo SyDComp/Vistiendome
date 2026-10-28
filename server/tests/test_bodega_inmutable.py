@@ -53,7 +53,9 @@ def _pedido(session: Session, sku: SKU, cantidad: int) -> Cotizacion:
     cot = Cotizacion(persona_id=persona.id, numero=40, estado=EstadoCotizacion.CONFIRMADA)
     session.add(cot)
     session.commit()
-    session.add(CotizacionItem(cotizacion_id=cot.id, sku_id=sku.id, cantidad=cantidad, camino=ciclo.BODEGA))
+    # Ya buscada por el taller: estos tests miran la bodega al despachar.
+    session.add(CotizacionItem(cotizacion_id=cot.id, sku_id=sku.id, cantidad=cantidad, camino=ciclo.BODEGA,
+                               encontrada=True))
     session.commit()
     session.refresh(cot)
     return cot

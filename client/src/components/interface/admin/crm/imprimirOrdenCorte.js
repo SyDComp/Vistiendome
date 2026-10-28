@@ -1,4 +1,4 @@
-import { agrupar, nombreDeProducto } from '../../../../utils/prendas';
+import { agrupar, nombreDeProducto, tareaDe } from '../../../../utils/prendas';
 import { escapar, imprimirDocumento } from '../../../../utils/impresion';
 // La hoja vive en un .css de verdad y se trae como texto: asi el editor la
 // entiende, y una comilla invertida en un comentario deja de romper la
@@ -30,13 +30,15 @@ const origenDe = (i) => i.para_stock
 // tiene y se usan.
 const FILAS_EN_BLANCO = 2;
 
-const tablaDe = ({ titulo, pedido, columnas, filas, unidades, conColumnaProducto }) => {
+const tablaDe = ({ titulo, pedido, buscar, columnas, filas, unidades, conColumnaProducto }) => {
     // Agrupado por pedido ya se sabe para quién es: la columna "Para" sobra y
     // ese ancho lo necesita "Producto", que es lo que distingue las filas.
     const colProducto = conColumnaProducto ? '<th class="ancha">Producto</th>' : '';
     const colDestino = conColumnaProducto ? '' : '<th class="ancha">Para</th>';
-    // Siempre son las mismas: casilla + (producto O para) + características + cantidad.
-    const celdasPorFila = columnas.length + 3;
+    // Por pedido, cada fila dice si se hace o se busca; por modelo lo dice el título.
+    const colTarea = conColumnaProducto ? '<th>Qué</th>' : '';
+    // Siempre son las mismas: casilla + (producto O para) + características + cantidad (+ qué).
+    const celdasPorFila = columnas.length + 3 + (conColumnaProducto ? 1 : 0);
 
     const encabezados = columnas.map(c => `<th>${escapar(c)}</th>`).join('');
     const cuerpo = filas.map(i => `
@@ -45,7 +47,7 @@ const tablaDe = ({ titulo, pedido, columnas, filas, unidades, conColumnaProducto
             ${conColumnaProducto ? `<td class="producto">${escapar(nombreDeProducto(i))}</td>` : ''}
             ${columnas.map(c => `<td>${escapar(i.config?.[c] || '—')}</td>`).join('')}
             <td class="cant">${escapar(i.cantidad)}</td>
-            ${conColumnaProducto ? '' : `<td class="origen">${escapar(origenDe(i))}</td>`}
+            ${conColumnaProducto ? `<td>${escapar(tareaDe(i))}</td>` : `<td class="origen">${escapar(origenDe(i))}</td>`}
         </tr>`).join('');
     const blancas = Array.from({ length: FILAS_EN_BLANCO }, () => `
         <tr class="blanca">${'<td></td>'.repeat(celdasPorFila)}</tr>`).join('');
@@ -56,11 +58,12 @@ const tablaDe = ({ titulo, pedido, columnas, filas, unidades, conColumnaProducto
             <div class="modelo-titulo">
                 <h2>${escapar(titulo)}</h2>
                 ${pedido != null ? `<span class="pedido">Pedido N° ${escapar(pedido)}</span>` : ''}
+                ${buscar ? '<span class="buscar">Buscar en bodega</span>' : ''}
             </div>
             <span>${unidades} ${unidades === 1 ? 'unidad' : 'unidades'}</span>
         </div>
         <table>
-            <thead><tr><th class="check"></th>${colProducto}${encabezados}<th class="cant">Cant.</th>${colDestino}</tr></thead>
+            <thead><tr><th class="check"></th>${colProducto}${encabezados}<th class="cant">Cant.</th>${colTarea}${colDestino}</tr></thead>
             <tbody>${cuerpo}${blancas}</tbody>
         </table>
     </section>`;
@@ -73,6 +76,7 @@ export const imprimirOrdenCorte = (orden, etiquetaEstado, columnasPermitidas = n
     const grupos = agrupar(orden.items || [], { por, permitidas: columnasPermitidas, orden: ordenCaracteristicas });
     const porPedido = por === 'pedido';
     const fecha = fechaDe(orden.created_at);
+    const hacer = (orden.items || []).filter(i => !i.buscar).reduce((s, i) => s + (Number(i.cantidad) || 0), 0);
 
     const cuerpo = `
 <div class="cab">
@@ -82,7 +86,7 @@ export const imprimirOrdenCorte = (orden, etiquetaEstado, columnasPermitidas = n
 </div>
 ${orden.notas ? `<div class="notas"><b>Notas</b>${escapar(orden.notas)}</div>` : ''}
 ${grupos.map(tablaDe).join('')}
-<div class="total"><span>Total a cortar</span><span>${escapar(orden.total_unidades)} unidades</span></div>`;
+<div class="total"><span>Para hacer: ${escapar(hacer)} · Para buscar en bodega: ${escapar(orden.total_unidades - hacer)}</span><span>${escapar(orden.total_unidades)} unidades</span></div>`;
 
     return imprimirDocumento({
         titulo: `Orden de Corte N° ${escapar(orden.numero)}`,

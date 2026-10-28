@@ -13,8 +13,9 @@ import './OrdenCorteForm.css';
  * Arma una orden de corte.
  *
  * Dos fuentes, porque son las dos formas en que se corta de verdad:
- *   1. Piezas de pedidos confirmados — el sistema las propone, no hay que
- *      escribirlas de nuevo.
+ *   1. Prendas de pedidos confirmados — el sistema las propone, no hay que
+ *      escribirlas de nuevo: las que hay que hacer y las de bodega que hay
+ *      que ir a buscar.
  *   2. Líneas libres para stock — cortar sin que nadie lo haya pedido todavía.
  */
 const OrdenCorteForm = ({ onVolver, onCreada }) => {
@@ -117,10 +118,11 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
             <section className="oc-bloque">
                 <div className="oc-bloque-cabecera">
                     <div>
-                        <h3>Piezas de pedidos confirmados</h3>
+                        <h3>Prendas de pedidos confirmados</h3>
                         <p className="oc-hint">
-                            Lo que las clientas ya compraron y todavía no se corta. Elige lo que
-                            entra en esta orden; lo que no elijas queda disponible para la próxima.
+                            Lo que las clientas ya compraron: lo que hay que hacer y lo que ya existe
+                            y hay que ir a buscar en bodega. Elige lo que entra en esta orden; lo que
+                            no elijas queda disponible para la próxima.
                         </p>
                     </div>
                     {!cargando && pendientes.length > 0 && (
@@ -134,7 +136,7 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
                     <div className="oc-vacio">Cargando...</div>
                 ) : pendientes.length === 0 ? (
                     <div className="oc-vacio">
-                        No hay piezas de pedidos esperando corte. Puedes armar la orden
+                        No hay prendas de pedidos esperando al taller. Puedes armar la orden
                         igual, agregando abajo lo que quieras cortar para stock.
                     </div>
                 ) : (

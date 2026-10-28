@@ -145,6 +145,10 @@ def vender(db: Session, clienta: Optional[Clienta], prendas: List[PrendaVenta],
         raise NoSeVende(f"No hay suficiente en bodega de: {', '.join(faltan)}. Eso es un pedido normal, no una venta rápida.")
     except ciclo.NoSeConfirma as e:
         raise NoSeVende(str(e))
+    # Quien vende sacó la prenda del perchero: no hay nada que el taller busque.
+    for it in activas(cotizacion):
+        ciclo.marcar(it, True)
+        db.add(it)
     db.flush()
 
     # Y se entrega.

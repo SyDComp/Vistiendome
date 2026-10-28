@@ -236,6 +236,11 @@ class CotizacionItem(SQLModel, table=True):
     # es el ciclo de la VENTA; esto es el ciclo de la CONFECCIÓN — ejes distintos.
     cortado: bool = Field(default=False)
 
+    # Una prenda por bodega que el taller ya fue a buscar (la marca la orden de
+    # corte al finalizar). Va aparte de `cortado` a propósito: lo cortado, si
+    # se cancela, entra a bodega como stock nuevo; lo encontrado ya era stock.
+    encontrada: bool = Field(default=False)
+
     # De dónde sale la prenda: BODEGA (se aparta de lo que hay) o TALLER (se
     # confecciona; nunca toca la bodega). Se decide al confirmar y queda
     # guardado: si mañana cambia la categoría, esta prenda no cambia de camino.

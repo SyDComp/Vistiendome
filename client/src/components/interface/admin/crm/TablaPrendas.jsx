@@ -50,12 +50,13 @@ const TablaPrendas = ({
 
     return (
         <div>
-            {grupos.map(({ clave, titulo, pedido, columnas, filas, unidades, conColumnaProducto }) => (
+            {grupos.map(({ clave, titulo, pedido, buscar, columnas, filas, unidades, conColumnaProducto }) => (
                 <section key={clave} className="tp-grupo">
                     <header className="tp-grupo-cab">
                         <div className="tp-grupo-titulo">
                             <h4 className="tp-producto">{titulo}</h4>
                             {pedido != null && <span className="tp-pedido">Pedido N° {pedido}</span>}
+                            {buscar && <span className="tp-buscar">Buscar en bodega</span>}
                         </div>
                         <span className="tp-unidades">
                             {unidades} {unidades === 1 ? 'unidad' : 'unidades'}

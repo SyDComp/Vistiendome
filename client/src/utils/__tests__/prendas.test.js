@@ -50,6 +50,25 @@ describe('agrupar por modelo', () => {
     });
 });
 
+describe('lo que se busca en bodega', () => {
+    it('por modelo va en su propio grupo, después de lo que se corta', () => {
+        const grupos = agrupar([
+            pieza('Allan', 27, 'M', { buscar: true }),
+            pieza('Camila', 30, 'L'),
+        ], { por: 'producto' });
+        expect(grupos.map(g => [g.titulo, g.buscar, g.filas.length])).toEqual([
+            ['Vestido Noemi', false, 1],
+            ['Vestido Noemi', true, 1],
+        ]);
+    });
+
+    it('por pedido queda con el resto de su pedido', async () => {
+        const { tareaDe } = await import('../prendas');
+        const [grupo] = agrupar([pieza('Allan', 27, 'M', { buscar: true }), pieza('Allan', 27, 'L')], { por: 'pedido' });
+        expect(grupo.filas.map(tareaDe)).toEqual(['Buscar', 'Hacer']);
+    });
+});
+
 describe('orden de las características', () => {
     it('sigue el orden de la tienda; lo que no está, al final y por nombre', async () => {
         const { ordenarCaracteristicas } = await import('../prendas');

@@ -20,9 +20,15 @@ describe('estadoDeProduccion', () => {
     });
 
     it('dice lo que espera bodega', () => {
-        expect(estadoDeProduccion(confirmado({ taller: 1, hechas: 1, bodega: 2, esperando: 1 })).texto).toBe('1 esperando bodega');
+        expect(estadoDeProduccion(confirmado({ taller: 1, hechas: 1, bodega: 2, esperando: 1, encontradas: 0 })).texto)
+            .toBe('1 esperando bodega · 1 por buscar en bodega');
         expect(estadoDeProduccion(confirmado({ taller: 2, hechas: 0, bodega: 2, esperando: 2 })).texto)
             .toBe('Por hacer · sin orden todavía · 2 esperando bodega');
+    });
+
+    it('dice lo apartado que el taller todavía no busca', () => {
+        expect(estadoDeProduccion(confirmado({ bodega: 3, encontradas: 1 })).texto).toBe('2 por buscar en bodega');
+        expect(estadoDeProduccion(confirmado({ bodega: 1, encontradas: 1, listo: true })).texto).toBe('Listo para despachar');
     });
 
     it('textoListo', () => {

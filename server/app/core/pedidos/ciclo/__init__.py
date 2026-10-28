@@ -10,6 +10,7 @@ from .confirmar import CambioLaBodega, NoSeConfirma, abono_de, confirmar, proble
 from .despacho import NoSeDespacha, devolver, sacar
 from .listo import Avance, avance
 from .propuesta import PrendaPropuesta, proponer
+from .tarea import BUSCAR, HACER, marcar, tarea_de, terminada
 from .transiciones import al_cambiar, por_que_no
 
 __all__ = [
@@ -19,5 +20,6 @@ __all__ = [
     "NoSeDespacha", "devolver", "sacar",
     "Avance", "avance",
     "PrendaPropuesta", "proponer",
+    "BUSCAR", "HACER", "marcar", "tarea_de", "terminada",
     "al_cambiar", "por_que_no",
 ]

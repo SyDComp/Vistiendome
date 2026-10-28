@@ -3,7 +3,8 @@
 
 Un pedido confirmado está listo cuando cada prenda tiene con qué salir:
 
-  · las de BODEGA, apartadas (no esperando a que llegue);
+  · las de BODEGA, apartadas (no esperando a que llegue) y ya buscadas por
+    el taller: la orden de corte que las tenía se finalizó;
   · las del TALLER, hechas: la orden de corte que las tenía se finalizó.
     Personalizadas incluidas: antes solo se contaban las del catálogo, y un
     pedido podía figurar "listo" con una personalizada sin hacer.
@@ -27,6 +28,7 @@ class Avance:
     hechas: int = 0       # de esas, las ya hechas
     bodega: int = 0       # prendas que salen de bodega
     esperando: int = 0    # de esas, las que esperan que llegue
+    encontradas: int = 0  # de esas, las que el taller ya buscó
     falta: List[str] = field(default_factory=list)
     listo: bool = False
 
@@ -46,6 +48,7 @@ def avance(cotizacion: Cotizacion, en_bodega: Dict[str, str]) -> Avance:
         elif item.camino == BODEGA:
             a.bodega += 1
             a.esperando += 1 if en_bodega.get(item.id) == ESPERANDO else 0
+            a.encontradas += 1 if item.encontrada else 0
 
     if EstadoCotizacion(getattr(cotizacion.estado, "value", cotizacion.estado)) != EstadoCotizacion.CONFIRMADA:
         return a
@@ -56,6 +59,8 @@ def avance(cotizacion: Cotizacion, en_bodega: Dict[str, str]) -> Avance:
             a.falta.append(f"{nombre}: por hacer en el taller")
         elif item.camino == BODEGA and en_bodega.get(item.id) == ESPERANDO:
             a.falta.append(f"{nombre}: esperando que llegue a bodega")
+        elif item.camino == BODEGA and not item.encontrada:
+            a.falta.append(f"{nombre}: por buscar en bodega (taller)")
         elif item.camino is None:
             a.falta.append(f"{nombre}: sin decidir de dónde sale")
     a.listo = bool(prendas) and not a.falta

@@ -200,12 +200,12 @@ El ojo de la fila abre el detalle, al costado. Se lee de arriba abajo.
 
 ![Confirmar un pedido](capturas/03-06-confirmar.png)
 
-1. **De dónde sale** cada prenda: *Bodega* (se aparta de lo que hay) o *Taller* (se confecciona). El sistema propone lo que conviene.
-2. Lo que pasa con esa prenda: aquí, se aparta de bodega, y quedan 30 libres.
+1. **De dónde sale** cada prenda: *Ya existe: buscar en bodega* (se aparta de lo que hay) o *Hay que hacerla: confeccionar*. El sistema propone lo que conviene. Las dos van a la orden de corte: el taller busca una y hace la otra.
+2. Lo que pasa con esa prenda: aquí, se aparta y el taller la busca en bodega, y quedan 30 libres.
 3. **Para cuándo estará listo.** Propone la fecha según el plazo habitual de los Ajustes del negocio; se puede cambiar.
 4. **El abono mínimo** y lo pagado. *Registrar pago* lo anota sin salir de aquí.
 5. **La nota.** Si se confirma sin el abono mínimo es obligatoria: queda escrito por qué.
-6. **Confirmar pedido.** Lo de bodega queda apartado y lo del taller entra a la orden de corte.
+6. **Confirmar pedido.** Lo de bodega queda apartado, y todo queda listo para ponerlo en una orden de corte.
 
 ### Los pagos
 
@@ -220,7 +220,7 @@ El ojo de la fila abre el detalle, al costado. Se lee de arriba abajo.
 
 ![Las prendas de un pedido confirmado](capturas/03-08-prendas-confirmado.png)
 
-1. De dónde sale cada prenda: *Bodega · apartada* o *Taller*.
+1. De dónde sale cada prenda: *Bodega · apartada, por buscar* (o *encontrada*, cuando el taller ya la buscó) o *Taller*.
 2. **Cancelar prenda**, si la clienta se arrepiente de una. Sale del pedido y queda en la historia.
 3. El precio ya no se cambia: se cotiza mientras el pedido está nuevo o en conversación.
 
@@ -254,7 +254,7 @@ El ojo de la fila abre el detalle, al costado. Se lee de arriba abajo.
 
 ## 4. Taller
 
-Lo que se confecciona pasa por una **orden de corte**: la lista de lo que el taller tiene que cortar. Están en **Ventas y CRM → Orden de Corte**. Cuando se confirma un pedido con una prenda *Taller*, esa prenda queda esperando a que se la ponga en una orden.
+Todo pedido pasa por una **orden de corte**: la hoja del taller, con lo que hay que **hacer** y lo que ya existe y hay que **buscar** en bodega. Están en **Ventas y CRM → Orden de Corte**. Cuando se confirma un pedido, sus prendas quedan esperando a que se las ponga en una orden. Un pedido queda listo para salir cuando todo está hecho o encontrado. En la caja no: quien vende saca la prenda del perchero.
 
 ### Las órdenes
 
@@ -268,11 +268,11 @@ Lo que se confecciona pasa por una **orden de corte**: la lista de lo que el tal
 
 ![El detalle de una orden de corte](capturas/04-02-detalle.png)
 
-1. **El estado.** Al pasarla a *Finalizada* el panel pide confirmar: las prendas de los pedidos quedan marcadas como cortadas, y lo que se cortó para stock entra al inventario.
-2. **Repetir:** crea una orden nueva con las mismas piezas.
+1. **El estado.** Al pasarla a *Finalizada* el panel pide confirmar: las prendas de los pedidos quedan hechas o encontradas, y lo que se cortó para stock entra al inventario. Lo encontrado no mueve stock: sale de bodega cuando sale el pedido.
+2. **Repetir:** crea una orden nueva con las mismas piezas para hacer (lo que era para buscar en bodega no se repite).
 3. **Imprimir** la orden para el taller, con un casillero por pieza para ir marcando.
 4. **Las notas** de la orden.
-5. **Cómo verla:** *por modelo* para cortar (se tiende la tela de un modelo y salen todas sus tallas juntas) o *por pedido* para armar y entregar.
+5. **Cómo verla:** *por modelo* para cortar (se tiende la tela de un modelo y salen todas sus tallas juntas; lo que hay que buscar va al final, marcado *Buscar en bodega*) o *por pedido* para armar y entregar (cada prenda dice *Hacer* o *Buscar*).
 6. **Para quién es** cada pieza. El enlace abre el pedido.
 
 ![La misma orden, por pedido](capturas/04-03-por-pedido.png)
@@ -283,7 +283,7 @@ Lo que se confecciona pasa por una **orden de corte**: la lista de lo que el tal
 
 ![Crear una orden de corte](capturas/04-04-nueva.png)
 
-1. **Piezas de pedidos confirmados:** lo que las clientas ya compraron y todavía no se corta.
+1. **Prendas de pedidos confirmados:** lo que las clientas ya compraron y el taller todavía no hace ni busca. Lo que espera que llegue a bodega aparece cuando llega.
 2. Se marca lo que entra en esta orden. Lo que no se marque queda para la próxima.
 3. **Seleccionar todo** (o *Quitar selección*).
 4. **Cortar para stock:** prendas que no son de ningún pedido. Al finalizar la orden entran al inventario.

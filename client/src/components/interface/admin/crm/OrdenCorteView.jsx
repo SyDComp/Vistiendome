@@ -113,10 +113,10 @@ const OrdenCorteView = () => {
                 <div className="oc-vacio">
                     <strong>Todavía no hay órdenes de corte.</strong>
                     <p>
-                        Una orden de corte reúne lo que vas a cortar: piezas de pedidos ya
-                        confirmados y también prendas para tener en stock. Al finalizarla,
-                        las piezas de pedidos quedan marcadas como cortadas y las de stock
-                        entran al inventario.
+                        Una orden de corte es la hoja del taller: lo que hay que hacer y lo que
+                        hay que buscar en bodega para los pedidos confirmados, y también prendas
+                        para tener en stock. Al finalizarla, lo de pedidos queda hecho o
+                        encontrado y lo de stock entra al inventario.
                     </p>
                     <button className="oc-btn-nueva" onClick={() => setVista('nueva')}>
                         <Plus size={17} strokeWidth={3} /> Crear la primera

@@ -68,9 +68,11 @@ const grupoDePedido = (item) => {
     };
 };
 
+// Lo que se busca en bodega va en su propio grupo, después de lo que se
+// corta: con la tela tendida no se mezcla lo que hay que ir a buscar.
 const grupoDeProducto = (item) => {
     const titulo = nombreDeProducto(item);
-    return { clave: `producto-${titulo}`, titulo, pedido: null };
+    return { clave: `${item.buscar ? 'buscar' : 'producto'}-${titulo}`, titulo, pedido: null, buscar: Boolean(item.buscar) };
 };
 
 /**
@@ -81,10 +83,10 @@ const grupoDeProducto = (item) => {
  *                     clienta eligió que salgan ("Sale en la orden de corte").
  *                     `null`/`undefined` = salen todas; NO es lo mismo que un
  *                     Set vacío, que significa "no quiere ninguna".
- * @returns {{clave: string, titulo: string, pedido: number|null,
+ * @returns {{clave: string, titulo: string, pedido: number|null, buscar: boolean,
  *            columnas: string[], filas: object[], unidades: number,
  *            conColumnaProducto: boolean}[]}
- *          En el orden en que aparecen.
+ *          En el orden en que aparecen; por modelo, lo que se busca al final.
  */
 export const agrupar = (items = [], { por = 'producto', permitidas = null, orden = [] } = {}) => {
     const sale = (clave) => !permitidas || permitidas.has(String(clave).toUpperCase());
@@ -93,9 +95,9 @@ export const agrupar = (items = [], { por = 'producto', permitidas = null, orden
 
     const grupos = new Map();
     items.forEach(item => {
-        const { clave, titulo, pedido } = grupoDe(item);
+        const { clave, titulo, pedido, buscar = false } = grupoDe(item);
         if (!grupos.has(clave)) {
-            grupos.set(clave, { clave, titulo, pedido, claves: new Set(), filas: [], unidades: 0 });
+            grupos.set(clave, { clave, titulo, pedido, buscar, claves: new Set(), filas: [], unidades: 0 });
         }
         const grupo = grupos.get(clave);
         // Sólo se hace columna la característica que tiene valor en alguna fila
@@ -107,10 +109,12 @@ export const agrupar = (items = [], { por = 'producto', permitidas = null, orden
         grupo.unidades += Number(item.cantidad) || 0;
     });
 
-    return [...grupos.values()].map(({ clave, titulo, pedido, claves, filas, unidades }) => ({
+    const ordenados = [...grupos.values()].sort((a, b) => a.buscar - b.buscar);   // estable
+    return ordenados.map(({ clave, titulo, pedido, buscar, claves, filas, unidades }) => ({
         clave,
         titulo,
         pedido,
+        buscar,
         columnas: ordenarCaracteristicas(claves, orden),
         filas,
         unidades,
@@ -119,6 +123,9 @@ export const agrupar = (items = [], { por = 'producto', permitidas = null, orden
         conColumnaProducto: porPedido,
     }));
 };
+
+/** "Hacer" o "Buscar": qué hace el taller con esa línea (lo de stock se hace). */
+export const tareaDe = (item) => (item.buscar ? 'Buscar' : 'Hacer');
 
 /** Total de unidades de todo el pedido, no de un grupo. */
 export const totalUnidades = (items = []) =>

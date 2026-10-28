@@ -39,6 +39,17 @@ def _orden_estado(client_admin, orden, estado):
 
 # --- Cancelar una prenda ----------------------------------------------------
 
+def test_cancelar_lo_que_se_iba_a_buscar_no_suma_stock_al_terminar_la_orden(client_admin, tienda, session):
+    _hay(session, tienda["vestido"], 1)
+    pedido = _pedido(client_admin, (tienda["vestido"], 1))
+    _confirmar(client_admin, pedido)
+    orden = _orden(client_admin, pedido, 0)
+    assert _cancelar(client_admin, pedido, 0).status_code == 200
+    _orden_estado(client_admin, orden, "FINALIZADA")
+    assert _saldo(client_admin, tienda["vestido"])["current_stock"] == 1
+    assert not _eventos(session, TipoEvento.CANCELADA_TERMINADA)
+
+
 def test_cancelar_libera_lo_apartado_y_la_prenda_queda_tachada(client_admin, tienda, session):
     _hay(session, tienda["vestido"], 1)
     pedido = _pedido(client_admin, (tienda["vestido"], 1), BOLERO)
@@ -160,6 +171,12 @@ def test_una_pieza_asignada_sale_de_bodega_apartada_y_se_vende_al_despachar(clie
     [p] = client_admin.post(f"{CRM}/cotizaciones/{pedido['id']}/propuesta", json={}).json()["prendas"]
     assert (p["opciones"], p["camino"], p["queda"], p["pieza_numero"]) == (["BODEGA"], "BODEGA", "APARTADA", pieza["numero"])
     assert _confirmar(client_admin, pedido).status_code == 200
+    # Ya existe, pero alguien tiene que ir por ella: pasa por el taller.
+    pedido = _leer(client_admin, pedido)
+    assert _leer(client_admin, pedido)["produccion"]["listo"] is False
+    [pendiente] = client_admin.get("/api/v1/ordenes-corte/pendientes").json()
+    assert pendiente["buscar"] is True and pendiente["nombre_custom"]
+    _orden_estado(client_admin, _orden(client_admin, pedido, 0), "FINALIZADA")
     assert _leer(client_admin, pedido)["produccion"]["listo"] is True
 
     _pagar_todo(client_admin, pedido)

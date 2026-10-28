@@ -9,8 +9,10 @@ ya existía no se pierde (decisión del usuario 2026-10-13):
   · lo que el taller YA hizo:
       del catálogo (tiene variante) → entra a la bodega, a su variante;
       personalizado                 → queda en Piezas únicas, una por unidad;
-  · lo que está en una orden de corte sin terminar sigue en la orden, y va a
-    bodega o a Piezas únicas cuando se termine (ver `al_terminar_la_orden`).
+  · lo que el taller está haciendo en una orden sin terminar sigue en la
+    orden, y va a bodega o a Piezas únicas cuando se termine (ver
+    `al_terminar_la_orden`). Lo que estaba por buscar en bodega no: ya era
+    stock, y queda libre como cualquier apartado.
 
 La cancelación no se deshace: si hace falta, la prenda se agrega de nuevo.
 """
@@ -26,6 +28,7 @@ from ...models.historia import TipoEvento
 from ...models.piezas import PiezaUnica
 from ...models.taller import EstadoOrdenCorte, OrdenCorte, OrdenCorteItem
 from .. import movimientos, piezas
+from .ciclo.caminos import BODEGA as BODEGA_CAMINO
 from .cotizar import nombre_de_prenda
 from .historia import Actor, anotar
 from .prendas import activas
@@ -78,7 +81,7 @@ def _cancelar(db: Session, cotizacion: Cotizacion, item: CotizacionItem) -> Opti
             db, item, True, cotizacion.numero,
             nota=f"Pedido #{cotizacion.numero}: se canceló una prenda que ya estaba hecha",
         )
-    elif _orden_sin_terminar(db, item) is not None:
+    elif item.camino != BODEGA_CAMINO and _orden_sin_terminar(db, item) is not None:
         destino = AL_TERMINAR
     item.cancelada_en = datetime.now(timezone.utc)
     db.add(item)

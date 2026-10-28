@@ -2,8 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { textoCamino, esperaBodega, textoQueda, esperandoVistas, pideNota, sePuedeConfirmar } from '../caminoPrenda';
 
 describe('textoCamino', () => {
-    it('dice si lo de bodega está apartado o esperando', () => {
-        expect(textoCamino({ camino: 'BODEGA', en_bodega: 'APARTADA' })).toBe('Bodega · apartada');
+    it('dice si lo de bodega está apartado o esperando, y si el taller ya lo buscó', () => {
+        expect(textoCamino({ camino: 'BODEGA', en_bodega: 'APARTADA' })).toBe('Bodega · apartada, por buscar');
+        expect(textoCamino({ camino: 'BODEGA', en_bodega: 'APARTADA', encontrada: true })).toBe('Bodega · apartada, encontrada');
+        expect(textoCamino({ camino: 'BODEGA', pieza_numero: 4, encontrada: true })).toBe('Bodega · pieza única N° 4 · encontrada');
         expect(textoCamino({ camino: 'BODEGA', en_bodega: 'ESPERANDO' })).toBe('Bodega · esperando que llegue');
     });
 
@@ -27,7 +29,7 @@ describe('la propuesta', () => {
     const esperando = { item_id: 'b', camino: 'BODEGA', queda: 'ESPERANDO', disponible: 0, requiere_nota: true };
 
     it('dice qué pasa con cada prenda', () => {
-        expect(textoQueda(apartada)).toBe('Se aparta de bodega (libres: 3)');
+        expect(textoQueda(apartada)).toBe('Se aparta y el taller la busca en bodega (libres: 3)');
         expect(textoQueda(esperando)).toBe('Queda esperando que llegue a bodega');
         expect(textoQueda({ camino: 'TALLER' })).toBe('Se confecciona en el taller');
         expect(textoQueda({ camino: null })).toBe('Elige de dónde sale');

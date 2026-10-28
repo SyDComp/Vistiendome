@@ -1,18 +1,20 @@
 /**
- * De dónde sale cada prenda de un pedido: de la bodega o del taller.
+ * De dónde sale cada prenda de un pedido: ya existe (bodega) o hay que
+ * hacerla (taller). Las dos pasan por el taller: lo de bodega lo va a buscar,
+ * lo otro lo confecciona (ver el servidor: core/pedidos/ciclo/tarea.py).
  *
- * Se decide al confirmar (ver el servidor: core/pedidos/ciclo/). Una prenda
- * por bodega queda apartada, o esperando si no alcanzó; se aparta sola cuando
- * entra stock.
+ * Se decide al confirmar. Una prenda por bodega queda apartada, o esperando si
+ * no alcanzó; se aparta sola cuando entra stock.
  */
 
-export const CAMINOS = { BODEGA: 'Bodega', TALLER: 'Taller' };
+export const CAMINOS = { BODEGA: 'Ya existe: buscar en bodega', TALLER: 'Hay que hacerla: confeccionar' };
 
 /** Dónde está una prenda de un pedido confirmado, dicho corto. Null si no tiene camino. */
 export const textoCamino = (prenda) => {
     if (prenda?.camino === 'BODEGA') {
-        if (prenda.pieza_numero) return `Bodega · pieza única N° ${prenda.pieza_numero}`;
-        return prenda.en_bodega === 'ESPERANDO' ? 'Bodega · esperando que llegue' : 'Bodega · apartada';
+        const buscada = prenda.encontrada ? 'encontrada' : 'por buscar';
+        if (prenda.pieza_numero) return `Bodega · pieza única N° ${prenda.pieza_numero} · ${buscada}`;
+        return prenda.en_bodega === 'ESPERANDO' ? 'Bodega · esperando que llegue' : `Bodega · apartada, ${buscada}`;
     }
     if (prenda?.camino === 'TALLER') return prenda.cortado ? 'Taller · hecha' : 'Taller';
     return null;
@@ -26,7 +28,7 @@ export const textoQueda = (p) => {
     if (p.pieza_numero) return `Pieza única N° ${p.pieza_numero}: ya está apartada para este pedido`;
     if (p.camino === 'BODEGA') {
         return p.queda === 'APARTADA'
-            ? `Se aparta de bodega (libres: ${p.disponible})`
+            ? `Se aparta y el taller la busca en bodega (libres: ${p.disponible})`
             : 'Queda esperando que llegue a bodega';
     }
     if (p.camino === 'TALLER') return 'Se confecciona en el taller';

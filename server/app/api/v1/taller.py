@@ -1,11 +1,14 @@
 """
 Órdenes de corte.
 
-Producción, no ventas: El taller arma la orden con lo que va a cortar, sea para
-cumplir pedidos o para tener stock. Por eso vive aparte del CRM.
+Producción, no ventas: la hoja de trabajo del taller, con lo que va a cortar
+(para cumplir pedidos o para tener stock) y lo que tiene que ir a buscar en
+bodega para completar un pedido (core/pedidos/ciclo/tarea.py). Por eso vive
+aparte del CRM.
 
 Al finalizar una orden el sistema cierra el círculo solo:
-  - las líneas que vinieron de un pedido marcan esa pieza como cortada;
+  - las líneas que vinieron de un pedido marcan esa pieza como cortada, o
+    como encontrada si era de bodega (esa no mueve stock);
   - las que eran para stock entran al inventario como unidades producidas.
 Sin eso, cortar 20 prendas para stock obligaría a cargarlas a mano en Bodega.
 """
@@ -15,7 +18,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
-from sqlalchemy import or_, text
+from sqlalchemy import text
 from pydantic import BaseModel
 
 from app.database import get_session
@@ -26,6 +29,7 @@ from app.models.iam import CuentaAcceso
 from app.api.deps import RequirePermiso
 from app.core import movimientos as movimientos_core
 from app.core.pedidos import cancelar, ciclo, historia
+from app.core.pedidos.cotizar import nombre_de_prenda
 from app.models.historia import TipoEvento
 
 router = APIRouter()
@@ -71,6 +75,8 @@ class ItemSalida(BaseModel):
     cotizacion_item_id: Optional[str] = None
     # Para que la pantalla distinga de un vistazo el origen de cada línea
     para_stock: bool = False
+    # De bodega: ya existe, el taller la busca en vez de hacerla.
+    buscar: bool = False
     pedido_numero: Optional[int] = None
     cliente: Optional[str] = None
     # Para poder saltar al pedido desde acá: el número sirve para leerlo, el id
@@ -111,6 +117,7 @@ def _salida(orden: OrdenCorte, db: Session) -> OrdenSalida:
             cantidad=it.cantidad,
             cotizacion_item_id=it.cotizacion_item_id,
             para_stock=it.cotizacion_item_id is None,
+            buscar=cot_item is not None and ciclo.tarea_de(cot_item) == ciclo.BUSCAR,
             pedido_numero=cot.numero if cot else None,
             # Mismo criterio que en la lista de arriba: el nombre de este
             # pedido puntual, no el de la Persona vinculada por RUT.
@@ -148,16 +155,18 @@ def piezas_pendientes(
     admin: CuentaAcceso = _ADMIN,
 ):
     """
-    Piezas de pedidos que todavía no están en ninguna orden de corte activa.
+    Prendas de pedidos que todavía no están en ninguna orden de corte activa:
+    las que hay que hacer y las de bodega que hay que ir a buscar (`buscar`).
 
     Es la materia prima para armar una orden, no la orden en sí. Se excluye lo
-    que ya está en una orden viva para no cortar dos veces lo mismo.
+    que ya está en una orden viva para no hacer (ni buscar) dos veces lo mismo.
 
     Por omisión sólo pedidos CONFIRMADA: cortar tela es irreversible y cuesta
     material, así que no entra lo que la clienta todavía no aceptó. Se puede
     ampliar con ?estado=TODAS.
 
-    Nunca lo que va por bodega: esa prenda ya existe, se aparta de lo que hay.
+    De bodega, solo lo apartado: lo que espera que llegue todavía no se puede
+    buscar. Las piezas únicas entran: ya existen, pero alguien va por ellas.
     """
     ya_asignados = {
         oi.cotizacion_item_id
@@ -172,23 +181,28 @@ def piezas_pendientes(
     query = (
         select(CotizacionItem)
         .join(Cotizacion, CotizacionItem.cotizacion_id == Cotizacion.id)
-        .where(or_(CotizacionItem.camino.is_(None), CotizacionItem.camino != ciclo.BODEGA))
-        # Ni lo cancelado ni una pieza única: no hay nada que hacer.
-        .where(CotizacionItem.cancelada_en.is_(None), CotizacionItem.pieza_id.is_(None))
+        .where(CotizacionItem.cancelada_en.is_(None))
     )
     if estado and estado != "TODAS":
         query = query.where(Cotizacion.estado == estado)
     else:
         query = query.where(Cotizacion.estado != "CANCELADA")
 
+    items = db.exec(query.order_by(Cotizacion.created_at.asc())).all()
+    en_bodega = ciclo.estado_en_bodega(db, {it.cotizacion_id: it.cotizacion for it in items if it.camino == ciclo.BODEGA}.values())
     filas = []
-    for it in db.exec(query.order_by(Cotizacion.created_at.asc())).all():
+    for it in items:
+        buscar = ciclo.tarea_de(it) == ciclo.BUSCAR
+        if buscar and en_bodega.get(it.id) != ciclo.APARTADA:
+            continue
         # `not it.sku` descartaba aca las piezas personalizadas: existian en el
         # pedido pero no aparecian nunca para cortar. Ahora entran con su
         # nombre; lo unico que no tienen es variante ni caracteristicas.
-        if it.id in ya_asignados or it.cortado:
+        if it.id in ya_asignados or ciclo.terminada(it):
             continue
-        if not it.sku and not (it.nombre_custom or "").strip():
+        # Una pieza única no tiene variante: su nombre la identifica en la hoja.
+        nombre = (it.nombre_custom or "").strip() or (nombre_de_prenda(it) if it.pieza_id else "")
+        if not it.sku and not nombre:
             continue
         cot = it.cotizacion
         persona = cot.persona if cot else None
@@ -196,8 +210,9 @@ def piezas_pendientes(
             "cotizacion_item_id": it.id,
             "sku_id": it.sku_id,
             "sku": it.sku.sku if it.sku else None,
-            "nombre_custom": it.nombre_custom,
-            "producto": (it.sku.product.name if it.sku and it.sku.product else None) or it.nombre_custom or "—",
+            "nombre_custom": nombre or None,
+            "producto": (it.sku.product.name if it.sku and it.sku.product else None) or nombre or "—",
+            "buscar": buscar,
             "config": (it.sku.config if it.sku else None) or it.config_custom or {},
             "config_propuesta": it.config_propuesta or {},
             "cantidad": it.cantidad,
@@ -281,14 +296,16 @@ def _aplicar_finalizacion(db: Session, orden: OrdenCorte, finalizando: bool, act
     """
     for it in orden.items:
         if it.cotizacion_item_id:
-            # Vino de un pedido: la pieza queda (o deja de estar) cortada.
+            # Vino de un pedido: queda (o deja de estar) cortada, o encontrada
+            # si era de bodega.
             cot_item = db.get(CotizacionItem, it.cotizacion_item_id)
             if cot_item:
-                cot_item.cortado = finalizando
+                ciclo.marcar(cot_item, finalizando)
                 db.add(cot_item)
                 # Si esa prenda se canceló mientras se hacía, lo hecho va a
-                # bodega o a Piezas únicas (ver core/pedidos/cancelar.py).
-                if cot_item.cancelada_en is not None:
+                # bodega o a Piezas únicas (ver core/pedidos/cancelar.py). Lo
+                # que se buscó ya era stock: no hay nada que llevar.
+                if cot_item.cancelada_en is not None and ciclo.tarea_de(cot_item) == ciclo.HACER:
                     cancelar.al_terminar_la_orden(db, cot_item, finalizando, orden.numero, actor)
             continue
 
@@ -337,6 +354,11 @@ def cambiar_estado(orden_id: str, data: EstadoEntrada, db: Session = Depends(get
     return _salida(orden, db)
 
 
+def _se_buscaba(db: Session, it: OrdenCorteItem) -> bool:
+    cot_item = db.get(CotizacionItem, it.cotizacion_item_id) if it.cotizacion_item_id else None
+    return cot_item is not None and ciclo.tarea_de(cot_item) == ciclo.BUSCAR
+
+
 @router.post("/{orden_id}/repetir", response_model=OrdenSalida)
 def repetir(orden_id: str, db: Session = Depends(get_session), admin: CuentaAcceso = _ADMIN):
     """
@@ -344,13 +366,15 @@ def repetir(orden_id: str, db: Session = Depends(get_session), admin: CuentaAcce
 
     Las líneas que venían de un pedido se copian SIN ese vínculo: ese pedido ya
     se cortó una vez y no se vuelve a marcar. Repetir es producir de nuevo lo
-    mismo, normalmente para stock.
+    mismo, normalmente para stock. Lo que era para buscar en bodega no se
+    copia: sin el pedido sería cortar para stock algo que nadie pidió hacer.
     """
     original = db.get(OrdenCorte, orden_id)
     if not original:
         raise HTTPException(status_code=404, detail="Orden de corte no encontrada")
-    if not original.items:
-        raise HTTPException(status_code=400, detail="La orden no tiene piezas que repetir")
+    a_repetir = [it for it in original.items if not _se_buscaba(db, it)]
+    if not a_repetir:
+        raise HTTPException(status_code=400, detail="La orden no tiene piezas que hacer: lo de bodega no se repite.")
 
     numero = db.execute(text("SELECT nextval('ordenes_corte_numero_seq')")).scalar_one()
     nueva = OrdenCorte(
@@ -362,7 +386,7 @@ def repetir(orden_id: str, db: Session = Depends(get_session), admin: CuentaAcce
     db.commit()
     db.refresh(nueva)
 
-    for it in original.items:
+    for it in a_repetir:
         db.add(OrdenCorteItem(orden_id=nueva.id, sku_id=it.sku_id, nombre_custom=it.nombre_custom,
                               config_custom=it.config_custom, config_propuesta=it.config_propuesta,
                               cantidad=it.cantidad))
@@ -379,7 +403,7 @@ def eliminar(orden_id: str, db: Session = Depends(get_session), admin: CuentaAcc
     if orden.estado == EstadoOrdenCorte.FINALIZADA:
         raise HTTPException(
             status_code=403,
-            detail="Una orden finalizada no se borra: ya movió stock y marcó piezas cortadas. Cancélala si hace falta.",
+            detail="Una orden finalizada no se borra: ya movió stock y marcó piezas hechas o encontradas. Cancélala si hace falta.",
         )
     historia.anotar_en_sus_pedidos(db, orden, TipoEvento.ORDEN_ELIMINADA, historia.de_cuenta(admin))
     for it in list(orden.items):

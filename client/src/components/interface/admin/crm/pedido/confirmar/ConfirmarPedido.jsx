@@ -93,8 +93,9 @@ const ConfirmarPedido = ({ pedido, onConfirmado, onCerrar }) => {
                     <div>
                         <h3 id="cfp-titulo" className="cfp-titulo">Confirmar pedido N° {pedido.numero}</h3>
                         <p className="cfp-subtitulo">
-                            La clienta aceptó. Decide de dónde sale cada prenda: de la bodega se aparta
-                            lo que hay; el taller la confecciona.
+                            La clienta aceptó. Decide si cada prenda ya existe (se aparta y el taller
+                            la busca en bodega) o hay que hacerla (el taller la confecciona). Las dos
+                            van a la orden de corte.
                         </p>
                     </div>
                     <button type="button" className="cfp-cerrar" onClick={onCerrar} aria-label="Cerrar" disabled={enviando}>

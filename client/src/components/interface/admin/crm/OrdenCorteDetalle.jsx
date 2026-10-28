@@ -13,6 +13,10 @@ import './OrdenCorteDetalle.css';
 import { ESTADOS, estiloEstado } from '../../../../utils/estadosOrdenCorte';
 import { cantidad } from '../../../../utils/cantidad';
 import { fechaDe } from '../../../../utils/fechaServidor';
+import { tareaDe } from '../../../../utils/prendas';
+
+// Por modelo lo dice el título del grupo; por pedido, cada fila.
+const COLUMNA_TAREA = { clave: 'tarea', etiqueta: 'Qué', valor: tareaDe };
 export { ESTADOS, estiloEstado };
 
 const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
@@ -47,8 +51,8 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
         if (estado === 'FINALIZADA') {
             const unidades = orden.items.filter(i => i.para_stock).reduce((a, i) => a + i.cantidad, 0);
             const aviso = unidades
-                ? `Finalizar la orden N° ${orden.numero}: las piezas de pedidos quedarán marcadas como cortadas y se sumarán ${cantidad(unidades, 'unidad', 'unidades')} al inventario. ¿Continuar?`
-                : `Finalizar la orden N° ${orden.numero}: las piezas de pedidos quedarán marcadas como cortadas. ¿Continuar?`;
+                ? `Finalizar la orden N° ${orden.numero}: lo de pedidos quedará hecho o encontrado y se sumarán ${cantidad(unidades, 'unidad', 'unidades')} al inventario. ¿Continuar?`
+                : `Finalizar la orden N° ${orden.numero}: lo de pedidos quedará hecho o encontrado. ¿Continuar?`;
             if (!await confirm(aviso)) return;
         }
         await aplicar();
@@ -105,7 +109,7 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
             {finalizada && (
                 <p className="oc-aviso">
                     Orden finalizada el {fechaDe(orden.finalizada_at)}.
-                    Las piezas de pedidos quedaron marcadas como cortadas y las de stock ya entraron al inventario.
+                    Lo de pedidos quedó hecho o encontrado, y lo cortado para stock ya entró al inventario.
                 </p>
             )}
 
@@ -137,7 +141,7 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
                 casilla
                 // Agrupado por pedido ya se sabe de quién es cada fila: esa
                 // columna sobra y el ancho lo necesita Producto.
-                columnasExtra={agruparPor === 'pedido' ? [] : [{
+                columnasExtra={agruparPor === 'pedido' ? [COLUMNA_TAREA] : [{
                     clave: 'origen',
                     etiqueta: 'Para',
                     // Enlace, no etiqueta: desde acá se llega al pedido sin
