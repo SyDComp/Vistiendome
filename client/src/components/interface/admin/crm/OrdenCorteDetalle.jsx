@@ -11,6 +11,7 @@ import useOrdenCaracteristicas from '../../../../hooks/useOrdenCaracteristicas';
 import './OrdenCorteDetalle.css';
 
 import { ESTADOS, estiloEstado } from '../../../../utils/estadosOrdenCorte';
+import { cantidad } from '../../../../utils/cantidad';
 export { ESTADOS, estiloEstado };
 
 const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
@@ -45,7 +46,7 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
         if (estado === 'FINALIZADA') {
             const unidades = orden.items.filter(i => i.para_stock).reduce((a, i) => a + i.cantidad, 0);
             const aviso = unidades
-                ? `Finalizar la orden N° ${orden.numero}: las piezas de pedidos quedarán marcadas como cortadas y se sumarán ${unidades} unidades al inventario. ¿Continuar?`
+                ? `Finalizar la orden N° ${orden.numero}: las piezas de pedidos quedarán marcadas como cortadas y se sumarán ${cantidad(unidades, 'unidad', 'unidades')} al inventario. ¿Continuar?`
                 : `Finalizar la orden N° ${orden.numero}: las piezas de pedidos quedarán marcadas como cortadas. ¿Continuar?`;
             if (!await confirm(aviso)) return;
         }
@@ -77,7 +78,7 @@ const OrdenCorteDetalle = ({ orden, onVolver, onCambio }) => {
                 <button className="oc-btn-volver" onClick={onVolver}><ArrowLeft size={16} /> Volver</button>
                 <SectionHeader
                     title={`Orden de Corte N° ${orden.numero}`}
-                    subtitle={`${orden.items.length} piezas · ${orden.total_unidades} unidades`}
+                    subtitle={`${cantidad(orden.items.length, 'pieza', 'piezas')} · ${cantidad(orden.total_unidades, 'unidad', 'unidades')}`}
                     icon={Scissors}
                 />
             </div>

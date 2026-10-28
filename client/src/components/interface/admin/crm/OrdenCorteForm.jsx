@@ -6,6 +6,7 @@ import { getPiezasPendientes, crearOrdenCorte } from '../../../../lib/api/endpoi
 import SelectorVariantes from './SelectorVariantes';
 import TablaPrendas from './TablaPrendas';
 import useCaracteristicasCorte from '../../../../hooks/useCaracteristicasCorte';
+import { cantidad } from '../../../../utils/cantidad';
 import './OrdenCorteForm.css';
 
 /**
@@ -110,7 +111,7 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
         <div className="fade-in oc-form">
             <div className="oc-form-top">
                 <button className="oc-btn-volver" onClick={onVolver}><ArrowLeft size={16} /> Volver</button>
-                <SectionHeader title="Nueva Orden de Corte" subtitle={`${totalUnidades} unidades en total`} icon={Scissors} />
+                <SectionHeader title="Nueva Orden de Corte" subtitle={`${cantidad(totalUnidades, 'unidad', 'unidades')} en total`} icon={Scissors} />
             </div>
 
             <section className="oc-bloque">
@@ -201,7 +202,7 @@ const OrdenCorteForm = ({ onVolver, onCreada }) => {
 
             <div className="oc-form-acciones">
                 <button className="oc-btn-primario" onClick={guardar} disabled={guardando || !totalUnidades}>
-                    <Save size={16} /> {guardando ? 'Creando...' : `Crear orden (${totalUnidades} unidades)`}
+                    <Save size={16} /> {guardando ? 'Creando...' : `Crear orden (${cantidad(totalUnidades, 'unidad', 'unidades')})`}
                 </button>
             </div>
 
