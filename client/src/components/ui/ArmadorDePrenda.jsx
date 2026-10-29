@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Plus, X, Sliders } from 'lucide-react';
+import { opcionesDe } from '../../utils/opcionesArmador';
 import './ArmadorDePrenda.css';
 
 /**
@@ -8,7 +9,8 @@ import './ArmadorDePrenda.css';
  * LA REGLA
  * Se elige, no se escribe. Las características son las MISMAS del catálogo y no
  * se pueden inventar nuevas: si el catálogo tiene TALLA, COLOR y CUELLO, eso es
- * lo que hay. Lo que sí se puede es proponer un VALOR nuevo dentro de una
+ * lo que hay. Cada una ofrece primero las opciones de esa prenda y después las
+ * demás del catálogo (utils/opcionesArmador.js). Lo que sí se puede es proponer un VALOR nuevo dentro de una
  * característica que ya existe —un color que todavía no está cargado—, porque
  * un encargo especial es justamente eso.
  *
@@ -99,6 +101,8 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
             });
             if (!res.ok) return;
             const r = await res.json();
+            // Si ya existe no es una propuesta: queda elegida, sin preguntar.
+            if (r.veredicto === 'ya_existe' && r.sugerencia) { aceptarSugerencia(clave, r.sugerencia); return; }
             setRevisiones(prev => ({ ...prev, [clave]: r }));
             // Lo ofensivo no se guarda: se saca de la selección en el acto.
             if (r.veredicto === 'ofensivo') {
@@ -277,6 +281,11 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
                 {claves.map(clave => {
                     const enModoNuevo = clave in propuestos;
                     const veredicto = revisiones[clave]?.veredicto;
+                    const { propias, otras } = opcionesDe({
+                        deLaPrenda: visibles[clave] || [], delCatalogo: atributos[clave] || [],
+                        elegido: enModoNuevo ? '' : config[clave], soloCatalogo,
+                    });
+                    const conGrupos = propias.length > 0 && otras.length > 0;
                     return (
                         <div key={clave}>
                             <label className="armador__etiqueta armador__etiqueta--con-boton">
@@ -297,7 +306,16 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
                                 onChange={e => elegir(clave, e.target.value)}
                             >
                                 <option value="">— sin especificar —</option>
-                                {(visibles[clave] || []).map(v => <option key={v} value={v}>{v}</option>)}
+                                {conGrupos ? (
+                                    <>
+                                        <optgroup label="De esta prenda">
+                                            {propias.map(v => <option key={v} value={v}>{v}</option>)}
+                                        </optgroup>
+                                        <optgroup label="Otras del catálogo">
+                                            {otras.map(v => <option key={v} value={v}>{v}</option>)}
+                                        </optgroup>
+                                    </>
+                                ) : [...propias, ...otras].map(v => <option key={v} value={v}>{v}</option>)}
                                 {!soloCatalogo && <option value={OTRO}>Otro (proponer)</option>}
                             </select>
                             {enModoNuevo && (
