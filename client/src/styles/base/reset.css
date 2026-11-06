@@ -23,6 +23,18 @@
   box-sizing: border-box;
 }
 
+/* UN TEXTAREA OCUPA EL ANCHO DE SU CAJA, NI MÁS NI MENOS
+   El navegador deja arrastrar la esquina para cambiarle el ancho, y así se
+   salía del formulario o quedaba angosto. Hacia abajo sí se puede agrandar,
+   para leer lo escrito. Va en el elemento y no en cada clase: así vale también
+   para los que se agreguen. */
+textarea {
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
+  resize: vertical;
+}
+
 html,
 body,
 #root {
