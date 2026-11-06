@@ -161,6 +161,13 @@ const ProductDetailViewInterno = ({ producto: initialProduct, isModal = false })
 
     const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
 
+    // Si falta elegir algo, o lo elegido no es una variante que exista, los
+    // botones abren las opciones. Antes quedaban apagados justo en ese caso, y
+    // apagados no le dicen a la clienta qué le falta.
+    const faltaElegir = !skuActual || Object.keys(selections).length < configAtributos.length;
+    const sinPrecio = loading || !producto || !(precioFinal > 0);
+    const siYaEligio = (accion) => () => (faltaElegir ? setIsDrawerOpen(true) : accion());
+
     if (error && !producto) return <div className="detail-error">{error || 'Producto no disponible'}</div>;
 
     return (
@@ -376,23 +383,16 @@ const ProductDetailViewInterno = ({ producto: initialProduct, isModal = false })
                             <div className="cta-grid-desktop">
                                 <button
                                     className="btn-primary-premium"
-                                    disabled={loading || !producto || !skuActual || !precioFinal || precioFinal <= 0}
-                                    onClick={() => {
-                                        const selectedCount = Object.keys(selections).length;
-                                        if (selectedCount < configAtributos.length) {
-                                            setIsDrawerOpen(true);
-                                        } else {
-                                            addToCart();
-                                        }
-                                    }}
+                                    disabled={sinPrecio}
+                                    onClick={siYaEligio(addToCart)}
                                 >
                                     <ShoppingBag size={20} />
                                     {loading ? 'Cargando producto...' : 'Añadir a Cotización'}
                                 </button>
                                 <button
                                     className="btn-secondary-premium"
-                                    disabled={loading || !producto || !skuActual || !precioFinal || precioFinal <= 0}
-                                    onClick={onWhatsApp}
+                                    disabled={sinPrecio}
+                                    onClick={siYaEligio(onWhatsApp)}
                                 >
                                     <MessageCircle size={20} />
                                     Pedir por WhatsApp
@@ -419,23 +419,16 @@ const ProductDetailViewInterno = ({ producto: initialProduct, isModal = false })
                     <div className="buttons-group-mobile">
                         <button
                             className="btn-mobile-buy"
-                            disabled={loading || !producto || !skuActual || !precioFinal || precioFinal <= 0}
-                            onClick={() => {
-                                const selectedCount = Object.keys(selections).length;
-                                if (selectedCount < configAtributos.length) {
-                                    setIsDrawerOpen(true);
-                                } else {
-                                    addToCart();
-                                }
-                            }}
+                            disabled={sinPrecio}
+                            onClick={siYaEligio(addToCart)}
                         >
                             <ShoppingBag size={20} />
                             {loading ? 'Cargando...' : 'Al Carrito'}
                         </button>
                         <button
                             className="btn-mobile-whatsapp-full"
-                            disabled={loading || !producto || !skuActual || !precioFinal || precioFinal <= 0}
-                            onClick={onWhatsApp}
+                            disabled={sinPrecio}
+                            onClick={siYaEligio(onWhatsApp)}
                         >
                             <MessageCircle size={20} />
                             Pedir por WhatsApp

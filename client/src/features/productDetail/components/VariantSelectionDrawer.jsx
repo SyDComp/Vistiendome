@@ -6,7 +6,9 @@ import { useScrollLock } from '../../../hooks/useScrollLock';
 import './VariantSelectionDrawer.css';
 
 /**
- * VariantSelectionDrawer - Panel inferior para selección de variantes en móvil
+ * El panel para elegir entre las opciones que la tienda muestra de ese producto
+ * (sus variantes). No es personalizar: eso es otra cosa (Contacto → pieza
+ * personalizada). En móvil siempre; en escritorio, cuando falta elegir algo.
  */
 const VariantSelectionDrawer = ({
     isOpen,
@@ -41,7 +43,7 @@ const VariantSelectionDrawer = ({
 
                 <header className="drawer-header">
                     <div>
-                        <span className="drawer-subtitle">Personaliza tu prenda</span>
+                        <span className="drawer-subtitle">Elige tu opción</span>
                         <h3 className="drawer-title">{productName}</h3>
                     </div>
                     <button className="btn-close-drawer" onClick={onClose}>
