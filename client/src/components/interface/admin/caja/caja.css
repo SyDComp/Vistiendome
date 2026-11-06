@@ -6,6 +6,10 @@
     min-height: 100vh;
     display: grid;
     grid-template-rows: auto 1fr;
+    /* Una columna que no crece con lo que lleva adentro: sin esto, la línea de
+       atajos de la cabecera (no se corta de línea) estiraba toda la caja a su
+       ancho, y a media pantalla (960 px) el cobro quedaba fuera de la vista. */
+    grid-template-columns: minmax(0, 1fr);
     background: var(--color-bg);
     color: var(--color-text-primary);
 }
@@ -83,7 +87,9 @@
 
 .cj-cuerpo {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(22rem, 28rem);
+    /* El cobro se angosta con la pantalla (en 1920 queda en 28rem; a media
+       pantalla, ~1/3) para que a la venta le quede espacio. */
+    grid-template-columns: minmax(0, 1fr) clamp(18rem, 34vw, 28rem);
     gap: 1.25rem;
     padding: 1.25rem;
     align-items: start;
