@@ -111,9 +111,10 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
         }
     }, [values.category_id]);
 
-    // Automatización de Slug con prefijo 'pr-' obligatorio
+    // Vista previa de la dirección: sale del nombre, también al editar. La que
+    // vale la decide el servidor (core/direccion_producto.py).
     useEffect(() => {
-        if (!initialData && values.name) {
+        if (values.name) {
             const cleanName = values.name
                 .toLowerCase()
                 .normalize('NFKD')
@@ -125,7 +126,7 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
             const slug = `pr-${cleanName}`;
             setValues(prev => ({ ...prev, slug }));
         }
-    }, [values.name, initialData, setValues]);
+    }, [values.name, setValues]);
     useEffect(() => {
         if (autoOpenVariants && productId) {
             setShowVariantPicker(true);
@@ -360,7 +361,9 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                     // No llamamos a onSuccess ni cerramos para permitir corrección
                 } else {
                     setBatchErrors(null);
-                    setGeneratedVariants(trasGuardar(skusOverride || generatedVariants));
+                    const codigos = result.codigos || {};
+                    setGeneratedVariants(trasGuardar(skusOverride || generatedVariants)
+                        .map(v => (codigos[v.id] ? { ...v, sku: codigos[v.id] } : v)));
                     toast.success(isNew ? 'Producto base creado con éxito' : 'Producto actualizado');
                     
                     // Refrescar tabla en segundo plano

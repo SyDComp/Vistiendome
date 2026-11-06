@@ -37,3 +37,15 @@ describe('sumarVersiones', () => {
         expect(variantes).toEqual([{ id: 1, sku: 'A', stock: 9, price: 100 }, { sku: 'B', stock: 0, price: 120 }]);
     });
 });
+
+describe('sumarVersiones con los códigos del servidor', () => {
+    it('una versión con los mismos valores ya existe, aunque su código y su orden difieran', () => {
+        const existentes = [{ id: 1, sku: 'PR-V-NEGRO-S', stock: 5, config: { COLOR: 'Negro', TALLA: 'S' } }];
+        const nuevas = [{ sku: 'PR-V-S-NEGRO', stock: 0, config: { talla: 'S', COLOR: 'negro' } },
+                        { sku: 'PR-V-M-NEGRO', stock: 0, config: { TALLA: 'M', COLOR: 'Negro' } }];
+        const { variantes, yaExistian } = sumarVersiones(existentes, nuevas);
+        expect(yaExistian).toBe(1);
+        expect(variantes.map(v => v.sku)).toEqual(['PR-V-NEGRO-S', 'PR-V-M-NEGRO']);
+        expect(variantes[0].stock).toBe(5);
+    });
+});

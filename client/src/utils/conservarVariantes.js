@@ -80,17 +80,25 @@ export const conservarDatosCargados = (combinaciones = [], existentes = []) => {
 /**
  * Sumar las versiones de "Añadir Versión" a las que ya tiene el producto.
  *
- * Una que ya existe (mismo código) NO se reemplaza. Antes sí: la nueva llegaba
- * sin id y con stock 0, el servidor la encontraba por su código y ajustaba su
- * saldo a 0 — borraba de la bodega lo que había.
+ * Una que ya existe NO se reemplaza. Antes sí: la nueva llegaba sin id y con
+ * stock 0, el servidor la encontraba por su código y ajustaba su saldo a 0 —
+ * borraba de la bodega lo que había. "Ya existe" es mismo código o mismos
+ * valores: el código definitivo lo pone el servidor, y el de acá puede diferir.
  *
  * @returns {{variantes: Array, yaExistian: number}}
  */
+const claveDeValores = (config) => JSON.stringify(
+    Object.entries(config || {})
+        .map(([k, v]) => [String(k).trim().toUpperCase(), String(v).trim().toLowerCase()])
+        .sort(([a], [b]) => a.localeCompare(b))
+);
+
 export const sumarVersiones = (existentes = [], nuevas = []) => {
     const porCodigo = new Map(existentes.map(v => [v.sku, v]));
+    const valores = new Set(existentes.filter(v => v.config).map(v => claveDeValores(v.config)));
     let yaExistian = 0;
     nuevas.forEach(v => {
-        if (porCodigo.has(v.sku)) yaExistian++;
+        if (porCodigo.has(v.sku) || (v.config && valores.has(claveDeValores(v.config)))) yaExistian++;
         else porCodigo.set(v.sku, v);
     });
     return { variantes: [...porCodigo.values()], yaExistian };

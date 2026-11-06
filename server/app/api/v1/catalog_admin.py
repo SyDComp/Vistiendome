@@ -11,6 +11,8 @@ from ...core.pedidos import ciclo as ciclo_pedido
 from ...core import retiro_variantes
 from ...core import categorias as categorias_core
 from ...core import caracteristicas
+from ...core.direccion_producto import direccion_de
+from ...core.codigos_variante import recodificar
 from ...core import codigos_barras
 from ...core.movimientos import tienen_historia
 from ...models.crm import CotizacionItem
@@ -81,6 +83,8 @@ class SKUCreate(BaseModel):
     sale_value: Optional[float] = None
     sale_start: Optional[datetime] = None
     sale_end: Optional[datetime] = None
+    # Quién es, si ya existe. El código no sirve para eso: cambia con el nombre.
+    id: Optional[int] = None
 
     @field_validator("barcode")
     @classmethod
@@ -149,6 +153,10 @@ class StockMovementCreate(BaseModel):
     reference_id: Optional[str] = None
 
 # --- HELPER: Obtener IDs de descendientes de una categoría ---
+
+def clave_de_valores(config: Optional[Dict[str, Any]]) -> tuple:
+    """Los valores de una variante, sin importar el orden en que vengan."""
+    return tuple(sorted((str(k).strip().upper(), str(v).strip().lower()) for k, v in (config or {}).items()))
 
 def slugify(text: str) -> str:
     """Convierte texto a un slug amigable para URL usando _ para espacios."""
@@ -1321,10 +1329,7 @@ from datetime import datetime
 @router.post("/products")
 async def create_product(data: ProductCreate, db: Session = Depends(get_session)):
     try:
-        # Enforce slug convention: pr-name_format
-        final_slug = data.slug
-        if not final_slug.startswith("pr-"):
-            final_slug = f"pr-{final_slug}"
+        final_slug = direccion_de(db, data.name)
         
         product = Product(
             name=data.name,
@@ -1389,6 +1394,7 @@ async def create_product(data: ProductCreate, db: Session = Depends(get_session)
             )
             db.add(link)
 
+        recodificar(db, product)
         db.commit()
 
         # Notificar cambio en tiempo real
@@ -1476,7 +1482,7 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
     
     # Update basic info
     product.name = data.name
-    product.slug = data.slug
+    product.slug = direccion_de(db, data.name, product_id)
     product.description = data.description
     product.category_id = data.category_id
     product.extras = data.extras
@@ -1502,7 +1508,16 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
         stock_map = {sid: total for sid, total in stock_results}
     
     # Update SKUs
+    existing_skus_by_id = {s.id: s for s in product.todas_las_skus}
     existing_skus_by_code = {s.sku: s for s in product.todas_las_skus}
+    # Una pantalla abierta desde antes de un cambio de nombre trae códigos viejos:
+    # la variante se reconoce por sus valores. Sin esto se creaba otra igual y la
+    # de verdad se daba de baja. Las activas al final: si hay dos, gana la que se vende.
+    existing_skus_by_config = {
+        clave_de_valores(s.config): s
+        for s in sorted(product.todas_las_skus, key=lambda x: not x.is_deleted)
+    }
+    vistas = set()
     operation_errors = []
     success_count = 0
     
@@ -1513,10 +1528,14 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
                 # Normalizar la configuración antes de procesar
                 norm_config = {normalize_char(k): normalize_opt(v) for k, v in s_data.config.items()}
                 
-                sku = None
-                if s_data.sku in existing_skus_by_code:
-                    # Actualizar existente
-                    sku = existing_skus_by_code[s_data.sku]
+                sku = existing_skus_by_id.get(s_data.id) or existing_skus_by_code.get(s_data.sku)
+                if sku is None:
+                    sku = existing_skus_by_config.get(clave_de_valores(norm_config))
+                    # Llegó como nueva, con su stock inicial: pisaría el saldo que hay.
+                    if sku is not None:
+                        s_data.stock = None
+                if sku is not None:
+                    vistas.add(sku.id)
                     # Vuelve a venderse si se había dado de baja.
                     sku.is_deleted = False
                     sku.price = s_data.price
@@ -1591,11 +1610,10 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
             continue
 
     # Eliminar SKUs que ya no vienen en el nuevo set (si aplica)
-    incoming_sku_names = {s_data.sku for s_data in data.skus}
     # Las que tienen historia se dan de baja; las demás se borran.
     retiro_variantes.retirar(db, [
-        sku_obj for sku_name, sku_obj in existing_skus_by_code.items()
-        if sku_name not in incoming_sku_names and not sku_obj.is_deleted
+        sku_obj for sku_obj in existing_skus_by_id.values()
+        if sku_obj.id not in vistas and not sku_obj.is_deleted
     ])
 
     # Update Images (Delete and recreate)
@@ -1613,7 +1631,9 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
             ui_config=i_data.ui_config
         )
         db.add(new_link)
-    
+
+    recodificar(db, product)
+    codigos = {s.id: s.sku for s in existing_skus_by_id.values() if s.id in vistas}
     db.commit()
 
     # Notificar cambio en tiempo real
@@ -1628,7 +1648,9 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
         "msg": "Proceso completado" if not operation_errors else "Proceso completado con algunas omisiones",
         "success_count": success_count,
         "error_count": len(operation_errors),
-        "errors": operation_errors
+        "errors": operation_errors,
+        # El servidor decide los códigos: el formulario sigue abierto y los actualiza.
+        "codigos": codigos,
     }
     
     # Si hubo errores pero también éxitos, podemos considerar un 200 con reporte 
