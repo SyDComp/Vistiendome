@@ -136,6 +136,13 @@ const ShippingLabelPrinter = () => {
                 const sorted = [...cotiData].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
                 setCotizaciones(sorted);
 
+                // Lo ya elegido toma los datos recién leídos: antes se quedaba con los
+                // de cuando se eligió, y "Actualizar" no cambiaba la etiqueta.
+                const porId = Object.fromEntries(sorted.map(c => [c.id, c]));
+                setSelected(prev => Object.fromEntries(Object.entries(prev)
+                    .filter(([id]) => porId[id])
+                    .map(([id, s]) => [id, { ...s, coti: porId[id], cliente: cliMap[porId[id].persona_id] || null }])));
+
                 // Si venía un ID en la URL, pre-seleccionarlo
                 if (initialSelectedId) {
                     const target = sorted.find(c => c.id === initialSelectedId);

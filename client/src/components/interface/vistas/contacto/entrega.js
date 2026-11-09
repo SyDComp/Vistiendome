@@ -15,6 +15,20 @@ export const OPCIONES_ENTREGA = [
 
 export const ENTREGA_INICIAL = 'DOMICILIO';
 
+const METODOS_POR_DEFECTO = ['STARKEN', 'CORREOS DE CHILE', 'OTRO'];
+
+/**
+ * Los transportistas que ofrece la tienda (Ajustes). El retiro no es uno: es su
+ * propio tipo de entrega. Lo usan Contacto y el destino de un pedido en el panel.
+ */
+export const metodosDeEnvio = (settings) => {
+    const configurados = (settings?.shipping_methods ?? METODOS_POR_DEFECTO).filter(m => {
+        const nombre = m.toUpperCase();
+        return !nombre.includes('CHILEXPRESS') && !nombre.includes('RETIRO');
+    });
+    return configurados.length > 0 ? configurados : METODOS_POR_DEFECTO;
+};
+
 export const esRetiro = (entrega) => entrega === 'RETIRO';
 
 /** Lo que va en el pedido según cómo se entrega. Un retiro no lleva dirección. */

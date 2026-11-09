@@ -4,11 +4,13 @@ import Button from '../../../ui/Button';
 import { Users } from 'lucide-react';
 import AdminFormLayout, { AdminFormSubmit } from '../../../ui/admin/AdminFormLayout';
 import PersonaFields from './PersonaFields';
+import { pedidosPorDespachar, destinoAPedidos } from '../../../../lib/api/endpoints';
+import { cantidad } from '../../../../utils/cantidad';
 
 const API_BASE = `/api/v1/crm`;
 
 const ClienteForm = ({ initialData, onSuccess, onCancel }) => {
-    const { toast } = useNotification();
+    const { toast, confirm } = useNotification();
     const [loading, setLoading] = useState(false);
     
     const [formData, setFormData] = useState(initialData || {
@@ -27,6 +29,22 @@ const ClienteForm = ({ initialData, onSuccess, onCancel }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    // Cada pedido guarda su destino; cambiar a la clienta no lo cambia. Si tiene
+    // pedidos que todavía no salen, se ofrece pasarles la ubicación nueva.
+    const ofrecerASusPedidos = async (clienteId) => {
+        try {
+            const pendientes = await pedidosPorDespachar(clienteId);
+            if (!pendientes.length) return;
+            const numeros = pendientes.map(p => `N° ${p.numero}`).join(', ');
+            if (!await confirm(`¿Usar esta dirección también en sus ${cantidad(pendientes.length, 'pedido', 'pedidos')} por despachar (${numeros})?`)) return;
+            const { cambiados, omitidos } = await destinoAPedidos(clienteId);
+            if (cambiados.length) toast.success(`Destino actualizado en ${cambiados.map(n => `N° ${n}`).join(', ')}`);
+            omitidos.forEach(o => toast.error(`N° ${o.numero}: ${o.motivo}`));
+        } catch (err) {
+            toast.error(err?.message || 'No se pudo pasar la dirección a sus pedidos');
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -59,6 +77,7 @@ const ClienteForm = ({ initialData, onSuccess, onCancel }) => {
             }
 
             toast.success(initialData ? "Cliente actualizado exitosamente" : "Cliente creado exitosamente");
+            if (initialData && formData.comuna_id) await ofrecerASusPedidos(initialData.id);
             if (onSuccess) onSuccess();
         } catch (error) {
             console.error("Error creating cliente:", error);

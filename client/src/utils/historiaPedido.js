@@ -133,6 +133,9 @@ export const describirEvento = ({ tipo, datos = {} }, modoEntrega) => {
                 ? { texto: `Cómo llegó: ${datos.de} → ${datos.a}`, detalle: null }
                 : { texto: `Se indicó cómo llegó: ${datos.a}`, detalle: null };
 
+        case 'DESTINO':
+            return { texto: 'Se cambió el destino', detalle: `${datos.de} → ${datos.a}` };
+
         case 'PRECIO':
             return {
                 texto: `Precio de ${datos.prenda}: ${textoPrecio(datos.de)} → ${textoPrecio(datos.a)}`,

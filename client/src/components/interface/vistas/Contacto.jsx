@@ -12,11 +12,10 @@ import { useScrollLock } from '../../../hooks/useScrollLock';
 import { formatearTelefono, digitosDeCelular } from '../../../utils/telefono';
 import CamposEntrega from './contacto/CamposEntrega';
 import { armarSolicitud } from './contacto/armarSolicitud';
-import { ENTREGA_INICIAL } from './contacto/entrega';
+import { ENTREGA_INICIAL, metodosDeEnvio } from './contacto/entrega';
 import { leerBorrador, guardarBorrador, olvidarBorrador } from '../../../utils/borrador';
 
 const BORRADOR = 'contactoDraft';
-const METODOS_POR_DEFECTO = ['STARKEN', 'CORREOS DE CHILE', 'OTRO'];
 
 const formularioVacio = (transporte) => ({
     rut: '',
@@ -43,11 +42,7 @@ const Contacto = () => {
 
     // Los transportistas. El retiro en tienda no es uno de ellos: es su propio
     // tipo de entrega (ver contacto/entrega.js), igual que en el carrito.
-    const metodosConfigurados = (settings?.shipping_methods ?? METODOS_POR_DEFECTO).filter(m => {
-        const nombre = m.toUpperCase();
-        return !nombre.includes('CHILEXPRESS') && !nombre.includes('RETIRO');
-    });
-    const finalShippingMethods = metodosConfigurados.length > 0 ? metodosConfigurados : METODOS_POR_DEFECTO;
+    const finalShippingMethods = metodosDeEnvio(settings);
 
     const [tipoContacto, setTipoContacto] = useState('seleccion'); // 'seleccion', 'individual', 'grupo'
 

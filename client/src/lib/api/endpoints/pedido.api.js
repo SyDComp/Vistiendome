@@ -3,6 +3,15 @@ import { del, get, post, put } from '../client.js';
 /** El pedido tal como está ahora en el servidor (el de la lista puede estar viejo). */
 export const obtenerPedido = (id) => get(`/api/v1/crm/cotizaciones/${id}`);
 
+/** Cambia a dónde va el pedido (mientras no sale). Devuelve el pedido. */
+export const cambiarDestino = (pedidoId, destino) => put(`/api/v1/crm/cotizaciones/${pedidoId}/destino`, destino);
+
+/** Los pedidos con despacho de una clienta que todavía no salen: [{id, numero}]. */
+export const pedidosPorDespachar = (clienteId) => get(`/api/v1/crm/clientes/${clienteId}/por-despachar`);
+
+/** Sus pedidos por despachar toman su ubicación de hoy: {cambiados, omitidos}. */
+export const destinoAPedidos = (clienteId) => post(`/api/v1/crm/clientes/${clienteId}/destino-a-pedidos`);
+
 /** Cotiza una prenda: {precio} un monto, {sin_costo: true}, o ninguno para "por cotizar". */
 export const cotizarPrenda = (pedidoId, prendaId, { precio, sin_costo }) =>
     put(`/api/v1/crm/cotizaciones/${pedidoId}/prendas/${prendaId}/precio`, { precio, sin_costo });

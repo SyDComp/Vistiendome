@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { History, Megaphone, Package, Truck, Wallet } from 'lucide-react';
+import { History, MapPin, Megaphone, Package, Truck, Wallet } from 'lucide-react';
 import useHistoriaPedido from '../../../../../hooks/useHistoriaPedido';
 import usePedido from '../../../../../hooks/usePedido';
 import { canalSegunHistoria } from '../../../../../utils/historiaPedido';
 import { obtenerPedido } from '../../../../../lib/api/endpoints';
 import CanalPedido from './CanalPedido';
+import DestinoPedido from './DestinoPedido';
 import FechaPedido from './FechaPedido';
 import ConfirmarPedido from './confirmar/ConfirmarPedido';
 import HistoriaPedido from './HistoriaPedido';
@@ -75,6 +76,11 @@ const SeguimientoPedido = ({ cotizacion, abierto = true, onCambio }) => {
             {fresco.pedido && (
                 <Seccion icono={<Wallet size={18} />} titulo="Pagos">
                     <PagosPedido pedido={fresco.pedido} abierto={abierto} onCambio={alPagar} />
+                </Seccion>
+            )}
+            {fresco.pedido && (
+                <Seccion icono={<MapPin size={18} />} titulo="Destino">
+                    <DestinoPedido key={fresco.pedido.id} pedido={fresco.pedido} onCambio={alSalir} />
                 </Seccion>
             )}
             {sale && (
