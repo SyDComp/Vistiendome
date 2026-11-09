@@ -37,7 +37,11 @@ def normalize_opt(text: str) -> str:
     upper_cleaned = cleaned.upper()
     if upper_cleaned in {"XS", "S", "M", "L", "XL", "XXL", "XXXL", "CM", "MM", "KG", "ML", "UN", "PAR"}:
         return upper_cleaned
-    return string.capwords(cleaned.lower())
+    # Una palabra con números va en mayúscula: "2XL", no "2xl". capwords solo
+    # sube la primera letra, y si es un número no sube nada: cada guardado
+    # dejaba las tallas grandes en minúscula.
+    return " ".join(p.upper() if any(ch.isdigit() for ch in p) else p.capitalize()
+                    for p in cleaned.lower().split())
 
 from ...core import inventory_core
 from pydantic import BaseModel, field_validator, model_validator

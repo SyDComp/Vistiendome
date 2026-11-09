@@ -106,3 +106,18 @@ def test_una_baja_y_una_activa_con_los_mismos_valores_no_chocan(client_admin, se
     activa, baja = _variantes(session, producto)
     assert activa.sku == "PR-VESTIDO_PERLA-NEGRO-S"
     assert baja.sku == "PR-VESTIDO_PERLA-NEGRO-S_2"
+
+
+def test_las_tallas_grandes_quedan_como_en_su_caracteristica(client_admin, session):
+    from app.api.v1.catalog_admin import normalize_opt
+    assert [normalize_opt(v) for v in ("2xl", "7XL", "xs", "3/4", "rojo italiano", "Tela punto roma")] == \
+        ["2XL", "7XL", "XS", "3/4", "Rojo Italiano", "Tela Punto Roma"]
+
+    cat = Category(name="Vestimenta", slug="vestimenta")
+    session.add(cat)
+    session.commit()
+    res = client_admin.post(PRODUCTOS, json={"name": "Vestido", "slug": "x", "description": "", "category_id": cat.id,
+                                             "skus": [{"sku": "A", "price": 1000, "config": {"talla": "3xl"}}]})
+    assert res.status_code in (200, 201), res.text
+    [v] = session.exec(select(SKU).where(SKU.product_id == res.json()["id"])).all()
+    assert v.config == {"TALLA": "3XL"}
