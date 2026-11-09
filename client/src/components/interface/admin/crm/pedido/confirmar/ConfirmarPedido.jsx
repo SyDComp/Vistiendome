@@ -116,8 +116,8 @@ const ConfirmarPedido = ({ pedido, onConfirmado, onCerrar }) => {
                         <>
                             <ul className="cfp-prendas" aria-busy={cargando}>
                                 {prendas.map(p => (
-                                    <PrendaPropuesta key={p.item_id} prenda={p} onCamino={elegir}
-                                        onQuitar={quitar} ocupado={ocupado} />
+                                    <PrendaPropuesta key={p.item_id} pedidoId={pedido.id} prenda={p} onCamino={elegir}
+                                        onQuitar={quitar} onCotizada={recargar} ocupado={ocupado} />
                                 ))}
                             </ul>
 

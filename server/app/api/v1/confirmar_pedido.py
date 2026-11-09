@@ -38,6 +38,7 @@ class PrendaPropuestaSalida(BaseModel):
     aviso: Optional[str] = None
     requiere_nota: bool = False
     pieza_numero: Optional[int] = None
+    rango_modelo: Optional[List[float]] = None
 
 
 class PropuestaSalida(BaseModel):

@@ -49,12 +49,23 @@ class PrendaPropuesta:
     requiere_nota: bool = False
     # Si es una pieza única de la bodega, su número (ya está apartada).
     pieza_numero: Optional[int] = None
+    # Sin precio y de un producto del catálogo: entre cuánto y cuánto van sus
+    # variantes, de referencia para cotizarla ahí mismo. [mínimo, máximo].
+    rango_modelo: Optional[List[float]] = None
 
 
 def _abastecimiento(item: CotizacionItem) -> Optional[str]:
     producto = item.sku.product if item.sku is not None else item.producto
     categoria = producto.category if producto is not None else None
     return efectivos(categoria).abastecimiento if categoria is not None else None
+
+
+def _rango_modelo(item: CotizacionItem) -> Optional[List[float]]:
+    if item.precio_unitario_estimado is not None:
+        return None
+    producto = item.sku.product if item.sku is not None else item.producto
+    precios = [s.price for s in (producto.skus if producto is not None else []) if s.price and s.price > 0]
+    return [min(precios), max(precios)] if precios else None
 
 
 def _mostrable(disponible) -> Optional[int]:
@@ -139,5 +150,6 @@ def proponer(db: Session, cotizacion: Cotizacion, elegidos: Optional[Dict[str, s
             requiere_nota=(camino == BODEGA and queda == ESPERANDO)
                           or (camino == TALLER and abastecimiento == SOLO_BODEGA),
             pieza_numero=item.pieza.numero if item.pieza is not None else None,
+            rango_modelo=_rango_modelo(item),
         ))
     return propuesta

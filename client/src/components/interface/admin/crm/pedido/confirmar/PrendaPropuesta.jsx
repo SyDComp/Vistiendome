@@ -1,12 +1,14 @@
 import React from 'react';
 import { textoPrecio } from '../../../../../../utils/precioPrenda';
 import { CAMINOS, textoQueda } from '../../../../../../utils/caminoPrenda';
+import CotizarAlConfirmar from './CotizarAlConfirmar';
 
 /**
  * Una prenda en la propuesta de confirmación: de dónde sale, qué pasa si se
- * confirma así, y el aviso si es distinto de lo habitual. Solo pinta.
+ * confirma así, y el aviso si es distinto de lo habitual. Si no tiene precio,
+ * se le pone ahí mismo (CotizarAlConfirmar).
  */
-const PrendaPropuesta = ({ prenda, onCamino, onQuitar, ocupado }) => {
+const PrendaPropuesta = ({ pedidoId, prenda, onCamino, onQuitar, onCotizada, ocupado }) => {
     const id = `camino-${prenda.item_id}`;
     const conAviso = Boolean(prenda.aviso);
     return (
@@ -30,6 +32,9 @@ const PrendaPropuesta = ({ prenda, onCamino, onQuitar, ocupado }) => {
             <p className={prenda.queda === 'ESPERANDO' || !prenda.camino ? 'cfp-queda cfp-queda--espera' : 'cfp-queda'}>
                 {textoQueda(prenda)}
             </p>
+            {prenda.precio === null && (
+                <CotizarAlConfirmar pedidoId={pedidoId} prenda={prenda} onCotizada={onCotizada} disabled={ocupado} />
+            )}
             {conAviso && (
                 <div className="cfp-aviso">
                     <p>{prenda.aviso}</p>

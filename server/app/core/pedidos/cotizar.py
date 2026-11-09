@@ -6,12 +6,14 @@ Solo mientras el pedido no está confirmado: confirmar es aceptar el precio, y
 desde ahí ya no se cambia por esta vía. Cada cambio queda en la historia.
 """
 
-from typing import Optional
+from typing import Dict, Optional
 
 from sqlmodel import Session
+from sqlalchemy.orm import object_session
 
 from ...models.crm import Cotizacion, CotizacionItem, EstadoCotizacion
 from ...models.historia import TipoEvento
+from .. import caracteristicas
 from . import precios
 from .historia import Actor, anotar
 
@@ -36,8 +38,26 @@ def nombre_de_prenda(item: CotizacionItem) -> str:
     else:
         base = item.producto.name if item.producto is not None else (item.nombre_custom or "Pieza especial")
         config = {**(item.config_custom or {}), **(item.config_propuesta or {})}
-    valores = [str(v) for v in (config or {}).values() if v]
+    orden = _orden_de_la_tienda(object_session(item))
+    claves = sorted((k for k, v in (config or {}).items() if v),
+                    key=lambda k: (orden.get(str(k).upper(), len(orden)), str(k).upper()))
+    valores = [str(config[k]) for k in claves]
     return f"{base} ({' / '.join(valores)})" if valores else base
+
+
+def _orden_de_la_tienda(db: Optional[Session]) -> Dict[str, int]:
+    """
+    Las características en el orden de la tienda, para que todas las prendas
+    digan sus valores igual (antes salían como venían: "Azul Rey / Bajo
+    Rodilla / 2XL" y "Azul Marino / S / Midi"). Se lee una vez por sesión.
+    """
+    if db is None:
+        return {}
+    if "orden_caracteristicas" not in db.info:
+        db.info["orden_caracteristicas"] = {
+            c.name.strip().upper(): i for i, c in enumerate(caracteristicas.en_orden(db))
+        }
+    return db.info["orden_caracteristicas"]
 
 
 def cotizar(
