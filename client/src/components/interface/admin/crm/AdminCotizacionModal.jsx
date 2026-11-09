@@ -6,6 +6,7 @@ import useCatalogoParaArmar from '../../../../hooks/useCatalogoParaArmar';
 import { useNotification } from '../../../../context/NotificationContext';
 import Imagen from '../../../ui/Imagen';
 import { formatearTelefono, normalizarTelefono } from '../../../../utils/telefono';
+import { formatRUT } from '../../../../utils/formatters';
 import SelectorCanal from './pedido/SelectorCanal';
 import SelectorPrecio from './pedido/SelectorPrecio';
 import { valorDesde, precioDeValor, esValido, paraServidor, textoSubtotal, textoTotal } from '../../../../utils/precioPrenda';
@@ -555,6 +556,8 @@ const FormularioCotizacion = ({ onClose, onCreated, initialCliente = null }) => 
                                             <input
                                                 type="text" placeholder="12.345.678-9"
                                                 value={newClienteData.rut} onChange={e => setNewClienteData({...newClienteData, rut: e.target.value})}
+                                                // Con puntos y guion al salir del campo, como en los demás formularios.
+                                                onBlur={e => setNewClienteData({ ...newClienteData, rut: formatRUT(e.target.value) })}
                                                 className="adm-campo"
                                             />
                                         </div>
