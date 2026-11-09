@@ -172,11 +172,9 @@ def get_categories_tree(db: Session = Depends(get_session)):
     Optimizado para filtros colapsables en el frontend. Solo devuelve las marcadas como is_filterable.
     """
     # Traer todas las categorías ordenadas por nivel para construir el árbol
-    all_categories = db.exec(
-        select(Category)
-        .where(Category.is_filterable == True)
-        .order_by(Category.level.asc())
-    ).all()
+    todas = db.exec(select(Category).order_by(Category.level.asc())).all()
+    all_categories = [c for c in todas if c.is_filterable]
+    padre_de = {c.id: c.parent_id for c in todas}
     
     # Mapeo por ID para construcción eficiente
     nodes = {}
@@ -189,10 +187,20 @@ def get_categories_tree(db: Session = Depends(get_session)):
             "children": []
         }
     
+    # Si su madre no sale en los filtros, cuelga de la abuela (la más cercana que
+    # sí sale). Antes subía a la raíz: Blazers no sale, y Mezclilla o Largo Rubí
+    # aparecían como categorías principales en la barra del explorador.
+    def visible_de(cid):
+        cid = padre_de.get(cid)
+        while cid and cid not in nodes:
+            cid = padre_de.get(cid)
+        return cid
+
     forest = []
     for c in all_categories:
-        if c.parent_id and c.parent_id in nodes:
-            nodes[c.parent_id]["children"].append(nodes[c.id])
+        madre = visible_de(c.id)
+        if madre:
+            nodes[madre]["children"].append(nodes[c.id])
         else:
             forest.append(nodes[c.id])
             

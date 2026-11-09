@@ -48,6 +48,28 @@
     display: none;
 }
 
+/* EN PANTALLA ANCHA, TODAS A LA VISTA
+   La fila se desplazaba de lado con la barra oculta: nada decía que había
+   más, y la última quedaba cortada en el borde (se notaba al elegirla, con el
+   fondo de color). Con espacio, bajan de línea. En el teléfono sigue de lado,
+   con el borde desvanecido para que se note que continúa. */
+@media (min-width: 769px) {
+    .filtros-container { align-items: flex-start; }
+    .filtros-chips-wrapper { flex-wrap: wrap; overflow-x: visible; }
+}
+@media (max-width: 768px) {
+    /* La fila va en su propia línea, a todo el ancho: al lado de "Filtros"
+       le quedaban 143 px y una categoría larga no cabía entera. */
+    .filtros-container { flex-wrap: wrap; }
+    .filtros-divider { display: none; }
+    .filtros-chips-wrapper {
+        flex-basis: 100%;
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.25rem), transparent);
+        mask-image: linear-gradient(to right, #000 calc(100% - 1.25rem), transparent);
+        padding-right: 1.25rem;
+    }
+}
+
 .filtro-chip {
     flex-shrink: 0;
     border: 1px solid var(--color-border);

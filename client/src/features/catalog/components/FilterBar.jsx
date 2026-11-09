@@ -15,6 +15,21 @@ const FilterBar = ({
     const [scrolledDown, setScrolledDown] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const lastScrollY = useRef(0);
+    const filaRef = useRef(null);
+
+    // En el teléfono la fila va de lado: la elegida queda entera a la vista,
+    // también fuera del borde desvanecido. Se mueve la fila, no la página.
+    useEffect(() => {
+        const fila = filaRef.current;
+        const chip = fila?.querySelector('.filtro-chip.active');
+        if (!fila || !chip || fila.scrollWidth <= fila.clientWidth) return;
+        // Fuera del borde desvanecido, si cabe: en el teléfono la fila es angosta.
+        const margen = Math.max(0, Math.min(24, fila.clientWidth - chip.offsetWidth - 8));
+        const f = fila.getBoundingClientRect();
+        const c = chip.getBoundingClientRect();
+        if (c.left < f.left) fila.scrollLeft += c.left - f.left - 8;
+        else if (c.right > f.right - margen) fila.scrollLeft += c.right - (f.right - margen);
+    }, [selectedCategory?.id]);
 
     const activeFilterTags = useMemo(() => {
         const tags = [];
@@ -111,7 +126,7 @@ const FilterBar = ({
 
                         <div className="filtros-divider" />
 
-                        <div className="filtros-chips-wrapper">
+                        <div className="filtros-chips-wrapper" ref={filaRef}>
                             <button
                                 type="button"
                                 onClick={handleClearAll}
