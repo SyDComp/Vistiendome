@@ -126,6 +126,7 @@ const ProductDetailViewInterno = ({ producto: initialProduct, isModal = false })
         const message = buildWhatsAppMessage({
             tipo: 'pedido',
             productos: [{ name: producto.name, variantLabel, selections, url: window.location.href }],
+            orden: Object.keys(filtersMetadata?.attributes || {}),
         });
         const contactNumber = settings?.social_links?.whatsapp?.replace(/\D/g, '') || '569XXXXXXXX';
         const url = `https://wa.me/${contactNumber}?text=${encodeURIComponent(message)}`;

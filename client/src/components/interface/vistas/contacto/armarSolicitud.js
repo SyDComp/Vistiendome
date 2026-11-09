@@ -35,9 +35,10 @@ const prendaParaPedido = (prenda) => ({
  * @param {'individual'|'grupo'} tipo
  * @param {object} datos    lo llenado en el formulario
  * @param {Array}  prendas  las armadas con el armador
+ * @param {string[]} orden  las características en el orden de la tienda
  * @returns {{mensaje: string, pedido: object}}
  */
-export const armarSolicitud = ({ tipo, datos, prendas = [] }) => {
+export const armarSolicitud = ({ tipo, datos, prendas = [], orden = [] }) => {
     const esGrupo = tipo === 'grupo';
     const nombre = datos.nombre.trim();
 
@@ -48,6 +49,7 @@ export const armarSolicitud = ({ tipo, datos, prendas = [] }) => {
         grupo: esGrupo ? { tipo: datos.tipoGrupo, cantidad: datos.cantidad, evento: datos.evento } : undefined,
         productos: prendas.map(prendaParaMensaje),
         mensaje: datos.mensaje,
+        orden,
     });
 
     const [nombres = '', ...apellidos] = nombre.split(/\s+/);

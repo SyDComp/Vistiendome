@@ -16,7 +16,7 @@ import '../vistas/Contacto.css';
 const BORRADOR = 'checkoutDraft';
 
 const CheckoutForm = ({ onClose }) => {
-    const { cart, total, descuentos, regalos, clearCart } = useCart();
+    const { cart, total, descuentos, regalos, clearCart, filtersMetadata } = useCart();
     const { settings } = useSettings();
     const rawShippingMethods = settings?.shipping_methods !== undefined 
         ? settings.shipping_methods 
@@ -156,6 +156,7 @@ const CheckoutForm = ({ onClose }) => {
         let registrado = false;
         const whatsappMsg = buildWhatsAppMessage({
             tipo: 'pedido',
+            orden: Object.keys(filtersMetadata?.attributes || {}),
             cliente: { nombre: formData.nombre, rut: formData.rut, email: formData.email, telefono: formData.telefono },
             despacho: {
                 transporte: formData.modo_entrega === 'RETIRO'

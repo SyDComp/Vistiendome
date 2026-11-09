@@ -40,3 +40,25 @@ describe('armarSolicitud', () => {
         expect(pedido).toMatchObject({ nombres: 'Ana', apellidos: 'María Pérez' });
     });
 });
+
+describe('orden de las características en el mensaje', () => {
+    it('todas las prendas en el orden de la tienda, vengan como vengan', () => {
+        const prendas = [
+            { nombre: 'Vestido Noemi', config: { COLOR: 'Azul Rey', LARGO: 'Bajo Rodilla', TALLA: '2XL' } },
+            { nombre: 'Vestido Noemi', config: { COLOR: 'Azul Marino', TALLA: 'S', LARGO: 'Midi' } },
+        ];
+        const { mensaje } = armarSolicitud({ tipo: 'grupo', datos: datos(), prendas, orden: ['TALLA', 'COLOR', 'LARGO'] });
+        const claves = mensaje.split('\n').map(l => l.match(/^\*(TALLA|COLOR|LARGO):\*/)?.[1]).filter(Boolean);
+        expect(claves).toEqual(['TALLA', 'COLOR', 'LARGO', 'TALLA', 'COLOR', 'LARGO']);
+    });
+
+    it('sin el orden de la tienda, igual van en el mismo orden en todas', () => {
+        const prendas = [
+            { nombre: 'A', config: { LARGO: 'Midi', COLOR: 'Rojo' } },
+            { nombre: 'B', config: { COLOR: 'Azul', LARGO: 'Maxi' } },
+        ];
+        const { mensaje } = armarSolicitud({ tipo: 'grupo', datos: datos(), prendas });
+        const claves = mensaje.split('\n').map(l => l.match(/^\*(COLOR|LARGO):\*/)?.[1]).filter(Boolean);
+        expect(claves).toEqual(['COLOR', 'LARGO', 'COLOR', 'LARGO']);
+    });
+});

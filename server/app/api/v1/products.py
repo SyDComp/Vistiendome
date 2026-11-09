@@ -216,7 +216,12 @@ def get_filters_metadata(db: Session = Depends(get_session)):
     categories = db.exec(select(Category).where(Category.is_filterable == True)).all()
     
     # 2. Atributos Filterable y sus valores únicos REALES en stock
-    filterable_chars = db.exec(select(Characteristic).where(Characteristic.is_filterable == True)).all()
+    # En el orden de la tienda (Características › flechas): de acá lo toman los
+    # filtros y los mensajes de WhatsApp del sitio, que no ven el panel.
+    filterable_chars = db.exec(
+        select(Characteristic).where(Characteristic.is_filterable == True)
+        .order_by(Characteristic.orden, Characteristic.id)
+    ).all()
     
     attributes_data = {}
     for char in filterable_chars:

@@ -1,3 +1,4 @@
+import { ordenarCaracteristicas } from './prendas';
 /**
  * Utilidades para el manejo de datos del carrito y generación de mensajes.
  */
@@ -53,10 +54,13 @@ export const openWhatsApp = (phone, message) => {
  * @param {number} [opts.total]
  * @param {string} [opts.mensaje]
  */
-const formatVariantAttributes = (p) => {
+// Las características van en el orden de la tienda, igual en todas las
+// prendas: antes salían como venían guardadas, y una decía COLOR, LARGO, TALLA
+// y la siguiente COLOR, TALLA, LARGO (reportado por QA 2026-11-09).
+const formatVariantAttributes = (p, orden = []) => {
     const lines = [];
     if (p.selections && typeof p.selections === 'object' && Object.keys(p.selections).length > 0) {
-        Object.entries(p.selections).forEach(([key, val]) => {
+        ordenarCaracteristicas(Object.keys(p.selections), orden).map(key => [key, p.selections[key]]).forEach(([key, val]) => {
             if (val) {
                 const label = key.charAt(0).toUpperCase() + key.slice(1);
                 lines.push(`*${label}:* ${val}`);
@@ -98,7 +102,7 @@ const formatVariantAttributes = (p) => {
 // Cada bloque es un grupo de líneas relacionadas (ej: Cliente+RUT+Contacto).
 // Los bloques se separan entre sí por una única línea en blanco — nada de
 // separadores ASCII, que en WhatsApp se ven como ruido, no como orden.
-export const buildWhatsAppMessage = ({ tipo = 'pedido', cliente, despacho, grupo, productos, descuentos, regalos, total, mensaje } = {}) => {
+export const buildWhatsAppMessage = ({ tipo = 'pedido', cliente, despacho, grupo, productos, descuentos, regalos, total, mensaje, orden = [] } = {}) => {
     const subtitulo = tipo === 'grupo' && grupo?.tipo
         ? `${TITULOS.grupo} · ${grupo.tipo}`
         : (TITULOS[tipo] || 'Nuevo mensaje');
@@ -134,7 +138,7 @@ export const buildWhatsAppMessage = ({ tipo = 'pedido', cliente, despacho, grupo
             if (p.descuento) {
                 prodLines.push(`*Descuento:* ${p.descuento.motivos.join(' + ')} (antes ${formatCurrency(p.descuento.antes)}${porUnidad})`);
             }
-            formatVariantAttributes(p).forEach(line => prodLines.push(line));
+            formatVariantAttributes(p, orden).forEach(line => prodLines.push(line));
             if (p.url) prodLines.push(`*Enlace:* ${p.url}`);
         });
         bloques.push(prodLines);

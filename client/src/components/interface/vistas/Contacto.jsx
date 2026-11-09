@@ -121,7 +121,7 @@ const Contacto = () => {
             return;
         }
 
-        const { mensaje, pedido } = armarSolicitud({ tipo: tipoContacto, datos, prendas });
+        const { mensaje, pedido } = armarSolicitud({ tipo: tipoContacto, datos, prendas, orden: Object.keys(atributos) });
 
         // Se olvida ANTES de abrir WhatsApp. Si el navegador lo abre en esta
         // misma pestaña, lo que viene después ya no corre: el borrador quedaba
