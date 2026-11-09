@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database import get_session
 from app.models.crm import Cotizacion, CotizacionItem, EstadoCotizacion, OrigenCotizacion, TipoDespacho, ModoEntrega
-from app.models.iam import Persona, TipoPersona, Direccion, CuentaAcceso
+from app.models.iam import Persona, TipoPersona, CuentaAcceso
 from app.models.catalog import StockMovement
 from app.models.taller import OrdenCorte, OrdenCorteItem, EstadoOrdenCorte
 from app.api.deps import get_current_user, RequirePermiso
@@ -23,6 +23,7 @@ from app.core import pagos as pagos_core
 from app.models.pagos import Pago
 from app.core.looks import asset_de_variante
 from app.core.portada import portadas
+from app.core import ubicacion_persona
 
 router = APIRouter()
 
@@ -59,8 +60,8 @@ class PersonaRead(BaseModel):
 
 def _get_persona_read(persona: Persona) -> PersonaRead:
     p_dict = persona.dict()
-    if persona.direcciones and len(persona.direcciones) > 0:
-        dir_obj = persona.direcciones[0]
+    dir_obj = ubicacion_persona.actual(persona)
+    if dir_obj is not None:
         p_dict["direccion"] = dir_obj.calle_y_numero
         p_dict["comuna_id"] = dir_obj.comuna_id
         if dir_obj.comuna:
@@ -627,13 +628,8 @@ def crear_cliente(data: PersonaCreate, session: Session = Depends(get_session), 
     session.commit()
     session.refresh(nueva_persona)
     
-    if data.direccion and data.comuna_id:
-        nueva_direccion = Direccion(
-            persona_id=nueva_persona.id,
-            comuna_id=data.comuna_id,
-            calle_y_numero=data.direccion
-        )
-        session.add(nueva_direccion)
+    if data.comuna_id:
+        ubicacion_persona.corregir(session, nueva_persona, data.comuna_id, data.direccion)
         session.commit()
         session.refresh(nueva_persona)
         
@@ -661,20 +657,8 @@ def actualizar_cliente(cliente_id: str, data: PersonaCreate, session: Session = 
     
     session.add(persona)
     
-    # Manejar direccion
-    if data.direccion and data.comuna_id:
-        if persona.direcciones and len(persona.direcciones) > 0:
-            dir_act = persona.direcciones[0]
-            dir_act.calle_y_numero = data.direccion
-            dir_act.comuna_id = data.comuna_id
-            session.add(dir_act)
-        else:
-            nueva_direccion = Direccion(
-                persona_id=persona.id,
-                comuna_id=data.comuna_id,
-                calle_y_numero=data.direccion
-            )
-            session.add(nueva_direccion)
+    # Dónde está: con la comuna basta, la calle es opcional.
+    ubicacion_persona.corregir(session, persona, data.comuna_id, data.direccion)
             
     session.commit()
     session.refresh(persona)

@@ -36,7 +36,8 @@ class Direccion(SQLModel, table=True):
     persona_id: str = Field(foreign_key="personas.id", index=True, max_length=26)
     comuna_id: int = Field(foreign_key="comunas.id", index=True)
     
-    calle_y_numero: str = Field(max_length=255)
+    # Nula si solo se sabe la comuna (un despacho a sucursal): core/ubicacion_persona.py.
+    calle_y_numero: Optional[str] = Field(default=None, max_length=255)
     referencia: Optional[str] = Field(default=None, max_length=255)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 

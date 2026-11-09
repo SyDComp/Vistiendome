@@ -11,8 +11,9 @@ from sqlalchemy import text
 from sqlmodel import Session, select
 
 from ...models.crm import Cotizacion, EstadoCotizacion, ModoEntrega, OrigenCotizacion
-from ...models.iam import Direccion, Persona, TipoPersona
+from ...models.iam import Persona, TipoPersona
 from .. import propuestas as core_propuestas
+from .. import ubicacion_persona
 from ...models.historia import TipoEvento
 from .historia import Actor, anotar
 from .agregar import poner_prenda
@@ -132,25 +133,11 @@ def crear_pedido(session: Session, data, actor: Actor, canal: str = None, permit
             session.flush()
             session.refresh(persona)
             
-    # 1.5 Crear o Buscar Direccion si viene en el payload (solo un despacho tiene)
-    if despacho and persona and data.comuna_id and data.direccion:
-        direccion_existente = session.exec(
-            select(Direccion).where(
-                Direccion.persona_id == persona.id,
-                Direccion.comuna_id == data.comuna_id,
-                Direccion.calle_y_numero == data.direccion
-            )
-        ).first()
-        
-        if not direccion_existente:
-            nueva_direccion = Direccion(
-                persona_id=persona.id,
-                comuna_id=data.comuna_id,
-                calle_y_numero=data.direccion
-            )
-            session.add(nueva_direccion)
-            session.flush()
-            
+    # 1.5 Dónde está la clienta: la comuna del despacho, con o sin calle (a
+    # sucursal no trae). Un retiro no dice dónde vive.
+    if despacho:
+        ubicacion_persona.registrar(session, persona, data.comuna_id, data.direccion)
+
     # 2. Crear Cotizacion
     numero = session.execute(text("SELECT nextval('cotizaciones_numero_seq')")).scalar_one()
     cotizacion = Cotizacion(
