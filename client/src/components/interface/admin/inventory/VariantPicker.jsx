@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { cantidad } from '../../../../utils/cantidad';
+import { codigoDe } from '../../../../utils/codigoVariante';
 import { X, ChevronRight, Check, Search, Layers, Box, Tag, ArrowLeft, Info, Hash, List, Sparkles, BookOpen, Image as ImageIcon, Upload, Trash2, Star, Palette } from 'lucide-react';
 import Button from '../../../ui/Button';
 import Accordion from '../../../ui/Accordion';
@@ -61,17 +63,6 @@ const VariantPicker = ({
     // Rastrea el valor previo de isOpen para detectar la transición cerrado -> abierto.
     const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
 
-    const semanticClean = (text) => {
-        if (!text) return "";
-        return text.toString()
-            .toLowerCase()
-            .normalize('NFKD')
-            .replace(/[\u0300-\u036f]/g, "")
-            .replace(/[^a-z0-9\s-]/g, '')
-            .trim()
-            .replace(/\s+/g, '_')
-            .replace(/_+/g, '_');
-    };
 
     // Reset del asistente cada vez que pasa de cerrado a abierto.
     // Se ajusta el estado DURANTE el render (patrón oficial de React para
@@ -400,11 +391,8 @@ const VariantPicker = ({
         });
 
         const rows = combos.map(config => {
-            const sku = [baseSlug, ...Object.values(config)]
-                .map(semanticClean)
-                .filter(Boolean)
-                .join('-')
-                .toUpperCase();
+            // Provisorio: el definitivo lo pone el servidor, con la misma regla.
+            const sku = codigoDe(baseSlug, config);
             return {
                 config,
                 sku,
@@ -578,17 +566,16 @@ const VariantPicker = ({
 
 
                 {/* 4. OVERLAYS */}
+                {/* La galería se abre como su propia ventana, encima de todo: tiene que
+                    saber cerrarse. Antes iba dentro de otra ventana con su ✕, pero la
+                    tapaba y no traía cómo cerrarse: sin elegir fotos no había salida, y
+                    volver atrás perdía lo armado (reportado por QA 2026-11-09). */}
                 {showGlobalGallery && (
-                    <div className="variant-picker-gallery-overlay">
-                        <div className="variant-picker-gallery-modal">
-                            <div className="variant-picker-gallery-header">
-                                <h3 className="variant-picker-gallery-title">Asignar Fotos a la Selección</h3>
-                                <button type="button" onClick={() => setShowGlobalGallery(false)} className="variant-picker-gallery-close">✕</button>
-                            </div>
-                            <div className="adm-scroll">
                                 <MediaGallery
                                     selectionMode
                                     allowMultiple={true}
+                                    contextInfo={`Asignar fotos a ${cantidad(selection.size, 'versión', 'versiones')}`}
+                                    onClose={() => setShowGlobalGallery(false)}
                                     onSelect={(selectedAssets) => {
                                         if (!selectedAssets) return;
                                         const assets = Array.isArray(selectedAssets) ? selectedAssets : [selectedAssets];
@@ -613,9 +600,6 @@ const VariantPicker = ({
                                         setShowGlobalGallery(false);
                                     }}
                                 />
-                            </div>
-                        </div>
-                    </div>
                 )}
             </div>
         );

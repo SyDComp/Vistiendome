@@ -243,6 +243,17 @@ const MediaGallery = ({
         }
     };
 
+    // Como ventana, Esc la cierra: siempre tiene que haber una salida, también
+    // sin elegir nada. Si hay una foto ampliada o un aviso encima, Esc es de ellos.
+    useEffect(() => {
+        if (!isOpen || !asModal || !onClose) return;
+        const alApretar = (e) => {
+            if (e.key === 'Escape' && previewIndex === null && !isDeleteWarningOpen) onClose();
+        };
+        window.addEventListener('keydown', alApretar);
+        return () => window.removeEventListener('keydown', alApretar);
+    }, [isOpen, asModal, onClose, previewIndex, isDeleteWarningOpen]);
+
     if (!isOpen) return null;
 
     const galleryContent = (
