@@ -13,6 +13,7 @@ import { formatearTelefono, digitosDeCelular } from '../../../utils/telefono';
 import CamposEntrega from './contacto/CamposEntrega';
 import { armarSolicitud } from './contacto/armarSolicitud';
 import { ENTREGA_INICIAL } from './contacto/entrega';
+import { leerBorrador, guardarBorrador, olvidarBorrador } from '../../../utils/borrador';
 
 const BORRADOR = 'contactoDraft';
 const METODOS_POR_DEFECTO = ['STARKEN', 'CORREOS DE CHILE', 'OTRO'];
@@ -79,16 +80,12 @@ const Contacto = () => {
     };
 
     // Lo escrito se guarda mientras se llena, para no perderlo si se recarga
-    // la página. Un borrador viejo se completa con los campos que le falten.
-    const [formData, setFormData] = useState(() => {
-        const vacio = formularioVacio(finalShippingMethods[0]);
-        try {
-            const guardado = JSON.parse(localStorage.getItem(BORRADOR) || 'null');
-            return guardado ? { ...vacio, ...guardado } : vacio;
-        } catch {
-            return vacio;
-        }
-    });
+    // la página (utils/borrador.js: solo mientras dure la pestaña). Un borrador
+    // viejo se completa con los campos que le falten.
+    const [formData, setFormData] = useState(() => ({
+        ...formularioVacio(finalShippingMethods[0]),
+        ...(leerBorrador(BORRADOR) || {}),
+    }));
     const cambiar = (parcial) => setFormData(prev => ({ ...prev, ...parcial }));
 
     const [status, setStatus] = useState(''); // 'sending', 'success', 'error-whatsapp'
@@ -100,7 +97,7 @@ const Contacto = () => {
         : { ...formData, transporte: finalShippingMethods[0] };
 
     useEffect(() => {
-        try { localStorage.setItem(BORRADOR, JSON.stringify(formData)); } catch { /* sin almacenamiento se sigue igual */ }
+        guardarBorrador(BORRADOR, formData);
     }, [formData]);
 
     // El campo muestra "+569" fijo. Si la clienta escribe o pega su número
@@ -114,7 +111,7 @@ const Contacto = () => {
     const olvidarFormulario = () => {
         setFormData(formularioVacio(finalShippingMethods[0]));
         setPrendas([]);
-        try { localStorage.removeItem(BORRADOR); } catch { /* nada que borrar */ }
+        olvidarBorrador(BORRADOR);
     };
 
     const handleSubmit = async (e) => {

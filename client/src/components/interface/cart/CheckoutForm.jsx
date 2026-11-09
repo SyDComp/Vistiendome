@@ -9,8 +9,11 @@ import { track } from '../../../lib/analytics';
 import { get, post } from '../../../lib/api/client';
 import { formatRUT } from '../../../utils/formatters';
 import { useSettings } from '../../../context/SettingsContext';
+import { leerBorrador, guardarBorrador, olvidarBorrador } from '../../../utils/borrador';
 import './CheckoutForm.css';
 import '../vistas/Contacto.css';
+
+const BORRADOR = 'checkoutDraft';
 
 const CheckoutForm = ({ onClose }) => {
     const { cart, total, descuentos, regalos, clearCart } = useCart();
@@ -42,13 +45,8 @@ const CheckoutForm = ({ onClose }) => {
         modo_entrega: 'DESPACHO'
     };
 
-    const getInitialValues = () => {
-        try {
-            const saved = localStorage.getItem('checkoutDraft');
-            if (saved) return JSON.parse(saved);
-        } catch (e) {}
-        return baseInitialValues;
-    };
+    // Lo escrito sobrevive a una recarga, no a cerrar la pestaña (utils/borrador.js).
+    const getInitialValues = () => leerBorrador(BORRADOR) || baseInitialValues;
 
     const [regiones, setRegiones] = useState([]);
     const [comunas, setComunas] = useState([]);
@@ -91,7 +89,7 @@ const CheckoutForm = ({ onClose }) => {
     const [falloRegistro, setFalloRegistro] = useState(false);
 
     useEffect(() => {
-        localStorage.setItem('checkoutDraft', JSON.stringify(values));
+        guardarBorrador(BORRADOR, values);
     }, [values]);
 
     useEffect(() => {
@@ -242,7 +240,7 @@ const CheckoutForm = ({ onClose }) => {
             return;
         }
 
-        localStorage.removeItem('checkoutDraft');
+        olvidarBorrador(BORRADOR);
         clearCart();
         onClose();
     };
