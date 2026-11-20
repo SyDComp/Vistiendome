@@ -10,6 +10,7 @@ from .historia import PedidoEvento, TipoEvento
 from .ajustes import AjusteNegocio
 from .piezas import PiezaUnica, EstadoPieza
 from .pagos import Pago, TipoPago
+from .caja import ArqueoCaja
 
 # Para que SQLAlchemy/SQLModel detecte las tablas de la Nueva Arquitectura
 __all__ = [
@@ -21,5 +22,5 @@ __all__ = [
     "OpcionPropuesta", "EstadoPropuesta",
     "PedidoEvento", "TipoEvento", "AjusteNegocio",
     "PiezaUnica", "EstadoPieza",
-    "Pago", "TipoPago",
+    "Pago", "TipoPago", "ArqueoCaja",
 ]

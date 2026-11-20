@@ -579,6 +579,9 @@ def get_sku(sku_id: int, db: Session = Depends(get_session)):
         "sale_start": sku.sale_start.isoformat() if sku.sale_start else None,
         "sale_end": sku.sale_end.isoformat() if sku.sale_end else None,
         "config": sku.config,
+        # Sin esto el panel lateral decía "Se asigna al guardar" y no dibujaba
+        # el código, aunque la variante lo tuviera.
+        "barcode": sku.barcode,
         "stock": stock_total,
         "image_urls": [m.url for m in sku.media_assets],
         "media_ids": [m.id for m in sku.media_assets],

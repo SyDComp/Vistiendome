@@ -6,6 +6,7 @@ import { pesos } from '../../../../utils/ventaLocal';
 import { loginQueVuelve } from '../../../../utils/volverTrasLogin';
 import CabeceraCaja from './CabeceraCaja';
 import CierreCaja from './cierre/CierreCaja';
+import AperturaCaja from './cierre/AperturaCaja';
 import useBuscadorCaja from './datos/useBuscadorCaja';
 import CobroCaja from './cobro/CobroCaja';
 import VentaHecha from './cobro/VentaHecha';
@@ -129,6 +130,7 @@ const Caja = () => {
             ) : (
                 <main className="cj-cuerpo">
                     <section className="cj-venta" aria-label="Venta">
+                        <AperturaCaja />
                         <LectorCaja ref={lector} texto={texto} onTexto={setTexto} interpretacion={interpretacion}
                             encontrado={encontrado} onElegido={v.agregar} onAbrirSelector={() => setSelector(true)}
                             onCodigo={v.porCodigo} disabled={v.enviando} />

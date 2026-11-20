@@ -3,6 +3,7 @@ import SectionHeader from '../../../ui/admin/SectionHeader';
 import DataTable from '../../../ui/admin/DataTable';
 import FilterBar from '../../../ui/admin/FilterBar';
 import ClienteForm from './ClienteForm';
+import { calzaClienta } from '../../../../utils/buscarClienta';
 import RowActions from '../../../ui/admin/RowActions';
 import DetailDrawer from '../../../ui/admin/DetailDrawer';
 import { useNotification } from '../../../../context/NotificationContext';
@@ -71,12 +72,7 @@ const ClientesView = () => {
     }, []);
 
     const filteredClientes = clientes.filter(cliente => {
-        const term = searchTerm.toLowerCase();
-        const matchSearch = (
-            (cliente.nombres?.toLowerCase() || '').includes(term) ||
-            (cliente.rut?.toLowerCase() || '').includes(term) ||
-            (cliente.email_personal?.toLowerCase() || '').includes(term)
-        );
+        const matchSearch = calzaClienta(cliente, searchTerm);
 
         let matchFilters = true;
         if (activeFilters.tipo_persona) {

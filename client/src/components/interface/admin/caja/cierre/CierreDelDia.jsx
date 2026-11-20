@@ -8,6 +8,8 @@ import useImprimirComprobante from '../comprobante/useImprimirComprobante';
 import { fechaLarga, hora, otroDia } from './fechas';
 import { imprimirCierre } from './imprimirCierre';
 import useCierre from './useCierre';
+import useArqueo from './useArqueo';
+import ArqueoCajon from './ArqueoCajon';
 import './cierre.css';
 
 /**
@@ -21,6 +23,7 @@ const CierreDelDia = () => {
     const imprimir = useImprimirComprobante();
     const [fecha, setFecha] = useState(null);          // null: hoy
     const { cierre, error, cargando } = useCierre(fecha);
+    const { arqueo, poner } = useArqueo(fecha);
     const dia = cierre?.fecha;
 
     const reimprimir = async (pedidoId) => {
@@ -36,13 +39,13 @@ const CierreDelDia = () => {
             if (e.target instanceof HTMLInputElement || !dia) return;
             if (e.key === 'ArrowLeft') setFecha(otroDia(dia, -1));
             else if (e.key === 'ArrowRight') setFecha(otroDia(dia, 1));
-            else if (e.key.toLowerCase() === 'i' && cierre) imprimirCierre(cierre);
+            else if (e.key.toLowerCase() === 'i' && cierre) imprimirCierre(cierre, arqueo);
             else return;
             e.preventDefault();
         };
         window.addEventListener('keydown', teclas);
         return () => window.removeEventListener('keydown', teclas);
-    }, [dia, cierre]);
+    }, [dia, cierre, arqueo]);
 
     return (
         <div className="cc">
@@ -57,7 +60,7 @@ const CierreDelDia = () => {
                     onClick={() => setFecha(otroDia(dia, 1))}><ChevronRight size={18} /></button>
                 <button type="button" className="sp-boton" onClick={() => setFecha(null)}>Hoy</button>
                 <span className="cc-largo">{dia && fechaLarga(dia)}</span>
-                <button type="button" className="cj-cobrar cc-imprimir" disabled={!cierre} onClick={() => imprimirCierre(cierre)}>
+                <button type="button" className="cj-cobrar cc-imprimir" disabled={!cierre} onClick={() => imprimirCierre(cierre, arqueo)}>
                     <Printer size={18} /> Imprimir cierre <kbd>I</kbd>
                 </button>
             </div>
@@ -67,15 +70,7 @@ const CierreDelDia = () => {
 
             {cierre && (
                 <div className="cc-cuerpo">
-                    <section className="cc-cajon" aria-label="Efectivo en el cajón">
-                        {cierre.efectivo_en_cajon !== null ? (
-                            <>
-                                <span>Efectivo que debería haber en el cajón</span>
-                                <strong>{formatCurrency(cierre.efectivo_en_cajon)}</strong>
-                                <small>Todo lo cobrado en efectivo este día, en la caja o en un abono, menos lo devuelto en efectivo.</small>
-                            </>
-                        ) : <span>No hubo pagos en efectivo este día.</span>}
-                    </section>
+                    {arqueo && arqueo.fecha === cierre.fecha && <ArqueoCajon key={arqueo.fecha} arqueo={arqueo} onCambio={poner} />}
 
                     <section className="cc-bloque" aria-label="Cobrado por medio">
                         <h3>Cobrado por medio</h3>

@@ -21,6 +21,18 @@
 .cc-cajon strong { font-size: 2.2rem; font-weight: 900; }
 .cc-cajon small { color: var(--color-text-muted); }
 
+/* El arqueo: filas de concepto y monto, y el total grande. */
+.cc-arqueo { gap: 0.5rem; }
+.cc-arqueo strong { font-size: 1.1rem; }
+.cc-arqueo-fila { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.cc-arqueo-total strong { font-size: 2.2rem; }
+.cc-arqueo-edicion { display: inline-flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.cc-arqueo-monto { width: 9rem; }
+.cc-arqueo-cierre { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 0.6rem; align-items: end; }
+.cc-arqueo-cierre label { display: grid; gap: 0.25rem; font-size: 0.85rem; color: var(--color-text-secondary); }
+.cc-arqueo-nota { grid-column: 1 / -1; }
+.cc-arqueo-diferencia--no { color: var(--color-danger, #b91c1c); }
+
 .cc-bloque {
     display: grid;
     gap: 0.6rem;

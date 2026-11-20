@@ -15,7 +15,23 @@ import { fechaLarga, hora } from './fechas';
 const fila = (izq, der, clase = '') =>
     `<div class="fila ${clase}"><span>${escapar(izq)}</span><span>${escapar(der)}</span></div>`;
 
-export const htmlCierre = (c, ahora = new Date()) => `
+// El cajón: con cuánto partió, cuánto debería haber y, si se contó, la diferencia.
+const cajon = (c, a) => {
+    if (!a || a.fondo_inicial === null) {
+        return c.efectivo_en_cajon !== null
+            ? `<div class="cajon"><span>Efectivo del día</span>${escapar(formatCurrency(c.efectivo_en_cajon))}</div><div class="detalle">Sin fondo anotado: no se sabe cuánto debería haber.</div><hr>`
+            : '';
+    }
+    const diferencia = a.diferencia === null ? '' : (a.diferencia === 0 ? 'Cuadra'
+        : a.diferencia > 0 ? `Sobran ${formatCurrency(a.diferencia)}` : `Faltan ${formatCurrency(-a.diferencia)}`);
+    return `${fila('Fondo inicial', formatCurrency(a.fondo_inicial))}
+    ${fila('Efectivo del día', formatCurrency(a.efectivo_del_dia || 0))}
+    <div class="cajon"><span>Debería haber</span>${escapar(formatCurrency(a.deberia))}</div>
+    ${a.contado !== null ? fila('Contado', formatCurrency(a.contado)) + fila('Diferencia', diferencia, 'total') + fila('Se deja para mañana', formatCurrency(a.deja)) : ''}
+    ${a.nota ? `<div class="detalle">${escapar(a.nota)}</div>` : ''}<hr>`;
+};
+
+export const htmlCierre = (c, ahora = new Date(), a = null) => `
 <div class="ticket">
     <div class="centro">
         <div class="tienda">${escapar(NOMBRE_TIENDA)}</div>
@@ -24,7 +40,7 @@ export const htmlCierre = (c, ahora = new Date()) => `
         <div class="detalle">Impreso el ${escapar(ahora.toLocaleString('es-CL', { dateStyle: 'short', timeStyle: 'short' }))}</div>
     </div>
     <hr>
-    ${c.efectivo_en_cajon !== null ? `<div class="cajon"><span>Efectivo que debería haber</span>${escapar(formatCurrency(c.efectivo_en_cajon))}</div><hr>` : ''}
+    ${cajon(c, a)}
     <div class="seccion">Cobrado por medio</div>
     ${c.por_medio.length ? c.por_medio.map(m => fila(`${m.medio} (${m.pagos})`, formatCurrency(m.neto))
         + (m.devuelto ? `<div class="detalle">${escapar(`  cobrado ${formatCurrency(m.cobrado)}, devuelto ${formatCurrency(m.devuelto)}`)}</div>` : '')).join('')
@@ -40,8 +56,8 @@ export const htmlCierre = (c, ahora = new Date()) => `
         <div class="detalle">Contaron en el cierre impreso ese día; hoy ya no cuentan.</div>` : ''}
 </div>`;
 
-export const imprimirCierre = (cierre) => imprimirEnMarco({
+export const imprimirCierre = (cierre, arqueo = null) => imprimirEnMarco({
     titulo: `Cierre de caja ${cierre.fecha}`,
-    cuerpo: htmlCierre(cierre),
+    cuerpo: htmlCierre(cierre, new Date(), arqueo && arqueo.fecha === cierre.fecha ? arqueo : null),
     estilos: [papel, estilos],
 });

@@ -102,6 +102,16 @@
 
 .cj-venta { display: grid; gap: 0.75rem; min-width: 0; }
 
+/* Al abrir la caja sin el fondo de hoy anotado (cierre/AperturaCaja.jsx). */
+.cj-apertura {
+    display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+    padding: 0.75rem 1rem; border: 1px dashed var(--color-brand); border-radius: 0.75rem;
+    background: var(--color-surface);
+}
+.cj-apertura label { font-weight: 700; }
+.cj-apertura input { width: 9rem; }
+.cj-apertura small { flex-basis: 100%; color: var(--color-text-muted); }
+
 /* El lector */
 .cj-lector { position: relative; display: grid; gap: 0.5rem; }
 .cj-lector-fila { display: flex; gap: 0.6rem; align-items: stretch; }

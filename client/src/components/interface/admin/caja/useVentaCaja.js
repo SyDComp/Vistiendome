@@ -45,7 +45,11 @@ export default function useVentaCaja() {
     const agregar = useCallback((d) => {
         const { lineas: nuevas, aviso: problema } = agregarALaVenta(lineasAlDia.current, d);
         cambiarLineas(nuevas);
-        setAviso(problema ? { tipo: 'error', texto: problema } : { tipo: 'ok', texto: `${d.nombre}: agregado` });
+        // Lo agregado se avisa con un mensaje que aparece y se va, con su visto
+        // (reportado por QA 2026-11-09); lo que no se pudo queda escrito, porque
+        // hay que leerlo.
+        if (problema) setAviso({ tipo: 'error', texto: problema });
+        else { setAviso(null); toast.success(`${d.nombre} se agregó a la venta`, 'Agregado'); }
     }, [cambiarLineas]);
 
     /** Lo que leyó la pistola (o un código escrito a mano). */

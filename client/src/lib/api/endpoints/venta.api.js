@@ -1,4 +1,4 @@
-import { get, post } from '../client.js';
+import { get, post, put } from '../client.js';
 import { aParametros } from '../../../utils/filtrosCaja';
 
 /**
@@ -29,6 +29,15 @@ export const catalogoCaja = (filtros, pagina = 1) => get(`${BASE}/catalogo?${aPa
 
 /** Las variantes libres de un producto, para elegir característica por característica. */
 export const variantesDeProducto = (productoId) => get(`${BASE}/productos/${productoId}/variantes`);
+
+/** El arqueo del cajón de un día (hoy si no se dice): fondo, debería haber, contado, diferencia. */
+export const arqueoDeCaja = (fecha) => get(`${BASE}/arqueo${fecha ? `?fecha=${encodeURIComponent(fecha)}` : ''}`);
+
+/** Con cuánto partió el cajón ese día. Devuelve el arqueo. */
+export const anotarFondo = (fecha, monto) => put(`${BASE}/arqueo/${fecha}/fondo`, { monto });
+
+/** Lo contado al cerrar, lo que se deja para mañana y una nota. Devuelve el arqueo. */
+export const cerrarArqueo = (fecha, { contado, deja, nota }) => put(`${BASE}/arqueo/${fecha}/cierre`, { contado, deja, nota });
 
 /** El cierre de caja de un día ('2026-10-26'; hoy si no se dice), calculado del libro de pagos. */
 export const cierreDeCaja = (fecha) => get(`${BASE}/cierre${fecha ? `?fecha=${encodeURIComponent(fecha)}` : ''}`);
