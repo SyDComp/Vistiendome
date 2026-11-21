@@ -28,6 +28,7 @@ export default function useVentaCaja() {
     const [clienta, setClienta] = useState({});
     const [recibido, setRecibido] = useState('');
     const [aviso, setAviso] = useState(null);       // {tipo: 'ok'|'error', texto}
+    const [agregado, setAgregado] = useState(null); // {nombre, vez}: la última prenda agregada
     const [enviando, setEnviando] = useState(false);
     const [hecha, setHecha] = useState(null);       // {pedido, vuelto}
     const [imprimiendo, setImprimiendo] = useState(false);
@@ -45,11 +46,10 @@ export default function useVentaCaja() {
     const agregar = useCallback((d) => {
         const { lineas: nuevas, aviso: problema } = agregarALaVenta(lineasAlDia.current, d);
         cambiarLineas(nuevas);
-        // Lo agregado se avisa con un mensaje que aparece y se va, con su visto
-        // (reportado por QA 2026-11-09); lo que no se pudo queda escrito, porque
-        // hay que leerlo.
+        // Lo agregado se avisa con un visto que aparece y se va (prendas/AvisoAgregado);
+        // lo que no se pudo queda escrito, porque hay que leerlo.
         if (problema) setAviso({ tipo: 'error', texto: problema });
-        else { setAviso(null); toast.success(`${d.nombre} se agregó a la venta`, 'Agregado'); }
+        else { setAviso(null); setAgregado({ nombre: d.nombre, vez: Date.now() }); }
     }, [cambiarLineas]);
 
     /** Lo que leyó la pistola (o un código escrito a mano). */
@@ -116,7 +116,7 @@ export default function useVentaCaja() {
     return {
         version, medios, lineas, cambiarLineas, agregar, porCodigo,
         sinDatos, setSinDatos, clienta, setClienta, pagos, cambiarPagos, falta: restante(lineas, pagos),
-        recibido, setRecibido, total, puedeCobrar, cobrar, enviando, aviso,
+        recibido, setRecibido, total, puedeCobrar, cobrar, enviando, aviso, agregado,
         hecha, imprimiendo, imprimirComprobante, nuevaVenta, vaciar,
     };
 }

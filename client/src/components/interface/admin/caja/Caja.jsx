@@ -12,6 +12,7 @@ import CobroCaja from './cobro/CobroCaja';
 import VentaHecha from './cobro/VentaHecha';
 import LectorCaja from './prendas/LectorCaja';
 import LineasCaja from './prendas/LineasCaja';
+import AvisoAgregado from './prendas/AvisoAgregado';
 import { PANEL_POR_OMISION, RUTA_CAJA } from './rutaCaja';
 import SelectorPrendas from './selector/SelectorPrendas';
 import useAtajosCaja from './teclado/useAtajosCaja';
@@ -134,6 +135,7 @@ const Caja = () => {
                         <LectorCaja ref={lector} texto={texto} onTexto={setTexto} interpretacion={interpretacion}
                             encontrado={encontrado} onElegido={v.agregar} onAbrirSelector={() => setSelector(true)}
                             onCodigo={v.porCodigo} disabled={v.enviando} />
+                        <AvisoAgregado agregado={v.agregado} />
                         {v.aviso && (
                             <p className={`cj-aviso cj-aviso--${v.aviso.tipo}`} role={v.aviso.tipo === 'error' ? 'alert' : 'status'}>
                                 {v.aviso.texto}

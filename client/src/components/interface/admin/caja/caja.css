@@ -3,7 +3,12 @@
    la mano. */
 
 .cj-pantalla {
-    min-height: 100vh;
+    /* Su propio scroll: el panel bloquea el de la página (useScrollLock en las
+       rutas /admin), y con la pantalla del PC de la caja lo que no cabía quedaba
+       sin poder bajar. */
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
     display: grid;
     grid-template-rows: auto 1fr;
     /* Una columna que no crece con lo que lleva adentro: sin esto, la línea de
@@ -216,6 +221,35 @@
 }
 .cj-sugerido:hover, .cj-sugerido--marcado { border-color: var(--color-brand); background: var(--color-bg-subtle); }
 .cj-sugerido-detalle { color: var(--color-text-muted); font-size: 0.9rem; }
+
+.cj-venta { position: relative; }
+
+/* "Agregado" con su visto: flota sobre la venta, no la empuja ni tapa el cobro. */
+.cj-agregado {
+    position: absolute;
+    top: 4.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.1rem;
+    border-radius: 999px;
+    background: var(--color-success-bg);
+    color: var(--color-success-deep);
+    border: 1px solid var(--color-success-border-strong);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+    font-weight: 600;
+    pointer-events: none;
+    animation: cj-agregado 1.8s ease forwards;
+}
+@keyframes cj-agregado {
+    0% { opacity: 0; transform: translate(-50%, -6px); }
+    12%, 80% { opacity: 1; transform: translate(-50%, 0); }
+    100% { opacity: 0; transform: translate(-50%, -4px); }
+}
+@media (prefers-reduced-motion: reduce) { .cj-agregado { animation: none; } }
 
 .cj-aviso { margin: 0; padding: 0.55rem 0.9rem; border-radius: 0.6rem; font-weight: 600; }
 .cj-aviso--ok { background: var(--color-success-bg); color: var(--color-success-deep); }
