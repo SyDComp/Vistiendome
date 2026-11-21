@@ -55,3 +55,13 @@ export const validarRut = (rut) => {
     }
     return { valido: true };
 };
+
+/**
+ * Para un RUT que se puede dejar en blanco: null si está vacío o es válido; si
+ * no, el motivo. Lo usan la caja y la cotización del panel (QA 2026-11-21).
+ */
+export const motivoRutOpcional = (rut) => {
+    if (!limpiarRut(rut)) return null;
+    const r = validarRut(rut);
+    return r.valido ? null : r.motivo;
+};

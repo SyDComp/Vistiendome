@@ -4,6 +4,7 @@ import './Contacto.css';
 import { useSettings } from '../../../context/SettingsContext';
 import { Camera, Globe, MessageCircle, Mail, Phone, MapPin, Clock, User, Users, Calendar, FileText, X, Map, Navigation, Package } from 'lucide-react';
 import { formatRUT } from '../../../utils/formatters';
+import { validarRut } from '../../../utils/rut';
 import { openWhatsApp } from '../../../utils/cartUtils';
 import { buildMapLinks } from '../../../utils/mapLinks';
 import Button from '../../ui/Button';
@@ -111,6 +112,10 @@ const Contacto = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validarRut(datos.rut).valido) {
+            setStatus('error-rut');
+            return;
+        }
         if (!validateWhatsApp(datos.whatsapp)) {
             setStatus('error-whatsapp');
             return;
@@ -208,7 +213,9 @@ const Contacto = () => {
                         value={formData.rut}
                         onChange={(e) => cambiar({ rut: e.target.value })}
                         onBlur={(e) => cambiar({ rut: formatRUT(e.target.value) })}
+                        className={status === 'error-rut' ? 'input-error' : ''}
                     />
+                    {status === 'error-rut' && <span className="error-msg">{validarRut(formData.rut).motivo}</span>}
                 </div>
                 <div className="form-group">
                     <label><User size={16} /> Nombre Completo *</label>

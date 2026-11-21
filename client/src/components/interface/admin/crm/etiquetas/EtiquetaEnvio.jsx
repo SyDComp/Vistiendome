@@ -1,5 +1,4 @@
 import React from 'react';
-import Barcode from 'react-barcode';
 import { describirEntrega } from '../../../../../utils/entrega';
 import { getShippingColor } from '../../../../../utils/shippingColors';
 import { formatearTelefono } from '../../../../../utils/telefono';
@@ -19,7 +18,6 @@ const EtiquetaEnvio = ({
     tinta = 'eco',
     conCorte = true,
     continua = false,
-    codigo = 'compact',
     conColorTransporte = true,
     coloresTransporte = {},
 }) => {
@@ -80,24 +78,7 @@ const EtiquetaEnvio = ({
                 </div>
 
                 <div className="ee-pie">
-                    {/* El código dice lo mismo que el número impreso al lado. Antes
-                        guardaba el id interno ("COTI-57" junto a "PEDIDO N° 12"),
-                        que no es el número que se ve en ningún lado. Un pedido
-                        sin número no lleva código: no se inventa otro. */}
-                    {codigo && cotizacion.numero != null && (
-                        <div className={`ee-codigo-barras ee-codigo-barras--${codigo}`}>
-                            <Barcode
-                                value={String(cotizacion.numero)}
-                                format="CODE128"
-                                width={2}
-                                height={60}
-                                margin={0}
-                                displayValue={false}
-                                background="transparent"
-                                lineColor="#000000"
-                            />
-                        </div>
-                    )}
+                    {/* Sin código de barras: nada lo leía (QA 2026-11-21). El número basta. */}
                     <div className="ee-pedido">PEDIDO {numero}</div>
                 </div>
             </div>

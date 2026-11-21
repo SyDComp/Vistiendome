@@ -24,6 +24,7 @@ from app.models.pagos import Pago
 from app.core.looks import asset_de_variante
 from app.core.portada import portadas
 from app.core import ubicacion_persona
+from app.core import rut as rut_core
 
 router = APIRouter()
 
@@ -37,6 +38,11 @@ class PersonaCreate(BaseModel):
     transporte_preferido: Optional[str] = None
     direccion: Optional[str] = None
     comuna_id: Optional[int] = None
+
+    @field_validator("rut")
+    @classmethod
+    def _rut_valido(cls, v):
+        return rut_core.validar_opcional(v)
 
 class PersonaRead(BaseModel):
     id: str
@@ -307,6 +313,12 @@ class CotizacionCreate(BaseModel):
 
     persona_id: Optional[str] = None
     rut: Optional[str] = Field(default=None, max_length=12)
+
+    @field_validator("rut")
+    @classmethod
+    def _rut_valido(cls, v):
+        return rut_core.validar_opcional(v)
+
     nombres: Optional[str] = Field(default="", max_length=100)
     apellidos: Optional[str] = Field(default="", max_length=100)
     email_personal: Optional[str] = Field(default=None, max_length=255)

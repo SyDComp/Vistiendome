@@ -98,8 +98,6 @@ const ShippingLabelPrinter = () => {
     const [formatKey, setFormatKey] = useState('hoja_4');
     const [papelKey, setPapelKey] = useState('carta');
     const [inkMode, setInkMode] = useState('eco'); // 'eco' | 'standard'
-    const [showBarcode, setShowBarcode] = useState(true);
-    const [barcodeSize, setBarcodeSize] = useState('compact'); // 'micro' | 'compact' | 'standard'
     const [showCutLines, setShowCutLines] = useState(true);
     const [showTransportColor, setShowTransportColor] = useState(true);
     const isMobile = useHasta('lg');
@@ -259,7 +257,6 @@ const ShippingLabelPrinter = () => {
     // por página (ver formatosEtiqueta.js).
     const medidas = geometria(formatKey, papelKey);
     const slotsPerPage = porPagina(medidas);
-    const codigo = showBarcode ? barcodeSize : null;
 
     const pages = useMemo(() => {
         const result = [];
@@ -269,7 +266,7 @@ const ShippingLabelPrinter = () => {
         return result;
     }, [previewSlots, slotsPerPage]);
 
-    useAjusteAlEspacio(vistaRef, [pages, formatKey, papelKey, inkMode, codigo, showCutLines, showTransportColor]);
+    useAjusteAlEspacio(vistaRef, [pages, formatKey, papelKey, inkMode, showCutLines, showTransportColor]);
 
     const marcarComoDespachadas = async (pendientes) => {
         setImpresos(null);
@@ -671,26 +668,6 @@ const ShippingLabelPrinter = () => {
                                 <label className="et-opcion">
                                     <input
                                         type="checkbox"
-                                        checked={showBarcode}
-                                        onChange={(e) => setShowBarcode(e.target.checked)}
-                                        className="et-casilla"
-                                    />
-                                    Código de Barras
-                                </label>
-                                {showBarcode && (
-                                    <select
-                                        value={barcodeSize}
-                                        onChange={(e) => setBarcodeSize(e.target.value)}
-                                        className="et-campo-corto"
-                                    >
-                                        <option value="micro">📏 Súper Pequeño (Micro)</option>
-                                        <option value="compact">📐 Pequeño / Compacto (Recomendado)</option>
-                                        <option value="standard">📏 Normal / Estándar</option>
-                                    </select>
-                                )}
-                                <label className="et-opcion">
-                                    <input
-                                        type="checkbox"
                                         checked={showCutLines}
                                         onChange={(e) => setShowCutLines(e.target.checked)}
                                         className="et-casilla"
@@ -753,7 +730,6 @@ const ShippingLabelPrinter = () => {
                                                     tinta={inkMode}
                                                     conCorte={showCutLines}
                                                     continua={!medidas.altoMm}
-                                                    codigo={codigo}
                                                     conColorTransporte={showTransportColor}
                                                     coloresTransporte={shippingColors}
                                                 />

@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from sqlmodel import Session, select, or_, func
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
+
+from ...core import rut as rut_core
 import pyotp
 
 from ...database import get_session
@@ -17,6 +19,11 @@ class BootstrapSchema(BaseModel):
     email_personal: str
     email_corporativo: str
     password: str
+
+    @field_validator("rut")
+    @classmethod
+    def _rut_valido(cls, v):
+        return rut_core.validar_opcional(v)
 
 @router.post("/bootstrap/first-admin")
 def bootstrap_system(data: BootstrapSchema, db: Session = Depends(get_session)):

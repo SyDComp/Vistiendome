@@ -5,6 +5,7 @@ import useAjustesNegocio from '../../../../hooks/useAjustesNegocio';
 import usePagosVenta from '../../../../hooks/usePagosVenta';
 import { agregarALaVenta } from '../../../../utils/caja';
 import { mensajeDeError } from '../../../../utils/errorServidor';
+import { motivoRutOpcional } from '../../../../utils/rut';
 import { paraServidor, pesos, restante, sePuedeVender, totalVenta } from '../../../../utils/ventaLocal';
 import useImprimirComprobante from './comprobante/useImprimirComprobante';
 
@@ -35,7 +36,9 @@ export default function useVentaCaja() {
 
     const total = totalVenta(lineas);
     const { pagos, cambiarPagos, reiniciar } = usePagosVenta(total, medios);
-    const puedeCobrar = sePuedeVender(lineas, pagos) && (sinDatos || Boolean((clienta.rut || '').trim()));
+    // Con sus datos, el RUT tiene que estar y cuadrar (QA 2026-11-21: no se validaba).
+    const puedeCobrar = sePuedeVender(lineas, pagos)
+        && (sinDatos || (Boolean((clienta.rut || '').trim()) && !motivoRutOpcional(clienta.rut)));
 
     // Dos lecturas seguidas pueden responder antes de que se pinte la primera:
     // la segunda tiene que sumar sobre lo que dejó la primera, no sobre lo pintado.

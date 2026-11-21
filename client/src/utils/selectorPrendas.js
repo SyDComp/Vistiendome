@@ -77,11 +77,14 @@ export const avanzar = (variantes, caracteristicas, elegidas, definiciones = [])
 };
 
 /**
- * Lo que el filtro ya eligió en este producto (lo escrito en el buscador o
- * lo puesto en Filtros): si de los valores filtrados el producto tiene uno
- * solo, ese queda elegido sin preguntar. Se prefiere el que tiene libres:
- * con "azul" (Azul o Azul Marino) y solo Azul Marino con stock, es ese.
- * Si quedan varios, se pregunta, y van marcados (opcionesPaso).
+ * Lo que el filtro sugiere en este producto (lo escrito en el buscador o lo
+ * puesto en Filtros): si de los valores filtrados el producto tiene uno solo,
+ * ese. Se prefiere el que tiene libres: con "azul" (Azul o Azul Marino) y solo
+ * Azul Marino con stock, es ese.
+ *
+ * No se elige solo: el paso se muestra igual, con todas las opciones y el
+ * cursor en la sugerida, para poder llevar otro color sin salir a buscarlo
+ * (QA 2026-11-21). Antes se saltaba el paso.
  * @param {object} valoresFiltro      {CARACTERISTICA: [valores]}
  * @returns {object}                  {CARACTERISTICA: valor}
  */

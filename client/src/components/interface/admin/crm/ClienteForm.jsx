@@ -6,6 +6,7 @@ import AdminFormLayout, { AdminFormSubmit } from '../../../ui/admin/AdminFormLay
 import PersonaFields from './PersonaFields';
 import { pedidosPorDespachar, destinoAPedidos } from '../../../../lib/api/endpoints';
 import { cantidad } from '../../../../utils/cantidad';
+import { validarRut } from '../../../../utils/rut';
 
 const API_BASE = `/api/v1/crm`;
 
@@ -51,6 +52,11 @@ const ClienteForm = ({ initialData, onSuccess, onCancel }) => {
         e.preventDefault();
         if (!formData.rut || !formData.nombres || !formData.apellidos) {
             toast.error("RUT, Nombres y Apellidos son obligatorios");
+            return;
+        }
+        const rut = validarRut(formData.rut);
+        if (!rut.valido) {
+            toast.error(rut.motivo);
             return;
         }
 

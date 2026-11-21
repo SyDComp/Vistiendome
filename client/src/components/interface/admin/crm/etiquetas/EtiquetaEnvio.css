@@ -112,14 +112,6 @@
     gap: calc(var(--escala) * 0.8mm);
 }
 
-/* El SVG trae su viewBox: se le da alto y lo ancho lo pone la proporción,
-   con el ancho de la etiqueta como tope. */
-.ee-codigo-barras { width: 100%; display: flex; justify-content: center; }
-.ee-codigo-barras svg { display: block; width: auto; max-width: 100%; }
-.ee-codigo-barras--micro svg { height: calc(var(--escala) * 6mm); }
-.ee-codigo-barras--compact svg { height: calc(var(--escala) * 9mm); }
-.ee-codigo-barras--standard svg { height: calc(var(--escala) * 13mm); }
-
 .ee-pedido { font-size: calc(var(--escala) * 7.5pt); font-weight: 800; color: #4a5568; letter-spacing: 0.05em; }
 
 /* Tinta estándar: la marca en un bloque negro y la comuna con fondo. */

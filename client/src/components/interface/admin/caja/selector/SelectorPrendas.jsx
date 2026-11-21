@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ArrowLeft, Filter, Gem, X } from 'lucide-react';
-import { alternar, cuantosFiltros, paginaDe, paginasDe, posicionDe } from '../../../../../utils/filtrosCaja';
+import { alternar, cuantosFiltros, paginaDe, paginasDe, posicionDe, POR_PAGINA } from '../../../../../utils/filtrosCaja';
 import { avanzar, caracteristicasDe, elegidasPorFiltro, opcionesDe, retroceder } from '../../../../../utils/selectorPrendas';
 import { opcionesFiltros, opcionesGrupo, opcionesPaso, opcionesPiezas } from '../../../../../utils/vistasSelector';
 import useCatalogoCaja from '../datos/useCatalogoCaja';
@@ -41,10 +41,11 @@ const SelectorPrendas = ({ filtrosIniciales, definiciones, orden, version, onEle
     const pasos = useMemo(() => (variantes ? caracteristicasDe(variantes, orden) : []), [variantes, orden]);
     const definicionDe = (c) => definiciones.find(d => d.name.toUpperCase() === c);
 
-    // Lo que el filtro ya eligió en este producto no se vuelve a preguntar.
-    const iniciales = useMemo(() => elegidasPorFiltro(variantes || [], pasos, filtros.valores),
+    // Lo filtrado se sugiere, no se elige: cada paso muestra todas sus
+    // opciones, con lo filtrado marcado y el cursor ahí (Enter lo lleva).
+    const sugeridas = useMemo(() => elegidasPorFiltro(variantes || [], pasos, filtros.valores),
         [filtros, pasos, variantes]);
-    const estado = variantes ? avanzar(variantes, pasos, { ...iniciales, ...aMano }, definiciones) : null;
+    const estado = variantes ? avanzar(variantes, pasos, aMano, definiciones) : null;
 
     const faceta = vista.tipo === 'grupo' ? datos?.facetas.find(f => f.clave === vista.clave) : null;
     const lista = {
@@ -62,6 +63,19 @@ const SelectorPrendas = ({ filtrosIniciales, definiciones, orden, version, onEle
     const pagina = enProductos ? paginaProductos : paginaLista;
 
     const ir = (nueva) => { setVista(nueva); setPaginaLista(1); setMarcada(0); };
+
+    // Al llegar a un paso, el cursor va a la opción que sugiere el filtro (o a
+    // la primera marcada), en su página.
+    const pasoActual = vista.tipo === 'producto' ? estado?.paso : null;
+    useEffect(() => {
+        if (!pasoActual) return;
+        const i = lista.findIndex(o => o.clave === sugeridas[pasoActual]);
+        const destino = i >= 0 ? i : lista.findIndex(o => o.marcada);
+        if (destino < 0) return;
+        setPaginaLista(Math.floor(destino / POR_PAGINA) + 1);
+        setMarcada(destino % POR_PAGINA);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pasoActual, vista.id]);
     const cambiarPagina = (n) => {
         if (n < 1 || n > paginas) return;
         (enProductos ? setPaginaProductos : setPaginaLista)(n);
@@ -87,7 +101,7 @@ const SelectorPrendas = ({ filtrosIniciales, definiciones, orden, version, onEle
         if (vista.tipo === 'piezas') return sumar(datos.piezas.find(p => p.pieza_id === o.clave));
         if (estado?.variante) return sumar(estado.variante);
         const nuevas = { ...aMano, [estado.paso]: o.clave };
-        const r = avanzar(variantes, pasos, { ...iniciales, ...nuevas }, definiciones);
+        const r = avanzar(variantes, pasos, nuevas, definiciones);
         if (r.variante) return sumar(r.variante);
         setAMano(nuevas);
         setMarcada(0);

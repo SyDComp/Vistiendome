@@ -15,7 +15,7 @@ import { ZONA } from '../../../../../utils/fechaServidor';
  */
 
 const fecha = (d) => d.toLocaleString('es-CL', {
-    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: ZONA,
+    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: ZONA,
 });
 
 const fila = (izq, der, clase = '') =>

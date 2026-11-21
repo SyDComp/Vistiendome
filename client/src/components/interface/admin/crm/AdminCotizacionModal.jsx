@@ -7,6 +7,7 @@ import { useNotification } from '../../../../context/NotificationContext';
 import Imagen from '../../../ui/Imagen';
 import { formatearTelefono, normalizarTelefono } from '../../../../utils/telefono';
 import { formatRUT } from '../../../../utils/formatters';
+import { motivoRutOpcional } from '../../../../utils/rut';
 import SelectorCanal from './pedido/SelectorCanal';
 import SelectorPrecio from './pedido/SelectorPrecio';
 import { valorDesde, precioDeValor, esValido, paraServidor, textoSubtotal, textoTotal } from '../../../../utils/precioPrenda';
@@ -282,6 +283,11 @@ const FormularioCotizacion = ({ onClose, onCreated, initialCliente = null }) => 
         e.preventDefault();
 
         // Validar cliente
+        const rutMalo = clientMode !== 'select' && motivoRutOpcional(newClienteData.rut);
+        if (rutMalo) {
+            toast.error(rutMalo);
+            return;
+        }
         if (clientMode === 'select' && !selectedCliente) {
             toast.error("Por favor selecciona un cliente registrado o crea uno nuevo");
             return;

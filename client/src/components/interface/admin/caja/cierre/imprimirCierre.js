@@ -37,7 +37,7 @@ export const htmlCierre = (c, ahora = new Date(), a = null) => `
         <div class="tienda">${escapar(NOMBRE_TIENDA)}</div>
         <div class="titulo">Cierre de caja</div>
         <div>${escapar(fechaLarga(c.fecha))}</div>
-        <div class="detalle">Impreso el ${escapar(ahora.toLocaleString('es-CL', { dateStyle: 'short', timeStyle: 'short' }))}</div>
+        <div class="detalle">Impreso el ${escapar(ahora.toLocaleString('es-CL', { dateStyle: 'short', timeStyle: 'short', hourCycle: 'h23', timeZone: 'America/Santiago' }))}</div>
     </div>
     <hr>
     ${cajon(c, a)}

@@ -65,7 +65,10 @@ const ArqueoCajon = ({ arqueo, onCambio }) => {
                 <small>Se propone lo que se dejó al cerrar el día anterior.</small>
             )}
 
-            <div className="cc-arqueo-fila"><span>Efectivo del día (cobrado menos devuelto)</span><span>{formatCurrency(a.efectivo_del_dia || 0)}</span></div>
+            {/* Lo cobrado, no lo que la clienta entregó: si pagó $40.000 una compra de
+                $38.970, entraron $38.970 (el vuelto nunca fue de la tienda). QA lo leyó
+                como que faltaba restar el vuelto (2026-11-21): el texto lo dice. */}
+            <div className="cc-arqueo-fila"><span>Efectivo que entró hoy (ventas y abonos, el vuelto ya descontado)</span><span>{formatCurrency(a.efectivo_del_dia || 0)}</span></div>
             <div className="cc-arqueo-fila cc-arqueo-total">
                 <span>Debería haber en el cajón</span>
                 <strong>{a.deberia === null ? '—' : formatCurrency(a.deberia)}</strong>

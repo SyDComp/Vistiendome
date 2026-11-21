@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from '../../../hooks/useForm';
 import { formatRUT } from '../../../utils/formatters';
+import { validarRut } from '../../../utils/rut';
 import Input from '../../ui/Input';
 import Button from '../../ui/Button';
 
 const validateSetup = (values) => {
     const errors = {};
     if (!values.rut) errors.rut = "Requerido legalmente";
+    else if (!validarRut(values.rut).valido) errors.rut = validarRut(values.rut).motivo;
     if (!values.nombres) errors.nombres = "Obligatorio";
     if (!values.apellidos) errors.apellidos = "Obligatorio";
     if (!values.password) errors.password = "Contraseña maestra requerida";

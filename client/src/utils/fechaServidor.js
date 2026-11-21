@@ -19,7 +19,8 @@ export const desdeServidor = (texto) => {
 };
 
 /** Un formateador en la hora de Chile: `enChile({ dateStyle: 'medium' })`. */
-export const enChile = (opciones) => new Intl.DateTimeFormat('es-CL', { ...opciones, timeZone: ZONA });
+// Las horas en 24 h en todo el panel: 21:00, no 9:00 p. m. (QA 2026-11-21).
+export const enChile = (opciones) => new Intl.DateTimeFormat('es-CL', { hourCycle: 'h23', ...opciones, timeZone: ZONA });
 
 const SOLO_FECHA = enChile({ day: '2-digit', month: '2-digit', year: 'numeric' });
 

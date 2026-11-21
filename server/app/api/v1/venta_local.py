@@ -7,7 +7,9 @@ La regla vive en core/pedidos/venta_rapida.py: acá solo se traduce a HTTP.
 from typing import Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+from app.core import rut as rut_core
 from sqlalchemy import func
 from sqlmodel import Session, select
 
@@ -43,6 +45,11 @@ class ClientaEntrada(BaseModel):
     nombres: str = Field(default="", max_length=100)
     apellidos: str = Field(default="", max_length=100)
     telefono: Optional[str] = Field(default=None, max_length=20)
+
+    @field_validator("rut")
+    @classmethod
+    def _rut_valido(cls, v):
+        return rut_core.validar_opcional(v)
 
 
 class PrendaEntrada(BaseModel):

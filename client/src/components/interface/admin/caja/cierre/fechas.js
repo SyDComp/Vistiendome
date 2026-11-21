@@ -15,5 +15,5 @@ export const fechaLarga = (iso) => {
 
 /** "15:32" de un instante ISO, en la hora de Chile. */
 export const hora = (instante) => new Date(instante).toLocaleTimeString('es-CL', {
-    hour: '2-digit', minute: '2-digit', timeZone: 'America/Santiago',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'America/Santiago',
 });

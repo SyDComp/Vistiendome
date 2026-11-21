@@ -1,4 +1,6 @@
 import React from 'react';
+import { formatRUT } from '../../../../../utils/formatters';
+import { motivoRutOpcional } from '../../../../../utils/rut';
 
 /** ↑ ↓ pasan de un dato a otro, sin soltar el teclado. */
 const moverEntreCampos = (e) => {
@@ -35,7 +37,12 @@ const ClientaVenta = ({ sinDatos, clienta, onSinDatos, onCambiar, disabled }) =>
                         {etiqueta}
                         <input type="text" className="sp-select" placeholder={ayuda} value={clienta[clave] || ''}
                             data-clienta={clave}
-                            onChange={e => onCambiar({ ...clienta, [clave]: e.target.value })} />
+                            aria-invalid={clave === 'rut' && Boolean(motivoRutOpcional(clienta.rut))}
+                            onChange={e => onCambiar({ ...clienta, [clave]: e.target.value })}
+                            onBlur={clave === 'rut' ? (e => onCambiar({ ...clienta, rut: formatRUT(e.target.value) })) : undefined} />
+                        {clave === 'rut' && motivoRutOpcional(clienta.rut) && (
+                            <span className="vl-error" role="alert">{motivoRutOpcional(clienta.rut)}</span>
+                        )}
                     </label>
                 ))}
             </div>

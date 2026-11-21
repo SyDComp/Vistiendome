@@ -1,7 +1,7 @@
 import React from 'react';
 import { formatCurrency } from '../../../../../../utils/cartUtils';
 
-const FECHA = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short' });
+const FECHA = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short', hourCycle: 'h23' });
 
 // Lo que no es un pago: sale del pedido.
 const TIPOS = { DEVOLUCION: 'Devolución', A_FAVOR: 'Quedó a favor de la clienta' };
