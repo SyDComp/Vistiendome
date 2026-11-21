@@ -35,6 +35,10 @@ La caja se abre a pantalla completa con el acceso directo **Caja Vistiendome** d
 6. **El total** de la venta.
 7. **Cobrar e imprimir** (C). Se activa cuando hay prendas en la venta.
 
+**Al abrir la caja** por primera vez en el día, pregunta con cuánto parte el cajón. Propone lo que se dejó al cerrar el día anterior: si es eso, basta con *Anotar*. Con ese número el cierre sabe cuánto debería haber al final del día.
+
+La caja funciona también a media pantalla, con otra ventana al lado.
+
 ### Sumar prendas
 
 Hay tres formas, y se pueden mezclar en una misma venta.
@@ -66,6 +70,8 @@ Al elegir un producto, la caja pregunta lo que falta, un paso a la vez: la talla
 2. Cada opción con su número y cuántas quedan libres.
 3. Si hay más de 10 opciones, siguen en la página siguiente (→).
 
+Si el color o la talla ya se escribieron en el buscador ("tapado negro"), ese paso viene con esa opción marcada y el cursor encima: Enter la lleva. Las demás siguen a la vista, por si la clienta quiere otra.
+
 Cuando queda una sola prenda posible, se suma sola a la venta y las tarjetas quedan abiertas para elegir otra. Esc las cierra.
 
 ![Los filtros de las tarjetas](capturas/02-05-filtros.png)
@@ -96,7 +102,7 @@ Cuando queda una sola prenda posible, se suma sola a la venta y las tarjetas que
 
 ![Venta con los datos de la clienta](capturas/02-08-con-datos.png)
 
-1. *Con sus datos*: el RUT, el nombre, el apellido y el teléfono. Sin el RUT no deja cobrar.
+1. *Con sus datos*: el RUT, el nombre, el apellido y el teléfono. El RUT se ordena solo con puntos y guion. Si falta, o si el dígito verificador no corresponde, lo dice debajo del campo y no deja cobrar.
 
 ### La venta registrada
 
@@ -115,9 +121,15 @@ Con **D** se abre el cierre de caja (también está en el panel, en Ventas y CRM
 
 1. **El día.** ← → cambian de día y **Hoy** vuelve a hoy: se puede revisar cualquier día anterior.
 2. **Imprimir cierre** (I).
-3. **El efectivo que debería haber en el cajón:** todo lo cobrado en efectivo ese día, en la caja o en abonos de pedidos, menos lo devuelto en efectivo.
+3. **El cajón:**
+   - **Fondo con que partió:** lo que se anotó al abrir. *Cambiar* lo corrige.
+   - **Efectivo que entró:** lo cobrado en efectivo ese día, en la caja o en abonos de pedidos, menos lo devuelto en efectivo. El vuelto ya está descontado: si una compra de $38.970 se pagó con $40.000, entraron $38.970.
+   - **Debería haber en el cajón:** el fondo más el efectivo que entró.
+   - **Contar el cajón:** se escribe lo que hay, cuánto se deja para mañana (en blanco: todo lo contado) y una nota si hace falta (por ejemplo, lo que se llevó al banco). El cierre dice si cuadra, si sobra o si falta, y quién lo cerró y a qué hora. *Corregir* permite cambiarlo.
 4. **Lo cobrado por medio:** cuántos pagos, cuánto se cobró, cuánto se devolvió y el neto de cada medio.
 5. **Las ventas de la caja** de ese día, cada una con su comprobante para reimprimir.
+
+Lo que se deja para mañana es lo que la caja propone como fondo al abrir el día siguiente.
 
 Esc vuelve a la caja.
 
@@ -201,11 +213,13 @@ El ojo de la fila abre el detalle, al costado. Se lee de arriba abajo.
 ![Confirmar un pedido](capturas/03-06-confirmar.png)
 
 1. **De dónde sale** cada prenda: *Ya existe: buscar en bodega* (se aparta de lo que hay) o *Hay que hacerla: confeccionar*. El sistema propone lo que conviene. Las dos van a la orden de corte: el taller busca una y hace la otra.
-2. Lo que pasa con esa prenda: aquí, se aparta y el taller la busca en bodega, y quedan 30 libres.
+2. Lo que pasa con esa prenda: aquí, se aparta y el taller la busca en bodega, y quedan 29 libres.
 3. **Para cuándo estará listo.** Propone la fecha según el plazo habitual de los Ajustes del negocio; se puede cambiar.
 4. **El abono mínimo** y lo pagado. *Registrar pago* lo anota sin salir de aquí.
 5. **La nota.** Si se confirma sin el abono mínimo es obligatoria: queda escrito por qué.
 6. **Confirmar pedido.** Lo de bodega queda apartado, y todo queda listo para ponerlo en una orden de corte.
+
+Una prenda personalizada que llegó sin precio (por ejemplo, desde Contacto) dice *Ponle precio* y se cotiza aquí mismo, sin salir de la ventana: el selector propone el rango de precios del modelo en que se basa.
 
 ### Los pagos
 
@@ -238,6 +252,8 @@ El ojo de la fila abre el detalle, al costado. Se lee de arriba abajo.
 1. Si algo no está listo, el sistema lo avisa
 2. y dice qué falta: aquí, una prenda que todavía está por hacerse en el taller.
 
+**El destino.** Cada pedido guarda a dónde va, y de ahí sale la etiqueta de envío. Mientras el pedido no haya salido, **Cambiar destino** lo corrige, y el cambio queda en la historia. Si se edita la dirección de una clienta que tiene pedidos por despachar, el panel ofrece pasarles la dirección nueva.
+
 ### La historia
 
 ![La historia de un pedido](capturas/03-11-historia.png)
@@ -248,7 +264,7 @@ El ojo de la fila abre el detalle, al costado. Se lee de arriba abajo.
 
 ![Lo que se imprime de un pedido](capturas/03-12-impresiones.png)
 
-1. **Sistema de etiquetas:** la etiqueta de envío.
+1. **Sistema de etiquetas:** la etiqueta de envío, con el destino del pedido y su número. *Actualizar* trae los cambios hechos al pedido o a la clienta.
 2. **Planilla de pedido**, para el taller.
 3. **Comprobante**, para la clienta.
 

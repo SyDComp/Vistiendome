@@ -31,7 +31,7 @@ def _buscar(p, texto):
 def _venta(p):
     """Dos prendas: un Vestido Noemi por tarjetas y un tapado por búsqueda."""
     _tarjetas(p)
-    _teclas(p, "2", "1", "6", "Escape")     # Noemi · talla 12 · Azul Rey; se cierra el selector
+    _teclas(p, "2", "1", "6", "1", "Escape")     # Noemi · talla 12 · Mostaza · Bajo Rodilla; se cierra el selector
     _buscar(p, "tapado negro m")
     p.locator(".cj-sugerido").first.click()
     p.wait_for_timeout(PAUSA)
@@ -40,6 +40,7 @@ def _venta(p):
 
 def _cobro(p):
     _venta(p)
+    p.locator(".vl-pago select").first.select_option("Efectivo")
     p.locator(".vl-pago input.sp-select").first.fill("20000")
     p.get_by_role("button", name="Agregar otro medio").click()
     p.locator(".vl-pago select").nth(1).select_option("Débito")
@@ -121,7 +122,7 @@ ESCENAS = [
         Marca(".cj-hecha-acciones .sp-boton", 3),
         Marca(".cj-hecha-acciones .cj-cobrar", 4),
     ]),
-    Escena("02-10-cierre", CAJA, preparar=_cierre, recorte=".cj-sel", marcas=[
+    Escena("02-10-cierre", CAJA, preparar=_cierre, recorte=".cj-sel", alto=1300, marcas=[
         Marca(".cc-dia", 1),
         Marca(".cc-imprimir", 2, esquina="arriba-derecha"),
         Marca(".cc-cajon", 3),

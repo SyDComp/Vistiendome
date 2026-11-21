@@ -1793,7 +1793,7 @@ const DetailDrawer = ({
                                             Sistema de Etiquetas y Ahorro de Tinta
                                         </h4>
                                         <p className="dd-subtitulo">
-                                            Accede al módulo avanzado para generar y descargar esta etiqueta en formatos múltiples, configurar ahorro de tinta e incluir códigos de barra.
+                                            Accede al módulo avanzado para generar y descargar esta etiqueta en formatos múltiples y configurar ahorro de tinta.
                                         </p>
                                     </div>
                                 </div>
