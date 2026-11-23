@@ -41,6 +41,8 @@ La caja se abre a pantalla completa con el acceso directo **Caja Vistiendome** d
 
 La caja funciona también a media pantalla, con otra ventana al lado.
 
+**Solo caja.** El botón **Solo caja**, arriba, deja ese equipo con la caja nada más: para volver al panel pide la contraseña de administración. Sirve para que quien vende no entre al panel por error o por curiosidad. Queda puesto aunque se cierre la ventana o se apague el equipo, y no cambia nada en los otros equipos. Para quitarlo: **Salir del modo caja** y la contraseña.
+
 ### Sumar prendas
 
 Hay tres formas, y se pueden mezclar en una misma venta.

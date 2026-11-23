@@ -69,6 +69,7 @@
     cursor: pointer;
 }
 .cj-volver:hover { border-color: var(--color-brand); color: var(--color-brand); }
+.cj-salidas { display: flex; gap: 0.5rem; flex-shrink: 0; }
 
 /* Llegar del panel: la caja sube desde abajo. Volver: baja y deja ver el panel. */
 @keyframes cj-subir { from { transform: translateY(100%); } to { transform: translateY(0); } }

@@ -14,6 +14,8 @@ import LectorCaja from './prendas/LectorCaja';
 import LineasCaja from './prendas/LineasCaja';
 import AvisoAgregado from './prendas/AvisoAgregado';
 import { PANEL_POR_OMISION, RUTA_CAJA } from './rutaCaja';
+import { activar as activarSoloCaja, RUTA_SALIR, useSoloCaja } from './soloCaja';
+import { useNotification } from '../../../../context/NotificationContext';
 import SelectorPrendas from './selector/SelectorPrendas';
 import useAtajosCaja from './teclado/useAtajosCaja';
 import useModoCaja from './teclado/useModoCaja';
@@ -116,14 +118,28 @@ const Caja = () => {
         return () => window.removeEventListener('keydown', teclas);
     }, [v.hecha, nuevaVenta]);
 
-    // Volver: la caja baja y deja ver el panel de donde se vino.
+    // Volver: la caja baja y deja ver el panel de donde se vino. En modo solo
+    // caja, se pide la contraseña (soloCaja/).
     const volverA = location.state?.volverA || PANEL_POR_OMISION;
-    const volver = () => (sinMovimiento() ? navigate(volverA) : setSaliendo(true));
+    const { confirm, toast } = useNotification();
+    const soloCaja = useSoloCaja();
+    const volver = () => {
+        if (soloCaja) return navigate(RUTA_SALIR);
+        return sinMovimiento() ? navigate(volverA) : setSaliendo(true);
+    };
+    const dejarSoloCaja = async () => {
+        const si = await confirm('Este equipo quedará solo con la caja. Para volver al panel se pedirá la contraseña de administración.',
+            { si: 'Dejar solo caja', no: 'Cancelar' });
+        if (!si) return;
+        activarSoloCaja();
+        toast.success('Para volver al panel se pedirá la contraseña.', 'Modo solo caja');
+    };
     const clase = `cj-pantalla${location.state?.desdePanel && !saliendo ? ' cj-pantalla--entra' : ''}${saliendo ? ' cj-pantalla--sale' : ''}`;
 
     return (
         <div className={clase} onAnimationEnd={() => saliendo && navigate(volverA)}>
-            <CabeceraCaja modo={modo} nombreCampo={nombreCampo} onVolver={volver} />
+            <CabeceraCaja modo={modo} nombreCampo={nombreCampo} onVolver={volver}
+                soloCaja={soloCaja} onSoloCaja={dejarSoloCaja} />
 
             {v.hecha ? (
                 <VentaHecha pedido={v.hecha.pedido} vuelto={v.hecha.vuelto} imprimiendo={v.imprimiendo} onNueva={nuevaVenta}

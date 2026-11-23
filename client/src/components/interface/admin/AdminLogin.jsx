@@ -6,6 +6,8 @@ import { useForm } from '../../../hooks/useForm';
 import Input from '../../ui/Input';
 import Button from '../../ui/Button';
 import { destinoTrasLogin } from '../../../utils/volverTrasLogin';
+import { estaActivo as soloCajaActivo } from './caja/soloCaja';
+import { RUTA_CAJA } from './caja/rutaCaja';
 
 const validateAdminAuth = (values) => {
     const errors = {};
@@ -51,7 +53,8 @@ const AdminLogin = () => {
             localStorage.setItem('admin_token', data.access_token);
             
             setTimeout(() => {
-                navigate(destinoTrasLogin(search));
+                // En modo solo caja se entra a la caja, no al panel.
+                navigate(soloCajaActivo() ? RUTA_CAJA : destinoTrasLogin(search));
             }, 1000);
 
         } catch (err) {

@@ -24,6 +24,8 @@ const AdminLogin = React.lazy(() => import('./components/interface/admin/AdminLo
 const DashboardLayout = React.lazy(() => import('./components/interface/admin/DashboardLayout'))
 const PedidoDetalle = React.lazy(() => import('./components/interface/admin/crm/PedidoDetalle'))
 const Caja = React.lazy(() => import('./components/interface/admin/caja/Caja'))
+const SalirSoloCaja = React.lazy(() => import('./components/interface/admin/caja/soloCaja/SalirSoloCaja'))
+import { GuardiaSoloCaja } from './components/interface/admin/caja/soloCaja'
 
 const Nosotros = React.lazy(() => import('./components/interface/vistas/Nosotros'))
 const Contacto = React.lazy(() => import('./components/interface/vistas/Contacto'))
@@ -54,6 +56,7 @@ function App() {
           <CartProvider>
             <Suspense fallback={<SuspenseFallback/>}>
               {/* Rutas Principales */}
+              <GuardiaSoloCaja>
               <Routes location={state?.backgroundLocation || location}>
                 <Route path="/" element={<Home/>}>
                    <Route index element={<Inicio/>} />
@@ -83,7 +86,10 @@ function App() {
                 <Route path="/admin/print/pedido/:id" element={<PedidoDetalle/>} />
                 {/* La caja del local: pantalla completa, sin el menú del panel. */}
                 <Route path="/admin/caja" element={<RedDeModulo><Caja/></RedDeModulo>} />
+                {/* Modo solo caja: para volver al panel se pide la contraseña. */}
+                <Route path="/admin/caja/salir" element={<SalirSoloCaja/>} />
               </Routes>
+              </GuardiaSoloCaja>
 
               {/* Ruta para el Modal (Capa Superior) */}
               {state?.backgroundLocation && (
