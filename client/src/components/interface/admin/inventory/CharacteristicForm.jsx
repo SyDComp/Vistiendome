@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Plus, Trash2, Settings2, Save, ArrowLeft,
     Hash, Type, LayoutList, Layers, GripVertical, ChevronRight, Settings, Lock, Image
@@ -7,7 +7,7 @@ import Button from '../../../ui/Button';
 import Input from '../../../ui/Input';
 import { useNotification } from '../../../../context/NotificationContext';
 import Badge from '../../../ui/Badge';
-import { formatChar, normalizeDomain } from '../../../../utils/formatters';
+import { formatChar, formatOpt, normalizeDomain } from '../../../../utils/formatters';
 import MediaGallery from '../media/MediaGallery';
 import Imagen from '../../../ui/Imagen';
 
@@ -71,7 +71,22 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
         }
     }, [isColorType, isPatternType, localData.is_system]);
 
+    // La opción recién añadida se muestra y queda lista para escribir: antes
+    // quedaba al final de la lista, fuera de la vista y sin el cursor, y
+    // parecía que el botón no hacía nada (reportado 2026-11-23, en Talla).
+    const listaRef = useRef(null);
+    const [enfocarNueva, setEnfocarNueva] = useState(false);
+    useEffect(() => {
+        if (!enfocarNueva) return;
+        setEnfocarNueva(false);
+        const fila = listaRef.current?.lastElementChild;
+        if (!fila) return;
+        fila.scrollIntoView({ block: 'center' });
+        fila.querySelector('input:not([disabled]):not([type="color"])')?.focus({ preventScroll: true });
+    }, [enfocarNueva, localData.domain.length]);
+
     const addOption = () => {
+        setEnfocarNueva(true);
         const newRow = {};
         localData.value_structure.forEach(col => {
             if (isColorType && col.key === 'hex_code') {
@@ -203,7 +218,7 @@ const CharacteristicForm = ({ initialData, onSave, onCancel, standalone = false 
                         </h4>
                     </div>
 
-                    <div className="char-form-options-list">
+                    <div className="char-form-options-list" ref={listaRef}>
                         {localData.domain.map((row, rIdx) => (
                             <div key={rIdx} className={`char-form-row ${row.is_system ? 'system' : 'normal'}`}>
                                 <div className="char-form-row-icon">

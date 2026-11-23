@@ -168,5 +168,8 @@
     flex-direction: column;
     height: 100%;
     animation: fadeIn 0.3s ease;
-    overflow: hidden;
+    /* clip y no hidden: recorta igual, pero no se vuelve contenedor de scroll,
+       así una cabecera sticky de adentro (Características) se pega a la
+       página que sí se desplaza. */
+    overflow: clip;
 }

@@ -1,19 +1,30 @@
 
+/* El formulario crece con sus opciones y se desplaza con la página. Antes
+   medía 90vh fijo y la lista se quedaba con lo que sobraba, con scroll propio:
+   en un notebook (650 px de alto) la lista quedaba en 0 px y no se veía ni la
+   opción recién añadida (reportado 2026-11-23). La cabecera, con Guardar,
+   queda pegada arriba. */
 .char-form-container {
     max-width: 800px;
     margin: 0 auto;
     width: 100%;
     display: flex;
     flex-direction: column;
-    height: 90vh;
     animation: fadeIn 0.3s ease-out;
 }
 
 .char-form-header {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
     margin-bottom: 24px;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding: 12px 0;
+    background: var(--color-bg);
 }
 
 .char-form-header-left {
@@ -48,11 +59,9 @@
     border-radius: 24px;
     border: 1px solid var(--color-border);
     box-shadow: 0 10px 25px -5px rgba(0,0,0,0.04);
-    overflow: hidden;
+    overflow: clip;
     display: flex;
     flex-direction: column;
-    flex: 1;
-    min-height: 0;
 }
 
 .char-form-section-1 {
@@ -139,8 +148,6 @@
     padding: 32px 32px 10px 32px;
     display: flex;
     flex-direction: column;
-    flex: 1;
-    min-height: 0;
 }
 
 .char-form-section-2-header {
@@ -159,19 +166,10 @@
 }
 
 .char-form-options-list {
-    flex: 1;
-    overflow-y: auto;
-    padding-right: 12px;
-    margin-right: -12px;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-brand) var(--color-bg-subtle);
 }
-.char-form-options-list::-webkit-scrollbar { width: 6px; }
-.char-form-options-list::-webkit-scrollbar-track { background: var(--color-bg-subtle); border-radius: 10px; }
-.char-form-options-list::-webkit-scrollbar-thumb { background: var(--color-brand); border-radius: 10px; }
 
 .char-form-row {
     display: flex;

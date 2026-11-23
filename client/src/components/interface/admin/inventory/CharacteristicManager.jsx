@@ -9,6 +9,7 @@ import FilterBar from '../../../ui/admin/FilterBar';
 import { useNotification } from '../../../../context/NotificationContext';
 import { Hash, Tag, Palette, ChevronUp, ChevronDown } from 'lucide-react';
 import { refrescarCaracteristicas } from '../../../../hooks/useCaracteristicas';
+import { formatChar, formatOpt, normalizeDomain } from '../../../../utils/formatters';
 
 const API_BASE = '/api/v1/admin/catalog';
 
@@ -54,23 +55,19 @@ const CharacteristicManager = () => {
 
     useEffect(() => { fetchCharacteristics(); }, [fetchCharacteristics]);
 
-    const normalizeChar = (text) => text.trim().toUpperCase();
-    const normalizeOpt = (text) => {
-        if (!text) return "";
-        return text.trim().toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-    };
 
     const handleSave = async (formData) => {
         if (!formData.name) return toast.error('El nombre de la característica es obligatorio');
         
-        // Aplicar Regla de Negocio: CARACTERÍSTICA y Opción
+        // La misma regla que el formulario (utils/formatters): las opciones del
+        // sistema no se tocan. Aquí había una copia propia que también las
+        // normalizaba, "XS" salía "Xs" y el servidor respondía 403: Talla no
+        // se podía guardar (reportado 2026-11-23; el arreglo del 24 de agosto
+        // solo corrigió el formulario).
         const normalizedData = {
             ...formData,
-            name: normalizeChar(formData.name),
-            domain: (formData.domain || []).map(item => ({
-                ...item,
-                value: item.value ? normalizeOpt(item.value) : item.value
-            }))
+            name: formatChar(formData.name),
+            domain: normalizeDomain(formData.domain)
         };
 
         try {
@@ -157,7 +154,7 @@ const CharacteristicManager = () => {
         if (!detailData) return;
 
         // Normalizar el valor antes de guardar (Regla de Negocio)
-        const finalValue = updatedItem.value ? normalizeOpt(updatedItem.value) : updatedItem.value;
+        const finalValue = updatedItem.value ? formatOpt(updatedItem.value) : updatedItem.value;
         const normalizedItem = { ...updatedItem, value: finalValue };
 
         // Si estamos actualizando una opción (ej: color) dentro de una característica

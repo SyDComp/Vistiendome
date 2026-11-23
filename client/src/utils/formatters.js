@@ -4,11 +4,20 @@
 
 export const formatChar = (text) => (text || '').trim().toUpperCase();
 
+const SIGLAS = new Set(['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'CM', 'MM', 'KG', 'ML', 'UN', 'PAR']);
+
+/**
+ * Mayúscula Cada Palabra, con la misma regla que el servidor
+ * (catalog_admin.normalize_opt): las siglas de talla y medida, y toda palabra
+ * con números, van en mayúscula. Antes "5XL" quedaba "5xl" en el formulario
+ * hasta guardar (reportado 2026-11-23).
+ */
 export const formatOpt = (text) => {
     if (!text) return '';
-    // Capitaliza la primera letra de cada palabra y el resto a minúsculas
-    return text.trim().toLowerCase().split(' ').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
+    const limpio = text.trim();
+    if (SIGLAS.has(limpio.toUpperCase())) return limpio.toUpperCase();
+    return limpio.toLowerCase().split(/\s+/).map(p =>
+        /\d/.test(p) ? p.toUpperCase() : p.charAt(0).toUpperCase() + p.slice(1)
     ).join(' ');
 };
 
