@@ -6,7 +6,15 @@ Cómo usar el panel y la caja de la tienda en el día a día, tarea por tarea. L
 
 El panel se abre en **vistiendomechile.com/admin** con el correo y la contraseña de la tienda. Si la sesión vence, el panel la vuelve a pedir y, al entrar, regresa a la pantalla donde estabas.
 
-**Cambiar la contraseña:** en **Mi Perfil**, abajo. Se escribe la actual y la nueva dos veces (mínimo 8 caracteres). Si se olvidó, la restablece quien mantiene el sistema.
+**Cambiar la contraseña:** en **Mi Perfil**, abajo.
+
+![Cambiar la contraseña en Mi Perfil](capturas/01-02-clave.png)
+
+1. **La contraseña actual.** Sin ella no se puede cambiar: así nadie la cambia con una sesión que quedó abierta.
+2. **La nueva, dos veces.** Mínimo 8 caracteres y distinta de la actual. Debajo dice lo que falta.
+3. **Cambiar contraseña.** Desde ahí se entra con la nueva.
+
+Si se olvidó, la restablece quien mantiene el sistema.
 
 ![El panel: menú, caja, estados de un pedido y salida](capturas/01-panel.png)
 
@@ -31,7 +39,7 @@ La caja se abre a pantalla completa con el acceso directo **Caja Vistiendome** d
 
 1. **El modo.** En **Atajos**, cada letra hace algo (B busca, C cobra…). En **Escribiendo**, las letras se escriben en el campo. **Esc** cambia de uno a otro. Antes de teclear, mira aquí en qué modo estás.
 2. **Las teclas** del modo Atajos, siempre a la vista.
-3. **Volver al panel.**
+3. **Solo caja** y **Volver al panel.** *Solo caja* deja el equipo solo con la caja (más abajo).
 4. **El buscador.** Aquí se escribe lo que se busca. La pistola no necesita este campo: suma la prenda esté donde esté.
 5. **Tarjetas** (Espacio): elegir la prenda mirando las fotos.
 6. **El total** de la venta.
@@ -42,6 +50,12 @@ La caja se abre a pantalla completa con el acceso directo **Caja Vistiendome** d
 La caja funciona también a media pantalla, con otra ventana al lado.
 
 **Solo caja.** El botón **Solo caja**, arriba, deja ese equipo con la caja nada más: para volver al panel pide la contraseña de administración. Sirve para que quien vende no entre al panel por error o por curiosidad. Queda puesto aunque se cierre la ventana o se apague el equipo, y no cambia nada en los otros equipos. Para quitarlo: **Salir del modo caja** y la contraseña.
+
+![La caja en modo solo caja pide la contraseña para volver al panel](capturas/02-11-solo-caja.png)
+
+1. **La contraseña** de administración.
+2. **Volver a la caja,** sin salir del modo.
+3. **Salir del modo caja.** Con la contraseña correcta, el equipo vuelve a mostrar el panel completo.
 
 ### Sumar prendas
 
@@ -419,6 +433,16 @@ Todo está en el menú **Catalogo**. Un **producto** es el modelo (Vestido Noemi
 4. **Visual:** si cambia cómo se ve la prenda. Las visuales separan una tarjeta de otra en el explorador del sitio. Talla, color y estampado son del sistema y no se borran.
 5. **Orden de corte:** si sale impresa en la hoja del taller.
 6. **Nueva característica.**
+
+**Editar una característica** (el lápiz de su fila):
+
+![Editar Talla y añadir una opción](capturas/05-16-opciones.png)
+
+1. **Guardar en biblioteca.** Queda arriba siempre, aunque la lista sea larga.
+2. **La opción nueva** aparece al final, con el cursor listo para escribir. Las tallas se escriben como sea ("5xl") y quedan en mayúscula ("5XL").
+3. **Añadir nueva opción.** Con **Enter** se añade otra enseguida.
+
+Las opciones con candado son del sistema: no se cambian ni se borran. Una opción que ya usa alguna variante tampoco se puede quitar.
 
 ### La bodega
 

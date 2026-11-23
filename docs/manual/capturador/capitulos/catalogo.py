@@ -40,6 +40,15 @@ def _generador(p, paso):
     p.wait_for_timeout(600)
 
 
+def _editar_talla(p):
+    """Talla abierta para editar, con una opción recién añadida (no se guarda)."""
+    p.locator('tbody tr:has-text("TALLA") button').last.click()
+    p.wait_for_selector(".char-form-container")
+    p.wait_for_timeout(500)
+    p.locator(".char-form-btn-add").click()
+    p.wait_for_timeout(500)
+
+
 def _bodega_noemi(p):
     p.locator("input[placeholder^='Buscar por SKU']").fill("noemi")
     p.wait_for_timeout(500)
@@ -163,6 +172,12 @@ ESCENAS = [
         Marca("tbody tr >> nth=1 >> td >> nth=4", 4),
         Marca("tbody tr >> nth=1 >> td >> nth=5", 5),
         Marca('button:has-text("Nueva Característica")', 6, esquina="arriba-derecha"),
+    ]),
+    Escena("05-16-opciones", f"{INV}/characteristics", preparar=_editar_talla, alto=1900,
+           recorte=(".char-form-header", ".char-form-btn-add"), marcas=[
+        Marca(".char-form-header-right", 1, esquina="arriba-derecha"),
+        Marca(".char-form-row >> nth=-1", 2),
+        Marca(".char-form-btn-add", 3),
     ]),
     Escena("05-09-bodega", f"{INV}/bodega", preparar=_bodega_noemi,
            recorte=("input[placeholder^='Buscar por SKU']", "tbody tr >> nth=4"), marcas=[

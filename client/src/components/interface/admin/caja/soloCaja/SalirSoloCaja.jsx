@@ -7,6 +7,8 @@ import { RUTA_CAJA } from '../rutaCaja';
 import { desactivar } from './soloCaja';
 import useSoloCaja from './useSoloCaja';
 import { verificarClave } from './verificarClave';
+// Los botones y campos del panel (sp-boton, sp-select), como en la caja.
+import '../../crm/pedido/pedido.css';
 import './soloCaja.css';
 
 /**

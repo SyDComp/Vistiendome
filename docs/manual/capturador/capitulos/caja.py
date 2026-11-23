@@ -4,6 +4,7 @@ estado con el teclado, igual que se usa en la tienda.
 """
 from ..escena import Escena
 from ..marcas import Marca
+from ..navegador import SITIO
 
 CAJA = "/admin/caja"
 PAUSA = 900         # lo que tarda la caja en traer lo que se pidió
@@ -70,11 +71,20 @@ def _cierre(p):
     p.wait_for_timeout(PAUSA)
 
 
+def _solo_caja(p):
+    """Con el modo puesto, ir al panel lleva a pedir la contraseña. Va al final:
+    la marca queda en el navegador de las capturas."""
+    p.evaluate("localStorage.setItem('vistiendome_solo_caja', '1')")
+    p.goto(f"{SITIO}/admin/dashboard", wait_until="networkidle")
+    p.wait_for_selector(".sc-tarjeta")
+    p.wait_for_timeout(400)
+
+
 ESCENAS = [
     Escena("02-01-caja", CAJA, recorte=(".cj-cabecera", ".cj-cobro"), marcas=[
         Marca(".cj-modo", 1),
         Marca(".cj-ayuda", 2, esquina="abajo-izquierda"),
-        Marca(".cj-volver", 3),
+        Marca(".cj-salidas", 3),
         Marca(".cj-lector-campo", 4),
         Marca(".cj-lector .cj-tarjetas", 5),
         Marca(".cj-total", 6),
@@ -128,5 +138,10 @@ ESCENAS = [
         Marca(".cc-cajon", 3),
         Marca(".cc-bloque >> nth=0", 4, esquina="arriba-derecha"),
         Marca(".cc-bloque:has(.cc-ventas) >> nth=0", 5),
+    ]),
+    Escena("02-11-solo-caja", CAJA, preparar=_solo_caja, recorte=".sc-tarjeta", marcas=[
+        Marca(".sc-tarjeta input", 1),
+        Marca('.sc-tarjeta button:has-text("Volver a la caja")', 2, esquina="abajo-izquierda"),
+        Marca('.sc-tarjeta button[type="submit"]', 3, esquina="abajo-derecha"),
     ]),
 ]
