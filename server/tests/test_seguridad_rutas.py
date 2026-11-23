@@ -58,6 +58,7 @@ PUBLICAS = {
 SOLO_SESION = {
     ("GET", "/api/v1/auth/me"),
     ("PUT", "/api/v1/auth/me"),
+    ("PUT", "/api/v1/auth/me/clave"),
 }
 
 

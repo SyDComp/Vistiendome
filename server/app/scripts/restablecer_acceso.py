@@ -16,11 +16,11 @@ from typing import List, Optional
 
 from sqlmodel import Session, select
 
-from app.core import security
+from app.core import clave, security
 from app.database import engine
 from app.models.iam import CuentaAcceso
 
-LARGO_MINIMO = 6
+LARGO_MINIMO = clave.LARGO_MINIMO
 
 
 def _mostrar(cuentas: List[CuentaAcceso]) -> None:

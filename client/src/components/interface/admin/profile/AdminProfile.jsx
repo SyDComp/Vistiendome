@@ -3,6 +3,7 @@ import { User, Mail, AlertCircle } from 'lucide-react';
 import Button from '../../../ui/Button';
 import Input from '../../../ui/Input';
 import AdminFormLayout, { AdminFormSubmit, AdminFormSection } from '../../../ui/admin/AdminFormLayout';
+import CambiarClave from './CambiarClave';
 
 const AdminProfile = () => {
     const [profile, setProfile] = useState({
@@ -160,6 +161,8 @@ const AdminProfile = () => {
                     </AdminFormSubmit>
                 </form>
             </AdminFormLayout>
+
+            <CambiarClave />
         </div>
     );
 };

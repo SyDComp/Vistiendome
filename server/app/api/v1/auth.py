@@ -8,6 +8,7 @@ import pyotp
 from ...database import get_session
 from ...models.iam import CuentaAcceso, Persona, EstadoCuenta, Permiso, UsuarioPermisosDirectos
 from ...core import security
+from ...core import clave
 from ..deps import get_current_user
 
 router = APIRouter()
@@ -186,3 +187,20 @@ def update_current_user(data: ProfileUpdateSchema, db: Session = Depends(get_ses
     db.commit()
     
     return {"msg": "Perfil actualizado correctamente."}
+
+
+class CambioClaveSchema(BaseModel):
+    actual: str
+    nueva: str
+
+
+@router.put("/me/clave")
+def cambiar_mi_clave(data: CambioClaveSchema, db: Session = Depends(get_session), current_admin: CuentaAcceso = Depends(get_current_user)):
+    """La cuenta que entró cambia su propia contraseña, diciendo la actual (core/clave.py)."""
+    try:
+        clave.cambiar(current_admin, data.actual, data.nueva)
+    except clave.ClaveRechazada as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    db.add(current_admin)
+    db.commit()
+    return {"msg": "Contraseña cambiada."}

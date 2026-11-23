@@ -6,6 +6,8 @@ Cómo usar el panel y la caja de la tienda en el día a día, tarea por tarea. L
 
 El panel se abre en **vistiendomechile.com/admin** con el correo y la contraseña de la tienda. Si la sesión vence, el panel la vuelve a pedir y, al entrar, regresa a la pantalla donde estabas.
 
+**Cambiar la contraseña:** en **Mi Perfil**, abajo. Se escribe la actual y la nueva dos veces (mínimo 8 caracteres). Si se olvidó, la restablece quien mantiene el sistema.
+
 ![El panel: menú, caja, estados de un pedido y salida](capturas/01-panel.png)
 
 1. **El menú.** Todo el panel está aquí:
