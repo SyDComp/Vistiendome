@@ -15,6 +15,7 @@ Borra:
     referencia, quedan: son las existencias, que la tienda regula;
   · las personas que no tienen cuenta de acceso (las clientas), con sus datos;
   · las estadísticas del sitio;
+  · los arqueos de la caja (fondo y cierre del cajón de cada día);
 y reinicia la numeración de pedidos, órdenes de corte y piezas únicas.
 
 No toca: el catálogo, las fotos, el sitio (portada, ayuda, ajustes), las
@@ -59,6 +60,8 @@ BORRAR = [
     ("remuneraciones de clientas", "historial_remuneraciones", f"persona_id IN (SELECT id FROM personas WHERE {CLIENTAS})"),
     ("clientas (personas sin cuenta de acceso)", "personas", CLIENTAS),
     ("eventos de estadísticas del sitio", "analytics_event", None),
+    # Agregado 2026-11-23: la tabla nació el 20 de noviembre, después de la purga.
+    ("arqueos de caja", "arqueos_caja", None),
 ]
 
 REINICIAR = ["cotizaciones_numero_seq", "ordenes_corte_numero_seq", "piezas_unicas_numero_seq",
