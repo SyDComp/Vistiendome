@@ -7,6 +7,7 @@ import Accordion from '../../../ui/Accordion';
 import LibraryPicker from './LibraryPicker';
 import MediaGallery from '../media/MediaGallery';
 import Imagen from '../../../ui/Imagen';
+import PrecioInput from '../../../ui/PrecioInput';
 
 // Calcula qué filas (índices) coinciden con los filtros rápidos activos.
 // Semántica: AND entre atributos con filtro, OR entre los valores de un mismo atributo.
@@ -41,6 +42,7 @@ const VariantPicker = ({
     const [selection, setSelection] = useState(new Set()); // Índices seleccionados en la pre-visualización
 
     const [step, setStep] = useState(1);
+    const [precioLote, setPrecioLote] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [showSpecLibrary, setShowSpecLibrary] = useState(false);
     const [showGlobalGallery, setShowGlobalGallery] = useState(false);
@@ -472,10 +474,11 @@ const VariantPicker = ({
                         <div className="variant-picker-bulk-actions">
                             <div className="variant-picker-bulk-price-wrap">
                                 <Tag size={16} color="rgba(255,255,255,0.4)" />
-                                <input
-                                    type="number"
+                                <PrecioInput
                                     placeholder="Precio lote"
-                                    onBlur={(e) => { if(e.target.value) applyBulk('price', parseFloat(e.target.value)); }}
+                                    value={precioLote}
+                                    onChange={setPrecioLote}
+                                    onBlur={(monto) => { if (monto !== '') applyBulk('price', monto); }}
                                     className="variant-picker-bulk-price-input"
                                 />
                             </div>
@@ -545,13 +548,12 @@ const VariantPicker = ({
                                         </div>
                                     </td>
                                     <td className="variant-picker-td">
-                                        <input
-                                            type="number"
+                                        <PrecioInput
                                             value={row.price}
                                             placeholder="Monto"
-                                            onChange={(e) => {
+                                            onChange={(monto) => {
                                                 const next = [...generatedPreview];
-                                                next[idx].price = e.target.value === '' ? '' : parseFloat(e.target.value);
+                                                next[idx].price = monto;
                                                 setGeneratedPreview(next);
                                             }}
                                             className="variant-picker-price-input"

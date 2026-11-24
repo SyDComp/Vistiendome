@@ -5,6 +5,7 @@ import Button from '../Button';
 import MediaGallery from '../../interface/admin/media/MediaGallery';
 import LibraryPicker from '../../interface/admin/inventory/LibraryPicker';
 import Input from '../Input';
+import PrecioInput from '../PrecioInput';
 import Imagen from '../Imagen';
 import { useScrollLock } from '../../../hooks/useScrollLock';
 import { useSettings } from '../../../context/SettingsContext';
@@ -648,10 +649,10 @@ const DetailDrawer = ({
                 inputs: [
                     {
                         label: 'Precio de Venta ($)',
-                        type: 'number',
+                        type: 'pesos',
                         name: 'price',
                         value: editData.price,
-                        onChange: (e) => setEditData(prev => ({...prev, price: parseFloat(e.target.value)}))
+                        onChange: (monto) => setEditData(prev => ({ ...prev, price: monto }))
                     },
                     {
                         label: 'Oferta de esta versión',
@@ -669,10 +670,14 @@ const DetailDrawer = ({
                     ...(editData.sale_type ? [
                         {
                             label: editData.sale_type === 'percent' ? 'Descuento (%)' : editData.sale_type === 'amount' ? 'Monto a descontar ($)' : 'Precio final ($)',
-                            type: 'number',
+                            type: editData.sale_type === 'percent' ? 'number' : 'pesos',
                             name: 'sale_value',
                             value: editData.sale_value ?? '',
-                            onChange: (e) => setEditData(prev => ({ ...prev, sale_value: e.target.value === '' ? null : parseFloat(e.target.value) }))
+                            // 'pesos' entrega el monto ya leído; 'number' (el %) entrega el evento.
+                            onChange: (v) => {
+                                const crudo = typeof v === 'object' && v !== null ? v.target.value : v;
+                                setEditData(prev => ({ ...prev, sale_value: crudo === '' ? null : Number(crudo) }));
+                            }
                         },
                         {
                             label: 'Desde (opcional)',
@@ -1673,6 +1678,18 @@ const DetailDrawer = ({
                                                             value={input.value}
                                                             onChange={input.onChange}
                                                             className="detail-drawer-range-input"
+                                                        />
+                                                    </div>
+                                                ) : input.type === 'pesos' ? (
+                                                    <div className="premium-input-group">
+                                                        <label className="premium-label" htmlFor={input.name}>{input.label}</label>
+                                                        <PrecioInput
+                                                            id={input.name}
+                                                            name={input.name}
+                                                            value={input.value}
+                                                            onChange={input.onChange}
+                                                            disabled={input.disabled}
+                                                            className="premium-input"
                                                         />
                                                     </div>
                                                 ) : (

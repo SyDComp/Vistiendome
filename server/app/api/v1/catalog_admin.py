@@ -14,6 +14,7 @@ from ...core import caracteristicas
 from ...core.direccion_producto import direccion_de
 from ...core.codigos_variante import recodificar
 from ...core import codigos_barras
+from ...core import pesos
 from ...core.movimientos import tienen_historia
 from ...models.crm import CotizacionItem
 from ...models.catalog import (
@@ -99,6 +100,8 @@ class SKUCreate(BaseModel):
     def _con_precio(self):
         if self.price is None or self.price <= 0:
             raise ValueError(f"La variante {self.sku} no tiene precio: toda variante del catálogo necesita un monto mayor que cero.")
+        pesos.revisar_precio(self.price, f"El precio de la variante {self.sku}")
+        pesos.revisar_oferta(self.sale_type, self.sale_value)
         return self
 
 class ImageCreate(BaseModel):
@@ -121,6 +124,11 @@ class ProductCreate(BaseModel):
     sale_value: Optional[float] = None
     sale_start: Optional[datetime] = None
     sale_end: Optional[datetime] = None
+
+    @model_validator(mode="after")
+    def _oferta_en_pesos(self):
+        pesos.revisar_oferta(self.sale_type, self.sale_value)
+        return self
 
 class VariantGenRequest(BaseModel):
     product_name: str
@@ -591,17 +599,16 @@ def get_sku(sku_id: int, db: Session = Depends(get_session)):
 
 class SKUUpdate(BaseModel):
     price: Optional[float] = None
-
-    @field_validator("price")
-    @classmethod
-    def _monto(cls, v):
-        if v is not None and v <= 0:
-            raise ValueError("El precio tiene que ser un monto mayor que cero.")
-        return v
-    sale_type: Optional[str] = None      # 'percent' | 'fixed' | None (sin oferta)
+    sale_type: Optional[str] = None      # 'percent' | 'fixed' | 'amount' | None (sin oferta)
     sale_value: Optional[float] = None
     sale_start: Optional[datetime] = None
     sale_end: Optional[datetime] = None
+
+    @model_validator(mode="after")
+    def _montos_en_pesos(self):
+        pesos.revisar_precio(self.price)
+        pesos.revisar_oferta(self.sale_type, self.sale_value)
+        return self
 
 
 @router.put("/skus/{sku_id}")

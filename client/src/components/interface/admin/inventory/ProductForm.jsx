@@ -4,6 +4,7 @@ import { conStockEditado, paraGuardar, trasGuardar } from '../../../../utils/sto
 import { caracteristicasDe } from '../../../../utils/caracteristicasDeVariantes';
 import { useForm } from '../../../../hooks/useForm';
 import Input from '../../../ui/Input';
+import PrecioInput from '../../../ui/PrecioInput';
 import Button from '../../../ui/Button';
 import SmartCanvas from '../../../ui/SmartCanvas';
 import MediaGallery from '../media/MediaGallery';
@@ -329,7 +330,7 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
             // Normalizar oferta: si no hay tipo seleccionado, se limpia toda la oferta
             sale_type: formValues.sale_type || null,
             sale_value: (formValues.sale_type && formValues.sale_value !== '' && formValues.sale_value != null)
-                ? parseFloat(formValues.sale_value)
+                ? Number(formValues.sale_value)
                 : null,
             sale_start: formValues.sale_type ? (formValues.sale_start || null) : null,
             sale_end: formValues.sale_type ? (formValues.sale_end || null) : null
@@ -645,17 +646,27 @@ const ProductForm = ({ initialData, onSuccess, onRefresh, autoOpenVariants = fal
                                                     : values.sale_type === 'amount' ? 'Monto a descontar ($)'
                                                     : 'Precio final ($)'}
                                             </label>
-                                            <input
-                                                type="number"
-                                                name="sale_value"
-                                                min="0"
-                                                max={values.sale_type === 'percent' ? '99' : undefined}
-                                                step={values.sale_type === 'percent' ? '1' : '100'}
-                                                value={values.sale_value}
-                                                onChange={handleChange}
-                                                placeholder={values.sale_type === 'percent' ? 'Ej: 20' : values.sale_type === 'amount' ? 'Ej: 5000' : 'Ej: 9990'}
-                                                className="product-form-select"
-                                            />
+                                            {values.sale_type === 'percent' ? (
+                                                <input
+                                                    type="number"
+                                                    name="sale_value"
+                                                    min="0"
+                                                    max="99"
+                                                    step="1"
+                                                    value={values.sale_value}
+                                                    onChange={handleChange}
+                                                    placeholder="Ej: 20"
+                                                    className="product-form-select"
+                                                />
+                                            ) : (
+                                                <PrecioInput
+                                                    name="sale_value"
+                                                    value={values.sale_value}
+                                                    onChange={(monto) => setValues(prev => ({ ...prev, sale_value: monto }))}
+                                                    placeholder={values.sale_type === 'amount' ? 'Ej: 5.000' : 'Ej: 9.990'}
+                                                    className="product-form-select"
+                                                />
+                                            )}
                                         </div>
                                         <div>
                                             <label className="product-form-label">Desde (opcional)</label>

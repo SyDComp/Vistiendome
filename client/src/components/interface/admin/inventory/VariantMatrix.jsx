@@ -1,6 +1,7 @@
 import React from 'react';
 import { Trash2, AlertCircle, Image as ImageIcon, Plus, Tag, Box } from 'lucide-react';
 import Imagen from '../../../ui/Imagen';
+import PrecioInput from '../../../ui/PrecioInput';
 
 /**
  * VariantList — Visualización de Combinaciones en formato de tarjetas.
@@ -80,10 +81,9 @@ const VariantMatrix = ({ variants, onUpdate, onDelete, productImages = [], baseP
                                         Precio ($)
                                     </label>
                                     <div className="adm-relativo">
-                                        <input 
-                                            type="number" 
-                                            value={v.price} 
-                                            onChange={(e) => handleChange(idx, 'price', parseFloat(e.target.value))}
+                                        <PrecioInput
+                                            value={v.price}
+                                            onChange={(monto) => handleChange(idx, 'price', monto)}
                                             className="vmatrix-input-price"
                                         />
                                         {isPriceSuggested && (

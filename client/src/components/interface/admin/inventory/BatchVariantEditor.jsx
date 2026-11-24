@@ -7,6 +7,7 @@ import Button from '../../../ui/Button';
 import Accordion from '../../../ui/Accordion';
 import MediaGallery from '../media/MediaGallery';
 import Imagen from '../../../ui/Imagen';
+import PrecioInput from '../../../ui/PrecioInput';
 import { useNotification } from '../../../../context/NotificationContext';
 import { mensajeDeError } from '../../../../utils/errorServidor';
 
@@ -333,24 +334,23 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
                             <div className="batch-editor-price-input-wrapper">
                                 <div className="batch-editor-price-input-inner">
                                     <Tag size={14} color="rgba(255,255,255,0.4)" />
-                                    <input 
-                                        type="number" 
+                                    <PrecioInput
                                         placeholder="Precio lote..."
                                         value={bulkPriceInput}
-                                        onChange={(e) => setBulkPriceInput(e.target.value)}
+                                        onChange={setBulkPriceInput}
                                         onKeyDown={(e) => {
-                                            if (e.key === 'Enter' && bulkPriceInput) {
-                                                applyBulkPrice(parseFloat(bulkPriceInput));
+                                            if (e.key === 'Enter' && bulkPriceInput !== '') {
+                                                applyBulkPrice(bulkPriceInput);
                                                 setBulkPriceInput('');
                                             }
                                         }}
                                         className="batch-editor-price-input"
                                     />
                                 </div>
-                                {bulkPriceInput && (
+                                {bulkPriceInput !== '' && (
                                     <button 
                                         onClick={() => {
-                                            applyBulkPrice(parseFloat(bulkPriceInput));
+                                            applyBulkPrice(bulkPriceInput);
                                             setBulkPriceInput('');
                                         }}
                                         className="batch-editor-btn-apply"
@@ -478,11 +478,9 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
                                                 </div>
                                             </td>
                                             <td className="batch-editor-td">
-                                                <input 
-                                                    type="number" 
+                                                <PrecioInput
                                                     value={v.price}
-                                                    onChange={(e) => {
-                                                        const val = parseFloat(e.target.value);
+                                                    onChange={(val) => {
                                                         setVariants(prev => prev.map(item => item.id === v.id ? { ...item, price: val } : item));
                                                     }}
                                                     className="batch-editor-price-input-table"
