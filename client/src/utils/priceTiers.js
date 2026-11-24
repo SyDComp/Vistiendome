@@ -5,9 +5,12 @@
  * lleva N unidades del mismo producto y todas las tallas caen dentro del rango
  * del tramo, se aplica su descuento. Nadie declara nada y nadie puede mentir.
  *
- * Configuración global en ajustes (clave `price_tiers`). Nada acá está
- * hardcodeado: la característica, el rango, el mínimo y el descuento son datos.
+ * Configuración en ajustes (clave `price_tiers`). Nada acá está hardcodeado:
+ * la característica, el rango, el mínimo, el descuento y los productos a los
+ * que aplica (`productos`, vacío = todo el catálogo) son datos.
  */
+
+import { aplicaAlProducto } from './alcanceProductos';
 
 const norm = (v) => String(v ?? '').toLowerCase().trim();
 
@@ -37,6 +40,28 @@ export const valoresEnRango = (valoresOrdenados, desde, hasta) => {
     if (i === -1 || j === -1) return [];
     const [a, b] = i <= j ? [i, j] : [j, i];
     return valoresOrdenados.slice(a, b + 1);
+};
+
+/**
+ * ¿Este valor (una talla, un color) cae dentro del tramo? Devuelve la
+ * pregunta lista para hacerla muchas veces.
+ *
+ * Sin desde ni hasta, el tramo no limita esa característica: entra cualquier
+ * valor, esté o no en la lista de filtros. Antes se buscaba el valor en esa
+ * lista también en ese caso, y un color que no figuraba ahí se quedaba sin
+ * descuento ni aviso. Lo usan el carrito y la ficha del producto, para que
+ * nunca digan cosas distintas.
+ */
+export const cabeEnTramo = (tramo, filtersMetadata) => {
+    if (!String(tramo?.from ?? '').trim() && !String(tramo?.to ?? '').trim()) return () => true;
+    // filters-metadata entrega cada característica como un array de valores
+    // ya ordenado. No usar `?.values`: en un array eso devuelve
+    // Array.prototype.values (una función), no los valores.
+    const car = tramo.characteristic;
+    const crudo = filtersMetadata?.attributes?.[car] ?? filtersMetadata?.[car];
+    const orden = Array.isArray(crudo) ? crudo : (crudo?.values ?? []);
+    const permitidos = new Set(valoresEnRango(orden, tramo.from, tramo.to).map(norm));
+    return (valor) => permitidos.has(norm(valor));
 };
 
 /**
@@ -74,17 +99,12 @@ export const evaluarTramos = (cart, config, filtersMetadata) => {
 
     for (const tramo of tramos) {
         const car = tramo.characteristic;
-        // filters-metadata entrega cada característica como un array de valores
-        // ya ordenado. No usar `?.values`: en un array eso devuelve
-        // Array.prototype.values (una función), no los valores.
-        const crudo = filtersMetadata?.attributes?.[car] ?? filtersMetadata?.[car];
-        const orden = Array.isArray(crudo) ? crudo : (crudo?.values ?? []);
-        const permitidos = new Set(valoresEnRango(orden, tramo.from, tramo.to).map(norm));
-        if (!permitidos.size) continue;
+        const cabe = cabeEnTramo(tramo, filtersMetadata);
 
         // Agrupar el carrito por producto + todo menos la característica del tramo
         const grupos = new Map();
         for (const item of cart) {
+            if (!aplicaAlProducto(tramo.productos, item.productId)) continue;
             const valor = Object.entries(item.selections || {})
                 .find(([k]) => norm(k) === norm(car))?.[1];
             if (valor == null) continue;
@@ -97,7 +117,7 @@ export const evaluarTramos = (cart, config, filtersMetadata) => {
             // Todas las tallas del grupo deben caer dentro del rango: si una se
             // sale, el grupo entero no califica para ESTE tramo (puede calificar
             // para otro más amplio).
-            if (!miembros.every(m => permitidos.has(norm(m.valor)))) continue;
+            if (!miembros.every(m => cabe(m.valor))) continue;
 
             const unidades = miembros.reduce((a, m) => a + (m.item.quantity || 0), 0);
             if (unidades < (Number(tramo.min_qty) || 0)) continue;

@@ -13,7 +13,8 @@ import useProductDetail from '../hooks/useProductDetail';
 import { formatSku } from '../utils/skuUtils';
 import { handleShare } from '../utils/shareUtils';
 import { buildWhatsAppMessage, formatCurrency } from '../../../utils/cartUtils';
-import { valoresEnRango, aplicarDescuento } from '../../../utils/priceTiers';
+import { cabeEnTramo, aplicarDescuento } from '../../../utils/priceTiers';
+import { aplicaAlProducto } from '../../../utils/alcanceProductos';
 import { enOferta } from '../../../utils/oferta';
 import VideoYoutube from '../../../components/ui/VideoYoutube';
 import { track } from '../../../lib/analytics';
@@ -83,21 +84,22 @@ const ProductDetailViewInterno = ({ producto: initialProduct, isModal = false })
         const tiers = settings?.price_tiers?.tiers || [];
         if (!tiers.length || !precioFinal) return [];
         return tiers
-            .filter(t => t?.active !== false && t.characteristic && t.from && t.to && t.min_qty)
+            // Desde/hasta en blanco = sin límite (cabeEnTramo), igual que en el
+            // carrito. Antes se exigían los dos y el tramo "mayorista" (todos
+            // los colores) descontaba sin avisar nunca.
+            .filter(t => t?.active !== false && t.characteristic && t.min_qty)
+            .filter(t => aplicaAlProducto(t.productos, producto?.id))
             .map(t => {
                 const valorActual = Object.entries(selections)
                     .find(([k]) => k.toLowerCase().trim() === t.characteristic.toLowerCase().trim())?.[1];
                 if (valorActual == null) return null;
-                const crudo = filtersMetadata?.attributes?.[t.characteristic] ?? filtersMetadata?.[t.characteristic];
-                const orden = Array.isArray(crudo) ? crudo : (crudo?.values ?? []);
-                const permitidos = new Set(valoresEnRango(orden, t.from, t.to).map(v => String(v).toLowerCase().trim()));
-                if (!permitidos.has(String(valorActual).toLowerCase().trim())) return null;
+                if (!cabeEnTramo(t, filtersMetadata)(valorActual)) return null;
                 const precioTramo = aplicarDescuento(precioFinal, t.discount_type, t.discount_value);
                 if (precioTramo >= precioFinal) return null;
                 return { nombre: t.name || 'Mayorista', minQty: t.min_qty, precioTramo };
             })
             .filter(Boolean);
-    }, [settings?.price_tiers, selections, filtersMetadata, precioFinal]);
+    }, [settings?.price_tiers, selections, filtersMetadata, precioFinal, producto?.id]);
 
     const onShare = async () => {
         const result = await handleShare(producto?.name);

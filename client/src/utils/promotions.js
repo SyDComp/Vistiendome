@@ -18,6 +18,8 @@
  * son datos que el taller define desde el panel.
  */
 
+import { aplicaAlProducto } from './alcanceProductos';
+
 /** ¿La promoción está vigente hoy? Sin fechas, siempre lo está. */
 export const enVigencia = (promo, ahora = new Date()) => {
     if (promo?.desde) {
@@ -35,11 +37,7 @@ export const enVigencia = (promo, ahora = new Date()) => {
 };
 
 /** Lista de productos vacía = aplica a todo el catálogo. */
-const enAlcance = (item, promo) => {
-    const ids = promo?.productos || [];
-    if (!ids.length) return true;
-    return ids.map(String).includes(String(item.productId));
-};
+const enAlcance = (item, promo) => aplicaAlProducto(promo?.productos, item.productId);
 
 const precioEfectivo = (item) => item.precioTramo ?? item.price ?? 0;
 

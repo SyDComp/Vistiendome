@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { valoresEnRango, evaluarTramos } from '../priceTiers';
+import { valoresEnRango, evaluarTramos, cabeEnTramo } from '../priceTiers';
 
 const TALLAS = ['12', '14', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'];
 const COLORES = ['Negro', 'Azul Marino', 'Verde Agua'];
@@ -49,6 +49,18 @@ describe('evaluarTramos', () => {
         expect(r.get('k1')?.precio).toBe(9000);
     });
 
+    it('sin desde ni hasta entra cualquier valor, aunque no esté en la lista de filtros', () => {
+        const colorNuevo = { ...linea(1, 'S', 6), selections: { COLOR: 'Fucsia', TALLA: 'S' } };
+        expect(evaluarTramos([colorNuevo], mayorista, metadata).get('k1')?.precio).toBe(9000);
+        expect(cabeEnTramo(mayorista.tiers[0], metadata)('Fucsia')).toBe(true);
+    });
+
+    it('con rango, solo entran los valores del rango', () => {
+        const cabe = cabeEnTramo({ characteristic: 'TALLA', from: '12', to: 'XS' }, metadata);
+        expect(cabe('14')).toBe(true);
+        expect(cabe('XL')).toBe(false);
+    });
+
     it('no aplica si no se llega al mínimo', () => {
         const r = evaluarTramos([linea(1, 'S', 5)], mayorista, metadata);
         expect(r.size).toBe(0);
@@ -66,5 +78,19 @@ describe('evaluarTramos', () => {
 
         const otroColor = { ...linea(2, 'M', 3), selections: { COLOR: 'Verde Agua', TALLA: 'M' } };
         expect(evaluarTramos([linea(1, 'S', 3), otroColor], iglesia, metadata).size).toBe(0);
+    });
+
+    // Cada tramo elige sus productos en Ajustes, como las promociones.
+    it('con productos elegidos solo descuenta esos productos', () => {
+        const soloElDos = { tiers: [{ ...mayorista.tiers[0], productos: ['2'] }] };
+        expect(evaluarTramos([linea(1, 'S', 6)], soloElDos, metadata).size).toBe(0);
+
+        const delDos = { ...linea(1, 'S', 6), productId: 2 };
+        expect(evaluarTramos([delDos], soloElDos, metadata).get('k1')?.precio).toBe(9000);
+    });
+
+    it('sin productos elegidos aplica a todo el catálogo, como los tramos de antes', () => {
+        const vacio = { tiers: [{ ...mayorista.tiers[0], productos: [] }] };
+        expect(evaluarTramos([linea(1, 'S', 6)], vacio, metadata).get('k1')?.precio).toBe(9000);
     });
 });

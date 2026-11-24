@@ -24,6 +24,7 @@ import { getFiltersMetadata, getCatalogo } from '../../../../lib/api/endpoints/p
 import { useSettings } from '../../../../context/SettingsContext';
 import { getShippingColor } from '../../../../utils/shippingColors';
 import { esTelefonoValido } from '../../../../utils/telefono';
+import SelectorProductos from './SelectorProductos';
 
 const SettingsManager = () => {
     const [settings, setSettings] = useState({
@@ -73,7 +74,7 @@ const SettingsManager = () => {
     });
     const [nosotros, setNosotros] = useState({ image_asset_id: null, image_url: '' });
     // Tramos de precio por cantidad (mayorista, iglesia, los que ella defina).
-    // Configuración global: aplica a todo el catálogo, no producto por producto.
+    // Cada tramo elige sus productos (vacío = todo el catálogo), como las promociones.
     const [priceTiers, setPriceTiers] = useState({ tiers: [] });
     // Cada característica -> sus valores en orden real. Un tramo puede ser por
     // Talla, Material, Idioma, lo que exista: no está fijo a una sola.
@@ -597,6 +598,7 @@ const SettingsManager = () => {
                         El descuento se aplica solo si la clienta lleva el mínimo de unidades <strong>del mismo producto y color</strong>,
                         y <strong>todas las tallas caen dentro del rango</strong>. Puede mezclar tallas: 5 de la 12 y 1 de la 3XL cuenta como 6.
                         Si un pedido califica para dos tramos, se cobra el más barato.
+                        Si no eliges productos, el tramo aplica a <strong>todo el catálogo</strong>.
                     </p>
 
                     {(priceTiers.tiers || []).map((t, i) => {
@@ -664,6 +666,11 @@ const SettingsManager = () => {
                                         className="adm-entrada" />
                                 </div>
                             </div>
+                            <SelectorProductos
+                                disponibles={productosDisponibles}
+                                elegidos={t.productos}
+                                onChange={(productos) => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, productos } : x) }))}
+                            />
                             <button type="button"
                                 onClick={() => setPriceTiers(p => ({ ...p, tiers: p.tiers.filter((_, k) => k !== i) }))}
                                 className="adm-quitar">
@@ -779,28 +786,11 @@ const SettingsManager = () => {
                                     </div>
                                 </div>
 
-                                <div className="input-group adm-separacion--arriba">
-                                    <label className="adm-rotulo">Productos ({(p.productos || []).length === 0 ? 'todo el catálogo' : `${p.productos.length} elegidos`})</label>
-                                    <div className="adm-etiquetas">
-                                        {productosDisponibles.map(prod => {
-                                            const elegido = (p.productos || []).map(String).includes(String(prod.id));
-                                            return (
-                                                <button key={prod.id} type="button"
-                                                    onClick={() => {
-                                                        const actuales = (p.productos || []).map(String);
-                                                        editar({
-                                                            productos: elegido
-                                                                ? actuales.filter(x => x !== String(prod.id))
-                                                                : [...actuales, String(prod.id)]
-                                                        });
-                                                    }}
-                                                    className={`adm-etiqueta-filtro ${elegido ? 'adm-estado-marcado' : 'adm-estado-neutro'}`}>
-                                                    {prod.name}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
+                                <SelectorProductos
+                                    disponibles={productosDisponibles}
+                                    elegidos={p.productos}
+                                    onChange={(productos) => editar({ productos })}
+                                />
 
                                 <label className="adm-elegible--arriba">
                                     <input type="checkbox" checked={p.combinable === true}
