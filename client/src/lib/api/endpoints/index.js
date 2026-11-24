@@ -13,3 +13,4 @@ export * from './pagos.api.js';
 export * from './venta.api.js';
 export * from './politicaCambios.api.js';
 export * from './cuenta.api.js';
+export * from './subirImagen.api.js';

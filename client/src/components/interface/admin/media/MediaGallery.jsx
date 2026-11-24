@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { subirImagen } from '../../../../lib/api/endpoints/subirImagen.api.js';
 import { Layers, Trash2 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import Button from '../../../ui/Button';
@@ -102,25 +103,21 @@ const MediaGallery = ({
         }
     }, [isOpen, itemsPool]);
 
+    // Siempre termina en "añadida" o en el motivo (subirImagen.api.js): antes un
+    // rechazo del servidor dejaba "Subiendo archivo..." para siempre.
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
+        e.target.value = '';            // para poder elegir el mismo archivo otra vez
         if (!file) return;
         setUploading(true);
         setStatus({ type: 'info', text: 'Subiendo archivo...' });
-        const formData = new FormData();
-        formData.append('file', file);
         try {
-            const res = await fetch(`/api/v1/media/upload`, { 
-                method: 'POST', 
-                body: formData 
-            });
-            if (res.ok) {
-                setStatus({ type: 'success', text: 'Imagen añadida' });
-                setTimeout(() => setStatus(null), 3000);
-                fetchImages();
-            }
+            await subirImagen(file);
+            setStatus({ type: 'success', text: 'Imagen añadida' });
+            setTimeout(() => setStatus(null), 3000);
+            fetchImages();
         } catch (err) {
-            setStatus({ type: 'error', text: 'Error de conexión' });
+            setStatus({ type: 'error', text: err.message });
         } finally {
             setUploading(false);
         }

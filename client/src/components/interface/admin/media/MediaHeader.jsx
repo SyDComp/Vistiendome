@@ -1,6 +1,7 @@
 import { 
     Image as ImageIcon, Sparkles, X, Check, MousePointer2, Search, Loader2, Upload, Trash2 
 } from 'lucide-react';
+import { ACEPTA } from '../../../../lib/api/endpoints/subirImagen.api.js';
 
 /**
  * MediaHeader Component (Presentational)
@@ -89,7 +90,7 @@ const MediaHeader = ({
                     </div>
                     
                     <label htmlFor="media-upload" className="media-gallery-upload-label">
-                        <input type="file" id="media-upload" className="media-gallery-upload-input" onChange={onFileUpload} accept="image/*" />
+                        <input type="file" id="media-upload" className="media-gallery-upload-input" onChange={onFileUpload} accept={ACEPTA} />
                         {uploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />} 
                         SUBIR
                     </label>

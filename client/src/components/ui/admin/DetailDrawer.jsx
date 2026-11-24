@@ -10,6 +10,8 @@ import { useScrollLock } from '../../../hooks/useScrollLock';
 import { useSettings } from '../../../context/SettingsContext';
 import { getShippingColor } from '../../../utils/shippingColors';
 import './DetailDrawer.css';
+import { useNotification } from '../../../context/NotificationContext';
+import { ACEPTA, subirImagen } from '../../../lib/api/endpoints/subirImagen.api.js';
 
 const API_BASE = '/api/v1/admin/catalog';
 
@@ -48,6 +50,7 @@ const DetailDrawer = ({
     const [currMetadata, setCurrMetadata] = useState(null);
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const { toast } = useNotification();
     const [showGlobalGallery, setShowGlobalGallery] = useState(false);
     const [showLibraryVarieties, setShowLibraryVarieties] = useState(false);
     const [showLibraryOptions, setShowLibraryOptions] = useState(false);
@@ -1204,24 +1207,16 @@ const DetailDrawer = ({
         const file = e.target.files[0];
         if (!file) return;
 
+        e.target.value = '';
         setUploading(true);
-        const formData = new FormData();
-        formData.append('file', file);
-
         try {
-            const res = await fetch(`/api/v1/media/upload`, {
-                method: 'POST',
-                body: formData
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                const newAssets = [...(editData.media_assets || []), data];
-                const newIds = [...(editData.media_ids || []), data.id];
-                setEditData({ ...editData, media_assets: newAssets, media_ids: newIds });
-            }
+            const data = await subirImagen(file);
+            const newAssets = [...(editData.media_assets || []), data];
+            const newIds = [...(editData.media_ids || []), data.id];
+            setEditData({ ...editData, media_assets: newAssets, media_ids: newIds });
         } catch (err) {
-            console.error("Error al subir imagen:", err);
+            // Antes un rechazo no decía nada (subirImagen.api.js).
+            toast.error(err.message, 'No se subió la imagen');
         } finally {
             setUploading(false);
         }
@@ -1746,7 +1741,7 @@ const DetailDrawer = ({
 
                                             {/* Botón para Carga Directa */}
                                             <label className="detail-drawer-upload-img-btn">
-                                                <input type="file" onChange={handleFileUpload} accept="image/*" className="dd-oculto" />
+                                                <input type="file" onChange={handleFileUpload} accept={ACEPTA} className="dd-oculto" />
                                                 {uploading ? <Sparkles size={20} className="animate-spin" /> : <Upload size={20} />}
                                                 <span className="detail-drawer-add-img-text">SUBIR</span>
                                             </label>
