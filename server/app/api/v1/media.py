@@ -15,6 +15,7 @@ from ...models.settings import SiteSetting
 from ...api.deps import RequirePermiso
 from ...models.iam import CuentaAcceso
 from ...core.imagenes import generar_derivadas, eliminar_derivadas, srcset_de
+from ...core.imagen_valida import motivo_invalida
 
 router = APIRouter()
 
@@ -68,6 +69,11 @@ async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_se
     extension = file.filename.split(".")[-1].lower()
     if extension not in ["jpg", "jpeg", "png", "webp", "gif"]:
         raise HTTPException(status_code=400, detail="Formato de imagen no permitido")
+
+    # 1b. Que sea de verdad una imagen, antes de escribir nada (core/imagen_valida.py).
+    motivo = motivo_invalida(file.file)
+    if motivo:
+        raise HTTPException(status_code=400, detail=motivo)
 
     # 2. Generar nombre único
     unique_filename = f"{uuid.uuid4()}.{extension}"
