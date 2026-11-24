@@ -10,6 +10,7 @@ import MediaHeader from './MediaHeader';
 import MediaCard from './MediaCard';
 import MediaLightbox from './MediaLightbox';
 import MediaDeleteWarningModal from './MediaDeleteWarningModal';
+import { ordenarGaleria } from '../../../../utils/ordenGaleria';
 
 /**
  * MediaGallery Premium v4: Orchestrator Component (State Container)
@@ -69,17 +70,7 @@ const MediaGallery = ({
     // Ordenamiento estable al abrir la galería o al recibir nuevos datos base
     useEffect(() => {
         if (images.length > 0) {
-            const currentSelected = new Set(selectedIds);
-            const sorted = [...images].sort((a, b) => {
-                const aSel = currentSelected.has(a.id);
-                const bSel = currentSelected.has(b.id);
-                if (aSel && !bSel) return -1;
-                if (!aSel && bSel) return 1;
-                const nameA = a.filename || a.url || '';
-                const nameB = b.filename || b.url || '';
-                return nameA.localeCompare(nameB);
-            });
-            setStableOrder(sorted);
+            setStableOrder(ordenarGaleria(images, new Set(selectedIds)));
         }
     }, [images, isOpen]);
 
