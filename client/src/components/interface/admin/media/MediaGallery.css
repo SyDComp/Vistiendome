@@ -519,6 +519,7 @@
 
 .media-gallery-lightbox-body {
     flex: 1;
+    min-height: 0;              /* que no crezca más que lo que queda bajo la cabecera */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -543,9 +544,13 @@
 
 
 
+/* La foto se ajusta al espacio que le queda (bajo la cabecera, dentro del
+   margen), no a la ventana: con 85vh, en una ventana baja la cabecera la
+   empujaba y el pie quedaba fuera de la pantalla (reportado 2026-11-24).
+   El ancho sigue topado en 85vw para no quedar debajo de las flechas. */
 .media-gallery-lightbox-img {
-    max-height: 85vh;
-    max-width: 85vw;
+    max-height: 100%;
+    max-width: min(100%, 85vw);
     object-fit: contain;
     border-radius: 20px;
     box-shadow: 0 50px 100px rgba(0, 0, 0, 0.5);
@@ -674,8 +679,8 @@
         padding: 8px !important;
     }
     .media-gallery-lightbox-img {
-        max-height: 75vh !important;
-        max-width: 95vw !important;
+        max-height: 100% !important;
+        max-width: 100% !important;
         border-radius: 12px !important;
     }
 }
