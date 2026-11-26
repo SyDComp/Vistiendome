@@ -19,9 +19,9 @@ Si se olvidó, la restablece quien mantiene el sistema.
 ![El panel: menú, caja, estados de un pedido y salida](capturas/01-panel.png)
 
 1. **El menú.** Todo el panel está aquí:
-   - **Producción:** la mesa de trabajo, para editar en bloque las variantes de un producto.
+   - **Producción:** la mesa de trabajo, para cambiar el precio de muchas variantes de un producto a la vez (capítulo 5).
    - **Catálogo:** productos, variantes, bodega, colecciones, categorías, características y códigos de barras.
-   - **Galería:** todas las fotos.
+   - **Galería:** todas las fotos (capítulo 5).
    - **Sitio Web:** la portada, las páginas de ayuda y los datos de contacto.
    - **Ventas y CRM:** la caja, el cierre de caja, las clientas, los pedidos, las órdenes de corte y las etiquetas de envío.
    - **Estadísticas**, **Ajustes del negocio** y **Mi Perfil**.
@@ -412,6 +412,37 @@ Todo está en el menú **Catalogo**. Un **producto** es el modelo (Vestido Noemi
 4. **Ver, editar o borrar** la variante.
 5. **Nueva variante.**
 
+### Producción: cambiar el precio de muchas variantes a la vez
+
+Para corregir o subir precios de variantes que ya existen se usa **Producción**, en el menú de la izquierda. Sirve para una variante o para todas las de un color o una talla de una vez.
+
+![Elegir el producto](capturas/05-17-produccion.png)
+
+1. **Escribe el nombre** del producto, o búscalo en la lista.
+2. **Tócalo** para abrir su mesa de trabajo.
+
+![Elegir las variantes y escribir el precio](capturas/05-18-elegir.png)
+
+1. **Todo** elige todas las variantes del producto; **Limpiar** suelta la selección.
+2. **Toca un color, una talla o un estampado** y quedan elegidas todas las variantes que lo tienen. Si tocas un color y una talla, quedan solo las que tienen los dos (aquí, todas las rojo italiano).
+3. **Cuántas quedaron elegidas.** Revísalo antes de seguir.
+4. **El precio nuevo**, escrito como siempre: «21.990».
+5. **Aplicar** pone ese precio en todas las elegidas.
+
+![Revisar y guardar](capturas/05-19-guardar.png)
+
+1. **Seleccionados** muestra solo las elegidas, para revisarlas. **Sin precio** muestra las que quedaron en $0.
+2. **El precio de cada variante.** Aquí se ve el precio aplicado, y también se puede escribir el de una sola variante en su fila, sin elegir nada arriba.
+3. **Guardar Cambios.** **Hasta aquí no se ha guardado nada:** Aplicar solo cambia la tabla. Si sales sin guardar, los precios quedan como estaban. Al guardar aparece el aviso verde **Éxito**.
+
+Para revisar que quedó bien, abre el producto en el sitio: el precio de la tarjeta («Desde $…») tiene que ser el que pusiste.
+
+### Cómo se escriben los precios
+
+En todo el panel los precios se escriben en pesos, como se escriben en Chile: «21.990» o «21990», da lo mismo. El punto de los miles lo pone el panel mientras escribes.
+
+Los pesos no tienen centavos, y el campo solo toma los números: **no escribas coma**. «52,99» se lee como 5.299, no como 52.990. Mira siempre el número que queda en el campo antes de aplicar o guardar.
+
 ### Categorías
 
 ![Las categorías](capturas/05-07-categorias.png)
@@ -510,6 +541,15 @@ Las opciones con candado son del sistema: no se cambian ni se borran. Una opció
 5. **El estilo:** blanco y negro o con el color de la variante, y con texto o solo las barras. Debajo se elige cuántas copias de cada una.
 6. **La vista previa** de la hoja.
 7. **Imprimir.**
+
+### La galería
+
+**Galería**, en el menú de la izquierda, guarda todas las fotos: las de los productos, las de la portada y las de las colecciones. Las más nuevas salen primero.
+
+- **Subir una foto:** botón **SUBIR**. Acepta JPG, PNG, WEBP y GIF. Si el archivo está dañado o no es una foto, no se sube y avisa por qué.
+- **Buscar** una foto por su nombre.
+- **Verla en grande:** un clic sobre la foto.
+- **Borrar varias:** **Activar Selección**, toca las fotos (o **Seleccionar Todo**) y **Eliminar**. Si alguna se está usando en un producto o en una página del sitio, antes de borrar muestra dónde se usa.
 
 ## 6. El sitio
 
@@ -625,10 +665,17 @@ Hay tres formas de bajar un precio: la **oferta** de un producto, con fecha de t
 El precio por cantidad se aplica si la clienta lleva el mínimo de unidades **del mismo producto y color**, y todas las tallas caen dentro del rango. Si califica para dos tramos, se cobra el más barato.
 
 1. **La característica** del rango; aquí, la talla.
-2. **Desde y hasta:** aquí, de la 12 a la 3XL.
+2. **Desde y hasta:** aquí, de la 12 a la 3XL. Si se dejan los dos en blanco, como en el tramo «mayorista» de abajo, vale para cualquier talla o color.
 3. **Mínimo de unidades.**
 4. **Tipo de descuento:** porcentaje, rebaja fija o precio fijo, con su valor al lado.
-5. **Agregar tramo.**
+5. **Productos:** toca los productos a los que se aplica el tramo; los elegidos quedan marcados. Si no eliges ninguno, vale para **todo el catálogo**.
+6. **Agregar tramo.**
+
+Todo se guarda con **Guardar cambios**, arriba de la página.
+
+![El aviso en la ficha del producto](capturas/06-13-aviso-cantidad.png)
+
+1. **Lo que ve la clienta** en la ficha de un producto con tramos: desde cuántas unidades y a qué precio queda cada una. Sale solo en los productos del tramo, y solo si la talla o el color elegidos caen en su rango.
 
 ![Promociones](capturas/06-11-promociones.png)
 
@@ -763,6 +810,15 @@ Si el pago era de un día anterior, el **Cierre de caja** de ese día lo sigue c
 ### Cambié algo del sitio y no se ve
 
 En la portada y en las páginas de atención al cliente, los cambios quedan en borrador hasta apretar **Guardar** arriba de la página. El **Guardar cambios** de un bloque o el **Guardar** del estudio solo lo dejan en el borrador (capítulo 6).
+
+### Un producto dice «Desde $12» (o un precio que no corresponde)
+
+La tarjeta del catálogo muestra el precio **más bajo** entre todas las variantes del producto. Basta una variante con el precio mal puesto para que la tarjeta diga «Desde» ese precio, aunque el producto y las demás variantes estén bien.
+
+1. Abre el producto en **Producción** (capítulo 5).
+2. En la tabla, busca las variantes con el precio raro: el precio está en la última columna.
+3. Elígelas, escribe el precio correcto en **Precio lote…**, **Aplicar** y **Guardar Cambios**.
+4. Revisa el producto en el sitio: el «Desde» ya muestra el precio correcto.
 
 ### Un producto sale "Sin stock" en la caja
 

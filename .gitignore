@@ -56,7 +56,7 @@ respaldo_*.json
 
 # --- Manual de uso: herramienta de capturas (local) ---
 docs/manual/.venv/
-docs/manual/.sesion.json
+docs/manual/.sesion*.json
 docs/manual/capturas/
 docs/manual/**/__pycache__/
 docs/manual/Manual_Vistiendome.pdf

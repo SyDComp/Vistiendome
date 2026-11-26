@@ -128,7 +128,13 @@ ESCENAS = [
         Marca(f"{CANTIDAD} >> .adm-tarjeta-interna >> nth=0 >> select >> nth=1", 2),
         Marca(f"{CANTIDAD} >> .adm-tarjeta-interna >> nth=0 >> input[type=number] >> nth=0", 3),
         Marca(f"{CANTIDAD} >> .adm-tarjeta-interna >> nth=0 >> select >> nth=3", 4),
-        Marca(f"{CANTIDAD} >> .adm-boton-oscuro", 5),
+        Marca(f"{CANTIDAD} >> .adm-tarjeta-interna >> nth=0 >> .adm-etiquetas", 5),
+        Marca(f"{CANTIDAD} >> .adm-boton-oscuro", 6),
+    ]),
+    # La ficha pública con el aviso de los tramos (en local: un tramo con productos elegidos y otro sin rango).
+    Escena("06-13-aviso-cantidad", "/catalogo/producto/pr-tapado_magdalena_invierno",
+           recorte=(".product-title-elegant", ".tier-hints-list"), marcas=[
+        Marca(".tier-hints-list", 1),
     ]),
     Escena("06-11-promociones", CONTACTO, preparar=_ver("Promociones"), alto=1300, recorte=PROMOS, marcas=[
         Marca(f"{PROMOS} >> .adm-tarjeta-interna >> nth=0 >> select", 1),
