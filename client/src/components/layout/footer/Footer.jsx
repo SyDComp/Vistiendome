@@ -139,6 +139,10 @@ const Footer = ({ onNavigate }) => {
                             <span className="heart">♡</span> Hecho en San Carlos, Chile
                         </div>
                     </div>
+                    <p className="footer-credito">
+                        Desarrollado y potenciado por{' '}
+                        <a href="https://sydcomp.com/" target="_blank" rel="noopener noreferrer">SyDComp</a>
+                    </p>
                 </div>
             </div>
 
