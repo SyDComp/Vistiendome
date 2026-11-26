@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatCurrency } from '../../../../../utils/cartUtils';
+import PrecioInput from '../../../../ui/PrecioInput';
 
 /**
  * Cómo paga: uno o más pagos (parte en efectivo, parte con débito…) que
@@ -20,8 +21,8 @@ const PagosVenta = ({ pagos, medios, falta, onCambiar, disabled }) => {
                     </label>
                     <label className="sp-pago-campo">
                         Monto
-                        <input type="text" inputMode="numeric" className="sp-select" value={p.monto}
-                            onChange={e => cambiar(i, { monto: e.target.value })} />
+                        <PrecioInput className="sp-select" value={p.monto}
+                            onChange={monto => cambiar(i, { monto })} />
                     </label>
                     {pagos.length > 1 && (
                         <button type="button" className="sp-boton" onClick={() => onCambiar(pagos.filter((_, j) => j !== i))}>

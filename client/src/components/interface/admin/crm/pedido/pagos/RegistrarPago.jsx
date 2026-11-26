@@ -4,6 +4,7 @@ import { registrarPago } from '../../../../../../lib/api/endpoints';
 import { montoDesde } from '../../../../../../utils/pagos';
 import { formatCurrency } from '../../../../../../utils/cartUtils';
 import { mensajeDeError } from '../../../../../../utils/errorServidor';
+import PrecioInput from '../../../../../ui/PrecioInput';
 
 // El medio con que se paga usando el saldo a favor (core/pagos/a_favor.py).
 
@@ -45,8 +46,8 @@ const RegistrarPago = ({ pedidoId, medios = [], medioAFavor = null, aFavor = 0, 
         <div className="sp-canal-edicion">
             <label className="sp-pago-campo">
                 Monto
-                <input type="text" inputMode="numeric" className="sp-select" placeholder="Ej: 15.000"
-                    value={monto} onChange={e => setMonto(e.target.value)} disabled={enviando} />
+                <PrecioInput className="sp-select" placeholder="Ej: 15.000"
+                    value={monto} onChange={setMonto} disabled={enviando} />
             </label>
             <label className="sp-pago-campo">
                 Medio de pago

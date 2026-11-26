@@ -1,4 +1,5 @@
 import React from 'react';
+import PrecioInput from '../../../../ui/PrecioInput';
 import './pedido.css';
 
 const OPCIONES = [
@@ -33,16 +34,13 @@ const SelectorPrecio = ({ id, valor, onChange, disabled = false }) => (
         {valor.tipo === 'monto' && (
             <>
                 <label htmlFor={id} className="sp-oculto">Monto en pesos</label>
-                <input
+                {/* En pesos chilenos: "21.990" son veintiún mil novecientos noventa (ui/PrecioInput). */}
+                <PrecioInput
                     id={id}
-                    type="number"
-                    min="1"
-                    step="1"
-                    inputMode="numeric"
                     className="sp-precio-monto"
                     placeholder="$ monto"
                     value={valor.monto}
-                    onChange={e => onChange({ ...valor, monto: e.target.value })}
+                    onChange={monto => onChange({ ...valor, monto })}
                     disabled={disabled}
                 />
             </>

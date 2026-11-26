@@ -114,7 +114,7 @@ const PRODUCT_COLUMNS = [
             return (
                 <span className="admin-product-price" style={faltanPrecios ? { display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#b45309' } : undefined}>
                     {faltanPrecios && <AlertTriangle size={14} />}
-                    {min === max ? `$${min.toLocaleString()}` : `$${min.toLocaleString()} - $${max.toLocaleString()}`}
+                    {min === max ? `$${min.toLocaleString('es-CL')}` : `$${min.toLocaleString('es-CL')} - $${max.toLocaleString('es-CL')}`}
                     {faltanPrecios && <em className="adm-aviso-alerta-texto" title="Hay variantes en $0 — revísalas en Producción › Sin precio">sin precio</em>}
                 </span>
             );
@@ -170,7 +170,7 @@ const VARIANT_COLUMNS = [
         label: 'Precio',
         width: '110px',
         render: (v) => v ? (
-            <span className="admin-product-price">${v.toLocaleString()}</span>
+            <span className="admin-product-price">${v.toLocaleString('es-CL')}</span>
         ) : (
             <span className="admin-product-price adm-aviso-alerta" title="Sin precio cargado — no se puede comprar en el sitio">
                 <AlertTriangle size={13} /> $0

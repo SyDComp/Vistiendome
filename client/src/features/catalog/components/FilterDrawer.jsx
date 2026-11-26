@@ -1,6 +1,7 @@
 import { useState, useEffect, Fragment } from 'react';
 import { X, ChevronDown, ChevronUp, RotateCcw, Check } from 'lucide-react';
 import Button from '../../../components/ui/Button';
+import PrecioInput from '../../../components/ui/PrecioInput';
 import './FilterDrawer.css';
 
 const FilterDrawer = ({
@@ -238,19 +239,18 @@ const FilterDrawer = ({
                         </button>
                         {expandedSections.price && (
                             <div className="filter-price-range fd-fila">
-                                <input 
-                                    type="number" 
-                                    placeholder={`Mín ($${metadata.price_range?.min?.toLocaleString()})`} 
+                                {/* En pesos: "20.000" son veinte mil, no veinte (ui/PrecioInput). */}
+                                <PrecioInput
+                                    placeholder={`Mín ($${metadata.price_range?.min?.toLocaleString('es-CL')})`}
                                     value={localFilters.priceRange?.min ?? ''}
-                                    onChange={(e) => handlePriceChange('min', e.target.value)}
+                                    onChange={(monto) => handlePriceChange('min', monto)}
                                     className="fd-campo"
                                 />
                                 <span>-</span>
-                                <input 
-                                    type="number" 
-                                    placeholder={`Máx ($${metadata.price_range?.max?.toLocaleString()})`} 
+                                <PrecioInput
+                                    placeholder={`Máx ($${metadata.price_range?.max?.toLocaleString('es-CL')})`}
                                     value={localFilters.priceRange?.max ?? ''}
-                                    onChange={(e) => handlePriceChange('max', e.target.value)}
+                                    onChange={(monto) => handlePriceChange('max', monto)}
                                     className="fd-campo"
                                 />
                             </div>

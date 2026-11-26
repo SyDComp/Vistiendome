@@ -2,6 +2,7 @@ import React from 'react';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { formatCurrency } from '../../../../../utils/cartUtils';
 import { totalVenta } from '../../../../../utils/ventaLocal';
+import PrecioInput from '../../../../ui/PrecioInput';
 
 /**
  * Lo que se lleva, como en la pantalla de una caja: cada prenda con su
@@ -37,9 +38,9 @@ const LineasCaja = ({ lineas, marcada, onCambiar, onListo, disabled }) => {
                         </div>
                         <label className="cj-precio">
                             <span className="cj-oculto">Precio de {l.nombre}</span>
-                            <input type="text" inputMode="numeric" className="sp-select" value={l.precio} disabled={disabled}
+                            <PrecioInput className="sp-select" value={l.precio} disabled={disabled}
                                 placeholder="Precio" onKeyDown={terminar} data-precio={l.clave}
-                                onChange={e => cambiar(l.clave, { precio: e.target.value })} />
+                                onChange={precio => cambiar(l.clave, { precio })} />
                         </label>
                         <span className="cj-subtotal">{formatCurrency(totalVenta([l]))}</span>
                         <button type="button" className="cj-icono cj-icono--quitar" aria-label={`Quitar ${l.nombre}`}

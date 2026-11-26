@@ -251,7 +251,7 @@ const DetailDrawer = ({
                     type: 'summary-card',
                     items: [
                         { label: 'Total Registradas', value: `${currData.skus.length} variantes` },
-                        { label: 'Rango de Precios', value: minPrice === maxPrice ? `$${minPrice.toLocaleString()}` : `$${minPrice.toLocaleString()} - $${maxPrice.toLocaleString()}` },
+                        { label: 'Rango de Precios', value: minPrice === maxPrice ? `$${minPrice.toLocaleString('es-CL')}` : `$${minPrice.toLocaleString('es-CL')} - $${maxPrice.toLocaleString('es-CL')}` },
                         { label: 'Atributos Definidos', value: Array.from(configKeys).join(', ') || 'Base' }
                     ],
                     footer: (

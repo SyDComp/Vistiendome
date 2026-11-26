@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNotification } from '../../../../../context/NotificationContext';
 import { anotarFondo } from '../../../../../lib/api/endpoints';
 import { mensajeDeError } from '../../../../../utils/errorServidor';
+import PrecioInput from '../../../../ui/PrecioInput';
 import useArqueo from './useArqueo';
 
 /**
@@ -35,8 +36,8 @@ const AperturaCaja = () => {
     return (
         <form className="cj-apertura" onSubmit={anotar}>
             <label htmlFor="cj-fondo">¿Con cuánto parte hoy el cajón?</label>
-            <input id="cj-fondo" className="sp-select" inputMode="numeric" value={valor} placeholder="$ 0"
-                onChange={e => setMonto(e.target.value)} disabled={guardando} />
+            <PrecioInput id="cj-fondo" className="sp-select" value={valor} placeholder="$ 0"
+                onChange={setMonto} disabled={guardando} />
             <button type="submit" className="sp-boton sp-boton--principal" disabled={guardando || pesosDe(valor) === null}>Anotar</button>
             {arqueo.fondo_propuesto !== null && monto === null && <small>Es lo que se dejó al cerrar el día anterior.</small>}
         </form>

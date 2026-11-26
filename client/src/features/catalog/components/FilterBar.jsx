@@ -62,9 +62,9 @@ const FilterBar = ({
             const hayValor = v => v !== null && v !== undefined;
             if (hayValor(min) || hayValor(max)) {
                 let label = 'Precio: ';
-                if (min && max) label += `$${min.toLocaleString()} - $${max.toLocaleString()}`;
-                else if (min) label += `Desde $${min.toLocaleString()}`;
-                else if (max) label += `Hasta $${max.toLocaleString()}`;
+                if (min && max) label += `$${min.toLocaleString('es-CL')} - $${max.toLocaleString('es-CL')}`;
+                else if (min) label += `Desde $${min.toLocaleString('es-CL')}`;
+                else if (max) label += `Hasta $${max.toLocaleString('es-CL')}`;
                 tags.push({ type: 'price', label });
             }
         }

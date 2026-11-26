@@ -25,6 +25,7 @@ import { useSettings } from '../../../../context/SettingsContext';
 import { getShippingColor } from '../../../../utils/shippingColors';
 import { esTelefonoValido } from '../../../../utils/telefono';
 import SelectorProductos from './SelectorProductos';
+import PrecioInput from '../../../ui/PrecioInput';
 
 const SettingsManager = () => {
     const [settings, setSettings] = useState({
@@ -661,9 +662,15 @@ const SettingsManager = () => {
                                 </div>
                                 <div className="input-group">
                                     <label className="adm-rotulo">Valor</label>
-                                    <input type="number" min="0" value={t.discount_value ?? ''}
-                                        onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, discount_value: parseFloat(e.target.value) || 0 } : x) }))}
-                                        className="adm-entrada" />
+                                    {(t.discount_type || 'percent') === 'percent' ? (
+                                        <input type="number" min="0" max="100" value={t.discount_value ?? ''}
+                                            onChange={e => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, discount_value: parseFloat(e.target.value) || 0 } : x) }))}
+                                            className="adm-entrada" />
+                                    ) : (
+                                        <PrecioInput value={t.discount_value ?? ''}
+                                            onChange={monto => setPriceTiers(p => ({ ...p, tiers: p.tiers.map((x, k) => k === i ? { ...x, discount_value: monto === '' ? 0 : monto } : x) }))}
+                                            className="adm-entrada" />
+                                    )}
                                 </div>
                             </div>
                             <SelectorProductos
@@ -768,8 +775,8 @@ const SettingsManager = () => {
                                             </div>
                                             <div className="input-group">
                                                 <label className="adm-rotulo">O monto mínimo ($)</label>
-                                                <input type="number" min="0" value={p.min_monto || ''}
-                                                    onChange={e => editar({ min_monto: parseInt(e.target.value) || 0 })} className="adm-entrada" />
+                                                <PrecioInput value={p.min_monto || ''}
+                                                    onChange={monto => editar({ min_monto: monto === '' ? 0 : monto })} className="adm-entrada" />
                                             </div>
                                         </>
                                     )}

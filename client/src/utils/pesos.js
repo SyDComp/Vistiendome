@@ -24,3 +24,14 @@ export const mostrarPesos = (monto) => {
     const n = Number(monto);
     return n.toLocaleString('es-CL', { maximumFractionDigits: Number.isInteger(n) ? 0 : 2 });
 };
+
+/**
+ * ¿Lo escrito agrega una coma? En Chile la coma separa decimales, y el peso no
+ * tiene centavos: "52,99" se leería 5.299 sin avisar (solo cuentan los
+ * dígitos). Se rechaza AGREGARLA, no tenerla: un monto viejo que se muestra
+ * con coma ("52,99") se tiene que poder corregir.
+ */
+export const agregaComa = (antes, despues) =>
+    (String(despues ?? '').match(/,/g) || []).length > (String(antes ?? '').match(/,/g) || []).length;
+
+export const AVISO_SIN_CENTAVOS = 'Los pesos no tienen centavos: escribe 52.990, sin coma.';

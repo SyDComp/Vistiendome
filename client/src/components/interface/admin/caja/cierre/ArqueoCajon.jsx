@@ -4,6 +4,7 @@ import { anotarFondo, cerrarArqueo } from '../../../../../lib/api/endpoints';
 import { formatCurrency } from '../../../../../utils/cartUtils';
 import { mensajeDeError } from '../../../../../utils/errorServidor';
 import { desdeServidor } from '../../../../../utils/fechaServidor';
+import PrecioInput from '../../../../ui/PrecioInput';
 import { hora } from './fechas';
 
 const numero = (texto) => (String(texto).trim() === '' ? null : Math.round(Number(String(texto).replace(/\D/g, ''))));
@@ -48,8 +49,8 @@ const ArqueoCajon = ({ arqueo, onCambio }) => {
                 <span>Fondo con que partió el cajón</span>
                 {editandoFondo ? (
                     <span className="cc-arqueo-edicion">
-                        <input className="sp-select cc-arqueo-monto" inputMode="numeric" aria-label="Fondo con que partió"
-                            value={valorFondo} onChange={e => setFondo(e.target.value)} placeholder="$ 0" disabled={guardando} />
+                        <PrecioInput className="sp-select cc-arqueo-monto" aria-label="Fondo con que partió"
+                            value={valorFondo} onChange={setFondo} placeholder="$ 0" disabled={guardando} />
                         <button type="button" className="sp-boton sp-boton--principal" disabled={guardando || numero(valorFondo) === null}
                             onClick={() => guardar(() => anotarFondo(a.fecha, numero(valorFondo)), 'Fondo anotado')}>Anotar</button>
                         {!sinFondo && <button type="button" className="sp-boton" onClick={() => setFondo(null)} disabled={guardando}>Cancelar</button>}
@@ -78,12 +79,12 @@ const ArqueoCajon = ({ arqueo, onCambio }) => {
             {a.deberia !== null && (cierre ? (
                 <div className="cc-arqueo-cierre">
                     <label>Contado en el cajón
-                        <input className="sp-select cc-arqueo-monto" inputMode="numeric" value={cierre.contado}
-                            onChange={e => setCierre({ ...cierre, contado: e.target.value })} placeholder="$ 0" disabled={guardando} autoFocus />
+                        <PrecioInput className="sp-select cc-arqueo-monto" value={cierre.contado}
+                            onChange={contado => setCierre({ ...cierre, contado })} placeholder="$ 0" disabled={guardando} autoFocus />
                     </label>
                     <label>Se deja para mañana
-                        <input className="sp-select cc-arqueo-monto" inputMode="numeric" value={cierre.deja}
-                            onChange={e => setCierre({ ...cierre, deja: e.target.value })} placeholder="Todo lo contado" disabled={guardando} />
+                        <PrecioInput className="sp-select cc-arqueo-monto" value={cierre.deja}
+                            onChange={deja => setCierre({ ...cierre, deja })} placeholder="Todo lo contado" disabled={guardando} />
                     </label>
                     <label className="cc-arqueo-nota">Nota
                         <input className="sp-select" value={cierre.nota} maxLength={500} placeholder="Ej: se llevó $50.000 al banco"

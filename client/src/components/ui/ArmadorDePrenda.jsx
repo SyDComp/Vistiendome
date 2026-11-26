@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Plus, X, Sliders } from 'lucide-react';
 import { opcionesDe } from '../../utils/opcionesArmador';
+import PrecioInput from './PrecioInput';
 import './ArmadorDePrenda.css';
 
 /**
@@ -273,8 +274,8 @@ const ArmadorDePrenda = ({ atributos = {}, productos = [], mostrarPrecio = true,
                 {mostrarPrecio && (
                     <div>
                         <label className="armador__etiqueta">Precio unitario ($)</label>
-                        <input type="number" min="0" className="armador__campo" value={precio}
-                            onChange={e => setPrecio(e.target.value)} placeholder="25000" />
+                        <PrecioInput className="armador__campo" value={precio}
+                            onChange={setPrecio} placeholder="25.000" />
                     </div>
                 )}
 

@@ -26,9 +26,9 @@ const QuickPeek = ({ isOpen, onClose, data, type = 'product' }) => {
     if (type === 'product') {
         const min = data?.price_min || 0;
         const max = data?.price_max || 0;
-        priceDisplay = min === max ? `$${min.toLocaleString()}` : `$${min.toLocaleString()} - $${max.toLocaleString()}`;
+        priceDisplay = min === max ? `$${min.toLocaleString('es-CL')}` : `$${min.toLocaleString('es-CL')} - $${max.toLocaleString('es-CL')}`;
     } else {
-        priceDisplay = `$${(data?.price || 0).toLocaleString()}`;
+        priceDisplay = `$${(data?.price || 0).toLocaleString('es-CL')}`;
     }
 
     const stock = data?.stock_total ?? data?.stock ?? 0;

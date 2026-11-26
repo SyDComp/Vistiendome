@@ -4,6 +4,7 @@ import { dejarAFavor, devolverPago } from '../../../../../../lib/api/endpoints';
 import { formatCurrency } from '../../../../../../utils/cartUtils';
 import { montoDesde } from '../../../../../../utils/pagos';
 import { mensajeDeError } from '../../../../../../utils/errorServidor';
+import PrecioInput from '../../../../../ui/PrecioInput';
 
 /**
  * Lo pagado de más (se canceló el pedido o una prenda, bajó un precio): se
@@ -50,8 +51,8 @@ const PagadoDeMas = ({ pedidoId, deMas, medios = [], onCambio }) => {
                 <div className="sp-canal-edicion">
                     <label className="sp-pago-campo">
                         {accion === 'devolver' ? 'Monto que se devuelve' : 'Monto que queda a favor'}
-                        <input type="text" inputMode="numeric" className="sp-select" value={monto}
-                            onChange={e => setMonto(e.target.value)} disabled={enviando} />
+                        <PrecioInput className="sp-select" value={monto}
+                            onChange={setMonto} disabled={enviando} />
                     </label>
                     {accion === 'devolver' && (
                         <label className="sp-pago-campo">
