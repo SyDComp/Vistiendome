@@ -3,6 +3,7 @@ import { formatCurrency } from '../../../../../utils/cartUtils';
 import ClientaVenta from './ClientaVenta';
 import { pesos } from '../../../../../utils/ventaLocal';
 import PagosVenta from './PagosVenta';
+import PrecioInput from '../../../../ui/PrecioInput';
 
 
 /**
@@ -24,12 +25,12 @@ const CobroCaja = ({
             </div>
             <ClientaVenta sinDatos={sinDatos} clienta={clienta} onSinDatos={onSinDatos} onCambiar={onClienta} disabled={enviando} />
             {total > 0 && <PagosVenta pagos={pagos} medios={medios} falta={falta} onCambiar={onPagos} disabled={enviando} />}
-            {efectivo > 0 && (
+            {enEfectivo > 0 && (
                 <div className="cj-vuelto">
                     <label className="sp-pago-campo">
                         Paga con (efectivo)
-                        <input type="text" inputMode="numeric" className="sp-select" value={recibido} disabled={enviando}
-                            placeholder={String(efectivo)} onChange={e => onRecibido(e.target.value)} />
+                        <PrecioInput className="sp-select" value={recibido} disabled={enviando}
+                            placeholder={enEfectivo.toLocaleString('es-CL')} onChange={onRecibido} />
                     </label>
                     {pesos(recibido) > 0 && (
                         <p className={vuelto >= 0 ? 'cj-vuelto-monto' : 'vl-falta'}>
