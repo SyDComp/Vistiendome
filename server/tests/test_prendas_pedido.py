@@ -14,6 +14,7 @@ from app.models.catalog import Category, Product, SKU
 from app.models.crm import Cotizacion, CotizacionItem
 from app.models.historia import PedidoEvento, TipoEvento
 from app.models.iam import Direccion
+from tests.apoyo_catalogo import en_biblioteca, variante
 
 # Una fecha comprometida que siempre está en el futuro.
 EN_UN_MES = (date.today() + timedelta(days=30)).isoformat()
@@ -28,9 +29,11 @@ def noemi(session: Session) -> Product:
     session.add(prod)
     session.commit()
     session.add_all([
-        SKU(product_id=prod.id, sku="NOE-CORAL-M", price=17490, config={"COLOR": "Coral", "TALLA": "M"}),
-        SKU(product_id=prod.id, sku="NOE-CORAL-L", price=17490, config={"COLOR": "Coral", "TALLA": "L"}),
+        variante(session, {"COLOR": "Coral", "TALLA": "M"}, product_id=prod.id, sku="NOE-CORAL-M", price=17490),
+        variante(session, {"COLOR": "Coral", "TALLA": "L"}, product_id=prod.id, sku="NOE-CORAL-L", price=17490),
     ])
+    # Las demás características que la tienda tiene en su biblioteca.
+    en_biblioteca(session, {"MANGAS": ["Larga"], "LARGO": ["Maxi"], "TALLA": ["XS"]})
     session.commit()
     session.refresh(prod)
     return prod
@@ -185,6 +188,8 @@ def test_un_producto_con_piezas_personalizadas_no_se_borra_del_todo(client, sess
 
 
 def test_la_historia_dice_cual_prenda_se_cotizo(client_admin, session):
+    en_biblioteca(session, {"TALLA": ["L", "XS"]})
+    session.commit()
     res = client_admin.post("/api/v1/crm/cotizaciones", json={
         "rut": "11111111-1", "nombres": "Ana", "canal": "WhatsApp",
         "items": [{"nombre_custom": "Tapado", "config_custom": {"TALLA": "L"}},

@@ -18,6 +18,8 @@ from app.core.pedidos import historia
 from app.models.crm import Cotizacion
 from app.models.historia import TipoEvento
 from app.models.iam import CuentaAcceso
+from ...models.listas import CanalPedido
+from ...core import listas
 
 router = APIRouter(dependencies=[Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))])
 
@@ -65,10 +67,15 @@ def corregir_canal(
     nuevo = data.canal.strip()
     if not nuevo:
         raise HTTPException(status_code=422, detail="Falta indicar cómo llegó el pedido.")
-    if nuevo == cotizacion.canal:
-        return {"canal": nuevo}
-    historia.anotar(db, cotizacion, TipoEvento.CANAL, historia.de_cuenta(admin), de=cotizacion.canal, a=nuevo)
-    cotizacion.canal = nuevo
+    try:
+        canal = listas.por_nombre(db, CanalPedido, nuevo, "un canal")
+    except listas.ValorInexistente as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    if canal.id == cotizacion.canal_id:
+        return {"canal": canal.nombre}
+    historia.anotar(db, cotizacion, TipoEvento.CANAL, historia.de_cuenta(admin), de=cotizacion.canal, a=canal.nombre)
+    cotizacion.canal_id, cotizacion.canal_elegido = canal.id, canal
+    nuevo = canal.nombre
     db.add(cotizacion)
     db.commit()
     return {"canal": nuevo}

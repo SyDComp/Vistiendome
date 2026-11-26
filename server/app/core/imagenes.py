@@ -10,7 +10,7 @@ El original NUNCA se modifica ni se borra: es la copia maestra.
 """
 
 import os
-from typing import Dict, Optional
+from typing import Dict
 
 from PIL import Image, ImageOps
 
@@ -109,29 +109,6 @@ def srcset_de(asset) -> str:
         for etiqueta, ancho in TAMANOS.items()
         if derivadas.get(etiqueta)
     ]
-    return ", ".join(partes)
-
-
-def srcset_desde_url(url: Optional[str], directorio_base: str = "media") -> str:
-    """
-    Igual que `srcset_de`, pero para cuando sólo se tiene la URL de la imagen y
-    no su MediaAsset (por ejemplo la portada de una colección, que se guarda
-    como texto).
-
-    Comprueba en disco que cada derivada exista antes de anunciarla: si se
-    anunciara una que no está, el navegador la elegiría y la imagen no cargaría.
-    Son un par de comprobaciones por imagen, y sólo en las pocas que llegan por
-    URL suelta.
-    """
-    if not url or url.startswith("http"):
-        return ""
-
-    base, _ = os.path.splitext(os.path.basename(url))
-    partes = []
-    for etiqueta, ancho in TAMANOS.items():
-        archivo = f"{base}_{etiqueta}.webp"
-        if os.path.exists(os.path.join(directorio_base, SUBCARPETA, archivo)):
-            partes.append(f"/{directorio_base}/{SUBCARPETA}/{archivo} {ancho}w")
     return ", ".join(partes)
 
 

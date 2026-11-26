@@ -73,7 +73,7 @@ def test_lo_del_catalogo_ya_hecho_entra_a_bodega(client_admin, tienda, session):
     _hechas(session, pedido, 0)
 
     assert _cancelar(client_admin, pedido, 0).status_code == 200
-    entrada = session.exec(select(StockMovement).where(StockMovement.reference_id == pedido["items"][0]["id"])).one()
+    entrada = session.exec(select(StockMovement).where(StockMovement.cotizacion_item_id == pedido["items"][0]["id"])).one()
     assert (entrada.type, entrada.quantity) == (MovementType.RECEIPT, 2)
     assert _saldo(client_admin, tienda["vestido"])["disponible"] == 2
 

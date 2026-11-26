@@ -6,7 +6,7 @@ from ...database import get_session
 from ...models.catalog import Collection, SKU, Product
 from ...core.looks import asset_de_variante
 from ...core.pricing import compute_effective_price, get_chile_time
-from ...core.imagenes import srcset_de, srcset_desde_url
+from ...core.imagenes import srcset_de
 
 router = APIRouter()
 
@@ -15,13 +15,12 @@ def list_public_collections(db: Session = Depends(get_session)):
     """Lista todas las colecciones activas para el público."""
     statement = select(Collection).where(Collection.is_active == True).order_by(Collection.created_at.desc())
     colecciones = db.exec(statement).all()
-    # La portada se guarda como texto, no como MediaAsset, así que las derivadas
-    # se resuelven desde la URL. Sin esto la portada del sitio bajaba estas
-    # fotos completas (~450 KB cada una) para mostrarlas del tamaño de una tarjeta.
+    # Las versiones livianas de la portada: sin esto el sitio bajaba estas fotos
+    # completas (~450 KB cada una) para mostrarlas del tamaño de una tarjeta.
     salida = []
     for c in colecciones:
         d = c.dict()
-        d["image_srcset"] = srcset_desde_url(c.image_url)
+        d["image_srcset"] = srcset_de(c.portada) if c.portada else ""
         salida.append(d)
     return salida
 

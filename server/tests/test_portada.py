@@ -14,6 +14,7 @@ from app.api.v1 import products
 from app.core.caja.fotos import fotos
 from app.core.portada import portadas
 from app.models.catalog import Category, MediaAsset, Product, ProductMediaLink, SKU, SKUMediaLink
+from tests.apoyo_catalogo import variante
 
 
 def _foto(session: Session, nombre: str) -> MediaAsset:
@@ -32,7 +33,7 @@ def producto(session: Session):
     p = Product(name="vestido perla", slug="vestido-perla", description="", category_id=cat.id)
     session.add(p)
     session.commit()
-    skus = [SKU(product_id=p.id, sku=f"PER-{i}", price=20000, config={"TALLA": t}) for i, t in enumerate("SML")]
+    skus = [variante(session, {"TALLA": t}, product_id=p.id, sku=f"PER-{i}", price=20000) for i, t in enumerate("SML")]
     session.add_all(skus)
     session.commit()
     return p, skus

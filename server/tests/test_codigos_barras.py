@@ -8,6 +8,7 @@ import barcode
 import pytest
 
 from app.core.codigos_barras import CodigoInvalido, codigo_desde, es_ean13_valido, revisar
+from tests.apoyo_catalogo import variante
 
 PRODUCTOS = "/api/v1/admin/catalog/products"
 
@@ -33,6 +34,8 @@ def test_un_ean13_escrito_a_mano_tiene_que_cuadrar():
 
 def test_las_variantes_nuevas_reciben_codigos_correlativos(client_admin, session):
     from app.models.catalog import Category
+    from tests.apoyo_catalogo import en_biblioteca
+    en_biblioteca(session, {"TALLA": ["S", "M"]})
     categoria = Category(name="Vestimenta", slug="vestimenta")
     session.add(categoria)
     session.commit()
@@ -73,8 +76,7 @@ def test_la_ficha_del_sitio_trae_el_codigo_de_la_etiqueta(session):
     p = Product(name="Vestido Noemi", slug="vestido-noemi", description="", category_id=cat.id)
     session.add(p)
     session.commit()
-    session.add(SKU(product_id=p.id, sku="NOE-VES_NOE-REDON-34-BAJ_ROD-TEL_SOF-12-MOSTA", price=16900,
-                    config={"TALLA": "12"}, barcode=codigo_desde(978)))
+    session.add(variante(session, {"TALLA": "12"}, product_id=p.id, sku="NOE-VES_NOE-REDON-34-BAJ_ROD-TEL_SOF-12-MOSTA", price=16900, barcode=codigo_desde(978)))
     session.commit()
     ficha = products.get_product_detail(str(p.id), db=session)
     assert ficha["skus"][0]["barcode"] == codigo_desde(978)

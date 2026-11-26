@@ -18,6 +18,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
+from ...models.catalog import StockMovement
 from sqlalchemy import text
 from pydantic import BaseModel
 
@@ -31,6 +32,7 @@ from app.core import movimientos as movimientos_core
 from app.core.pedidos import cancelar, ciclo, historia
 from app.core.pedidos.cotizar import nombre_de_prenda
 from app.models.historia import TipoEvento
+from ...core import caracteristicas
 
 router = APIRouter()
 
@@ -269,15 +271,18 @@ def crear(data: OrdenCrear, db: Session = Depends(get_session), admin: CuentaAcc
             raise HTTPException(status_code=400, detail="Una pieza sin variante necesita un nombre")
         if entrada.cantidad <= 0:
             raise HTTPException(status_code=400, detail="La cantidad debe ser mayor que cero")
-        db.add(OrdenCorteItem(
+        linea = OrdenCorteItem(
             orden_id=orden.id,
             sku_id=entrada.sku_id,
             nombre_custom=(entrada.nombre_custom or "").strip() or None,
-            config_custom=entrada.config_custom or None,
-            config_propuesta=entrada.config_propuesta or None,
             cantidad=entrada.cantidad,
             cotizacion_item_id=entrada.cotizacion_item_id,
-        ))
+        )
+        try:
+            caracteristicas.vestir(db, linea, entrada.config_custom, entrada.config_propuesta)
+        except caracteristicas.OpcionInexistente as e:
+            raise HTTPException(status_code=422, detail=str(e))
+        db.add(linea)
     db.flush()
     db.refresh(orden)
     historia.anotar_en_sus_pedidos(db, orden, TipoEvento.ORDEN_AGREGADA, historia.de_cuenta(admin))
@@ -316,7 +321,7 @@ def _aplicar_finalizacion(db: Session, orden: OrdenCorte, finalizando: bool, act
         movimientos_core.llevar_a(
             db,
             sku_id=it.sku_id,
-            reference_id=it.id,
+            hecho=it,
             objetivo=it.cantidad if finalizando else 0,
             tipo_si_resta=MovementType.ADJUSTMENT,
             tipo_si_suma=MovementType.RECEIPT,
@@ -387,9 +392,10 @@ def repetir(orden_id: str, db: Session = Depends(get_session), admin: CuentaAcce
     db.refresh(nueva)
 
     for it in a_repetir:
-        db.add(OrdenCorteItem(orden_id=nueva.id, sku_id=it.sku_id, nombre_custom=it.nombre_custom,
-                              config_custom=it.config_custom, config_propuesta=it.config_propuesta,
-                              cantidad=it.cantidad))
+        linea = OrdenCorteItem(orden_id=nueva.id, sku_id=it.sku_id, nombre_custom=it.nombre_custom,
+                               cantidad=it.cantidad)
+        caracteristicas.vestir(db, linea, it.config_custom, it.config_propuesta)
+        db.add(linea)
     db.commit()
     db.refresh(nueva)
     return _salida(nueva, db)
@@ -404,6 +410,14 @@ def eliminar(orden_id: str, db: Session = Depends(get_session), admin: CuentaAcc
         raise HTTPException(
             status_code=403,
             detail="Una orden finalizada no se borra: ya movió stock y marcó piezas hechas o encontradas. Cancélala si hace falta.",
+        )
+    # Una orden reabierta ya no está finalizada, pero lo que movió (la entrada y
+    # su vuelta) sigue apuntando a sus líneas: esa historia no se borra.
+    if orden.items and db.exec(select(StockMovement.id).where(
+            StockMovement.orden_corte_item_id.in_([it.id for it in orden.items]))).first():
+        raise HTTPException(
+            status_code=403,
+            detail="Esta orden ya movió stock en la bodega, aunque se haya reabierto. No se borra: cancélala si hace falta.",
         )
     historia.anotar_en_sus_pedidos(db, orden, TipoEvento.ORDEN_ELIMINADA, historia.de_cuenta(admin))
     for it in list(orden.items):

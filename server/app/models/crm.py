@@ -1,3 +1,6 @@
+from pydantic import computed_field
+from .catalog import _sin_campos_retirados
+from .prendas_opciones import como_config, como_propuesta
 from datetime import date, datetime
 from typing import Any, Optional, List, Dict
 from sqlmodel import SQLModel, Field, Relationship
@@ -107,7 +110,8 @@ class Cotizacion(SQLModel, table=True):
     # `origen`. Texto, no una referencia a la lista de Ajustes del negocio: si
     # mañana se quita una opción, los pedidos viejos siguen diciendo lo que
     # decían. Nulo en los manuales anteriores a este campo: no se sabe.
-    canal: Optional[str] = Field(default=None, max_length=60)
+    # «¿Cómo llegó?», de la lista de la tienda (models/listas.py).
+    canal_id: Optional[int] = Field(default=None, foreign_key="canal_pedido.id")
 
     # Retiro o despacho. Nullable sólo por los pedidos anteriores a que este
     # campo existiera; los nuevos siempre lo traen.
@@ -120,10 +124,11 @@ class Cotizacion(SQLModel, table=True):
     fecha_evento: Optional[str] = Field(default=None)
     
     # Etiqueta de Envío
-    transporte: Optional[str] = Field(default=None, max_length=100)
+    # El método de envío, de la lista de la tienda.
+    metodo_envio_id: Optional[int] = Field(default=None, foreign_key="metodo_envio.id")
     tipo_despacho: Optional[TipoDespacho] = Field(default=None)
-    region: Optional[str] = Field(default=None, max_length=100)
-    comuna: Optional[str] = Field(default=None, max_length=100)
+    # La comuna del despacho; la región es la de la comuna.
+    comuna_id: Optional[int] = Field(default=None, foreign_key="comunas.id")
     direccion: Optional[str] = Field(default=None, max_length=255) # O 'Sucursal Chillan' si es a sucursal
 
     # EL NOMBRE QUE LA PERSONA ESCRIBIO EN ESTE PEDIDO PUNTUAL, TAL CUAL.
@@ -179,6 +184,40 @@ class Cotizacion(SQLModel, table=True):
     # prendas en otro orden después de editar una, y en pantalla la prenda
     # recién cotizada saltaba de lugar. El id no sirve para esto: dos ULID del
     # mismo milisegundo no salen en orden.
+    canal_elegido: Optional["CanalPedido"] = Relationship(sa_relationship_kwargs={"lazy": "joined"})
+    envio: Optional["MetodoEnvio"] = Relationship(sa_relationship_kwargs={"lazy": "joined"})
+    comuna_destino: Optional["Comuna"] = Relationship(sa_relationship_kwargs={"lazy": "joined"})
+
+    def __init__(self, **datos):
+        _sin_campos_retirados("Cotizacion", datos, {
+            "canal": "se pasa canal_id (core.listas.por_nombre)",
+            "transporte": "se pasa metodo_envio_id (core.listas.por_nombre)",
+            "region": "se pasa comuna_id: la región es la de la comuna",
+            "comuna": "se pasa comuna_id",
+        })
+        super().__init__(**datos)
+
+    @computed_field
+    @property
+    def canal(self) -> Optional[str]:
+        return self.canal_elegido.nombre if self.canal_elegido else None
+
+    @computed_field
+    @property
+    def transporte(self) -> Optional[str]:
+        return self.envio.nombre if self.envio else None
+
+    @computed_field
+    @property
+    def comuna(self) -> Optional[str]:
+        return self.comuna_destino.nombre if self.comuna_destino else None
+
+    @computed_field
+    @property
+    def region(self) -> Optional[str]:
+        c = self.comuna_destino
+        return c.region.nombre if c and c.region else None
+
     items: List["CotizacionItem"] = Relationship(
         back_populates="cotizacion",
         sa_relationship_kwargs={"order_by": "(CotizacionItem.posicion, CotizacionItem.id)"},
@@ -219,7 +258,6 @@ class CotizacionItem(SQLModel, table=True):
     #
     # Mismo formato que SKU.config ({"TALLA": "M", "COLOR": "Uva"}), para que la
     # planilla del taller las muestre en columnas sin distinguir el origen.
-    config_custom: Optional[Dict[str, str]] = Field(default=None, sa_type=JSON)
 
     # Cuales de esos valores los PROPUSO el cliente y no existen en el catalogo.
     #
@@ -229,7 +267,6 @@ class CotizacionItem(SQLModel, table=True):
     #
     # Distinguirlos no es un detalle: un valor del catalogo se corta con tela
     # que hay; uno propuesto hay que conseguirlo antes de prometer una fecha.
-    config_propuesta: Optional[Dict[str, str]] = Field(default=None, sa_type=JSON)
 
     # Vive en el ítem, no en la Cotizacion: una cotización puede tener piezas
     # ya cortadas y otras no. El estado de la Cotizacion (NUEVA/CONFIRMADA/...)
@@ -265,3 +302,31 @@ class CotizacionItem(SQLModel, table=True):
     # Hay dos claves entre prendas y piezas (de dónde salió una pieza, y qué
     # pieza es una prenda): se dice cuál es esta.
     pieza: Optional["PiezaUnica"] = Relationship(sa_relationship_kwargs={"foreign_keys": "[CotizacionItem.pieza_id]"})
+
+    # Sus características, por identidad (models/prendas_opciones.py). Se
+    # asignan con core.caracteristicas.vestir.
+    opciones: List["CotizacionItemOpcion"] = Relationship(
+        sa_relationship_kwargs={"lazy": "selectin", "cascade": "all, delete-orphan"}
+    )
+    propuestas: List["CotizacionItemPropuesta"] = Relationship(
+        sa_relationship_kwargs={"lazy": "selectin", "cascade": "all, delete-orphan"}
+    )
+
+    def __init__(self, **datos):
+        _sin_campos_retirados("CotizacionItem", datos, {
+            "config_custom": "se usa core.caracteristicas.vestir",
+            "config_propuesta": "se usa core.caracteristicas.vestir",
+        })
+        super().__init__(**datos)
+
+    @computed_field
+    @property
+    def config_custom(self) -> Optional[Dict[str, str]]:
+        """Las opciones del catálogo que tiene, con los nombres de hoy."""
+        return como_config(self.opciones) or None
+
+    @computed_field
+    @property
+    def config_propuesta(self) -> Optional[Dict[str, str]]:
+        """Lo que la clienta pidió y no existía, con el nombre de hoy de su característica."""
+        return como_propuesta(self.propuestas) or None

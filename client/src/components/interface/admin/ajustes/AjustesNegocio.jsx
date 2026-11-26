@@ -35,6 +35,8 @@ const AjustesNegocio = () => {
 
     const guardarMedios = async (lista) => {
         await guardar('medios_pago', lista);
+        // Si se renombró el efectivo, el nombre que usa la caja para el vuelto cambió.
+        await recargar();
         toast.success('Medios de pago guardados');
     };
 
@@ -123,7 +125,7 @@ const AjustesNegocio = () => {
                         id="medios"
                         opciones={ajustes.medios_pago || []}
                         onGuardar={guardarMedios}
-                        aviso="Quitar o renombrar un medio no cambia los pagos ya registrados: siguen diciendo cómo se pagó."
+                        aviso="Renombrar un medio también cambia su nombre en los pagos ya registrados (es el mismo medio). Quitar uno que ya se usó deja de ofrecerlo, y sus pagos siguen diciendo cómo se pagó."
                     />
                 </section>
             )}
@@ -140,7 +142,7 @@ const AjustesNegocio = () => {
                         id="canales"
                         opciones={ajustes.canales_pedido || []}
                         onGuardar={guardarCanales}
-                        aviso="Quitar o renombrar una opción no cambia los pedidos que ya la tienen: siguen diciendo lo que decían."
+                        aviso="Renombrar una opción también cambia su nombre en los pedidos que ya la tienen (es la misma opción). Quitar una que ya se usó deja de ofrecerla, y esos pedidos la siguen diciendo."
                     />
                 </section>
             )}

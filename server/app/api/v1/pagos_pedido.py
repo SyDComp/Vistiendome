@@ -36,6 +36,9 @@ class PagoSalida(BaseModel):
     tipo: str
     monto: int
     medio: str
+    # Lo que el panel reconoce por la clave del medio, no por su nombre (models/listas.py).
+    es_efectivo: bool = False
+    es_a_favor: bool = False
     nota: Optional[str] = None
     registrado_por: Optional[str] = None
     registrado_en: datetime

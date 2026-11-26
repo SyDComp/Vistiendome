@@ -6,7 +6,6 @@ import { formatCurrency } from '../../../../../../utils/cartUtils';
 import { mensajeDeError } from '../../../../../../utils/errorServidor';
 
 // El medio con que se paga usando el saldo a favor (core/pagos/a_favor.py).
-const MEDIO_A_FAVOR = 'Saldo a favor';
 
 /**
  * "Registrar pago": monto, medio (los de Ajustes del negocio) y una nota
@@ -17,7 +16,9 @@ const MEDIO_A_FAVOR = 'Saldo a favor';
  * pedido (`avisos`): si algo no calza, la nota es obligatoria (cómo se
  * verificó que es la misma persona).
  */
-const RegistrarPago = ({ pedidoId, medios = [], aFavor = 0, origenes = [], avisos = [], sugerido, onRegistrado, onCancelar }) => {
+// medioAFavor: el nombre de hoy del medio de clave "a_favor" (Ajustes del negocio).
+const RegistrarPago = ({ pedidoId, medios = [], medioAFavor = null, aFavor = 0, origenes = [], avisos = [], sugerido, onRegistrado, onCancelar }) => {
+    const MEDIO_A_FAVOR = medioAFavor;
     const { toast } = useNotification();
     const [monto, setMonto] = useState(sugerido > 0 ? String(sugerido) : '');
     const [medio, setMedio] = useState(medios[0] || '');
@@ -51,7 +52,7 @@ const RegistrarPago = ({ pedidoId, medios = [], aFavor = 0, origenes = [], aviso
                 Medio de pago
                 <select className="sp-select" value={medio} onChange={e => setMedio(e.target.value)} disabled={enviando}>
                     {medios.map(m => <option key={m} value={m}>{m}</option>)}
-                    {aFavor > 0 && (
+                    {aFavor > 0 && MEDIO_A_FAVOR && (
                         <option value={MEDIO_A_FAVOR}>{MEDIO_A_FAVOR} (tiene {formatCurrency(aFavor)})</option>
                     )}
                 </select>

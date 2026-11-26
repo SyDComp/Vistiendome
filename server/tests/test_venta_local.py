@@ -13,6 +13,7 @@ from app.models.piezas import PiezaUnica
 from test_ciclo_pedido import (  # noqa: F401  (tienda y sin_abono_minimo son fixtures)
     CRM, _confirmar, _hay, _hechas, _pedido, sin_abono_minimo, tienda,
 )
+from tests.apoyo_catalogo import variante
 
 VENTA = f"{CRM}/venta-local"
 
@@ -117,11 +118,11 @@ def test_los_productos_de_la_caja_traen_lo_libre_y_lo_mas_vendido_primero(client
 
 
 def test_el_catalogo_de_la_caja_filtra_pagina_y_cuenta(client_admin, tienda, session):
-    from app.models.catalog import SKU, Characteristic
-    session.add(Characteristic(name="TALLA", domain=[{"value": "M"}, {"value": "L"}], is_filterable=True))
+    from tests.apoyo_catalogo import en_biblioteca
+    en_biblioteca(session, {"TALLA": ["M", "L"]})
     _hay(session, tienda["cinturon"], 3)
     _hay(session, tienda["suelto"], 5)
-    negro = SKU(product_id=tienda["suelto"].product_id, sku="SUELTO-L", price=10000, config={"TALLA": "L"})
+    negro = variante(session, {"TALLA": "L"}, product_id=tienda["suelto"].product_id, sku="SUELTO-L", price=10000)
     session.add(negro)
     session.commit()
     _hay(session, negro, 1)
@@ -154,10 +155,8 @@ def test_el_buscador_de_la_caja_entiende_palabras_sin_tildes(client_admin, tiend
 def test_la_caja_muestra_todo_lo_que_cumple_con_su_stock_aunque_sea_cero(client_admin, tienda, session):
     """Escribir "rojo" tiene que traer toda prenda roja: la que no tiene stock sale con 0, después."""
     from app.models.catalog import SKU
-    rojo_sin = SKU(product_id=tienda["vestido"].product_id, sku="VESTIDO-ROJO", price=10000,
-                   config={"COLOR": "Rojo Italiano"})
-    rojo_con = SKU(product_id=tienda["suelto"].product_id, sku="SUELTO-ROJO", price=10000,
-                   config={"COLOR": "Rojo Italiano"})
+    rojo_sin = variante(session, {"COLOR": "Rojo Italiano"}, product_id=tienda["vestido"].product_id, sku="VESTIDO-ROJO", price=10000)
+    rojo_con = variante(session, {"COLOR": "Rojo Italiano"}, product_id=tienda["suelto"].product_id, sku="SUELTO-ROJO", price=10000)
     session.add_all([rojo_sin, rojo_con])
     session.commit()
     _hay(session, rojo_con, 2)
@@ -206,8 +205,8 @@ def test_el_cierre_de_otro_dia_viene_vacio(client_admin, tienda, session):
 def test_una_palabra_suelta_busca_tambien_en_las_caracteristicas(client_admin, tienda, session):
     """"rojo" en Color o en Estampado: llega como palabra y trae lo que tenga una u otra."""
     from app.models.catalog import SKU
-    color = SKU(product_id=tienda["vestido"].product_id, sku="V-ROJO", price=10000, config={"COLOR": "Rojo Italiano"})
-    estampado = SKU(product_id=tienda["suelto"].product_id, sku="S-FLORES", price=10000, config={"ESTAMPADO": "Flores Rojas"})
+    color = variante(session, {"COLOR": "Rojo Italiano"}, product_id=tienda["vestido"].product_id, sku="V-ROJO", price=10000)
+    estampado = variante(session, {"ESTAMPADO": "Flores Rojas"}, product_id=tienda["suelto"].product_id, sku="S-FLORES", price=10000)
     session.add_all([color, estampado])
     session.commit()
     r = client_admin.get(f"{VENTA}/buscar", params={"palabra": "rojo"}).json()

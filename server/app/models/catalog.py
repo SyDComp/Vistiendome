@@ -2,7 +2,19 @@ from typing import Optional, List, Dict, Any
 from sqlmodel import SQLModel, Field, Relationship, JSON
 from enum import Enum
 from datetime import datetime
-from sqlalchemy import Column, DateTime, func as sa_func
+from pydantic import computed_field
+from sqlalchemy import Column, DateTime, ForeignKeyConstraint, UniqueConstraint, func as sa_func
+
+
+def _sin_campos_retirados(modelo: str, datos: Dict[str, Any], retirados: Dict[str, str]) -> None:
+    """
+    Estos campos eran texto copiado y hoy se calculan de los enlaces. El
+    constructor los ignoraba EN SILENCIO: `SKU(config=...)` creaba una variante
+    sin opciones. Que falle en el acto.
+    """
+    for campo, en_su_lugar in retirados.items():
+        if campo in datos:
+            raise TypeError(f"{modelo}({campo}=...) ya no existe: {en_su_lugar}.")
 
 class MovementType(str, Enum):
     RECEIPT = "RECEIPT"      # Ingreso (Proveedores/Carga inicial)
@@ -21,7 +33,28 @@ class CategoryCharacteristicLink(SQLModel, table=True):
 class SpecificationCharacteristicLink(SQLModel, table=True):
     specification_id: Optional[int] = Field(default=None, foreign_key="specification.id", primary_key=True)
     characteristic_id: Optional[int] = Field(default=None, foreign_key="attribute.id", primary_key=True)
-    allowed_values: List[str] = Field(default=[], sa_type=JSON)
+
+    # Las opciones que la especificación permite, por identidad (ver
+    # EspecificacionOpcion). Renombrar una opción se ve aquí sin tocar nada.
+    permitidas: List["EspecificacionOpcion"] = Relationship(
+        sa_relationship_kwargs={
+            "lazy": "selectin",
+            "cascade": "all, delete-orphan",
+            "primaryjoin": "and_(SpecificationCharacteristicLink.specification_id == EspecificacionOpcion.specification_id, "
+                           "SpecificationCharacteristicLink.characteristic_id == EspecificacionOpcion.caracteristica_id)",
+            "foreign_keys": "[EspecificacionOpcion.specification_id, EspecificacionOpcion.caracteristica_id]",
+        }
+    )
+
+    def __init__(self, **datos):
+        _sin_campos_retirados("SpecificationCharacteristicLink", datos,
+                              {"allowed_values": "se agregan EspecificacionOpcion a .permitidas"})
+        super().__init__(**datos)
+
+    @computed_field
+    @property
+    def allowed_values(self) -> List[str]:
+        return [e.opcion.valor for e in sorted(self.permitidas, key=lambda e: (e.opcion.orden, e.opcion.id))]
 
 class CategorySpecificationLink(SQLModel, table=True):
     category_id: Optional[int] = Field(default=None, foreign_key="category.id", primary_key=True)
@@ -73,9 +106,30 @@ class Characteristic(SQLModel, table=True):
     is_system: bool = Field(default=False)
     system_id: Optional[str] = Field(default=None)
     
+    # Qué datos tiene cada opción además de su nombre (el hex de un color, la
+    # imagen de un estampado). Los valores van en OpcionCaracteristica.datos.
     value_structure: List[Dict[str, Any]] = Field(default=[], sa_type=JSON)
-    domain: List[Dict[str, Any]] = Field(default=[], sa_type=JSON)
-    
+
+    # Las opciones, cada una con su identidad. Antes eran una lista de textos
+    # dentro de esta fila y las variantes copiaban el texto: renombrar dejaba a
+    # todos con el nombre viejo. Se modifican sólo con
+    # core/caracteristicas/opciones.py.
+    opciones: List["OpcionCaracteristica"] = Relationship(
+        back_populates="caracteristica",
+        sa_relationship_kwargs={"lazy": "selectin", "cascade": "all, delete-orphan"},
+    )
+
+    def __init__(self, **datos):
+        _sin_campos_retirados("Characteristic", datos,
+                              {"domain": "se usa core.caracteristicas.sincronizar"})
+        super().__init__(**datos)
+
+    @computed_field
+    @property
+    def domain(self) -> List[Dict[str, Any]]:
+        """Las opciones como las lee el panel: {id, value, order, is_system, ...datos}."""
+        return [opcion.como_dominio() for opcion in sorted(self.opciones, key=lambda o: (o.orden, o.id or 0))]
+
     # Relationships
     categories: List["Category"] = Relationship(
         back_populates="template_characteristics", 
@@ -85,6 +139,89 @@ class Characteristic(SQLModel, table=True):
         back_populates="characteristics",
         link_model=SpecificationCharacteristicLink
     )
+
+class OpcionCaracteristica(SQLModel, table=True):
+    """
+    Una opción de una característica (Negro, XL, Redondo), con identidad propia.
+
+    Las variantes, las especificaciones y los precios por cantidad le apuntan
+    por su id: cambiarle el nombre se ve en todos lados en el mismo momento, y
+    la base no deja borrarla mientras alguien la use.
+    """
+    __tablename__ = "opcion_caracteristica"
+    __table_args__ = (
+        UniqueConstraint("caracteristica_id", "valor", name="opcion_unica_en_su_caracteristica"),
+        # Para que sku_opcion pueda exigir que la opción sea de la característica que dice.
+        UniqueConstraint("id", "caracteristica_id", name="opcion_con_su_caracteristica"),
+    )
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    caracteristica_id: int = Field(foreign_key="attribute.id", index=True)
+    valor: str
+    orden: int = Field(default=0)
+    # Las del sistema (las tallas y colores base) no se renombran ni se quitan.
+    es_sistema: bool = Field(default=False)
+    # Lo que declara value_structure además del nombre: hex_code, image_url...
+    datos: Dict[str, Any] = Field(default={}, sa_type=JSON)
+
+    caracteristica: Characteristic = Relationship(
+        back_populates="opciones", sa_relationship_kwargs={"lazy": "joined"}
+    )
+
+    def como_dominio(self) -> Dict[str, Any]:
+        return {**(self.datos or {}), "id": self.id, "value": self.valor, "order": self.orden, "is_system": self.es_sistema}
+
+
+class SKUOpcion(SQLModel, table=True):
+    """
+    Qué opción tiene una variante en cada característica: una sola por
+    característica, y la base exige que la opción sea de esa característica.
+    """
+    __tablename__ = "sku_opcion"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["opcion_id", "caracteristica_id"],
+            ["opcion_caracteristica.id", "opcion_caracteristica.caracteristica_id"],
+            name="sku_opcion_de_su_caracteristica",
+        ),
+    )
+
+    sku_id: int = Field(foreign_key="sku.id", primary_key=True)
+    caracteristica_id: int = Field(foreign_key="attribute.id", primary_key=True)
+    opcion_id: int = Field(index=True)
+
+    opcion: OpcionCaracteristica = Relationship(
+        sa_relationship_kwargs={
+            "lazy": "joined",
+            "primaryjoin": "SKUOpcion.opcion_id == OpcionCaracteristica.id",
+            "foreign_keys": "[SKUOpcion.opcion_id]",
+        }
+    )
+
+
+class EspecificacionOpcion(SQLModel, table=True):
+    """Una opción que una especificación permite para una de sus características."""
+    __tablename__ = "especificacion_opcion"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["opcion_id", "caracteristica_id"],
+            ["opcion_caracteristica.id", "opcion_caracteristica.caracteristica_id"],
+            name="especificacion_opcion_de_su_caracteristica",
+        ),
+    )
+
+    specification_id: int = Field(foreign_key="specification.id", primary_key=True)
+    caracteristica_id: int = Field(foreign_key="attribute.id", primary_key=True)
+    opcion_id: int = Field(primary_key=True)
+
+    opcion: OpcionCaracteristica = Relationship(
+        sa_relationship_kwargs={
+            "lazy": "joined",
+            "primaryjoin": "EspecificacionOpcion.opcion_id == OpcionCaracteristica.id",
+            "foreign_keys": "[EspecificacionOpcion.opcion_id]",
+        }
+    )
+
 
 class Specification(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -106,8 +243,12 @@ class Collection(SQLModel, table=True):
     name: str = Field(unique=True, index=True)
     slug: str = Field(unique=True, index=True)
     description: Optional[str] = None
-    image_url: Optional[str] = None
-    
+
+    # La foto de portada, de la Galería. Antes era su dirección como texto: al
+    # borrar la foto no se revisaba, y al cambiarle el nombre quedaba rota.
+    portada_id: Optional[int] = Field(default=None, foreign_key="mediaasset.id")
+    portada: Optional["MediaAsset"] = Relationship(sa_relationship_kwargs={"lazy": "joined"})
+
     is_active: bool = Field(default=True)
     created_at: datetime = Field(
         default_factory=datetime.utcnow,
@@ -116,6 +257,16 @@ class Collection(SQLModel, table=True):
     
     # Relationships
     skus: List["SKU"] = Relationship(back_populates="collections", link_model=CollectionSKULink)
+
+    def __init__(self, **datos):
+        _sin_campos_retirados("Collection", datos, {"image_url": "se pasa portada_id (core.medios.foto_por_direccion)"})
+        super().__init__(**datos)
+
+    @computed_field
+    @property
+    def image_url(self) -> Optional[str]:
+        """La dirección de hoy de la foto de portada."""
+        return self.portada.url if self.portada else None
 
 class Product(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -209,9 +360,13 @@ class SKU(SQLModel, table=True):
     product_id: int = Field(foreign_key="product.id")
     sku: str = Field(unique=True, index=True)
     barcode: Optional[str] = Field(default=None, unique=True, index=True)
-    
-    config: Dict[str, str] = Field(default={}, sa_type=JSON)
-    
+
+    # Qué opción tiene en cada característica, por identidad. Se asignan sólo
+    # con core/caracteristicas/enlaces.py, que no acepta opciones inexistentes.
+    opciones: List["SKUOpcion"] = Relationship(
+        sa_relationship_kwargs={"lazy": "selectin", "cascade": "all, delete-orphan"}
+    )
+
     price: float
 
     # --- Override de oferta a nivel variante ---
@@ -238,13 +393,35 @@ class SKU(SQLModel, table=True):
     
     cotizacion_items: List["CotizacionItem"] = Relationship(back_populates="sku")
 
+    def __init__(self, **datos):
+        _sin_campos_retirados("SKU", datos, {"config": "se usa core.caracteristicas.asignar"})
+        super().__init__(**datos)
+
+    @computed_field
+    @property
+    def config(self) -> Dict[str, str]:
+        """
+        {CARACTERÍSTICA: opción} con los nombres de HOY, en el orden de las
+        características. Se calcula de los enlaces: no hay copia que se quede vieja.
+        """
+        enlaces = sorted(self.opciones, key=lambda e: (e.opcion.caracteristica.orden, e.opcion.caracteristica.id))
+        return {e.opcion.caracteristica.name: e.opcion.valor for e in enlaces}
+
 class StockMovement(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     sku_id: int = Field(foreign_key="sku.id")
     type: MovementType
     quantity: int # Delta (ej: +10, -1)
     
-    reference_id: Optional[str] = None # ID de Orden, ID de Carga, etc.
+    # De qué hecho salió (core/movimientos.py: un hecho, un saldo). Uno de:
+    #   · la prenda de un pedido (despacharla, cancelarla hecha),
+    #   · la línea de una orden de corte (terminarla),
+    #   · un lote: el identificador de una operación en bloque (un conteo, una
+    #     partida). No apunta a otra fila: agrupa los movimientos de esa operación.
+    # Antes era un solo texto con cualquiera de los tres, sin enlace.
+    cotizacion_item_id: Optional[str] = Field(default=None, max_length=26, foreign_key="cotizacion_items.id", index=True)
+    orden_corte_item_id: Optional[str] = Field(default=None, max_length=26, foreign_key="orden_corte_items.id", index=True)
+    lote: Optional[str] = Field(default=None, max_length=40, index=True)
     note: Optional[str] = None
     
     created_at: datetime = Field(
@@ -254,11 +431,16 @@ class StockMovement(SQLModel, table=True):
     
     sku: "SKU" = Relationship(back_populates="movements")
 
-class ColorSwatch(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    name: str = Field(unique=True, index=True)
-    hex_code: str = Field(default="#000000")
-    slug: str = Field(unique=True, index=True)
+    def __init__(self, **datos):
+        _sin_campos_retirados("StockMovement", datos, {
+            "reference_id": "se pasa cotizacion_item_id, orden_corte_item_id o lote"})
+        super().__init__(**datos)
+
+    @computed_field
+    @property
+    def reference_id(self) -> Optional[str]:
+        """El origen, como lo lee el panel: el id de la prenda, de la línea o el lote."""
+        return self.cotizacion_item_id or self.orden_corte_item_id or self.lote
 
 class MediaAsset(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)

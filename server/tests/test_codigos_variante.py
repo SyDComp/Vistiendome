@@ -19,6 +19,8 @@ def _sku(codigo, talla, **extra):
 
 @pytest.fixture
 def producto(client_admin, session: Session):
+    from tests.apoyo_catalogo import en_biblioteca
+    en_biblioteca(session, {"TALLA": ["S", "M", "L"], "COLOR": ["Negro"]})
     cat = Category(name="Vestimenta", slug="vestimenta")
     session.add(cat)
     session.commit()
@@ -97,8 +99,9 @@ def test_la_que_ya_no_viene_se_sigue_retirando(client_admin, session, producto):
 
 def test_una_baja_y_una_activa_con_los_mismos_valores_no_chocan(client_admin, session, producto):
     primera, segunda = _variantes(session, producto)
+    from tests.apoyo_catalogo import enlazar
     segunda.is_deleted = True
-    segunda.config = dict(primera.config)
+    enlazar(session, segunda, primera.config)
     session.add(segunda)
     session.commit()
     _guardar(client_admin, producto, "Vestido Perla", [_sku(primera.sku, "S", id=primera.id)])
@@ -113,6 +116,8 @@ def test_las_tallas_grandes_quedan_como_en_su_caracteristica(client_admin, sessi
     assert [normalize_opt(v) for v in ("2xl", "7XL", "xs", "3/4", "rojo italiano", "Tela punto roma")] == \
         ["2XL", "7XL", "XS", "3/4", "Rojo Italiano", "Tela Punto Roma"]
 
+    from tests.apoyo_catalogo import en_biblioteca
+    en_biblioteca(session, {"TALLA": ["3XL"]})
     cat = Category(name="Vestimenta", slug="vestimenta")
     session.add(cat)
     session.commit()

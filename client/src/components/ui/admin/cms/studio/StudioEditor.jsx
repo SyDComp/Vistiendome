@@ -223,7 +223,15 @@ const StudioEditor = ({ isOpen, onClose, data, onSave, mode = 'single' }) => {
                     items={allVariants}
                     emptyMessage={loadingLibrary ? "Cargando catálogo..." : "No se encontraron elementos."}
                     onItemClick={v => {
-                        addLayer('image', { url: v.image || v.image_url, link: `/catalogo/producto/${v.product_id}/${v.sku}` });
+                        // La prenda y su foto por identidad: el servidor arma el link de
+                        // hoy (core/portada_referencias). Si la variante deja de venderse,
+                        // la capa no se muestra en vez de llevar a una prenda que no está.
+                        addLayer('image', {
+                            url: v.image || v.image_url,
+                            asset_id: v.media_assets?.[0]?.id ?? null,
+                            sku_id: v.id,
+                            link: `/catalogo/producto/${v.product_id}/${v.sku}`,
+                        });
                         setShowLibrary(false);
                     }} 
                 />

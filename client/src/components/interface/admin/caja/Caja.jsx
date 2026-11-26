@@ -161,7 +161,7 @@ const Caja = () => {
                             onListo={() => document.activeElement?.blur()} disabled={v.enviando} />
                     </section>
                     <CobroCaja total={v.total} sinDatos={v.sinDatos} clienta={v.clienta} onSinDatos={v.setSinDatos}
-                        onClienta={v.setClienta} pagos={v.pagos} medios={v.medios} falta={v.falta} onPagos={v.cambiarPagos}
+                        onClienta={v.setClienta} pagos={v.pagos} medios={v.medios} efectivo={v.efectivo} falta={v.falta} onPagos={v.cambiarPagos}
                         recibido={v.recibido} onRecibido={v.setRecibido} puedeCobrar={v.puedeCobrar} onCobrar={v.cobrar}
                         enviando={v.enviando} />
                 </main>

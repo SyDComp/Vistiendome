@@ -51,7 +51,7 @@ def ajustar_a_conteo(db: Session, filas: Iterable[Contada], motivo: str) -> List
     movimientos = [
         StockMovement(
             sku_id=f.sku_id, type=MovementType.ADJUSTMENT, quantity=f.contado - f.esperado,
-            reference_id=referencia, note=f"Conteo: había {f.esperado}, se contaron {f.contado}. {motivo.strip()}",
+            lote=referencia, note=f"Conteo: había {f.esperado}, se contaron {f.contado}. {motivo.strip()}",
         )
         for f in filas if f.contado != f.esperado
     ]

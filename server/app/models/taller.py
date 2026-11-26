@@ -7,10 +7,12 @@ pero también corta para tener stock. Por eso la orden es una entidad propia y
 no una vista derivada de las ventas.
 """
 
+from pydantic import computed_field
+from .catalog import _sin_campos_retirados
+from .prendas_opciones import como_config, como_propuesta
 from datetime import datetime
 from typing import Optional, List, Dict
 from enum import Enum
-from sqlalchemy import JSON
 
 from sqlmodel import SQLModel, Field, Relationship
 import ulid
@@ -70,10 +72,8 @@ class OrdenCorteItem(SQLModel, table=True):
     # Caracteristicas de la pieza personalizada, en el mismo formato que
     # SKU.config. Viajan con ella para que la planilla del taller diga que hay
     # que cortar y no solo como se llama.
-    config_custom: Optional[Dict[str, str]] = Field(default=None, sa_type=JSON)
     # Cuales de esos valores los propuso el cliente. El taller necesita verlo:
     # es la diferencia entre cortar con lo que hay y tener que conseguir tela.
-    config_propuesta: Optional[Dict[str, str]] = Field(default=None, sa_type=JSON)
     cantidad: int = Field(default=1)
 
     # De dónde salió esta línea. Con pedido: al finalizar se marca esa pieza
@@ -84,4 +84,32 @@ class OrdenCorteItem(SQLModel, table=True):
     )
 
     orden: OrdenCorte = Relationship(back_populates="items")
+
+    # Sus características, por identidad (models/prendas_opciones.py). Se
+    # asignan con core.caracteristicas.vestir.
+    opciones: List["OrdenCorteItemOpcion"] = Relationship(
+        sa_relationship_kwargs={"lazy": "selectin", "cascade": "all, delete-orphan"}
+    )
+    propuestas: List["OrdenCorteItemPropuesta"] = Relationship(
+        sa_relationship_kwargs={"lazy": "selectin", "cascade": "all, delete-orphan"}
+    )
+
+    def __init__(self, **datos):
+        _sin_campos_retirados("OrdenCorteItem", datos, {
+            "config_custom": "se usa core.caracteristicas.vestir",
+            "config_propuesta": "se usa core.caracteristicas.vestir",
+        })
+        super().__init__(**datos)
+
+    @computed_field
+    @property
+    def config_custom(self) -> Optional[Dict[str, str]]:
+        """Las opciones del catálogo que tiene, con los nombres de hoy."""
+        return como_config(self.opciones) or None
+
+    @computed_field
+    @property
+    def config_propuesta(self) -> Optional[Dict[str, str]]:
+        """Lo que la clienta pidió y no existía, con el nombre de hoy de su característica."""
+        return como_propuesta(self.propuestas) or None
     sku: Optional["SKU"] = Relationship()

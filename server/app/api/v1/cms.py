@@ -2,9 +2,8 @@ from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Body, Query
 from sqlmodel import Session, select
 from ...database import get_session
-from ...core.imagenes import srcset_de
+from ...core import portada_referencias
 from ...models.cms import HomepageSection, HelpSection
-from ...models.catalog import MediaAsset
 from pydantic import BaseModel
 from ...core.sockets import manager
 from ...api.deps import RequirePermiso
@@ -13,33 +12,13 @@ from ...models.iam import CuentaAcceso
 router = APIRouter()
 
 
-def _resolve_layer_media(node, db: Session):
-    """Resuelve recursivamente la URL vigente de cualquier nodo con `asset_id`
-    (ej. capas de imagen de los bloques hero). Robusto ante renombrados:
-    la referencia se guarda por ID y la url se calcula al leer."""
-    if isinstance(node, dict):
-        resolved = {k: _resolve_layer_media(v, db) for k, v in node.items()}
-        aid = resolved.get("asset_id")
-        if aid:
-            asset = db.get(MediaAsset, aid)
-            if asset:
-                resolved["url"] = asset.url
-                # Las capas de los bloques hero son las imágenes más grandes de
-                # la portada: sin esto se bajaban completas (~450 KB cada una).
-                resolved["srcset"] = srcset_de(asset)
-        return resolved
-    if isinstance(node, list):
-        return [_resolve_layer_media(x, db) for x in node]
-    return node
-
-
 def _serialize_section(s, db: Session):
     return {
         "id": s.id,
         "page": s.page,
         "type": s.type,
         "title": s.title,
-        "config": _resolve_layer_media(s.config, db),
+        "config": portada_referencias.resolver(s.config, db),
         "order": s.order,
         "is_active": s.is_active,
     }

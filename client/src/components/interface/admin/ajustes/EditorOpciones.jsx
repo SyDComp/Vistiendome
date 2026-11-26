@@ -3,6 +3,11 @@ import { ArrowUp, ArrowDown, Trash2, Plus } from 'lucide-react';
 
 const clave = (texto) => texto.trim().toLocaleLowerCase('es');
 
+// Cada fila recuerda cómo se llamaba al abrir (origen): así el servidor sabe
+// que una fila con otro texto es la MISMA opción renombrada, y lo ya registrado
+// (pagos, pedidos) muestra el nombre nuevo. Una fila nueva no tiene origen.
+const filasDe = (opciones) => opciones.map(o => ({ origen: o, texto: o }));
+
 /**
  * Editar una lista de opciones: agregar, renombrar, ordenar y quitar.
  *
@@ -10,14 +15,14 @@ const clave = (texto) => texto.trim().toLocaleLowerCase('es');
  * edición a medias no queda guardada, y "Descartar" vuelve a lo que había.
  */
 const EditorOpciones = ({ id, opciones, onGuardar, aviso }) => {
-    const [borrador, setBorrador] = useState(opciones);
+    const [borrador, setBorrador] = useState(() => filasDe(opciones));
     const [nueva, setNueva] = useState('');
     const [guardando, setGuardando] = useState(false);
     const [error, setError] = useState(null);
 
-    useEffect(() => { setBorrador(opciones); }, [opciones]);
+    useEffect(() => { setBorrador(filasDe(opciones)); }, [opciones]);
 
-    const limpias = borrador.map(o => o.trim()).filter(Boolean);
+    const limpias = borrador.map(f => f.texto.trim()).filter(Boolean);
     const conteo = new Map();
     limpias.forEach(o => conteo.set(clave(o), (conteo.get(clave(o)) || 0) + 1));
     const repetidas = new Set([...conteo].filter(([, n]) => n > 1).map(([k]) => k));
@@ -26,7 +31,7 @@ const EditorOpciones = ({ id, opciones, onGuardar, aviso }) => {
         ? 'Tiene que quedar al menos una opción.'
         : repetidas.size ? 'Hay opciones repetidas.' : null;
 
-    const editar = (i, valor) => setBorrador(b => b.map((o, j) => (j === i ? valor : o)));
+    const editar = (i, valor) => setBorrador(b => b.map((f, j) => (j === i ? { ...f, texto: valor } : f)));
     const quitar = (i) => setBorrador(b => b.filter((_, j) => j !== i));
     const mover = (i, d) => setBorrador(b => {
         const copia = [...b];
@@ -36,7 +41,7 @@ const EditorOpciones = ({ id, opciones, onGuardar, aviso }) => {
     const agregar = (e) => {
         e.preventDefault();
         if (!nueva.trim()) return;
-        setBorrador(b => [...b, nueva.trim()]);
+        setBorrador(b => [...b, { origen: null, texto: nueva.trim() }]);
         setNueva('');
     };
 
@@ -44,7 +49,9 @@ const EditorOpciones = ({ id, opciones, onGuardar, aviso }) => {
         setGuardando(true);
         setError(null);
         try {
-            await onGuardar(limpias);
+            await onGuardar(borrador
+                .filter(f => f.texto.trim())
+                .map(f => ({ origen: f.origen, nombre: f.texto.trim() })));
         } catch (err) {
             setError(err?.message || 'No se pudo guardar.');
         } finally {
@@ -55,7 +62,7 @@ const EditorOpciones = ({ id, opciones, onGuardar, aviso }) => {
     return (
         <div className="aj-editor">
             <ul className="aj-lista">
-                {borrador.map((opcion, i) => (
+                {borrador.map(({ texto: opcion }, i) => (
                     <li key={i} className="aj-opcion">
                         <input
                             className={repetidas.has(clave(opcion)) ? 'aj-campo aj-campo--error' : 'aj-campo'}

@@ -21,6 +21,9 @@ from ...models.historia import TipoEvento
 from ...models.iam import Persona
 from .. import ubicacion_persona
 from .historia import Actor, anotar
+from ...models.listas import MetodoEnvio
+from .. import listas
+from ..comuna_de_despacho import ComunaInexistente, comuna_de
 
 NO_SE_CAMBIA = {EstadoCotizacion.DESPACHADA, EstadoCotizacion.CANCELADA}
 DOMICILIO = "DOMICILIO"
@@ -86,18 +89,23 @@ def cambiar(db: Session, cotizacion: Cotizacion, d: Destino, actor: Actor) -> No
     if falta:
         raise NoSeCambiaDestino(f"Para el despacho falta {', '.join(falta)}.")
 
+    try:
+        envio = listas.por_nombre(db, MetodoEnvio, d.transporte, "un método de envío") if d.transporte else None
+        comuna = comuna_de(db, d.comuna_id, d.comuna, d.region) if not retiro else None
+    except (listas.ValorInexistente, ComunaInexistente) as e:
+        raise NoSeCambiaDestino(str(e))
+
     antes = texto(cotizacion)
     cotizacion.modo_entrega = ModoEntrega(d.modo_entrega)
     cotizacion.tipo_despacho = d.tipo_despacho
-    cotizacion.transporte = d.transporte
-    cotizacion.region = d.region
-    cotizacion.comuna = d.comuna
+    cotizacion.metodo_envio_id, cotizacion.envio = (envio.id, envio) if envio else (None, None)
+    cotizacion.comuna_id, cotizacion.comuna_destino = (comuna.id, comuna) if comuna else (None, None)
     cotizacion.direccion = d.direccion
     db.add(cotizacion)
     if antes != texto(cotizacion):
         anotar(db, cotizacion, TipoEvento.DESTINO, actor, de=antes, a=texto(cotizacion))
-    if not retiro and cotizacion.persona is not None:
-        ubicacion_persona.registrar(db, cotizacion.persona, d.comuna_id, d.direccion)
+    if not retiro and cotizacion.persona is not None and comuna is not None:
+        ubicacion_persona.registrar(db, cotizacion.persona, comuna.id, d.direccion)
 
 
 def por_despachar(db: Session, persona: Persona) -> List[Cotizacion]:

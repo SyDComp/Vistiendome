@@ -77,7 +77,7 @@ class PedidoEvento(SQLModel, table=True):
 
     # La cuenta y su nombre en ese momento. Sin cuenta es el sitio web, o un
     # pedido anterior a la historia del que no quedó registrado quién lo cargó.
-    actor_cuenta_id: Optional[str] = Field(default=None, max_length=26)
+    actor_cuenta_id: Optional[str] = Field(default=None, max_length=26, foreign_key="cuentas_acceso.id")
     actor_nombre: Optional[str] = Field(default=None, max_length=120)
 
     ocurrido_at: datetime = Field(

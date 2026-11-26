@@ -11,6 +11,7 @@ from app.models.catalog import Category, MovementType, Product, SKU, StockMoveme
 from app.models.crm import Cotizacion, CotizacionItem
 from app.models.historia import PedidoEvento, TipoEvento
 from app.models.taller import OrdenCorte, OrdenCorteItem
+from tests.apoyo_catalogo import variante
 
 CRM = "/api/v1/crm"
 
@@ -50,7 +51,7 @@ def tienda(session: Session):
         prod = Product(name=nombre, slug=clave, description="", category_id=categoria.id)
         session.add(prod)
         session.commit()
-        sku = SKU(product_id=prod.id, sku=clave.upper(), price=10000, config={"TALLA": "M"})
+        sku = variante(session, {"TALLA": "M"}, product_id=prod.id, sku=clave.upper(), price=10000)
         session.add(sku)
         session.commit()
         variantes[clave] = sku

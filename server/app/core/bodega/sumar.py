@@ -43,7 +43,7 @@ def sumar_a_todas(db: Session, sku_ids: Iterable[int], tipo: str, cantidad: int,
 
     referencia = nueva_referencia()
     movimientos = [
-        StockMovement(sku_id=i, type=tipo_movimiento, quantity=delta, reference_id=referencia, note=motivo.strip())
+        StockMovement(sku_id=i, type=tipo_movimiento, quantity=delta, lote=referencia, note=motivo.strip())
         for i in ids
     ]
     db.add_all(movimientos)

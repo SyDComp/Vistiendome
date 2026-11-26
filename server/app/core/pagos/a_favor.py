@@ -13,9 +13,8 @@ from sqlmodel import Session, select
 from ...models.crm import Cotizacion
 from ...models.pagos import Pago, TipoPago
 
-# El medio con que se paga usando el saldo a favor. No está en la lista de
-# Ajustes: aparece solo cuando la clienta tiene saldo.
-MEDIO_A_FAVOR = "Saldo a favor"
+# Pagar con saldo a favor es un medio de pago de clave "a_favor"
+# (models/listas.py): se reconoce por esa clave, nunca por su nombre.
 
 
 def disponible(db: Session, persona_id: str) -> int:
@@ -30,5 +29,5 @@ def disponible(db: Session, persona_id: str) -> int:
         .where(Cotizacion.persona_id == persona_id, Pago.anulado_en.is_(None))
     ).all()
     dejado = sum(p.monto for p in filas if p.tipo == TipoPago.A_FAVOR)
-    usado = sum(p.monto for p in filas if p.tipo == TipoPago.PAGO and p.medio == MEDIO_A_FAVOR)
+    usado = sum(p.monto for p in filas if p.tipo == TipoPago.PAGO and p.es_a_favor)
     return dejado - usado

@@ -5,7 +5,6 @@ import CharacteristicManager from './CharacteristicManager';
 import FilterManager from './FilterManager';
 import SpecificationManager from './SpecificationManager';
 import LogisticsManager from './LogisticsManager';
-import ColorManager from './ColorManager';
 import CollectionManager from './CollectionManager';
 import LibraryPicker from './LibraryPicker';
 import SectionHeader from '../../../ui/admin/SectionHeader';
@@ -424,8 +423,6 @@ const InventoryModule = ({ view = 'products' }) => {
                 <SpecificationManager/>
             ) : view === 'logistics' || view === 'bodega' ? (
                 <LogisticsManager/>
-            ) : view === 'colors' ? (
-                <ColorManager/>
             ) : view === 'collections' ? (
                 <CollectionManager/>
             ) : (

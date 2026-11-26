@@ -17,6 +17,9 @@ from .. import ubicacion_persona
 from ...models.historia import TipoEvento
 from .historia import Actor, anotar
 from .agregar import poner_prenda
+from ...models.listas import CanalPedido, MetodoEnvio
+from .. import listas
+from ..comuna_de_despacho import comuna_de
 
 
 def modo_de(data) -> ModoEntrega:
@@ -151,14 +154,15 @@ def crear_pedido(session: Session, data, actor: Actor, canal: str = None, permit
         modo_entrega=modo_de(data),
         # Un retiro no tiene transportista ni destino: guardarlos sería dejar
         # datos que contradicen el modo.
-        transporte=data.transporte if despacho else None,
+        metodo_envio_id=(listas.por_nombre(session, MetodoEnvio, data.transporte, "un método de envío").id
+                         if despacho and (data.transporte or "").strip() else None),
         tipo_despacho=data.tipo_despacho if despacho else None,
-        region=(data.region or None) if despacho else None,
-        comuna=(data.comuna or None) if despacho else None,
+        comuna_id=(getattr(comuna_de(session, data.comuna_id, data.comuna, data.region), "id", None)
+                   if despacho else None),
         direccion=(data.direccion or None) if despacho else None,
         nombre_contacto=nombre_contacto,
         telefono_contacto=(data.telefono or "").strip() or None,
-        canal=canal,
+        canal_id=listas.por_nombre(session, CanalPedido, canal, "un canal").id if (canal or "").strip() else None,
         estado=EstadoCotizacion.NUEVA
     )
     session.add(cotizacion)

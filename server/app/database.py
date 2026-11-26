@@ -58,6 +58,11 @@ def init_db():
     if not settings.is_dev:
         return
     SQLModel.metadata.create_all(engine)
+    # Las listas de la tienda (canales, medios, envíos) no pueden quedar vacías.
+    from app.core.semilla_listas import sembrar
+    with Session(engine) as db:
+        sembrar(db)
+        db.commit()
 
 def get_session():
     """Generador de sesiones para FastAPI (Dependency Injection)"""

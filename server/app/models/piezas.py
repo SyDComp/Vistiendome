@@ -10,12 +10,15 @@ Una fila es UNA prenda física: una línea de 3 personalizadas hechas y
 canceladas son 3 piezas, porque se venden de a una.
 """
 
+from pydantic import computed_field
+from .catalog import _sin_campos_retirados
+from .prendas_opciones import como_config, como_propuesta
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
-from sqlalchemy import JSON, Column, DateTime, ForeignKey, String
-from sqlmodel import Field, SQLModel
+from sqlalchemy import Column, DateTime, ForeignKey, String
+from sqlmodel import Field, Relationship, SQLModel
 import ulid
 
 
@@ -41,8 +44,6 @@ class PiezaUnica(SQLModel, table=True):
     producto_id: Optional[int] = Field(default=None, foreign_key="product.id")
     # Lo que tiene, en el mismo formato que una variante ({"TALLA": "M"}), y
     # cuáles de esos valores se propusieron y no existen en el catálogo.
-    config: Dict[str, str] = Field(default_factory=dict, sa_type=JSON)
-    config_propuesta: Dict[str, str] = Field(default_factory=dict, sa_type=JSON)
 
     # De qué prenda de qué pedido salió. El número se copia: si ese pedido se
     # borra, la pieza sigue diciendo de dónde vino.
@@ -63,3 +64,31 @@ class PiezaUnica(SQLModel, table=True):
 
     creada_en: datetime = Field(default_factory=_ahora, sa_column=Column(DateTime(timezone=True), nullable=False))
     actualizada_en: datetime = Field(default_factory=_ahora, sa_column=Column(DateTime(timezone=True), nullable=False))
+
+    # Sus características, por identidad (models/prendas_opciones.py). Se
+    # asignan con core.caracteristicas.vestir.
+    opciones: List["PiezaOpcion"] = Relationship(
+        sa_relationship_kwargs={"lazy": "selectin", "cascade": "all, delete-orphan"}
+    )
+    propuestas: List["PiezaPropuesta"] = Relationship(
+        sa_relationship_kwargs={"lazy": "selectin", "cascade": "all, delete-orphan"}
+    )
+
+    def __init__(self, **datos):
+        _sin_campos_retirados("PiezaUnica", datos, {
+            "config": "se usa core.caracteristicas.vestir",
+            "config_propuesta": "se usa core.caracteristicas.vestir",
+        })
+        super().__init__(**datos)
+
+    @computed_field
+    @property
+    def config(self) -> Dict[str, str]:
+        """Las opciones del catálogo que tiene, con los nombres de hoy."""
+        return como_config(self.opciones) or {}
+
+    @computed_field
+    @property
+    def config_propuesta(self) -> Dict[str, str]:
+        """Lo que la clienta pidió y no existía, con el nombre de hoy de su característica."""
+        return como_propuesta(self.propuestas) or {}

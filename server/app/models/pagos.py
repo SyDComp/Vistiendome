@@ -13,7 +13,9 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy import Column, DateTime, ForeignKey, String, event, inspect
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
+from pydantic import computed_field
+from .catalog import _sin_campos_retirados
 import ulid
 
 
@@ -41,22 +43,45 @@ class Pago(SQLModel, table=True):
     )
     tipo: str = Field(default=TipoPago.PAGO, max_length=12)
     monto: int
-    # El medio tal como se eligió ("Transferencia"). Texto y no una referencia
-    # a la lista de Ajustes: si mañana se quita una opción, los pagos viejos
-    # siguen diciendo cómo se pagó.
-    medio: str = Field(max_length=60)
+    # El medio, de la lista de la tienda. Si mañana se quita de la lista, se
+    # desactiva y no se borra (core/listas): los pagos viejos siguen diciendo
+    # cómo se pagó, y si se renombra, lo dicen con el nombre de hoy.
+    medio_id: int = Field(foreign_key="medio_pago.id")
     nota: Optional[str] = Field(default=None, max_length=300)
 
-    registrado_por_id: Optional[str] = Field(default=None, max_length=26)
+    # Quién, por su cuenta. El nombre queda como estaba ese día (core/pedidos/historia/actor.py).
+    registrado_por_id: Optional[str] = Field(default=None, max_length=26, foreign_key="cuentas_acceso.id")
     registrado_por: Optional[str] = Field(default=None, max_length=120)
     registrado_en: datetime = Field(default_factory=_ahora, sa_column=Column(DateTime(timezone=True), nullable=False))
 
     anulado_en: Optional[datetime] = Field(default=None, sa_column=Column(DateTime(timezone=True), nullable=True))
+    anulado_por_id: Optional[str] = Field(default=None, max_length=26, foreign_key="cuentas_acceso.id")
     anulado_por: Optional[str] = Field(default=None, max_length=120)
     anulado_motivo: Optional[str] = Field(default=None, max_length=300)
 
+    medio_elegido: Optional["MedioPago"] = Relationship(sa_relationship_kwargs={"lazy": "joined"})
 
-_SE_ANULA = {"anulado_en", "anulado_por", "anulado_motivo"}
+    def __init__(self, **datos):
+        _sin_campos_retirados("Pago", datos, {"medio": "se pasa medio_id (core.listas.por_nombre)"})
+        super().__init__(**datos)
+
+    @computed_field
+    @property
+    def medio(self) -> Optional[str]:
+        return self.medio_elegido.nombre if self.medio_elegido else None
+
+    @computed_field
+    @property
+    def es_efectivo(self) -> bool:
+        return bool(self.medio_elegido and self.medio_elegido.clave == "efectivo")
+
+    @computed_field
+    @property
+    def es_a_favor(self) -> bool:
+        return bool(self.medio_elegido and self.medio_elegido.clave == "a_favor")
+
+
+_SE_ANULA = {"anulado_en", "anulado_por", "anulado_por_id", "anulado_motivo"}
 
 
 @event.listens_for(Pago, "before_update")

@@ -14,8 +14,8 @@ const pedido = {
 };
 const pagos = [
     { tipo: 'PAGO', medio: 'Débito', monto: 5000, registrado_en: '2026-10-20T15:31:00' },
-    { tipo: 'PAGO', medio: 'Efectivo', monto: 20000, registrado_en: '2026-10-20T15:30:30' },
-    { tipo: 'PAGO', medio: 'Efectivo', monto: 999, registrado_en: '2026-10-20T15:30:10', anulado_en: '2026-10-20' },
+    { tipo: 'PAGO', medio: 'Efectivo', es_efectivo: true, monto: 20000, registrado_en: '2026-10-20T15:30:30' },
+    { tipo: 'PAGO', medio: 'Efectivo', es_efectivo: true, monto: 999, registrado_en: '2026-10-20T15:30:10', anulado_en: '2026-10-20' },
 ];
 
 describe('comprobante', () => {

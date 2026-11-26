@@ -102,7 +102,7 @@ class CierreCaja(BaseModel):
     fecha: date
     por_medio: List[MedioCierre]
     total_neto: int
-    efectivo_en_cajon: Optional[int]   # None si no hay un medio "Efectivo"
+    efectivo_en_cajon: Optional[int]   # None si no hay un medio de clave "efectivo"
     con_saldo_a_favor: int
     ventas_caja: List[dict]
     anulados_despues: List[dict]

@@ -49,7 +49,7 @@ def _lo_hecho_a_su_lugar(db: Session, item: CotizacionItem, hecha: bool, pedido_
     """
     if item.sku_id:
         movimientos.llevar_a(
-            db, sku_id=item.sku_id, reference_id=item.id, objetivo=item.cantidad if hecha else 0,
+            db, sku_id=item.sku_id, hecho=item, objetivo=item.cantidad if hecha else 0,
             tipo_si_suma=MovementType.RECEIPT, tipo_si_resta=MovementType.ADJUSTMENT, nota=nota,
         )
         return BODEGA

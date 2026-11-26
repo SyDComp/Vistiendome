@@ -9,9 +9,8 @@ from ...database import get_session
 from sqlmodel import Session
 
 from sqlmodel import select, delete
-from ...models.catalog import Product, SKU, MediaAsset, ProductMediaLink, SKUMediaLink
-from ...models.cms import HomepageSection
-from ...models.settings import SiteSetting
+from ...models.catalog import MediaAsset
+from ...core import medios
 from ...api.deps import RequirePermiso
 from ...models.iam import CuentaAcceso
 from ...core.imagenes import generar_derivadas, eliminar_derivadas, srcset_de
@@ -38,26 +37,6 @@ def _display_alias(asset) -> str:
         return asset.alias.strip()
     return _auto_alias(asset.original_name) or asset.filename
 
-
-def _json_references_asset(node, asset_id, needles) -> bool:
-    """
-    Escanea recursivamente un JSON buscando una referencia a un asset, ya sea por
-    ID (clave *asset_id == asset_id) o por URL/nombre (string que contiene la url/filename).
-    `needles` = set de strings en minúscula (url y filename del asset).
-    """
-    if isinstance(node, dict):
-        for k, v in node.items():
-            if k in ("image_asset_id", "asset_id", "media_asset_id") and v == asset_id:
-                return True
-            if _json_references_asset(v, asset_id, needles):
-                return True
-        return False
-    if isinstance(node, list):
-        return any(_json_references_asset(x, asset_id, needles) for x in node)
-    if isinstance(node, str):
-        low = node.lower()
-        return any(n and n in low for n in needles)
-    return False
 
 @router.post("/upload")
 async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_session), current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
@@ -186,82 +165,24 @@ async def update_alias(data: AliasUpdate, db: Session = Depends(get_session), cu
 @router.post("/check-references")
 def check_media_references(ids: List[int], db: Session = Depends(get_session), current_admin: CuentaAcceso = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))):
     """
-    Verifica si una lista de IDs de MediaAsset está en uso en productos, SKUs (variantes) o el CMS.
+    Dónde se usa cada foto: productos, variantes, portadas de colecciones,
+    secciones de la portada y ajustes del sitio (core/medios).
     """
     results = []
-    has_references = False
-
     for asset_id in ids:
         asset = db.get(MediaAsset, asset_id)
         if not asset:
             continue
-
-        associations = []
-
-        # 1. Comprobar asociaciones con Productos
-        links = db.exec(
-            select(ProductMediaLink, Product)
-            .join(Product, Product.id == ProductMediaLink.product_id)
-            .where(ProductMediaLink.media_asset_id == asset_id)
-        ).all()
-        for link, product in links:
-            associations.append({
-                "type": "product",
-                "name": f"Producto: {product.name}",
-                "id": product.id
-            })
-
-        # 2. Comprobar asociaciones con SKUs (Variantes)
-        sku_links = db.exec(
-            select(SKUMediaLink, SKU, Product)
-            .join(SKU, SKU.id == SKUMediaLink.sku_id)
-            .join(Product, Product.id == SKU.product_id)
-            .where(SKUMediaLink.media_asset_id == asset_id)
-        ).all()
-        for link, sku, product in sku_links:
-            associations.append({
-                "type": "sku",
-                "name": f"Variante: {product.name} ({sku.sku})",
-                "id": sku.id
-            })
-
-        # Aguja de búsqueda por URL/nombre (para refs externas/legacy) + ID
-        needles = {(asset.url or "").lower(), (asset.filename or "").lower()}
-
-        # 3. Comprobar asociaciones con Secciones del CMS (Homepage) — por ID o url/nombre
-        sections = db.exec(select(HomepageSection)).all()
-        for sec in sections:
-            if _json_references_asset(sec.config, asset_id, needles):
-                associations.append({
-                    "type": "homepage",
-                    "name": f"CMS Homepage - Sección: {sec.title} ({sec.type})",
-                    "id": sec.id
-                })
-
-        # 4. Comprobar asociaciones con Configuraciones del sitio (modal de bienvenida, etc.)
-        SETTING_LABELS = {
-            "welcome_modal": "Modal de Bienvenida",
-            "top_banner": "Barra de Anuncios",
-        }
-        for st in db.exec(select(SiteSetting)).all():
-            if _json_references_asset(st.value, asset_id, needles):
-                associations.append({
-                    "type": "setting",
-                    "name": f"Configuración: {SETTING_LABELS.get(st.key, st.key)}",
-                    "id": st.key
-                })
-
-        if len(associations) > 0:
-            has_references = True
+        associations = medios.donde_se_usa(db, asset)
+        if associations:
             results.append({
                 "media_id": asset_id,
                 "filename": asset.filename,
                 "original_name": asset.original_name,
                 "associations": associations
             })
-
     return {
-        "has_references": has_references,
+        "has_references": bool(results),
         "references": results
     }
 
@@ -282,9 +203,10 @@ async def delete_media_batch(ids: List[int], db: Session = Depends(get_session),
         file_path = os.path.join(UPLOAD_DIR, asset.filename)
 
         try:
-            # 1. Limpiar Referencias en DB (Integridad Referencial Estricta)
-            db.exec(delete(SKUMediaLink).where(SKUMediaLink.media_asset_id == asset_id))
-            db.exec(delete(ProductMediaLink).where(ProductMediaLink.media_asset_id == asset_id))
+            # 1. La foto sale de todo lo que la usaba: productos, variantes,
+            #    colecciones, portada y ajustes. Antes la portada y la bienvenida
+            #    seguían con su dirección y en el sitio quedaba una imagen rota.
+            medios.quitar_de_todo(db, asset)
 
             # Borrar la entidad MediaAsset
             db.delete(asset)

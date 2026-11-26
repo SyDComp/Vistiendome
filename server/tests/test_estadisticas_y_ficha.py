@@ -10,6 +10,7 @@ from sqlmodel import Session
 from app.api.v1 import analytics, products
 from app.models.analytics import AnalyticsEvent
 from app.models.catalog import Category, MovementType, Product, SKU, StockMovement
+from tests.apoyo_catalogo import variante
 
 
 @pytest.fixture
@@ -48,7 +49,7 @@ def test_con_menos_de_cinco_vistas_no_entra(session, dos_productos):
 
 def test_la_ficha_trae_el_stock_de_cada_variante(session, dos_productos):
     noemi, _ = dos_productos
-    skus = [SKU(product_id=noemi.id, sku=f"NOE-{t}", price=16900, config={"TALLA": t}) for t in ("M", "L", "XL")]
+    skus = [variante(session, {"TALLA": t}, product_id=noemi.id, sku=f"NOE-{t}", price=16900) for t in ("M", "L", "XL")]
     session.add_all(skus)
     session.commit()
     session.add_all([

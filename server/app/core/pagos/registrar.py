@@ -20,9 +20,11 @@ from ...models.historia import TipoEvento
 from ...models.pagos import Pago, TipoPago
 from .. import ajustes_negocio
 from ..pedidos.historia import Actor, anotar
-from .a_favor import MEDIO_A_FAVOR, disponible
+from .a_favor import disponible
 from . import verificar
 from .cuentas import Cuentas, cuentas, pagos_de
+from ...models.listas import MedioPago
+from .. import listas
 
 
 class NoSeRegistra(Exception):
@@ -43,22 +45,35 @@ def _monto_valido(monto) -> None:
         raise NoSeRegistra("El monto tiene que ser un número de pesos mayor que cero.")
 
 
-def _medio_valido(db: Session, medio: str) -> None:
-    medios = ajustes_negocio.leer(db, ajustes_negocio.MEDIOS_PAGO)
-    if medio not in medios:
-        raise NoSeRegistra(f'"{medio}" no es un medio de pago. Opciones: {", ".join(medios)}.')
+def _medio(db: Session, nombre: str) -> MedioPago:
+    """El medio de la lista con ese nombre, que se siga ofreciendo (o el del saldo a favor)."""
+    try:
+        medio = listas.por_nombre(db, MedioPago, nombre, "un medio de pago")
+    except listas.ValorInexistente:
+        medio = None
+    if medio is None or not medio.activo:
+        opciones = ajustes_negocio.leer(db, ajustes_negocio.MEDIOS_PAGO)
+        raise NoSeRegistra(f'"{nombre}" no es un medio de pago. Opciones: {", ".join(opciones)}.')
+    return medio
 
 
-def _anotar_pago(db, cotizacion, actor, tipo, monto, medio, nota, **extra) -> Pago:
+def _a_favor(db: Session) -> MedioPago:
+    medio = listas.por_clave(db, MedioPago, "a_favor")
+    if medio is None:
+        raise NoSeRegistra("Falta el medio de pago del saldo a favor.")
+    return medio
+
+
+def _anotar_pago(db, cotizacion, actor, tipo, monto, medio: MedioPago, nota, **extra) -> Pago:
     pago = Pago(
-        cotizacion_id=cotizacion.id, tipo=tipo, monto=monto, medio=medio,
+        cotizacion_id=cotizacion.id, tipo=tipo, monto=monto, medio_id=medio.id, medio_elegido=medio,
         nota=(nota or "").strip() or None,
         registrado_por_id=actor.cuenta_id, registrado_por=actor.nombre,
     )
     db.add(pago)
     evento = {TipoPago.PAGO: TipoEvento.PAGO, TipoPago.DEVOLUCION: TipoEvento.DEVOLUCION,
               TipoPago.A_FAVOR: TipoEvento.A_FAVOR}[tipo]
-    anotar(db, cotizacion, evento, actor, monto=monto, medio=medio, nota=pago.nota,
+    anotar(db, cotizacion, evento, actor, monto=monto, medio=medio.nombre, nota=pago.nota,
            **{k: v for k, v in extra.items() if v is not None})
     return pago
 
@@ -69,7 +84,8 @@ def registrar(db: Session, cotizacion: Cotizacion, monto: int, medio: str, nota:
         raise NoSeRegistra("El pedido está cancelado: no se le registran pagos.")
     _monto_valido(monto)
     no_calza = []
-    if medio == MEDIO_A_FAVOR:
+    medio = _medio(db, medio)
+    if medio.clave == "a_favor":
         tiene = disponible(db, cotizacion.persona_id)
         if monto > tiene:
             raise NoSeRegistra(f"La clienta tiene {pesos(tiene)} a favor: no alcanza para {pesos(monto)}.")
@@ -80,8 +96,6 @@ def registrar(db: Session, cotizacion: Cotizacion, monto: int, medio: str, nota:
             raise NoSeRegistra(
                 " ".join(no_calza) + " Escribe en la nota cómo verificaste que es la misma persona."
             )
-    else:
-        _medio_valido(db, medio)
 
     c = _cuentas(db, cotizacion)
     if not c.por_cotizar and monto > c.saldo:
@@ -102,8 +116,7 @@ def _de_mas(db: Session, cotizacion: Cotizacion, monto: int) -> None:
 def devolver(db: Session, cotizacion: Cotizacion, monto: int, medio: str, nota: Optional[str], actor: Actor) -> Pago:
     """Se le devuelve a la clienta lo pagado de más. No hace commit."""
     _de_mas(db, cotizacion, monto)
-    _medio_valido(db, medio)
-    return _anotar_pago(db, cotizacion, actor, TipoPago.DEVOLUCION, monto, medio, nota)
+    return _anotar_pago(db, cotizacion, actor, TipoPago.DEVOLUCION, monto, _medio(db, medio), nota)
 
 
 def dejar_a_favor(db: Session, cotizacion: Cotizacion, monto: int, nota: Optional[str], actor: Actor) -> Pago:
@@ -111,7 +124,7 @@ def dejar_a_favor(db: Session, cotizacion: Cotizacion, monto: int, nota: Optiona
     if not cotizacion.persona_id:
         raise NoSeRegistra("Una venta sin datos no tiene a quién dejarle un saldo a favor: devuélvelo.")
     _de_mas(db, cotizacion, monto)
-    return _anotar_pago(db, cotizacion, actor, TipoPago.A_FAVOR, monto, MEDIO_A_FAVOR, nota)
+    return _anotar_pago(db, cotizacion, actor, TipoPago.A_FAVOR, monto, _a_favor(db), nota)
 
 
 def anular(db: Session, cotizacion: Cotizacion, pago: Pago, motivo: Optional[str], actor: Actor) -> None:
@@ -124,7 +137,7 @@ def anular(db: Session, cotizacion: Cotizacion, pago: Pago, motivo: Optional[str
     if pago.tipo == TipoPago.A_FAVOR and disponible(db, cotizacion.persona_id) < pago.monto:
         raise NoSeRegistra("Ese saldo a favor ya se usó en otro pedido: anula primero ese pago.")
     pago.anulado_en = datetime.now(timezone.utc)
-    pago.anulado_por = actor.nombre
+    pago.anulado_por_id, pago.anulado_por = actor.cuenta_id, actor.nombre
     pago.anulado_motivo = motivo
     db.add(pago)
     anotar(db, cotizacion, TipoEvento.PAGO_ANULADO, actor, monto=pago.monto, medio=pago.medio, motivo=motivo,

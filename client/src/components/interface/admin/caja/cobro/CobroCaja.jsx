@@ -4,7 +4,6 @@ import ClientaVenta from './ClientaVenta';
 import { pesos } from '../../../../../utils/ventaLocal';
 import PagosVenta from './PagosVenta';
 
-const EFECTIVO = 'Efectivo';
 
 /**
  * El cobro: el total, quién compra (sin datos, si no los quiere dar), cómo
@@ -12,11 +11,11 @@ const EFECTIVO = 'Efectivo';
  * no se registra: lo que entra a la caja es el monto del pago.
  */
 const CobroCaja = ({
-    total, sinDatos, clienta, onSinDatos, onClienta, pagos, medios, falta, onPagos,
+    total, sinDatos, clienta, onSinDatos, onClienta, pagos, medios, efectivo, falta, onPagos,
     recibido, onRecibido, puedeCobrar, onCobrar, enviando,
 }) => {
-    const efectivo = pagos.filter(p => p.medio === EFECTIVO).reduce((t, p) => t + pesos(p.monto), 0);
-    const vuelto = pesos(recibido) - efectivo;
+    const enEfectivo = pagos.filter(p => p.medio === efectivo).reduce((t, p) => t + pesos(p.monto), 0);
+    const vuelto = pesos(recibido) - enEfectivo;
     return (
         <aside className="cj-cobro" aria-label="Cobro">
             <div className="cj-total">

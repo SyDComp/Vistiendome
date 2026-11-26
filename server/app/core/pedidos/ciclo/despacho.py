@@ -53,7 +53,7 @@ def sacar(db: Session, cotizacion: Cotizacion) -> None:
         if item.camino != BODEGA or not item.sku_id:
             continue
         movimientos.llevar_a(
-            db, sku_id=item.sku_id, reference_id=item.id, objetivo=-item.cantidad,
+            db, sku_id=item.sku_id, hecho=item, objetivo=-item.cantidad,
             tipo_si_resta=MovementType.SALE, tipo_si_suma=MovementType.RETURN,
             nota=f"Despacho pedido #{cotizacion.numero}",
         )
@@ -77,7 +77,7 @@ def devolver(db: Session, cotizacion: Cotizacion) -> None:
         if not item.sku_id:
             continue
         movimientos.llevar_a(
-            db, sku_id=item.sku_id, reference_id=item.id, objetivo=0,
+            db, sku_id=item.sku_id, hecho=item, objetivo=0,
             tipo_si_resta=MovementType.SALE, tipo_si_suma=MovementType.RETURN,
             nota=f"Se deshizo el despacho del pedido #{cotizacion.numero}",
         )

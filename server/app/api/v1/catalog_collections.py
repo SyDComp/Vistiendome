@@ -10,15 +10,27 @@ import unicodedata
 from ...core.sockets import manager
 from ...api.deps import RequirePermiso
 from ...models.iam import CuentaAcceso
+from ...core.medios import foto_por_direccion
 
 router = APIRouter()
 
 class CollectionCreate(BaseModel):
     name: str
     description: Optional[str] = None
+    # El panel manda la dirección de la foto elegida; se guarda la foto (portada_id).
     image_url: Optional[str] = None
     is_active: bool = True
     sku_ids: List[int] = []
+
+
+def _portada_id(db: Session, url: Optional[str]) -> Optional[int]:
+    """La foto de la Galería que es esa dirección. Una dirección que no es de la Galería no se acepta."""
+    if not url:
+        return None
+    foto = foto_por_direccion(db, url)
+    if foto is None:
+        raise HTTPException(status_code=422, detail="La portada tiene que ser una foto de la Galería o de una variante.")
+    return foto.id
 
 def slugify(text: str) -> str:
     """Convierte texto a un slug amigable para URL usando _ para espacios."""
@@ -75,7 +87,7 @@ async def create_collection(data: CollectionCreate, db: Session = Depends(get_se
         name=data.name,
         slug=slug,
         description=data.description,
-        image_url=data.image_url,
+        portada_id=_portada_id(db, data.image_url),
         is_active=data.is_active
     )
     db.add(collection)
@@ -108,7 +120,7 @@ async def update_collection(id: int, data: CollectionCreate, db: Session = Depen
     old_slug = collection.slug
     collection.name = data.name
     collection.description = data.description
-    collection.image_url = data.image_url
+    collection.portada_id = _portada_id(db, data.image_url)
     collection.is_active = data.is_active
     
     # Actualizar SKUs (Borrar antiguos y poner nuevos)

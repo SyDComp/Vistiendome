@@ -19,6 +19,7 @@ from .. import propuestas as core_propuestas
 from .cotizar import ESTADOS_QUE_SE_COTIZAN, nombre_de_prenda
 from .historia import Actor, anotar
 from .prendas import prenda_desde
+from .. import caracteristicas
 
 
 class NoSeAgrega(Exception):
@@ -33,11 +34,11 @@ def poner_prenda(session: Session, cotizacion: Cotizacion, entrada, posicion: in
     Qué prenda es —variante, personalizada de un producto o escrita a mano— y
     su precio en tres estados: ver prendas.py.
     """
-    item = CotizacionItem(
-        cotizacion_id=cotizacion.id,
-        posicion=posicion,
-        **prenda_desde(session, entrada, permitir_sin_costo),
-    )
+    campos = prenda_desde(session, entrada, permitir_sin_costo)
+    elegido, propuesto = campos.pop("config_custom"), campos.pop("config_propuesta")
+    item = CotizacionItem(cotizacion_id=cotizacion.id, posicion=posicion, **campos)
+    # Lo elegido y lo propuesto, enlazados a sus características (core/caracteristicas/prendas).
+    caracteristicas.vestir(session, item, elegido, propuesto)
     session.add(item)
 
     # Lo que el cliente propuso y no existe en el catalogo queda registrado

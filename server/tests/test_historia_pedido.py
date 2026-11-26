@@ -15,6 +15,7 @@ from sqlmodel import Session, select
 from app.models.catalog import Category, Product, SKU
 from app.models.crm import Cotizacion, CotizacionItem
 from app.models.historia import PedidoEvento, TipoEvento
+from tests.apoyo_catalogo import variante as nueva_variante
 
 # Una fecha comprometida que siempre está en el futuro.
 EN_UN_MES = (date.today() + timedelta(days=30)).isoformat()
@@ -45,7 +46,7 @@ def variante(session: Session) -> SKU:
     prod = Product(name="Vestido Noemi", slug="vestido-noemi", description="", category_id=cat.id)
     session.add(prod)
     session.commit()
-    sku = SKU(product_id=prod.id, sku="NOE-M", price=17490, config={"TALLA": "M"})
+    sku = nueva_variante(session, {"TALLA": "M"}, product_id=prod.id, sku="NOE-M", price=17490)
     session.add(sku)
     session.commit()
     return sku

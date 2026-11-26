@@ -38,6 +38,10 @@ def session_fixture():
     # Create all tables in the memory db
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
+        # Las listas de la tienda con lo que traen de fábrica, como una base nueva.
+        from app.core.semilla_listas import sembrar
+        sembrar(session)
+        session.commit()
         yield session
     # Drop all tables after the test
     SQLModel.metadata.drop_all(engine)

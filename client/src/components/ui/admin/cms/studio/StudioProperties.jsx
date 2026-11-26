@@ -63,7 +63,10 @@ const StudioProperties = ({ scene, activeLayer, activeLayerIdx, bgColor, breakpo
                             className="est-campo est-campo--menor" 
                             placeholder="/catalogo/producto/nombre-producto"
                             value={activeLayer.link || ''} 
-                            onChange={e => onUpdateLayer({ link: e.target.value })} 
+                            onChange={e => onUpdateLayer({
+                                link: e.target.value,
+                                sku_id: null, // un link escrito a mano deja de seguir a la prenda del catálogo
+                            })}
                         />
                     </Prop>
 

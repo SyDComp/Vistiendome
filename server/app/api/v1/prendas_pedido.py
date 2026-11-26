@@ -18,6 +18,7 @@ from app.core.pedidos.cancelar import NoSeCancela, cancelar_prenda
 from app.core.pedidos.quitar import NoSeQuita, quitar
 from app.models.crm import Cotizacion, CotizacionItem
 from app.models.iam import CuentaAcceso
+from ...core import caracteristicas
 
 router = APIRouter()
 _ADMIN = Depends(RequirePermiso("SISTEMA", "ADMINISTRAR"))
@@ -38,6 +39,9 @@ def agregar_prenda(cotizacion_id: str, data: CotizacionItemCreate, db: Session =
         agregar(db, cotizacion, data, historia.de_cuenta(admin))
     except NoSeAgrega as e:
         raise HTTPException(status_code=409, detail=str(e))
+    except caracteristicas.OpcionInexistente as e:
+        db.rollback()
+        raise HTTPException(status_code=422, detail=str(e))
     db.commit()
     db.refresh(cotizacion)
     return leer_pedidos(db, [cotizacion])[0]

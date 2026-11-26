@@ -11,6 +11,8 @@ except ImportError:
 
 import ulid
 from .geo import Comuna
+from pydantic import computed_field
+from .catalog import _sin_campos_retirados
 
 def generate_ulid() -> str:
     return str(ulid.ULID())
@@ -55,12 +57,23 @@ class Persona(SQLModel, table=True):
     telefono: Optional[str] = Field(default=None, max_length=20)
     tipo_persona: TipoPersona = Field(default=TipoPersona.LEAD)
     estado: str = Field(default="ACTIVO", max_length=50)
-    transporte_preferido: Optional[str] = Field(default=None, max_length=50)
+    metodo_envio_preferido_id: Optional[int] = Field(default=None, foreign_key="metodo_envio.id")
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     cuenta_acceso: Optional["CuentaAcceso"] = Relationship(back_populates="persona", sa_relationship_kwargs={"uselist": False})
     perfil_cliente: Optional["PerfilCliente"] = Relationship(back_populates="persona", sa_relationship_kwargs={"uselist": False})
     
+    envio_preferido: Optional["MetodoEnvio"] = Relationship(sa_relationship_kwargs={"lazy": "joined"})
+
+    def __init__(self, **datos):
+        _sin_campos_retirados("Persona", datos, {"transporte_preferido": "se pasa metodo_envio_preferido_id"})
+        super().__init__(**datos)
+
+    @computed_field
+    @property
+    def transporte_preferido(self) -> Optional[str]:
+        return self.envio_preferido.nombre if self.envio_preferido else None
+
     cotizaciones: List["Cotizacion"] = Relationship(back_populates="persona")
     direcciones: List["Direccion"] = Relationship(back_populates="persona")
 

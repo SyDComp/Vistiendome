@@ -14,6 +14,7 @@ from sqlmodel import Session, select
 
 from ...models.crm import CotizacionItem
 from ...models.piezas import EstadoPieza, PiezaUnica
+from .. import caracteristicas
 
 
 def _nombre(item: CotizacionItem) -> str:
@@ -34,15 +35,15 @@ def llevar_a(db: Session, item: CotizacionItem, unidades: int, pedido_numero, no
     ).all()
     diferencia = unidades - len(vivas)
     for _ in range(max(diferencia, 0)):
-        db.add(PiezaUnica(
+        pieza = PiezaUnica(
             numero=db.execute(text("SELECT nextval('piezas_unicas_numero_seq')")).scalar_one(),
             nombre=_nombre(item),
             producto_id=item.producto_id,
-            config=dict(item.config_custom or {}),
-            config_propuesta=dict(item.config_propuesta or {}),
             origen_item_id=item.id,
             origen_pedido_numero=pedido_numero,
-        ))
+        )
+        caracteristicas.vestir(db, pieza, item.config_custom, item.config_propuesta)
+        db.add(pieza)
     sobran = [p for p in reversed(vivas) if p.estado == EstadoPieza.DISPONIBLE][:max(-diferencia, 0)]
     for pieza in sobran:
         pieza.estado = EstadoPieza.BAJA

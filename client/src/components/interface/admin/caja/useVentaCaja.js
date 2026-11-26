@@ -9,7 +9,6 @@ import { motivoRutOpcional } from '../../../../utils/rut';
 import { paraServidor, pesos, restante, sePuedeVender, totalVenta } from '../../../../utils/ventaLocal';
 import useImprimirComprobante from './comprobante/useImprimirComprobante';
 
-const EFECTIVO = 'Efectivo';
 
 /**
  * La venta que se arma en la caja: las prendas, quién compra, los pagos,
@@ -22,6 +21,8 @@ export default function useVentaCaja() {
     const { ajustes } = useAjustesNegocio();
     const imprimir = useImprimirComprobante();
     const medios = useMemo(() => ajustes?.medios_pago || [], [ajustes]);
+    // El medio que da vuelto: se reconoce por su clave en el servidor, no por su nombre.
+    const efectivo = ajustes?.medio_efectivo || null;
 
     const [version, setVersion] = useState(0);
     const [lineas, setLineas] = useState([]);
@@ -90,9 +91,9 @@ export default function useVentaCaja() {
         setEnviando(true);
         try {
             const pedido = await registrarVenta(paraServidor({ clienta: sinDatos ? null : clienta, lineas, pagos }));
-            const efectivo = pagos.filter(p => p.medio === EFECTIVO).reduce((t, p) => t + pesos(p.monto), 0);
+            const enEfectivo = pagos.filter(p => p.medio === efectivo).reduce((t, p) => t + pesos(p.monto), 0);
             const conCuanto = pesos(recibido);
-            setHecha({ pedido, vuelto: conCuanto > efectivo ? conCuanto - efectivo : 0, recibido: conCuanto });
+            setHecha({ pedido, vuelto: conCuanto > enEfectivo ? conCuanto - enEfectivo : 0, recibido: conCuanto });
             setVersion(n => n + 1);
             await imprimirComprobante(pedido, { recibido: conCuanto });
         } catch (err) {
@@ -117,7 +118,7 @@ export default function useVentaCaja() {
     }, [lineas.length, confirm, nuevaVenta]);
 
     return {
-        version, medios, lineas, cambiarLineas, agregar, porCodigo,
+        version, medios, efectivo, lineas, cambiarLineas, agregar, porCodigo,
         sinDatos, setSinDatos, clienta, setClienta, pagos, cambiarPagos, falta: restante(lineas, pagos),
         recibido, setRecibido, total, puedeCobrar, cobrar, enviando, aviso, agregado,
         hecha, imprimiendo, imprimirComprobante, nuevaVenta, vaciar,

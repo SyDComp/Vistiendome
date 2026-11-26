@@ -8,6 +8,7 @@ import pytest
 from app.api.v1.catalog_admin import ProductCreate, SKUCreate
 from app.core import pesos
 from app.models.catalog import SKU, Category, Product
+from tests.apoyo_catalogo import variante
 
 
 def test_un_precio_con_decimales_no_pasa_y_dice_como_escribirlo():
@@ -40,7 +41,7 @@ def test_editar_la_variante_rechaza_el_precio_con_centavos_sin_tocarlo(client_ad
     p = Product(name="Abrigo", slug="pr-abrigo", description="", category_id=cat.id)
     session.add(p)
     session.commit()
-    s = SKU(product_id=p.id, sku="PR-ABRIGO-S", price=52990, config={"TALLA": "S"})
+    s = variante(session, {"TALLA": "S"}, product_id=p.id, sku="PR-ABRIGO-S", price=52990)
     session.add(s)
     session.commit()
 

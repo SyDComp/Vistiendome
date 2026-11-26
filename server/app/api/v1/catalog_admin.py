@@ -20,29 +20,16 @@ from ...models.crm import CotizacionItem
 from ...models.catalog import (
     Product, Category, SKU, MediaAsset, ProductMediaLink, SKUMediaLink,
     Characteristic, Specification, SpecificationCharacteristicLink, CategorySpecificationLink,
-    StockMovement, MovementType, ColorSwatch
+    StockMovement, MovementType,
+    OpcionCaracteristica, SKUOpcion, EspecificacionOpcion,
 )
+from ...models.tramos import TramoPrecio, TramoProducto
+from ...models.promociones import PromocionProducto
 import string
 from ...core.imagenes import srcset_de
 from ...core.portada import portadas
 
-def normalize_char(text: str) -> str:
-    """Normaliza características a MAYÚSCULAS"""
-    if not text: return ""
-    return text.strip().upper()
-
-def normalize_opt(text: str) -> str:
-    """Normaliza opciones a Mayúscula Cada Palabra preservando siglas comunes en mayúscula"""
-    if not text: return ""
-    cleaned = text.strip()
-    upper_cleaned = cleaned.upper()
-    if upper_cleaned in {"XS", "S", "M", "L", "XL", "XXL", "XXXL", "CM", "MM", "KG", "ML", "UN", "PAR"}:
-        return upper_cleaned
-    # Una palabra con números va en mayúscula: "2XL", no "2xl". capwords solo
-    # sube la primera letra, y si es un número no sube nada: cada guardado
-    # dejaba las tallas grandes en minúscula.
-    return " ".join(p.upper() if any(ch.isdigit() for ch in p) else p.capitalize()
-                    for p in cleaned.lower().split())
+from ...core.caracteristicas.nombres import normalize_char, normalize_opt
 
 from ...core import inventory_core
 from pydantic import BaseModel, field_validator, model_validator
@@ -153,10 +140,6 @@ class CategoryUpdate(BaseModel):
     abastecimiento: Optional[str] = None
     acepta_personalizacion: Optional[bool] = None
 
-class ColorSwatchCreate(BaseModel):
-    name: str
-    hex_code: str
-
 class StockMovementCreate(BaseModel):
     sku_id: int
     type: MovementType
@@ -225,11 +208,6 @@ async def ordenar_attributes(data: OrdenCaracteristicas, db: Session = Depends(g
 @router.post("/attributes")
 async def create_attribute(data: Dict[str, Any], db: Session = Depends(get_session)):
     norm_name = normalize_char(data.get("name", ""))
-    norm_domain = []
-    for item in data.get("domain", []):
-        new_item = {**item}
-        if "value" in new_item: new_item["value"] = normalize_opt(new_item["value"])
-        norm_domain.append(new_item)
 
     attr = Characteristic(
         name=norm_name,
@@ -238,10 +216,13 @@ async def create_attribute(data: Dict[str, Any], db: Session = Depends(get_sessi
         afecta_apariencia=data.get("afecta_apariencia", False),
         en_orden_corte=data.get("en_orden_corte", True),
         value_structure=data.get("value_structure", []),
-        domain=norm_domain,
         is_system=data.get("is_system", False),
         orden=caracteristicas.siguiente_orden(db),
     )
+    try:
+        caracteristicas.sincronizar(db, attr, data.get("domain", []))
+    except caracteristicas.OpcionesInvalidas as e:
+        raise HTTPException(status_code=400, detail=str(e))
     db.add(attr)
     db.commit()
     db.refresh(attr)
@@ -284,60 +265,30 @@ async def update_attribute(attr_id: int, attr_data: Dict[str, Any], db: Session 
             detail=f"'{db_attr.name}' define cómo se ve la prenda y no puede dejar de hacerlo: el Explorador la necesita para separar las tarjetas"
         )
 
-    # Normalizar nombre si viene (y no es sistema o es el mismo)
+    # Normalizar nombre si viene (y no es sistema o es el mismo). Renombrar es
+    # sólo esto: las variantes, especificaciones y tramos le apuntan por id.
     if "name" in attr_data:
         attr_data["name"] = normalize_char(attr_data["name"])
-    
-    # Normalizar dominio si viene
+
+    # Las opciones, por identidad: renombrar una es la misma opción con otro
+    # nombre, y se ve en todas las variantes que la tienen (core/caracteristicas/opciones).
     if "domain" in attr_data:
-        new_domain = attr_data["domain"]
-        old_domain = db_attr.domain or []
-        
-        # A. VALIDAR INMUTABILIDAD DE vOS (Opciones del Sistema)
-        # Si la característica es de sistema, verificamos que no se hayan borrado o alterado las vOS existentes
-        if db_attr.is_system:
-            old_system_values = {opt["value"]: opt for opt in old_domain if opt.get("is_system")}
-            new_values_map = {opt["value"]: opt for opt in new_domain}
-            
-            for val, old_opt in old_system_values.items():
-                if val not in new_values_map:
-                    raise HTTPException(status_code=403, detail=f"La opción de sistema '{val}' es inmutable y no puede ser eliminada")
-                
-                # Opcional: Impedir cambio de hex_code en vOS si quisiéramos ser ultra-estrictos
-                # if old_opt.get("hex_code") != new_values_map[val].get("hex_code"):
-                #    raise HTTPException(status_code=403, detail=f"No se permite alterar el color base de la opción de sistema '{val}'")
+        try:
+            caracteristicas.sincronizar(db, db_attr, attr_data["domain"])
+        except caracteristicas.OpcionDelSistema as e:
+            db.rollback()
+            raise HTTPException(status_code=403, detail=str(e))
+        except caracteristicas.OpcionesInvalidas as e:
+            db.rollback()
+            raise HTTPException(status_code=400, detail=str(e))
 
-        # B. CHECK DE USO (Para vOS y vOU)
-        # Si se está intentando eliminar una opción (que no esté en el nuevo dominio), comprobamos si hay SKUs usándola
-        old_values = {opt["value"] for opt in old_domain}
-        new_values = {normalize_opt(opt.get("value", "")) for opt in new_domain}
-        removed_values = old_values - new_values
-        
-        if removed_values:
-            # Buscamos en SKUs si alguna configuración usa estos valores para ESTE atributo
-            # Nota: SKU.config es JSONB, buscamos la clave del atributo
-            for val in removed_values:
-                # Consulta para ver si existe algún SKU con este valor en la clave db_attr.name
-                statement = select(func.count(SKU.id)).where(SKU.config[db_attr.name].as_string() == val)
-                count = db.exec(statement).one()
-                if count > 0:
-                    raise HTTPException(
-                        status_code=400, 
-                        detail=f"No se puede eliminar '{val}': está vinculada a {count} variante(s). Desvincúlala primero."
-                    )
-
-        norm_domain = []
-        for item in new_domain:
-            new_item = {**item}
-            if "value" in new_item: new_item["value"] = normalize_opt(new_item["value"])
-            # Asegurar que mantenemos el flag is_system si ya venía o si es nueva vOU
-            norm_domain.append(new_item)
-        attr_data["domain"] = norm_domain
-
+    # Lo calculado y la identidad no se asignan: el panel devuelve el objeto entero.
     for key, value in attr_data.items():
+        if key in ("id", "domain", "opciones"):
+            continue
         if hasattr(db_attr, key):
             setattr(db_attr, key, value)
-            
+
     db.add(db_attr)
     db.commit()
     db.refresh(db_attr)
@@ -506,9 +457,16 @@ async def delete_attribute(attr_id: int, db: Session = Depends(get_session)):
     if db_attr.is_system:
         raise HTTPException(status_code=403, detail="No se puede eliminar una característica maestra del sistema")
     
-    # Check si tiene productos asociados antes de borrar
-    # (Opcional: aquí podríamos ser más estrictos si quisiéramos)
-    
+    # Antes se borraba aunque la usaran variantes, que quedaban con un nombre
+    # que ya no existía. Ahora le apuntan por id: se avisa quién la usa.
+    en_uso = sorted({uso for o in db_attr.opciones for uso in caracteristicas.usos(db, o.id)})
+    en_uso += caracteristicas.usos_de_caracteristica(db, attr_id)
+    tramos = db.exec(select(func.count()).select_from(TramoPrecio).where(TramoPrecio.caracteristica_id == attr_id)).one()
+    if tramos:
+        en_uso.append(f"{tramos} precio(s) por cantidad")
+    if en_uso:
+        raise HTTPException(status_code=400, detail=f"No se puede eliminar {db_attr.name}: la usan {', '.join(en_uso)}.")
+
     db.delete(db_attr)
     db.commit()
 
@@ -679,6 +637,21 @@ def list_specifications(db: Session = Depends(get_session)):
         })
     return results
 
+def _enlace_de_especificacion(db: Session, spec_id: int, char_info: Dict[str, Any]) -> SpecificationCharacteristicLink:
+    """Una característica de la especificación, con sus opciones permitidas enlazadas por id."""
+    caracteristica = db.get(Characteristic, char_info["id"])
+    if caracteristica is None:
+        raise HTTPException(status_code=422, detail=f"La característica {char_info['id']} no existe.")
+    por_valor = {o.valor: o for o in caracteristica.opciones}
+    link = SpecificationCharacteristicLink(specification_id=spec_id, characteristic_id=caracteristica.id)
+    for valor in char_info.get("allowed_values", []):
+        opcion = por_valor.get(normalize_opt(valor))
+        if opcion is None:
+            raise HTTPException(status_code=422, detail=f"'{valor}' no es una opción de {caracteristica.name}.")
+        link.permitidas.append(EspecificacionOpcion(
+            specification_id=spec_id, caracteristica_id=caracteristica.id, opcion_id=opcion.id, opcion=opcion))
+    return link
+
 @router.post("/specifications")
 def create_specification(data: SpecificationCreate, db: Session = Depends(get_session)):
     new_spec = Specification(name=data.name, description=data.description)
@@ -689,15 +662,7 @@ def create_specification(data: SpecificationCreate, db: Session = Depends(get_se
     chars_to_link = data.characteristics if data.characteristics else [{"id": cid, "allowed_values": []} for cid in data.characteristic_ids]
 
     for char_info in chars_to_link:
-        char_id = char_info["id"]
-        # Normalizar valores permitidos
-        allowed = [normalize_opt(v) for v in char_info.get("allowed_values", [])]
-        link = SpecificationCharacteristicLink(
-            specification_id=new_spec.id, 
-            characteristic_id=char_id,
-            allowed_values=allowed
-        )
-        db.add(link)
+        db.add(_enlace_de_especificacion(db, new_spec.id, char_info))
         
     # Vincular categorías
     for cat_id in data.category_ids:
@@ -724,15 +689,9 @@ def update_specification(spec_id: int, data: SpecificationCreate, db: Session = 
     
     chars_to_link = data.characteristics if data.characteristics else [{"id": cid, "allowed_values": []} for cid in data.characteristic_ids]
 
+    db.flush()  # los enlaces viejos se van antes de poner los nuevos (misma llave)
     for char_info in chars_to_link:
-        char_id = char_info["id"]
-        allowed = char_info.get("allowed_values", [])
-        link = SpecificationCharacteristicLink(
-            specification_id=spec_id, 
-            characteristic_id=char_id,
-            allowed_values=allowed
-        )
-        db.add(link)
+        db.add(_enlace_de_especificacion(db, spec_id, char_info))
         
     # Sincronizar categorías (borrar y recrear)
     old_cat_links = db.exec(select(CategorySpecificationLink).where(CategorySpecificationLink.specification_id == spec_id)).all()
@@ -752,6 +711,7 @@ def delete_specification(spec_id: int, db: Session = Depends(get_session)):
     spec = db.get(Specification, spec_id)
     if not spec:
         raise HTTPException(status_code=404, detail="Especificación no encontrada")
+    db.exec(delete(EspecificacionOpcion).where(EspecificacionOpcion.specification_id == spec_id))
     db.delete(spec)
     db.commit()
     return {"ok": True}
@@ -1227,19 +1187,17 @@ def list_skus_admin(
     try:
         for key, value in request.query_params.items():
             if key.startswith("attr_") and value:
-                attr_name = key.replace("attr_", "")
-                key_variants = {
-                    attr_name,
-                    attr_name.upper(),
-                    attr_name.lower(),
-                    string.capwords(attr_name.lower())
-                }
+                nombre = normalize_char(key.replace("attr_", ""))
                 val_lower = value.strip().lower()
-                conditions = [
-                    func.lower(cast(SKU.config, JSONB)[k].astext) == val_lower
-                    for k in key_variants
-                ]
-                statement = statement.where(or_(*conditions))
+                statement = statement.where(
+                    select(SKUOpcion.sku_id)
+                    .join(OpcionCaracteristica, OpcionCaracteristica.id == SKUOpcion.opcion_id)
+                    .join(Characteristic, Characteristic.id == SKUOpcion.caracteristica_id)
+                    .where(SKUOpcion.sku_id == SKU.id,
+                           func.upper(Characteristic.name) == nombre,
+                           func.lower(OpcionCaracteristica.valor) == val_lower)
+                    .exists()
+                )
     except Exception as e:
         print(f"Error en filtros dinámicos: {e}")
         # No bloqueamos la ejecución, pero logueamos
@@ -1342,9 +1300,17 @@ from datetime import datetime
 
 @router.post("/products")
 async def create_product(data: ProductCreate, db: Session = Depends(get_session)):
+    # Si una variante pide algo que la biblioteca no tiene, no se crea nada:
+    # antes el producto quedaba creado y vacío.
+    libro = caracteristicas.biblioteca(db)
+    try:
+        opciones_de = [caracteristicas.resolver(libro, s_data.config) for s_data in data.skus]
+    except caracteristicas.OpcionInexistente as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
     try:
         final_slug = direccion_de(db, data.name)
-        
+
         product = Product(
             name=data.name,
             slug=final_slug,
@@ -1361,23 +1327,20 @@ async def create_product(data: ProductCreate, db: Session = Depends(get_session)
         db.commit()
         db.refresh(product)
 
-        for s_data in data.skus:
+        for s_data, opciones in zip(data.skus, opciones_de):
             barcode_val = s_data.barcode or codigos_barras.nuevo_codigo(db)
-
-            # Normalizar config del SKU
-            norm_config = {normalize_char(k): normalize_opt(v) for k, v in s_data.config.items()}
 
             sku = SKU(
                 product_id=product.id,
                 sku=s_data.sku,
                 barcode=barcode_val,
                 price=s_data.price,
-                config=norm_config,
                 sale_type=s_data.sale_type,
                 sale_value=s_data.sale_value,
                 sale_start=s_data.sale_start,
                 sale_end=s_data.sale_end
             )
+            caracteristicas.asignar(sku, opciones)
             db.add(sku)
             db.flush()
 
@@ -1493,7 +1456,16 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
     product = db.get(Product, product_id)
     if not product:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
-    
+
+    # Las opciones de TODAS las variantes, antes de tocar nada. Si una pide algo
+    # que la biblioteca no tiene, no se guarda ninguna: fallar a mitad de camino
+    # dejaba esa variante fuera, y al final se daba de baja por "no venir".
+    libro = caracteristicas.biblioteca(db)
+    try:
+        opciones_de = [caracteristicas.resolver(libro, s_data.config) for s_data in data.skus]
+    except caracteristicas.OpcionInexistente as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
     # Update basic info
     product.name = data.name
     product.slug = direccion_de(db, data.name, product_id)
@@ -1534,14 +1506,13 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
     vistas = set()
     operation_errors = []
     success_count = 0
-    
-    for s_data in data.skus:
+
+    for s_data, opciones in zip(data.skus, opciones_de):
         try:
             # Usar un "savepoint" (Nested Transaction) para aislar cada operación de SKU
             with db.begin_nested():
-                # Normalizar la configuración antes de procesar
-                norm_config = {normalize_char(k): normalize_opt(v) for k, v in s_data.config.items()}
-                
+                norm_config = {o.caracteristica.name: o.valor for o in opciones}
+
                 sku = existing_skus_by_id.get(s_data.id) or existing_skus_by_code.get(s_data.sku)
                 if sku is None:
                     sku = existing_skus_by_config.get(clave_de_valores(norm_config))
@@ -1554,7 +1525,7 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
                     sku.is_deleted = False
                     sku.price = s_data.price
                     sku.barcode = s_data.barcode or sku.barcode or codigos_barras.nuevo_codigo(db)
-                    sku.config = norm_config
+                    caracteristicas.asignar(sku, opciones)
                     sku.sale_type = s_data.sale_type
                     sku.sale_value = s_data.sale_value
                     sku.sale_start = s_data.sale_start
@@ -1571,12 +1542,12 @@ async def update_product(product_id: int, data: ProductCreate, db: Session = Dep
                         sku=s_data.sku,
                         barcode=s_data.barcode or codigos_barras.nuevo_codigo(db),
                         price=s_data.price,
-                        config=norm_config,
                         sale_type=s_data.sale_type,
                         sale_value=s_data.sale_value,
                         sale_start=s_data.sale_start,
                         sale_end=s_data.sale_end
                     )
+                    caracteristicas.asignar(sku, opciones)
                     db.add(sku)
                     db.flush() # Disparar el check de unicidad preventivamente
                     
@@ -1684,8 +1655,15 @@ async def delete_product(product_id: int, force: bool = False, db: Session = Dep
     # También cuenta una prenda de pedido que es de este producto sin ser una
     # variante (una pieza personalizada): borrar el producto la dejaría
     # apuntando a nada.
+    # Igual un producto que nombra una promoción o un precio por cantidad: si
+    # se borrara, y era el único, la lista quedaría vacía, que significa
+    # "todo el catálogo".
     con_historia = bool(tienen_historia(db, [s.id for s in product.todas_las_skus])) or bool(
         db.exec(select(CotizacionItem.id).where(CotizacionItem.producto_id == product.id)).first()
+    ) or bool(
+        db.exec(select(PromocionProducto.product_id).where(PromocionProducto.product_id == product.id)).first()
+    ) or bool(
+        db.exec(select(TramoProducto.product_id).where(TramoProducto.product_id == product.id)).first()
     )
     perform_hard_delete = (settings.is_dev or force) and not con_historia
 
@@ -1811,127 +1789,28 @@ def seed_system_attributes(db: Session = Depends(get_session)):
                 # dos lo son. Sigue siendo editable desde el panel.
                 afecta_apariencia=system_id in ("sys_color", "sys_pattern"),
                 value_structure=v_struct,
-                domain=attr_domain
             )
+            caracteristicas.sincronizar(db, attr, attr_domain)
             db.add(attr)
         else:
             attr.value_structure = v_struct
-            # Actualizar/Fusionar dominios
-            # Mantener las vOU (User Options) que el usuario ya haya creado, 
-            # pero eliminando duplicados si el sistema ahora provee una vOS con el mismo nombre.
-            current_domain = attr.domain or []
-            
-            # Nueva lógica Ultra-Deduplicada:
-            # 1. Crear un mapa de Valor Normalizado -> Objeto Opción para las vOS nuevas
-            vos_map = {normalize_opt(opt["value"]): opt for opt in attr_domain}
-            
-            # 2. Filtrar las opciones actuales
-            # Si una opción actual (sea vOS antigua o vOU) tiene el mismo nombre que una vOS nueva,
-            # LA DESCARTAMOS (será reemplazada por la vOS fresca del mapa).
-            # Solo conservamos vOU reales que NO colisionen por nombre.
-            preserved_vou = []
-            seen_values = set(vos_map.keys())
-            
-            for opt in current_domain:
-                val = normalize_opt(opt.get("value", ""))
-                if not val: continue
-                
-                # Solo conservamos si no es una vOS antigua (porque ya tenemos la fresca en vos_map)
-                # y si no colisiona con una vOS nueva por nombre
-                if val not in seen_values and not opt.get("is_system"):
-                    preserved_vou.append(opt)
-                    seen_values.add(val) # Evitar duplicados dentro de las propias vOU si existieran
-            
-            # 3. Resultado final: todas las vOS nuevas + las vOU preservadas
-            attr.domain = list(vos_map.values()) + preserved_vou
+            # Las del kit primero, en su orden; después las que agregó la tienda,
+            # con su identidad (las variantes que las usan no se tocan). Si la
+            # tienda ya tenía una con el nombre de una del kit, es esa misma.
+            kit = {normalize_opt(opt["value"]) for opt in attr_domain}
+            propias = [o.como_dominio() for o in sorted(attr.opciones, key=lambda o: (o.orden, o.id))
+                       if o.valor not in kit and not o.es_sistema]
+            caracteristicas.sincronizar(db, attr, attr_domain + propias)
             attr.is_system = True
             attr.system_id = system_id
             db.add(attr)
-            
+
+        # Las del kit quedan marcadas del sistema, también si ya existían.
+        for opcion in attr.opciones:
+            if opcion.valor in {normalize_opt(opt["value"]) for opt in attr_domain if opt.get("is_system")}:
+                opcion.es_sistema = True
+
         results.append(attr_name)
 
     db.commit()
     return {"msg": "Kits base inyectados correctamente", "attributes": results}
-
-# --- ENDPOINTS DE COLORES (Color Swatch Registry) ---
-
-@router.post("/colors/sync")
-def sync_colors_to_attribute(db: Session = Depends(get_session)):
-    """
-    Sincroniza la tabla ColorSwatch con la característica maestra 'Color'.
-    Asegura que el 'domain' de la característica 'Color' refleje los swatches oficiales.
-    """
-    # 1. Obtener todos los swatches oficiales
-    swatches = db.exec(select(ColorSwatch)).all()
-    domain_list = [{"value": s.name, "hex_code": s.hex_code} for s in swatches]
-    
-    # 2. Buscar la característica 'Color' (por nombre, insensible a mayúsculas)
-    chars = db.exec(select(Characteristic)).all()
-    color_attr = next((c for c in chars if c.name.lower() in ['color', 'colores']), None)
-    
-    if not color_attr:
-        # Si no existe, la creamos
-        color_attr = Characteristic(
-            name="COLOR",
-            description="Característica maestra del sistema para gestión cromática.",
-            is_filterable=True,
-            is_system=True,
-            domain=domain_list
-        )
-        db.add(color_attr)
-    else:
-        # Si ya es de sistema, preferimos usar el nuevo endpoint de seed para una gestión más fina,
-        # pero aquí actualizamos el dominio si se solicita.
-        color_attr.domain = domain_list
-        db.add(color_attr)
-    
-    db.commit()
-    return {"status": "success", "synced_count": len(domain_list)}
-
-@router.get("/colors")
-def list_colors(db: Session = Depends(get_session)):
-    return db.exec(select(ColorSwatch)).all()
-
-@router.post("/colors")
-def create_color(data: ColorSwatchCreate, db: Session = Depends(get_session)):
-    # Generamos un slug para el color
-    new_slug = slugify(data.name)
-    
-    # Verificamos si ya existe
-    existing = db.exec(select(ColorSwatch).where(ColorSwatch.slug == new_slug)).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Ya existe un color con ese nombre o similar.")
-        
-    color = ColorSwatch(
-        name=data.name,
-        hex_code=data.hex_code,
-        slug=new_slug
-    )
-    db.add(color)
-    db.commit()
-    db.refresh(color)
-    return color
-
-@router.put("/colors/{color_id}")
-def update_color(color_id: int, data: ColorSwatchCreate, db: Session = Depends(get_session)):
-    color = db.get(ColorSwatch, color_id)
-    if not color:
-        raise HTTPException(status_code=404, detail="Color no encontrado")
-    
-    color.name = data.name
-    color.hex_code = data.hex_code
-    color.slug = slugify(data.name)
-    
-    db.add(color)
-    db.commit()
-    db.refresh(color)
-    return color
-
-@router.delete("/colors/{color_id}")
-def delete_color(color_id: int, db: Session = Depends(get_session)):
-    color = db.get(ColorSwatch, color_id)
-    if not color:
-        raise HTTPException(status_code=404, detail="Color no encontrado")
-    db.delete(color)
-    db.commit()
-    return {"ok": True}

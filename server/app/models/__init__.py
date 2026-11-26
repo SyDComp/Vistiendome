@@ -11,6 +11,11 @@ from .ajustes import AjusteNegocio
 from .piezas import PiezaUnica, EstadoPieza
 from .pagos import Pago, TipoPago
 from .caja import ArqueoCaja
+from .listas import CanalPedido, MedioPago, MetodoEnvio
+from .tramos import TramoPrecio, TramoProducto
+from .promociones import Promocion, PromocionProducto
+from .prendas_opciones import (CotizacionItemOpcion, CotizacionItemPropuesta, OrdenCorteItemOpcion,
+                               OrdenCorteItemPropuesta, PiezaOpcion, PiezaPropuesta)
 
 # Para que SQLAlchemy/SQLModel detecte las tablas de la Nueva Arquitectura
 __all__ = [
@@ -22,5 +27,8 @@ __all__ = [
     "OpcionPropuesta", "EstadoPropuesta",
     "PedidoEvento", "TipoEvento", "AjusteNegocio",
     "PiezaUnica", "EstadoPieza",
-    "Pago", "TipoPago", "ArqueoCaja",
+    "Pago", "TipoPago", "ArqueoCaja", "CanalPedido", "MedioPago", "MetodoEnvio",
+    "TramoPrecio", "TramoProducto", "Promocion", "PromocionProducto",
+    "CotizacionItemOpcion", "CotizacionItemPropuesta", "OrdenCorteItemOpcion",
+    "OrdenCorteItemPropuesta", "PiezaOpcion", "PiezaPropuesta",
 ]

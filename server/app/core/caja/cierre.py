@@ -23,18 +23,19 @@ from sqlmodel import Session, select
 from ...models.crm import Cotizacion
 from ...models.pagos import Pago, TipoPago
 from .. import pagos as libro
-from ..pedidos.venta_rapida import CANAL_LOCAL
+from ...models.listas import CanalPedido
 
 CHILE = ZoneInfo("America/Santiago")
 # El medio que cuenta para el cajón. Es el nombre que trae Ajustes del negocio
 # › Medios de pago; si se renombra, el cierre lo muestra en la lista igual,
 # pero sin el "debería haber en el cajón".
-EFECTIVO = "Efectivo"
 
 
 @dataclass
 class PorMedio:
     medio: str
+    # El efectivo se reconoce por su clave (models/listas.py), no por su nombre.
+    es_efectivo: bool = False
     cobrado: int = 0
     devuelto: int = 0
     pagos: int = 0
@@ -72,7 +73,7 @@ class Cierre:
 
     @property
     def efectivo_en_cajon(self) -> Optional[int]:
-        efectivo = next((m for m in self.por_medio if m.medio == EFECTIVO), None)
+        efectivo = next((m for m in self.por_medio if m.es_efectivo), None)
         return efectivo.neto if efectivo else None
 
     @property
@@ -117,19 +118,20 @@ def cierre(db: Session, dia: date) -> Cierre:
             continue
         if p.tipo == TipoPago.A_FAVOR:
             continue                     # queda a favor de la clienta: no mueve plata
-        if p.medio == libro.MEDIO_A_FAVOR:
+        if p.es_a_favor:
             c.con_saldo_a_favor += p.monto
             continue
-        m = por_medio.setdefault(p.medio, PorMedio(medio=p.medio))
+        m = por_medio.setdefault(p.medio_id, PorMedio(medio=p.medio, es_efectivo=p.es_efectivo))
         if p.tipo == TipoPago.PAGO:
             m.cobrado += p.monto
             m.pagos += 1
         elif p.tipo == TipoPago.DEVOLUCION:
             m.devuelto += p.monto
-    c.por_medio = sorted(por_medio.values(), key=lambda m: (m.medio != EFECTIVO, -m.neto, m.medio))
+    c.por_medio = sorted(por_medio.values(), key=lambda m: (not m.es_efectivo, -m.neto, m.medio))
 
     ventas = db.exec(
-        select(Cotizacion).where(Cotizacion.canal == CANAL_LOCAL,
+        select(Cotizacion).join(CanalPedido, Cotizacion.canal_id == CanalPedido.id)
+        .where(CanalPedido.clave == "local",
                                  Cotizacion.created_at >= desde.replace(tzinfo=None),
                                  Cotizacion.created_at < hasta.replace(tzinfo=None))
         .order_by(Cotizacion.created_at)

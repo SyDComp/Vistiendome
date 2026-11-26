@@ -18,6 +18,7 @@ from ..pedidos import precios
 from ..pedidos.cotizar import ESTADOS_QUE_SE_COTIZAN
 from ..pedidos.historia import Actor, anotar
 from .estados import NoSePuede, apartar
+from .. import caracteristicas
 
 
 def asignar(db: Session, pieza: PiezaUnica, cotizacion: Cotizacion, precio: Optional[float],
@@ -37,10 +38,9 @@ def asignar(db: Session, pieza: PiezaUnica, cotizacion: Cotizacion, precio: Opti
         cantidad=1,
         precio_unitario_estimado=precios.normalizar(precio, sin_costo),
         nombre_custom=pieza.nombre,
-        config_custom=dict(pieza.config or {}) or None,
-        config_propuesta=dict(pieza.config_propuesta or {}) or None,
         pieza_id=pieza.id,
     )
+    caracteristicas.vestir(db, item, pieza.config, pieza.config_propuesta)
     db.add(item)
     db.add(pieza)
     db.flush()

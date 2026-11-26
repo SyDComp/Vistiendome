@@ -11,7 +11,7 @@ from typing import Dict, List, Optional
 
 from sqlmodel import Session, select
 
-from ..models.catalog import Characteristic
+from ..models.catalog import Characteristic, OpcionCaracteristica
 from ..models.propuestas import OpcionPropuesta, EstadoPropuesta
 
 
@@ -121,28 +121,24 @@ def aprobar(
     if not caracteristica:
         return None
 
-    dominio = list(caracteristica.domain or [])
-    existentes = {normalizar(o.get("value")) for o in dominio if o.get("value")}
+    existentes = {normalizar(o.valor) for o in caracteristica.opciones}
 
     opcion = None
     if primera.valor_normalizado not in existentes:
-        opcion = {
-            "value": primera.valor,
-            "order": len(dominio) + 1,
-            "is_system": False,
-        }
         # Los datos que el cliente no podía dar —el hex de un color, la imagen
         # de un estampado— y que el taller completa al aprobar. Sin ellos, una
         # opción de una característica del sistema entra incompleta y se ve mal
         # en toda la tienda.
-        for k, v in (extras or {}).items():
-            if k and k != "value" and v not in (None, ""):
-                opcion[k] = v
-        dominio.append(opcion)
-        # Reasignar la lista entera: mutarla en el sitio no marca el JSON como
-        # sucio y el cambio no llegaría a la base.
-        caracteristica.domain = dominio
+        datos = {k: v for k, v in (extras or {}).items() if k and k != "value" and v not in (None, "")}
+        nueva = OpcionCaracteristica(
+            valor=primera.valor,
+            orden=max((o.orden for o in caracteristica.opciones), default=0) + 1,
+            es_sistema=False,
+            datos=datos,
+        )
+        caracteristica.opciones.append(nueva)
         db.add(caracteristica)
+        opcion = {**datos, "value": nueva.valor, "order": nueva.orden, "is_system": False}
 
     ahora = datetime.utcnow()
     for p in propuestas_del_mismo_valor:

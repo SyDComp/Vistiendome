@@ -7,6 +7,7 @@ import pytest
 from sqlmodel import Session
 
 from app.models.catalog import Category, Characteristic, Product, SKU
+from tests.apoyo_catalogo import variante
 
 PRODUCTOS = "/api/v1/admin/catalog/products"
 
@@ -69,11 +70,11 @@ def test_el_explorador_muestra_todo_producto_sea_lo_que_sea(client, session):
     session.add_all([vestido, biblia, corbata])
     session.commit()
     session.add_all([
-        SKU(product_id=vestido.id, sku="V-N", price=1000, config={"COLOR": "Negro", "TALLA": "S"}),
-        SKU(product_id=vestido.id, sku="V-N2", price=1000, config={"COLOR": "Negro", "TALLA": "M"}),
-        SKU(product_id=vestido.id, sku="V-A", price=1000, config={"COLOR": "Azul", "TALLA": "S"}),
-        SKU(product_id=biblia.id, sku="B-1", price=5000, config={"TALLA": "Grande"}),
-        SKU(product_id=biblia.id, sku="B-2", price=5000, config={"TALLA": "Chica"}),
+        variante(session, {"COLOR": "Negro", "TALLA": "S"}, product_id=vestido.id, sku="V-N", price=1000),
+        variante(session, {"COLOR": "Negro", "TALLA": "M"}, product_id=vestido.id, sku="V-N2", price=1000),
+        variante(session, {"COLOR": "Azul", "TALLA": "S"}, product_id=vestido.id, sku="V-A", price=1000),
+        variante(session, {"TALLA": "Grande"}, product_id=biblia.id, sku="B-1", price=5000),
+        variante(session, {"TALLA": "Chica"}, product_id=biblia.id, sku="B-2", price=5000),
     ])
     session.commit()
 

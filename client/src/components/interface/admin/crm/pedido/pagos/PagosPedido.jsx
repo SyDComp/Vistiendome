@@ -87,7 +87,7 @@ const PagosPedido = ({ pedido, abierto = true, onCambio }) => {
                 </div>
             )}
             {registrando && (
-                <RegistrarPago pedidoId={pedido.id} medios={ajustes?.medios_pago || []} aFavor={datos.a_favor_disponible}
+                <RegistrarPago pedidoId={pedido.id} medios={ajustes?.medios_pago || []} medioAFavor={ajustes?.medio_a_favor} aFavor={datos.a_favor_disponible}
                     origenes={datos.a_favor_origenes || []} avisos={datos.a_favor_avisos || []}
                     sugerido={cuentas.por_cotizar ? 0 : cuentas.saldo}
                     onRegistrado={alCambiar} onCancelar={() => setRegistrando(false)} />

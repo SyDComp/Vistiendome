@@ -8,6 +8,7 @@ from sqlmodel import Session, select
 
 from app.core.existencias import existencias_de
 from app.models.catalog import Category, MovementType, Product, SKU, StockMovement
+from tests.apoyo_catalogo import variante
 
 SUMAR = "/api/v1/admin/catalog/kardex/lote/sumar"
 CONTEO = "/api/v1/admin/catalog/kardex/lote/conteo"
@@ -21,7 +22,7 @@ def variantes(session: Session):
     p = Product(name="Vestido Noemi", slug="vestido-noemi", description="", category_id=cat.id)
     session.add(p)
     session.commit()
-    skus = [SKU(product_id=p.id, sku=f"NOE-{t}", price=16900, config={"TALLA": t}) for t in ("M", "L", "XL")]
+    skus = [variante(session, {"TALLA": t}, product_id=p.id, sku=f"NOE-{t}", price=16900) for t in ("M", "L", "XL")]
     session.add_all(skus)
     session.commit()
     for s, hay in zip(skus, (5, 2, 0)):

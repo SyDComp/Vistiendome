@@ -25,6 +25,10 @@ from app.core.looks import asset_de_variante
 from app.core.portada import portadas
 from app.core import ubicacion_persona
 from app.core import rut as rut_core
+from ...core import caracteristicas
+from ...models.listas import MetodoEnvio
+from ...core import listas
+from ...core.comuna_de_despacho import ComunaInexistente
 
 router = APIRouter()
 
@@ -382,6 +386,16 @@ _ORIGENES_PUBLICOS = {
 }
 
 
+def _envio_preferido(session: Session, nombre: Optional[str]) -> Optional[int]:
+    """El método de envío preferido de la clienta, por su nombre en la lista."""
+    if not (nombre or "").strip():
+        return None
+    try:
+        return listas.por_nombre(session, MetodoEnvio, nombre, "un método de envío").id
+    except listas.ValorInexistente as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+
 @router.post("/", response_model=PedidoRecibido)
 def crear_cotizacion(data: CotizacionCreate, request: Request, session: Session = Depends(get_session)):
     """
@@ -394,7 +408,11 @@ def crear_cotizacion(data: CotizacionCreate, request: Request, session: Session 
         raise HTTPException(status_code=403, detail="Los pedidos manuales se crean desde el panel.")
     if not _LIMITE_PEDIDOS.permite(request.client.host if request.client else "?"):
         raise HTTPException(status_code=429, detail="Demasiados pedidos seguidos. Espera unos minutos.")
-    cotizacion = pedidos_core.crear_pedido(session, data, historia.SITIO_WEB)
+    try:
+        cotizacion = pedidos_core.crear_pedido(session, data, historia.SITIO_WEB)
+    except (caracteristicas.OpcionInexistente, listas.ValorInexistente, ComunaInexistente) as e:
+        session.rollback()
+        raise HTTPException(status_code=422, detail=str(e))
     session.commit()
     return PedidoRecibido(numero=cotizacion.numero)
 
@@ -410,8 +428,12 @@ def crear_cotizacion_manual(
     if not canal:
         raise HTTPException(status_code=422, detail="Falta indicar cómo llegó el pedido.")
     data.origen = OrigenCotizacion.MANUAL
-    cotizacion = pedidos_core.crear_pedido(session, data, historia.de_cuenta(current_admin), canal=canal,
-                                           permitir_sin_costo=True)
+    try:
+        cotizacion = pedidos_core.crear_pedido(session, data, historia.de_cuenta(current_admin), canal=canal,
+                                               permitir_sin_costo=True)
+    except (caracteristicas.OpcionInexistente, listas.ValorInexistente, ComunaInexistente) as e:
+        session.rollback()
+        raise HTTPException(status_code=422, detail=str(e))
     session.commit()
     session.refresh(cotizacion)
     return _get_cotizacion_read(cotizacion)
@@ -551,7 +573,7 @@ def eliminar_cotizacion(
     # historia apunta a las prendas de este pedido: sin el pedido, nadie
     # podría saber de dónde salió.
     con_movimientos = db.exec(
-        select(StockMovement.id).where(StockMovement.reference_id.in_([it.id for it in items]))
+        select(StockMovement.id).where(StockMovement.cotizacion_item_id.in_([it.id for it in items]))
     ).first() if items else None
     if con_movimientos:
         raise HTTPException(
@@ -634,7 +656,7 @@ def crear_cliente(data: PersonaCreate, session: Session = Depends(get_session), 
         email_personal=data.email_personal,
         telefono=data.telefono,
         tipo_persona=data.tipo_persona,
-        transporte_preferido=data.transporte_preferido
+        metodo_envio_preferido_id=_envio_preferido(session, data.transporte_preferido),
     )
     session.add(nueva_persona)
     session.commit()
@@ -665,7 +687,7 @@ def actualizar_cliente(cliente_id: str, data: PersonaCreate, session: Session = 
     persona.email_personal = data.email_personal
     persona.telefono = data.telefono
     persona.tipo_persona = data.tipo_persona
-    persona.transporte_preferido = data.transporte_preferido
+    persona.metodo_envio_preferido_id = _envio_preferido(session, data.transporte_preferido)
     
     session.add(persona)
     

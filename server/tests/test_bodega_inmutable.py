@@ -24,6 +24,7 @@ from app.models.catalog import Category, MovementType, Product, SKU, StockMoveme
 from app.models.crm import Cotizacion, CotizacionItem, EstadoCotizacion
 from app.models.iam import Persona
 from app.models.taller import OrdenCorte, OrdenCorteItem
+from tests.apoyo_catalogo import variante
 
 
 @pytest.fixture
@@ -35,7 +36,7 @@ def catalogo(session: Session):
     prod = Product(name="Vestido Noemi", slug="vestido-noemi", description="", category_id=cat.id)
     session.add(prod)
     session.commit()
-    sku = SKU(product_id=prod.id, sku="NOE-M-CORAL", price=17490, config={"TALLA": "M"})
+    sku = variante(session, {"TALLA": "M"}, product_id=prod.id, sku="NOE-M-CORAL", price=17490)
     session.add(sku)
     session.commit()
     return {"categoria": cat, "comodin": comodin, "producto": prod, "sku": sku}
@@ -101,7 +102,7 @@ def test_redespachar_no_descuenta_dos_veces(session, catalogo):
     _cambiar(session, cot, EstadoCotizacion.DESPACHADA)
 
     item = cot.items[0]
-    assert movimientos.neto_de(session, item.id) == -2
+    assert movimientos.neto_de(session, item) == -2
     assert existencias.existencias(session, sku.id) == 0
     assert len(_movimientos(session, sku)) == 4  # carga, salida, vuelta, salida
 

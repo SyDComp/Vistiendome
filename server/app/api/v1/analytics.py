@@ -44,6 +44,16 @@ class TrackEvent(BaseModel):
     session_id: Optional[str] = None
 
 
+def _variante_por_codigo(db: Session, codigo: Optional[str]) -> Optional[int]:
+    """
+    La variante que hoy tiene ese código. Desde aquí el evento le apunta por id:
+    si mañana el código cambia (al renombrar el producto), sus cifras siguen juntas.
+    """
+    if not codigo:
+        return None
+    return db.exec(select(SKU.id).where(SKU.sku == codigo)).first()
+
+
 @router.post("/track")
 def track_event(data: TrackEvent, db: Session = Depends(get_session)):
     """Registra un evento de analítica. Público, no bloquea la navegación."""
@@ -53,8 +63,8 @@ def track_event(data: TrackEvent, db: Session = Depends(get_session)):
     q = data.query.strip()[:200] if data.query else None
     event = AnalyticsEvent(
         type=data.type,
-        product_id=data.product_id,
-        sku=data.sku,
+        product_id=data.product_id if data.product_id and db.get(Product, data.product_id) else None,
+        sku_id=_variante_por_codigo(db, data.sku),
         query=q if q else None,
         session_id=data.session_id,
     )
@@ -199,16 +209,19 @@ def analytics_summary(db: Session = Depends(get_session), days: int = Query(30, 
     # --- Variantes (SKU) más agregadas al carrito / cerradas por WhatsApp ---
     def top_variants(event_type, limit=10):
         rows = db.exec(
-            select(AnalyticsEvent.sku, func.count())
+            select(AnalyticsEvent.sku_id, func.count())
             .where(
                 AnalyticsEvent.type == event_type,
                 AnalyticsEvent.created_at >= since,
-                AnalyticsEvent.sku.is_not(None),
+                AnalyticsEvent.sku_id.is_not(None),
             )
-            .group_by(AnalyticsEvent.sku)
+            .group_by(AnalyticsEvent.sku_id)
             .order_by(func.count().desc())
             .limit(limit)
         ).all()
+        # Cada variante con su código de HOY: las cifras de un código anterior son las mismas.
+        codigo_de = {s.id: s.sku for s in db.exec(select(SKU).where(SKU.id.in_([i for i, _ in rows]))).all()} if rows else {}
+        rows = [(codigo_de.get(i), cnt) for i, cnt in rows if codigo_de.get(i)]
         codes = [c for c, _ in rows]
         info = {}
         if codes:

@@ -79,7 +79,7 @@ def anotar_fondo(db: Session, dia: date, monto: int, actor: Actor) -> None:
     """Con cuánto partió el cajón ese día. Se puede corregir. No hace commit."""
     a = db.get(ArqueoCaja, dia) or ArqueoCaja(fecha=dia)
     a.fondo_inicial = _monto(monto, "El fondo")
-    a.abierto_por, a.abierto_en = actor.nombre, _ahora()
+    a.abierto_por_id, a.abierto_por, a.abierto_en = actor.cuenta_id, actor.nombre, _ahora()
     db.add(a)
 
 
@@ -93,5 +93,5 @@ def cerrar(db: Session, dia: date, contado: int, deja: Optional[int], nota: Opti
     if a.deja > a.contado:
         raise NoSeAnota("No se puede dejar más de lo que se contó.")
     a.nota = (nota or "").strip() or None
-    a.cerrado_por, a.cerrado_en = actor.nombre, _ahora()
+    a.cerrado_por_id, a.cerrado_por, a.cerrado_en = actor.cuenta_id, actor.nombre, _ahora()
     db.add(a)

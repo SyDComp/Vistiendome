@@ -14,7 +14,6 @@ import { nombreDeProducto } from './prendas';
 import { frasesPolitica, sinCambio } from './politicaCambios';
 import { desdeServidor } from './fechaServidor';
 
-const EFECTIVO = 'Efectivo';
 
 const activa = (item) => !item.cancelada_en;
 
@@ -52,7 +51,7 @@ export const armarComprobante = ({ pedido, pagos, tienda, recibido = 0, reimpres
     const total = lineas.reduce((t, l) => t + l.subtotal, 0);
     const libro = movimientos(pagos);
     const pagado = libro.filter(p => p.tipo === 'PAGO');
-    const efectivo = pagado.filter(p => p.medio === EFECTIVO).reduce((t, p) => t + p.monto, 0);
+    const efectivo = pagado.filter(p => p.es_efectivo).reduce((t, p) => t + p.monto, 0);
     return {
         tienda,
         numero: pedido.numero,

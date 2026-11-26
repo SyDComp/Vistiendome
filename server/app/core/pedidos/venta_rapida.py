@@ -32,9 +32,12 @@ from . import ciclo, fecha
 from .creacion import crear_pedido
 from .historia import Actor, anotar
 from .prendas import activas
+from ...models.listas import CanalPedido
+from .. import listas
 
-# Cómo llegó: al local. Es el sentido mismo de esta venta.
-CANAL_LOCAL = "En la tienda"
+# Cómo llegó: al local. Es el sentido mismo de esta venta. El canal se
+# reconoce por su clave "local" (models/listas.py): su nombre lo decide la tienda.
+CANAL_LOCAL = "local"
 # El nombre del pedido cuando la clienta no da datos.
 SIN_DATOS = "Venta en el local"
 
@@ -116,7 +119,8 @@ def vender(db: Session, clienta: Optional[Clienta], prendas: List[PrendaVenta],
     """
     _validar(db, prendas)
 
-    cotizacion = crear_pedido(db, _datos(clienta, prendas), actor, canal=CANAL_LOCAL,
+    cotizacion = crear_pedido(db, _datos(clienta, prendas), actor,
+                              canal=listas.por_clave(db, CanalPedido, CANAL_LOCAL).nombre,
                               permitir_sin_costo=True, sin_clienta=clienta is None)
     for p in prendas:
         if p.pieza_id:
