@@ -12,7 +12,6 @@ const WorkspaceModule = () => {
     const [showBatchEditor, setShowBatchEditor] = useState(false);
     const [productVariants, setProductVariants] = useState([]);
     const [allAttributes, setAllAttributes] = useState([]);
-    const [categoryAttributes, setCategoryAttributes] = useState([]);
     // Sin esto, un fallo del servidor se veia como "no se encontro el producto":
     // la pantalla le echaba la culpa a la clienta de un error que no era suyo.
     const [error, setError] = useState(null);
@@ -58,22 +57,14 @@ const WorkspaceModule = () => {
             const resSkus = await fetch(`${API_BASE}/skus?product_id=${product.id}&page_size=999999&t=${Date.now()}`);
             const skusData = await resSkus.json();
 
-            // 3. Cargamos los atributos de la categoría Y la biblioteca global para cruzar datos
-            const [resCatAttrs, resGlobalAttrs] = await Promise.all([
-                fetch(`${API_BASE}/categories/${fullProduct.category_id}/attributes`),
-                fetch(`${API_BASE}/attributes`)
-            ]);
-            
-            const catAttrs = await resCatAttrs.json();
+            // 3. La biblioteca, solo para el ORDEN de los botones: los botones
+            // salen de las variantes del producto (utils/opcionesDelProducto).
+            const resGlobalAttrs = await fetch(`${API_BASE}/attributes`);
             const globalAttrs = await resGlobalAttrs.json();
 
-            // Guardamos los nombres de los atributos de la categoría para el filtro del Workspace
-            const catAttrNames = (catAttrs || []).map(a => a.name);
-            
             setSelectedProduct(fullProduct);
             setProductVariants(skusData.items || []);
-            setAllAttributes(globalAttrs || []); // Biblioteca completa para el dominio
-            setCategoryAttributes(catAttrNames); // Nuevo estado para filtrar visualmente
+            setAllAttributes(globalAttrs || []);
             setShowBatchEditor(true);
         } catch (err) {
             console.error(err);
@@ -90,7 +81,6 @@ const WorkspaceModule = () => {
                     product={selectedProduct}
                     initialVariants={productVariants}
                     allAttributes={allAttributes}
-                    categoryAttributes={categoryAttributes}
                     onClose={() => setShowBatchEditor(false)}
                     onSave={() => {
                         // Opcional: refrescar datos si es necesario

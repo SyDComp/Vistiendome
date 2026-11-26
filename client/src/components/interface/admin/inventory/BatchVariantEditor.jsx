@@ -10,6 +10,7 @@ import Imagen from '../../../ui/Imagen';
 import PrecioInput from '../../../ui/PrecioInput';
 import { useNotification } from '../../../../context/NotificationContext';
 import { mensajeDeError } from '../../../../utils/errorServidor';
+import { opcionesDelProducto, cumpleFiltros, hayFiltros, describirFiltros } from '../../../../utils/opcionesDelProducto';
 
 const API_BASE = `/api/v1/admin/catalog`;
 
@@ -18,7 +19,7 @@ const API_BASE = `/api/v1/admin/catalog`;
  * Permite editar precios y fotos de múltiples variantes a la vez usando
  * lógica de selección por atributos.
  */
-const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [], categoryAttributes = [], onClose, onSave }) => {
+const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [], onClose, onSave }) => {
     const { toast } = useNotification();
     const [variants, setVariants] = useState([]);
     const [selection, setSelection] = useState(new Set()); // IDs de variantes seleccionadas
@@ -55,87 +56,18 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
         setVariants(normalized);
     }, [initialVariants]); // Mantenemos la dependencia pero el guard arriba evita el reset indeseado
 
-    // 1. CÁLCULO DINÁMICO DE ATRIBUTOS (Todas las características del catálogo y del producto)
-    const attributesInUse = useMemo(() => {
-        const finalAttrs = new Map();
-        
-        // A. Añadimos primero TODOS los atributos de la BIBLIOTECA GLOBAL (allAttributes)
-        // para que TODAS las características creadas en "Gestión de Características" (ej. Estampado, Color, etc.) estén siempre disponibles
-        if (allAttributes && allAttributes.length > 0) {
-            allAttributes.forEach(attr => {
-                if (!attr.name) return;
-                const options = (attr.domain || []).map(d => typeof d === 'string' ? d : (d.value || d.name || '---'));
-                finalAttrs.set(attr.name, new Set(options));
-            });
-        }
-
-        // B. Añadimos cualquier atributo definido en la categoría por si aún no está en la biblioteca
-        if (categoryAttributes && categoryAttributes.length > 0) {
-            categoryAttributes.forEach(catAttr => {
-                const name = typeof catAttr === 'string' ? catAttr : catAttr.name;
-                if (!name) return;
-                let targetName = name;
-                for (const existingName of finalAttrs.keys()) {
-                    if (existingName.toLowerCase() === name.toLowerCase()) {
-                        targetName = existingName;
-                        break;
-                    }
-                }
-                if (!finalAttrs.has(targetName)) {
-                    finalAttrs.set(targetName, new Set());
-                }
-            });
-        }
-
-        // C. Fusionamos con cualquier valor que venga directamente en los SKUs (config de cada variante)
-        variants.forEach(v => {
-            if (v.config) {
-                Object.entries(v.config).forEach(([name, val]) => {
-                    if (!name) return;
-                    let targetName = name;
-                    for (const existingName of finalAttrs.keys()) {
-                        if (existingName.toLowerCase() === name.toLowerCase()) {
-                            targetName = existingName;
-                            break;
-                        }
-                    }
-                    if (!finalAttrs.has(targetName)) {
-                        finalAttrs.set(targetName, new Set());
-                    }
-                    if (val !== undefined && val !== null && val !== '') {
-                        finalAttrs.get(targetName).add(val);
-                    }
-                });
-            }
-        });
-
-        // Convertir el Map a array ordenado alfabéticamente para el UI
-        return Array.from(finalAttrs.entries())
-            .map(([name, valuesSet]) => ({
-                name,
-                values: Array.from(valuesSet).sort()
-            }))
-            .sort((a, b) => a.name.localeCompare(b.name));
-    }, [variants, allAttributes, categoryAttributes]);
+    // 1. LOS BOTONES: solo lo que tienen las variantes de este producto, con
+    // cuántas hay de cada uno (utils/opcionesDelProducto). Antes salía la
+    // biblioteca entera y tocar una opción que el producto no tiene no hacía nada.
+    const attributesInUse = useMemo(
+        () => opcionesDelProducto(variants, allAttributes),
+        [variants, allAttributes]
+    );
 
     // 2. LÓGICA DE FILTRADO Y SELECCIÓN INTELIGENTE
     useEffect(() => {
-        const activeCriteria = Object.entries(activeFilters).filter(([_, s]) => s && s.size > 0);
-        
-        if (activeCriteria.length > 0) {
-            const nextSelection = new Set();
-            variants.forEach(v => {
-                let matchesAll = true;
-                for (const [attrName, activeValues] of activeCriteria) {
-                    const rowValue = v.config?.[attrName];
-                    if (!activeValues.has(rowValue)) {
-                        matchesAll = false;
-                        break;
-                    }
-                }
-                if (matchesAll) nextSelection.add(v.id);
-            });
-            setSelection(nextSelection);
+        if (hayFiltros(activeFilters)) {
+            setSelection(new Set(variants.filter(v => cumpleFiltros(v.config, activeFilters)).map(v => v.id)));
         } else {
             // Si no hay filtros activos, limpiamos la selección para que la barra desaparezca
             setSelection(new Set());
@@ -292,35 +224,41 @@ const BatchVariantEditor = ({ product, initialVariants = [], allAttributes = [],
                             <Accordion 
                                 key={attr.name}
                                 title={attr.name}
-                                initialOpen={attr.values && attr.values.length > 0}
+                                initialOpen={true}
                                 showArrow={true}
                                 className="batch-editor-inner-accordion"
                             >
                                 <div className="batch-editor-filters-grid">
-                                    {attr.values && attr.values.length > 0 ? (
-                                        attr.values.map(val => {
-                                            const isActive = activeFilters[attr.name]?.has(val);
-                                            
-                                            return (
-                                                <button 
-                                                    key={val}
-                                                    onClick={() => toggleQuickFilter(attr.name, val)}
-                                                    className={`batch-editor-filter-btn ${isActive ? 'active' : 'inactive'}`}
-                                                >
-                                                    {val}
-                                                </button>
-                                            );
-                                        })
-                                    ) : (
-                                        <div className="batch-editor-no-options-msg">
-                                            Sin opciones asignadas para esta característica en este producto.
-                                        </div>
-                                    )}
+                                    {attr.values.map(({ valor, cantidad }) => {
+                                        const isActive = activeFilters[attr.name]?.has(valor);
+                                        return (
+                                            <button
+                                                key={valor}
+                                                onClick={() => toggleQuickFilter(attr.name, valor)}
+                                                className={`batch-editor-filter-btn ${isActive ? 'active' : 'inactive'}`}
+                                                aria-pressed={isActive}
+                                                title={`${cantidad} variante${cantidad !== 1 ? 's' : ''} con ${valor}`}
+                                            >
+                                                {valor} <span className="batch-editor-filter-count">{cantidad}</span>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </Accordion>
                         ))}
                     </div>
                 </Accordion>
+
+                {/* Lo elegido arriba no lo tiene junto ninguna variante: se dice, en vez de no hacer nada. */}
+                {hayFiltros(activeFilters) && !variants.some(v => cumpleFiltros(v.config, activeFilters)) && (
+                    <div className="batch-editor-sin-coincidencias" role="status">
+                        <AlertCircle size={18} />
+                        <span>
+                            Ninguna variante de este producto tiene <strong>{describirFiltros(activeFilters)}</strong> a la vez.
+                            Toca otra opción o <strong>Limpiar</strong>.
+                        </span>
+                    </div>
+                )}
 
                 {/* 2. BARRA DE ACCIÓN MASIVA (Flotante o fija si hay selección) */}
                 {selection.size > 0 && (
